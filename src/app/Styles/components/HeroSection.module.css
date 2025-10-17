@@ -1,0 +1,171 @@
+.hero {
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
+  padding-top: 20px; /* keeps hero visible below navbar */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.overlay {
+  background: rgba(0, 0, 0, 0.55);
+  width: 100%;
+  height: 100%;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.heroContent {
+  max-width: 800px;
+  color: white;
+  margin-bottom: 60px;
+}
+
+.universityName {
+  font-size: clamp(45px, 5vw, 48px);
+  color: #ffffff;
+  margin-bottom: 12px;
+  margin-top: 50px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0.5px;
+}
+
+.separator {
+  width: 90px;
+  height: 3px;
+  background-color: #b38e19;
+  margin: 0 auto 20px auto;
+  border-radius: 3px;
+}
+
+.mainTitle {
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: bold;
+  margin-bottom: 16px;
+  color: #ffffff;
+  line-height: 1.3;
+}
+
+.description {
+  font-size: clamp(16px, 2vw, 18px);
+  color: #f3f5fd;
+  line-height: 1.8;
+  margin-bottom: 35px;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+
+.btn {
+  padding: 12px 28px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.primary {
+  background-color: #b38e19;
+  color: #fff;
+}
+.primary:hover {
+  background-color: #7e7e85;
+}
+
+.secondary {
+  background: transparent;
+  border: 2px solid #ffffff;
+  color: #ffffff;
+}
+.secondary:hover {
+  background-color: #999898;
+}
+
+.outline {
+  background: transparent;
+  border: 2px solid #fff;
+  color: #ffffff;
+}
+.outline:hover {
+  background-color: #a4a4b6;
+  color: rgb(20, 20, 20);
+}
+
+/* Stats wrapper below hero */
+.statsWrapper {
+  width: 100%;
+  margin-top: 40px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .hero {
+    padding-top: 120px; /* more space under fixed navbar */
+  }
+
+  .buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+/* Responsive tweaks */
+@media (max-width: 600px) {
+  .hero {
+    padding-top: 120px; /* more space under fixed navbar */
+  }
+}
+.fullScreenOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(2px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* .modalCard {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  width: 420px;
+  max-width: 90%;
+  padding: 30px;
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+} */
+.modalCard {
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

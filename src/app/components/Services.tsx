@@ -1,0 +1,164 @@
+"use client";
+import React, { useState } from 'react';
+
+interface ServiceItem {
+  icon: string;
+  title: string;
+  description: string;
+  id: number;
+}
+
+const Services: React.FC = () => {
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+
+  const servicesData: ServiceItem[] = [
+    { icon: "🔍", title: "الاستعلامات", description: "استعلم عن جميع الخدمات", id: 1 },
+    { icon: "📖", title: "دليل الطالب", description: "دليل شامل للخدمات", id: 2 },
+    { icon: "💬", title: "الدعم الطلابي", description: "خدمات الدعم والإرشاد", id: 3 },
+    { icon: "📝", title: "تسجيل الأنشطة", description: "سجل في الأنشطة بسهولة", id: 4 },
+    { icon: "📅", title: "التقويم الأكاديمي", description: "تصفح مواعيد الأنشطة", id: 5 },
+    { icon: "✈️", title: "المنح والبعثات", description: "معلومات عن الفرص المتاحة", id: 6 },
+  ];
+
+  const containerStyle: React.CSSProperties = {
+    direction: 'rtl',
+    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+    padding: '2rem 1rem',
+    backgroundColor: '#f8f9fa',
+    minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  };
+
+  const headerStyle: React.CSSProperties = {
+    textAlign: 'center',
+    marginBottom: '2rem',
+    width: '100%',
+  };
+
+  const titleStyle: React.CSSProperties = {
+    fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
+    fontWeight: 'bold',
+    color: '#2c3e50',
+    marginBottom: '0.5rem',
+  };
+
+  const subtitleStyle: React.CSSProperties = {
+    fontSize: 'clamp(1rem, 2vw, 1.2rem)',
+    color: '#7f8c8d',
+    lineHeight: '1.6',
+    maxWidth: '600px',
+    margin: '0 auto',
+  };
+
+  // const dividerStyle: React.CSSProperties = {
+  //   width: '80%',
+  //   height: '2px',
+  //   backgroundColor: '#3498db',
+  //   margin: '1.5rem auto',
+  //   border: 'none',
+  // };
+
+   const servicesGridStyle: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(3, 1fr)',
+  gap: '1.5rem',
+  maxWidth: '1000px',
+  margin: '0 auto',
+  width: '100%',
+};
+
+  const serviceCardStyle: React.CSSProperties = {
+    backgroundColor: 'white',
+    padding: '2rem 1.5rem',
+    borderRadius: '12px',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    textAlign: 'center',
+    transition: 'all 0.3s ease',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '200px',
+    cursor: 'pointer',
+    border: '2px solid transparent',
+  };
+
+  const serviceCardHoverStyle: React.CSSProperties = {
+    ...serviceCardStyle,
+    transform: 'translateY(-8px)',
+    boxShadow: '0 12px 25px rgba(0, 0, 0, 0.15)',
+    border: '2px solid #ffffff',
+  };
+
+  const iconStyle: React.CSSProperties = {
+    fontSize: '3rem',
+    marginBottom: '1rem',
+    transition: 'transform 0.3s ease',
+  };
+
+  const iconHoverStyle: React.CSSProperties = {
+    ...iconStyle,
+    transform: 'scale(1.1)',
+  };
+
+  const titleCardStyle: React.CSSProperties = {
+    fontSize: '1.3rem',
+    fontWeight: 'bold',
+    color: '#2c3e50',
+    marginBottom: '0.8rem',
+  };
+
+  const descriptionStyle: React.CSSProperties = {
+    fontSize: '0.95rem',
+    color: '#7f8c8d',
+    lineHeight: '1.5',
+  };
+
+  const handleCardClick = (serviceId: number) => {
+    // This will be handled by routing later
+    console.log(`Navigating to service: ${serviceId}`);
+    // You can replace this with your routing logic
+    // router.push(`/services/${serviceId}`);
+  };
+
+  return (
+    <div style={containerStyle}>
+      <div style={headerStyle}>
+        <h1 style={titleStyle}>الخدمات السريعة</h1>
+        <p style={subtitleStyle}>
+          وصول سريع لأهم الخدمات الطلابية
+        </p>
+      </div>
+
+      {/* <hr style={dividerStyle} /> */}
+
+      <div style={servicesGridStyle}>
+        {servicesData.map((service) => (
+          <div
+            key={service.id}
+            style={
+              hoveredCard === service.id ? serviceCardHoverStyle : serviceCardStyle
+            }
+            onMouseEnter={() => setHoveredCard(service.id)}
+            onMouseLeave={() => setHoveredCard(null)}
+            onClick={() => handleCardClick(service.id)}
+          >
+            <div 
+              style={
+                hoveredCard === service.id ? iconHoverStyle : iconStyle
+              }
+            >
+              {service.icon}
+            </div>
+            <h3 style={titleCardStyle}>{service.title}</h3>
+            <p style={descriptionStyle}>{service.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default Services;

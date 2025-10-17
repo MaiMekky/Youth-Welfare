@@ -1,0 +1,80 @@
+.statsSection {
+  position: relative;
+  width: 100%;
+  /* background: url("/helwan-bg.jpg") center/cover no-repeat; */
+  /* padding: 80px 0; */
+  margin-top: -60px;
+}
+
+.statsOverlay {
+  padding: 60px 20px;
+}
+
+.statsContainer {
+  display: flex;
+  justify-content: space-between; /* distribute evenly */
+  align-items: stretch;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 20px;
+  flex-wrap: nowrap; /* keep them in one row */
+}
+
+.statCard {
+ flex: 1 1 25%;
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 30px 20px;
+  width: 280px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 4px 15px rgba(49, 49, 49, 0.2);
+  transition: transform 0.3s ease, background 0.3s ease;
+  flex: 1 1 22%; /* allow 4 per row nicely */
+}
+
+.statCard:hover {
+  transform: translateY(-8px);
+  
+}
+
+.statIcon {
+  font-size: 40px;
+  color: #fbbf24;
+  margin-bottom: 10px;
+}
+
+.statValue {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.statLabel {
+  font-size: 18px;
+  color: #fbbf24;
+  margin-bottom: 4px;
+}
+
+.statDesc {
+  font-size: 14px;
+  color: #ddd;
+}
+
+/* ✅ Responsive behavior */
+@media (max-width: 1024px) {
+  .statsContainer {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .statCard {
+    width: 45%; /* 2 per row on tablets */
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .statCard {
+    width: 100%; /* 1 per row on phones */
+  }
+}

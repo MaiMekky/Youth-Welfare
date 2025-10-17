@@ -1,0 +1,22 @@
+/* globals.css */
+
+html, body {
+  padding: 0;
+  margin: 0;
+  direction: rtl;
+  font-family: "Cairo", sans-serif;
+  background-color: #ffffff;
+  color: #000000;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+html {
+  scroll-behavior: smooth;
+}

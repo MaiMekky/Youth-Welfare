@@ -1,0 +1,73 @@
+/* app/student/styles/studentNavbar.css */
+:root {
+  --blue-900: #1f255e;
+  --bg: #f7f8fa;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Cairo', sans-serif;
+  background: var(--bg);
+  direction: rtl;
+}
+
+.student-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  padding: 10px 18px;
+  border-bottom: 1px solid #e6e6e6;
+  flex-wrap: wrap;
+}
+
+.navbar-logo {
+  font-weight: 700;
+  font-size: 18px;
+  color: #111;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-btn {
+  background: transparent;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.nav-btn:hover,
+.nav-btn.active {
+  background: #f1f1f1;
+}
+
+.logout-btn {
+  background: #ff4d4d;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* responsive */
+@media (max-width: 768px) {
+  .student-navbar {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .navbar-links {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}

@@ -1,0 +1,52 @@
+/* app/student/styles/headerCard.css */
+.header-card-container {
+  padding: 24px;
+}
+
+.header-card {
+  background: #1f255e;
+  color: #fff;
+  padding: 36px 20px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.header-title {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+}
+
+.header-subtitle {
+  margin: 0;
+  font-size: 15px;
+  opacity: 0.9;
+}
+
+.header-tabs {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  background: #1f255e;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.tab-btn.active,
+.tab-btn:hover {
+  background: #0d133d;
+}
+
+/* responsive */
+@media (max-width: 768px) {
+  .header-card { padding: 24px 12px; }
+  .header-title { font-size: 22px; }
+  .tab-btn { padding: 6px 10px; font-size: 14px; }
+}

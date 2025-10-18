@@ -15,6 +15,7 @@ export default function StudentLayout({
   children: React.ReactNode;
 }) {
   return (
+    
     <div className="student-app">
       {/* Navbar and header can be included here if you want them on every subpage */}
       <div className="student-content">{children}</div>

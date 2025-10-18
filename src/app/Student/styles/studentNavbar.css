@@ -1,73 +1,188 @@
-/* app/student/styles/studentNavbar.css */
+/* Responsive RTL Navbar (updated for StudentNavbar component)
+   Import this file in _app.tsx or the component (component already imports it).
+*/
+
 :root {
-  --blue-900: #1f255e;
-  --bg: #f7f8fa;
+  --navy: #26264e;
+  --gold: #b58900;
+  --card-bg: #ffffff;
+  --logout-red: #d13b3b;
+  --muted-shadow: rgba(17,20,48,0.04);
+  --accent-shadow: rgba(181,140,20,0.12);
+  --radius: 12px;
+  --glass: rgba(43,67,124,0.06);
 }
 
-html, body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Cairo', sans-serif;
-  background: var(--bg);
-  direction: rtl;
+/* Base layout */
+* { box-sizing: border-box; }
+.navbar {
+  background: var(--card-bg);
+  border-bottom: 3px solid rgba(181,150,30,0.07);
+  padding: 12px 0;
+  position: sticky;
+  top: 0;
+  z-index: 80;
+  direction: rtl; /* ensure RTL */
 }
-
-.student-navbar {
+.navbar-inner {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  background: #fff;
-  padding: 10px 18px;
-  border-bottom: 1px solid #e6e6e6;
-  flex-wrap: wrap;
+  gap: 18px;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
-.navbar-logo {
+/* Brand */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: right;
+}
+.brand-mark {
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  background: var(--navy);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: 700;
-  font-size: 18px;
-  color: #111;
+  box-shadow: 0 8px 22px rgba(38,38,78,0.12);
+  font-size: 20px;
 }
+.brand-name { font-weight: 700; color: var(--navy); }
+.brand-sub { color: var(--gold); font-size: 12px; }
 
-.navbar-links {
+/* Center nav (desktop only) */
+.nav {
   display: flex;
   gap: 10px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
+  align-items: center;
+  justify-content: center;
+}
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--navy);
+  border: none;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .12s ease, transform .08s ease;
+}
+.nav-link-with-icon .nav-icon { display: inline-flex; align-items: center; justify-content: center; color: var(--navy); }
+
+/* Hover */
+.nav-link:hover {
+  background: rgba(38,38,78,0.04);
+  transform: translateY(-1px);
 }
 
-.nav-btn {
+/* Active gold pill */
+.nav-link.active-pill {
+  background: var(--gold);
+  color: #ffffff;
+  padding: 10px 14px;
+  border-radius: 12px;
+  box-shadow: 0 6px 14px var(--accent-shadow);
+}
+
+/* Actions group */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logout {
+  background: #fff;
+  color: var(--logout-red);
+  border: 1px solid rgba(209,59,59,0.12);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .12s ease, transform .08s ease;
+}
+.logout:hover { background: rgba(209,59,59,0.04); transform: translateY(-1px); }
+
+/* Hamburger toggle (mobile) */
+.hamburger {
+  display: none;
   background: transparent;
   border: none;
-  padding: 8px 12px;
-  border-radius: 6px;
+  padding: 8px;
+  margin-inline-start: 6px;
   cursor: pointer;
-  font-size: 14px;
+  color: var(--navy);
+}
+.hamburger svg { display: block; }
+.hamburger .line { transition: transform .22s ease, opacity .18s ease; }
+
+/* Mobile menu (dropdown) */
+.mobile-menu {
+  display: none;
+  width: 100%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.96));
+  border-bottom: 1px solid rgba(17,20,48,0.03);
+  box-shadow: 0 6px 20px rgba(17,20,48,0.04);
+  z-index: 70;
+}
+.mobile-menu.open { display: block; }
+.mobile-menu-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 10px 20px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.nav-btn:hover,
-.nav-btn.active {
-  background: #f1f1f1;
+/* Mobile item */
+.mobile-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(17,20,48,0.03);
+  background: var(--card-bg);
+  text-align: right;
+  justify-content: flex-start; /* label on the left, icon on the right in DOM but visually icon will be right due to RTL */
+  color: var(--navy);
+  font-weight: 700;
+  cursor: pointer;
 }
+.mobile-item .mobile-icon { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; color: var(--navy); }
+.mobile-item .mobile-label { flex: 1; font-weight: 600; text-align: right; color: var(--navy); }
 
-.logout-btn {
-  background: #ff4d4d;
+.mobile-item-active {
+  background: var(--gold);
   color: #fff;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 6px;
-  cursor: pointer;
+  border-color: rgba(0,0,0,0.03);
+}
+.mobile-item-active .mobile-icon { color: #fff; }
+
+/* Desktop -> Mobile responsive rules */
+@media (max-width: 860px) {
+  .nav { display: none; }
+  .hamburger { display: inline-flex; }
+  .brand-mark { width: 44px; height: 44px; font-size: 18px; border-radius: 10px; }
+  .brand-name { font-size: 0.98rem; }
 }
 
-/* responsive */
-@media (max-width: 768px) {
-  .student-navbar {
-    flex-direction: column;
-    gap: 10px;
-    align-items: stretch;
-  }
-  .navbar-links {
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-}
+/* Hamburger animation */
+.hamburger.open .line.top { transform: translateY(6px) rotate(45deg); }
+.hamburger.open .line.middle { opacity: 0; transform: scaleX(0); }
+.hamburger.open .line.bottom { transform: translateY(-6px) rotate(-45deg); }
+
+/* Small tweaks */
+.nav-link .nav-label { white-space: nowrap; }
+.container { padding: 0 16px; }

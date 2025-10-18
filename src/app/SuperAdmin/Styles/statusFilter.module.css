@@ -1,0 +1,23 @@
+.statusBar {
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.approvedBadge {
+  background: #D8F5DC;
+  color: #197C2F;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.studentsCount {
+  color: #555;
+  font-size: 14px;
+}

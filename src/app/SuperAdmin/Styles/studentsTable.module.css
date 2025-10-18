@@ -1,0 +1,39 @@
+.studentsTable {
+  background: #fff;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+.studentsTable table {
+  width: 100%;
+  border-collapse: collapse;
+  direction: rtl;
+  text-align: center;
+}
+
+.studentsTable th {
+  background: #F3F4F8;
+  color: #2C2A6A;
+  padding: 12px 10px;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.studentsTable td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #E2E5EF;
+  font-size: 14px;
+  color: #333;
+}
+
+.status {
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.success {
+  background: #E9F8EC;
+  color: #208A3E;
+}

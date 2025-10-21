@@ -1,19 +1,40 @@
 // app/student/components/HeaderCard.tsx
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import "../styles/headerCard.css";
 
-export default function HeaderCard() {
+interface HeaderCardProps {
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+}
+
+export default function HeaderCard({ activeTab, onTabChange }: HeaderCardProps) {
   return (
     <header className="header-card-container">
       <div className="header-card">
         <h1 className="header-title">التكافل الاجتماعي</h1>
-        <p className="header-subtitle">نظام الدعم المالي والاجتماعي لطلاب الجامعة</p>
+        <p className="header-subtitle">نظام الدعم المالي والاجتماعي لطلاب جامعة حلوان</p>
       </div>
-
       <div className="header-tabs">
-        <button className="tab-btn active">معلومات الدعم</button>
-        <button className="tab-btn">تقديم طلب</button>
-        <button className="tab-btn">طلباتي</button>
+        <button
+          className={`tab-btn ${activeTab === "info" ? "active" : ""}`}
+          onClick={() => onTabChange("info")}
+        >
+          معلومات الدعم
+        </button>
+        <button
+          className={`tab-btn ${activeTab === "apply" ? "active" : ""}`}
+          onClick={() => onTabChange("apply")}
+        >
+          تقديم طلب
+        </button>
+        <button
+          className={`tab-btn ${activeTab === "myRequests" ? "active" : ""}`}
+          onClick={() => onTabChange("myRequests")}
+        >
+          طلباتي
+        </button>
       </div>
     </header>
   );

@@ -1,0 +1,130 @@
+.container {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  direction: rtl;
+  max-width: 900px;
+  margin: 40px auto;
+}
+
+.pageTitle {
+  font-size: 24px;
+  color: #2c3a5f;
+  margin-bottom: 25px;
+  text-align: center;
+  border-bottom: 2px solid #f1c40f;
+  padding-bottom: 10px;
+}
+
+.section {
+  margin-bottom: 25px;
+}
+
+.section h3 {
+  color: #1f2937;
+  margin-bottom: 10px;
+  border-right: 5px solid #facc15;
+  padding-right: 8px;
+}
+
+.infoGrid {
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 15px 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 20px;
+}
+
+.longText {
+  background: #fff8dc;
+  padding: 15px;
+  border-radius: 10px;
+  line-height: 1.8;
+  margin-top: 10px;
+  font-size: 15px;
+}
+
+.docsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.docsTable th, .docsTable td {
+  padding: 10px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: right;
+}
+
+.verified {
+  color: #047857;
+  font-weight: 600;
+}
+
+.pending {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.missing {
+  color: #991b1b;
+  font-weight: 600;
+}
+
+.sectionNote {
+  background: #fef3c7;
+  border: 1px solid #facc15;
+  padding: 15px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 25px;
+}
+
+.btnApprove {
+  background-color: #10b981;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.btnReject {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.btnReceived {
+  background-color: #fef9c3;
+  color: #b45309;
+  border-radius: 8px;
+  padding: 10px 20px;
+  text-align: center;
+  font-weight: 500;
+  margin: 20px auto;
+  border: 1px solid #facc15;
+}
+
+.btnBack {
+  background-color: #d4af37;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  display: block;
+  margin: 20px auto 0;
+  cursor: pointer;
+}

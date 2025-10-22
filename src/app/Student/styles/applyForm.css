@@ -91,6 +91,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  height: 100px;
 }
 
 .form-group label {
@@ -119,21 +120,31 @@
   justify-content: space-between;
   align-items: center;
   margin-top: 25px;
-}/* Application form details */
-.application-details-card {
+}.application-details-card {
   background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-  padding: 30px 25px;
-  margin-top: 30px;
+  border-radius: 16px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+  padding: 30px 35px;
+  max-width: 950px;
+  margin: 40px auto;
   text-align: right;
 }
 
 .form-title {
   color: #27285d;
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 700;
   margin-bottom: 25px;
+  text-align: center;
+}
+
+.section-title {
+  color: #27285d;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 25px 0 15px;
+  border-bottom: 2px solid #f1f1f1;
+  padding-bottom: 6px;
 }
 
 .apply-form .form-group {
@@ -142,27 +153,30 @@
 
 .apply-form label {
   display: block;
-  color: #27285d;
+  color: #333;
   font-weight: 500;
   margin-bottom: 6px;
   font-size: 15px;
 }
 
 .apply-form input,
-.apply-form textarea {
+.apply-form textarea,
+.apply-form select {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid #dcdcdc;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 14px;
   outline: none;
-  transition: 0.2s;
+  transition: 0.2s ease;
+  background-color: #fff;
 }
 
 .apply-form input:focus,
-.apply-form textarea:focus {
+.apply-form textarea:focus,
+.apply-form select:focus {
   border-color: #27285d;
-  box-shadow: 0 0 3px rgba(39, 40, 93, 0.3);
+  box-shadow: 0 0 4px rgba(39, 40, 93, 0.2);
 }
 
 .apply-form .error {
@@ -172,10 +186,48 @@
   display: block;
 }
 
-.submit-btn {
-  margin-top: 20px;
+/* Grid Layout */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px 25px;
 }
 
+textarea {
+  resize: none;
+}
+
+/* Buttons */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 25px;
+}
+
+.submit-btn {
+  background: #27285d;
+  color: #fff;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: 0.2s ease;
+}
+
+.submit-btn:hover {
+  background: #1f204d;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .application-details-card {
+    padding: 20px;
+  }
+  .section-title {
+    font-size: 16px;
+  }
+}
 .upload-container {
   direction: rtl;
   background: #fff;
@@ -302,4 +354,4 @@
 
 .submit-btn:hover {
   background: #1f204d;
-}
+} 

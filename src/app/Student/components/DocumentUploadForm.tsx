@@ -6,7 +6,7 @@ import "../styles/applyForm.css";
 
 export default function DocumentUploadForm() {
   const [files, setFiles] = useState<{ [key: string]: File | null }>({});
-
+  
   const documents = [
     {
       id: "socialResearch",

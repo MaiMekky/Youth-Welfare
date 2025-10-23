@@ -209,3 +209,55 @@
     gap: 10px;
   }
 }
+/* ===== Gmail-style Pagination ===== */
+.gmailFooter {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 14px 14px;
+  margin: 0 25px 25px;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #1c1e58;
+}
+
+.paginationInfo strong {
+  color: #1c1e58;
+}
+
+.paginationControls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.paginationControls select {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 13px;
+  outline: none;
+  color: #1c1e58;
+}
+
+.arrowBtn {
+  border: 1px solid #ccc;
+  background: #f8f8f8;
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: 0.2s;
+  color: #1c1e58;
+}
+
+.arrowBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.arrowBtn:hover:not(:disabled) {
+  background: #eaeaea;
+}

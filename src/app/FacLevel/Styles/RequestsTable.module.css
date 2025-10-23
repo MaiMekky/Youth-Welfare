@@ -117,6 +117,7 @@
   border-radius: 0 0 8px 8px;
   font-size: 14px;
   color: #2c3a5f;
+  
 }
 
 .footerRight {
@@ -160,13 +161,6 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
-.filtersSection {
-  background: white;
-  border-radius: 12px;
-  padding: 16px 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  margin-bottom: 16px;
-}
 
 .filtersHeader {
   display: flex;
@@ -177,6 +171,18 @@
 }
 
 .filtersContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.filtersSection {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -206,10 +212,19 @@
   outline: none;
 }
 
+.searchInput:focus {
+  border-color: #d4af37;
+}
+
 .filterSelect {
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 8px;
   background: white;
   outline: none;
+  color: #2c3a5f;
 }
+
+
+
+

@@ -9,6 +9,44 @@ export default function RequestDetailsPage() {
 
   const [status, setStatus] = useState("pending");
 
+  // ✅ الخصومات
+  const [discounts, setDiscounts] = useState({
+    books: false,
+    enrollment: false,
+    regular: false,
+    full: false,
+  });
+
+  const baseAmount = 1500;
+
+  // 🧮 حساب المبلغ بعد الخصم
+  const calculateDiscount = () => {
+    if (discounts.full) return 0;
+    let discountValue = 0;
+    if (discounts.books) discountValue += baseAmount * 0.1;
+    if (discounts.enrollment) discountValue += baseAmount * 0.2;
+    if (discounts.regular) discountValue += baseAmount * 0.3;
+    return Math.max(baseAmount - discountValue, 0);
+  };
+
+  const handleDiscountChange = (type: string) => {
+    setDiscounts((prev) => {
+      const updated = { ...prev, [type]: !prev[type] };
+
+      // لو اختار خصم كامل → يلغي الباقي
+      if (type === "full" && !prev.full) {
+        return { books: false, enrollment: false, regular: false, full: true };
+      }
+
+      // لو شال خصم كامل → يرجّعهم فاضيين
+      if (type === "full" && prev.full) {
+        return { books: false, enrollment: false, regular: false, full: false };
+      }
+
+      return updated;
+    });
+  };
+
   const handleInitialApprove = () => setStatus("received");
   const handleFinalApprove = () => setStatus("final");
   const handleReject = () => setStatus("rejected");
@@ -51,7 +89,8 @@ export default function RequestDetailsPage() {
       <section className={styles.section}>
         <h3>معلومات طلب الدعم</h3>
         <div className={styles.infoGrid}>
-          <p><strong>المبلغ المطلوب:</strong> 1500 جنيه</p>
+          <p><strong>المبلغ المطلوب:</strong> {baseAmount} جنيه</p>
+          <p><strong>المبلغ بعد الخصم:</strong> {calculateDiscount()} جنيه</p>
           <p><strong>تاريخ التقديم:</strong> ١٥‏/١‏/٢٠٢٤</p>
         </div>
         <p className={styles.longText}>
@@ -107,6 +146,42 @@ export default function RequestDetailsPage() {
         المستندات الناقصة أو غير الصحيحة قد تؤدي إلى تأخير أو رفض الطلب.
       </section>
 
+      {/* ✅ صندوق الخصومات */}
+      <div className={styles.discountsBox}>
+        <label>
+          <input
+            type="checkbox"
+            checked={discounts.books}
+            onChange={() => handleDiscountChange("books")}
+          />
+          خصم مصاريف الكتب (10%)
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={discounts.enrollment}
+            onChange={() => handleDiscountChange("enrollment")}
+          />
+          خصم مصاريف الانتساب (20%)
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={discounts.regular}
+            onChange={() => handleDiscountChange("regular")}
+          />
+          خصم مصاريف الانتظام (30%)
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={discounts.full}
+            onChange={() => handleDiscountChange("full")}
+          />
+          خصم المصاريف كاملة (100%)
+        </label>
+      </div>
+
       {/* 🟩 الأزرار */}
       <div className={styles.actions}>
         {status === "pending" && (
@@ -131,7 +206,7 @@ export default function RequestDetailsPage() {
       )}
 
       <button onClick={() => router.back()} className={styles.btnBack}>
-         رجوع
+        رجوع
       </button>
     </div>
   );

@@ -14,7 +14,7 @@
 
 .studentsTable th {
   background: #f3f4f8;
-  color: #2c2a6a;
+  color:  #2C3A5F;
   padding: 12px 10px;
   font-weight: 700;
   font-size: 15px;
@@ -29,15 +29,56 @@
 
 .status {
   font-weight: 700;
-  padding: 6px 10px;
-  border-radius: 8px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  display: inline-block;
+}
+.received {
+  background: #fff3cd;
+  color: #856404;
 }
 
+.finalApproval {
+  background: #e9f8ec;
+  color: #1e7e34;
+}
+
+.inReview {
+  background: #e3e7ff;
+  color: #2c2a6a;
+}
+
+.rejected {
+  background: #fdecea;
+  color: #d93025;
+}
+
+.defaultStatus {
+  background: #f0f0f0;
+  color: #444;
+}
 .success {
   background: #e9f8ec;
   color: #208a3e;
 }
+.detailsBtn {
+  background: #f5f6fa;
+  color: #2c2a6a;
+  border: 1px solid #dcdfe6;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
 
+.detailsBtn:hover {
+  background: #2c2a6a;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(44, 42, 106, 0.2);
+}
 .viewBtn, .approveBtn, .rejectBtn {
   border: none;
   padding: 6px 12px;
@@ -50,7 +91,7 @@
 
 .viewBtn {
   background: #eef3ff;
-  color: #2c2a6a;
+  color:  #2C3A5F;
 }
 
 .approveBtn {
@@ -356,4 +397,58 @@
   .gridRow {
     grid-template-columns: 1fr;
   }
+}
+/* ===== Footer Pagination (Gmail Style) ===== */
+.tableFooter {
+  margin-top: 16px;
+  padding: 10px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fafafa;
+  border-top: 1px solid #ddd;
+  border-radius: 0 0 12px 12px;
+  font-size: 14px;
+  color: #2c3a5f;
+  direction: rtl;
+}
+
+.footerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rowsSelect {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 13px;
+  background: white;
+  outline: none;
+  color: #2c3a5f;
+}
+
+.paginationButtons {
+  display: flex;
+  gap: 5px;
+}
+
+.paginationButtons button {
+  background: #f1f1f1;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 8px;
+  cursor: pointer;
+  transition: 0.2s;
+  color: #2c3a5f;
+}
+
+.paginationButtons button:hover {
+  background: #ddd;
+}
+
+.paginationButtons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

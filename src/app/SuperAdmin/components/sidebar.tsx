@@ -8,7 +8,7 @@ export default function Sidebar() {
       <div className={styles.profileSection}>
         <div className={styles.profileAvatar}></div>
         <div className={styles.profileInfo}>
-          <h3>المدير العام</h3>
+          <h3> مشرف النظام</h3>
           <p style={{ textAlign: "center" }}>نظام إدارة الفعاليات</p>
         </div>
       </div>

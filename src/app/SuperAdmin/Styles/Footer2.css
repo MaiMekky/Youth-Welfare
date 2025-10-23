@@ -1,6 +1,5 @@
 .footer {
-  background-color: #1c2147;
-  color: #ffffff;
+background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);  color: #ffffff;
   direction: rtl;
   font-family: "Cairo", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   padding: 3rem 2rem;

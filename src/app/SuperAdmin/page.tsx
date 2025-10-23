@@ -16,7 +16,7 @@ export default function Page() {
         <p className={styles.pageSubtitle}>طلبات الدعم المالي المعتمدة للطلاب</p>
 
         <FiltersBar />
-        <StatusFilter />
+        {/* <StatusFilter /> */}
         <StudentsTable />
        
       </div>

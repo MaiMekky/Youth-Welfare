@@ -1,7 +1,6 @@
 .saSidebar {
   width: 280px;
-  background: #1c2147;
-  color: #fff;
+background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);  color: #fff;
   padding: 30px 20px;
   display: flex;
   flex-direction: column;
@@ -31,6 +30,7 @@
 .profileInfo p {
   font-size: 13px;
   color: rgba(255,255,255,0.8);
+  
 }
 
 .sidebarMenu {

@@ -71,17 +71,7 @@ export default function FiltersBar() {
             <option value="deceased">متوفى</option>
           </select>
 
-          <select
-            value={filters.fatherIncome}
-            onChange={(e) => handleChange("fatherIncome", e.target.value)}
-            className={styles.select}
-          >
-            <option value="" disabled hidden>دخل الأب</option>
-            <option value="none">لا يوجد</option>
-            <option value="low">منخفض</option>
-            <option value="medium">متوسط</option>
-            <option value="high">مرتفع</option>
-          </select>
+
 
           <select
             value={filters.motherStatus}
@@ -110,7 +100,7 @@ export default function FiltersBar() {
             onChange={(e) => handleChange("brothers", e.target.value)}
             className={styles.select}
           >
-            <option value="" disabled hidden>عدد الإخوة</option>
+            <option value="" disabled hidden>افراد الاسرة</option>
             <option value="none">لا يوجد</option>
             <option value="1-2">1-2</option>
             <option value="3-5">3-5</option>
@@ -146,12 +136,12 @@ export default function FiltersBar() {
             onChange={(e) => handleChange("grade", e.target.value)}
             className={styles.select}
           >
-            <option value="" disabled hidden>الصف الدراسي</option>
+            <option value="" disabled hidden>التقدير</option>
             <option value="none">لا يوجد</option>
-            <option value="1">الفرقة الأولى</option>
-            <option value="2">الفرقة الثانية</option>
-            <option value="3">الفرقة الثالثة</option>
-            <option value="4">الفرقة الرابعة</option>
+            <option value="1">امتياز</option>
+            <option value="2">جيد جدا</option>
+            <option value="3">جيد</option>
+            <option value="4">مقبول</option>
           </select>
 
           <select

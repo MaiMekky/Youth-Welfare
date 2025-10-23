@@ -1,0 +1,16 @@
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-header h2 {
+  font-size: 1.75rem;
+  margin: 0 0 0.5rem;
+}
+
+.breadcrumb {
+  color: #666;
+}
+
+.subtext {
+  color: #888;
+}

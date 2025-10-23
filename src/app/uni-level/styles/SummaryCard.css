@@ -1,0 +1,40 @@
+.summary-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.summary-icon {
+  background: #e8f5e9;
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.summary-info, .summary-total {
+  flex: 1;
+}
+
+.label {
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.export-btn {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  width: 48px;
+  height: 48px;
+}

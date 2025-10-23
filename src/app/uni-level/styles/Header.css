@@ -1,0 +1,34 @@
+.header {
+  background: linear-gradient(135deg, #2d2863, #3d3875);
+  color: white;
+  padding: 1rem 2rem;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.logo {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem;
+  border-radius: 8px;
+}
+
+.logo-icon {
+  font-size: 1.5rem;
+}
+
+.header-title h1 {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.header-title p {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin: 0;
+}

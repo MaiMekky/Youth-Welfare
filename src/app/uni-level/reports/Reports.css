@@ -1,12 +1,15 @@
 /* Reports Container */
 .reports-container {
-  margin-right: 312px;
+  flex: 1;
   min-height: 100vh;
   background: #f8f9fc;
   direction: rtl;
   display: flex;
   flex-direction: column;
+  padding: 32px 40px;
+  box-sizing: border-box;
 }
+
 
 .reports-main-content {
   flex: 1;

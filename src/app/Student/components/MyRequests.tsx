@@ -77,11 +77,10 @@
 
 // }
 
-
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, Eye, X, CheckCircle } from "lucide-react";
+import { Eye, X, CheckCircle } from "lucide-react";
 import "../styles/myRequests.css";
 
 interface Request {
@@ -102,7 +101,6 @@ export default function MyRequests() {
   const [filteredRequests, setFilteredRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchRequests();
@@ -110,16 +108,13 @@ export default function MyRequests() {
 
   useEffect(() => {
     filterRequests();
-  }, [activeTab, searchQuery, requests]);
+  }, [activeTab, requests]);
 
   const fetchRequests = async () => {
     try {
       setLoading(true);
-      
-      // Simulate API call with dummy data
-      // Replace with: const response = await fetch("/api/student/requests");
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      
+
       const dummyData: Request[] = [
         {
           id: "1",
@@ -129,10 +124,11 @@ export default function MyRequests() {
           submissionDate: "2 يناير 2025",
           familyMembers: 3,
           familyIncome: "1500 جنيه",
-          reason: "أحتاج إلى دعم مالي لمساعدة أسرتي بعد وفاة والدي وعدم وجود دخل ثابت للأسرة",
+          reason:
+            "أحتاج إلى دعم مالي لمساعدة أسرتي بعد وفاة والدي وعدم وجود دخل ثابت للأسرة",
           currentStep: 2,
           totalSteps: 3,
-        }
+        },
       ];
 
       setRequests(dummyData);
@@ -145,21 +141,9 @@ export default function MyRequests() {
 
   const filterRequests = () => {
     let filtered = requests;
-
-    // Filter by status
     if (activeTab !== "all") {
       filtered = filtered.filter((req) => req.status === activeTab);
     }
-
-    // Filter by search query
-    if (searchQuery.trim()) {
-      filtered = filtered.filter(
-        (req) =>
-          req.requestNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          req.reason.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
     setFilteredRequests(filtered);
   };
 
@@ -184,19 +168,12 @@ export default function MyRequests() {
 
   const handleCancelRequest = (requestId: string) => {
     if (confirm("هل أنت متأكد من إلغاء هذا الطلب؟")) {
-      // Call API to cancel request
       alert("تم إلغاء الطلب");
     }
   };
 
   const handleViewDetails = (requestId: string) => {
-    // Navigate to request details page or open modal
     alert(`عرض تفاصيل الطلب: ${requestId}`);
-  };
-
-  const getStatusCount = (status: string) => {
-    if (status === "all") return requests.length;
-    return requests.filter((req) => req.status === status).length;
   };
 
   if (loading) {
@@ -212,12 +189,6 @@ export default function MyRequests() {
 
   return (
     <div className="my-requests-container">
-      {/* Header */}
-      <div className="requests-header">
-        <h2>البحث برقم الطلب</h2>
-        <p>ادخل رقم الطلب (مثلاً: SS-2025-001)</p>
-      </div>
-
       {/* Tabs */}
       <div className="requests-tabs">
         <button
@@ -225,42 +196,7 @@ export default function MyRequests() {
           onClick={() => setActiveTab("all")}
         >
           طلباتي
-          <span className="count">({getStatusCount("all")})</span>
         </button>
-        <button
-          className={`tab-button ${activeTab === "under-review" ? "active" : ""}`}
-          onClick={() => setActiveTab("under-review")}
-        >
-          قيد المراجعة
-          <span className="count">({getStatusCount("under-review")})</span>
-        </button>
-        <button
-          className={`tab-button ${activeTab === "approved" ? "active" : ""}`}
-          onClick={() => setActiveTab("approved")}
-        >
-          مقبولة
-          <span className="count">({getStatusCount("approved")})</span>
-        </button>
-        <button
-          className={`tab-button ${activeTab === "rejected" ? "active" : ""}`}
-          onClick={() => setActiveTab("rejected")}
-        >
-          مرفوضة
-          <span className="count">({getStatusCount("rejected")})</span>
-        </button>
-      </div>
-
-      {/* Search */}
-      <div className="search-section">
-        <div className="search-box">
-          <Search size={20} color="#6b7280" />
-          <input
-            type="text"
-            placeholder="ابحث برقم الطلب أو السبب..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
       </div>
 
       {/* Requests List */}
@@ -269,16 +205,11 @@ export default function MyRequests() {
           <div className="empty-state">
             <div className="empty-state-icon">📭</div>
             <h3>لا توجد طلبات</h3>
-            <p>
-              {searchQuery
-                ? "لم يتم العثور على طلبات تطابق البحث"
-                : "لم تقم بتقديم أي طلبات بعد"}
-            </p>
+            <p>لم تقم بتقديم أي طلبات بعد</p>
           </div>
         ) : (
           filteredRequests.map((request) => (
             <div key={request.id} className="request-card">
-              {/* Header */}
               <div className="request-card-header">
                 <div className="request-info">
                   <h3>{request.type}</h3>
@@ -289,7 +220,6 @@ export default function MyRequests() {
                 </span>
               </div>
 
-              {/* Details */}
               <div className="request-details">
                 <div className="detail-item">
                   <span className="detail-label">تاريخ التقديم</span>
@@ -305,13 +235,11 @@ export default function MyRequests() {
                 </div>
               </div>
 
-              {/* Reason */}
               <div className="request-reason">
                 <h4>سبب الطلب</h4>
                 <p>{request.reason}</p>
               </div>
 
-              {/* Progress Tracker */}
               <div className="progress-tracker">
                 <h4>تتبع حالة الطلب</h4>
                 <div className="progress-steps">
@@ -319,7 +247,10 @@ export default function MyRequests() {
                     <div
                       className="progress-line-fill"
                       style={{
-                        width: `${getProgressPercentage(request.currentStep, request.totalSteps)}%`,
+                        width: `${getProgressPercentage(
+                          request.currentStep,
+                          request.totalSteps
+                        )}%`,
                       }}
                     ></div>
                   </div>
@@ -327,7 +258,7 @@ export default function MyRequests() {
                     const stepNumber = request.totalSteps - index;
                     const isCompleted = stepNumber < request.currentStep;
                     const isActive = stepNumber === request.currentStep;
-                    
+
                     return (
                       <div
                         key={index}
@@ -338,14 +269,15 @@ export default function MyRequests() {
                         <div className="step-circle">
                           {isCompleted ? <CheckCircle size={18} /> : stepNumber}
                         </div>
-                        <span className="step-label">{getStepLabel(stepNumber)}</span>
+                        <span className="step-label">
+                          {getStepLabel(stepNumber)}
+                        </span>
                       </div>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Actions */}
               <div className="request-actions">
                 <button
                   className="action-btn view"
@@ -354,7 +286,8 @@ export default function MyRequests() {
                   <Eye size={18} />
                   عرض التفاصيل
                 </button>
-                {request.status === "pending" || request.status === "under-review" ? (
+                {(request.status === "pending" ||
+                  request.status === "under-review") && (
                   <button
                     className="action-btn cancel"
                     onClick={() => handleCancelRequest(request.id)}
@@ -362,7 +295,7 @@ export default function MyRequests() {
                     <X size={18} />
                     إلغاء الطلب
                   </button>
-                ) : null}
+                )}
               </div>
             </div>
           ))

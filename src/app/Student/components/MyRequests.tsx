@@ -213,10 +213,7 @@ export default function MyRequests() {
   return (
     <div className="my-requests-container">
       {/* Header */}
-      <div className="requests-header">
-        <h2>البحث برقم الطلب</h2>
-        <p>ادخل رقم الطلب (مثلاً: SS-2025-001)</p>
-      </div>
+      
 
       {/* Tabs */}
       <div className="requests-tabs">
@@ -227,41 +224,11 @@ export default function MyRequests() {
           طلباتي
           <span className="count">({getStatusCount("all")})</span>
         </button>
-        <button
-          className={`tab-button ${activeTab === "under-review" ? "active" : ""}`}
-          onClick={() => setActiveTab("under-review")}
-        >
-          قيد المراجعة
-          <span className="count">({getStatusCount("under-review")})</span>
-        </button>
-        <button
-          className={`tab-button ${activeTab === "approved" ? "active" : ""}`}
-          onClick={() => setActiveTab("approved")}
-        >
-          مقبولة
-          <span className="count">({getStatusCount("approved")})</span>
-        </button>
-        <button
-          className={`tab-button ${activeTab === "rejected" ? "active" : ""}`}
-          onClick={() => setActiveTab("rejected")}
-        >
-          مرفوضة
-          <span className="count">({getStatusCount("rejected")})</span>
-        </button>
+   
       </div>
 
       {/* Search */}
-      <div className="search-section">
-        <div className="search-box">
-          <Search size={20} color="#6b7280" />
-          <input
-            type="text"
-            placeholder="ابحث برقم الطلب أو السبب..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-      </div>
+     
 
       {/* Requests List */}
       <div className="requests-list">

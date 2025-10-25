@@ -3,9 +3,9 @@
   position: fixed;
   right: 0;
   top: 0;
-  width: 312px;
-  height: 100vh;
-  background: linear-gradient(180deg, #2c3e7d 0%, #1e2a5a 100%);
+  width: 240px;
+  height: auto;
+  background:#1e2a5a;
   display: flex;
   flex-direction: column;
   padding: 32px 20px;

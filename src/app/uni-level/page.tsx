@@ -1,14 +1,12 @@
 "use client";
 import { useState } from "react";
 import Head from "next/head";
-import Header from "./components/Header";
 import PageHeader from "./components/PageHeader";
 import Toolbar from "./components/Toolbar";
 import SummaryCard from "./components/SummaryCard";
 import ApplicationsTable from "./components/ApplicationsTable";
-import Footer from "./components/Footer";
+import Layout from "./Layout";
 import "./ApplicationsPage.css";
-import Sidebar from "./components/Sidebar";
 
 interface Application {
   id: string;
@@ -34,23 +32,17 @@ export default function ApplicationsPage() {
   ]);
 
   return (
-    <>
+    <Layout>
       <Head>
         <title>الطلبات المعتمدة على مستوى الجامعة</title>
       </Head>
 
-      <Sidebar />
-
       <div className="applications-container">
-        <Header />
-        <main className="main-content">
-          <PageHeader />
-          <Toolbar />
-          <SummaryCard totalRequests={applications.length} totalAmount="10,100 جنيه" />
-          <ApplicationsTable applications={applications} />
-        </main>
-        <Footer />
+        <PageHeader />
+        <Toolbar />
+        <SummaryCard totalRequests={applications.length} totalAmount="10,100 جنيه" />
+        <ApplicationsTable applications={applications} />
       </div>
-    </>
+    </Layout>
   );
 }

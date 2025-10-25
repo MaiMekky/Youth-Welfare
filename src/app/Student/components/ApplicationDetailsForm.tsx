@@ -187,13 +187,13 @@ export default function ApplicationDetailsForm() {
           </div>
 
           <div className="form-group">
-            <label>المعدل التراكمي</label>
+            <label>التقدير</label>
             <input
               type="text"
               name="gpa"
               value={formData.gpa}
               onChange={handleChange}
-              placeholder="أدخل المعدل من 0 إلى 4"
+              placeholder="ادخل التقدير الخاص بك"
             />
             {errors.gpa && <span className="error">{errors.gpa}</span>}
           </div>

@@ -8,8 +8,8 @@ export default function RequestDetailsPage() {
   const router = useRouter();
 
   const [status, setStatus] = useState("pending");
+  const [notification, setNotification] = useState<string | null>(null);
 
-  // ✅ الخصومات
   const [discounts, setDiscounts] = useState({
     books: false,
     enrollment: false,
@@ -19,26 +19,22 @@ export default function RequestDetailsPage() {
 
   const baseAmount = 1500;
 
-  // 🧮 حساب المبلغ بعد الخصم
   const calculateDiscount = () => {
-    if (discounts.full) return 0;
+    if (discounts.full) return baseAmount;
     let discountValue = 0;
     if (discounts.books) discountValue += baseAmount * 0.1;
     if (discounts.enrollment) discountValue += baseAmount * 0.2;
     if (discounts.regular) discountValue += baseAmount * 0.3;
-    return Math.max(baseAmount - discountValue, 0);
+    return discountValue;
   };
 
   const handleDiscountChange = (type: string) => {
     setDiscounts((prev) => {
       const updated = { ...prev, [type]: !prev[type] };
 
-      // لو اختار خصم كامل → يلغي الباقي
       if (type === "full" && !prev.full) {
         return { books: false, enrollment: false, regular: false, full: true };
       }
-
-      // لو شال خصم كامل → يرجّعهم فاضيين
       if (type === "full" && prev.full) {
         return { books: false, enrollment: false, regular: false, full: false };
       }
@@ -47,15 +43,46 @@ export default function RequestDetailsPage() {
     });
   };
 
-  const handleInitialApprove = () => setStatus("received");
-  const handleFinalApprove = () => setStatus("final");
-  const handleReject = () => setStatus("rejected");
+  const showNotification = (message: string, type: "success" | "warning" | "error") => {
+    setNotification(`${type}:${message}`);
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  const handleInitialApprove = () => {
+    setStatus("received");
+    showNotification("تمت الموافقة المبدئية بنجاح", "warning");
+  };
+
+  const handleFinalApprove = () => {
+    setStatus("final");
+    showNotification("تمت الموافقة النهائية على الطلب", "success");
+  };
+
+  const handleReject = () => {
+    setStatus("rejected");
+    showNotification("تم رفض الطلب", "error");
+  };
 
   return (
     <div className={styles.container}>
+      {/* 🔔 إشعار ثابت فوق اليمين */}
+      {notification && (
+        <div
+          className={`${styles.notification} ${
+            notification.startsWith("success")
+              ? styles.success
+              : notification.startsWith("warning")
+              ? styles.warning
+              : styles.error
+          }`}
+        >
+          {notification.split(":")[1]}
+        </div>
+      )}
+
       <h2 className={styles.pageTitle}>تفاصيل الطالب - أحمد محمد علي</h2>
 
-      {/* 🟨 المعلومات الشخصية */}
+      {/* الأقسام */}
       <section className={styles.section}>
         <h3>المعلومات الشخصية</h3>
         <div className={styles.infoGrid}>
@@ -70,7 +97,6 @@ export default function RequestDetailsPage() {
         </div>
       </section>
 
-      {/* 🟩 معلومات الأسرة */}
       <section className={styles.section}>
         <h3>معلومات الأسرة</h3>
         <div className={styles.infoGrid}>
@@ -85,12 +111,10 @@ export default function RequestDetailsPage() {
         </div>
       </section>
 
-      {/* 🟦 معلومات طلب الدعم */}
       <section className={styles.section}>
         <h3>معلومات طلب الدعم</h3>
         <div className={styles.infoGrid}>
-          <p><strong>المبلغ المطلوب:</strong> {baseAmount} جنيه</p>
-          <p><strong>المبلغ بعد الخصم:</strong> {calculateDiscount()} جنيه</p>
+          <p><strong>الخصم:</strong> {calculateDiscount()} جنيه</p>
           <p><strong>تاريخ التقديم:</strong> ١٥‏/١‏/٢٠٢٤</p>
         </div>
         <p className={styles.longText}>
@@ -99,7 +123,6 @@ export default function RequestDetailsPage() {
         </p>
       </section>
 
-      {/* 🟨 المستندات المطلوبة */}
       <section className={styles.section}>
         <h3>المستندات المطلوبة</h3>
         <table className={styles.docsTable}>
@@ -140,74 +163,29 @@ export default function RequestDetailsPage() {
         </table>
       </section>
 
-      {/* 🟧 ملاحظة */}
-      <section className={styles.sectionNote}>
-        <strong>ملاحظة هامة:</strong> جميع المستندات المطلوبة يجب أن تكون أصلية أو صور طبق الأصل معتمدة.
-        المستندات الناقصة أو غير الصحيحة قد تؤدي إلى تأخير أو رفض الطلب.
-      </section>
-
-      {/* ✅ صندوق الخصومات */}
+      {/* ✅ خصومات */}
       <div className={styles.discountsBox}>
-        <label>
-          <input
-            type="checkbox"
-            checked={discounts.books}
-            onChange={() => handleDiscountChange("books")}
-          />
-          خصم مصاريف الكتب (10%)
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            checked={discounts.enrollment}
-            onChange={() => handleDiscountChange("enrollment")}
-          />
-          خصم مصاريف الانتساب (20%)
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            checked={discounts.regular}
-            onChange={() => handleDiscountChange("regular")}
-          />
-          خصم مصاريف الانتظام (30%)
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            checked={discounts.full}
-            onChange={() => handleDiscountChange("full")}
-          />
-          خصم المصاريف كاملة (100%)
-        </label>
+        <label><input type="checkbox" checked={discounts.books} onChange={() => handleDiscountChange("books")} /> خصم مصاريف الكتب</label>
+        <label><input type="checkbox" checked={discounts.enrollment} onChange={() => handleDiscountChange("enrollment")} /> خصم مصاريف الانتساب</label>
+        <label><input type="checkbox" checked={discounts.regular} onChange={() => handleDiscountChange("regular")} /> خصم مصاريف الانتظام</label>
+        <label><input type="checkbox" checked={discounts.full} onChange={() => handleDiscountChange("full")} /> خصم المصاريف كاملة</label>
       </div>
 
-      {/* 🟩 الأزرار */}
+      {/* ✅ الأزرار */}
       <div className={styles.actions}>
-        {status === "pending" && (
-          <button onClick={handleInitialApprove} className={styles.btnApprove}>
-            موافقة مبدئية
-          </button>
-        )}
-        {status === "received" && (
-          <button onClick={handleFinalApprove} className={styles.btnApprove}>
-            موافقة نهائية
-          </button>
-        )}
-        {status !== "final" && status !== "rejected" && (
-          <button onClick={handleReject} className={styles.btnReject}>
-            رفض
-          </button>
-        )}
+        {status === "pending" && <button onClick={handleInitialApprove} className={styles.btnApprove}>موافقة مبدئية</button>}
+        {status === "received" && <button onClick={handleFinalApprove} className={styles.btnApprove}>موافقة نهائية</button>}
+        {status !== "final" && status !== "rejected" && <button onClick={handleReject} className={styles.btnReject}>رفض</button>}
       </div>
 
-      {status === "final" && (
-        <div className={styles.btnReceived}>✅ تم اعتماد الطلب نهائيًا</div>
-      )}
+      {status === "final" && <div className={styles.btnReceived}>✅ تم اعتماد الطلب نهائيًا</div>}
 
-      <button onClick={() => router.back()} className={styles.btnBack}>
-        رجوع
-      </button>
+      {/* 🔙 زر الرجوع تحت الموافقة */}
+      <div className={styles.backContainer}>
+        <button onClick={() => router.back()} className={styles.btnBack}>
+         رجوع
+        </button>
+      </div>
     </div>
   );
 }

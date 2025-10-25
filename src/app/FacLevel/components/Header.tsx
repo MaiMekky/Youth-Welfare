@@ -15,10 +15,10 @@ export default function Header() {
           </div>
         </div>
         <div className={styles.headerRight}>
-          <button className={styles.btnAddRequest}>
+          {/* <button className={styles.btnAddRequest}>
             <FileText size={18} />
             <span>إضافة الطلبات</span>
-          </button>
+          </button> */}
           <div className={styles.userInfo}>
             <User size={20} />
             <div>

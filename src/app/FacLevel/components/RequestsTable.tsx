@@ -1,34 +1,18 @@
 "use client";
 import React, { useState } from "react";
 import styles from "../Styles/RequestsTable.module.css";
-import { FileText, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { FileText, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function RequestsTable({ requests }: any) {
   const router = useRouter();
 
-  // ======= البحث والفلترة =======
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedFilter, setSelectedFilter] = useState("all");
-
-  const filteredRequests = requests.filter((req: any) => {
-    const matchesSearch =
-      req.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      req.studentId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      req.reqNumber.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesFilter =
-      selectedFilter === "all" ? true : req.status === selectedFilter;
-
-    return matchesSearch && matchesFilter;
-  });
-
   // ======= التقسيم =======
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const totalPages = Math.ceil(filteredRequests.length / rowsPerPage);
+  const [rowsPerPage, setRowsPerPage] = useState(5); // يبدأ من 5
+  const totalPages = Math.ceil(requests.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
-  const visibleRequests = filteredRequests.slice(startIndex, startIndex + rowsPerPage);
+  const visibleRequests = requests.slice(startIndex, startIndex + rowsPerPage);
 
   const handleDetailsClick = (id: string) => {
     router.push(`/requests/${id}`);
@@ -57,33 +41,7 @@ export default function RequestsTable({ requests }: any) {
           <FileText size={20} />
           <h3>طلبات الدعم المالي</h3>
         </div>
-        <p className={styles.tableSubtitle}>عرض {filteredRequests.length} طلب</p>
-      </div>
-
-      {/* ====== الفلاتر ====== */}
-      <div className={styles.filtersSection}>
-        <div className={styles.searchWrapper}>
-          <Search className={styles.searchIcon} size={18} />
-          <input
-            type="text"
-            placeholder="ابحث بالاسم أو رقم الطالب أو الطلب..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className={styles.searchInput}
-          />
-        </div>
-
-        <select
-          value={selectedFilter}
-          onChange={(e) => setSelectedFilter(e.target.value)}
-          className={styles.filterSelect}
-        >
-          <option value="all">عرض الكل</option>
-          <option value="received">تم الاستلام</option>
-          <option value="review">موافقة مبدئية</option>
-          <option value="approved">موافقة نهائية</option>
-          <option value="rejected">مرفوض</option>
-        </select>
+        <p className={styles.tableSubtitle}>عرض {requests.length} طلب</p>
       </div>
 
       {/* ====== الجدول ====== */}
@@ -141,7 +99,7 @@ export default function RequestsTable({ requests }: any) {
               })
             ) : (
               <tr>
-                <td colSpan={7}>لا توجد نتائج مطابقة</td>
+                <td colSpan={7}>لا توجد نتائج</td>
               </tr>
             )}
           </tbody>
@@ -152,8 +110,8 @@ export default function RequestsTable({ requests }: any) {
       <div className={styles.tableFooter}>
         <div className={styles.footerLeft}>
           عرض <strong>{startIndex + 1}</strong>–
-          <strong>{Math.min(startIndex + rowsPerPage, filteredRequests.length)}</strong> من{" "}
-          <strong>{filteredRequests.length}</strong>
+          <strong>{Math.min(startIndex + rowsPerPage, requests.length)}</strong> من{" "}
+          <strong>{requests.length}</strong>
         </div>
 
         <div className={styles.footerRight}>

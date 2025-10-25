@@ -6,6 +6,7 @@
   direction: rtl;
   max-width: 900px;
   margin: 40px auto;
+  border: 3px solid #f1c40f; 
 }
 
 .pageTitle {
@@ -145,4 +146,144 @@
   align-items: center;
   gap: 8px;
   cursor: pointer;
+}
+/* ✅ الإشعار فوق يمين الشاشة (خارج الكونتينر) */
+.notification {
+  position: fixed;
+  top: 25px;
+  right: 25px;
+  width: 300px;
+  background: #ffffff;
+  padding: 14px 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  font-weight: 600;
+  color: #333;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease forwards;
+  overflow: hidden;
+  border-right: 6px solid transparent;
+}
+
+/* ✅ ألوان الإشعار */
+.success {
+  border-right-color: #22c55e;
+}
+.warning {
+  border-right-color: #f59e0b;
+}
+.error {
+  border-right-color: #dc2626;
+}
+
+/* ✅ الشريطة الصفراء المتحركة */
+.notification::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background-color: #facc15;
+  animation: progress 3s linear forwards;
+}
+
+/* ✅ حركة الظهور */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ✅ حركة الشريطة */
+@keyframes progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+/* زر الرجوع */
+.backContainer {
+  text-align: center;
+  margin-top: 25px;
+}
+
+.btnBack {
+  background-color: #d4af37;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btnBack:hover {
+  background-color: #b8962d;
+  transform: scale(1.05);
+}
+
+/* ✅ الإشعار فوق اليمين */
+.notification {
+  position: fixed;
+  top: 25px;
+  right: 25px;
+  width: 300px;
+  background: #fff;
+  padding: 14px 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  font-weight: 600;
+  color: #333;
+  z-index: 9999;
+  border-right: 6px solid transparent;
+  overflow: hidden;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.success {
+  border-right-color: #22c55e;
+}
+.warning {
+  border-right-color: #f59e0b;
+}
+.error {
+  border-right-color: #dc2626;
+}
+
+.notification::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background-color: #facc15;
+  animation: progress 3s linear forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
 }

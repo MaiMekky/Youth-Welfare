@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./RequestDetails.module.css";
 
+
 export default function RequestDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
@@ -24,7 +25,7 @@ export default function RequestDetailsPage() {
     let discountValue = 0;
     if (discounts.books) discountValue += baseAmount * 0.1;
     if (discounts.enrollment) discountValue += baseAmount * 0.2;
-    if (discounts.regular) discountValue += baseAmount * 0.3;
+    if (discounts.regular) discountValue += baseAmount * 0.5;
     return discountValue;
   };
 
@@ -55,7 +56,7 @@ export default function RequestDetailsPage() {
 
   const handleFinalApprove = () => {
     setStatus("final");
-    showNotification("تمت الموافقة النهائية على الطلب", "success");
+    showNotification("تم قبول الطلب بنجاح", "success");
   };
 
   const handleReject = () => {
@@ -162,19 +163,81 @@ export default function RequestDetailsPage() {
           </tbody>
         </table>
       </section>
+{/* ✅ خصومات مع Dropdown لكل نوع خصم */}
+<section className={styles.section}>
+  <h3>الخصومات المتاحة</h3>
+  <div className={styles.discountsBox}>
+    {/* خصم مصاريف الكتب */}
+    <div className={styles.discountSelect}>
+      <label>خصم مصاريف الكتب:</label>
+      <select
+        value={discounts.books}
+        onChange={(e) => setDiscounts({ ...discounts, books: e.target.value })}
+      >
+        <option value="none">لا يوجد</option>
+        <option value="200">200</option>
+        <option value="300">300</option>
+        <option value="400">400</option>
+        <option value="500">500</option>
+        <option value="700">700</option>
+      </select>
+    </div>
 
-      {/* ✅ خصومات */}
-      <div className={styles.discountsBox}>
-        <label><input type="checkbox" checked={discounts.books} onChange={() => handleDiscountChange("books")} /> خصم مصاريف الكتب</label>
-        <label><input type="checkbox" checked={discounts.enrollment} onChange={() => handleDiscountChange("enrollment")} /> خصم مصاريف الانتساب</label>
-        <label><input type="checkbox" checked={discounts.regular} onChange={() => handleDiscountChange("regular")} /> خصم مصاريف الانتظام</label>
-        <label><input type="checkbox" checked={discounts.full} onChange={() => handleDiscountChange("full")} /> خصم المصاريف كاملة</label>
-      </div>
+    {/* خصم مصاريف الانتساب */}
+    <div className={styles.discountSelect}>
+      <label>خصم مصاريف الانتساب:</label>
+      <select
+        value={discounts.enrollment}
+        onChange={(e) => setDiscounts({ ...discounts, enrollment: e.target.value })}
+      >
+        <option value="none">لا يوجد</option>
+        <option value="200">100</option>
+        <option value="300">300</option>
+        <option value="400">400</option>
+        <option value="500">500</option>
+        <option value="700">700</option>
+      </select>
+    </div>
+
+    {/* خصم مصاريف الانتظام */}
+    <div className={styles.discountSelect}>
+      <label>خصم مصاريف الانتظام:</label>
+      <select
+        value={discounts.regular}
+        onChange={(e) => setDiscounts({ ...discounts, regular: e.target.value })}
+      >
+        <option value="none">لا يوجد</option>
+        <option value="200">200</option>
+        <option value="300">300</option>
+        <option value="400">400</option>
+        <option value="500">500</option>
+        <option value="700">700</option>
+      </select>
+    </div>
+
+    {/* خصم المصاريف كاملة */}
+    <div className={styles.discountSelect}>
+      <label>خصم المصاريف كاملة:</label>
+      <select
+        value={discounts.full}
+        onChange={(e) => setDiscounts({ ...discounts, full: e.target.value })}
+      >
+        <option value="none">لا يوجد</option>
+        <option value="200">200</option>
+        <option value="300">300</option>
+        <option value="400">400</option>
+        <option value="500">500</option>
+        <option value="700">700</option>
+      </select>
+    </div>
+  </div>
+</section>
+
 
       {/* ✅ الأزرار */}
       <div className={styles.actions}>
         {status === "pending" && <button onClick={handleInitialApprove} className={styles.btnApprove}>موافقة مبدئية</button>}
-        {status === "received" && <button onClick={handleFinalApprove} className={styles.btnApprove}>موافقة نهائية</button>}
+        {status === "received" && <button onClick={handleFinalApprove} className={styles.btnApprove}>قبول</button>}
         {status !== "final" && status !== "rejected" && <button onClick={handleReject} className={styles.btnReject}>رفض</button>}
       </div>
 

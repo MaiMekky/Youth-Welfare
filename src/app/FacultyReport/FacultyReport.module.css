@@ -209,55 +209,69 @@
     gap: 10px;
   }
 }
-/* ===== Gmail-style Pagination ===== */
+/* ===== Gmail Footer matching Table Footer Theme ===== */
 .gmailFooter {
-  background: #fff;
-  border: 1px solid #ddd;
-  border-top: none;
-  border-radius: 0 0 14px 14px;
-  margin: 0 25px 25px;
-  padding: 12px 20px;
+  background: #fafafa;          /* match table footer */
+  border: 1px solid #ddd;       /* same border */
+  border-top: 1px solid #ddd;   /* like tableFooter, not none */
+  border-radius: 0 0 8px 8px;   /* same as tableFooter */
+  margin: 12px 25px 25px;       /* similar spacing */
+  padding: 10px 16px;           /* match tableFooter */
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 14px;
-  color: #1c1e58;
+  color: #2c3a5f;               /* match tableFooter text color */
 }
 
-.paginationInfo strong {
-  color: #1c1e58;
+/* Info section strong text */
+.gmailFooter .paginationInfo strong {
+  color: #2c3a5f;
 }
 
-.paginationControls {
+/* Controls section */
+.gmailFooter .paginationControls {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;                    /* match tableFooter .footerRight gap */
 }
 
-.paginationControls select {
+.gmailFooter .paginationControls select {
   border: 1px solid #ccc;
   border-radius: 6px;
-  padding: 4px 6px;
+  padding: 5px 8px;
   font-size: 13px;
   outline: none;
-  color: #1c1e58;
+  background: white;
+  color: #2c3a5f;
 }
 
-.arrowBtn {
-  border: 1px solid #ccc;
-  background: #f8f8f8;
+/* Arrow buttons */
+.gmailFooter .arrowBtn {
+  background: #f1f1f1;
+  border: none;
   border-radius: 6px;
-  padding: 4px 8px;
+  padding: 5px 8px;
   cursor: pointer;
   transition: 0.2s;
-  color: #1c1e58;
+  color: #2c3a5f;
 }
 
-.arrowBtn:disabled {
+.gmailFooter .arrowBtn:hover:not(:disabled) {
+  background: #ddd;
+}
+
+.gmailFooter .arrowBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.arrowBtn:hover:not(:disabled) {
-  background: #eaeaea;
+.facultyMain {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.gmailFooter {
+  margin-top: auto; /* keep it pushed down inside the main area */
 }

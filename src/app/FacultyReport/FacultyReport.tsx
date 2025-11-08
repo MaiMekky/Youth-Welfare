@@ -46,117 +46,120 @@ export default function FacultyReport() {
         </div>
       </header>
 
-      {/* ===== Stats Section ===== */}
-      <section className={styles.statsSection}>
-        <div className={`${styles.statBox} ${styles.yellow}`}>
-          <div>
-            <p>إجمالي المبلغ</p>
-            <h2>{totalAmount.toLocaleString()} ج.م</h2>
+      {/* ===== Main Content ===== */}
+      <main className={styles.facultyMain}>
+        {/* ===== Stats Section ===== */}
+        <section className={styles.statsSection}>
+          <div className={`${styles.statBox} ${styles.yellow}`}>
+            <div>
+              <p>إجمالي المبلغ</p>
+              <h2>{totalAmount.toLocaleString()} ج.م</h2>
+            </div>
+            <span className={styles.icon}>💰</span>
           </div>
-          <span className={styles.icon}>💰</span>
+
+          <div className={`${styles.statBox} ${styles.blue}`}>
+            <div>
+              <p>إجمالي الطلبات</p>
+              <h2>{totalCount}</h2>
+            </div>
+            <span className={styles.icon}>👥</span>
+          </div>
+        </section>
+
+        {/* ===== Search Bar ===== */}
+        <div className={styles.searchBar}>
+          <Search size={18} />
+          <input
+            type="text"
+            placeholder="...ابحث بالاسم، رقم الطالب أو رقم الطلب"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
 
-        <div className={`${styles.statBox} ${styles.blue}`}>
-          <div>
-            <p>إجمالي الطلبات</p>
-            <h2>{totalCount}</h2>
+        {/* ===== Table Section ===== */}
+        <div className={styles.tableContainer}>
+          <div className={styles.tableHeader}>
+            <h2>تفاصيل طلبات الطلاب</h2>
+            <div className={styles.tableButtons}>
+              <button className={styles.printBtn}>🖨️ طباعة</button>
+              <button className={styles.exportBtn}>⬇️ تصدير</button>
+            </div>
           </div>
-          <span className={styles.icon}>👥</span>
-        </div>
-      </section>
 
-      {/* ===== Search Bar ===== */}
-      <div className={styles.searchBar}>
-        <Search size={18} />
-        <input
-          type="text"
-          placeholder="...ابحث بالاسم، رقم الطالب أو رقم الطلب"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
-
-      {/* ===== Table Section ===== */}
-      <div className={styles.tableContainer}>
-        <div className={styles.tableHeader}>
-          <h2>تفاصيل طلبات الطلاب</h2>
-          <div className={styles.tableButtons}>
-            <button className={styles.printBtn}>🖨️ طباعة</button>
-            <button className={styles.exportBtn}>⬇️ تصدير</button>
-          </div>
-        </div>
-
-        <table className={styles.reportTable}>
-          <thead>
-            <tr>
-              <th>اسم الطالب</th>
-              <th>رقم الطالب</th>
-              <th>رقم الطلب</th>
-              <th>(جنيه) المبلغ</th>
-              <th>تاريخ التقديم</th>
-              <th>المعدل التراكمي</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentStudents.length > 0 ? (
-              currentStudents.map((s, i) => (
-                <tr key={i}>
-                  <td>{s.name}</td>
-                  <td>{s.id}</td>
-                  <td>{s.req}</td>
-                  <td className={styles.amount}>{s.amount.toLocaleString()}</td>
-                  <td>{s.date}</td>
-                  <td>{s.gpa}</td>
-                </tr>
-              ))
-            ) : (
+          <table className={styles.reportTable}>
+            <thead>
               <tr>
-                <td colSpan={6}>لا توجد نتائج مطابقة</td>
+                <th>اسم الطالب</th>
+                <th>رقم الطالب</th>
+                <th>رقم الطلب</th>
+                <th>(جنيه) المبلغ</th>
+                <th>تاريخ التقديم</th>
+                <th>المعدل التراكمي</th>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {currentStudents.length > 0 ? (
+                currentStudents.map((s, i) => (
+                  <tr key={i}>
+                    <td>{s.name}</td>
+                    <td>{s.id}</td>
+                    <td>{s.req}</td>
+                    <td className={styles.amount}>{s.amount.toLocaleString()}</td>
+                    <td>{s.date}</td>
+                    <td>{s.gpa}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6}>لا توجد نتائج مطابقة</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
 
-      {/* ===== Gmail-style Pagination ===== */}
-      <div className={styles.gmailFooter}>
-        <div className={styles.paginationInfo}>
-          عرض <strong>{startIndex + 1}</strong>–
-          <strong>{Math.min(endIndex, filteredStudents.length)}</strong> من{" "}
-          <strong>{filteredStudents.length}</strong>
+          {/* ===== Gmail-style Pagination ===== */}
+          <div className={styles.gmailFooter}>
+            <div className={styles.paginationInfo}>
+              عرض <strong>{startIndex + 1}</strong>–
+              <strong>{Math.min(endIndex, filteredStudents.length)}</strong> من{" "}
+              <strong>{filteredStudents.length}</strong>
+            </div>
+
+            <div className={styles.paginationControls}>
+              <span>عدد العناصر في الصفحة:</span>
+              <select
+                value={rowsPerPage}
+                onChange={(e) => {
+                  setRowsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+              </select>
+
+              <button
+                className={styles.arrowBtn}
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronRight size={18} />
+              </button>
+
+              <button
+                className={styles.arrowBtn}
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronLeft size={18} />
+              </button>
+            </div>
+          </div>
         </div>
-
-        <div className={styles.paginationControls}>
-          <span>عدد العناصر في الصفحة:</span>
-          <select
-            value={rowsPerPage}
-            onChange={(e) => {
-              setRowsPerPage(Number(e.target.value));
-              setCurrentPage(1);
-            }}
-          >
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-          </select>
-
-          <button
-            className={styles.arrowBtn}
-            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-            disabled={currentPage === 1}
-          >
-            <ChevronRight size={18} />
-          </button>
-
-          <button
-            className={styles.arrowBtn}
-            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-            disabled={currentPage === totalPages}
-          >
-            <ChevronLeft size={18} />
-          </button>
-        </div>
-      </div>
+      </main>
 
       {/* ===== Footer ===== */}
       <footer className={styles.footer}>

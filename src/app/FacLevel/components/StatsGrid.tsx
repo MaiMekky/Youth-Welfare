@@ -1,14 +1,35 @@
 "use client";
-import React from "react";
-import { ClipboardList, Clock, FileSearch, CheckCircle } from "lucide-react";
+import React, { useMemo } from "react";
+import { ClipboardList, Clock, FileSearch, CheckCircle, XCircle } from "lucide-react";
 import styles from "../Styles/StatsGrid.module.css";
 
-export default function StatsGrid() {
+export default function StatsGrid({ requests }: any) {
+  // ✅ حساب عدد الطلبات حسب الحالة
+  const statusCounts = useMemo(() => {
+    const counts = {
+      total: requests.length, // إجمالي الطلبات (تم الاستلام)
+      received: 0, // منتظر
+      review: 0,
+      approved: 0,
+      rejected: 0,
+    };
+
+    requests.forEach((req: any) => {
+      if (req.status && counts.hasOwnProperty(req.status)) {
+        counts[req.status]++;
+      }
+    });
+
+    return counts;
+  }, [requests]);
+
+  // ✅ ترتيب الكروت بال labels العربية
   const stats = [
-    { icon: ClipboardList, label: "تم الاستلام", value: "8", color: "statTotal" },
-    { icon: Clock, label: "في الانتظار", value: "5", color: "statPending" },
-    { icon: FileSearch, label: "موافقة مبدئية", value: "2", color: "statReview" },
-    { icon: CheckCircle, label: "تم الموافقة", value: "1", color: "statApproved" },
+    { icon: ClipboardList, label: "تم الاستلام", value: statusCounts.total, color: "statTotal" },
+    { icon: Clock, label: "منتظر", value: statusCounts.received, color: "statPending" },
+    { icon: FileSearch, label: "موافقة مبدئية", value: statusCounts.review, color: "statReview" },
+    { icon: CheckCircle, label: "مقبول", value: statusCounts.approved, color: "statApproved" },
+    { icon: XCircle, label: "مرفوض", value: statusCounts.rejected, color: "statRejected" },
   ];
 
   return (

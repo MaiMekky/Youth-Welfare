@@ -1,19 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Header from "./components/Header";
 import PageTitleSection from "./components/PageTitleSection";
 import StatsGrid from "./components/StatsGrid";
 import FiltersSection from "./components/FiltersSection";
 import RequestsTable from "./components/RequestsTable";
 import Footer from "./components/Footer";
-import { FileText, AlertCircle, Clock, CheckCircle } from "lucide-react";
 import DiscountsSection from "./components/DiscountsSection";
 
 export default function FinancialSupportPage() {
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
+  // ✅ بيانات الطلبات (requests)
   const requests = [
     {
       id: 1,
@@ -70,35 +70,45 @@ export default function FinancialSupportPage() {
       statusText: "مرفوض",
       actions: ["details"],
     },
-  ];
-
-  const stats = [
-    { icon: FileText, label: "إجمالي الطلبات", value: "8", color: "stat-total" },
-    { icon: AlertCircle, label: "في الانتظار", value: "5", color: "stat-pending" },
-    { icon: Clock, label: "قيد المراجعة", value: "2", color: "stat-review" },
-    { icon: CheckCircle, label: "تم الموافقة", value: "1", color: "stat-approved" },
+    {
+      id: 6,
+      name: "محمد صلاح عبد الله",
+      studentId: "ST-ENG-006",
+      reqNumber: "REQ006",
+      amount: "1,500",
+      date: "2024/11/30",
+      status: "received",
+      statusText: "تم الاستلام",
+      actions: ["rejected", "approved", "details"],
+    },
+    
   ];
 
   // ✅ فلترة الطلبات حسب الحالة أو البحث
-  const filteredRequests = requests.filter((req) => {
-    const matchFilter =
-      selectedFilter === "all" || req.status === selectedFilter;
-    const matchSearch =
-      req.name.includes(searchQuery) ||
-      req.studentId.includes(searchQuery) ||
-      req.reqNumber.includes(searchQuery);
-    return matchFilter && matchSearch;
-  });
+  const filteredRequests = useMemo(() => {
+    return requests.filter((req) => {
+      const matchFilter =
+        selectedFilter === "all" || req.status === selectedFilter;
+      const matchSearch =
+        req.name.includes(searchQuery) ||
+        req.studentId.includes(searchQuery) ||
+        req.reqNumber.includes(searchQuery);
+      return matchFilter && matchSearch;
+    });
+  }, [selectedFilter, searchQuery, requests]);
 
   return (
     <div className="page-wrapper">
       <Header />
       <main className="main-content">
         <PageTitleSection />
-        <StatsGrid />
+
+        {/* ✅ إحصائيات الطلبات - مرتبطة ديناميكياً بالطلبات */}
+        <StatsGrid requests={filteredRequests} />
+
         <DiscountsSection />
 
-        {/* ✅ قسم الفلترة */}
+        {/* ✅ الفلاتر */}
         <FiltersSection
           selectedFilter={selectedFilter}
           setSelectedFilter={setSelectedFilter}
@@ -106,10 +116,11 @@ export default function FinancialSupportPage() {
           setSearchQuery={setSearchQuery}
         />
 
-        {/* ✅ جدول الطلبات بعد الفلترة */}
+        {/* ✅ جدول الطلبات */}
         <RequestsTable requests={filteredRequests} />
       </main>
       <Footer />
     </div>
   );
 }
+

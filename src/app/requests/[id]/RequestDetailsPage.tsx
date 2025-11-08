@@ -29,9 +29,9 @@ export default function RequestDetailsPage() {
         <p><strong>المبلغ المطلوب:</strong> 2000 جنيه</p>
         <p>
           <strong>الحالة الحالية:</strong>{" "}
-          {status === "pending" && "قيد المراجعة"}
+          {status === "pending" && "منتظر"}
           {status === "partial" && "موافقة مبدئية"}
-          {status === "final" && "موافقة نهائية"}
+          {status === "final" && "مقبول"}
           {status === "rejected" && "مرفوض"}
         </p>
       </div>
@@ -39,7 +39,7 @@ export default function RequestDetailsPage() {
       <div className={styles.actions}>
         {status !== "rejected" && status !== "final" && (
           <button onClick={handleApprove} className={styles.btnApprove}>
-            {status === "pending" ? "موافقة مبدئية" : "موافقة نهائية"}
+            {status === "pending" ? "موافقة مبدئية" : "مقبول"}
           </button>
         )}
         {status !== "final" && (

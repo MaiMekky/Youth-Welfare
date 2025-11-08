@@ -287,3 +287,48 @@
     width: 100%;
   }
 }
+/* حاوية الخصومات */
+.discountsBox {
+  background: #fffbea;
+  border: 1px solid #facc15;
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  font-size: 15px;
+}
+
+/* كل عنصر خصم (label + select) */
+.discountSelect {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 180px; /* لتوحيد حجم الحقول */
+  flex: 1 1 180px;
+}
+
+/* نص الـ label */
+.discountSelect label {
+  font-weight: 600;
+  color: #2c3a5f;
+  margin-right: 20px;
+}
+
+/* الـ select */
+.discountSelect select {
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: white;
+  color: #2c3a5f;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.discountSelect select:focus {
+  outline: none;
+  border-color: #facc15;
+  box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.2);
+  background-color: #fffef0;
+}

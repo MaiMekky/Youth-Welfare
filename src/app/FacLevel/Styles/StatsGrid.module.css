@@ -1,7 +1,7 @@
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
+  gap: 15px;
   margin: 24px 0;
   direction: rtl;
 }
@@ -49,3 +49,7 @@
 .statPending { background-color: #FEF3C7; color: #B45309; }
 .statReview { background-color: #FED7AA; color: #C2410C; }
 .statApproved { background-color: #D1FAE5; color: #047857; }
+.statRejected {
+  background-color: #f87171; /* red tone */
+  color: white;
+}

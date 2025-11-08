@@ -10,8 +10,8 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl">
-      <body className="app-body">
+    <html lang="ar">
+      <body >
         <div className="app-container">
          
           <Sidebar />

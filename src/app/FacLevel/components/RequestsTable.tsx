@@ -21,11 +21,11 @@ export default function RequestsTable({ requests }: any) {
   const translateStatus = (status: string) => {
     switch (status) {
       case "received":
-        return "تم الاستلام";
+        return "منتظر";
       case "review":
         return "موافقة مبدئية";
       case "approved":
-        return "موافقة نهائية";
+        return "مقبول";
       case "rejected":
         return "مرفوض";
       default:
@@ -74,11 +74,11 @@ export default function RequestsTable({ requests }: any) {
                         className={`${styles.statusBadge} ${
                           translatedStatus === "موافقة مبدئية"
                             ? styles.statusInitial
-                            : translatedStatus === "موافقة نهائية"
+                            : translatedStatus === "مقبول"
                             ? styles.statusFinal
                             : translatedStatus === "مرفوض"
                             ? styles.statusRejected
-                            : translatedStatus === "تم الاستلام"
+                            : translatedStatus === "منتظر"
                             ? styles.statusReceived
                             : styles.statusPending
                         }`}

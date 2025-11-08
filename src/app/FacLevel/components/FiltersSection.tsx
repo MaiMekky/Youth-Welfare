@@ -33,9 +33,9 @@ export default function FiltersSection({
           className={styles.filterSelect}
         >
           <option value="all">عرض الكل</option>
-          <option value="received">تم الاستلام</option>
+          <option value="received">منتظر</option>
           <option value="review">موافقة مبدئية</option>
-          <option value="approved">موافقة نهائية</option>
+          <option value="approved">مقبول</option>
           <option value="rejected">مرفوض</option>
         </select>
       </div>

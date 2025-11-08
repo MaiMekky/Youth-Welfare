@@ -5,15 +5,16 @@ import styles from "../Styles/DiscountsSection.module.css";
 export default function DiscountsSection() {
   const [isEditing, setIsEditing] = useState(false);
   const [discounts, setDiscounts] = useState({
-    books: "20%",
-    distant: "30%",
-    regular: "25%",
-    full: "50%",
+    books: ["200", "300", "400", "500", "700"],
+    distant: ["200", "300", "400", "500", "700"],
+    regular:["200", "300", "400", "500", "700"],
+    full: ["200", "300", "400", "500", "700"],
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setDiscounts({ ...discounts, [name]: value });
+  const handleChange = (type: string, index: number, value: string) => {
+    const updated = [...discounts[type as keyof typeof discounts]];
+    updated[index] = value;
+    setDiscounts({ ...discounts, [type]: updated });
   };
 
   const handleSave = () => {
@@ -21,63 +22,39 @@ export default function DiscountsSection() {
     console.log("✅ Saved:", discounts);
   };
 
+  const renderInputs = (type: string) => {
+    return discounts[type as keyof typeof discounts].map((val, idx) => (
+      <input
+        key={idx}
+        type="text"
+        value={val}
+        onChange={(e) => handleChange(type, idx, e.target.value)}
+        className={styles.discountInput}
+      />
+    ));
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.cards}>
         <div className={styles.card}>
           <h4>خصم مصاريف الكتب</h4>
-          {isEditing ? (
-            <input
-              type="text"
-              name="books"
-              value={discounts.books}
-              onChange={handleChange}
-            />
-          ) : (
-            <p>{discounts.books}</p>
-          )}
+          {isEditing ? renderInputs("books") : discounts.books.map((d, i) => <p key={i}>{d}</p>)}
         </div>
 
         <div className={styles.card}>
           <h4>خصم مصاريف انتساب</h4>
-          {isEditing ? (
-            <input
-              type="text"
-              name="distant"
-              value={discounts.distant}
-              onChange={handleChange}
-            />
-          ) : (
-            <p>{discounts.distant}</p>
-          )}
+          {isEditing ? renderInputs("distant") : discounts.distant.map((d, i) => <p key={i}>{d}</p>)}
         </div>
 
         <div className={styles.card}>
           <h4>خصم مصاريف انتظام</h4>
-          {isEditing ? (
-            <input
-              type="text"
-              name="regular"
-              value={discounts.regular}
-              onChange={handleChange}
-            />
-          ) : (
-            <p>{discounts.regular}</p>
-          )}
+          {isEditing ? renderInputs("regular") : discounts.regular.map((d, i) => <p key={i}>{d}</p>)}
         </div>
 
         <div className={styles.card}>
           <h4>خصم المصاريف الكاملة</h4>
-          {isEditing ? (
-            <input
-              type="text"
-              name="full"
-              value={discounts.full}
-              onChange={handleChange}
-            />
-          ) : (
-            <p>{discounts.full}</p>
-          )}
+          {isEditing ? renderInputs("full") : discounts.full.map((d, i) => <p key={i}>{d}</p>)}
         </div>
       </div>
 
@@ -95,3 +72,4 @@ export default function DiscountsSection() {
     </div>
   );
 }
+

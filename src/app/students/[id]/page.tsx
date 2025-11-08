@@ -17,8 +17,8 @@ export default function StudentDetailsPage() {
   };
 
   const handleApprove = () => {
-    setStatus("موافقة نهائية");
-    showNotification("✅ تمت الموافقة النهائية على الطالب", "success");
+    setStatus("مقبول");
+    showNotification("✅ تم قبول الطالب", "success");
   };
 
   const handleReject = () => {
@@ -27,7 +27,7 @@ export default function StudentDetailsPage() {
   };
 
   const showDualButtons =
-    status === "موافقة مبدئية" || status === "مرفوض" || status === "تم الاستلام";
+    status === "موافقة مبدئية" || status === "مرفوض" || status === "منتظر";
 
   return (
     <div className={styles.container}>
@@ -123,14 +123,14 @@ export default function StudentDetailsPage() {
 
         {/* ===== الأزرار ===== */}
         <div className={styles.actions}>
-          {status === "موافقة نهائية" ? (
+          {status === "مقبول" ? (
             <button className={styles.rejectBtn} onClick={handleReject}>
               رفض الطالب
             </button>
           ) : showDualButtons ? (
             <>
               <button className={styles.approveBtn} onClick={handleApprove}>
-                موافقة نهائية
+                قبول الطالب   
               </button>
               <button className={styles.rejectBtn} onClick={handleReject}>
                 رفض الطالب

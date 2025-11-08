@@ -1,24 +1,52 @@
 "use client";
 import React from "react";
 import styles from "../Styles/sidebar.module.css";
+import Image from "next/image";
+import Logo from "../../assets/logo1.png";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function Sidebar() {
+  const pathname = usePathname(); // current route
+
+  const menuItems = [
+    { label: "صلاحيات الوصول", href: "#" },
+    { label: "سجلات النشاط", href: "/ActivityLogs" },
+    { label: "إدارة الفعاليات", href: "#" },
+    { label: "إحصائيات الزوار", href: "#" },
+    { label: "التكافل الاجتماعي", href: "/SuperAdmin" },
+  ];
+
   return (
     <aside className={styles.saSidebar}>
       <div className={styles.profileSection}>
-        <div className={styles.profileAvatar}></div>
+        <div className={styles.profileAvatar}>
+          <Image
+            src={Logo}
+            alt="Logo"
+            width={60}
+            height={60}
+            className={styles.logoImage}
+          />
+        </div>
         <div className={styles.profileInfo}>
-          <h3> مشرف النظام</h3>
+          <h3>مشرف النظام</h3>
           <p style={{ textAlign: "center" }}>نظام إدارة الفعاليات</p>
         </div>
       </div>
 
       <nav className={styles.sidebarMenu}>
-        <a href="#" className={styles.menuItem}> صلاحيات الوصول</a>
-        <a href="#" className={styles.menuItem}> سجلات النشاط</a>
-        <a href="#" className={styles.menuItem}> إدارة الفعاليات</a>
-        <a href="#" className={styles.menuItem}> إحصائيات الزوار</a>
-        <a href="#" className={`${styles.menuItem} ${styles.active}`}> التكافل الاجتماعي</a>
+        {menuItems.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`${styles.menuItem} ${
+              pathname === item.href ? styles.active : ""
+            }`}
+          >
+            {item.label}
+          </Link>
+        ))}
       </nav>
     </aside>
   );

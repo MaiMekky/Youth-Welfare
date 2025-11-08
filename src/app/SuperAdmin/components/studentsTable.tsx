@@ -35,7 +35,7 @@ export default function StudentsTable() {
       faculty: "الهندسة",
       grade: "جيد جداً",
       disability: "لا",
-      requestStatus: "موافقة نهائية",
+      requestStatus: "مقبول",
     },
     {
       id: "2",
@@ -49,7 +49,7 @@ export default function StudentsTable() {
       faculty: "التجارة",
       grade: "امتياز",
       disability: "نعم",
-      requestStatus: "قيد المراجعة",
+      requestStatus: "موافقة مبدئية",
     },
     {
       id: "3",
@@ -63,7 +63,7 @@ export default function StudentsTable() {
       faculty: "الحقوق",
       grade: "جيد",
       disability: "لا",
-      requestStatus: "تم الاستلام",
+      requestStatus: "منتظر",
     },
   ];
 
@@ -85,11 +85,11 @@ export default function StudentsTable() {
 
   const getStatusClass = (status: string) => {
     switch (status) {
-      case "تم الاستلام":
+      case "منتظر":
         return styles.received;
-      case "موافقة نهائية":
+      case "مقبول":
         return styles.finalApproval;
-      case "قيد المراجعة":
+      case "موافقة مبدئية":
         return styles.inReview;
       case "مرفوض":
         return styles.rejected;
@@ -154,7 +154,7 @@ export default function StudentsTable() {
       {/* ✅ Footer */}
       <div className={styles.tableFooter}>
         <div className={styles.footerLeft}>
-          <strong>عرض</strong> {startIndex}–{endIndex} من {students.length}
+          <strong>عرض</strong> {startIndex}–{endIndex} <strong>من</strong> {students.length}
         </div>
 
         <div className={styles.footerRight}>

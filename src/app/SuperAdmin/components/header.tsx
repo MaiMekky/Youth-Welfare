@@ -29,14 +29,14 @@ export default function Header() {
           </div>
 
          
-
+{/* 
           <div className={styles.profile}>
             <div className={styles.avatar}></div>
             <div className={styles.profileInfo}>
               <div className={styles.name}>مشرف النظام</div>
               <div className={styles.role}>نظام إدارة الفعاليات</div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </header>

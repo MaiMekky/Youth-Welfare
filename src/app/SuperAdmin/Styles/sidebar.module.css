@@ -6,7 +6,10 @@ background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);  color: #fff;
   flex-direction: column;
   align-items: center;
 }
-
+.logoImage {
+  object-fit: cover;
+   border-radius: 50%;
+}
 .profileAvatar {
   width: 70px;
   height: 70px;

@@ -20,13 +20,13 @@ export default function Header() {
             <FileText size={18} />
             <span>إضافة الطلبات</span>
           </button> */}
-          <div className={styles.userInfo}>
+          {/* <div className={styles.userInfo}>
             <User size={20} />
             <div>
               <p className={styles.userName}>د.أحمد حسن</p>
               <p className={styles.userRole}>كلية الهندسة</p>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </header>

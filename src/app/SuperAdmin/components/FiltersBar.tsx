@@ -17,12 +17,10 @@ export default function FiltersBar() {
     search: "",
   });
 
-  // ✅ التغيير في أي فلتر
   const handleChange = (key: string, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  // ✅ مسح كل الفلاتر
   const clearAllFilters = () => {
     setFilters({
       fatherStatus: "",
@@ -39,10 +37,8 @@ export default function FiltersBar() {
     });
   };
 
-  // ✅ فلترة البيانات (لما تبدأي تربطيها بجدول أو داتا)
   const applyFilters = () => {
     console.log("Filters applied:", filters);
-    // هنا هتعملي فلترة فعلية للداتا لما تضيفيها بعدين
   };
 
   return (
@@ -59,7 +55,6 @@ export default function FiltersBar() {
         />
 
         <div className={styles.filterSelects}>
-          {/* كل الفلاتر */}
           <select
             value={filters.fatherStatus}
             onChange={(e) => handleChange("fatherStatus", e.target.value)}
@@ -67,11 +62,11 @@ export default function FiltersBar() {
           >
             <option value="" disabled hidden>حالة الأب</option>
             <option value="none">لا يوجد</option>
-            <option value="alive">حي</option>
+            <option value="working">يعمل</option>
+            <option value="retired">بالمعاش</option>
+            <option value="sick">مريض</option>
             <option value="deceased">متوفى</option>
           </select>
-
-
 
           <select
             value={filters.motherStatus}
@@ -80,7 +75,9 @@ export default function FiltersBar() {
           >
             <option value="" disabled hidden>حالة الأم</option>
             <option value="none">لا يوجد</option>
-            <option value="alive">حية</option>
+            <option value="working">تعمل</option>
+            <option value="retired">بالمعاش</option>
+            <option value="sick">مريضة</option>
             <option value="deceased">متوفاة</option>
           </select>
 
@@ -92,7 +89,7 @@ export default function FiltersBar() {
             <option value="" disabled hidden>حالة السكن</option>
             <option value="none">لا يوجد</option>
             <option value="owned">ملك</option>
-            <option value="rented">إيجار</option>
+            <option value="rented">ايجار</option>
           </select>
 
           <select
@@ -100,11 +97,11 @@ export default function FiltersBar() {
             onChange={(e) => handleChange("brothers", e.target.value)}
             className={styles.select}
           >
-            <option value="" disabled hidden>افراد الاسرة</option>
+            <option value="" disabled hidden>عدد الإخوة</option>
             <option value="none">لا يوجد</option>
             <option value="1-2">1-2</option>
             <option value="3-5">3-5</option>
-            <option value="6+">6+</option>
+            <option value="6+">6 فأكثر</option>
           </select>
 
           <select
@@ -139,7 +136,7 @@ export default function FiltersBar() {
             <option value="" disabled hidden>التقدير</option>
             <option value="none">لا يوجد</option>
             <option value="1">امتياز</option>
-            <option value="2">جيد جدا</option>
+            <option value="2">جيد جدًا</option>
             <option value="3">جيد</option>
             <option value="4">مقبول</option>
           </select>
@@ -161,19 +158,17 @@ export default function FiltersBar() {
             className={styles.select}
           >
             <option value="" disabled hidden>حالة الطلب</option>
-            <option value="none">لا يوجد</option>
+            <option value="initial">موافقة مبدئية</option>
             <option value="approved">مقبول</option>
+            <option value="pending">منتظر</option>
             <option value="rejected">مرفوض</option>
-            <option value="pending">قيد المراجعة</option>
           </select>
         </div>
 
-        {/* ✅ زرار مسح كل الفلاتر */}
         <button onClick={clearAllFilters} className={styles.clearBtn}>
           مسح جميع الفلاتر
         </button>
 
-        {/* ✅ زرار لتطبيق الفلاتر (اختياري) */}
         <button onClick={applyFilters} className={styles.applyBtn}>
           تطبيق الفلاتر
         </button>

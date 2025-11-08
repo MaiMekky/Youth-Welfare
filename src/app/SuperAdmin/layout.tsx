@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html >
+    <html lang="ar">
       <body>
         <div className="sa-app">
           <Header />

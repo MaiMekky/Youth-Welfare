@@ -12,8 +12,8 @@ export default function Cards(_: Props) {
           --bg:#f6f9ff;
           --card-bg: #ffffff;
           --muted:#64748b;
-          --title:#0b2545;
-          --text:#0f172a;
+          --title:#2C3A5F;
+          --text:#2C3A5F;
           --accent:#c18f00;
         }
 
@@ -333,6 +333,9 @@ export default function Cards(_: Props) {
             <p className="desc">
               شهادة حيازة زراعية أو ملكية أرض زراعية للمقيمين في المحافظات (إن وُجدت)
             </p>
+            <p className="desc">
+              صورة بطاقة تكافل وكرامة  (إن وُجدت)
+            </p>
           </div>
 
           {/* Right column: compact list with badges and icons */}
@@ -392,6 +395,20 @@ export default function Cards(_: Props) {
             <div className="doc-item muted">
               <div className="content">
                 <div className="text">حيازة زراعية لسكان الأقاليم</div>
+                <span className="badge-muted">إن وُجدت</span>
+              </div>
+              <div className="doc-icon" aria-hidden>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 7v13a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V7"/>
+                  <path d="M7 3h10l4 4H3l4-4z"/>
+                </svg>
+              </div>
+            </div>
+          
+           <div className="doc-item muted">
+              <div className="content">
+              صورة بطاقة تكافل وكرامة
+                <div className="text"></div>
                 <span className="badge-muted">إن وُجدت</span>
               </div>
               <div className="doc-icon" aria-hidden>

@@ -62,6 +62,7 @@ export default function ApplicationDetailsForm() {
       Number(formData.gpa) > 4
     )
       newErrors.gpa = "الرجاء إدخال معدل تراكمي صحيح بين 0 و 4";
+      
 
     // Family info validations
     if (!formData.address.trim()) newErrors.address = "العنوان مطلوب";
@@ -101,15 +102,21 @@ export default function ApplicationDetailsForm() {
 
   return (
     <div className="application-details-card" dir="rtl">
-      <h3 className="form-title">نموذج تعبئة طلب الدعم</h3>
-      <form className="apply-form" onSubmit={handleSubmit}>
+ <div className="form-header">
+        <h2 className="main-title">نموذج تعبئة طلب الدعم</h2>
+        <p className="subtitle">
+          <strong>تنويه هام:</strong> يرجى التأكد من رفع جميع المستندات المطلوبة
+          بدقة قبل إرسال الطلب، لتفادي رفضه أو تأجيل معالجته.
+        </p>
+      </div>      <form className="apply-form" onSubmit={handleSubmit}>
         {/* ===========================
              معلومات الطالب
         ============================ */}
+
         <h4 className="section-title">معلومات الطالب</h4>
         <div className="grid-2">
           <div className="form-group">
-            <label>الاسم الكامل</label>
+            <label  style={{color:"#2C3A5F"}}>الاسم الكامل</label>
             <input
               type="text"
               name="studentName"
@@ -123,7 +130,7 @@ export default function ApplicationDetailsForm() {
           </div>
 
           <div className="form-group">
-            <label>الرقم القومي</label>
+            <label  style={{color:"#2C3A5F"}}>الرقم القومي</label>
             <input
               type="text"
               name="nationalId"
@@ -138,7 +145,7 @@ export default function ApplicationDetailsForm() {
           </div>
 
           <div className="form-group">
-            <label>الكلية</label>
+            <label style={{color:"#2C3A5F"}}>الكلية</label>
             <input
               type="text"
               name="college"
@@ -150,7 +157,7 @@ export default function ApplicationDetailsForm() {
           </div>
 
           <div className="form-group">
-            <label>الفرقة الدراسية</label>
+            <label  style={{color:"#2C3A5F"}}>الفرقة الدراسية</label>
             <input
               type="text"
               name="year"
@@ -162,7 +169,7 @@ export default function ApplicationDetailsForm() {
           </div>
 
           <div className="form-group">
-            <label>رقم الهاتف</label>
+            <label  style={{color:"#2C3A5F"}}>رقم الهاتف</label>
             <input
               type="text"
               name="phone"
@@ -175,7 +182,7 @@ export default function ApplicationDetailsForm() {
           </div>
 
           <div className="form-group">
-            <label>البريد الإلكتروني</label>
+            <label  style={{color:"#2C3A5F"}}>البريد الإلكتروني</label>
             <input
               type="email"
               name="email"
@@ -185,18 +192,22 @@ export default function ApplicationDetailsForm() {
             />
             {errors.email && <span className="error">{errors.email}</span>}
           </div>
+<div className="form-group">
+  <label style={{ color: "#2C3A5F" }}>التقدير</label>
+  <select style={{ color: "#2C3A5F" }}
+    name="gpa"
+    value={formData.gpa}
+    onChange={handleChange}
+  >
+    <option value="" hidden>اختر...</option>
+    <option value="امتياز">امتياز</option>
+    <option value="جيد جدا">جيد جدًا</option>
+    <option value="جيد">جيد</option>
+    <option value="مقبول">مقبول</option>
+  </select>
+  {errors.gpa && <span className="error">{errors.gpa}</span>}
+</div>
 
-          <div className="form-group">
-            <label>التقدير</label>
-            <input
-              type="text"
-              name="gpa"
-              value={formData.gpa}
-              onChange={handleChange}
-              placeholder="ادخل التقدير الخاص بك"
-            />
-            {errors.gpa && <span className="error">{errors.gpa}</span>}
-          </div>
         </div>
 
         {/* ===========================
@@ -204,43 +215,47 @@ export default function ApplicationDetailsForm() {
         ============================ */}
         <h4 className="section-title">بيانات الأسرة</h4>
         <div className="grid-2">
-          <div className="form-group">
-            <label>حالة الأب</label>
-            <select
-              name="fatherStatus"
-              value={formData.fatherStatus}
-              onChange={handleChange}
-            >
-              <option value="">اختر...</option>
-              <option value="حي">حي</option>
-              <option value="متوفى">متوفى</option>
-              <option value="منفصل">منفصل</option>
-            </select>
-            {errors.fatherStatus && (
-              <span className="error">{errors.fatherStatus}</span>
-            )}
-          </div>
+    <div className="form-group">
+  <label style={{ color: "#2C3A5F" }}>حالة الأب</label>
+  <select
+    style={{ color: "#2C3A5F" }}
+    name="fatherStatus"
+    value={formData.fatherStatus}
+    onChange={handleChange}
+  >
+    <option value="" disabled hidden>اختر...</option>
+    <option value="working">يعمل</option>
+    <option value="retired">بالمعاش</option>
+    <option value="sick">مريض</option>
+    <option value="deceased">متوفى</option>
+  </select>
+  {errors.fatherStatus && (
+    <span className="error">{errors.fatherStatus}</span>
+  )}
+</div>
+
+<div className="form-group">
+  <label style={{ color: "#2C3A5F" }}>حالة الأم</label>
+  <select
+    style={{ color: "#2C3A5F" }}
+    name="motherStatus"
+    value={formData.motherStatus}
+    onChange={handleChange}
+  >
+    <option value="" disabled hidden>اختر...</option>
+    <option value="working">تعمل</option>
+    <option value="retired">بالمعاش</option>
+    <option value="sick">مريضة</option>
+    <option value="deceased">متوفاة</option>
+  </select>
+  {errors.motherStatus && (
+    <span className="error">{errors.motherStatus}</span>
+  )}
+</div>
+
 
           <div className="form-group">
-            <label>حالة الأم</label>
-            <select
-              name="motherStatus"
-              value={formData.motherStatus}
-              onChange={handleChange}
-            >
-              <option value="">اختر...</option>
-              <option value="حية">حية</option>
-              <option value="متوفاة">متوفاة</option>
-              <option value="منفصلة">منفصلة</option>
-              <option value="ربة منزل">ربة منزل</option>
-            </select>
-            {errors.motherStatus && (
-              <span className="error">{errors.motherStatus}</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label>إجمالي دخل الأسرة (شهريًا)</label>
+            <label  style={{color:"#2C3A5F"}}>إجمالي دخل الأسرة (شهريًا)</label>
             <input
               type="number"
               name="familyIncome"
@@ -254,7 +269,7 @@ export default function ApplicationDetailsForm() {
           </div>
 
           <div className="form-group">
-            <label>عدد أفراد الأسرة</label>
+            <label  style={{color:"#2C3A5F"}}>عدد أفراد الأسرة</label>
             <input
               type="number"
               name="familyMembers"
@@ -268,7 +283,7 @@ export default function ApplicationDetailsForm() {
           </div>
 
           <div className="form-group">
-            <label>الترتيب بين الإخوات</label>
+            <label  style={{color:"#2C3A5F"}}>الترتيب بين الإخوات</label>
             <input
               type="number"
               name="siblingOrder"
@@ -282,7 +297,7 @@ export default function ApplicationDetailsForm() {
           </div>
 
           <div className="form-group">
-            <label>العنوان</label>
+            <label style={{color:"#2C3A5F"}}>العنوان</label>
             <input
               type="text"
               name="address"
@@ -294,13 +309,13 @@ export default function ApplicationDetailsForm() {
           </div>
 
           <div className="form-group">
-            <label>رقم موبايل الأب</label>
+            <label style={{color:"#2C3A5F"}}>رقم موبايل الأب</label>
             <input
               type="text"
               name="fatherPhone"
               value={formData.fatherPhone}
               onChange={handleChange}
-              placeholder="01XXXXXXXXX"
+              placeholder="201XXXXXXXXX+"
               maxLength={11}
             />
             {errors.fatherPhone && (
@@ -309,13 +324,13 @@ export default function ApplicationDetailsForm() {
           </div>
 
           <div className="form-group">
-            <label>رقم موبايل الأم</label>
+            <label style={{color:"#2C3A5F"}}>رقم موبايل الأم</label>
             <input
               type="text"
               name="motherPhone"
               value={formData.motherPhone}
               onChange={handleChange}
-              placeholder="01XXXXXXXXX"
+              placeholder="201XXXXXXXXX+"
               maxLength={11}
             />
             {errors.motherPhone && (
@@ -324,8 +339,8 @@ export default function ApplicationDetailsForm() {
           </div>
 
           <div className="form-group">
-            <label>هل الطالب لديه إعاقة؟</label>
-            <select
+            <label style={{color:"#2C3A5F"}}>هل الطالب لديه إعاقة؟</label>
+            <select  style={{color:"#2C3A5F"}}
               name="disability"
               value={formData.disability}
               onChange={handleChange}
@@ -340,15 +355,15 @@ export default function ApplicationDetailsForm() {
           </div>
 
           <div className="form-group">
-            <label>حالة المسكن</label>
-            <select
+            <label style={{color:"#2C3A5F"}}>حالة المسكن</label>
+            <select  style={{color:"#2C3A5F"}}
               name="housingStatus"
               value={formData.housingStatus}
               onChange={handleChange}
             >
               <option value="">اختر...</option>
               <option value="ملك">ملك</option>
-              <option value="إيجار">إيجار</option>
+              <option value="إيجار">ايجار</option>
               <option value="مشترك">مشترك</option>
             </select>
             {errors.housingStatus && (
@@ -362,8 +377,8 @@ export default function ApplicationDetailsForm() {
         ============================ */}
         <h4 className="section-title">تفاصيل طلب الدعم</h4>
         <div className="form-group">
-          <label>سبب طلب الدعم</label>
-          <textarea
+          <label style={{color:"#2C3A5F"}}>سبب طلب الدعم</label>
+          <textarea style={{color:"#2C3A5F"}}
             name="supportReason"
             value={formData.supportReason}
             onChange={handleChange}

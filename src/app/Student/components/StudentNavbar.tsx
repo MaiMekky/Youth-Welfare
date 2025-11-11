@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import "../styles/studentNavbar.css"; // ensure this is imported somewhere (or in _app.tsx)
-
+import Image from "next/image";
+import Logo from "@/app/assets/logo1.png";
 type NavItem = {
   key: string;
   label: string;
@@ -89,7 +90,8 @@ const StudentNavbar: React.FC = () => {
     <header className="navbar">
       <div className="navbar-inner container">
         <div className="brand" aria-hidden>
-          <div className="brand-mark">🎓</div>
+          <div className="brand-mark"><Image src={Logo} alt="Logo" width={45} height={45} style={{borderRadius : "10px"}}/>
+</div>
           <div className="brand-name">
             رعاية الشباب
             <div className="brand-sub">جامعة حلوان</div>

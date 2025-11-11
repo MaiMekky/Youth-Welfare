@@ -38,6 +38,12 @@ export default function DocumentUploadForm() {
       description: "شهادة حيازة زراعية أو ملكية أرض زراعية للمقيمين في المحافظات (إن وجدت).",
       required: false,
     },
+    {
+      id: "takafulCard",
+      title: "صورة بطاقة تكافل وكرامة",
+      description: "صورة واضحة من بطاقة تكافل وكرامة (إن وجدت).",
+      required: false,
+    },
   ];
 
   const handleFileChange = (id: string, file: File | null) => {
@@ -65,7 +71,7 @@ export default function DocumentUploadForm() {
         {documents.map((doc) => (
           <div key={doc.id} className="document-card">
             <div className="document-header">
-              <h4>{doc.title}</h4>
+              <h4 style={{ color: "#2C3A5F" }}>{doc.title}</h4>
               {doc.required && <span className="required-badge">مطلوب</span>}
             </div>
             <p className="document-desc">{doc.description}</p>
@@ -87,8 +93,6 @@ export default function DocumentUploadForm() {
           </div>
         ))}
       </div>
-
-   
     </div>
   );
 }

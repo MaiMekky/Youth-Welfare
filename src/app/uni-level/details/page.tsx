@@ -8,11 +8,7 @@ export default function ApplicationDetailsPage() {
       <p className="subtitle">
         Financial Support Application Details - All required documents
       </p>
-      <p className="note">
-        يرجى ملء جميع البيانات المطلوبة وإرفاق المستندات الضرورية وفق أفراد الأسرة حتى يتم
-        الوفاء أو مخالفة للقانون لإرسال طلب من خلال النظام
-      </p>
-
+    
       {/* Documents Section */}
       <section className="section documents">
         <h3>رفع المستندات / Documents Upload</h3>
@@ -110,6 +106,8 @@ export default function ApplicationDetailsPage() {
           </div>
         </div>
       </section>
+
+     
     </div>
   );
 }

@@ -5,10 +5,9 @@
   padding: 20px 0;
   font-size: 0.95rem;
   margin-top: 40px;
-  box-sizing: border-box;
 }
 
-.footer-container {
+.footerContainer {
   max-width: 1300px;
   margin: 0 auto;
   padding: 0 24px;
@@ -16,59 +15,37 @@
   justify-content: space-between;
   align-items: flex-start;
   flex-wrap: wrap;
-  direction: rtl;
   gap: 1.5rem;
+  direction: rtl;
 }
 
-.footer-left {
+.footerLeft {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
   text-align: right;
 }
 
-.footer-logo {
+.footerLogo {
   font-weight: bold;
   font-size: 1.2rem;
 }
 
-.footer-text {
+.footerText {
   display: flex;
   flex-direction: column;
   font-size: 0.9rem;
   opacity: 0.9;
 }
 
-.footer-right {
+.footerRight {
   text-align: right;
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
 }
 
-.footer-right p {
+.footerRight p {
   margin: 0;
   line-height: 1.5;
-}
-
-/* ✅ Makes footer responsive with sidebar layout */
-@media (max-width: 1024px) {
-  .footer-container {
-    flex-direction: column;
-    text-align: center;
-    align-items: center;
-  }
-
-  .footer-left,
-  .footer-right {
-    text-align: center;
-    align-items: center;
-  }
-}
-
-@media (max-width: 600px) {
-  .footer {
-    font-size: 0.85rem;
-    padding: 15px 0;
-  }
 }

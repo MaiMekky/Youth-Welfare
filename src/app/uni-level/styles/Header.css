@@ -1,116 +1,57 @@
 .header {
-  background: linear-gradient(135deg, #2d2863, #3d3875);
-  color: #fff;
-  padding: 0.8rem 2rem;
+  background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 16px 24px;
   width: 100%;
   position: sticky;
   top: 0;
   z-index: 1000;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-.header-inner {
+.headerContent {
+  max-width: 1400px;
+  margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1400px;
-  margin: 0 auto;
 }
 
-/* ---------- Left Section ---------- */
-.header-left {
+.headerLeft {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 16px;
 }
 
-.menu-toggle {
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  display: none;
-}
-
-.menu-icon {
-  width: 26px;
-  height: 26px;
-}
-
-.logo-container {
+.headerIcon {
+  background-color: #D4AF37;
+  padding: 10px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
-  gap: 0.7rem;
+  justify-content: center;
 }
 
-.logo-img {
-  width: 45px;
-  height: 45px;
-  object-fit: contain;
-  border-radius: 50%;
-  background-color: white;
-  padding: 4px;
-  box-shadow: 0 0 6px rgba(255, 255, 255, 0.2);
-}
-
-.logo-text h1 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.logo-text p {
-  font-size: 0.85rem;
-  margin: 0;
-  opacity: 0.9;
-}
-
-/* ---------- Right Section ---------- */
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.user-name {
-  font-size: 0.9rem;
-  opacity: 0.9;
-}
-
-.user-avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
+.headerLogo {
+  width: 50px;
+  height: 50px;
+  border-radius: 5px;
   object-fit: cover;
-  border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
-/* ---------- Responsive ---------- */
-@media (max-width: 992px) {
-  .menu-toggle {
-    display: block;
-  }
+.headerTitleH1 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
 
-  .header-inner {
-    flex-direction: row;
-    justify-content: space-between;
-  }
+.headerTitleP {
+  font-size: 13px;
+  color: #B8C5E0;
+}
 
-  .logo-text h1 {
-    font-size: 1rem;
-  }
-
-  .logo-text p {
-    font-size: 0.75rem;
-  }
-
-  .user-name {
-    display: none;
-  }
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }

@@ -97,7 +97,7 @@ export default function FiltersBar() {
             onChange={(e) => handleChange("brothers", e.target.value)}
             className={styles.select}
           >
-            <option value="" disabled hidden>عدد الإخوة</option>
+            <option value="" disabled hidden>عدد افراد الاسرة</option>
             <option value="none">لا يوجد</option>
             <option value="1-2">1-2</option>
             <option value="3-5">3-5</option>

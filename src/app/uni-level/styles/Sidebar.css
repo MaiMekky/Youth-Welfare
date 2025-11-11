@@ -1,119 +1,141 @@
-/* ================= Sidebar ================= */
 .sidebar {
   width: 260px;
-  background: linear-gradient(135deg, #27285d, #3b3c75);
-  color: #f3f5fd;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #2d3a70 0%, #1e2a5a 100%);
+  color: #fff;
   display: flex;
   flex-direction: column;
-  padding: 22px 18px;
-  box-sizing: border-box;
-  flex-shrink: 0; /* يحافظ على حجم ثابت بجانب main */
-  min-height: 100vh; /* يغطي طول الصفحة */
-  position: relative; /* لا fixed عشان Layout */
+  padding: 20px 15px;
+  position: relative;
   z-index: 10;
+  box-sizing: border-box;
 }
 
-/* Header داخل Sidebar */
-.sidebar .header {
+/* Header */
+.sidebar-header {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
+  position: relative;
+}
+.sidebar-header h2 {
+  font-size: 18px;
+  margin: 0;
+  color: #fff;
+}
+.sidebar-header p {
+  font-size: 13px;
+  color: #d1d5db;
+  margin: 4px 0 0;
+}
+.closeBtn {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: transparent;
+  border: none;
+  color: #fff;
 }
 
-.sidebar .header h2 {
-  font-size: 1.4rem;
-  color: #b38e19;
-  margin-bottom: 6px;
-  font-weight: bold;
-}
-
-.sidebar .header p {
-  font-size: 0.95rem;
-  color: #d0d2f0;
-}
-
-/* Profile Section */
-.sidebar .profile {
+/* Profile Card */
+.profile-card {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 12px 14px;
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.08);
-  padding: 12px 14px;
-  border-radius: 14px;
+  gap: 10px;
   margin-bottom: 25px;
 }
-
-.sidebar .profile svg {
-  margin-left: 10px;
-  color: #b38e19;
+.profile-card h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.profile-card p {
+  margin: 0;
+  font-size: 13px;
+  color: #cbd5e1;
+}
+.profile-icon {
+  background-color: rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 6px;
 }
 
-.sidebar .profile h3 {
-  font-size: 1rem;
-  margin-bottom: 4px;
-  color: #f3f5fd;
-}
-
-.sidebar .profile p {
-  font-size: 0.85rem;
-  color: #c6c8e8;
-}
-
-/* Navigation */
-.sidebar .nav {
+/* Navigation Buttons */
+.nav {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  flex-grow: 1; /* ياخد المساحة بين البروفايل والفوتر */
 }
-
-.sidebar .nav button {
+.nav button {
+  width: 100%;
+  padding: 10px 12px;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  background: transparent;
+  justify-content: flex-start;
+  gap: 8px;
+  background-color: transparent;
+  color: #fff;
   border: none;
-  color: #f3f5fd;
-  font-size: 1rem;
-  padding: 12px 14px;
-  border-radius: 10px;
+  border-radius: 6px;
+  font-size: 14px;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: 0.3s;
+}
+.nav button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.nav button.active {
+  background-color: #b38e19;
+  color: #fff;
+  font-weight: 600;
 }
 
-.sidebar .nav button svg {
-  transition: transform 0.3s ease;
-}
-
-.sidebar .nav button:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #b38e19;
-}
-
-.sidebar .nav button:hover svg {
-  transform: translateX(-3px);
-}
-
-/* Footer داخل Sidebar (لو حابب يكون موجود) */
-.sidebar .footer {
+/* Footer */
+.footer {
+ 
   text-align: center;
-  font-size: 0.85rem;
-  color: #bcbfe3;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 12px;
+  color: #d1d5db;
+ 
 }
 
-/* ================= Mobile adjustments ================= */
+/* Mobile Styles */
 .mobileMenuBtn {
   display: none;
+  background: transparent;
+  border: none;
+  color: #1e2a5a;
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  z-index: 100;
+}
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 9;
 }
 
+/* Responsive */
 @media (max-width: 992px) {
-  .layout-container {
-    flex-direction: column;
-  }
-
   .sidebar {
-    width: 100%;
-    min-height: auto;
+    position: fixed;
+    right: -260px;
+    top: 0;
+    height: 100vh;
+    transition: right 0.3s ease;
+  }
+  .sidebar.open {
+    right: 0;
+  }
+  .closeBtn {
+    display: block;
+  }
+  .mobileMenuBtn {
+    display: block;
   }
 }

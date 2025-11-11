@@ -38,36 +38,37 @@ const Sidebar: React.FC = () => {
 
       {/* Sidebar */}
       <aside id="sidebar" className={`sidebar ${isOpen ? "open" : ""}`}>
-        <div className="header">
+        <div className="sidebar-header">
           <h2>النظام الإداري</h2>
           <p>إدارة التكافل الاجتماعي</p>
-          
+          <button className="closeBtn" onClick={() => setIsOpen(false)}>
+            <X size={20} />
+          </button>
         </div>
 
-        <div className="profile">
-          <User size={28} />
+        <div className="profile-card">
+          <div className="profile-icon">
+            <User size={22} />
+          </div>
           <div>
             <h3>مدير النظام</h3>
             <p>admin@helwan.edu.eg</p>
           </div>
         </div>
 
-        {/* Navigation */}
         <nav className="nav">
-          <button onClick={handleAllApplicationsClick}>
-            <FileText size={18} />
-            <span>كل الطلبات</span>
-          </button>
-
-          <button onClick={handleReportsClick}>
+          <button className="active" onClick={handleReportsClick}>
             <BarChart3 size={18} />
             <span>تقارير الكليات</span>
           </button>
+
+          <button onClick={handleAllApplicationsClick}>
+            <FileText size={18} />
+            <span>إدارة الطلبات</span>
+          </button>
         </nav>
 
-        <div className="footer">
-          <p>الإصدار 1.0.0 | النظام نشط</p>
-        </div>
+      
       </aside>
 
       {/* Overlay for mobile */}

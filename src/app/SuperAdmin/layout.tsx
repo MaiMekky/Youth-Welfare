@@ -1,23 +1,28 @@
-// app/SuperAdmin/layout.tsx
-import React from "react";
+"use client"; // لازم لتحويل الـ layout لـ Client Component
+import React, { useState } from "react";
 import "../globals.css";
 import Header from "./components/header";
+import Sidebar from "./components/sidebar";
+import Footer from "./components/Footer2";
 
-export const metadata = {
-  title: "التكافل الاجتماعي - لوحة الإدارة",
-};
 
 export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
-    <html lang="ar">
-      <body>
-        <div className="sa-app">
-          <Header />
-          <div className="sa-content">
-            {children}
-          </div>
-        </div>
-      </body>
-    </html>
+    <div style={{ display: "flex", minHeight: "100vh", direction: "rtl" }}>
+      {/* Sidebar */}
+      <Sidebar isOpen={sidebarOpen} toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+
+      {/* Main area */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+        <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+        {/* <main style={{ flex: 1, padding: "20px" }}>
+          {children}
+        </main> */}
+         <main style={{ flex: 1, padding: "20px", background: "#f3f5fd" }}>{children}</main>
+        <Footer />
+      </div>
+    </div>
   );
 }

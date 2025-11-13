@@ -1,12 +1,16 @@
 "use client";
 import React from "react";
 import styles from "../Styles/Header.module.css";
+import { Menu } from "lucide-react";
 
-export default function Header() {
+export default function Header({ toggleSidebar }: { toggleSidebar: () => void }) {
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
-      
+        <button className={styles.mobileToggle} onClick={toggleSidebar}>
+          <Menu size={24} />
+        </button>
+
         <div className={styles.brand}>
           <div className={styles.brandText}>
             <h1 className={styles.title}>التكافل الاجتماعي</h1>
@@ -14,7 +18,6 @@ export default function Header() {
           </div>
         </div>
 
-      
         <div className={styles.controls}>
           <button className={styles.exportBtn}>
             <span className={styles.exportIcon}>⬇</span> تصدير البيانات
@@ -27,16 +30,6 @@ export default function Header() {
               placeholder="ابحث بالاسم أو الرقم القومي أو كود التكافل..."
             />
           </div>
-
-         
-{/* 
-          <div className={styles.profile}>
-            <div className={styles.avatar}></div>
-            <div className={styles.profileInfo}>
-              <div className={styles.name}>مشرف النظام</div>
-              <div className={styles.role}>نظام إدارة الفعاليات</div>
-            </div>
-          </div> */}
         </div>
       </div>
     </header>

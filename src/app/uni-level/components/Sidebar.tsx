@@ -3,18 +3,20 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import "../styles/Sidebar.css";
 import { Menu, X, FileText, BarChart3, User } from "lucide-react";
+import Image from "next/image";
+import logo from "../../assets/logo1.png";
 
-const Sidebar: React.FC = () => {
+export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
-  const handleAllApplicationsClick = () => {
-    router.push("/uni-level");
+  const handleReportsClick = () => {
+    router.push("/uni-level/reports");
     setIsOpen(false);
   };
 
-  const handleReportsClick = () => {
-    router.push("/uni-level/reports");
+  const handleAllApplicationsClick = () => {
+    router.push("/uni-level");
     setIsOpen(false);
   };
 
@@ -31,16 +33,18 @@ const Sidebar: React.FC = () => {
 
   return (
     <>
-      {/* Mobile Menu Button */}
       <button className="mobileMenuBtn" onClick={() => setIsOpen(true)}>
         <Menu size={24} />
       </button>
 
-      {/* Sidebar */}
       <aside id="sidebar" className={`sidebar ${isOpen ? "open" : ""}`}>
         <div className="sidebar-header">
           <h2>النظام الإداري</h2>
           <p>إدارة التكافل الاجتماعي</p>
+          <div className="headerIcon">
+            
+            <Image src={logo} alt="logo" className="headerLogo" width={50} height={50} />
+          </div>
           <button className="closeBtn" onClick={() => setIsOpen(false)}>
             <X size={20} />
           </button>
@@ -61,20 +65,14 @@ const Sidebar: React.FC = () => {
             <BarChart3 size={18} />
             <span>تقارير الكليات</span>
           </button>
-
           <button onClick={handleAllApplicationsClick}>
             <FileText size={18} />
             <span>إدارة الطلبات</span>
           </button>
         </nav>
-
-      
       </aside>
 
-      {/* Overlay for mobile */}
-      {isOpen && <div className="overlay" onClick={() => setIsOpen(false)}></div>}
+      {isOpen && <div className="overlay" onClick={() => setIsOpen(false)} />}
     </>
   );
-};
-
-export default Sidebar;
+}

@@ -1,7 +1,7 @@
+/* Header.css */
 .header {
   background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
   color: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   padding: 16px 24px;
   width: 100%;
   position: sticky;
@@ -13,18 +13,13 @@
   max-width: 1400px;
   margin: 0 auto;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.headerLeft {
-  display: flex;
+  justify-content: flex-start;
   align-items: center;
   gap: 16px;
 }
 
 .headerIcon {
-  background-color: #D4AF37;
+  background-color: #B38E19;
   padding: 10px;
   border-radius: 8px;
   display: flex;
@@ -48,10 +43,4 @@
 .headerTitleP {
   font-size: 13px;
   color: #B8C5E0;
-}
-
-.headerRight {
-  display: flex;
-  align-items: center;
-  gap: 16px;
 }

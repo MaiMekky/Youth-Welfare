@@ -1,16 +1,18 @@
+/* Layout.css */
+
 /* Base layout container */
 .layout-container {
   display: flex;
   flex-direction: row;
   min-height: 100vh;
-  background-color: #f8f9fb;
+  background-color: #f3f5fd;
   overflow-x: hidden;
 }
 
 /* Sidebar */
 .sidebar {
   width: 260px;
-  background-color: #2d2863;
+  background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
   color: white;
   flex-shrink: 0;
   display: flex;
@@ -20,23 +22,14 @@
   z-index: 10;
 }
 
-/* Main area (beside sidebar) */
+/* Main area */
 .layout-main {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
   overflow: hidden;
-  background-color: #f8f9fb;
-}
-
-/* Header fixed at top within layout-main */
-.layout-main header {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background-color: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  background-color: #f3f5fd;
 }
 
 /* Content section */
@@ -47,23 +40,17 @@
   box-sizing: border-box;
 }
 
-/* Footer natural at bottom */
+/* Footer */
 footer {
   margin-top: auto;
   padding: 16px 20px;
   text-align: center;
   background-color: #1e2a5a;
   color: #fff;
-  border-top: 1px solid #e5e7eb;
   font-size: 0.9rem;
 }
 
-/* Footer content (optional improvement for alignment) */
-footer p {
-  margin: 4px 0;
-}
-
-/* ✅ Responsive adjustments */
+/* Responsive */
 @media (max-width: 992px) {
   .layout-container {
     flex-direction: column;
@@ -79,7 +66,6 @@ footer p {
   }
 }
 
-/* ✅ Handle small mobile view */
 @media (max-width: 576px) {
   .layout-content {
     padding: 12px 16px;

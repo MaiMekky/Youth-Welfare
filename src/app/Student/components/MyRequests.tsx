@@ -110,34 +110,48 @@ export default function MyRequests() {
     filterRequests();
   }, [activeTab, requests]);
 
-  const fetchRequests = async () => {
-    try {
-      setLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+  // const fetchRequests = async () => {
+  //   try {
+  //     setLoading(true);
+  //     await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      const dummyData: Request[] = [
-        {
-          id: "1",
-          requestNumber: "SS-2025-001",
-          type: "طلب دعم مالي",
-          status: "under-review",
-          submissionDate: "2 يناير 2025",
-          familyMembers: 3,
-          familyIncome: "1500 جنيه",
-          reason:
-            "أحتاج إلى دعم مالي لمساعدة أسرتي بعد وفاة والدي وعدم وجود دخل ثابت للأسرة",
-          currentStep: 2,
-          totalSteps: 3,
-        },
-      ];
+  //     const dummyData: Request[] = [
+  //       {
+  //         id: "1",
+  //         requestNumber: "SS-2025-001",
+  //         type: "طلب دعم مالي",
+  //         status: "under-review",
+  //         submissionDate: "2 يناير 2025",
+  //         familyMembers: 3,
+  //         familyIncome: "1500 جنيه",
+  //         reason:
+  //           "أحتاج إلى دعم مالي لمساعدة أسرتي بعد وفاة والدي وعدم وجود دخل ثابت للأسرة",
+  //         currentStep: 2,
+  //         totalSteps: 3,
+  //       },
+  //     ];
 
-      setRequests(dummyData);
-    } catch (error) {
-      console.error("Error fetching requests:", error);
-    } finally {
-      setLoading(false);
+  //     setRequests(dummyData);
+  //   } catch (error) {
+  //     console.error("Error fetching requests:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  const statusToStep = (status: string): number => {
+    switch (status) {
+      case "pending":
+        return 1;
+      case "under-review":
+        return 2;
+      case "approved":
+      case "rejected":
+        return 3;
+      default:
+        return 1;
     }
   };
+
 
   const filterRequests = () => {
     let filtered = requests;
@@ -149,16 +163,16 @@ export default function MyRequests() {
 
   const getStatusText = (status: string) => {
     const statusMap: { [key: string]: string } = {
-      pending: "قيد الانتظار",
-      "under-review": "قيد المراجعة",
-      approved: "تم القبول",
-      rejected: "تم الرفض",
+      pending: "منتظر",
+      "under-review": "موافقة مبدئية",
+      approved: "مقبول",
+      rejected: "مرفوض",
     };
     return statusMap[status] || status;
   };
 
   const getStepLabel = (step: number) => {
-    const steps = ["النتيجة النهائية", "قيد المراجعة", "تم التقديم"];
+    const steps = ["منتظر","موافقة مبدئية", "مقبول", "مرفوض"];
     return steps[step - 1] || "";
   };
 
@@ -166,11 +180,66 @@ export default function MyRequests() {
     return ((current - 1) / (total - 1)) * 100;
   };
 
-  const handleCancelRequest = (requestId: string) => {
-    if (confirm("هل أنت متأكد من إلغاء هذا الطلب؟")) {
-      alert("تم إلغاء الطلب");
+  // const handleCancelRequest = (requestId: string) => {
+  //   if (confirm("هل أنت متأكد من إلغاء هذا الطلب؟")) {
+  //     alert("تم إلغاء الطلب");
+  //   }
+  // };
+
+  const fetchRequests = async () => {
+  try {
+    setLoading(true);
+
+    // Get token from localStorage
+    const token = localStorage.getItem("access");
+    if (!token) throw new Error("User not authenticated");
+
+    const response = await fetch(
+      "http://127.0.0.1:8000/api/solidarity/student/status/",
+      {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("Error fetching requests:", errorData);
+      return;
     }
-  };
+
+    const data = await response.json();
+
+    // Map backend data to your Request interface if needed
+    const mappedRequests: Request[] = data.map((item: any) => ({
+      // const statusStep = statusToStep(item.req_status);
+     
+      id: item.solidarity_id,
+      requestNumber: item.solidarity_id,
+      // type: item.req_type === "financial_aid" ? "طلب دعم مالي" : item.req_type,
+      status: item.req_status,
+      submissionDate: new Date(item.created_at).toLocaleDateString("ar-EG", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }),
+      familyMembers: item.family_numbers,
+      familyIncome: item.total_income,
+      reason: item.reason,
+      // currentStep: statusStep,
+      totalSteps: 3,
+   
+   }));
+
+    setRequests(mappedRequests);
+  } catch (error) {
+    console.error("Error fetching requests:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleViewDetails = (requestId: string) => {
     alert(`عرض تفاصيل الطلب: ${requestId}`);
@@ -286,7 +355,7 @@ export default function MyRequests() {
                   <Eye size={18} />
                   عرض التفاصيل
                 </button>
-                {(request.status === "pending" ||
+                {/* {(request.status === "pending" ||
                   request.status === "under-review") && (
                   <button
                     className="action-btn cancel"
@@ -295,7 +364,7 @@ export default function MyRequests() {
                     <X size={18} />
                     إلغاء الطلب
                   </button>
-                )}
+                )} */}
               </div>
             </div>
           ))

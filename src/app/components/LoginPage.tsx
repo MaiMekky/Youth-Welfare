@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import logo from "@/app/assets/logo1.png";
 import styles from "../Styles/components/LoginPage.module.css";
 
@@ -8,8 +9,10 @@ interface LoginPageProps {
   onClose: () => void;
   onSwitchToSignup: () => void;
 }
- 
+
 export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps) {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -22,21 +25,47 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
       newErrors.email = "البريد غير صالح";
 
     if (!password.trim()) newErrors.password = "كلمة المرور مطلوبة";
-    else if (password.length < 6) newErrors.password = "كلمة المرور قصيرة جدًا";
+    // else if (password.length < 6) newErrors.password = "كلمة المرور قصيرة جدًا";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
+
     setLoading(true);
-    setTimeout(() => {
-      alert("تم تسجيل الدخول بنجاح 🎉");
+    setErrors({});
+
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/auth/login/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          password: password.trim(),
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("فشل تسجيل الدخول، تأكد من البريد أو كلمة المرور.");
+      }
+
+      const data = await res.json();
+
+     
+      localStorage.setItem("access", data.access);
+
+     
+      router.push("/Student");
+    } catch (err: any) {
+      setErrors({ general: err.message || "حدث خطأ أثناء تسجيل الدخول." });
+    } finally {
       setLoading(false);
-      onClose();
-    }, 1200);
+    }
   };
 
   return (
@@ -69,6 +98,8 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
           className={errors.password ? styles.invalid : ""}
         />
         {errors.password && <p className={styles.errorMsg}>{errors.password}</p>}
+
+        {errors.general && <p className={styles.errorMsg}>{errors.general}</p>}
 
         <button type="submit" disabled={loading} className={styles.loginButton}>
           {loading ? "جاري التحقق..." : "تسجيل الدخول"}

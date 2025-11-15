@@ -23,6 +23,7 @@ interface FormData {
   phone: string;
   address: string;
   gender: string;
+  grade: string; 
 }
 
 export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
@@ -45,6 +46,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
     phone: "",
     address: "",
     gender: "",
+    grade: "",
   });
 
   const [profileImg, setProfileImg] = useState<string>(profilePlaceholder.src);
@@ -53,8 +55,8 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
   );
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type } = e.target;
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target as any;
     const numericFields = ["studentId", "studentCode", "phone"];
 
     const newValue =
@@ -80,10 +82,11 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
 
     // fullNameEn - English letters only (as before)
     if (!formData.fullNameEn.trim()) {
-      newErrors.fullNameEn = "الاسم باللغة الإنجليزية مطلوب";
-    } else if (!/^[A-Za-z\s]+$/.test(formData.fullNameEn)) {
-      newErrors.fullNameEn = "برجاء ادخال الاسم باللغة الإنجليزية";
+      newErrors.fullNameEn = "الاسم باللغة العربية مطلوب";
     }
+    // } else if (!/^[A-Za-z\s]+$/.test(formData.fullNameEn)) {
+    //   newErrors.fullNameEn = "برجاء ادخال الاسم باللغة الإنجليزية";
+    // }
 
     // email
     if (!formData.email.trim()) {
@@ -99,10 +102,10 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
       newErrors.password = "كلمة المرور يجب أن تكون بين 6 و 14 حرفًا";
     } else if (
       !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]+$/.test(formData.password)
-    ) {
-      newErrors.password =
-        "كلمة المرور يجب أن تحتوي على حرف كبير وحرف صغير ورقم باللغة الإنجليزية فقط";
-    }
+     ) 
+    //   newErrors.password =
+    //     "كلمة المرور يجب أن تحتوي على حرف كبير وحرف صغير ورقم باللغة الإنجليزية فقط";
+    // }
 
     // confirm password
     if (formData.confirmPassword !== formData.password) {
@@ -137,16 +140,24 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
     if (!formData.level.trim()) {
       newErrors.level = "الفرقة مطلوبة";
     }
+// phone (optional but validate when present)
+if (
+  formData.phone &&
+  !/^\+20[1][0125][0-9]{8}$/.test(formData.phone)
+) {
+  newErrors.phone = "رقم الهاتف غير صحيح، يجب أن يبدأ بـ +20";
+}
 
-    // phone (optional but validate when present)
-    if (formData.phone && !/^01[0125][0-9]{8}$/.test(formData.phone)) {
-      newErrors.phone = "رقم الهاتف غير صحيح";
-    }
 
     // address
     if (!formData.address.trim()) {
       newErrors.address = "العنوان مطلوب";
     }
+    // grade
+if (!formData.grade.trim()) {
+  newErrors.grade = "التقدير مطلوب";
+}
+
 
     // gender (optional) - no validation required but can be enforced if needed
 
@@ -154,24 +165,66 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+const handleSubmit = async (e: FormEvent) => {
+  e.preventDefault();
 
-    setLoading(true);
-    try {
-      // simulate submit or call your API here
-      await new Promise((r) => setTimeout(r, 900));
-      // success
-      alert("تم إنشاء الحساب بنجاح 🎉");
-      onClose();
-    } catch (err) {
-      console.error(err);
-      alert("حدث خطأ، حاول مرة أخرى");
-    } finally {
-      setLoading(false);
+  if (!validateForm()) return;
+
+  const formDataToSend = new FormData();
+
+  // Append text fields
+  formDataToSend.append("name", formData.fullNameEn);
+  formDataToSend.append("email", formData.email);
+  formDataToSend.append("password", formData.password);
+  formDataToSend.append("faculty", String(formData.faculty));
+  formDataToSend.append("gender", formData.gender);
+  formDataToSend.append("nid", formData.studentId);
+  formDataToSend.append("uid", formData.studentCode);
+  formDataToSend.append("phone_number", formData.phone);
+  formDataToSend.append("address", formData.address);
+  formDataToSend.append("acd_year", formData.level);
+  formDataToSend.append("grade", formData.grade);
+  formDataToSend.append("major", formData.department);
+
+  // Append file if user uploaded one
+  const profileFileInput = document.getElementById("profileUpload") as HTMLInputElement;
+  if (profileFileInput?.files?.[0]) {
+    formDataToSend.append("profile_image", profileFileInput.files[0]);
+  }
+
+  setLoading(true);
+
+  try {
+    const response = await fetch("http://127.0.0.1:8000/api/auth/signUp/", {
+      method: "POST",
+      body: formDataToSend, // FormData automatically sets Content-Type
+      headers: {
+        // DO NOT set Content-Type manually
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("API Error:", errorData);
+      alert("حدث خطأ أثناء إنشاء الحساب ❌");
+      return;
     }
-  };
+
+    const data = await response.json();
+    if (data.access) {
+      localStorage.setItem("access", data.access);
+    }
+
+    alert("تم إنشاء الحساب بنجاح 🎉");
+    onClose();
+  } catch (err) {
+    console.error(err);
+    alert("حدث خطأ، حاول مرة أخرى");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className={styles.loginBox}>
@@ -180,7 +233,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
       </button>
 
       <div className={styles.logoContainer}>
-        <Image src={logo} alt="logo" width={90} height={90} />
+        <Image src={logo} alt="logo" width={150} height={150} draggable={false} />
       </div>
 
       <h2 className={styles.loginTitle}>إنشاء حساب جديد</h2>
@@ -211,7 +264,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
         <input
           name="fullNameEn"
           type="text"
-          placeholder="الاسم رباعي باللغة الإنجليزية"
+          placeholder="الاسم رباعي باللغة العربية"
           value={formData.fullNameEn}
           onChange={handleChange}
           className={errors.fullNameEn ? styles.invalid : ""}
@@ -329,15 +382,30 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
           className={errors.address ? styles.invalid : ""}
         />
         {errors.address && <p className={styles.errorMsg}>{errors.address}</p>}
+        {/* grade */}
+<select
+  name="grade"
+  value={formData.grade}
+  onChange={handleChange}
+  className={errors.grade ? styles.invalid : styles.input}
+>
+  <option value="" disabled hidden>اختر التقدير</option>
+   <option value="امتياز">امتياز</option>
+    <option value="جيد جدا">جيد جدًا</option>
+    <option value="جيد">جيد</option>
+    <option value="مقبول">مقبول</option>
+</select>
+
+{errors.grade && <p className={styles.errorMsg}>{errors.grade}</p>}
 
         {/* gender */}
-        <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 8 }}>
+        <div style={{ display: "flex", gap: 12,color: "#2C3A5F", marginTop: 8 }}>
           <label style={{ cursor: "pointer" }}>
             <input
               type="radio"
               name="gender"
-              value="ذكر"
-              checked={formData.gender === "ذكر"}
+              value="M"
+              checked={formData.gender === "M"}
               onChange={handleChange}
             />{" "}
             ذكر
@@ -346,8 +414,8 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
             <input
               type="radio"
               name="gender"
-              value="أنثى"
-              checked={formData.gender === "أنثى"}
+              value="F"
+              checked={formData.gender === "F"}
               onChange={handleChange}
             />{" "}
             أنثى

@@ -75,7 +75,7 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
       </button>
 
       <div className={styles.logoContainer}>
-        <Image src={logo} alt="Logo" width={90} height={90} />
+        <Image src={logo} alt="Logo" width={150} height={150} draggable ={false} />
       </div>
 
       <h2 className={styles.loginTitle}>تسجيل الدخول</h2>

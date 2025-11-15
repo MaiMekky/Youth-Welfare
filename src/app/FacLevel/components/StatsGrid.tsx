@@ -1,31 +1,50 @@
 "use client";
+
 import React, { useMemo } from "react";
 import { ClipboardList, Clock, FileSearch, CheckCircle, XCircle } from "lucide-react";
 import styles from "../Styles/StatsGrid.module.css";
 
-export default function StatsGrid({ requests }: any) {
-  // ✅ حساب عدد الطلبات حسب الحالة
-  const statusCounts = useMemo(() => {
-    const counts = {
-      total: requests.length, // إجمالي الطلبات (تم الاستلام)
-      received: 0, // منتظر
-      review: 0,
-      approved: 0,
-      rejected: 0,
-    };
+interface Request {
+  id: number;
+  status: string;
+}
 
-    requests.forEach((req: any) => {
-      if (req.status && counts.hasOwnProperty(req.status)) {
-        counts[req.status]++;
+interface StatsGridProps {
+  requests: Request[];
+}
+
+export default function StatsGrid({ requests }: StatsGridProps) {
+  // حساب عدد الطلبات حسب الحالة
+  const statusCounts = useMemo(() => {
+    const counts = { total: requests.length, received: 0, review: 0, approved: 0, rejected: 0 };
+
+    requests.forEach((req) => {
+      const status = req.status.toLowerCase().trim(); // مهم: lowercase + trim لأي فراغات
+      switch (status) {
+        case "received":
+          counts.received++;
+          break;
+        case "review":
+          counts.review++;
+          break;
+        case "approved":
+          counts.approved++;
+          break;
+        case "rejected":
+          counts.rejected++;
+          break;
+        default:
+          // لو فيه status جديدة غير متوقعة
+          break;
       }
     });
 
     return counts;
   }, [requests]);
 
-  // ✅ ترتيب الكروت بال labels العربية
+  // ترتيب الكروت مع labels العربية
   const stats = [
-    { icon: ClipboardList, label: "تم الاستلام", value: statusCounts.total, color: "statTotal" },
+    { icon: ClipboardList, label: "إجمالي الطلبات", value: statusCounts.total, color: "statTotal" },
     { icon: Clock, label: "منتظر", value: statusCounts.received, color: "statPending" },
     { icon: FileSearch, label: "موافقة مبدئية", value: statusCounts.review, color: "statReview" },
     { icon: CheckCircle, label: "مقبول", value: statusCounts.approved, color: "statApproved" },

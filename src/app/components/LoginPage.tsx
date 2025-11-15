@@ -1,19 +1,24 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import logo from "@/app/assets/logo1.png";
 import styles from "../Styles/components/LoginPage.module.css";
+import { loginUser } from "../../services/authService";
 
 interface LoginPageProps {
   onClose: () => void;
   onSwitchToSignup: () => void;
 }
- 
+
 export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
+
+  const router = useRouter();
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -22,21 +27,32 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
       newErrors.email = "البريد غير صالح";
 
     if (!password.trim()) newErrors.password = "كلمة المرور مطلوبة";
-    else if (password.length < 6) newErrors.password = "كلمة المرور قصيرة جدًا";
+    else if (password.length < 3) newErrors.password = "كلمة المرور قصيرة جدًا";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
+
     setLoading(true);
-    setTimeout(() => {
-      alert("تم تسجيل الدخول بنجاح 🎉");
+    setApiError("");
+
+    const result = await loginUser(email, password);
+
+    if (result.success) {
       setLoading(false);
-      onClose();
-    }, 1200);
+
+      // temporary redirect to FacLevel only
+      router.push("/FacLevel");
+
+      onClose(); // close the login popup
+    } else {
+      setApiError(result.message);
+      setLoading(false);
+    }
   };
 
   return (
@@ -69,6 +85,8 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
           className={errors.password ? styles.invalid : ""}
         />
         {errors.password && <p className={styles.errorMsg}>{errors.password}</p>}
+
+        {apiError && <p className={styles.errorMsg}>{apiError}</p>}
 
         <button type="submit" disabled={loading} className={styles.loginButton}>
           {loading ? "جاري التحقق..." : "تسجيل الدخول"}

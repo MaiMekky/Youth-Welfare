@@ -1,21 +1,122 @@
 "use client";
-import React, { useState } from "react";
+
+import React, { useEffect, useState } from "react";
 import styles from "../Styles/RequestsTable.module.css";
 import { FileText, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
-export default function RequestsTable({ requests }: any) {
+interface RequestsTableProps {
+  onDataFetched: (data: any[]) => void;
+}
+
+// ===============================
+// Token Service
+// ===============================
+export const getAccessToken = () => localStorage.getItem("access_token");
+export const getRefreshToken = () => localStorage.getItem("refresh_token");
+export const saveTokens = (access: string, refresh?: string) => {
+  localStorage.setItem("access_token", access);
+  if (refresh) localStorage.setItem("refresh_token", refresh);
+};
+
+export const refreshToken = async (): Promise<string | null> => {
+  const refresh = getRefreshToken();
+  if (!refresh) return null;
+
+  try {
+    const res = await fetch("http://127.0.0.1:8000/api/auth/refresh/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh }),
+    });
+
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data?.access) {
+      saveTokens(data.access);
+      return data.access;
+    }
+    return null;
+  } catch (err) {
+    console.error("Refresh error:", err);
+    return null;
+  }
+};
+
+// ===============================
+// API Service
+// ===============================
+const API_URL = "http://127.0.0.1:8000/api/solidarity/faculty/applications/";
+
+const fetchApplications = async (token: string) => {
+  try {
+    const res = await axios.get(API_URL, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
+  } catch (err: any) {
+    if (err.response?.status === 401) throw new Error("TOKEN_EXPIRED");
+    throw err;
+  }
+};
+
+// ===============================
+// RequestsTable Component
+// ===============================
+export default function RequestsTable({ onDataFetched }: RequestsTableProps) {
   const router = useRouter();
-
-  // ======= التقسيم =======
+  const [requests, setRequests] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(5); // يبدأ من 5
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
   const totalPages = Math.ceil(requests.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
   const visibleRequests = requests.slice(startIndex, startIndex + rowsPerPage);
 
-  const handleDetailsClick = (id: string) => {
-    router.push(`/requests/${id}`);
+  useEffect(() => {
+    const loadApplications = async () => {
+      setLoading(true);
+      try {
+        let token = getAccessToken();
+        if (!token) throw new Error("No access token");
+
+        try {
+          const data = await fetchApplications(token);
+          formatData(data);
+        } catch (err: any) {
+          if (err.message === "TOKEN_EXPIRED") {
+            token = await refreshToken();
+            if (!token) throw new Error("Refresh failed");
+            const data = await fetchApplications(token);
+            formatData(data);
+          } else {
+            console.error("API fetch error:", err);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadApplications();
+  }, []);
+
+  const formatData = (data: any[]) => {
+    const formatted = data.map((item) => ({
+      id: item.solidarity_id,
+      name: item.student_name,
+      studentId: item.student_uid,
+      reqNumber: item.solidarity_id,
+      date: new Date(item.created_at).toLocaleDateString("ar-EG"),
+      amount: item.total_income,
+      status: item.req_status,
+    }));
+    setRequests(formatted);
+    onDataFetched(formatted); // تبعت للـ parent
   };
 
   const translateStatus = (status: string) => {
@@ -33,9 +134,14 @@ export default function RequestsTable({ requests }: any) {
     }
   };
 
+  const handleDetailsClick = (id: string) => {
+    router.push(`/requests/${id}`);
+  };
+
+  if (loading) return <p>جاري تحميل البيانات...</p>;
+
   return (
     <div className={styles.tableSection}>
-      {/* ====== Header ====== */}
       <div className={styles.tableHeader}>
         <div className={styles.tableTitle}>
           <FileText size={20} />
@@ -44,7 +150,6 @@ export default function RequestsTable({ requests }: any) {
         <p className={styles.tableSubtitle}>عرض {requests.length} طلب</p>
       </div>
 
-      {/* ====== الجدول ====== */}
       <div className={styles.tableWrapper}>
         <table className={styles.requestsTable}>
           <thead>
@@ -60,43 +165,28 @@ export default function RequestsTable({ requests }: any) {
           </thead>
           <tbody>
             {visibleRequests.length > 0 ? (
-              visibleRequests.map((req: any) => {
-                const translatedStatus = translateStatus(req.status);
-                return (
-                  <tr key={req.id}>
-                    <td className={styles.studentName}>{req.name}</td>
-                    <td>{req.studentId}</td>
-                    <td>{req.reqNumber}</td>
-                    <td>{req.date}</td>
-                    <td className={styles.amount}>{req.amount}</td>
-                    <td>
-                      <span
-                        className={`${styles.statusBadge} ${
-                          translatedStatus === "موافقة مبدئية"
-                            ? styles.statusInitial
-                            : translatedStatus === "مقبول"
-                            ? styles.statusFinal
-                            : translatedStatus === "مرفوض"
-                            ? styles.statusRejected
-                            : translatedStatus === "منتظر"
-                            ? styles.statusReceived
-                            : styles.statusPending
-                        }`}
-                      >
-                        {translatedStatus}
-                      </span>
-                    </td>
-                    <td>
-                      <button
-                        className={styles.btnDetails}
-                        onClick={() => handleDetailsClick(req.id)}
-                      >
-                        تفاصيل
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })
+              visibleRequests.map((req) => (
+                <tr key={req.id}>
+                  <td>{req.name}</td>
+                  <td>{req.studentId}</td>
+                  <td>{req.reqNumber}</td>
+                  <td>{req.date}</td>
+                  <td>{req.amount}</td>
+                  <td>
+                    <span className={styles.statusBadge}>
+                      {translateStatus(req.status)}
+                    </span>
+                  </td>
+                  <td>
+                    <button
+                      className={styles.btnDetails}
+                      onClick={() => handleDetailsClick(req.id)}
+                    >
+                      تفاصيل
+                    </button>
+                  </td>
+                </tr>
+              ))
             ) : (
               <tr>
                 <td colSpan={7}>لا توجد نتائج</td>
@@ -106,7 +196,6 @@ export default function RequestsTable({ requests }: any) {
         </table>
       </div>
 
-      {/* ====== Pagination ====== */}
       <div className={styles.tableFooter}>
         <div className={styles.footerLeft}>
           عرض <strong>{startIndex + 1}</strong>–
@@ -122,7 +211,6 @@ export default function RequestsTable({ requests }: any) {
               setRowsPerPage(Number(e.target.value));
               setCurrentPage(1);
             }}
-            className={styles.rowsSelect}
           >
             <option value={5}>5</option>
             <option value={10}>10</option>
@@ -130,7 +218,7 @@ export default function RequestsTable({ requests }: any) {
             <option value={50}>50</option>
           </select>
 
-          <div className={styles.paginationButtons}>
+          <div>
             <button
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={currentPage === 1}

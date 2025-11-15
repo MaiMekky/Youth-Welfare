@@ -1,4 +1,3 @@
-// app/api/stats/route.ts
 import { NextResponse } from "next/server";
 import type { StatItem } from "../../types/stats";
 

@@ -5,7 +5,7 @@ import { ClipboardList, Clock, FileSearch, CheckCircle, XCircle } from "lucide-r
 import styles from "../Styles/StatsGrid.module.css";
 
 interface Request {
-  id: number;
+  id: number | string;
   status: string;
 }
 
@@ -14,12 +14,24 @@ interface StatsGridProps {
 }
 
 export default function StatsGrid({ requests }: StatsGridProps) {
-  // حساب عدد الطلبات حسب الحالة
+  // Normalize status: accept english codes or Arabic labels and map them to the same set
+  const normalizeStatus = (raw: string) => {
+    if (!raw) return "";
+    const s = raw.toString().toLowerCase().trim();
+    // Common Arabic labels mapping -> english codes used internally
+    if (s === "منتظر") return "received";
+    if (s === "موافقة مبدئية") return "review";
+    if (s === "مقبول") return "approved";
+    if (s === "مرفوض") return "rejected";
+    // already english
+    return s;
+  };
+
   const statusCounts = useMemo(() => {
     const counts = { total: requests.length, received: 0, review: 0, approved: 0, rejected: 0 };
 
     requests.forEach((req) => {
-      const status = req.status.toLowerCase().trim(); // مهم: lowercase + trim لأي فراغات
+      const status = normalizeStatus(req.status || "");
       switch (status) {
         case "received":
           counts.received++;
@@ -34,7 +46,6 @@ export default function StatsGrid({ requests }: StatsGridProps) {
           counts.rejected++;
           break;
         default:
-          // لو فيه status جديدة غير متوقعة
           break;
       }
     });
@@ -42,7 +53,6 @@ export default function StatsGrid({ requests }: StatsGridProps) {
     return counts;
   }, [requests]);
 
-  // ترتيب الكروت مع labels العربية
   const stats = [
     { icon: ClipboardList, label: "إجمالي الطلبات", value: statusCounts.total, color: "statTotal" },
     { icon: Clock, label: "منتظر", value: statusCounts.received, color: "statPending" },

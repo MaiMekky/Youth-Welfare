@@ -19,9 +19,9 @@ export default function FinancialSupportPage() {
     return requests.filter((req) => {
       const matchFilter = selectedFilter === "all" || req.status === selectedFilter;
       const matchSearch =
-        req.name.includes(searchQuery) ||
-        req.studentId.includes(searchQuery) ||
-        req.reqNumber.includes(searchQuery);
+        req.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        req.studentId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        String(req.reqNumber)?.toLowerCase().includes(searchQuery.toLowerCase());
       return matchFilter && matchSearch;
     });
   }, [selectedFilter, searchQuery, requests]);
@@ -47,8 +47,8 @@ export default function FinancialSupportPage() {
 
         {/* جدول الطلبات بعد الفلترة */}
         <RequestsTable
-          onDataFetched={setRequests}
-          filteredRequests={filteredRequests}
+          onDataFetched={setRequests}        // parent state setter — يستقبل RequestsTable البيانات ويخزنها في الأب
+          filteredRequests={filteredRequests} // لعرض النتائج المفلترة فقط في الجدول
         />
 
       </main>

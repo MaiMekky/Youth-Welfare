@@ -1,39 +1,76 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./FacultyReport.module.css";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import axios from "axios"; 
 
 export default function FacultyReport() {
-  const allStudents = [
-    { name: "أحمد محمد علي", id: "ST-ENG-001", req: "REQ001", date: "2024/12/10", amount: 1500, gpa: 3.45 },
-    { name: "عمر خالد إبراهيم", id: "ST-ENG-002", req: "REQ002", date: "2024/12/09", amount: 1200, gpa: 3.12 },
-    { name: "يوسف إبراهيم أحمد", id: "ST-ENG-003", req: "REQ003", date: "2024/12/09", amount: 1800, gpa: 3.78 },
-    { name: "أميرة سعيد محمد", id: "ST-ENG-004", req: "REQ004", date: "2024/12/08", amount: 1400, gpa: 3.3 },
-    { name: "محمد يوسف علي", id: "ST-ENG-005", req: "REQ005", date: "2024/12/08", amount: 1600, gpa: 3.56 },
-    { name: "نور حسن عبد الرحمن", id: "ST-ENG-006", req: "REQ006", date: "2024/12/07", amount: 1300, gpa: 3.74 },
-    { name: "خالد أحمد محمد", id: "ST-ENG-007", req: "REQ007", date: "2024/12/07", amount: 1700, gpa: 3.67 },
-    { name: "فاطمة علي حسن", id: "ST-ENG-008", req: "REQ008", date: "2024/12/06", amount: 1100, gpa: 3.01 },
-  ];
-
-  // ✅ البحث
+  const [students, setStudents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredStudents = allStudents.filter((s) =>
-    [s.name, s.id, s.req].some((field) =>
-      field.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+  const BEARER_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzYzMjQ0ODU5LCJpYXQiOjE3NjMyMzU4NTksImp0aSI6ImMzY2RiYzVkMWY3NjRkODdiZjljZTFhM2FmMmI3ZDE2IiwiYWRtaW5faWQiOjUsInVzZXJfdHlwZSI6ImFkbWluIiwicm9sZSI6Ilx1MDY0NVx1MDYyZlx1MDY0YVx1MDYzMSBcdTA2MjdcdTA2MmZcdTA2MjdcdTA2MzFcdTA2MjkiLCJuYW1lIjoiXHUwNjJlXHUwNjI3XHUwNjQ0XHUwNjJmIFx1MDYyNVx1MDYyOFx1MDYzMVx1MDYyN1x1MDY0N1x1MDY0YVx1MDY0NSJ9.Cx-jqQTOFa3O72SZenYv1vzZqbuGmPmhZUDX7RH66wQ";
+
+  // ================================
+  // 🔥 Fetch data from API
+  // ================================
+  const fetchData = async () => {
+    try {
+      const res = await axios.get(
+        "http://127.0.0.1:8000/api/solidarity/super_dept/all_applications/",
+        {
+          headers: {
+            Authorization: `Bearer ${BEARER_TOKEN}`,
+          },
+        }
+      );
+      const data = res.data;
+
+      // 🔁 تحويل بيانات الـ API للشكل اللي الجدول محتاجه
+      const mapped = data.map((item) => ({
+        name: item.student_name,
+        id: item.student_uid,
+        req: item.solidarity_id,
+        amount: Number(item.total_income) || 0,
+        date: new Date(item.created_at).toISOString().slice(0, 10),
+        gpa: item.family_numbers ?? "-", // مفيش GPA؟ نحط "-"
+      }));
+
+      setStudents(mapped);
+    } catch (err) {
+      console.error("API Error:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // ================================
+  // 🔍 Search
+  // ================================
+  const filteredStudents = students.filter((s) =>
+    [s.name, s.id, String(s.req)]
+      .join(" ")
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
   );
 
-  // ✅ Pagination
+  // ================================
+  // 📄 Pagination
+  // ================================
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const totalPages = Math.ceil(filteredStudents.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
+
   const currentStudents = filteredStudents.slice(startIndex, endIndex);
 
-  const totalAmount = filteredStudents.reduce((acc, s) => acc + s.amount, 0);
+  // ================================
+  // 📊 Stats
+  // ================================
+  const totalAmount = filteredStudents.reduce((acc, s) => acc + (s.amount || 0), 0);
   const totalCount = filteredStudents.length;
 
   return (
@@ -74,7 +111,10 @@ export default function FacultyReport() {
             type="text"
             placeholder="...ابحث بالاسم، رقم الطالب أو رقم الطلب"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
           />
         </div>
 
@@ -96,9 +136,10 @@ export default function FacultyReport() {
                 <th>رقم الطلب</th>
                 <th>(جنيه) المبلغ</th>
                 <th>تاريخ التقديم</th>
-                <th>المعدل التراكمي</th>
+                
               </tr>
             </thead>
+
             <tbody>
               {currentStudents.length > 0 ? (
                 currentStudents.map((s, i) => (
@@ -108,7 +149,7 @@ export default function FacultyReport() {
                     <td>{s.req}</td>
                     <td className={styles.amount}>{s.amount.toLocaleString()}</td>
                     <td>{s.date}</td>
-                    <td>{s.gpa}</td>
+                    
                   </tr>
                 ))
               ) : (

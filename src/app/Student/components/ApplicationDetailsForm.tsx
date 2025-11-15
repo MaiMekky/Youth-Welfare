@@ -17,11 +17,14 @@ export default function ApplicationDetailsForm() {
     address: "",
     fatherStatus: "",
     motherStatus: "",
-    familyIncome: "",
+    FatherIncome: "",
+    MotherIncome: "",
     familyMembers: "",
     siblingOrder: "",
     fatherPhone: "",
     motherPhone: "",
+    TakafulWKarama: "",
+    AcademicStatus: "",
     disability: "",
     housingStatus: "",
     supportReason: "",
@@ -58,7 +61,8 @@ export default function ApplicationDetailsForm() {
     if (!formData.address.trim()) newErrors.address = "العنوان مطلوب";
     if (!formData.fatherStatus) newErrors.fatherStatus = "حالة الأب مطلوبة";
     if (!formData.motherStatus) newErrors.motherStatus = "حالة الأم مطلوبة";
-    if (!formData.familyIncome.trim()) newErrors.familyIncome = "إجمالي دخل الأسرة مطلوب";
+    if (!formData.FatherIncome.trim()) newErrors.FatherIncome = "دخل الأب مطلوب";
+    if (!formData.MotherIncome.trim()) newErrors.MotherIncome = "دخل الأم مطلوب";
     if (!formData.familyMembers.trim()) newErrors.familyMembers = "عدد أفراد الأسرة مطلوب";
     if (!formData.siblingOrder.trim()) newErrors.siblingOrder = "الترتيب بين الإخوات مطلوب";
     if (!/^\+20\d{10}$/.test(formData.fatherPhone))
@@ -80,12 +84,15 @@ const formPayload = new FormData();
 formPayload.append("family_numbers", String(formData.familyMembers));
 formPayload.append("father_status", formData.fatherStatus);
 formPayload.append("mother_status", formData.motherStatus);
-formPayload.append("father_income", String(formData.familyIncome)); // أو أقسمي الأب والأم لو عندك
+formPayload.append("father_income", String(formData.FatherIncome));
+formPayload.append("mother_income", String(formData.MotherIncome)); 
 formPayload.append("arrange_of_brothers", String(formData.siblingOrder));
 formPayload.append("f_phone_num", formData.fatherPhone);
 formPayload.append("m_phone_num", formData.motherPhone);
 formPayload.append("reason", formData.supportReason);
-formPayload.append("disabilities", formData.disability || "");
+formPayload.append("disabilities", formData.disability);
+formPayload.append("sd", formData.TakafulWKarama);
+formPayload.append("acd_status", formData.AcademicStatus);
 formPayload.append("grade", formData.gpa);
 formPayload.append("address", formData.address);
 formPayload.append("housing_status", formData.housingStatus);
@@ -290,6 +297,22 @@ formPayload.append("req_type", "financial_aid");
   {errors.gpa && <span className="error">{errors.gpa}</span>}
 </div>
 
+          <div className="form-group">
+            <label style={{color:"#2C3A5F"}}>النظام الاكاديمي</label>
+            <select  style={{color:"#2C3A5F"}}
+              name="AcademicStatus"
+              value={formData.AcademicStatus}
+              onChange={handleChange}
+            >
+              <option value="" hidden>اختر...</option>
+              <option value="انتظام">انتظام</option>
+              <option value="انتساب">انتساب</option>
+            </select>
+            {errors.AcademicStatus && (
+              <span className="error">{errors.AcademicStatus}</span>
+            )}
+          </div>  
+
         </div>
 
         {/* ===========================
@@ -337,16 +360,30 @@ formPayload.append("req_type", "financial_aid");
 
 
           <div className="form-group">
-            <label  style={{color:"#2C3A5F"}}>إجمالي دخل الأسرة (شهريًا)</label>
+            <label  style={{color:"#2C3A5F"}}>دخل الأب</label>
             <input
               type="number"
-              name="familyIncome"
-              value={formData.familyIncome}
+              name="FatherIncome"
+              value={formData.FatherIncome}
               onChange={handleChange}
-              placeholder="أدخل إجمالي الدخل"
+              placeholder="أدخل دخل الأب"
             />
-            {errors.familyIncome && (
-              <span className="error">{errors.familyIncome}</span>
+            {errors.FatherIncome && (
+              <span className="error">{errors.FatherIncome}</span>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label  style={{color:"#2C3A5F"}}>دخل الأم</label>
+            <input
+              type="number"
+              name="MotherIncome"
+              value={formData.MotherIncome}
+              onChange={handleChange}
+              placeholder="أدخل دخل الأم"
+            />
+            {errors.MotherIncome && (
+              <span className="error">{errors.MotherIncome}</span>
             )}
           </div>
 
@@ -378,17 +415,6 @@ formPayload.append("req_type", "financial_aid");
             )}
           </div>
 
-          <div className="form-group">
-            <label style={{color:"#2C3A5F"}}>العنوان</label>
-            <input
-              type="text"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              placeholder="أدخل العنوان الكامل"
-            />
-            {errors.address && <span className="error">{errors.address}</span>}
-          </div>
 
           <div className="form-group">
             <label style={{color:"#2C3A5F"}}>رقم موبايل الأب</label>
@@ -421,29 +447,13 @@ formPayload.append("req_type", "financial_aid");
           </div>
 
           <div className="form-group">
-            <label style={{color:"#2C3A5F"}}>هل الطالب لديه إعاقة؟</label>
-            <select  style={{color:"#2C3A5F"}}
-              name="disability"
-              value={formData.disability}
-              onChange={handleChange}
-            >
-              <option value="">اختر...</option>
-              <option value="نعم">نعم</option>
-              <option value="لا">لا</option>
-            </select>
-            {errors.disability && (
-              <span className="error">{errors.disability}</span>
-            )}
-          </div>
-
-          <div className="form-group">
             <label style={{color:"#2C3A5F"}}>حالة المسكن</label>
             <select  style={{color:"#2C3A5F"}}
               name="housingStatus"
               value={formData.housingStatus}
               onChange={handleChange}
             >
-              <option value="">اختر...</option>
+              <option value="" hidden>اختر...</option>
               <option value="ملك">ملك</option>
               <option value="ايجار">ايجار</option>
         
@@ -452,7 +462,53 @@ formPayload.append("req_type", "financial_aid");
               <span className="error">{errors.housingStatus}</span>
             )}
           </div>
+          
+          <div className="form-group">
+            <label style={{color:"#2C3A5F"}}>العنوان</label>
+            <input
+              type="text"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              placeholder="أدخل العنوان الكامل"
+            />
+            {errors.address && <span className="error">{errors.address}</span>}
+          </div>
+          
+          
+          <div className="form-group">
+            <label style={{color:"#2C3A5F"}}>هل الطالب لديه إعاقة؟</label>
+            <select  style={{color:"#2C3A5F"}}
+              name="disability"
+              value={formData.disability}
+              onChange={handleChange}
+            >
+              <option value="" hidden disabled>اختر...</option>
+              <option value="نعم">نعم</option>
+              <option value="لا">لا</option>
+            </select>
+            {errors.disability && (
+              <span className="error">{errors.disability}</span>
+            )}
+          </div>
+
+             <div className="form-group">
+            <label style={{color:"#2C3A5F"}}>هل الطالب مشترك في تكافل وكرامة؟</label>
+            <select  style={{color:"#2C3A5F"}}
+              name="TakafulWKarama"
+              value={formData.TakafulWKarama}
+              onChange={handleChange}
+            >
+              <option value="" hidden disabled>اختر...</option>
+              <option value="مشترك">مشترك</option>
+              <option value="غير مشترك">غير مشترك</option>
+            </select>
+            {errors.TakafulWKarama && (
+              <span className="error">{errors.TakafulWKarama}</span>
+            )}
+          </div>
         </div>
+
 
         {/* ===========================
              تفاصيل طلب الدعم

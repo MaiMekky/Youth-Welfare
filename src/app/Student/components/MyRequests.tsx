@@ -82,6 +82,8 @@
 import React, { useState, useEffect } from "react";
 import { Eye, X, CheckCircle } from "lucide-react";
 import "../styles/myRequests.css";
+import { useRouter } from "next/navigation";
+
 
 interface Request {
   id: string;
@@ -138,19 +140,33 @@ export default function MyRequests() {
   //     setLoading(false);
   //   }
   // };
-  const statusToStep = (status: string): number => {
-    switch (status) {
-      case "pending":
-        return 1;
-      case "under-review":
-        return 2;
-      case "approved":
-      case "rejected":
-        return 3;
-      default:
-        return 1;
-    }
-  };
+const mapStatusForCSS = (status: string) => {
+  switch(status) {
+    case "pending":
+    case "منتظر":
+      return "pending";
+    case "under-review":
+    case "موافقة مبدئية":
+      return "under-review";
+    case "approved":
+    case "مقبول":
+      return "approved";
+    case "rejected":
+    case "مرفوض":
+      return "rejected";
+    default:
+      return "pending";
+  }
+};
+const statusToStep = (status: string): number => {
+  switch(mapStatusForCSS(status)) {
+    case "pending": return 1;
+    case "under-review": return 2;
+    case "approved": return 3;
+    //  case "rejected": return 3;
+    default: return 1;
+  }
+};
 
 
   const filterRequests = () => {
@@ -171,10 +187,11 @@ export default function MyRequests() {
     return statusMap[status] || status;
   };
 
-  const getStepLabel = (step: number) => {
-    const steps = ["منتظر","موافقة مبدئية", "مقبول", "مرفوض"];
-    return steps[step - 1] || "";
-  };
+const getStepLabel = (step: number) => {
+  const steps = ["منتظر", "موافقة مبدئية", "مقبول"];
+  return steps[step - 1] || "";
+};
+
 
   const getProgressPercentage = (current: number, total: number) => {
     return ((current - 1) / (total - 1)) * 100;
@@ -228,7 +245,7 @@ export default function MyRequests() {
       familyMembers: item.family_numbers,
       familyIncome: item.total_income,
       reason: item.reason,
-      // currentStep: statusStep,
+      currentStep: statusToStep(item.req_status),
       totalSteps: 3,
    
    }));
@@ -240,10 +257,11 @@ export default function MyRequests() {
     setLoading(false);
   }
 };
+const router = useRouter();
+ const handleViewDetails = (requestId: string) => {
+  router.push(`/my-requests/${requestId}`);
+};
 
-  const handleViewDetails = (requestId: string) => {
-    alert(`عرض تفاصيل الطلب: ${requestId}`);
-  };
 
   if (loading) {
     return (
@@ -284,9 +302,9 @@ export default function MyRequests() {
                   <h3>{request.type}</h3>
                   <p className="request-number">رقم الطلب: {request.requestNumber}</p>
                 </div>
-                <span className={`status-badge ${request.status}`}>
-                  {getStatusText(request.status)}
-                </span>
+              <span className={`status-badge ${mapStatusForCSS(request.status)}`}>
+  {getStatusText(request.status)}
+</span>
               </div>
 
               <div className="request-details">
@@ -315,35 +333,35 @@ export default function MyRequests() {
                   <div className="progress-line">
                     <div
                       className="progress-line-fill"
+                      // style={{
+                      //   width: `${getProgressPercentage(
+                      //     request.currentStep,
+                      //     request.totalSteps
+                      //   )}%`,
+                      // }}
                       style={{
-                        width: `${getProgressPercentage(
-                          request.currentStep,
-                          request.totalSteps
-                        )}%`,
-                      }}
+     width: `${getProgressPercentage(request.currentStep, request.totalSteps)}%`,
+  }}
                     ></div>
                   </div>
-                  {[...Array(request.totalSteps)].map((_, index) => {
-                    const stepNumber = request.totalSteps - index;
-                    const isCompleted = stepNumber < request.currentStep;
-                    const isActive = stepNumber === request.currentStep;
+             {[...Array(request.totalSteps)].map((_, index) => {
+              const stepNumber = index + 1; // بدل ما تعمل totalSteps - index
+             const isCompleted = stepNumber < request.currentStep;
+             const isActive = stepNumber === request.currentStep;
 
-                    return (
-                      <div
-                        key={index}
-                        className={`progress-step ${
-                          isCompleted ? "completed" : isActive ? "active" : ""
-                        }`}
-                      >
-                        <div className="step-circle">
-                          {isCompleted ? <CheckCircle size={18} /> : stepNumber}
-                        </div>
-                        <span className="step-label">
-                          {getStepLabel(stepNumber)}
-                        </span>
-                      </div>
-                    );
-                  })}
+              return (
+                <div
+                  key={index}
+                  className={`progress-step ${isCompleted ? "completed" : isActive ? "active" : ""}`}
+                >
+                  <div className="step-circle">
+                    {isCompleted ? <CheckCircle size={18} /> : stepNumber}
+                  </div>
+                  <span className="step-label">{getStepLabel(stepNumber)}</span>
+                </div>
+              );
+            })}
+
                 </div>
               </div>
 

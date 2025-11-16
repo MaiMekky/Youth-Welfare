@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import logo from "@/app/assets/logo1.png";
 import styles from "../Styles/components/LoginPage.module.css";
-
+import { useRouter } from "next/navigation";
 interface LoginPageProps {
   onClose: () => void;
   onSwitchToSignup: () => void;
@@ -30,43 +30,54 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
+const router = useRouter();
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
+  e.preventDefault();
+  if (!validate()) return;
+  setLoading(true);
 
-    setLoading(true);
-    setErrors({});
+  try {
+    const res = await fetch("http://localhost:8000/api/auth/login/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
 
-    try {
-      const res = await fetch("http://127.0.0.1:8000/api/auth/login/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: email.trim(),
-          password: password.trim(),
-        }),
-      });
+    const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error("فشل تسجيل الدخول، تأكد من البريد أو كلمة المرور.");
-      }
-
-      const data = await res.json();
-
-     
-      localStorage.setItem("access", data.access);
-
-     
-      router.push("/Student");
-    } catch (err: any) {
-      setErrors({ general: err.message || "حدث خطأ أثناء تسجيل الدخول." });
-    } finally {
+    if (!res.ok) {
+      alert(data.message || "فشل تسجيل الدخول");
       setLoading(false);
+      return;
     }
-  };
+
+    // data = { token: "JWT_TOKEN", role: "super_admin" }
+
+    // حفظ التوكن في localStorage
+     localStorage.setItem('access', data.access);
+    localStorage.setItem('refresh', data.refresh);
+    localStorage.setItem('user_type', data.user_type);
+    localStorage.setItem('admin_id', data.admin_id.toString());
+    localStorage.setItem('role', data.role);
+    localStorage.setItem('name', data.name);
+
+
+    // توجيه حسب الدور
+    // if (data.role === "super_admin") {
+      router.push("/SuperAdmin");
+    // } 
+    // else {
+    //   router.push("/student/home"); // أي صفحة عامة
+    // }
+
+  } catch (error) {
+    console.error(error);
+    alert("حدث خطأ أثناء تسجيل الدخول");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className={styles.loginBox}>

@@ -1,0 +1,61 @@
+/* app/SuperAdmin/globals.css */
+
+/* --- Basic tokens --- */
+:root {
+  --dark-blue: #2C2A6A;
+  --gold: #C9A227;
+  --bg-light: #F7F8FC;
+  --white: #FFFFFF;
+  --text-main: #1F1F3F;
+  --text-muted: #808191;
+  --success: #1AB65C;
+}
+
+/* Reset + base */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body,#__next{height:100%}
+body{
+  font-family: "Inter", "Noto Kufi Arabic", "Segoe UI", Arial, sans-serif;
+  background: var(--muted);
+  color: var(--text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.4;
+
+}
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+  background-color: #f3f5fd; /* الخلفية العامة */
+}
+
+
+/* app wrapper */
+.sa-app{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+/* header spacing - header sits on top */
+.sa-content{
+  display:flex;
+  flex:1;
+  gap:24px;
+  padding: 28px;
+}
+
+/* Utility */
+.container{
+  width:100%;
+  max-width:1200px;
+  margin-inline:auto;
+  padding-inline: 16px;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 900px){
+  .sa-content{padding:18px}
+}

@@ -1,0 +1,68 @@
+.saSidebar {
+  width: 280px;
+background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);  color: #fff;
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.logoImage {
+  object-fit: cover;
+   border-radius: 50%;
+}
+.profileAvatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: #C9A227;
+  color: #fff;
+  font-weight: 700;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.profileInfo h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.profileInfo p {
+  font-size: 13px;
+  color: rgba(255,255,255,0.8);
+  
+}
+
+.sidebarMenu {
+  width: 100%;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.menuItem {
+  padding: 12px 16px;
+  display: flex;
+  justify-content: right;
+  align-items: center;
+  gap: 8px;
+  border-radius: 10px;
+  color: #fff;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.menuItem:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.active {
+  background: #C9A227;
+  color: #2C2A6A;
+  font-weight: 700;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.15);
+}

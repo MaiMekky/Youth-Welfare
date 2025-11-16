@@ -1,0 +1,86 @@
+.container {
+  padding: 40px 20px;
+  max-width: 950px;
+  margin: 0 auto;
+  font-family: "Cairo", sans-serif;
+  direction: rtl;
+  color: #1e1e1e;
+}
+
+.contentCard {
+  border: 2px solid #d4a017; /* أصفر غامق */
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  padding: 35px 40px 30px;
+  position: relative;
+  background: #fff;
+}
+
+/* ⭐ العنوان */
+.pageTitle {
+  text-align: center;
+  font-size: 26px;
+  font-weight: 800;
+  color: #2c2a6a;
+  margin-bottom: 30px;
+}
+
+/* الأقسام */
+.section {
+  margin-bottom: 25px;
+  border-bottom: 1px solid #e0c97d;
+  padding-bottom: 12px;
+}
+
+.section h3 {
+  font-size: 18px;
+  color: #2c2a6a;
+  margin-bottom: 10px;
+  font-weight: 700;
+  border-right: 4px solid #d4a017;
+  padding-right: 8px;
+}
+
+/* الشبكة */
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 25px;
+}
+
+.infoGrid p {
+  font-size: 15px;
+  margin: 0;
+  line-height: 1.7;
+}
+
+.infoGrid strong {
+  color: #2c2a6a;
+}
+
+/* ⭐ رسبونسيف للموبايل */
+@media (max-width: 600px) {
+  .contentCard {
+    padding: 25px 20px;
+  }
+
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+}
+.docLink {
+  display: inline-block;
+  background-color: #d4a017; /* أصفر غامق */
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: 0.3s;
+  margin-top: 5px;
+}
+
+.docLink:hover {
+  background-color: #e0b92f; /* أصفر فاتح عند hover */
+  color: #2c2a6a;
+}

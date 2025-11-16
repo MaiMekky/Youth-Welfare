@@ -10,19 +10,19 @@ export default function Page() {
   return (
     <> 
     <div className={styles.superadminWrapper}>
-      <Sidebar />
+      
       <div className={styles.mainArea}>
         <h1 className={styles.pageTitle}>التكافل الاجتماعي</h1>
         <p className={styles.pageSubtitle}>طلبات الدعم المالي المعتمدة للطلاب</p>
 
         <FiltersBar />
-        <StatusFilter />
+        {/* <StatusFilter /> */}
         <StudentsTable />
        
       </div>
       
     </div>
-     <Footer />
+    
      </>
   );
 }

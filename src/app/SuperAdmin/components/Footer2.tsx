@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import "../Styles/Footer2.css";
 
@@ -8,7 +9,7 @@ const Footer: React.FC = () => {
         {/* Support */}
         <div className="footer-section">
           <h3 className="section-title">الدعم</h3>
-          <p>الدعم الفني متاح</p>
+          <p>الدعم الفني متاح على مدار الساعة</p>
           <p>مراقبة النظام 24/7</p>
           <p className="email">admin@university.edu</p>
         </div>
@@ -37,13 +38,13 @@ const Footer: React.FC = () => {
           <h3 className="section-title">لوحة تحكم المشرف العام</h3>
           <p className="dashboard-description">
             منصة إدارة شاملة للأحداث والأنشطة وشؤون الطلاب.
-            إدارة المبادرات الثقافية والرياضية والأكاديمية بتميز.
+            إدارة المبادرات الثقافية والرياضية والأكاديمية بتميز وفعالية.
           </p>
         </div>
       </div>
 
       <div className="footer-bottom">
-        <p>لوحة تحكم المشرف العام للجامعة. جميع الحقوق محفوظة 2025 ©</p>
+        <p>لوحة تحكم المشرف العام للجامعة - جميع الحقوق محفوظة © 2025</p>
         <div className="footer-bottom-row">
           <span className="status">
             النظام متصل <span className="status-dot"></span>

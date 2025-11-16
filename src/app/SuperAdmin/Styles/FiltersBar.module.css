@@ -8,7 +8,7 @@
 .sectionTitle {
   font-size: 16px;
   font-weight: 700;
-  color: #2C2A6A;
+  color:  #2C3A5F;
   margin-bottom: 16px;
 }
 
@@ -32,7 +32,7 @@
   padding: 10px;
   border-radius: 8px;
   background: #F8F9FB;
-  color: #1F1F3F;
+  color:  #2C3A5F;
 }
 
 .clearBtn {
@@ -42,7 +42,7 @@
   border-radius: 8px;
   padding: 10px 16px;
   font-weight: 600;
-  color: #2C2A6A;
+  color:  #2C3A5F;
   cursor: pointer;
 }
 .filter-selects select {
@@ -70,7 +70,7 @@
 }
 .applyBtn {
   margin-top: 18px;
-  background: #2c2a6a;
+background:  #2C3A5F;
   border: none;
   border-radius: 8px;
   padding: 10px 16px;

@@ -1,0 +1,280 @@
+.student-footer {
+  background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+  color: #ffffff;
+  font-family: 'Arial', sans-serif;
+  direction: rtl;
+  padding: 48px 16px 0;
+  margin-top: 64px;
+}
+
+.footer-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+  padding-bottom: 48px;
+  text-align: right;
+}
+
+/* Section Headers */
+.footer-section h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #ffffff;
+}
+
+/* University Info Section */
+.university-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.university-icon {
+  width: 24px;
+  height: 24px;
+  color: #ffffff;
+}
+
+.university-details {
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 16px;
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 8px;
+}
+
+.location-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Contact Section */
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  transition: color 0.3s ease;
+  cursor: pointer;
+}
+
+.contact-item:hover {
+  color: #ffffff;
+}
+
+.contact-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background-color: #B38E19;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.contact-icon {
+  width: 16px;
+  height: 16px;
+  color: #ffffff;
+}
+
+/* Support Section */
+.support-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.support-list li {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.support-list li:hover {
+  color: #ffffff;
+}
+
+/* Social Media Section */
+.social-icons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.social-link {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background-color: #B38E19;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.social-link:hover {
+  transform: scale(1.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.social-link svg {
+  width: 20px;
+  height: 20px;
+  color: #ffffff;
+}
+
+.social-description {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.5;
+}
+
+/* Footer Bottom */
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 32px 0;
+}
+
+.footer-bottom-content {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.copyright {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+.footer-links {
+  display: flex;
+  gap: 24px;
+}
+
+.footer-links a {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: color 0.3s ease;
+  cursor: pointer;
+}
+
+.footer-links a:hover {
+  color: #ffffff;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .footer-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .student-footer {
+    padding: 32px 16px 0;
+    margin-top: 48px;
+  }
+
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    text-align: center;
+  }
+
+  .university-header {
+    justify-content: center;
+  }
+
+  .location {
+    justify-content: center;
+  }
+
+  .contact-item {
+    justify-content: center;
+  }
+
+  .social-icons {
+    justify-content: center;
+  }
+
+  .footer-bottom-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .footer-links {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-section h3 {
+    font-size: 16px;
+  }
+
+  .university-details,
+  .support-list li,
+  .contact-item,
+  .social-description,
+  .copyright {
+    font-size: 13px;
+  }
+
+  .social-link {
+    width: 36px;
+    height: 36px;
+  }
+
+  .social-link svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .contact-icon-wrapper {
+    width: 36px;
+    height: 36px;
+  }
+
+  .contact-icon {
+    width: 14px;
+    height: 14px;
+  }
+}

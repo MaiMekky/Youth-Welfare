@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import logo from "@/app/assets/logo1.png";
 import styles from "../Styles/components/LoginPage.module.css";
 import { useRouter } from "next/navigation";
@@ -8,8 +9,10 @@ interface LoginPageProps {
   onClose: () => void;
   onSwitchToSignup: () => void;
 }
- 
+
 export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps) {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -83,7 +86,7 @@ const router = useRouter();
       </button>
 
       <div className={styles.logoContainer}>
-        <Image src={logo} alt="Logo" width={90} height={90} />
+        <Image src={logo} alt="Logo" width={150} height={150} draggable ={false} />
       </div>
 
       <h2 className={styles.loginTitle}>تسجيل الدخول</h2>
@@ -106,6 +109,8 @@ const router = useRouter();
           className={errors.password ? styles.invalid : ""}
         />
         {errors.password && <p className={styles.errorMsg}>{errors.password}</p>}
+
+        {errors.general && <p className={styles.errorMsg}>{errors.general}</p>}
 
         <button type="submit" disabled={loading} className={styles.loginButton}>
           {loading ? "جاري التحقق..." : "تسجيل الدخول"}

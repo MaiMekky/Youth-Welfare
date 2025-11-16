@@ -82,3 +82,18 @@
   .exportBtn { padding: 8px 12px; font-size: 13px; }
   .searchInput { font-size: 13px; height: 36px; padding: 8px 12px; }
 }
+.logoutBtn {
+  background-color: #e74c3c; /* أحمر */
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  margin-left: 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.logoutBtn:hover {
+  background-color: #c0392b;
+}

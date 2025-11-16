@@ -40,7 +40,6 @@ export default function FiltersBar() {
   const applyFilters = () => {
     console.log("Filters applied:", filters);
   };
-
   return (
     <div className={styles.filtersContainer}>
       <h2 className={styles.sectionTitle}>البحث وفلترة الطلاب</h2>
@@ -55,6 +54,7 @@ export default function FiltersBar() {
         />
 
         <div className={styles.filterSelects}>
+          {/* Father's status filter */}
           <select
             value={filters.fatherStatus}
             onChange={(e) => handleChange("fatherStatus", e.target.value)}
@@ -68,6 +68,7 @@ export default function FiltersBar() {
             <option value="deceased">متوفى</option>
           </select>
 
+          {/* Mother's status filter */}
           <select
             value={filters.motherStatus}
             onChange={(e) => handleChange("motherStatus", e.target.value)}

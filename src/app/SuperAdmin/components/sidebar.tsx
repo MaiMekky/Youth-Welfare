@@ -10,7 +10,7 @@ export default function Sidebar() {
   const pathname = usePathname(); // current route
 
   const menuItems = [
-    { label: "صلاحيات الوصول", href: "#" },
+    { label: "صلاحيات الوصول", href: "/CreateAdmins" },
     { label: "سجلات النشاط", href: "/ActivityLogs" },
     { label: "إدارة الفعاليات", href: "#" },
     { label: "إحصائيات الزوار", href: "#" },

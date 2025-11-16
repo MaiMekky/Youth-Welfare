@@ -2,8 +2,19 @@
 import React from "react";
 import styles from "../Styles/Header.module.css";
 import { Menu } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function Header({ toggleSidebar }: { toggleSidebar: () => void }) {
+  const router = useRouter();
+
+  const handleLogout = () => {
+    // إزالة التوكن من التخزين المحلي
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    // إعادة التوجيه لصفحة تسجيل الدخول
+    router.push("/");
+  };
+
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
@@ -30,6 +41,11 @@ export default function Header({ toggleSidebar }: { toggleSidebar: () => void })
               placeholder="ابحث بالاسم أو الرقم القومي أو كود التكافل..."
             />
           </div>
+
+          {/* زر تسجيل الخروج */}
+          <button className={styles.logoutBtn} onClick={handleLogout}>
+            تسجيل خروج
+          </button>
         </div>
       </div>
     </header>

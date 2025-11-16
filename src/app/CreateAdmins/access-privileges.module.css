@@ -1,0 +1,145 @@
+.pageWrapper { min-height:100vh; padding:20px; background:#f5f7fa; font-family:'Segoe UI', sans-serif; color:#2C3A5F; display:flex; flex-direction:column; gap:20px; }
+.controlsBar { display:flex; gap:15px; justify-content:space-between; align-items:center; flex-wrap:wrap; }
+.btnAddUser { background:#f2c94c; color:#2C3A5F; padding:8px 15px; border:none; border-radius:6px; cursor:pointer; }
+.btnAddUser:hover { background:#e0b943; }
+.selectWrapper { flex:1; max-width:200px; }
+.roleSelect { width:100%; padding:8px 10px; border:1px solid #2C3A5F; border-radius:6px; cursor:pointer; }
+.searchWrapper { flex:1; max-width:250px; display:flex; align-items:center; background:#fff; border:1px solid #2C3A5F; border-radius:6px; padding:5px 10px; }
+.searchInput { border:none; outline:none; flex:1; padding:6px 8px; }
+.tableContainer { overflow-x:auto; background:#fff; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+.usersTable { width:100%; border-collapse:collapse; min-width:800px; }
+.usersTable th, .usersTable td { padding:10px; text-align:center; border-bottom:1px solid #eee; }
+.usersTable th { background:#2C3A5F; color:#f2c94c; position:sticky; top:0; font-weight:500; }
+.usersTable tr:nth-child(even){background:#f9f9f9;}
+.usersTable tr:hover{background:#f2f3f7;}
+.actionButtons { display:flex; gap:8px; justify-content:center; }
+.btnAction { border:none; padding:6px 10px; border-radius:6px; cursor:pointer; }
+.btnDelete { background:#dc3545; color:#fff; }
+.btnDelete:hover { background:#b02a37; }
+.btnEdit { background:#f2c94c; color:#fff; }
+.btnEdit:hover { background:#f2c94c; }
+.statusCell, .permissions { display:flex; justify-content:center; gap:5px; flex-wrap:wrap; margin-top:5px; }
+.statusTag { padding:3px 8px; border-radius:5px; font-size:12px; font-weight:500; display:inline-block; }
+.statusTag.active { background:#d4edda; color:#155724; }
+.statusTag.inactive { background:#f8d7da; color:#721c24; }
+/* Permissions styled like status badges */
+.permissionBadge {
+  display: inline-block;
+  padding: 3px 8px;       /* similar to status */
+  border-radius: 5px;     /* rounded pill shape */
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  min-width: 25px;        /* optional for uniform width */
+}
+
+/* Colors like before, but matching status style */
+.permissionD { background-color: #f8d7da; color: #721c24; }  /* Delete - red */
+.permissionU { background-color: #d1ecf1; color: #0c5460; }  /* Update - blue */
+.permissionR { background-color: #cce5ff; color: #004085; }  /* Read - dark blue */
+.permissionC { background-color: #fff3cd; color: #856404; }  /* Create - yellow */
+
+.roleBadge { border:1px solid #2C3A5F; color:#2C3A5F; padding:4px 8px; border-radius:6px; font-size:0.85rem; font-weight:500; }
+.userInfo { display:flex; flex-direction:column; gap:2px; }
+.userName { font-weight:600; }
+.userEmail, .userMeta { font-size:0.85rem; color:#555; }
+.modifiedInfo { display:flex; flex-direction:column; gap:2px; }
+.date { font-weight:500; }
+.modifiedBy { font-size:0.85rem; color:#555; }
+
+/* Toggle Switch */
+.toggleSwitch { position:relative; display:inline-block; width:40px; height:20px; }
+.toggleSwitch input { opacity:0; width:0; height:0; }
+.toggleSlider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#ccc; border-radius:34px; transition:0.4s; }
+.toggleSlider::before { position:absolute; content:""; height:16px; width:16px; left:2px; bottom:2px; background:white; border-radius:50%; transition:0.4s; }
+.toggleSwitch input:checked + .toggleSlider { background:#28a745; }
+.toggleSwitch input:checked + .toggleSlider::before { transform:translateX(20px); }
+
+.centerWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.formCard {
+  width: 480px;
+  background: #fff;
+  padding: 25px 30px;
+  border-radius: 15px;
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.10);
+  border: 1px solid #e5e7eb;
+}
+
+.formTitle {
+  font-size: 26px;
+  font-weight: bold;
+  color: #2C3A5F;
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+.formSubtitle {
+  text-align: center;
+  color: #6b7280;
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  margin: 15px 0 10px;
+  color: #2C3A5F;
+  font-weight: 600;
+}
+
+.inputField,
+.selectField {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.checkboxRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 15px;
+  color: #2C3A5F;
+}
+
+.buttonsRow {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.btnCancel {
+  background: #dc3545;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.btnCancel:hover {
+  background: #b02a37;
+}
+
+.btnAddUser {
+  background: #f2c94c;
+  color: #2C3A5F;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btnAddUser:hover {
+  background: #d9b13f;
+}

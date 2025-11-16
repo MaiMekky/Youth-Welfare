@@ -1,103 +1,88 @@
 "use client";
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import styles from "./ACtivityLogs.module.css";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export const sampleLogs = [
-  {
-    id: 1,
-    details: "تم إنشاء فعالية فنية بعدد 150 مشارك",
-    ip: "192.168.1.100",
-    status: "نجاح",
-    statusClass: "success",
-    action: "إنشاء",
-    actionClass: "create",
-    which: "معرض الفن 2024",
-    what: "تم إنشاء فعالية جديدة",
-    who: "أحمد علي",
-    when: "2025-11-08 10:30",
-  },
-  {
-    id: 2,
-    details: "تم إلغاء صلاحية حذف المستخدم",
-    ip: "192.168.1.105",
-    status: "نجاح",
-    statusClass: "success",
-    action: "تغيير الصلاحيات",
-    actionClass: "change-permissions",
-    which: "المستخدم مايك ديفيس",
-    what: "تم تحديث صلاحيات المستخدم",
-    who: "منى سمير",
-    when: "2025-11-08 11:00",
-  },
-  {
-    id: 3,
-    details: "تم حذف فعالية رياضية ملغاة",
-    ip: "192.168.1.110",
-    status: "نجاح",
-    statusClass: "success",
-    action: "حذف",
-    actionClass: "delete",
-    which: "بطولة رياضية قديمة",
-    what: "تم حذف الفعالية",
-    who: "خالد محمد",
-    when: "2025-11-08 12:00",
-  },
-  {
-    id: 4,
-    details: "كلمة مرور غير صحيحة",
-    ip: "192.168.1.115",
-    status: "فشل",
-    statusClass: "failed",
-    action: "تسجيل الدخول",
-    actionClass: "login",
-    which: "لوحة الإدارة",
-    what: "محاولة تسجيل دخول فاشلة",
-    who: "منى سمير",
-    when: "2025-11-08 12:30",
-  },
-  {
-    id: 5,
-    details: "تم تحديث تاريخ ومكان الفعالية",
-    ip: "192.168.1.120",
-    status: "نجاح",
-    statusClass: "success",
-    action: "تحديث",
-    actionClass: "update",
-    which: "مهرجان ثقافي 2024",
-    what: "تم تحديث الفعالية",
-    who: "أحمد علي",
-    when: "2025-11-08 13:00",
-  },
-  {
-    id: 6,
-    details: "إنهاء الجلسة بشكل طبيعي",
-    ip: "192.168.1.125",
-    status: "نجاح",
-    statusClass: "success",
-    action: "تسجيل خروج",
-    actionClass: "logout",
-    which: "جلسة الإدارة",
-    what: "تم تسجيل الخروج",
-    who: "خالد محمد",
-    when: "2025-11-08 14:00",
-  },
-];
+// شكل الريسبونس الحقيقي اللي بترجع من الداتابيز
+interface Log {
+  log_id: number;
+  actor_name: string;
+  actor_role: string | null;
+  faculty_name: string | null;
+  action: string;
+  target_type: string;
+  solidarity_id: number;
+  ip_address: string | null;
+  logged_at: string;
+}
+
 export default function ActivityLogsTable() {
+  const [logs, setLogs] = useState<Log[]>([]);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
   const [actionFilter, setActionFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [logsPerPage, setLogsPerPage] = useState(5);
 
-  const filteredLogs = sampleLogs.filter((log) => {
+  // 🔥 FETCH LOGS
+  useEffect(() => {
+    const fetchLogs = async () => {
+      try {
+        const token = localStorage.getItem("access");
+
+        const response = await fetch(
+          "http://127.0.0.1:8000/api/solidarity/super_dept/system_logs/",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const data = await response.json();
+        setLogs(data);
+      } catch (error) {
+        console.error("Error fetching logs: ", error);
+      }
+    };
+
+    fetchLogs();
+  }, []);
+
+  // ⚡ تحويل البيانات لشكل الجدول
+  const mappedLogs = logs.map((log) => ({
+    id: log.log_id,
+    who: log.actor_name,
+    action: log.action,
+    when: new Date(log.logged_at).toLocaleString("ar-EG", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    role: log.actor_role || "—",
+    faculty: log.faculty_name || "—",
+    ip: log.ip_address || "-",
+    which: log.target_type,
+    what: log.solidarity_id,
+    status: log.action.includes("رفض") ? "فشل" : "نجاح",
+    statusClass: log.action.includes("رفض") ? "failed" : "success",
+  }));
+
+  // 🔍 الفلاتر
+  const filteredLogs = mappedLogs.filter((log) => {
     const matchesSearch =
-      log.details.includes(search) ||
-      log.which.includes(search) ||
-      log.who.includes(search);
-    const matchesStatus = statusFilter === "all" || log.status === statusFilter;
-    const matchesAction = actionFilter === "all" || log.action === actionFilter;
-    return matchesSearch && matchesStatus && matchesAction;
+      log.who.includes(search) ||
+      log.action.includes(search) ||
+      log.which.includes(search);
+
+    const matchesAction =
+      actionFilter === "all" || log.action === actionFilter;
+
+    return matchesSearch && matchesAction;
   });
 
   const totalPages = Math.ceil(filteredLogs.length / logsPerPage);
@@ -106,30 +91,28 @@ export default function ActivityLogsTable() {
     currentPage * logsPerPage
   );
 
-  const handlePrev = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
-  const handleNext = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  const handlePrev = () => setCurrentPage((p) => Math.max(p - 1, 1));
+  const handleNext = () =>
+    setCurrentPage((p) => Math.min(p + 1, totalPages));
 
   return (
     <div className={styles.activityLogsContainer}>
       <h2 className={styles.logsHeader}>سجلات النشاط والتقارير</h2>
 
+      {/* Filters */}
       <div className={styles.filters}>
         <button>تصدير ⬇</button>
         <input type="date" />
-        <select onChange={(e) => setStatusFilter(e.target.value)}>
-          <option value="all">كل الحالات</option>
-          <option value="نجاح">نجاح</option>
-          <option value="فشل">فشل</option>
-        </select>
+
         <select onChange={(e) => setActionFilter(e.target.value)}>
           <option value="all">كل الإجراءات</option>
-          <option value="إنشاء">إنشاء</option>
-          <option value="تحديث">تحديث</option>
-          <option value="حذف">حذف</option>
-          <option value="تسجيل الدخول">تسجيل الدخول</option>
-          <option value="تسجيل خروج">تسجيل خروج</option>
-          <option value="تغيير الصلاحيات">تغيير الصلاحيات</option>
+          <option value="موافقة طلب">موافقة طلب</option>
+          <option value="موافقة مبدئية">موافقة مبدئية</option>
+          <option value="رفض طلب">رفض طلب</option>
+          <option value="عرض مستندات الطلب">عرض مستندات الطلب</option>
+          <option value="عرض بيانات الطلب">عرض بيانات الطلب</option>
         </select>
+
         <input
           type="text"
           placeholder="ابحث بالاسم أو الإجراء أو الهدف"
@@ -138,38 +121,41 @@ export default function ActivityLogsTable() {
         />
       </div>
 
+      {/* TABLE */}
       <table className={styles.logsTable}>
         <thead>
           <tr>
             <th>من قام</th>
             <th>ماذا فعل</th>
             <th>متى</th>
-            <th>التفاصيل</th>
+            <th>الدور</th>
+            <th>الكلية</th>
             <th>عنوان IP</th>
             <th>الهدف</th>
-            <th>الوصف</th>
+            <th>رقم الطلب</th>
             <th>الحالة</th>
-            <th>الإجراء</th>
           </tr>
         </thead>
+
         <tbody>
           {displayedLogs.map((log) => (
             <tr key={log.id}>
               <td>{log.who}</td>
               <td>{log.action}</td>
               <td>{log.when}</td>
-              <td>{log.details}</td>
+
+              <td>{log.role}</td>
+              <td>{log.faculty}</td>
+
               <td>{log.ip}</td>
               <td style={{ fontWeight: "bold" }}>{log.which}</td>
               <td>{log.what}</td>
+
               <td>
-                <span className={`${styles.statusTag} ${styles[log.statusClass]}`}>
+                <span
+                  className={`${styles.statusTag} ${styles[log.statusClass]}`}
+                >
                   {log.status}
-                </span>
-              </td>
-              <td>
-                <span className={`${styles.actionTag} ${styles[log.actionClass]}`}>
-                  {log.action}
                 </span>
               </td>
             </tr>
@@ -177,11 +163,14 @@ export default function ActivityLogsTable() {
         </tbody>
       </table>
 
+      {/* FOOTER */}
       <div className={styles.gmailFooter}>
         <div className="paginationInfo">
           عرض{" "}
           <strong>{(currentPage - 1) * logsPerPage + 1}</strong>-
-          <strong>{Math.min(currentPage * logsPerPage, filteredLogs.length)}</strong>{" "}
+          <strong>
+            {Math.min(currentPage * logsPerPage, filteredLogs.length)}
+          </strong>{" "}
           من <strong>{filteredLogs.length}</strong> سجل
         </div>
 
@@ -197,16 +186,21 @@ export default function ActivityLogsTable() {
           <option value={25}>25</option>
         </select>
 
-        <div className="paginationControls" >
-          <button className="arrowBtn" onClick={handlePrev} disabled={currentPage === 1}>
-             <ChevronRight style={{color : "#2C3A5F"}} size={20} />
+        <div className="paginationControls">
+          <button
+            className="arrowBtn"
+            onClick={handlePrev}
+            disabled={currentPage === 1}
+          >
+            <ChevronRight style={{ color: "#2C3A5F" }} size={20} />
           </button>
+
           <button
             className="arrowBtn"
             onClick={handleNext}
             disabled={currentPage === totalPages}
           >
-            <ChevronLeft style={{color : "#2C3A5F"}} size={20} />
+            <ChevronLeft style={{ color: "#2C3A5F" }} size={20} />
           </button>
         </div>
       </div>

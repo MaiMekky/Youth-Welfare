@@ -1,87 +1,74 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import styles from "../Styles/studentsTable.module.css";
 
-interface Student {
-  id: string;
-  name: string;
-  nationalId: string;
-  fatherStatus: string;
-  motherStatus: string;
-  housingStatus: string;
-  familyMembers: number;
-  totalIncome: string;
-  faculty: string;
-  grade: string;
-  disability: string;
-  requestStatus: string;
+interface Application {
+  solidarity_id: number;
+  student_name: string;
+  student_uid: string;
+  faculty_name: string;
+  req_status: string;
+  total_income: string;
+  family_numbers: number;
+  created_at: string;
 }
 
 export default function StudentsTable() {
   const router = useRouter();
 
-  const students: Student[] = [
-    {
-      id: "1",
-      name: "عمر خالد إبراهيم",
-      nationalId: "29703101401789",
-      fatherStatus: "متوفي",
-      motherStatus: "على قيد الحياة",
-      housingStatus: "إيجار",
-      familyMembers: 5,
-      totalIncome: "4500 ج",
-      faculty: "الهندسة",
-      grade: "جيد جداً",
-      disability: "لا",
-      requestStatus: "مقبول",
-    },
-    {
-      id: "2",
-      name: "سارة محمد",
-      nationalId: "29801012345678",
-      fatherStatus: "على قيد الحياة",
-      motherStatus: "على قيد الحياة",
-      housingStatus: "تمليك",
-      familyMembers: 3,
-      totalIncome: "1500 ج",
-      faculty: "التجارة",
-      grade: "امتياز",
-      disability: "نعم",
-      requestStatus: "موافقة مبدئية",
-    },
-    {
-      id: "3",
-      name: "أحمد علي",
-      nationalId: "29905012233445",
-      fatherStatus: "متوفي",
-      motherStatus: "على قيد الحياة",
-      housingStatus: "إيجار",
-      familyMembers: 6,
-      totalIncome: "2000 ج",
-      faculty: "الحقوق",
-      grade: "جيد",
-      disability: "لا",
-      requestStatus: "منتظر",
-    },
-  ];
-
+  const [applications, setApplications] = useState<Application[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  const totalPages = Math.ceil(students.length / rowsPerPage);
-  const startIndex = (currentPage - 1) * rowsPerPage + 1;
-  const endIndex = Math.min(startIndex + rowsPerPage - 1, students.length);
+useEffect(() => {
+  const fetchApplications = async () => {
+    try {
+      const token = localStorage.getItem("access");
 
-  const visibleStudents = students.slice(
-    (currentPage - 1) * rowsPerPage,
-    (currentPage - 1) * rowsPerPage + rowsPerPage
-  );
+      if (!token) {
+        console.error("❌ No token found");
+        return;
+      }
 
-  const handleViewDetails = (studentId: string) => {
-    router.push(`/students/${studentId}`);
+      const res = await fetch("http://127.0.0.1:8000/api/solidarity/super_dept/all_applications/", {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log("STATUS:", res.status);
+
+      if (!res.ok) {
+        console.error("❌ Fetch error", res.status);
+        return;
+      }
+
+      const data = await res.json();
+      console.log("🔥 DATA:", data);
+
+      setApplications(data);
+
+    } catch (error) {
+      console.error("❌ Error fetching applications:", error);
+    }
   };
+
+  fetchApplications();
+}, []);
+
+  // Pagination Calculations
+  const totalPages = Math.ceil(applications.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage + 1;
+  const endIndex = Math.min(startIndex + rowsPerPage - 1, applications.length);
+
+  const visibleApps = applications.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
 
   const getStatusClass = (status: string) => {
     switch (status) {
@@ -89,8 +76,6 @@ export default function StudentsTable() {
         return styles.received;
       case "مقبول":
         return styles.finalApproval;
-      case "موافقة مبدئية":
-        return styles.inReview;
       case "مرفوض":
         return styles.rejected;
       default:
@@ -105,43 +90,37 @@ export default function StudentsTable() {
           <tr>
             <th>رقم</th>
             <th>الاسم</th>
-            <th>الرقم القومي</th>
-            <th>حالة الأب</th>
-            <th>حالة الأم</th>
-            <th>السكن</th>
+            <th>الرقم الجامعي</th>
+            <th>الكلية</th>
             <th>عدد أفراد الأسرة</th>
             <th>الدخل الإجمالي</th>
-            <th>الكلية</th>
-            <th>التقدير</th>
-            <th>ذوي الهمم</th>
+            <th>تاريخ التقديم</th>
             <th>الحالة</th>
             <th>الإجراء</th>
           </tr>
         </thead>
 
         <tbody>
-          {visibleStudents.map((student, index) => (
-            <tr key={student.id}>
+          {visibleApps.map((app, index) => (
+            <tr key={app.solidarity_id}>
               <td>{index + startIndex}</td>
-              <td>{student.name}</td>
-              <td>{student.nationalId}</td>
-              <td>{student.fatherStatus}</td>
-              <td>{student.motherStatus}</td>
-              <td>{student.housingStatus}</td>
-              <td>{student.familyMembers}</td>
-              <td>{student.totalIncome}</td>
-              <td>{student.faculty}</td>
-              <td>{student.grade}</td>
-              <td>{student.disability}</td>
+              <td>{app.student_name}</td>
+              <td>{app.student_uid}</td>
+              <td>{app.faculty_name}</td>
+              <td>{app.family_numbers}</td>
+              <td>{app.total_income}</td>
+              <td>{app.created_at.slice(0, 10)}</td>
+
               <td>
-                <span className={`${styles.status} ${getStatusClass(student.requestStatus)}`}>
-                  {student.requestStatus}
+                <span className={`${styles.status} ${getStatusClass(app.req_status)}`}>
+                  {app.req_status}
                 </span>
               </td>
+
               <td>
                 <button
                   className={styles.detailsBtn}
-                  onClick={() => handleViewDetails(student.id)}
+                  onClick={() => router.push(`/students/${app.solidarity_id}`)}
                 >
                   تفاصيل
                 </button>
@@ -151,10 +130,11 @@ export default function StudentsTable() {
         </tbody>
       </table>
 
-      {/* ✅ Footer */}
+      {/* Footer */}
       <div className={styles.tableFooter}>
         <div className={styles.footerLeft}>
-          <strong>عرض</strong> {startIndex}–{endIndex} <strong>من</strong> {students.length}
+          <strong>عرض</strong> {startIndex}–{endIndex} <strong>من</strong>{" "}
+          {applications.length}
         </div>
 
         <div className={styles.footerRight}>

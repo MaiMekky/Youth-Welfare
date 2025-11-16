@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import logo from "@/app/assets/logo1.png";
 import styles from "../Styles/components/LoginPage.module.css";
-
+import { useRouter } from "next/navigation";
 interface LoginPageProps {
   onClose: () => void;
   onSwitchToSignup: () => void;
@@ -22,22 +22,59 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
       newErrors.email = "البريد غير صالح";
 
     if (!password.trim()) newErrors.password = "كلمة المرور مطلوبة";
-    else if (password.length < 6) newErrors.password = "كلمة المرور قصيرة جدًا";
+    // else if (password.length < 6) newErrors.password = "كلمة المرور قصيرة جدًا";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+const router = useRouter();
+  const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!validate()) return;
+  setLoading(true);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
-    setLoading(true);
-    setTimeout(() => {
-      alert("تم تسجيل الدخول بنجاح 🎉");
+  try {
+    const res = await fetch("http://localhost:8000/api/auth/login/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "فشل تسجيل الدخول");
       setLoading(false);
-      onClose();
-    }, 1200);
-  };
+      return;
+    }
+
+    // data = { token: "JWT_TOKEN", role: "super_admin" }
+
+    // حفظ التوكن في localStorage
+     localStorage.setItem('access', data.access);
+    localStorage.setItem('refresh', data.refresh);
+    localStorage.setItem('user_type', data.user_type);
+    localStorage.setItem('admin_id', data.admin_id.toString());
+    localStorage.setItem('role', data.role);
+    localStorage.setItem('name', data.name);
+
+
+    // توجيه حسب الدور
+    // if (data.role === "super_admin") {
+      router.push("/SuperAdmin");
+    // } 
+    // else {
+    //   router.push("/student/home"); // أي صفحة عامة
+    // }
+
+  } catch (error) {
+    console.error(error);
+    alert("حدث خطأ أثناء تسجيل الدخول");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className={styles.loginBox}>

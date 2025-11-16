@@ -4,14 +4,13 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import logo from "@/app/assets/logo1.png";
 import styles from "../Styles/components/LoginPage.module.css";
-import { useRouter } from "next/navigation";
 interface LoginPageProps {
   onClose: () => void;
   onSwitchToSignup: () => void;
 }
 
 export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps) {
-  const router = useRouter();
+  let router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -30,7 +29,7 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-const router = useRouter();
+  router = useRouter();
   const handleLogin = async (e: React.FormEvent) => {
   e.preventDefault();
   if (!validate()) return;

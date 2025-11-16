@@ -15,7 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ar">
-      <body>
+      <body className="app-body">
         <LanguageProvider>
           {children}
         </LanguageProvider>

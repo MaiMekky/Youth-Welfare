@@ -16,6 +16,9 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
+
+  const router = useRouter();
 
   const validate = () => {
     const newErrors: Record<string, string> = {};

@@ -1,0 +1,277 @@
+.facultyReportPage {
+  background: #f6f7fb;
+  min-height: 100vh;
+  font-family: "Cairo", sans-serif;
+  direction: rtl;
+  color: #222;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== Header ===== */
+.facultyHeader {
+ background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+
+  color: white;
+  padding: 20px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.facultyHeader h1 {
+  font-size: 22px;
+  margin: 0;
+}
+
+.facultyHeader p {
+  font-size: 13px;
+  opacity: 0.8;
+  margin: 3px 0 0;
+}
+
+/* ===== Stats Section ===== */
+.statsSection {
+  display: flex;
+  gap: 20px;
+  margin: 25px;
+  flex-wrap: wrap;
+}
+
+.statBox {
+  flex: 1;
+  min-width: 220px;
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #ddd;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.yellow {
+  background: #fff8e1;
+  border-color: #f5d55b;
+  color: #b08900;
+}
+
+.blue {
+  background: #eef2ff;
+  border-color: #b9c4f5;
+  color: #1c1e58;
+}
+
+.icon {
+  font-size: 30px;
+}
+
+/* ===== Search Bar ===== */
+.searchBar {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 14px;
+  margin: 0 25px 25px;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.searchBar input {
+  border: none;
+  outline: none;
+  flex: 1;
+  font-size: 14px;
+  background: transparent;
+}
+
+.searchBar button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+/* ===== Table Section ===== */
+.tableContainer {
+  background: #fff;
+  margin: 0 25px;
+  border-radius: 14px;
+  border: 1px solid #ddd;
+  overflow: hidden;
+}
+
+.tableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.tableHeader h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #1c1e58;
+}
+
+.tableButtons button {
+  margin-left: 10px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  color: white;
+}
+
+.printBtn {
+  background: #1c1e58;
+}
+
+.exportBtn {
+  background: #d9c31d;
+  color: #222;
+}
+
+/* ===== Table ===== */
+.reportTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+}
+
+.reportTable th {
+  background: #f9f9ff;
+  padding: 10px;
+  font-size: 14px;
+  border-bottom: 1px solid #ddd;
+}
+
+.reportTable td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+.reportTable tr:hover {
+  background: #f5f6ff;
+}
+
+.amount {
+  color: #b08900;
+  font-weight: bold;
+}
+
+/* ===== Footer ===== */
+.footer {
+ background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 18px 30px;
+  font-size: 13px;
+  direction: rtl;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.footer p {
+  margin: 2px 0;
+}
+
+.left, .center, .right {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.center {
+  text-align: center;
+  flex: 1;
+}
+
+.right {
+  text-align: left;
+  font-size: 12px;
+  color: #d1d5db;
+}
+
+@media (max-width: 768px) {
+  .statsSection {
+    flex-direction: column;
+  }
+
+  .facultyFooter {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+}
+/* ===== Gmail Footer matching Table Footer Theme ===== */
+.gmailFooter {
+  background: #fafafa;          /* match table footer */
+  border: 1px solid #ddd;       /* same border */
+  border-top: 1px solid #ddd;   /* like tableFooter, not none */
+  border-radius: 0 0 8px 8px;   /* same as tableFooter */
+  margin: 12px 25px 25px;       /* similar spacing */
+  padding: 10px 16px;           /* match tableFooter */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #2c3a5f;               /* match tableFooter text color */
+}
+
+/* Info section strong text */
+.gmailFooter .paginationInfo strong {
+  color: #2c3a5f;
+}
+
+/* Controls section */
+.gmailFooter .paginationControls {
+  display: flex;
+  align-items: center;
+  gap: 12px;                    /* match tableFooter .footerRight gap */
+}
+
+.gmailFooter .paginationControls select {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 13px;
+  outline: none;
+  background: white;
+  color: #2c3a5f;
+}
+
+/* Arrow buttons */
+.gmailFooter .arrowBtn {
+  background: #f1f1f1;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 8px;
+  cursor: pointer;
+  transition: 0.2s;
+  color: #2c3a5f;
+}
+
+.gmailFooter .arrowBtn:hover:not(:disabled) {
+  background: #ddd;
+}
+
+.gmailFooter .arrowBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.facultyMain {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.gmailFooter {
+  margin-top: auto; /* keep it pushed down inside the main area */
+}

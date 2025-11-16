@@ -1,13 +1,14 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import "../styles/studentNavbar.css"; // ensure this is imported somewhere (or in _app.tsx)
-
+import Image from "next/image";
+import Logo from "@/app/assets/logo1.png";
+import { useRouter } from "next/navigation";
 type NavItem = {
   key: string;
   label: string;
   icon: React.ReactNode;
 };
-
 const IconHome = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
     <path d="M3 10.5L12 4l9 6.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
@@ -45,12 +46,19 @@ const IconManage = () => (
     <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.82 2.82l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.82-2.82l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09c.7 0 1.28-.34 1.51-1a1.65 1.65 0 00-.33-1.82L4.3 3.89A2 2 0 017.12 1.06l.06.06c.46.46 1.1.66 1.71.56.6-.1 1.07-.59 1.22-1.18l.18-.7A2 2 0 0113.9.18l.18.7c.15.59.62 1.08 1.22 1.18.61.1 1.25-.1 1.71-.56l.06-.06A2 2 0 0119.7 3.9l-.06.06c-.46.46-.66 1.1-.56 1.71.1.6.59 1.07 1.18 1.22l.7.18a2 2 0 01.12 3.72l-.7.18c-.59.15-1.08.62-1.18 1.22-.1.61.1 1.25.56 1.71z" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
-
+  
 const StudentNavbar: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
+  const router = useRouter(); // router جوا الcomponent
+
+  const handleLogout = () => {
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    router.push("/");
+  }
   const navItems: NavItem[] = [
     { key: "home", label: "الرئيسية", icon: <IconHome /> },
     { key: "union", label: "اتحاد الطلبة", icon: <IconUnion /> },
@@ -84,12 +92,12 @@ const StudentNavbar: React.FC = () => {
     document.addEventListener("click", onDocClick);
     return () => document.removeEventListener("click", onDocClick);
   }, [mobileOpen]);
-
   return (
     <header className="navbar">
       <div className="navbar-inner container">
         <div className="brand" aria-hidden>
-          <div className="brand-mark">🎓</div>
+          <div className="brand-mark"><Image src={Logo} alt="Logo" width={45} height={45} style={{borderRadius : "10px"}}/>
+</div>
           <div className="brand-name">
             رعاية الشباب
             <div className="brand-sub">جامعة حلوان</div>
@@ -119,7 +127,7 @@ const StudentNavbar: React.FC = () => {
 
         {/* Actions and mobile toggle */}
         <div className="nav-actions">
-          <button className="logout">تسجيل خروج</button>
+          <button className="logout"onClick={handleLogout}>تسجيل خروج</button>
 
           {/* Mobile hamburger - visible only on small screens */}
           <button

@@ -1,0 +1,99 @@
+.header {
+  width: 100%;
+  background: linear-gradient(180deg, #2c3a5f 0%, #3d4d75 100%);
+  color: #fff;
+  padding: 18px 32px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  width: 100%;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: right;
+  gap: 12px;
+}
+
+.title { font-size: 22px; font-weight: 800; margin: 0; color: #f2c94c; }
+.subtitle { font-size: 13px; margin: 0; color: rgba(255,255,255,0.75); }
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.exportBtn {
+  background: #f2c94c;
+  color: #1c2147;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.3s ease;
+}
+
+.searchBox { flex: 1; min-width: 200px; max-width: 400px; }
+.searchInput { width: 100%; height: 40px; padding: 10px 14px; border-radius: 10px; border: none; background: #f8f9fb; font-size: 14px; color: #333; outline: none; }
+.searchInput::placeholder { color: #777; }
+
+/* Mobile toggle button */
+.mobileToggle {
+  display: none;
+  background: none;
+  border: none;
+  color: #f2c94c;
+  cursor: pointer;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .inner { flex-direction: column; align-items: stretch; text-align: center; gap: 16px; }
+  .brand { justify-content: center; }
+  .controls { flex-direction: column; width: 100%; }
+  .exportBtn, .searchBox { width: 100%; justify-content: center; }
+  .mobileToggle { display: block; position: absolute; left: 20px; top: 18px; }
+}
+
+@media (max-width: 600px) {
+  .header { padding: 14px 16px; }
+  .title { font-size: 18px; }
+  .subtitle { font-size: 11px; }
+  .exportBtn { padding: 8px 12px; font-size: 13px; }
+  .searchInput { font-size: 13px; height: 36px; padding: 8px 12px; }
+}
+.logoutBtn {
+  background-color: #e74c3c; /* أحمر */
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  margin-left: 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.logoutBtn:hover {
+  background-color: #c0392b;
+}

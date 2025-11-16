@@ -1,0 +1,136 @@
+.sidebar {
+  width: 260px;
+ background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+  transition: transform 0.3s ease-in-out;
+  z-index: 1000;
+}
+
+/* النص العلوي */
+.header {
+  margin-bottom: 20px;
+  position: relative;
+}
+.header h2 {
+  font-size: 18px;
+  margin-bottom: 4px;
+  color: #ffffff;
+}
+.header p {
+  font-size: 13px;
+  color: #d1d5db;
+}
+.closeBtn {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: none;
+}
+
+/* الملف الشخصي */
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+ background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+.profile h3 {
+  font-size: 15px;
+  margin: 0;
+}
+.profile p {
+  font-size: 13px;
+  color: #d1d5db;
+  margin: 0;
+}
+
+/* التنقل */
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.nav button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-align: right;
+}
+.nav button:hover { background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+}
+.nav .active {
+  background-color: #d4af37;
+   color: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+  font-weight: 600;
+}
+
+/* الفوتر */
+.footer {
+  font-size: 12px;
+  color: #d1d5db;
+  text-align: center;
+  margin-top: auto;
+}
+
+/* ===== Responsive ===== */
+.mobileMenuBtn {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: none;
+  z-index: 1100;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0,0,0,0.4);
+  z-index: 900;
+}
+
+@media (max-width: 992px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    transform: translateX(100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .closeBtn {
+    display: block;
+  }
+
+  .mobileMenuBtn {
+    display: block;
+  }
+}

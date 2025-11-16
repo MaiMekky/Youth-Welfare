@@ -2,23 +2,23 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import logo from "@/app/assets/logo1.png"; // تأكد المسار صحيح
+import logo from "@/app/assets/logo1.png";
 import styles from "../Styles/components/LoginPage.module.css";
-import { loginUser } from "././../services/authService";
-
 interface LoginPageProps {
   onClose: () => void;
   onSwitchToSignup: () => void;
 }
 
 export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps) {
+  let router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
 
-  const router = useRouter();
+  router = useRouter();
 
   // ======= Validation =======
   const validate = () => {
@@ -28,31 +28,59 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
       newErrors.email = "البريد غير صالح";
 
     if (!password.trim()) newErrors.password = "كلمة المرور مطلوبة";
-    else if (password.length < 3) newErrors.password = "كلمة المرور قصيرة جدًا";
+    // else if (password.length < 6) newErrors.password = "كلمة المرور قصيرة جدًا";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
-  // ======= Handle Login =======
+  router = useRouter();
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
+  e.preventDefault();
+  if (!validate()) return;
+  setLoading(true);
 
-    setLoading(true);
-    setApiError("");
+  try {
+    const res = await fetch("http://localhost:8000/api/auth/login/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
 
-    const result = await loginUser(email, password);
+    const data = await res.json();
 
-    if (result.success) {
+    if (!res.ok) {
+      alert(data.message || "فشل تسجيل الدخول");
       setLoading(false);
-      onClose(); // اغلاق البوب اب
-      router.push("/uni-level"); // Redirect بعد login
-    } else {
-      setApiError(result.message || "فشل تسجيل الدخول");
-      setLoading(false);
+      return;
     }
-  };
+
+    // data = { token: "JWT_TOKEN", role: "super_admin" }
+
+    // حفظ التوكن في localStorage
+     localStorage.setItem('access', data.access);
+    localStorage.setItem('refresh', data.refresh);
+    localStorage.setItem('user_type', data.user_type);
+    localStorage.setItem('admin_id', data.admin_id.toString());
+    localStorage.setItem('role', data.role);
+    localStorage.setItem('name', data.name);
+
+
+    // توجيه حسب الدور
+    // if (data.role === "super_admin") {
+      router.push("/SuperAdmin");
+    // } 
+    // else {
+    //   router.push("/student/home"); // أي صفحة عامة
+    // }
+
+  } catch (error) {
+    console.error(error);
+    alert("حدث خطأ أثناء تسجيل الدخول");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className={styles.loginBox}>
@@ -63,13 +91,7 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
 
       {/* Logo */}
       <div className={styles.logoContainer}>
-        <Image
-          src={logo}
-          alt="Logo"
-          width={90}
-          height={90}
-          style={{ maxWidth: "100%", height: "auto" }}
-        />
+        <Image src={logo} alt="Logo" width={150} height={150} draggable ={false} />
       </div>
 
       <h2 className={styles.loginTitle}>تسجيل الدخول</h2>
@@ -94,7 +116,7 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
         />
         {errors.password && <p className={styles.errorMsg}>{errors.password}</p>}
 
-        {apiError && <p className={styles.errorMsg}>{apiError}</p>}
+        {errors.general && <p className={styles.errorMsg}>{errors.general}</p>}
 
         <button type="submit" disabled={loading} className={styles.loginButton}>
           {loading ? "جاري التحقق..." : "تسجيل الدخول"}

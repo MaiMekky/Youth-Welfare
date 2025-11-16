@@ -1,0 +1,63 @@
+.pageTitleSection {
+  /* background-color: white; */
+  border-radius: 12px;
+  /* box-shadow: 0 1px 3px rgba(0,0,0,0.1); */
+  padding: 24px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.pageTitleLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.pageIcon {
+  background-color: #D4AF37;
+  padding: 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.pageTitleH2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #2C3A5F;
+  margin-bottom: 4px;
+}
+
+.pageTitleP {
+  font-size: 14px;
+  color: #6B7280;
+}
+
+.pageActions {
+  display: flex;
+  gap: 12px;
+}
+
+.btnSecondary {
+  background-color: white;
+  border: 1px solid #D1D5DB;
+  padding: 10px 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+  transition: background-color 0.2s;
+}
+
+.btnSecondary:hover {
+  background-color: #F9FAFB;
+}

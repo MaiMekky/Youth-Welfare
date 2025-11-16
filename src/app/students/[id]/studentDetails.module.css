@@ -1,0 +1,185 @@
+.container {
+  padding: 40px 20px;
+  max-width: 950px;
+  margin: 0 auto;
+  font-family: "Cairo", sans-serif;
+  direction: rtl;
+  color: #1e1e1e;
+}
+
+.contentCard {
+  border: 2px solid #d4a017; /* أصفر غامق */
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  padding: 35px 40px 30px;
+  position: relative;
+}
+
+
+.backBtn {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  background: none;
+  border: none;
+  color: #2c2a6a;
+  font-size: 15px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.backBtn:hover {
+  text-decoration: underline;
+}
+
+/* العنوان في النص */
+.pageTitle {
+  text-align: center;
+  font-size: 26px;
+  font-weight: 800;
+  color: #2c2a6a;
+  margin-bottom: 30px;
+}
+
+.section {
+  margin-bottom: 25px;
+  border-bottom: 1px solid #e0c97d;
+  padding-bottom: 12px;
+}
+
+.section h3 {
+  font-size: 18px;
+  color: #2c2a6a;
+  margin-bottom: 10px;
+  font-weight: 700;
+  border-right: 4px solid #d4a017;
+  padding-right: 8px;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 25px;
+}
+
+.infoGrid p {
+  font-size: 15px;
+  margin: 0;
+  line-height: 1.7;
+}
+
+.infoGrid strong {
+  color: #2c2a6a;
+}
+
+.docsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.docsList li {
+  margin-bottom: 5px;
+}
+
+.docsList li a {
+  color: #2c2a6a;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+.approveBtn {
+  background: #e9f8ec;
+  color: #208a3e;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.approveBtn:hover {
+  background: #d5f3db;
+}
+
+.rejectBtn {
+  background: #ffecec;
+  color: #b02a37;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.rejectBtn:hover {
+  background: #ffd7d7;
+}
+/* ✅ إشعار فوق يمين الشاشة */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 25px;
+  width: 280px;
+  background: #fff;
+  padding: 14px 16px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  font-weight: 600;
+  color: #333;
+  z-index: 9999;
+  animation: fadeIn 0.4s ease forwards;
+  overflow: hidden;
+}
+
+/* ✅ ألوان النجاح والرفض */
+.success {
+  border-right: 6px solid #4caf50;
+}
+
+.error {
+  border-right: 6px solid #f44336;
+}
+
+/* ✅ شريطة التحميل الصفراء */
+.notification::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background-color: #d4a017;
+  animation: progress 2.5s linear forwards;
+  transform-origin: left;
+}
+
+/* ✅ أنيميشنات */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}

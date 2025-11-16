@@ -77,12 +77,13 @@
 
 // }
 
-
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, Eye, X, CheckCircle } from "lucide-react";
+import { Eye, X, CheckCircle } from "lucide-react";
 import "../styles/myRequests.css";
+import { useRouter } from "next/navigation";
+
 
 interface Request {
   id: string;
@@ -102,7 +103,6 @@ export default function MyRequests() {
   const [filteredRequests, setFilteredRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchRequests();
@@ -110,94 +110,158 @@ export default function MyRequests() {
 
   useEffect(() => {
     filterRequests();
-  }, [activeTab, searchQuery, requests]);
+  }, [activeTab, requests]);
 
-  const fetchRequests = async () => {
-    try {
-      setLoading(true);
-      
-      // Simulate API call with dummy data
-      // Replace with: const response = await fetch("/api/student/requests");
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      const dummyData: Request[] = [
-        {
-          id: "1",
-          requestNumber: "SS-2025-001",
-          type: "طلب دعم مالي",
-          status: "under-review",
-          submissionDate: "2 يناير 2025",
-          familyMembers: 3,
-          familyIncome: "1500 جنيه",
-          reason: "أحتاج إلى دعم مالي لمساعدة أسرتي بعد وفاة والدي وعدم وجود دخل ثابت للأسرة",
-          currentStep: 2,
-          totalSteps: 3,
-        }
-      ];
+  // const fetchRequests = async () => {
+  //   try {
+  //     setLoading(true);
+  //     await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      setRequests(dummyData);
-    } catch (error) {
-      console.error("Error fetching requests:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     const dummyData: Request[] = [
+  //       {
+  //         id: "1",
+  //         requestNumber: "SS-2025-001",
+  //         type: "طلب دعم مالي",
+  //         status: "under-review",
+  //         submissionDate: "2 يناير 2025",
+  //         familyMembers: 3,
+  //         familyIncome: "1500 جنيه",
+  //         reason:
+  //           "أحتاج إلى دعم مالي لمساعدة أسرتي بعد وفاة والدي وعدم وجود دخل ثابت للأسرة",
+  //         currentStep: 2,
+  //         totalSteps: 3,
+  //       },
+  //     ];
+
+  //     setRequests(dummyData);
+  //   } catch (error) {
+  //     console.error("Error fetching requests:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+const mapStatusForCSS = (status: string) => {
+  switch(status) {
+    case "pending":
+    case "منتظر":
+      return "pending";
+    case "under-review":
+    case "موافقة مبدئية":
+      return "under-review";
+    case "approved":
+    case "مقبول":
+      return "approved";
+    case "rejected":
+    case "مرفوض":
+      return "rejected";
+    default:
+      return "pending";
+  }
+};
+const statusToStep = (status: string): number => {
+  switch(mapStatusForCSS(status)) {
+    case "pending": return 1;
+    case "under-review": return 2;
+    case "approved": return 3;
+    //  case "rejected": return 3;
+    default: return 1;
+  }
+};
+
 
   const filterRequests = () => {
     let filtered = requests;
-
-    // Filter by status
     if (activeTab !== "all") {
       filtered = filtered.filter((req) => req.status === activeTab);
     }
-
-    // Filter by search query
-    if (searchQuery.trim()) {
-      filtered = filtered.filter(
-        (req) =>
-          req.requestNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          req.reason.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
     setFilteredRequests(filtered);
   };
 
   const getStatusText = (status: string) => {
     const statusMap: { [key: string]: string } = {
-      pending: "قيد الانتظار",
-      "under-review": "قيد المراجعة",
-      approved: "تم القبول",
-      rejected: "تم الرفض",
+      pending: "منتظر",
+      "under-review": "موافقة مبدئية",
+      approved: "مقبول",
+      rejected: "مرفوض",
     };
     return statusMap[status] || status;
   };
 
-  const getStepLabel = (step: number) => {
-    const steps = ["النتيجة النهائية", "قيد المراجعة", "تم التقديم"];
-    return steps[step - 1] || "";
-  };
+const getStepLabel = (step: number) => {
+  const steps = ["منتظر", "موافقة مبدئية", "مقبول"];
+  return steps[step - 1] || "";
+};
+
 
   const getProgressPercentage = (current: number, total: number) => {
     return ((current - 1) / (total - 1)) * 100;
   };
 
-  const handleCancelRequest = (requestId: string) => {
-    if (confirm("هل أنت متأكد من إلغاء هذا الطلب؟")) {
-      // Call API to cancel request
-      alert("تم إلغاء الطلب");
+  // const handleCancelRequest = (requestId: string) => {
+  //   if (confirm("هل أنت متأكد من إلغاء هذا الطلب؟")) {
+  //     alert("تم إلغاء الطلب");
+  //   }
+  // };
+
+  const fetchRequests = async () => {
+  try {
+    setLoading(true);
+
+    // Get token from localStorage
+    const token = localStorage.getItem("access");
+    if (!token) throw new Error("User not authenticated");
+
+    const response = await fetch(
+      "http://127.0.0.1:8000/api/solidarity/student/status/",
+      {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("Error fetching requests:", errorData);
+      return;
     }
-  };
 
-  const handleViewDetails = (requestId: string) => {
-    // Navigate to request details page or open modal
-    alert(`عرض تفاصيل الطلب: ${requestId}`);
-  };
+    const data = await response.json();
 
-  const getStatusCount = (status: string) => {
-    if (status === "all") return requests.length;
-    return requests.filter((req) => req.status === status).length;
-  };
+    // Map backend data to your Request interface if needed
+    const mappedRequests: Request[] = data.map((item: any) => ({
+      // const statusStep = statusToStep(item.req_status);
+     
+      id: item.solidarity_id,
+      requestNumber: item.solidarity_id,
+      // type: item.req_type === "financial_aid" ? "طلب دعم مالي" : item.req_type,
+      status: item.req_status,
+      submissionDate: new Date(item.created_at).toLocaleDateString("ar-EG", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }),
+      familyMembers: item.family_numbers,
+      familyIncome: item.total_income,
+      reason: item.reason,
+      currentStep: statusToStep(item.req_status),
+      totalSteps: 3,
+   
+   }));
+
+    setRequests(mappedRequests);
+  } catch (error) {
+    console.error("Error fetching requests:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+const router = useRouter();
+ const handleViewDetails = (requestId: string) => {
+  router.push(`/my-requests/${requestId}`);
+};
+
 
   if (loading) {
     return (
@@ -212,12 +276,6 @@ export default function MyRequests() {
 
   return (
     <div className="my-requests-container">
-      {/* Header */}
-      <div className="requests-header">
-        <h2>البحث برقم الطلب</h2>
-        <p>ادخل رقم الطلب (مثلاً: SS-2025-001)</p>
-      </div>
-
       {/* Tabs */}
       <div className="requests-tabs">
         <button
@@ -225,42 +283,7 @@ export default function MyRequests() {
           onClick={() => setActiveTab("all")}
         >
           طلباتي
-          <span className="count">({getStatusCount("all")})</span>
         </button>
-        <button
-          className={`tab-button ${activeTab === "under-review" ? "active" : ""}`}
-          onClick={() => setActiveTab("under-review")}
-        >
-          قيد المراجعة
-          <span className="count">({getStatusCount("under-review")})</span>
-        </button>
-        <button
-          className={`tab-button ${activeTab === "approved" ? "active" : ""}`}
-          onClick={() => setActiveTab("approved")}
-        >
-          مقبولة
-          <span className="count">({getStatusCount("approved")})</span>
-        </button>
-        <button
-          className={`tab-button ${activeTab === "rejected" ? "active" : ""}`}
-          onClick={() => setActiveTab("rejected")}
-        >
-          مرفوضة
-          <span className="count">({getStatusCount("rejected")})</span>
-        </button>
-      </div>
-
-      {/* Search */}
-      <div className="search-section">
-        <div className="search-box">
-          <Search size={20} color="#6b7280" />
-          <input
-            type="text"
-            placeholder="ابحث برقم الطلب أو السبب..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
       </div>
 
       {/* Requests List */}
@@ -269,27 +292,21 @@ export default function MyRequests() {
           <div className="empty-state">
             <div className="empty-state-icon">📭</div>
             <h3>لا توجد طلبات</h3>
-            <p>
-              {searchQuery
-                ? "لم يتم العثور على طلبات تطابق البحث"
-                : "لم تقم بتقديم أي طلبات بعد"}
-            </p>
+            <p>لم تقم بتقديم أي طلبات بعد</p>
           </div>
         ) : (
           filteredRequests.map((request) => (
             <div key={request.id} className="request-card">
-              {/* Header */}
               <div className="request-card-header">
                 <div className="request-info">
                   <h3>{request.type}</h3>
                   <p className="request-number">رقم الطلب: {request.requestNumber}</p>
                 </div>
-                <span className={`status-badge ${request.status}`}>
-                  {getStatusText(request.status)}
-                </span>
+              <span className={`status-badge ${mapStatusForCSS(request.status)}`}>
+  {getStatusText(request.status)}
+</span>
               </div>
 
-              {/* Details */}
               <div className="request-details">
                 <div className="detail-item">
                   <span className="detail-label">تاريخ التقديم</span>
@@ -305,47 +322,49 @@ export default function MyRequests() {
                 </div>
               </div>
 
-              {/* Reason */}
               <div className="request-reason">
                 <h4>سبب الطلب</h4>
                 <p>{request.reason}</p>
               </div>
 
-              {/* Progress Tracker */}
               <div className="progress-tracker">
                 <h4>تتبع حالة الطلب</h4>
                 <div className="progress-steps">
                   <div className="progress-line">
                     <div
                       className="progress-line-fill"
+                      // style={{
+                      //   width: `${getProgressPercentage(
+                      //     request.currentStep,
+                      //     request.totalSteps
+                      //   )}%`,
+                      // }}
                       style={{
-                        width: `${getProgressPercentage(request.currentStep, request.totalSteps)}%`,
-                      }}
+     width: `${getProgressPercentage(request.currentStep, request.totalSteps)}%`,
+  }}
                     ></div>
                   </div>
-                  {[...Array(request.totalSteps)].map((_, index) => {
-                    const stepNumber = request.totalSteps - index;
-                    const isCompleted = stepNumber < request.currentStep;
-                    const isActive = stepNumber === request.currentStep;
-                    
-                    return (
-                      <div
-                        key={index}
-                        className={`progress-step ${
-                          isCompleted ? "completed" : isActive ? "active" : ""
-                        }`}
-                      >
-                        <div className="step-circle">
-                          {isCompleted ? <CheckCircle size={18} /> : stepNumber}
-                        </div>
-                        <span className="step-label">{getStepLabel(stepNumber)}</span>
-                      </div>
-                    );
-                  })}
+             {[...Array(request.totalSteps)].map((_, index) => {
+              const stepNumber = index + 1; // بدل ما تعمل totalSteps - index
+             const isCompleted = stepNumber < request.currentStep;
+             const isActive = stepNumber === request.currentStep;
+
+              return (
+                <div
+                  key={index}
+                  className={`progress-step ${isCompleted ? "completed" : isActive ? "active" : ""}`}
+                >
+                  <div className="step-circle">
+                    {isCompleted ? <CheckCircle size={18} /> : stepNumber}
+                  </div>
+                  <span className="step-label">{getStepLabel(stepNumber)}</span>
+                </div>
+              );
+            })}
+
                 </div>
               </div>
 
-              {/* Actions */}
               <div className="request-actions">
                 <button
                   className="action-btn view"
@@ -354,7 +373,8 @@ export default function MyRequests() {
                   <Eye size={18} />
                   عرض التفاصيل
                 </button>
-                {request.status === "pending" || request.status === "under-review" ? (
+                {/* {(request.status === "pending" ||
+                  request.status === "under-review") && (
                   <button
                     className="action-btn cancel"
                     onClick={() => handleCancelRequest(request.id)}
@@ -362,7 +382,7 @@ export default function MyRequests() {
                     <X size={18} />
                     إلغاء الطلب
                   </button>
-                ) : null}
+                )} */}
               </div>
             </div>
           ))

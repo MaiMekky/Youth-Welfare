@@ -1,0 +1,141 @@
+.footer {
+  background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+  color: #ffffff;
+  direction: rtl;
+  font-family: "Cairo", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  padding: 3rem 2rem;
+  text-align: right;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* المحتوى الأساسي */
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  padding-bottom: 1.5rem;
+}
+
+.footer-section h3.section-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #f2c94c;
+  margin-bottom: 1rem;
+}
+
+.footer-section p,
+.footer-section li {
+  color: #e5e7eb;
+  font-size: 0.95rem;
+  margin-bottom: 0.6rem;
+  line-height: 1.6;
+}
+
+.email {
+  color: #fbbf24;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.email:hover {
+  color: #fde68a;
+}
+
+.features-list,
+.quick-access-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dashboard-description {
+  max-width: 320px;
+  color: #e0e7ff;
+  line-height: 1.8;
+  font-size: 0.95rem;
+}
+
+/* الجزء السفلي */
+.footer-bottom {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: #d1d5db;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 1rem;
+}
+
+.footer-bottom-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.status {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #22c55e;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.powered-by {
+  color: #9ca3af;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1024px) {
+  .footer-content {
+    text-align: center;
+  }
+
+  .dashboard-description {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer {
+    padding: 2rem 1rem;
+  }
+
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+
+  .footer-bottom-row {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer {
+    padding: 1.5rem 1rem;
+  }
+
+  .footer-section p,
+  .footer-section li {
+    font-size: 0.9rem;
+  }
+
+  .footer-bottom {
+    font-size: 0.8rem;
+  }
+}

@@ -1,0 +1,474 @@
+/* Base container & layout (original provided CSS) */
+.container {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  direction: rtl;
+  max-width: 900px;
+  margin: 40px auto;
+  border: 3px solid #f1c40f;
+}
+
+.pageTitle {
+  font-size: 24px;
+  color: #2c3a5f;
+  margin-bottom: 25px;
+  text-align: center;
+  border-bottom: 2px solid #f1c40f;
+  padding-bottom: 10px;
+}
+
+.section {
+  margin-bottom: 25px;
+}
+
+.section h3 {
+  color: #1f2937;
+  margin-bottom: 10px;
+  border-right: 5px solid #facc15;
+  padding-right: 8px;
+}
+
+.infoGrid {
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 15px 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 20px;
+}
+
+.longText {
+  background: #fff8dc;
+  padding: 15px;
+  border-radius: 10px;
+  line-height: 1.8;
+  margin-top: 10px;
+  font-size: 15px;
+}
+
+.docsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.docsTable th, .docsTable td {
+  padding: 10px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: right;
+}
+
+.verified {
+  color: #047857;
+  font-weight: 600;
+}
+
+.pending {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.missing {
+  color: #991b1b;
+  font-weight: 600;
+}
+
+.sectionNote {
+  background: #fef3c7;
+  border: 1px solid #facc15;
+  padding: 15px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 25px;
+}
+
+.btnApprove {
+  background-color: #10b981;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.btnReject {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.btnReceived {
+  background-color: #fef9c3;
+  color: #b45309;
+  border-radius: 8px;
+  padding: 10px 20px;
+  text-align: center;
+  font-weight: 500;
+  margin: 20px auto;
+  border: 1px solid #facc15;
+}
+
+.btnBack {
+  background-color: #d4af37;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  display: block;
+  margin: 20px auto 0;
+  cursor: pointer;
+}
+.discountsBox {
+  background: #fffbea;
+  border: 1px solid #facc15;
+  border-radius: 10px;
+  padding: 15px 20px;
+  margin: 25px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px 40px;
+  font-size: 15px;
+}
+
+.discountsBox label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+/* ✅ الإشعار فوق يمين الشاشة (خارج الكونتينر) */
+.notification {
+  position: fixed;
+  top: 25px;
+  right: 25px;
+  width: 300px;
+  background: #ffffff;
+  padding: 14px 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  font-weight: 600;
+  color: #333;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease forwards;
+  overflow: hidden;
+  border-right: 6px solid transparent;
+}
+
+/* ✅ ألوان الإشعار */
+.success {
+  border-right-color: #22c55e;
+}
+.warning {
+  border-right-color: #f59e0b;
+}
+.error {
+  border-right-color: #dc2626;
+}
+
+/* ✅ الشريطة الصفراء المتحركة */
+.notification::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background-color: #facc15;
+  animation: progress 3s linear forwards;
+}
+
+/* ✅ حركة الظهور */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ✅ حركة الشريطة */
+@keyframes progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+/* زر الرجوع */
+.backContainer {
+  text-align: center;
+  margin-top: 25px;
+}
+
+.btnBack {
+  background-color: #d4af37;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btnBack:hover {
+  background-color: #b8962d;
+  transform: scale(1.05);
+}
+
+/* ✅ الإشعار فوق اليمين (duplicate cleaned earlier) */
+.notification {
+  position: fixed;
+  top: 25px;
+  right: 25px;
+  width: 300px;
+  background: #fff;
+  padding: 14px 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  font-weight: 600;
+  color: #333;
+  z-index: 9999;
+  border-right: 6px solid transparent;
+  overflow: hidden;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.success {
+  border-right-color: #22c55e;
+}
+.warning {
+  border-right-color: #f59e0b;
+}
+.error {
+  border-right-color: #dc2626;
+}
+
+.notification::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background-color: #facc15;
+  animation: progress 3s linear forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+/* حاوية الخصومات */
+.discountsBox {
+  background: #fffbea;
+  border: 1px solid #facc15;
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  font-size: 15px;
+}
+
+/* كل عنصر خصم (label + select) */
+.discountSelect {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 180px; /* لتوحيد حجم الحقول */
+  flex: 1 1 180px;
+}
+
+/* نص الـ label */
+.discountSelect label {
+  font-weight: 600;
+  color: #2c3a5f;
+  margin-right: 20px;
+}
+
+/* الـ select */
+.discountSelect select {
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: white;
+  color: #2c3a5f;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.discountSelect select:focus {
+  outline: none;
+  border-color: #facc15;
+  box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.2);
+  background-color: #fffef0;
+}
+
+/* ============================
+   Documents section enhancements
+   ============================ */
+
+/* Table improvements: sticky header, subtle row hover */
+.docsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+}
+
+.docsTable thead th {
+  background: #f8f9fb;
+  font-weight: 700;
+  color: #1f2937;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  text-align: right;
+}
+
+.docsTable tbody tr {
+  transition: background-color 0.15s, transform 0.06s;
+}
+
+.docsTable tbody tr:hover {
+  background: #fcfdfd;
+  transform: translateY(-1px);
+}
+
+.docsTable th,
+.docsTable td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #eef2f6;
+  vertical-align: middle;
+}
+
+/* Small secondary text for size/date */
+.docMeta {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 6px;
+}
+
+/* Actions column: group view & download buttons */
+.docActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-start; /* visually left side for actions inside RTL container */
+}
+
+/* Link button for preview/download */
+.docLinkButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #ffffff;
+  border: 1px solid #e6e9ee;
+  color: #2c3a5f;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 13px;
+  transition: background-color 0.15s, transform 0.08s;
+}
+
+.docLinkButton:hover {
+  background: #f8fafc;
+  transform: translateY(-1px);
+}
+
+/* Badge for mime/type or file status */
+.docBadge {
+  display: inline-block;
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #1e3a8a;
+  margin-left: 8px;
+}
+
+/* Inline thumbnail for image previews (constrained) */
+.docImagePreview {
+  max-width: 180px;
+  max-height: 120px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e6eef7;
+  display: block;
+  margin-top: 8px;
+}
+
+/* When file url is not available */
+.noLink {
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 820px) {
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+  .discountSelect {
+    min-width: 100%;
+    flex: 1 1 100%;
+  }
+  .docsTable th, .docsTable td {
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+  .docImagePreview {
+    max-width: 140px;
+    max-height: 100px;
+  }
+}
+
+/* Accessibility: focus outlines for keyboard users */
+.docLinkButton:focus,
+.btnApprove:focus,
+.btnReject:focus,
+.btnBack:focus {
+  outline: 3px solid rgba(250,204,21,0.25);
+  outline-offset: 2px;
+}
+
+/* subtle helper text below docs table */
+.docsNote {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 8px;
+}

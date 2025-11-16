@@ -1,0 +1,55 @@
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+  margin: 24px 0;
+  direction: rtl;
+}
+
+.statCard {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  padding: 20px;
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.statCard:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.statContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.statLabel {
+  font-size: 15px;
+  color: #6B7280;
+  margin-bottom: 6px;
+}
+
+.statValue {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2C3A5F;
+}
+
+.statIcon {
+  padding: 14px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ألوان مختلفة لكل نوع */
+.statTotal { background-color: #DBEAFE; color: #1E40AF; }
+.statPending { background-color: #FEF3C7; color: #B45309; }
+.statReview { background-color: #FED7AA; color: #C2410C; }
+.statApproved { background-color: #D1FAE5; color: #047857; }
+.statRejected {
+  background-color: #f87171; /* red tone */
+  color: white;
+}

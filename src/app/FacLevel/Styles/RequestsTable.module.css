@@ -1,0 +1,230 @@
+.tableSection {
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  padding: 24px;
+  overflow-x: auto;
+  direction: rtl;
+}
+
+.tableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.tableTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #2c3a5f;
+}
+
+.tableTitle h3 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.tableSubtitle {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.requestsTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.requestsTable th,
+.requestsTable td {
+  text-align: center;
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+
+.requestsTable th {
+  background-color: #f9fafb;
+  color: #374151;
+  font-weight: 600;
+}
+
+.requestsTable tr:hover {
+  background-color: #fff8e7;
+}
+
+.btnDetails {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #d4af37;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btnDetails:hover {
+  background-color: #b99728;
+}
+
+/* حالات الطلب */
+.statusBadge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.statusInitial {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.statusFinal {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.statusRejected {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.statusReceived {
+  background-color: #e0f2fe;
+  color: #075985;
+}
+.statusPending {
+  background-color: #f6c90e;
+  color: #000;
+}
+
+/* ====== Footer Pagination ====== */
+.tableFooter {
+  margin-top: 12px;
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fafafa;
+  border-top: 1px solid #ddd;
+  border-radius: 0 0 8px 8px;
+  font-size: 14px;
+  color: #2c3a5f;
+  
+}
+
+.footerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  
+}
+
+.rowsSelect {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 13px;
+  background: white;
+  outline: none;
+  color: #2c3a5f;
+}
+
+.paginationButtons {
+  display: flex;
+  gap: 5px;
+  
+}
+
+.paginationButtons button {
+  background: #f1f1f1;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 8px;
+  cursor: pointer;
+  transition: 0.2s;
+  color: #2c3a5f;
+}
+
+.paginationButtons button:hover {
+  background: #ddd;
+}
+
+.paginationButtons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.filtersHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: #2c3a5f;
+}
+
+.filtersContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.filtersSection {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.searchWrapper {
+  position: relative;
+  flex: 1;
+  min-width: 250px;
+}
+
+.searchIcon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #aaa;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 8px 35px 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  outline: none;
+}
+
+.searchInput:focus {
+  border-color: #d4af37;
+}
+
+.filterSelect {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 8px;
+  background: white;
+  outline: none;
+  color: #2c3a5f;
+}
+
+
+
+

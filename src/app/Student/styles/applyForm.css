@@ -36,7 +36,7 @@
 }
 
 .apply-title {
-  color: #27285d;
+  color: #2C3A5F;
   font-size: 20px;
   margin-bottom: 8px;
   font-weight: 600;
@@ -51,7 +51,7 @@
 /* Buttons */
 .apply-btn {
   width: 100%;
-  background-color: #27285d;
+  background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -62,7 +62,7 @@
 }
 
 .apply-btn:hover {
-  background-color: #1f204d;
+  background-color: #2C3A5F;
 }
 
 .back-btn {
@@ -95,7 +95,7 @@
 }
 
 .form-group label {
-  color: #27285d;
+  color: #2C3A5F;
   font-weight: 500;
   font-size: 15px;
 }
@@ -107,11 +107,12 @@
   padding: 10px;
   font-size: 15px;
   outline: none;
+  color: #2C3A5F;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
-  border-color: #27285d;
+  border-color: #2C3A5F;
   box-shadow: 0 0 0 2px rgba(39, 40, 93, 0.15);
 }
 
@@ -131,7 +132,7 @@
 }
 
 .form-title {
-  color: #27285d;
+  color: #2C3A5F;
   font-size: 22px;
   font-weight: 700;
   margin-bottom: 25px;
@@ -139,7 +140,7 @@
 }
 
 .section-title {
-  color: #27285d;
+  color: #2C3A5F;
   font-size: 18px;
   font-weight: 600;
   margin: 25px 0 15px;
@@ -175,7 +176,7 @@
 .apply-form input:focus,
 .apply-form textarea:focus,
 .apply-form select:focus {
-  border-color: #27285d;
+  border-color: #2C3A5F;
   box-shadow: 0 0 4px rgba(39, 40, 93, 0.2);
 }
 
@@ -205,7 +206,7 @@ textarea {
 }
 
 .submit-btn {
-  background: #27285d;
+  background: #2C3A5F;
   color: #fff;
   border: none;
   padding: 12px 30px;
@@ -216,7 +217,7 @@ textarea {
 }
 
 .submit-btn:hover {
-  background: #1f204d;
+  background: #2C3A5F;
 }
 
 /* Responsive */
@@ -240,7 +241,7 @@ textarea {
 }
 
 .upload-title {
-  color: #27285d;
+  color: #2C3A5F;
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 25px;
@@ -301,11 +302,11 @@ textarea {
 /* Upload button */
 .upload-btn {
   background: #fff;
-  border: 1px dashed #27285d;
+  border: 1px dashed #2C3A5F;
   border-radius: 10px;
   padding: 10px;
   width: 100%;
-  color: #27285d;
+  color: #2C3A5F;
   font-weight: 500;
   display: flex;
   align-items: center;
@@ -316,7 +317,7 @@ textarea {
 }
 
 .upload-btn:hover {
-  background: #27285d;
+  background: #2C3A5F;
   color: #fff;
 }
 
@@ -348,10 +349,36 @@ textarea {
 }
 
 .submit-btn {
-  background: #27285d;
+  background: #2C3A5F;
   color: #fff;
 }
 
 .submit-btn:hover {
-  background: #1f204d;
+  background: #B38E19;
 } 
+.form-header {
+  text-align: center;
+  margin-bottom: 25px;
+  padding: 15px 20px;
+  background: linear-gradient(90deg, #f9fafc 0%, #eef2f8 100%);
+  border: 1px solid #d8e1ee;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.main-title {
+  color: #2C3A5F;
+  font-size: 1.6rem;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.subtitle {
+  color: #555c7a;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0;
+}
+.subtitle strong {
+  color: #c0392b;
+}

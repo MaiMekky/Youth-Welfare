@@ -1,0 +1,52 @@
+/* Footer.css */
+.footer {
+  background-color: #1e2a5a;
+  color: #e5e7eb;
+  width: 100%;
+  padding: 20px 0;
+  font-size: 0.95rem;
+  margin-top: 40px;
+}
+
+.footerContainer {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  direction: rtl;
+}
+
+.footerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  text-align: right;
+}
+
+.footerLogo {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.footerText {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.footerRight {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.footerRight p {
+  margin: 0;
+  line-height: 1.5;
+}

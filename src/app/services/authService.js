@@ -3,16 +3,10 @@ import { saveTokens } from "./tokenService";
 
 export const loginUser = async (email, password) => {
   try {
-    const res = await api.post("/login/", {
-      email,
-      password,
-    });
-
+    const res = await api.post("/auth/login/", { email, password });
     const { access, refresh, role } = res.data;
 
-    // Save tokens
     saveTokens(access, refresh);
-
     return { success: true, role };
   } catch (error) {
     return {
@@ -25,4 +19,5 @@ export const loginUser = async (email, password) => {
 export const logoutUser = () => {
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
+  window.location.href = "/login";
 };

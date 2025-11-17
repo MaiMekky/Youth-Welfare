@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import logo from "@/app/assets/logo1.png";
+import logo from "../assets/logo1.png";
 import styles from "../Styles/components/LoginPage.module.css";
 interface LoginPageProps {
   onClose: () => void;
@@ -56,23 +56,43 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
 
     // data = { token: "JWT_TOKEN", role: "super_admin" }
 
+
+    
+    console.log(data)
     // حفظ التوكن في localStorage
      localStorage.setItem('access', data.access);
     localStorage.setItem('refresh', data.refresh);
     localStorage.setItem('user_type', data.user_type);
-    localStorage.setItem('admin_id', data.admin_id.toString());
+    if (data.user_type === "student") {
+      localStorage.setItem('student_id', data.student_id.toString());
+     }else { 
+      localStorage.setItem('admin_id', data.admin_id.toString());
+     }
     localStorage.setItem('role', data.role);
     localStorage.setItem('name', data.name);
 
+    console.log("bruh")
+  // توجيه حسب الدور
+   if (data.user_type === "admin") {
+      if (data.role === "مشرف النظام") {
+        console.log("after")
+        router.push("/SuperAdmin");
+      } else if(data.role === "مدير ادارة") { 
+        router.push("/FacLevel");
+      }
+      else if(data.role === "مسؤول كلية") { 
+        router.push("/FacLevel");
+      }
+    }
+    else if (data.user_type === "student") {
+      router.push("/Student");
+    }
 
-    // توجيه حسب الدور
-    // if (data.role === "super_admin") {
-      router.push("/SuperAdmin");
-    // } 
-    // else {
-    //   router.push("/student/home"); // أي صفحة عامة
-    // }
-
+     console.log("after erelksdjfowei")
+    //  else if (data.role === "مدير ادارة") {
+    //   router.push("/");
+    //  }
+    
   } catch (error) {
     console.error(error);
     alert("حدث خطأ أثناء تسجيل الدخول");
@@ -124,6 +144,7 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
       </form>
 
       {/* Signup Link */}
+
       <p className={styles.signupText}>
         ليس لديك حساب؟{" "}
         <span className={styles.linkSwitch} onClick={onSwitchToSignup}>

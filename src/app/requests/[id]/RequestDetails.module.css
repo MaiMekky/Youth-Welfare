@@ -472,3 +472,41 @@
   color: #6b7280;
   margin-top: 8px;
 }
+.docsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin-top: 15px;
+}
+
+.docCard {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.docLinkButton {
+  display: inline-block;
+  margin: 10px 0;
+  padding: 8px 12px;
+  background: #0070f3;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.docLinkButton:hover {
+  background: #0059c8;
+}
+
+.uploadDate {
+  font-size: 0.85rem;
+  color: #777;
+}
+
+.noLink {
+  color: #999;
+  font-size: 0.9rem;
+}

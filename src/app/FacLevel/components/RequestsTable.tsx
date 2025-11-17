@@ -13,8 +13,8 @@ interface RequestsTableProps {
 // ===============================
 // Token Service
 // ===============================
-export const getAccessToken = () => localStorage.getItem("access_token");
-export const getRefreshToken = () => localStorage.getItem("refresh_token");
+export const getAccessToken = () => localStorage.getItem("access");
+export const getRefreshToken = () => localStorage.getItem("refresh");
 export const saveTokens = (access: string, refresh?: string) => {
   localStorage.setItem("access_token", access);
   if (refresh) localStorage.setItem("refresh_token", refresh);

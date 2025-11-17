@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "../Styles/DiscountsSection.module.css";
 import api from "../../../services/api";
+import axios from "axios";
 
 type DiscountsState = {
   books: string[];
@@ -10,8 +11,8 @@ type DiscountsState = {
   full: string[]; // full_discount
 };
 
-const API_GET = "/solidarity/faculty/faculty/discounts/";
-const API_PATCH = "/solidarity/faculty/update_faculty_discounts/";
+const API_GET = "http://127.0.0.1:8000/api/solidarity/faculty/faculty/discounts/";
+const API_PATCH = "http://127.0.0.1:8000/api/solidarity/faculty/update_faculty_discounts/";
 
 export default function DiscountsSection() {
   const [isEditing, setIsEditing] = useState(false);
@@ -59,7 +60,13 @@ export default function DiscountsSection() {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.get(API_GET);
+      const res = await axios({
+        method: 'get',
+        url: API_GET,
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("access")}`
+        }
+      });
       const serverDiscounts = res.data?.discounts ?? res.data;
       const mapped = serverToLocal(serverDiscounts);
       setDiscounts((prev) => ({

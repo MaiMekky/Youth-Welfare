@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import api from "../../../services/api";
 import styles from "./RequestDetails.module.css";
+import axios from "axios";
 
 /*
   What I implemented:
@@ -98,7 +99,12 @@ export default function RequestDetailsPage() {
 
   const fetchApplication = async () => {
     try {
-      const res = await api.get(`/solidarity/faculty/${id}/applications/`);
+      const res = await axios.get(
+        `http://127.0.0.1:8000/api/solidarity/faculty/${id}/applications/`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
+        }
+      );
       const data = res.data;
       let item: Application | null = null;
       if (Array.isArray(data)) {
@@ -124,7 +130,12 @@ export default function RequestDetailsPage() {
 
   const fetchDocuments = async () => {
     try {
-      const res = await api.get(`/solidarity/faculty/${id}/documents/`);
+      const res = await axios.get(
+        `http://127.0.0.1:8000/api/solidarity/faculty/${id}/documents/`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
+        }
+      );
       const data = res.data;
       setDocuments(Array.isArray(data) ? data : data ? [data] : []);
     } catch (err: any) {
@@ -292,7 +303,12 @@ export default function RequestDetailsPage() {
     setApplication((prev) => ({ ...(prev ?? {}), total_discount: String(optimisticTotal) }));
 
     try {
-      const res = await api.patch(`/solidarity/faculty/${id}/assign_discount/`, { discounts: payloadDiscounts });
+      const res = await axios.patch(
+        "http://127.0.0.1:8000/api/solidarity/faculty/${id}/assign_discount/",
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
+        }
+      );
       const data = res.data;
       // merge returned fields into application (server may return updated totals)
       setApplication((prev) => ({ ...(prev ?? {}), ...(data ?? {}) }));
@@ -390,7 +406,7 @@ export default function RequestDetailsPage() {
               </tr>
             </thead>
             <tbody>
-              {documents.map((doc) => (
+              {/* {documents.map((doc) => (
                 <tr key={doc.doc_id}>
                   <td>{doc.doc_type ?? `مستند ${doc.doc_id}`}</td>
                   <td>{formatBytes(doc.file_size)}</td>
@@ -410,7 +426,39 @@ export default function RequestDetailsPage() {
                     )}
                   </td>
                 </tr>
-              ))}
+              ))} */}
+              <section className={styles.section}>
+  <h3>المستندات</h3>
+
+  {documents.length === 0 ? (
+    <p>لا توجد مستندات.</p>
+  ) : (
+    <div className={styles.docsContainer}>
+      {documents.map((doc) => (
+        <div key={doc.doc_id} className={styles.docCard}>
+          <p><strong>{doc.doc_type ?? `مستند ${doc.doc_id}`}</strong></p>
+
+          {doc.file_url ? (
+            <a
+              href={doc.file_url}
+              rel="noopener noreferrer"
+              className={styles.docLinkButton}
+            >
+              افتح الملف
+            </a>
+          ) : (
+            <p className={styles.noLink}>لا يوجد رابط</p>
+          )}
+
+          <p className={styles.uploadDate}>
+            تم الرفع: {doc.uploaded_at ? doc.uploaded_at.slice(0, 10) : "-"}
+          </p>
+        </div>
+      ))}
+    </div>
+  )}
+</section>
+
             </tbody>
           </table>
         )}

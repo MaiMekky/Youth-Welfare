@@ -2,37 +2,53 @@
 import React, { useState, useEffect } from "react";
 import styles from "./FacultyReport.module.css";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
-import axios from "axios"; 
+import axios from "axios";
+
+interface StudentType {
+  name: string;
+  id: number | string;
+  req: number;
+  amount: number;
+  date: string;
+  gpa: string | number;
+}
 
 export default function FacultyReport() {
-  const [students, setStudents] = useState([]);
+  const [students, setStudents] = useState<StudentType[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-
-  const BEARER_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzYzMjQ0ODU5LCJpYXQiOjE3NjMyMzU4NTksImp0aSI6ImMzY2RiYzVkMWY3NjRkODdiZjljZTFhM2FmMmI3ZDE2IiwiYWRtaW5faWQiOjUsInVzZXJfdHlwZSI6ImFkbWluIiwicm9sZSI6Ilx1MDY0NVx1MDYyZlx1MDY0YVx1MDYzMSBcdTA2MjdcdTA2MmZcdTA2MjdcdTA2MzFcdTA2MjkiLCJuYW1lIjoiXHUwNjJlXHUwNjI3XHUwNjQ0XHUwNjJmIFx1MDYyNVx1MDYyOFx1MDYzMVx1MDYyN1x1MDY0N1x1MDY0YVx1MDY0NSJ9.Cx-jqQTOFa3O72SZenYv1vzZqbuGmPmhZUDX7RH66wQ";
+  const [token, setToken] = useState<string | null>(null);
 
   // ================================
-  // 🔥 Fetch data from API
+  // ✅ Load token
+  // ================================
+  useEffect(() => {
+    const t = localStorage.getItem("access");
+    setToken(t);
+  }, []);
+
+  // ================================
+  // 🔥 Fetch Data
   // ================================
   const fetchData = async () => {
+    if (!token) return;
+
     try {
       const res = await axios.get(
-        "http://127.0.0.1:8000/api/solidarity/super_dept/all_applications/",
+        "http://127.0.0.1:8000/api/solidarity/faculty/faculty_approved/",
         {
-          headers: {
-            Authorization: `Bearer ${BEARER_TOKEN}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
-      const data = res.data;
 
-      // 🔁 تحويل بيانات الـ API للشكل اللي الجدول محتاجه
-      const mapped = data.map((item) => ({
+      const apiData = res.data;
+
+      const mapped: StudentType[] = apiData.results.map((item: any) => ({
         name: item.student_name,
-        id: item.student_uid,
+        id: item.student_id,
         req: item.solidarity_id,
         amount: Number(item.total_income) || 0,
-        date: new Date(item.created_at).toISOString().slice(0, 10),
-        gpa: item.family_numbers ?? "-", // مفيش GPA؟ نحط "-"
+        date: "-", // ❌ No date in API so we show placeholder
+        gpa: "-",  // ❌ No GPA returned from API
       }));
 
       setStudents(mapped);
@@ -42,11 +58,11 @@ export default function FacultyReport() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (token) fetchData();
+  }, [token]);
 
   // ================================
-  // 🔍 Search
+  // 🔍 Search Filter
   // ================================
   const filteredStudents = students.filter((s) =>
     [s.name, s.id, String(s.req)]
@@ -70,12 +86,14 @@ export default function FacultyReport() {
   // ================================
   // 📊 Stats
   // ================================
-  const totalAmount = filteredStudents.reduce((acc, s) => acc + (s.amount || 0), 0);
+  const totalAmount = filteredStudents.reduce(
+    (acc, s) => acc + (s.amount || 0),
+    0
+  );
   const totalCount = filteredStudents.length;
 
   return (
     <div className={styles.facultyReportPage}>
-      {/* ===== Header ===== */}
       <header className={styles.facultyHeader}>
         <div>
           <h1>كلية الهندسة - التقرير الشامل</h1>
@@ -83,9 +101,7 @@ export default function FacultyReport() {
         </div>
       </header>
 
-      {/* ===== Main Content ===== */}
       <main className={styles.facultyMain}>
-        {/* ===== Stats Section ===== */}
         <section className={styles.statsSection}>
           <div className={`${styles.statBox} ${styles.yellow}`}>
             <div>
@@ -104,7 +120,6 @@ export default function FacultyReport() {
           </div>
         </section>
 
-        {/* ===== Search Bar ===== */}
         <div className={styles.searchBar}>
           <Search size={18} />
           <input
@@ -118,7 +133,6 @@ export default function FacultyReport() {
           />
         </div>
 
-        {/* ===== Table Section ===== */}
         <div className={styles.tableContainer}>
           <div className={styles.tableHeader}>
             <h2>تفاصيل طلبات الطلاب</h2>
@@ -135,8 +149,6 @@ export default function FacultyReport() {
                 <th>رقم الطالب</th>
                 <th>رقم الطلب</th>
                 <th>(جنيه) المبلغ</th>
-                <th>تاريخ التقديم</th>
-                
               </tr>
             </thead>
 
@@ -147,9 +159,9 @@ export default function FacultyReport() {
                     <td>{s.name}</td>
                     <td>{s.id}</td>
                     <td>{s.req}</td>
-                    <td className={styles.amount}>{s.amount.toLocaleString()}</td>
-                    <td>{s.date}</td>
-                    
+                    <td className={styles.amount}>
+                      {s.amount.toLocaleString()}
+                    </td>
                   </tr>
                 ))
               ) : (
@@ -160,7 +172,6 @@ export default function FacultyReport() {
             </tbody>
           </table>
 
-          {/* ===== Gmail-style Pagination ===== */}
           <div className={styles.gmailFooter}>
             <div className={styles.paginationInfo}>
               عرض <strong>{startIndex + 1}</strong>–
@@ -201,24 +212,6 @@ export default function FacultyReport() {
           </div>
         </div>
       </main>
-
-      {/* ===== Footer ===== */}
-      <footer className={styles.footer}>
-        <div className={styles.left}>
-          <p>
-            إدارة التكافل الاجتماعي | جامعة حلوان<br />
-            قسم خدمات الطلاب - نظام إدارة الدعم المالي
-          </p>
-        </div>
-        <div className={styles.center}>
-          <p>solidarity@helwan.edu.eg :الدعم</p>
-          <p>© 2024 جامعة حلوان. جميع الحقوق محفوظة.</p>
-        </div>
-        <div className={styles.right}>
-          <p>آخر تحديث: ديسمبر 2024</p>
-          <p>الإصدار 1.0.0 - النظام نشط</p>
-        </div>
-      </footer>
     </div>
   );
 }

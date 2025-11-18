@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import api from "../../../services/api";
+import { useParams, useRouter } from "next/navigation";
+import axios from "axios";
 import "./ApplicationDetails.css";
 
-const FIXED_TEST_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzYzMjU5MDc3LCJpYXQiOjE3NjMyNTAwNzcsImp0aSI6ImQyOWQwNWVkZjJjYjQwY2E5OTRlMWRmZjI0NzM3YTdiIiwiYWRtaW5faWQiOjUsInVzZXJfdHlwZSI6ImFkbWluIiwicm9sZSI6Ilx1MDY0NVx1MDYyZlx1MDY0YVx1MDYzMSBcdTA2MjdcdTA2MmZcdTA2MjdcdTA2MzFcdTA2MjkiLCJuYW1lIjoiXHUwNjJlXHUwNjI3XHUwNjQ0XHUwNjJmIFx1MDYyNVx1MDYyOFx1MDYzMVx1MDYyN1x1MDY0N1x1MDY0YVx1MDY0NSJ9.8pPQh8xC-VczhI6qwNGBnZb3q4jXgAnZ4LO7h_QLZDk";
-
-export default function ApplicationDetailsPage({ params }: any) {
-  const { id } = params;
+export default function ApplicationDetailsPage() {
+  const { id } = useParams(); // solidarity_id من URL
+  const router = useRouter();
 
   const [data, setData] = useState<any>(null);
   const [docs, setDocs] = useState<any[]>([]);
@@ -15,104 +15,111 @@ export default function ApplicationDetailsPage({ params }: any) {
   const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    async function fetchAll() {
+    const fetchData = async () => {
+      if (!id) {
+        setErrorMsg("لا يوجد معرف للطلب في الرابط");
+        setLoading(false);
+        return;
+      }
+
       try {
-        setErrorMsg("");
+        const token = localStorage.getItem("access");
+        if (!token) throw new Error("غير مسموح بالوصول: لم يتم العثور على توكن.");
 
-        console.log("PARAM ID:", id);
+        const headers = { Authorization: `Bearer ${token}` };
 
-        const headers = {
-          Authorization: `Bearer ${FIXED_TEST_TOKEN}`,
-        };
-
-        // ==========================
-        // 1) Application Data
-        // ==========================
-        const appRes = await api.get(
-          `/solidarity/super_dept/${id}/applications/`,
+        // ====== جلب بيانات الطلب ======
+        const appRes = await axios.get(
+          `http://127.0.0.1:8000/api/solidarity/super_dept/${id}/applications/`,
           { headers }
         );
-        console.log("Application Response:", appRes.data);
         setData(appRes.data);
 
-        // ==========================
-        // 2) Documents
-        // ==========================
-        const docsRes = await api.get(
-          `/solidarity/super_dept/${id}/documents/`,
+        // ====== جلب المستندات ======
+        const docsRes = await axios.get(
+          `http://127.0.0.1:8000/api/solidarity/super_dept/${id}/documents/`,
           { headers }
         );
-        console.log("Documents Response:", docsRes.data);
         setDocs(docsRes.data);
 
       } catch (err: any) {
-        console.error("Full Error:", err);
-
-        if (err.response) {
-          console.log("ERR STATUS:", err.response.status);
-          console.log("ERR DATA:", err.response.data);
-          if (err.response.status === 403) {
-            setErrorMsg("غير مسموح لك بعرض هذه البيانات (403 Forbidden)");
-          } else if (err.response.status === 404) {
-            setErrorMsg("الطلب غير موجود (404 Not Found)");
-          } else {
-            setErrorMsg(`حدث خطأ أثناء تحميل البيانات: ${err.response.status}`);
-          }
-        } else {
-          setErrorMsg("حدث خطأ أثناء تحميل البيانات");
-        }
-
+        console.error(err);
+        setErrorMsg("حدث خطأ أثناء تحميل البيانات");
       } finally {
         setLoading(false);
       }
-    }
+    };
 
-    fetchAll();
+    fetchData();
   }, [id]);
 
   if (loading) return <p>جاري التحميل...</p>;
   if (errorMsg) return <p style={{ color: "red" }}>{errorMsg}</p>;
-  if (!data) return <p>لا يوجد بيانات</p>;
+  if (!data) return <p>لا توجد بيانات للطلب</p>;
 
   return (
     <div className="details-container">
+      <button onClick={() => router.back()}>← العودة</button>
       <h2 className="page-title">تفصيل طلب دعم مالي</h2>
-      <p className="subtitle">
-        Financial Support Application Details - All required documents
-      </p>
 
-      {/* Documents Section */}
-      <section className="section documents">
-        <h3>رفع المستندات / Documents Upload</h3>
-        <div className="document-list">
-          {docs.length === 0 && <p>لا توجد مستندات</p>}
-          {docs.map((doc) => (
-            <div key={doc.doc_id} className="doc-card">
-              <div className="doc-info">
-                <h4>{doc.doc_type}</h4>
-                <p>File Type: {doc.mime_type}</p>
-                <span className="status required">موجود</span>
-              </div>
-              <a href={doc.file_url} target="_blank" className="view-btn">
-                View
-              </a>
-            </div>
-          ))}
-        </div>
+      {/* البيانات الأساسية */}
+      <section className="section info">
+        <h3>البيانات الأساسية</h3>
+        <ul>
+          <li><strong>رقم التضامن:</strong> {data.solidarity_id}</li>
+          <li><strong>الاسم:</strong> {data.student_name}</li>
+          <li><strong>الرقم الجامعي:</strong> {data.student_uid}</li>
+          <li><strong>الكلية:</strong> {data.faculty_name}</li>
+          <li><strong>الحالة الدراسية:</strong> {data.acd_status}</li>
+          <li><strong>عدد أفراد الأسرة:</strong> {data.family_numbers}</li>
+        </ul>
       </section>
 
-      {/* Personal Info */}
+      {/* المعلومات المالية */}
       <section className="section info">
-        <h3>البيانات الشخصية / Personal Information</h3>
+        <h3>المعلومات المالية</h3>
         <ul>
-          <li><strong>الاسم:</strong> {data.student_name}</li>
-          <li><strong>رقم الطالب:</strong> {data.student_uid}</li>
-          <li><strong>الكلية:</strong> {data.faculty_name}</li>
-          <li><strong>عدد أفراد الأسرة:</strong> {data.family_numbers}</li>
-          <li><strong>الدخل الشهري:</strong> {data.total_income}</li>
-          <li><strong>الهاتف:</strong> {data.m_phone_num || "غير متوفر"}</li>
+          <li><strong>دخل الأب:</strong> {data.father_income}</li>
+          <li><strong>دخل الأم:</strong> {data.mother_income}</li>
+          <li><strong>إجمالي الدخل:</strong> {data.total_income}</li>
+        </ul>
+      </section>
+
+      {/* السكن والاتصال */}
+      <section className="section info">
+        <h3>معلومات الاتصال والسكن</h3>
+        <ul>
+          <li><strong>هاتف الأم:</strong> {data.m_phone_num}</li>
+          <li><strong>هاتف الأب:</strong> {data.f_phone_num}</li>
+          <li><strong>السكن:</strong> {data.housing_status}</li>
           <li><strong>العنوان:</strong> {data.address}</li>
         </ul>
+      </section>
+
+      {/* إضافي */}
+      <section className="section info">
+        <h3>معلومات إضافية</h3>
+        <ul>
+          <li><strong>سبب الطلب:</strong> {data.reason}</li>
+          <li><strong>الإعاقة:</strong> {data.disabilities}</li>
+          <li><strong>الترتيب بين الإخوة:</strong> {data.arrange_of_brothers}</li>
+          <li><strong>الموافقة من:</strong> {data.approved_by}</li>
+          <li><strong>آخر تحديث:</strong> {new Date(data.updated_at).toLocaleString()}</li>
+        </ul>
+      </section>
+
+      {/* المستندات */}
+      <section className="section documents">
+        <h3>المستندات</h3>
+        {docs.length === 0 ? <p>لا توجد مستندات.</p> :
+          <ul>
+            {docs.map((doc) => (
+              <li key={doc.doc_id}>
+                <a href={doc.file_url} target="_blank" rel="noreferrer">{doc.doc_type}</a>
+              </li>
+            ))}
+          </ul>
+        }
       </section>
     </div>
   );

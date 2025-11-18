@@ -157,3 +157,8 @@
     display: block;
   }
 }
+.nav button.active {
+  background-color: #B38E19;
+  color: #fff;
+  font-weight: 700;
+}

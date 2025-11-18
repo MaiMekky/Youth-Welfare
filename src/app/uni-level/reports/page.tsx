@@ -94,11 +94,11 @@ export default function ReportsPage() {
 
         {/* Toolbar */}
         <div className="reports-toolbar">
-          <div className="reports-toolbar-right">
+          {/* <div className="reports-toolbar-right">
             <button className="reports-export-btn">تصدير إكسل</button>
             <button className="reports-print-btn">طباعة الملخص</button>
-          </div>
-          <div className="reports-toolbar-left">
+          </div> */}
+          {/* <div className="reports-toolbar-left">
             <div className="reports-search-box">
               <input
                 type="text"
@@ -119,7 +119,7 @@ export default function ReportsPage() {
               <option>كلية الصيدلة</option>
               <option>كلية الآداب</option>
             </select>
-          </div>
+          </div> */}
         </div>
 
         {/* Summary */}

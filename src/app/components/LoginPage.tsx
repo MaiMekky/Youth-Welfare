@@ -78,7 +78,7 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
         console.log("after")
         router.push("/SuperAdmin");
       } else if(data.role === "مدير ادارة") { 
-        router.push("/FacLevel");
+        router.push("/uni-level");
       }
       else if(data.role === "مسؤول كلية") { 
         router.push("/FacLevel");

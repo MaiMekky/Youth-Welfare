@@ -4,7 +4,21 @@ import styles from "../Styles/Header.module.css";
 import { Home, FileText, User } from "lucide-react";
 import Image from "next/image";
 import logo from "@/app/assets/logo1.png";
+import { useRouter } from "next/navigation";
+
+
+
+
 export default function Header() {
+    const handleLogout = () => {
+    const router = useRouter();
+    // إزالة التوكن من التخزين المحلي
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    // إعادة التوجيه لصفحة تسجيل الدخول
+    router.push("/");
+  };
+
   return (
     <header className={styles.header}>
       <div className={styles.headerContent}>
@@ -27,6 +41,9 @@ export default function Header() {
               <p className={styles.userRole}>كلية الهندسة</p>
             </div>
           </div> */}
+        <button className={styles.logoutBtn} onClick={handleLogout}>
+            تسجيل خروج
+          </button>
         </div>
       </div>
     </header>

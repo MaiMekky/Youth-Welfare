@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import "../styles/Sidebar.css";
 import { Menu, X, FileText, BarChart3, User } from "lucide-react";
 import Image from "next/image";
@@ -9,6 +9,7 @@ import logo from "../../assets/logo1.png";
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleReportsClick = () => {
     router.push("/uni-level/reports");
@@ -42,7 +43,6 @@ export default function Sidebar() {
           <h2>النظام الإداري</h2>
           <p>إدارة التكافل الاجتماعي</p>
           <div className="headerIcon">
-            
             <Image src={logo} alt="logo" className="headerLogo" width={50} height={50} />
           </div>
           <button className="closeBtn" onClick={() => setIsOpen(false)}>
@@ -61,11 +61,18 @@ export default function Sidebar() {
         </div>
 
         <nav className="nav">
-          <button className="active" onClick={handleReportsClick}>
+          <button
+            className={pathname === "/uni-level/reports" ? "active" : ""}
+            onClick={handleReportsClick}
+          >
             <BarChart3 size={18} />
             <span>تقارير الكليات</span>
           </button>
-          <button onClick={handleAllApplicationsClick}>
+
+          <button
+            className={pathname === "/uni-level" ? "active" : ""}
+            onClick={handleAllApplicationsClick}
+          >
             <FileText size={18} />
             <span>إدارة الطلبات</span>
           </button>

@@ -2,42 +2,58 @@
 import React, { useEffect, useState } from "react";
 import "../styles/ApplicationsTable.css";
 import { useRouter } from "next/navigation";
-import api from "../../services/api"; // لو عندك api.js فيه axios instance
 
 interface Application {
-  id: string;
+  id: number;
   requestNumber: string;
   studentName: string;
-  department?: string;
   college: string;
   amount: string;
   date: string;
   status: string;
 }
-
-export default function ApplicationsTable() {
+interface ApplicationsTableProps {
+  onDataLoaded: (apps: Application[]) => void;
+}
+export default  function ApplicationsTable({ onDataLoaded }: ApplicationsTableProps) {
   const router = useRouter();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+ useEffect(() => {
     const fetchApplications = async () => {
       try {
-        const res = await api.get("/solidarity/super_dept/all_applications/");
-        // Map API response to table format
-        const mappedApps: Application[] = res.data.map((app: any, index: number) => ({
-          id: app.solidarity_id || index + 1,
-          requestNumber: app.student_uid || "N/A",
-          studentName: app.student_name || "N/A",
-          department: app.faculty_name || "N/A",
-          college: app.faculty_name || "N/A",
-          amount: app.total_income || "0",
-          date: app.created_at ? new Date(app.created_at).toLocaleDateString() : "-",
-          status: app.req_status || "-",
+        const token = localStorage.getItem("access");
+        if (!token) return;
+
+        const res = await fetch(
+          "http://127.0.0.1:8000/api/solidarity/super_dept/all_applications/",
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await res.json();
+        const mappedApps: Application[] = data.map((app: any) => ({
+          id: app.solidarity_id,
+          studentName: app.student_name,
+          requestNumber: app.student_uid,
+          college: app.faculty_name,
+          amount: app.total_income,
+          date: app.created_at
+            ? new Date(app.created_at).toLocaleDateString()
+            : "-",
+          status: app.req_status,
         }));
+
         setApplications(mappedApps);
+        onDataLoaded(mappedApps); // 🔥 بعتي الداتا للصفحة
+
       } catch (err) {
-        console.error("Error fetching applications:", err);
+        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -46,8 +62,9 @@ export default function ApplicationsTable() {
     fetchApplications();
   }, []);
 
-  const handleNavigate = (id: string) => {
-    router.push(`/uni-level/details/${id}`); // pass id if needed
+  const handleNavigate = (app: Application) => {
+    localStorage.setItem("selectedApplication", JSON.stringify(app));
+    router.push(`/uni-level/details/${app.id}`);
   };
 
   if (loading) return <p>جاري التحميل...</p>;
@@ -55,8 +72,8 @@ export default function ApplicationsTable() {
   return (
     <div className="table-wrapper">
       <div className="table-actions">
-        <button className="print-btn">🖨️ طباعة</button>
-        <button className="export-btn">↓ تصدير</button>
+        <button className="print-btn">طباعة</button>
+        <button className="export-btn">تصدير</button>
       </div>
 
       <div className="table-container">
@@ -85,7 +102,7 @@ export default function ApplicationsTable() {
                 <td className="amount">{app.amount}</td>
                 <td>{app.date}</td>
                 <td>
-                  <button className="details" onClick={() => handleNavigate(app.id)}>
+                  <button className="details" onClick={() => handleNavigate(app)}>
                     التفاصيل
                   </button>
                 </td>

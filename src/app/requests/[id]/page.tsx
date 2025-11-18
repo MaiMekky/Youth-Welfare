@@ -482,11 +482,11 @@ export default function RequestDetailsPage() {
           <div className={styles.discountSelect}>
             <label>خصم مصاريف الانتساب:</label>
             <select 
-              value={selectedDiscounts.reg_discount} 
-              onChange={(e) => handleDiscountChange("reg_discount", e.target.value)}
+              value={selectedDiscounts.aff_discount} 
+              onChange={(e) => handleDiscountChange("aff_discount", e.target.value)}
             >
               <option value="none">لا يوجد</option>
-              {availableDiscounts.reg_discount.map((item, index) => ( 
+              {availableDiscounts.aff_discount.map((item, index) => ( 
                 <option key={index} value={item}>{item}</option>
               ))}
             </select>
@@ -495,11 +495,11 @@ export default function RequestDetailsPage() {
           <div className={styles.discountSelect}>
             <label>خصم مصاريف الانتظام:</label>
             <select 
-              value={selectedDiscounts.aff_discount} 
-              onChange={(e) => handleDiscountChange("aff_discount", e.target.value)}
+              value={selectedDiscounts.reg_discount} 
+              onChange={(e) => handleDiscountChange("reg_discount", e.target.value)}
             >
               <option value="none">لا يوجد</option>
-              {availableDiscounts.aff_discount.map((item, index) => ( 
+              {availableDiscounts.reg_discount.map((item, index) => ( 
                 <option key={index} value={item}>{item}</option>
               ))}
             </select>

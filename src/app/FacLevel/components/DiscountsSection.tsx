@@ -103,12 +103,6 @@ export default function DiscountsSection() {
     });
   };
 
-  const attemptSave = async (method: "patch" | "put", payload: any) => {
-    // returns response or throws
-    if (method === "patch") return api.patch(API_PATCH, payload);
-    return api.put(API_PATCH, payload);
-  };
-
   const handleSave = async () => {
     setSaving(true);
     setError(null);
@@ -120,17 +114,17 @@ export default function DiscountsSection() {
       // Try PATCH first
       let res;
       try {
-        res = await attemptSave("patch", payload);
+        res = await axios({
+          method: 'patch',
+          url: API_PATCH,
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem("access")}`
+          },
+          data: payload
+        });
+
       } catch (err: any) {
-        // If PATCH not allowed or not found, try PUT as fallback
         const status = err?.response?.status;
-        console.warn("PATCH failed:", status, err?.response?.data ?? err?.message);
-        if (status === 404 || status === 405) {
-          console.log("Trying PUT fallback...");
-          res = await attemptSave("put", payload);
-        } else {
-          throw err;
-        }
       }
 
       // If we reach here, request succeeded

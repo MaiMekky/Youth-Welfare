@@ -56,6 +56,20 @@ type DocumentItem = {
   uploaded_at?: string | null;
 };
 
+type Discounts = {
+  aff_discount: number[];
+  reg_discount: number[];
+  bk_discount: number[];
+  full_discount: number[];
+};
+
+type SelectedDiscounts = {
+  bk_discount: string;
+  reg_discount: string;
+  aff_discount: string;
+  full_discount: string;
+};
+
 export default function RequestDetailsPage() {
   const { id } = useParams(); // faculty id (route param)
   const router = useRouter();
@@ -67,11 +81,12 @@ export default function RequestDetailsPage() {
   const [notification, setNotification] = useState<string | null>(null);
 
   // Discounts as select values ("none" or numeric string)
-  const [discounts, setDiscounts] = useState({
-    books: "none",
-    enrollment: "none",
-    regular: "none",
-    full: "none",
+  const [availableDiscounts, setAvailableDiscounts] = useState<Discounts>({ bk_discount: [], reg_discount: [], aff_discount: [], full_discount: [] });
+  const [selectedDiscounts, setSelectedDiscounts] = useState<SelectedDiscounts>({
+    bk_discount: "none",
+    reg_discount: "none",
+    aff_discount: "none",
+    full_discount: "none"
   });
 
   const baseAmount = 1500;
@@ -91,7 +106,7 @@ export default function RequestDetailsPage() {
   const loadAll = async () => {
     setLoading(true);
     try {
-      await Promise.all([fetchApplication(), fetchDocuments()]);
+      await Promise.all([fetchApplication(), fetchDocuments(), fetchDiscountValues()]);
     } finally {
       setLoading(false);
     }
@@ -142,6 +157,23 @@ export default function RequestDetailsPage() {
       console.error("fetchDocuments error:", err);
       showNotification("فشل في تحميل المستندات", "error");
       setDocuments([]);
+    }
+  };
+
+  const fetchDiscountValues = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8000/api/solidarity/faculty/faculty/discounts/`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
+        }
+      );
+      const data = res.data;
+      setAvailableDiscounts(data.discounts || { bk_discount: [], reg_discount: [], aff_discount: [], full_discount: [] });
+    } catch (err: any) {
+      console.error("fetchDiscountValues error:", err);
+      showNotification("فشل في تحميل discounts", "error");
+      setAvailableDiscounts({ bk_discount: [], reg_discount: [], aff_discount: [], full_discount: [] });
     }
   };
 
@@ -231,21 +263,21 @@ export default function RequestDetailsPage() {
       const v = Number(application.total_discount);
       return isNaN(v) ? baseAmount : v;
     }
-    if (discounts.full !== "none") return Number(discounts.full) || baseAmount;
+    if (selectedDiscounts.full_discount !== "none") return Number(selectedDiscounts.full_discount) || baseAmount;
     let total = 0;
-    total += discounts.books !== "none" ? Number(discounts.books) || 0 : 0;
-    total += discounts.enrollment !== "none" ? Number(discounts.enrollment) || 0 : 0;
-    total += discounts.regular !== "none" ? Number(discounts.regular) || 0 : 0;
+    total += selectedDiscounts.bk_discount !== "none" ? Number(selectedDiscounts.bk_discount) || 0 : 0;
+    total += selectedDiscounts.reg_discount !== "none" ? Number(selectedDiscounts.reg_discount) || 0 : 0;
+    total += selectedDiscounts.aff_discount !== "none" ? Number(selectedDiscounts.aff_discount) || 0 : 0;
     return total;
   };
 
-  const handleDiscountChange = (field: "books" | "enrollment" | "regular" | "full", value: string) => {
-    setDiscounts((prev) => {
-      if (field === "full" && value !== "none") {
-        return { books: "none", enrollment: "none", regular: "none", full: value };
+  const handleDiscountChange = (field: keyof SelectedDiscounts, value: string) => {
+    setSelectedDiscounts((prev) => {
+      if (field === "full_discount" && value !== "none") {
+        return { bk_discount: "none", reg_discount: "none", aff_discount: "none", full_discount: value };
       }
-      if (field !== "full" && prev.full !== "none" && value !== "none") {
-        return { ...prev, [field]: value, full: "none" };
+      if (field !== "full_discount" && prev.full_discount !== "none" && value !== "none") {
+        return { ...prev, [field]: value, full_discount: "none" };
       }
       return { ...prev, [field]: value };
     });
@@ -268,10 +300,10 @@ export default function RequestDetailsPage() {
   */
   const DISCOUNT_TYPE_MAP: Record<string, string> = {
     // adjust these values if backend uses different names
-    books: "books_discount",
-    enrollment: "enrollment_discount",
-    regular: "regular_discount",
-    full: "full_discount",
+    bk_discount: "bk_discount",
+    reg_discount: "reg_discount",
+    aff_discount: "aff_discount",
+    full_discount: "full_discount",
   };
 
   const assignDiscounts = async () => {
@@ -279,10 +311,10 @@ export default function RequestDetailsPage() {
     if (actionLoading) return;
 
     // Build discounts payload from UI selections
-    const payloadDiscounts: { discount_type: string; discount_value: string }[] = [];
+    let payloadDiscounts: any = [];
 
-    (Object.keys(discounts) as Array<keyof typeof discounts>).forEach((key) => {
-      const val = discounts[key];
+    (Object.keys(selectedDiscounts) as Array<keyof SelectedDiscounts>).forEach((key) => {
+      const val = selectedDiscounts[key];
       if (val && val !== "none") {
         payloadDiscounts.push({
           discount_type: DISCOUNT_TYPE_MAP[key],
@@ -299,16 +331,22 @@ export default function RequestDetailsPage() {
     setActionLoading(true);
     const prevApp = application;
     // optimistic: update total_discount and keep breakdown in UI (we don't have server breakdown)
-    const optimisticTotal = payloadDiscounts.reduce((sum, d) => sum + Number(d.discount_value || 0), 0);
+    const optimisticTotal = payloadDiscounts.reduce((sum: number, d: { discount_value: any; }) => sum + Number(d.discount_value || 0), 0);
     setApplication((prev) => ({ ...(prev ?? {}), total_discount: String(optimisticTotal) }));
 
     try {
-      const res = await axios.patch(
-        "http://127.0.0.1:8000/api/solidarity/faculty/${id}/assign_discount/",
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
-        }
-      );
+      // adjusting the structure of the payload
+      const payload = { 
+        "discounts": payloadDiscounts
+      }
+
+      const res = await axios({
+        method: 'patch',
+        url: `http://127.0.0.1:8000/api/solidarity/faculty/${application?.solidarity_id}/assign_discount/`,
+        headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
+        data: payload
+      });
+
       const data = res.data;
       // merge returned fields into application (server may return updated totals)
       setApplication((prev) => ({ ...(prev ?? {}), ...(data ?? {}) }));
@@ -396,71 +434,29 @@ export default function RequestDetailsPage() {
         {documents.length === 0 ? (
           <p>لا توجد مستندات.</p>
         ) : (
-          <table className={styles.docsTable}>
-            <thead>
-              <tr>
-                <th>اسم المستند</th>
-                <th>الحجم</th>
-                <th>تاريخ الرفع</th>
-                <th>رابط / معاينة</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* {documents.map((doc) => (
-                <tr key={doc.doc_id}>
-                  <td>{doc.doc_type ?? `مستند ${doc.doc_id}`}</td>
-                  <td>{formatBytes(doc.file_size)}</td>
-                  <td>{formatDate(doc.uploaded_at)}</td>
-                  <td>
-                    {doc.file_url ? (
-                      <>
-                        <a className={styles.docLinkButton} href={doc.file_url} target="_blank" rel="noreferrer">
-                          عرض / تحميل
-                        </a>
-                        {doc.mime_type && doc.mime_type.startsWith("image/") && (
-                          <img className={styles.docImagePreview} src={doc.file_url ?? ""} alt={doc.doc_type} />
-                        )}
-                      </>
-                    ) : (
-                      <span className={styles.noLink}>لا يوجد رابط</span>
-                    )}
-                  </td>
-                </tr>
-              ))} */}
-              <section className={styles.section}>
-  <h3>المستندات</h3>
+          <div className={styles.docsContainer}>
+            {documents.map((doc) => (
+              <div key={doc.doc_id} className={styles.docCard}>
+                <p><strong>{doc.doc_type ?? `مستند ${doc.doc_id}`}</strong></p>
 
-  {documents.length === 0 ? (
-    <p>لا توجد مستندات.</p>
-  ) : (
-    <div className={styles.docsContainer}>
-      {documents.map((doc) => (
-        <div key={doc.doc_id} className={styles.docCard}>
-          <p><strong>{doc.doc_type ?? `مستند ${doc.doc_id}`}</strong></p>
+                {doc.file_url ? (
+                  <a
+                    href={doc.file_url}
+                    rel="noopener noreferrer"
+                    className={styles.docLinkButton}
+                  >
+                    افتح الملف
+                  </a>
+                ) : (
+                  <p className={styles.noLink}>لا يوجد رابط</p>
+                )}
 
-          {doc.file_url ? (
-            <a
-              href={doc.file_url}
-              rel="noopener noreferrer"
-              className={styles.docLinkButton}
-            >
-              افتح الملف
-            </a>
-          ) : (
-            <p className={styles.noLink}>لا يوجد رابط</p>
-          )}
-
-          <p className={styles.uploadDate}>
-            تم الرفع: {doc.uploaded_at ? doc.uploaded_at.slice(0, 10) : "-"}
-          </p>
-        </div>
-      ))}
-    </div>
-  )}
-</section>
-
-            </tbody>
-          </table>
+                <p className={styles.uploadDate}>
+                  تم الرفع: {doc.uploaded_at ? doc.uploaded_at.slice(0, 10) : "-"}
+                </p>
+              </div>
+            ))}
+          </div>
         )}
         <div className={styles.docsNote}>
           تُعرض المستندات المرفوعة من الطالب هنا. يمكن فتح كل مستند في نافذة جديدة للمعاينة أو التحميل.
@@ -472,47 +468,53 @@ export default function RequestDetailsPage() {
         <div className={styles.discountsBox}>
           <div className={styles.discountSelect}>
             <label>خصم مصاريف الكتب:</label>
-            <select value={discounts.books} onChange={(e) => handleDiscountChange("books", e.target.value)}>
+            <select 
+              value={selectedDiscounts.bk_discount} 
+              onChange={(e) => handleDiscountChange("bk_discount", e.target.value)}
+            >
               <option value="none">لا يوجد</option>
-              <option value="100">100</option>
-              <option value="200">200</option>
-              <option value="300">300</option>
-              <option value="400">400</option>
-              <option value="700">700</option>
+              {availableDiscounts.bk_discount.map((item, index) => ( 
+                <option key={index} value={item}>{item}</option>
+              ))}
             </select>
           </div>
 
           <div className={styles.discountSelect}>
             <label>خصم مصاريف الانتساب:</label>
-            <select value={discounts.enrollment} onChange={(e) => handleDiscountChange("enrollment", e.target.value)}>
+            <select 
+              value={selectedDiscounts.reg_discount} 
+              onChange={(e) => handleDiscountChange("reg_discount", e.target.value)}
+            >
               <option value="none">لا يوجد</option>
-              <option value="100">100</option>
-              <option value="200">200</option>
-              <option value="300">300</option>
-              <option value="400">400</option>
-              <option value="700">700</option>
+              {availableDiscounts.reg_discount.map((item, index) => ( 
+                <option key={index} value={item}>{item}</option>
+              ))}
             </select>
           </div>
 
           <div className={styles.discountSelect}>
             <label>خصم مصاريف الانتظام:</label>
-            <select value={discounts.regular} onChange={(e) => handleDiscountChange("regular", e.target.value)}>
+            <select 
+              value={selectedDiscounts.aff_discount} 
+              onChange={(e) => handleDiscountChange("aff_discount", e.target.value)}
+            >
               <option value="none">لا يوجد</option>
-              <option value="100">100</option>
-              <option value="200">200</option>
-              <option value="300">300</option>
-              <option value="400">400</option>
-              <option value="700">700</option>
+              {availableDiscounts.aff_discount.map((item, index) => ( 
+                <option key={index} value={item}>{item}</option>
+              ))}
             </select>
           </div>
 
           <div className={styles.discountSelect}>
             <label>خصم المصاريف كاملة:</label>
-            <select value={discounts.full} onChange={(e) => handleDiscountChange("full", e.target.value)}>
+            <select 
+              value={selectedDiscounts.full_discount} 
+              onChange={(e) => handleDiscountChange("full_discount", e.target.value)}
+            >
               <option value="none">لا يوجد</option>
-              <option value={baseAmount.toString()}>كامل ({baseAmount})</option>
-              <option value="1200">1200</option>
-              <option value="1400">1400</option>
+              {availableDiscounts.full_discount.map((item, index) => ( 
+                <option key={index} value={item}>{item}</option>
+              ))}
             </select>
           </div>
         </div>
@@ -529,7 +531,12 @@ export default function RequestDetailsPage() {
           <button
             onClick={() => {
               // reset UI selections to none and reload from server if needed
-              setDiscounts({ books: "none", enrollment: "none", regular: "none", full: "none" });
+              setSelectedDiscounts({
+                bk_discount: "none",
+                reg_discount: "none", 
+                aff_discount: "none",
+                full_discount: "none"
+              });
               fetchApplication();
               showNotification("تم إعادة تعيين الاختيارات", "warning");
             }}

@@ -36,9 +36,9 @@ export default function Sidebar() {
       </div>
 
       <nav className={styles.sidebarMenu}>
-        {menuItems.map((item) => (
+        {menuItems.map((item, index) => (
           <Link
-            key={item.href}
+            key={index}
             href={item.href}
             className={`${styles.menuItem} ${
               pathname === item.href ? styles.active : ""

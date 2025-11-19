@@ -54,9 +54,16 @@ export default function StudentDetailsPage() {
           }
         );
 
+        if (!response.ok) { 
+          setDocs([])
+          setLoading(false)
+          return
+        }
+
         const files = await response.json();
         setDocs(files);
         setLoading(false);
+
       } catch (error) {
         console.error("Error fetching documents:", error);
         setLoading(false);
@@ -127,6 +134,8 @@ const handleReject = async () => {
     showNotification("❌ فشل رفض الطالب", "error");
   }
 };
+
+console.log("docs: ", docs)
 
 
   if (loading || !data) return <p className={styles.loading}>جاري التحميل...</p>;

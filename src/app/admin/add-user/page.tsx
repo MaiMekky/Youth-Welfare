@@ -11,6 +11,9 @@ export default function AddUser() {
   const admin_id = searchParams.get("id");
   const isEdit = Boolean(admin_id);
 
+  const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -18,17 +21,9 @@ export default function AddUser() {
     role: '',
     permissions: [] as string[],
     status: true,
-    faculty: '',
+    faculty: '', // This will store faculty ID as string
     departments: [] as string[],
   });
-
-  const facultyMap: { [key: string]: number } = {
-    'كلية الهندسة': 1,
-    'كلية العلوم': 2,
-    'كلية التجارة': 4,
-    'كلية الطب': 3,
-    'كلية التربية': 5,
-  };
 
   const departmentsMap: { [key: string]: number } = {
     'فني و ثقافي': 1,
@@ -47,11 +42,40 @@ export default function AddUser() {
     "super_admin": "مشرف النظام",
   };
 
-  const faculties = Object.keys(facultyMap);
   const departmentsList = Object.keys(departmentsMap);
 
+  // Fetch faculties on component mount
   useEffect(() => {
-    if (isEdit) {
+    const fetchFaculties = async () => {
+      try {
+        const token = localStorage.getItem('access');
+        const response = await fetch('http://localhost:8000/api/solidarity/super_dept/faculties/', {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch faculties');
+        }
+
+        const facultiesData = await response.json();
+        console.log("data: ", facultiesData)
+        setFaculties(facultiesData);
+      } catch (error) {
+        console.error('Error fetching faculties:', error);
+        alert('حدث خطأ في تحميل الكليات');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFaculties();
+  }, []);
+
+  useEffect(() => {
+    if (isEdit && faculties.length > 0) {
       const token = localStorage.getItem('access');
 
       fetch(`http://localhost:8000/api/auth/admin_management/${admin_id}/`, {
@@ -60,6 +84,9 @@ export default function AddUser() {
         .then(res => res.json())
         .then(data => {
           const deptNames = data.dept_name ? data.dept_name.split(', ') : [];
+
+          // Store faculty ID directly (convert to string for consistency with form state)
+          const facultyId = data.faculty ? data.faculty.toString() : '';
 
           setFormData({
             name: data.name,
@@ -73,16 +100,13 @@ export default function AddUser() {
               ...(data.can_delete ? ['D'] : [])
             ],
             status: data.acc_status === 'active',
-            faculty: Object.keys(facultyMap).find(k => facultyMap[k] === data.faculty) || '',
-            departments:
-              data.role === "مدير ادارة"
-                ? [String(data.dept)] // رقم القسم كـ string في حالة مدير إدارة
-                : deptNames, // نصوص الأقسام لمسؤول كلية
+            faculty: facultyId,
+            departments: data.dept_fac_ls
           });
         })
         .catch(err => console.error('Error fetching admin data:', err));
     }
-  }, [admin_id]);
+  }, [admin_id, faculties]); // Added faculties to dependencies
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, checked, type } = e.target;
@@ -95,16 +119,15 @@ export default function AddUser() {
       return;
     }
 
-  if (type === 'checkbox' && name === 'departments') {
-  setFormData(prev => ({
-    ...prev,
-    departments: checked
-      ? [...prev.departments, value]
-      : prev.departments.filter(dep => dep !== value)
-  }));
-  return;
-}
-
+    if (type === 'checkbox' && name === 'departments') {
+      setFormData(prev => ({
+        ...prev,
+        departments: checked
+          ? [...prev.departments, value]
+          : prev.departments.filter(dep => dep !== value)
+      }));
+      return;
+    }
 
     if (type === 'checkbox' && name === 'permissions') {
       setFormData(prev => ({
@@ -135,32 +158,38 @@ export default function AddUser() {
 
       const method = isEdit ? 'PATCH' : 'POST';
 
+      // Convert faculty ID to number (empty string becomes null)
+      const facultyId = formData.faculty ? Number(formData.faculty) : null;
+
+      // Find faculty name by ID for faculty_name field
+      const facultyName = faculties.find(f => f.faculty_id === facultyId)?.name || null;
+
       const payload = {
-       ...(isEdit ? {} : { admin_id: 0 }),
-  name: formData.name,
-  email: formData.email,
-  ...(formData.password && { password: formData.password }),
-  role: roleMap[formData.role] || formData.role,
+        ...(isEdit ? {} : { admin_id: 0 }),
+        name: formData.name,
+        email: formData.email,
+        ...(formData.password && { password: formData.password }),
+        role: roleMap[formData.role] || formData.role,
 
-  faculty: formData.faculty ? facultyMap[formData.faculty] : null,
-  faculty_name: formData.faculty || null,
+        faculty: facultyId, // Send faculty ID directly
+        faculty_name: facultyName,
 
-dept:
-  formData.role === "department_manager"
-    ? Number(formData.departments[0]) 
-    : null,                            
+        dept:
+          formData.role === "department_manager"
+            ? Number(formData.departments[0]) 
+            : null,                            
 
-dept_fac_ls:
-  formData.role === "faculty_admin"
-    ? formData.departments          
-    : [],                              
+        dept_fac_ls:
+          formData.role === "faculty_admin"
+            ? formData.departments          
+            : [],                              
 
-  acc_status: formData.status ? "active" : "inactive",
+        acc_status: formData.status ? "active" : "inactive",
 
-  can_create: formData.permissions.includes("C"),
-  can_read: formData.permissions.includes("R"),
-  can_update: formData.permissions.includes("U"),
-  can_delete: formData.permissions.includes("D"),
+        can_create: formData.permissions.includes("C"),
+        can_read: formData.permissions.includes("R"),
+        can_update: formData.permissions.includes("U"),
+        can_delete: formData.permissions.includes("D"),
       };
 
       const res = await fetch(url, {
@@ -186,6 +215,18 @@ dept_fac_ls:
       alert('حدث خطأ ما.');
     }
   };
+
+  if (loading) {
+    return (
+      <div className={styles.pageWrapper} dir="rtl">
+        <div className={styles.centerWrapper}>
+          <div className={styles.formCard}>
+            <p>جاري تحميل البيانات...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.pageWrapper} dir="rtl">
@@ -254,7 +295,11 @@ dept_fac_ls:
                   onChange={handleChange}
                 >
                   <option value="" hidden>اختر الكلية</option>
-                  {faculties.map(f => <option key={f}>{f}</option>)}
+                  {faculties.map(faculty => (
+                    <option key={faculty.faculty_id} value={faculty.faculty_id.toString()}>
+                      {faculty.name}
+                    </option>
+                  ))}
                 </select>
 
                 <h3 className={styles.sectionTitle}>اختر الأقسام</h3>

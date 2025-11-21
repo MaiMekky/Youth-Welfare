@@ -17,6 +17,14 @@ export default function FacultyReport() {
   const [students, setStudents] = useState<StudentType[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [token, setToken] = useState<string | null>(null);
+  const [userData, setUserData] = useState<any>(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUserData(JSON.parse(storedUser));
+    }
+  }, []);
 
   // ================================
   // ✅ Load token
@@ -96,7 +104,10 @@ export default function FacultyReport() {
     <div className={styles.facultyReportPage}>
       <header className={styles.facultyHeader}>
         <div>
-          <h1>كلية الهندسة - التقرير الشامل</h1>
+          <h1>
+          التقرير الشامل - {userData?.faculty_name || ""}
+        </h1>
+
           <p>Engineering Faculty - Comprehensive Report</p>
         </div>
       </header>

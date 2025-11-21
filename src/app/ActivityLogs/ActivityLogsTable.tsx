@@ -21,6 +21,7 @@ export default function ActivityLogsTable() {
   const [logs, setLogs] = useState<Log[]>([]);
   const [search, setSearch] = useState("");
   const [actionFilter, setActionFilter] = useState("all");
+  const [activityFilter, setActivityFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [logsPerPage, setLogsPerPage] = useState(5);
 
@@ -70,6 +71,7 @@ export default function ActivityLogsTable() {
     what: log.solidarity_id,
     status: log.action.includes("رفض") ? "فشل" : "نجاح",
     statusClass: log.action.includes("رفض") ? "failed" : "success",
+    activityType: log.target_type.includes("تكافل") ? "تكافل" : "أسر", // ✅ تعيين نوع النشاط
   }));
 
   // 🔍 الفلاتر
@@ -81,8 +83,9 @@ export default function ActivityLogsTable() {
 
     const matchesAction =
       actionFilter === "all" || log.action === actionFilter;
-
-    return matchesSearch && matchesAction;
+  const matchesActivity =
+      activityFilter === "all" || log.activityType === activityFilter;
+    return matchesSearch && matchesAction && matchesActivity;
   });
 
   const totalPages = Math.ceil(filteredLogs.length / logsPerPage);
@@ -112,7 +115,12 @@ export default function ActivityLogsTable() {
           <option value="عرض مستندات الطلب">عرض مستندات الطلب</option>
           <option value="عرض بيانات الطلب">عرض بيانات الطلب</option>
         </select>
-
+   {/* ✅ فلتر النشاط الجديد */}
+        <select onChange={(e) => setActivityFilter(e.target.value)}>
+          <option value="all">كل الأنشطة</option>
+          <option value="تكافل">تكافل</option>
+          <option value="أسر">أسر</option>
+        </select>
         <input
           type="text"
           placeholder="ابحث بالاسم أو الإجراء أو الهدف"

@@ -247,10 +247,24 @@ export default function RequestDetailsPage() {
     }
   };
 
-  const handlePreApprove = async () => {
-    await postAction("pre_approve", "received", "تمت الموافقة المبدئية بنجاح");
-  };
+const handlePreApprove = async () => {
+  await postAction("pre_approve", "received", "تمت الموافقة المبدئية بنجاح");
+};
+
   const handleApprove = async () => {
+      // تحقق من وجود خصم
+  const hasDiscount =
+    discounts.full !== "none" ||
+    discounts.books !== "none" ||
+    discounts.enrollment !== "none" ||
+    discounts.regular !== "none" ||
+    (application?.total_discount && Number(application.total_discount) > 0);
+
+  if (!hasDiscount) {
+    showNotification("يجب اختيار نوع خصم أو تطبيق خصم قبل الموافقة المبدئية", "warning");
+    return;
+  }
+
     await postAction("approve", "final", "تمت الموافقة النهائية بنجاح");
   };
   const handleReject = async () => {

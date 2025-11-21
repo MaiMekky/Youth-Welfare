@@ -4,8 +4,11 @@ import { Upload } from "lucide-react";
 import Image from "next/image";
 import "../styles/applyForm.css";
 
+interface ApplicationDetailsFormProps {
+  onSuccess?: () => void;
+}
 
-export default function ApplicationDetailsForm() {
+export default function ApplicationDetailsForm({ onSuccess }: ApplicationDetailsFormProps) {
   const [formData, setFormData] = useState({
     studentName: "",
     nationalId: "",
@@ -125,7 +128,7 @@ formPayload.append("req_type", "financial_aid");
         console.log("Server response:", data);
         alert("✅ تم إرسال الطلب بنجاح");
         setShowSuccess(true);
-        
+        if (onSuccess) onSuccess();
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.error("Submission error:", errorData);

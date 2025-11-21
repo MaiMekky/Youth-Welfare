@@ -88,7 +88,7 @@ export default function RequestDetailsPage() {
     aff_discount: "none",
     full_discount: "none"
   });
-
+const [preApproved, setPreApproved] = useState(false);
   const baseAmount = 1500;
 
   useEffect(() => {
@@ -199,14 +199,12 @@ export default function RequestDetailsPage() {
   };
 
   // Status visibility helpers (adjust if backend uses different status strings)
-  const canPreApprove = (status?: string | null) => {
-    if (!status) return false;
-    return ["pending", "new"].includes(status.toLowerCase());
-  };
-  const canApprove = (status?: string | null) => {
-    if (!status) return false;
-    return ["received", "pre_approved", "pre-approved", "preapprove"].includes(status.toLowerCase());
-  };
+const canPreApprove = (status?: string | null) =>
+  status ? ["pending", "new"].includes(status.toLowerCase()) : false;
+
+const canApprove = (status?: string | null) =>
+  status ? ["received", "pre_approved", "pre-approved"].includes(status.toLowerCase()) : false;
+
   const canReject = (status?: string | null) => {
     if (!status) return true;
     return status.toLowerCase() !== "final" && status.toLowerCase() !== "rejected";
@@ -249,19 +247,19 @@ export default function RequestDetailsPage() {
 
 const handlePreApprove = async () => {
   await postAction("pre_approve", "received", "تمت الموافقة المبدئية بنجاح");
+  setPreApproved(true); 
 };
 
   const handleApprove = async () => {
-      // تحقق من وجود خصم
-  const hasDiscount =
-    discounts.full !== "none" ||
-    discounts.books !== "none" ||
-    discounts.enrollment !== "none" ||
-    discounts.regular !== "none" ||
+ const hasDiscount =
+    selectedDiscounts.full_discount !== "none" ||
+    selectedDiscounts.bk_discount !== "none" ||
+    selectedDiscounts.aff_discount !== "none" ||
+    selectedDiscounts.reg_discount !== "none" ||
     (application?.total_discount && Number(application.total_discount) > 0);
 
   if (!hasDiscount) {
-    showNotification("يجب اختيار نوع خصم أو تطبيق خصم قبل الموافقة المبدئية", "warning");
+    showNotification("يجب اختيار خصم قبل الموافقة النهائية", "warning");
     return;
   }
 
@@ -561,26 +559,27 @@ const handlePreApprove = async () => {
           </button>
         </div>
       </section>
+<div className={styles.actions}>
+  {canPreApprove(application?.req_status) && (
+    <button onClick={handlePreApprove} disabled={actionLoading} className={styles.btnApprove}>
+      {actionLoading ? "جاري..." : "موافقة مبدئية"}
+    </button>
+  )}
 
-      <div className={styles.actions}>
-        {canPreApprove(application?.req_status) && (
-          <button onClick={handlePreApprove} disabled={actionLoading} className={styles.btnApprove}>
-            {actionLoading ? "جاري..." : "موافقة مبدئية"}
-          </button>
-        )}
+  {canApprove(application?.req_status) && (
+    <button onClick={handleApprove} disabled={actionLoading} className={styles.btnApprove}>
+      {actionLoading ? "جاري..." : "قبول"}
+    </button>
+  )}
 
-        {canApprove(application?.req_status) && (
-          <button onClick={handleApprove} disabled={actionLoading} className={styles.btnApprove}>
-            {actionLoading ? "جاري..." : "قبول"}
-          </button>
-        )}
+  {canReject(application?.req_status) && (
+    <button onClick={handleReject} disabled={actionLoading} className={styles.btnReject}>
+      {actionLoading ? "جاري..." : "رفض"}
+    </button>
+  )}
+</div>
 
-        {canReject(application?.req_status) && (
-          <button onClick={handleReject} disabled={actionLoading} className={styles.btnReject}>
-            {actionLoading ? "جاري..." : "رفض"}
-          </button>
-        )}
-      </div>
+
 
       {application?.req_status === "final" && <div className={styles.btnReceived}>✅ تم اعتماد الطلب نهائيًا</div>}
 

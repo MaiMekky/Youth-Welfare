@@ -59,7 +59,20 @@ export default function AddUser() {
       })
         .then(res => res.json())
         .then(data => {
-          const deptNames = data.dept_name ? data.dept_name.split(', ') : [];
+
+ let deptNames: string[] = [];
+
+// لو الداتا Array بالفعل
+if (Array.isArray(data.dept_name)) {
+  deptNames = data.dept_name;
+}
+// لو الداتا string مش منسق كويس، فيه {} أو commas
+else if (typeof data.dept_name === "string") {
+  deptNames = data.dept_name
+    .replace(/[{}]/g, '')   // شيل الأقواس {}
+    .split(',')             // افصل على حسب الفواصل
+    .map(s => s.trim());    // شيل الفراغات
+}
 
           setFormData({
             name: data.name,
@@ -74,10 +87,10 @@ export default function AddUser() {
             ],
             status: data.acc_status === 'active',
             faculty: Object.keys(facultyMap).find(k => facultyMap[k] === data.faculty) || '',
-            departments:
-              data.role === "مدير ادارة"
-                ? [String(data.dept)] // رقم القسم كـ string في حالة مدير إدارة
-                : deptNames, // نصوص الأقسام لمسؤول كلية
+           departments:
+            data.role === "مدير ادارة"
+              ? [String(data.dept)]
+              : deptNames,
           });
         })
         .catch(err => console.error('Error fetching admin data:', err));

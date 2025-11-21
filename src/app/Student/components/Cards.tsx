@@ -34,6 +34,7 @@ export default function Cards(_: Props) {
           padding: 24px;
           box-shadow: 0 6px 18px rgba(12, 38, 86, 0.08);
           box-sizing: border-box;
+          color: var(--text);
         }
 
         .card + .card { margin-top: 20px; }
@@ -59,19 +60,22 @@ export default function Cards(_: Props) {
 
         hr.separator { margin: 20px 0; border: none; border-top: 1px solid #eef2ff; }
 
-        .subtitle { margin: 0 0 8px 0; color: var(--title); }
+        .subtitle { margin: 0 0 8px 0; color: var(--title); font-size: 22px; }
 
         .tracking-row { display:flex; gap:16px; margin-top:8px; align-items:flex-start; flex-wrap:wrap; }
         .box {
           padding:16px;
           border-radius:10px;
-          background:#eef2ff;
+          background:#f8fafc;
           box-sizing:border-box;
+          border: 1px solid #e2e8f0;
         }
-        .request-box { min-width: 320px; flex: 1 1 320px; }
+        .request-box { min-width: 320px; flex: 1 1; }
         .box-title { margin:0 0 6px 0; color: var(--title); }
         .small-list { margin:0; padding-left:18px; color:#334155; }
-
+        .small-list li {
+          margin-bottom: 8px;
+        }
         .note-box{
           margin-top:18px;
           background:#fff7ed;
@@ -79,6 +83,16 @@ export default function Cards(_: Props) {
           padding:12px;
           border-radius:8px;
           color:#663c00;
+           color: #856404;
+      // border: 1px solid #ffeeba;
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 16px;
+      line-height: 1.5;
+      text-align: right;
+    }
         }
 
         /* Conditions card */
@@ -181,6 +195,46 @@ export default function Cards(_: Props) {
           .doc-item { padding:10px; }
           .badge, .badge-muted { padding: 3px 8px; font-size:11px; }
         }
+
+        .instructions-box {
+  margin-top: 18px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px 22px;
+}
+
+.instructions-box h4 {
+  margin: 0 0 14px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.instructions-box ul {
+  margin: 0;
+  padding-left: 22px;
+  color: #334155;
+  line-height: 1.9;
+  font-size: 15px;
+}
+
+.instructions-box ul li {
+  margin-bottom: 12px;
+  position: relative;
+}
+
+.sub-list {
+  margin-top: 8px;
+  padding-left: 18px;
+}
+
+.sub-list li {
+  margin-bottom: 8px;
+  color: #475569;
+}
+
+
       `}</style>
 
       {/* First card: overview */}
@@ -194,7 +248,7 @@ export default function Cards(_: Props) {
           قبل لجنة متخصصة لضمان وصول الدعم لمن يستحقه فعلاً.
         </p>
 
-        <div className="overview-grid">
+        {/* <div className="overview-grid">
           <div className="info-card">
             <h3>أنواع الدعم المتاحة</h3>
             <ul>
@@ -214,44 +268,11 @@ export default function Cards(_: Props) {
               <li>• دعم الطوارئ: حتى 2000 جنيه</li>
             </ul>
           </div>
-        </div>
+        </div> */}
 
         <hr className="separator" />
 
-        <h2 className="subtitle">تتبع طلبك ورقم المرجع</h2>
-
-        <div className="tracking-row">
-          <div className="box" style={{ flex: 1 }}>
-            <h4 className="box-title">مراحل المعالجة:</h4>
-            <ul className="small-list">
-              <li>• تم التقديم: الطلب مستلم بنجاح</li>
-              <li>• قيد المراجعة: يتم دراسة الطلب</li>
-              <li>• النتيجة النهائية: موافقة أو رفض</li>
-            </ul>
-          </div>
-
-          <div className="box request-box">
-            <h4 className="box-title">رقم الطلب:</h4>
-            <p style={{ margin: "8px 0" }}>
-              ستحصل على رقم طلب فريد بصيغة SS-2025-XXX — احتفظ بهذا الرقم للمتابعة والاستعلام.
-            </p>
-
-            <p style={{ marginTop: 8, color: "#475569", fontSize: 13 }}>
-              احتفظ برقم الطلب للمتابعة والاستعلام. يمكنك البحث عن طلبك باستخدام هذا الرقم من
-              خلال قسم "طلباتي" في بوابة الجامعة.
-            </p>
-          </div>
-        </div>
-
-        <div className="note-box">
-          <strong>ملاحظة مهمة:</strong>
-          <span style={{ marginInlineStart: 8 }}>
-            يتم مراجعة جميع الطلبات خلال 7-10 أيام عمل. ستتلقى إشعاراً بالنتيجة عبر البريد
-            الإلكتروني المسجل، كما يمكنك متابعة حالة طلبك في قسم "طلباتي".
-          </span>
-        </div>
       </div>
-
       {/* Conditions card (inserted between overview and documents) */}
       <div className="card">
         <h1>شروط الاستحقاق</h1>
@@ -271,6 +292,10 @@ export default function Cards(_: Props) {
               </svg>
             </div>
           </div>
+      
+       
+
+
 
           <div className="condition-item">
             <div className="condition-content">
@@ -288,7 +313,7 @@ export default function Cards(_: Props) {
           <div className="condition-item">
             <div className="condition-content">
               <div className="condition-title">الدخل الشهري</div>
-              <div className="condition-desc">يجب ألا يتجاوز إجمالي دخل الأسرة 3000 جنيه شهرياً</div>
+              <div className="condition-desc">يجب ألا يتجاوز إجمالي دخل الأسرة 700 جنيه شهرياً لكل  فرد في الاسرة</div>
             </div>
             <div className="condition-icon" aria-hidden>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b3f5c" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
@@ -316,6 +341,28 @@ export default function Cards(_: Props) {
 
       {/* Documents card */}
       <div className="card">
+
+  {/* Important notice */}
+  <div className="note-box">
+  <p>
+    يشترط للتقدم بطلب التكافل أن يتوجه الطالب إلى الكلية لاستلام المستندات اللازمة 
+    لإعداد الأوراق المطلوبة لكي يتمكن من تقديم الطلب.
+  </p>
+    <style jsx>{`
+    .important-notice {
+      // background-color: #fff3cd;
+      color: #856404;
+      // border: 1px solid #ffeeba;
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 16px;
+      line-height: 1.5;
+      text-align: right;
+    }
+  `}</style>
+  </div>
         <h1>المستندات المطلوبة</h1>
         <p className="lead">المستندات اللازمة لتقديم طلب الدعم المالي</p>
 
@@ -421,6 +468,93 @@ export default function Cards(_: Props) {
           </div>
         </div>
       </div>
+       <div className="card">
+         
+<div className="instructions-box">
+  <h4 style={{color : "#2C3A5F"}}>إرشادات التقديم لطلب التكافل الاجتماعي</h4>
+
+  <ul>
+    <li>
+      التوجه إلى الكلية لاستلام المستندات اللازمة لإجراء البحث الاجتماعي.
+    </li>
+
+    <li>
+      التوجه إلى وحدة التضامن الاجتماعي أو مكتب التكافل الأقرب لمحل السكن
+      لإصدار البحث الاجتماعي.
+    </li>
+
+    <li>
+      تجهيز المستندات المطلوبة، وتشمل:
+      <ul className="sub-list">
+        <li>بحث اجتماعي معتمد من وحدة التضامن الاجتماعي.</li>
+        <li>مفردات المرتب أو المعاش أو أي مستند يثبت الدخل.</li>
+        <li>
+          صورة بطاقة الرقم القومي لولي الأمر (أو من يعوله)، ويُفضَّل إرفاق نسخة
+          رقمية عند الحاجة.
+        </li>
+        <li>صورة بطاقة الرقم القومي للطالب.</li>
+        <li>صورة بطاقة تكافل وكرامة (إن وُجدت).</li>
+        <li>
+          في حال كانت البطاقة (تكافل و كرامة) باسم الأم، يجب إرفاق شهادة ميلاد الطالب لإثبات
+          الصلة.
+        </li>
+        <li>الحيازة الزراعية لسكان المناطق الريفية (إن وُجدت).</li>
+      </ul>
+    </li>
+
+    <li>
+      رفع المستندات المطلوبة من خلال صفحة تقديم الطلب، مع إدخال البيانات بدقة
+      والتأكد من صحتها.
+    </li>
+
+    <li>
+      بعد مراجعة المستندات المرفوعة، وفي حال صدور موافقة مبدئية، يتعين على الطالب
+      التوجه إلى الكلية لتسليم المستندات الورقية.
+    </li>
+
+    <li>
+      بعد تسليم المستندات في الكلية، تتم مراجعتها مرة أخرى لإصدار القرار النهائي
+      بالقبول أو الرفض.
+    </li>
+  </ul>
+</div>
+
+        </div>
+        <div className="card">
+        <h2 className="subtitle">تتبع طلبك ورقم المرجع</h2>
+
+    <div className="note-box">
+            <strong>ملاحظة مهمة:</strong>
+            <span style={{ marginInlineStart: 8 }}>
+              يرجى متابعة حالة الطلب بشكل دوري، وفي حالة ظهور الموافقة المبدئية،
+              يتعين على الطالب التوجه إلى الكلية لتسليم الأوراق المطلوبة.
+            </span>
+          </div>
+        <div className="tracking-row">
+          <div className="box" style={{ flex: 1 }}>
+            <h4 className="box-title">مراحل المعالجة:</h4>
+            <ul className="small-list">
+              <li>منتظر: تم استلام الطلب وجار مراجعته من قِبل مسؤول الكلية.</li>
+              <li>موافقة مبدئية: يرجى التوجه إلى الكلية لتسليم الأوراق المطلوبة للمراجعة.</li>
+              <li>النتيجة النهائية: يكون القرار إما مقبول أو مرفوض.</li>
+            </ul>
+          </div>
+
+          <div className="box request-box">
+            <h4 className="box-title">رقم الطلب:</h4>
+            <p style={{ margin: "8px 0" }}>
+              ستحصل على رقم الطلب , احتفظ بهذا الرقم للمتابعة والاستعلام.
+            </p>
+
+            <p style={{ marginTop: 8, color: "#475569", fontSize: 13 }}>
+               يمكنك ايجاد رقم الطلب من خلال قسم
+               "طلباتي".
+            </p>
+          </div>
+       
+        </div>
+        </div>
     </div>
+    
   );
 }

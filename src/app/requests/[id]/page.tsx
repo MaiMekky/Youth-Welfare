@@ -254,10 +254,10 @@ const handlePreApprove = async () => {
   const handleApprove = async () => {
       // تحقق من وجود خصم
   const hasDiscount =
-    discounts.full !== "none" ||
-    discounts.books !== "none" ||
-    discounts.enrollment !== "none" ||
-    discounts.regular !== "none" ||
+    selectedDiscounts.full_discount !== "none" ||
+    selectedDiscounts.bk_discount !== "none" ||
+    selectedDiscounts.aff_discount !== "none" ||
+    selectedDiscounts.reg_discount !== "none" ||
     (application?.total_discount && Number(application.total_discount) > 0);
 
   if (!hasDiscount) {

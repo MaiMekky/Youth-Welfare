@@ -1,17 +1,25 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styles from "../Styles/Header.module.css";
-import { Menu } from "lucide-react";
+import { Menu, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function Header({ toggleSidebar }: { toggleSidebar: () => void }) {
   const router = useRouter();
 
+  const [userData, setUserData] = useState<any>(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUserData(JSON.parse(storedUser));
+    }
+  }, []);
+
   const handleLogout = () => {
-    // إزالة التوكن من التخزين المحلي
     localStorage.removeItem("access");
     localStorage.removeItem("refresh");
-    // إعادة التوجيه لصفحة تسجيل الدخول
+    localStorage.removeItem("user"); // لو عايزة تمسحي بيانات اليوزر كمان
     router.push("/");
   };
 
@@ -29,24 +37,26 @@ export default function Header({ toggleSidebar }: { toggleSidebar: () => void })
           </div>
         </div>
 
-        <div className={styles.controls}>
-          <button className={styles.exportBtn}>
-            <span className={styles.exportIcon}>⬇</span> تصدير البيانات
-          </button>
-
-          <div className={styles.searchBox}>
-            <input
-              type="text"
-              className={styles.searchInput}
-              placeholder="ابحث بالاسم أو الرقم القومي أو كود التكافل..."
-            />
+        {/* بروفايل السوبر أدمن */}
+        <div className={styles.profileBox}>
+          <div className={styles.profileIcon}>
+            <User size={32} />
           </div>
 
-          {/* زر تسجيل الخروج */}
-          <button className={styles.logoutBtn} onClick={handleLogout}>
-            تسجيل خروج
-          </button>
+          <div className={styles.profileInfo}>
+            <span className={styles.profileName}>
+              {userData?.name || "اسم المستخدم"}
+            </span>
+            <span className={styles.profileRole}>
+              {userData?.role || "الدور"}
+            </span>
+          </div>
         </div>
+
+        {/* زر تسجيل الخروج */}
+        <button className={styles.logoutBtn} onClick={handleLogout}>
+          تسجيل خروج
+        </button>
       </div>
     </header>
   );

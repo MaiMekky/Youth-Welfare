@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import styles from "../Styles/Sidbar.module.css";
@@ -9,6 +10,16 @@ export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+
+  const [userData, setUserData] = useState<any>(null);
+
+  // Load user data from localStorage
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUserData(JSON.parse(storedUser));
+    }
+  }, []);
 
   // Close sidebar when clicking outside
   useEffect(() => {
@@ -48,24 +59,19 @@ export default function Sidebar() {
           </button>
         </div>
 
-        <div className={styles.profile}>
-          <User size={28} />
-          <div>
-            <h3>د. أحمد حسن</h3>
-            <p>كلية الهندسة</p>
+        {/* Profile Section */}
+        {userData && (
+          <div className={styles.profile}>
+            <User size={28} />
+            <div>
+              <h3>{userData.name}</h3>
+              <p>{userData.faculty_name}</p>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Navigation */}
         <nav className={styles.nav}>
-          {/* <button
-            onClick={() => handleNavigation("/")}
-            className={pathname === "/" ? styles.active : ""}
-          >
-            <Home size={18} />
-            <span>الصفحة الرئيسية</span>
-          </button> */}
-
           <button
             onClick={() => handleNavigation("/FacultyReport")}
             className={pathname === "/FacultyReport" ? styles.active : ""}

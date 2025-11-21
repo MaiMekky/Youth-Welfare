@@ -27,17 +27,18 @@ export default function FiltersSection({
           />
         </div>
 
-        <select
-          value={selectedFilter}
-          onChange={(e) => setSelectedFilter(e.target.value)}
-          className={styles.filterSelect}
-        >
-          <option value="all">عرض الكل</option>
-          <option value="received">منتظر</option>
-          <option value="review">موافقة مبدئية</option>
-          <option value="approved">مقبول</option>
-          <option value="rejected">مرفوض</option>
-        </select>
+      <select
+  value={selectedFilter}
+  onChange={(e) => setSelectedFilter(e.target.value)}
+  className={styles.filterSelect}
+>
+  <option value="all">عرض الكل</option>
+  <option value="منتظر">منتظر</option>
+  <option value="موافقة مبدئية">موافقة مبدئية</option>
+  <option value="مقبول">مقبول</option>
+  <option value="مرفوض">مرفوض</option>
+</select>
+
       </div>
     </div>
   );

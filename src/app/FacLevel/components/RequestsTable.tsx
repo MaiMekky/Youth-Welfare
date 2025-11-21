@@ -8,6 +8,7 @@ import axios from "axios";
 
 interface RequestsTableProps {
   onDataFetched: (data: any[]) => void;
+   filteredRequests: any[];
 }
 
 // ===============================
@@ -64,16 +65,17 @@ const fetchApplications = async (token: string) => {
 // ===============================
 // RequestsTable Component
 // ===============================
-export default function RequestsTable({ onDataFetched }: RequestsTableProps) {
+export default function RequestsTable({ onDataFetched, filteredRequests }: RequestsTableProps) {
   const router = useRouter();
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  const totalPages = Math.ceil(requests.length / rowsPerPage);
+  // ⚡ استخدام filteredRequests بدل requests للعرض
+  const totalPages = Math.ceil(filteredRequests.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
-  const visibleRequests = requests.slice(startIndex, startIndex + rowsPerPage);
+  const visibleRequests = filteredRequests.slice(startIndex, startIndex + rowsPerPage);
 
   useEffect(() => {
     const loadApplications = async () => {
@@ -147,7 +149,10 @@ export default function RequestsTable({ onDataFetched }: RequestsTableProps) {
           <FileText size={20} />
           <h3>طلبات الدعم المالي</h3>
         </div>
-        <p className={styles.tableSubtitle}>عرض {requests.length} طلب</p>
+      <p className={styles.tableSubtitle}>
+  عرض {filteredRequests.length} {filteredRequests.length === 1 ? "طلب" : "طلبات"}
+</p>
+
       </div>
 
       <div className={styles.tableWrapper}>
@@ -173,9 +178,22 @@ export default function RequestsTable({ onDataFetched }: RequestsTableProps) {
                   <td>{req.date}</td>
                   <td>{req.amount}</td>
                   <td>
-                    <span className={styles.statusBadge}>
-                      {translateStatus(req.status)}
-                    </span>
+                    <span
+                  className={`${styles.statusBadge} ${
+                    req.status === "منتظر"
+                      ? styles.statusWait
+                      : req.status === "موافقة مبدئية"
+                      ? styles.statusReview
+                      : req.status === "مقبول"
+                      ? styles.statusApproved
+                      : req.status === "مرفوض"
+                      ? styles.statusRejected
+                      : ""
+                  }`}
+                >
+                  {translateStatus(req.status)}
+                </span>
+
                   </td>
                   <td>
                     <button
@@ -195,12 +213,9 @@ export default function RequestsTable({ onDataFetched }: RequestsTableProps) {
           </tbody>
         </table>
       </div>
-
-      <div className={styles.tableFooter}>
+ <div className={styles.tableFooter}>
         <div className={styles.footerLeft}>
-          عرض <strong>{startIndex + 1}</strong>–
-          <strong>{Math.min(startIndex + rowsPerPage, requests.length)}</strong> من{" "}
-          <strong>{requests.length}</strong>
+          عرض <strong>{startIndex + 1}</strong>–<strong>{Math.min(startIndex + rowsPerPage, filteredRequests.length)}</strong> من <strong>{filteredRequests.length}</strong>
         </div>
 
         <div className={styles.footerRight}>

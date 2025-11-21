@@ -18,7 +18,7 @@ export default function SummaryCard({ totalRequests, totalAmount }: Props) {
         <div className="value">{totalAmount}</div>
       </div>
 
-      <button className="export-btn">تصدير</button>
+      {/* <button className="export-btn">تصدير</button> */}
     </div>
   );
 }

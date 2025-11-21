@@ -67,8 +67,8 @@ const handleDataLoaded = (apps: Application[]) => {
 
       <div className="applications-container">
         <PageHeader />
-        <Toolbar />
-
+        {/* <Toolbar /> */}
+        
         <SummaryCard
           totalRequests={summaryData.totalRequests}
           totalAmount={summaryData.totalAmount}

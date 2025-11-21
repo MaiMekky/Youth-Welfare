@@ -10,7 +10,30 @@ export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+const [adminInfo, setAdminInfo] = useState({
+    name: "",
+    email: "",
+    role: "",
+  });
 
+  useEffect(() => {
+    // جلب البيانات من الـ localStorage
+    const tokenData = localStorage.getItem("access"); // أو لو خزنتِ كامل الـ JSON في localStorage
+    const userDataString = localStorage.getItem("user"); // لو خزنت الـ JSON كامل باسم userData
+    if (userDataString) {
+      try {
+        const userData = JSON.parse(userDataString);
+
+        setAdminInfo({
+          name: userData.name || "مدير النظام",
+          email: userData.email || "admin@helwan.edu.eg",
+          role: userData.role || "",
+        });
+      } catch (error) {
+        console.error("فشل في قراءة بيانات المدير من localStorage", error);
+      }
+    }
+  }, []);
   const handleReportsClick = () => {
     router.push("/uni-level/reports");
     setIsOpen(false);
@@ -40,8 +63,8 @@ export default function Sidebar() {
 
       <aside id="sidebar" className={`sidebar ${isOpen ? "open" : ""}`}>
         <div className="sidebar-header">
-          <h2>النظام الإداري</h2>
-          <p>إدارة التكافل الاجتماعي</p>
+          <h2>إدارة التكافل الاجتماعي</h2>
+          <p>جامعة حلوان - قسم خدمات الطلاب</p>  
           <div className="headerIcon">
             <Image src={logo} alt="logo" className="headerLogo" width={50} height={50} />
           </div>
@@ -54,12 +77,12 @@ export default function Sidebar() {
           <div className="profile-icon">
             <User size={22} />
           </div>
-          <div>
-            <h3>مدير النظام</h3>
-            <p>admin@helwan.edu.eg</p>
-          </div>
+         <div className="admin-info">
+      <h3>{adminInfo.name}</h3>
+      {adminInfo.role && <p>{adminInfo.role}</p>}
+      {/* <p>{adminInfo.email}</p> */}
+    </div>
         </div>
-
         <nav className="nav">
           <button
             className={pathname === "/uni-level/reports" ? "active" : ""}

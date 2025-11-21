@@ -24,8 +24,8 @@ export default function Header() {
         <div className="headerLeft">
 
           <div className="headerTitle">
-            <h1 className="headerTitleH1">إدارة التكافل الاجتماعي</h1>
-            <p className="headerTitleP">جامعة حلوان - قسم خدمات الطلاب</p>
+            <h1 className="headerTitleH1">النظام الاداري</h1>
+            <p className="headerTitleP">إدارة التكافل الاجتماعي</p>
           </div>
         </div>
 

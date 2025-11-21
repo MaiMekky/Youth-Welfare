@@ -72,37 +72,44 @@
   background-color: #b99728;
 }
 
-/* حالات الطلب */
+/* ========== Status Badges ========== */
+
 .statusBadge {
-  display: inline-block;
   padding: 6px 12px;
-  border-radius: 12px;
+  border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
+  display: inline-block;
+  text-align: center;
+  min-width: 80px;
 }
 
-.statusInitial {
-  background-color: #fef3c7;
-  color: #92400e;
+/* 🟡 منتظر */
+.statusWait {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
 }
 
-.statusFinal {
-  background-color: #d1fae5;
-  color: #065f46;
+/* 🔵 موافقة مبدئية */
+.statusReview {
+  background-color: #cde4ff;
+  color: #0d4c91;
+  border: 1px solid #b5d7ff;
 }
 
+/* 🟢 مقبول */
+.statusApproved {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+/* 🔴 مرفوض */
 .statusRejected {
-  background-color: #fee2e2;
-  color: #991b1b;
-}
-
-.statusReceived {
-  background-color: #e0f2fe;
-  color: #075985;
-}
-.statusPending {
-  background-color: #f6c90e;
-  color: #000;
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
 }
 
 /* ====== Footer Pagination ====== */

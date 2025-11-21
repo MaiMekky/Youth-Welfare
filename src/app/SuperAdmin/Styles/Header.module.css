@@ -2,7 +2,7 @@
   width: 100%;
   background: linear-gradient(180deg, #2c3a5f 0%, #3d4d75 100%);
   color: #fff;
-  padding: 18px 32px;
+  padding: 15px 15px;
   box-shadow: 0 6px 16px rgba(0,0,0,0.25);
   position: sticky;
   top: 0;
@@ -96,4 +96,42 @@
 
 .logoutBtn:hover {
   background-color: #c0392b;
+}
+.profileBox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+  padding: 12px;
+  border-radius: 10px;
+  margin-right: auto;
+}
+
+.profileIcon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.profileName {
+  font-size: 15px;
+  margin: 0;
+  color: #fff;
+  font-weight: 600;
+}
+
+.profileRole {
+  font-size: 13px;
+  margin: 0;
+  color: #d1d5db;
 }

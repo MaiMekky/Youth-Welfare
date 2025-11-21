@@ -1,81 +1,78 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Head from "next/head";
 import Layout from "../Layout";
 import "./Reports.css";
 import { useRouter } from "next/navigation";
 
 interface CollegeReport {
-  id: string;
-  college: string;
-  department: string;
-  manager: string;
-  date: string;
-  totalStudents: number;
-  acceptedStudents: number;
-  totalAmount: string;
-  approved: number;
-  status: string;
+  faculty_id: number;
+  faculty_name: string;
+  total_approved_amount: string;
+  approved_count: number;
+  pending_count: number;
 }
 
 export default function ReportsPage() {
   const router = useRouter();
-  const [reports] = useState<CollegeReport[]>([
-    {
-      id: "1",
-      college: "كلية الهندسة",
-      department: "الهندسة",
-      manager: "د. أحمد حسين",
-      date: "٠٤/٠٦/٧٠",
-      totalStudents: 45,
-      acceptedStudents: 90,
-      totalAmount: "67,500 جنيه",
-      approved: 15,
-      status: "عرض التفاصيل",
-    },
-    {
-      id: "2",
-      college: "كلية الطب",
-      department: "الطب",
-      manager: "د. فاطمة عبد الرحمن",
-      date: "٠٤/٠٦/٧٠",
-      totalStudents: 38,
-      acceptedStudents: 25,
-      totalAmount: "57,000 جنيه",
-      approved: 13,
-      status: "عرض التفاصيل",
-    },
-    {
-      id: "3",
-      college: "كلية الصيدلة",
-      department: "الصيدلة",
-      manager: "د. محمد كاظم",
-      date: "٠٤/٠٦/٧٠",
-      totalStudents: 32,
-      acceptedStudents: 20,
-      totalAmount: "44,800 جنيه",
-      approved: 12,
-      status: "عرض التفاصيل",
-    },
-    {
-      id: "4",
-      college: "كلية الآداب",
-      department: "الآداب",
-      manager: "د. نادين أحمد",
-      date: "٠٤/٠٦/٧٠",
-      totalStudents: 28,
-      acceptedStudents: 18,
-      totalAmount: "36,400 جنيه",
-      approved: 10,
-      status: "عرض التفاصيل",
-    },
-  ]);
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedFilter, setSelectedFilter] = useState("جميع الكليات");
+  const [reports, setReports] = useState<CollegeReport[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [summary, setSummary] = useState({
+    totalRequests: 0,
+    totalAmount: "0 جنيه",
+  });
 
-  const totalRequests = reports.reduce((sum, report) => sum + report.totalStudents, 0);
-  const totalAmount = "205,700 جنيه";
+  // ======================
+  // 🔥 جلب البيانات من الـ API
+  // ======================
+  const fetchReports = async () => {
+    try {
+      setLoading(true);
+
+      const token = localStorage.getItem("access");
+      if (!token) {
+        console.error("لا يوجد توكن");
+        return;
+      }
+
+      const res = await fetch(
+        "http://127.0.0.1:8000/api/solidarity/super_dept/faculty_summary/",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("فشل في جلب البيانات");
+
+      const data = await res.json();
+
+      setReports(data.rows);
+setSummary({
+  totalRequests:
+    (data.totals.total_approved_count ?? 0) +
+    (data.totals.total_pending_count ?? 0),
+
+  totalAmount: `${parseFloat(
+    data.totals.total_approved_amount ?? 0
+  ).toLocaleString("en-US")} جنيه`,
+});
+
+    } catch (error) {
+      console.error(error);
+      alert("حدث خطأ أثناء جلب تقارير الكليات");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReports();
+  }, []);
+
+  if (loading) return <Layout><p>جاري التحميل...</p></Layout>;
 
   return (
     <Layout>
@@ -92,48 +89,20 @@ export default function ReportsPage() {
           </p>
         </div>
 
-        {/* Toolbar */}
-        <div className="reports-toolbar">
-          {/* <div className="reports-toolbar-right">
-            <button className="reports-export-btn">تصدير إكسل</button>
-            <button className="reports-print-btn">طباعة الملخص</button>
-          </div> */}
-          {/* <div className="reports-toolbar-left">
-            <div className="reports-search-box">
-              <input
-                type="text"
-                placeholder="بحث في الكليات..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="reports-search-input"
-              />
-            </div>
-            <select
-              className="reports-filter-select"
-              value={selectedFilter}
-              onChange={(e) => setSelectedFilter(e.target.value)}
-            >
-              <option>جميع الكليات</option>
-              <option>كلية الهندسة</option>
-              <option>كلية الطب</option>
-              <option>كلية الصيدلة</option>
-              <option>كلية الآداب</option>
-            </select>
-          </div> */}
-        </div>
-
         {/* Summary */}
         <div className="reports-summary-card">
           <div className="reports-summary-label">إحصائيات الجامعة</div>
           <div className="reports-summary-stats">
             <div className="reports-stat-item">
-              <span className="reports-stat-value">{totalRequests}</span>
+              <span className="reports-stat-value">{summary.totalRequests}</span>
               <span className="reports-stat-label">إجمالي الطلبات</span>
             </div>
+
             <div className="reports-stat-divider"></div>
+
             <div className="reports-stat-item">
               <span className="reports-stat-value reports-stat-value-amount">
-                {totalAmount}
+                {summary.totalAmount}
               </span>
               <span className="reports-stat-label">إجمالي الميزانية</span>
             </div>
@@ -154,38 +123,27 @@ export default function ReportsPage() {
               <thead>
                 <tr>
                   <th>الكلية</th>
-                  <th>الإداري</th>
-                  <th>التاريخ</th>
-                  <th>الطلاب</th>
-                  <th>المبلغ</th>
-                  <th>معتمد</th>
+                  <th>المعتمد</th>
                   <th>في الانتظار</th>
-                  <th>الإجراءات</th>
+                  <th>إجمالي المبلغ المعتمد</th>
                 </tr>
               </thead>
+
               <tbody>
-                {reports.map((report) => (
-                  <tr key={report.id}>
-                    <td>{report.college}</td>
-                    <td>{report.manager}</td>
-                    <td>{report.date}</td>
-                    <td>{report.totalStudents}</td>
-                    <td>{report.totalAmount}</td>
-                    <td>{report.approved}</td>
-                    <td>{report.acceptedStudents}</td>
+                {reports.map((row) => (
+                  <tr key={row.faculty_id}>
+                    <td>{row.faculty_name}</td>
+                    <td>{row.approved_count}</td>
+                    <td>{row.pending_count}</td>
                     <td>
-                      <button
-                        className="reports-details-btn"
-                        onClick={() => router.push(`/uni-level/reports/${report.id}`)}
-                      >
-                        عرض التفاصيل
-                      </button>
+                      {parseFloat(row.total_approved_amount).toLocaleString("en-US")} جنيه
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+
         </div>
       </div>
     </Layout>

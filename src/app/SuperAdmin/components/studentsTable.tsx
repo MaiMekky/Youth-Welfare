@@ -106,7 +106,7 @@ export default function StudentsTable() {
         setFilters={setFilters}
         onApply={() => fetchApplications(filters)}
       />
-
+    <br />
       <div className={styles.studentsTable}>
         <table>
           <thead>

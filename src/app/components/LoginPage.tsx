@@ -62,7 +62,14 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
     // حفظ التوكن في localStorage
      localStorage.setItem('access', data.access);
     localStorage.setItem('refresh', data.refresh);
-    localStorage.setItem('user_type', data.user_type);
+    // localStorage.setItem('user_type', data.user_type);
+    localStorage.setItem("user", JSON.stringify({
+  name:data.name,
+  role: data.role,
+  faculty_name: data.faculty_name,
+  admin_id:data.admin_id,
+  user_type:data.user_type
+}));
     if (data.user_type === "student") {
       localStorage.setItem('student_id', data.student_id.toString());
      }else { 

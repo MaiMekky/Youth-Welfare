@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import styles from "../Styles/FiltersBar.module.css";
+import styles from "../styles/FiltersBar.module.css"
 
 interface FiltersBarProps {
   filters: any;

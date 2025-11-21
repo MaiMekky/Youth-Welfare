@@ -198,18 +198,20 @@ export default function RequestDetailsPage() {
     }
   };
 
-  // Status visibility helpers (adjust if backend uses different status strings)
+  // UPDATED: Status visibility helpers with Arabic status values
   const canPreApprove = (status?: string | null) => {
     if (!status) return false;
-    return ["pending", "new"].includes(status.toLowerCase());
+    return status === "منتظر"; // Only show for "منتظر" status
   };
+  
   const canApprove = (status?: string | null) => {
     if (!status) return false;
-    return ["received", "pre_approved", "pre-approved", "preapprove"].includes(status.toLowerCase());
+    return status === "موافقة مبدئية"; // Only show for "موافقة مبدئية" status
   };
+  
   const canReject = (status?: string | null) => {
     if (!status) return true;
-    return status.toLowerCase() !== "final" && status.toLowerCase() !== "rejected";
+    return status !== "مقبول" && status !== "مرفوض"; // Hide for final states
   };
 
   // Generic POST action (pre_approve / approve / reject) with optimistic update
@@ -225,7 +227,13 @@ export default function RequestDetailsPage() {
     setApplication((prev) => ({ ...(prev ?? {}), req_status: optimisticStatus }));
 
     try {
-      const res = await api.post(`/solidarity/faculty/${id}/${suffix}/`);
+      const res = await axios.post(
+        `http://localhost:8000/api/solidarity/faculty/${id}/${suffix}/`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
+        }
+      );
       const data = res.data;
       setApplication((prev) => ({ ...(prev ?? {}), ...(data ?? {}) }));
       await fetchDocuments(); // documents may change after verification actions
@@ -247,28 +255,63 @@ export default function RequestDetailsPage() {
     }
   };
 
-const handlePreApprove = async () => {
-  await postAction("pre_approve", "received", "تمت الموافقة المبدئية بنجاح");
-};
-
   const handleApprove = async () => {
-      // تحقق من وجود خصم
-  const hasDiscount =
-    selectedDiscounts.full_discount !== "none" ||
-    selectedDiscounts.bk_discount !== "none" ||
-    selectedDiscounts.aff_discount !== "none" ||
-    selectedDiscounts.reg_discount !== "none" ||
-    (application?.total_discount && Number(application.total_discount) > 0);
+    // تحقق من وجود خصم
+    const hasDiscount =
+      selectedDiscounts.full_discount !== "none" ||
+      selectedDiscounts.bk_discount !== "none" ||
+      selectedDiscounts.aff_discount !== "none" ||
+      selectedDiscounts.reg_discount !== "none" ||
+      (application?.total_discount && Number(application.total_discount) > 0);
 
-  if (!hasDiscount) {
-    showNotification("يجب اختيار نوع خصم أو تطبيق خصم قبل الموافقة المبدئية", "warning");
-    return;
-  }
+    if (!hasDiscount) {
+      showNotification("يجب اختيار نوع خصم أو تطبيق خصم قبل الموافقة النهائية", "warning");
+      return;
+    }
 
-    await postAction("approve", "final", "تمت الموافقة النهائية بنجاح");
+    await postAction("approve", "مقبول", "تمت الموافقة النهائية بنجاح");
   };
+
   const handleReject = async () => {
-    await postAction("reject", "rejected", "تم رفض الطلب بنجاح");
+    await postAction("reject", "مرفوض", "تم رفض الطلب بنجاح");
+  };
+
+  // NEW: Direct initial approval function
+  const handleInitialApproval = async () => {
+    if (!application?.solidarity_id) {
+      showNotification("لا يوجد معرف طلب صالح", "error");
+      return;
+    }
+
+    if (actionLoading) return;
+    
+    setActionLoading(true);
+    try {
+      const response = await axios.post(
+        `http://localhost:8000/api/solidarity/faculty/${application.solidarity_id}/pre_approve/`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
+        }
+      );
+      
+      // Update application state with response data
+      setApplication((prev) => ({ ...(prev ?? {}), ...response.data }));
+      showNotification("تمت الموافقة مبدئية بنجاح", "success");
+      
+      // Refresh documents if needed
+      await fetchDocuments();
+    } catch (err: any) {
+      console.error("Initial approval error:", err);
+      if (err?.response?.data) {
+        const serverMsg = typeof err.response.data === "string" ? err.response.data : JSON.stringify(err.response.data);
+        showNotification(serverMsg, "error");
+      } else {
+        showNotification("فشل في تنفيذ الموافقة مبدئية", "error");
+      }
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   // Discounts UI handling
@@ -297,23 +340,7 @@ const handlePreApprove = async () => {
     });
   };
 
-  /*
-    Assign discounts API (PATCH /api/solidarity/faculty/{id}/assign_discount/)
-    Expected payload (per your example):
-    {
-      "discounts": [
-        { "discount_type": "aff_discount", "discount_value": "" }
-      ]
-    }
-
-    Assumptions & mapping:
-    - The backend expects discount_type strings. I provide a mapping object below where you can adjust the exact strings
-      to match your backend's expected discount_type values.
-    - We will send only the selected discounts (those not "none").
-    - Use PATCH as you stated.
-  */
   const DISCOUNT_TYPE_MAP: Record<string, string> = {
-    // adjust these values if backend uses different names
     bk_discount: "bk_discount",
     reg_discount: "reg_discount",
     aff_discount: "aff_discount",
@@ -563,18 +590,21 @@ const handlePreApprove = async () => {
       </section>
 
       <div className={styles.actions}>
+        {/* NEW: Initial Approval Button - shows for "منتظر" status */}
         {canPreApprove(application?.req_status) && (
-          <button onClick={handlePreApprove} disabled={actionLoading} className={styles.btnApprove}>
+          <button onClick={handleInitialApproval} disabled={actionLoading} className={styles.btnApprove}>
             {actionLoading ? "جاري..." : "موافقة مبدئية"}
           </button>
         )}
 
+        {/* Final approval button - shows for "موافقة مبدئية" status */}
         {canApprove(application?.req_status) && (
           <button onClick={handleApprove} disabled={actionLoading} className={styles.btnApprove}>
-            {actionLoading ? "جاري..." : "قبول"}
+            {actionLoading ? "جاري..." : "موافقة نهائية"}
           </button>
         )}
 
+        {/* Reject button - shows for all statuses except "مقبول" and "مرفوض" */}
         {canReject(application?.req_status) && (
           <button onClick={handleReject} disabled={actionLoading} className={styles.btnReject}>
             {actionLoading ? "جاري..." : "رفض"}
@@ -582,7 +612,9 @@ const handlePreApprove = async () => {
         )}
       </div>
 
-      {application?.req_status === "final" && <div className={styles.btnReceived}>✅ تم اعتماد الطلب نهائيًا</div>}
+      {/* Show final status message */}
+      {application?.req_status === "مقبول" && <div className={styles.btnReceived}>✅ تم اعتماد الطلب نهائيًا</div>}
+      {application?.req_status === "مرفوض" && <div className={styles.btnReceived}>❌ تم رفض الطلب</div>}
 
       <div className={styles.backContainer}>
         <button onClick={() => router.back()} className={styles.btnBack}>

@@ -100,6 +100,43 @@ export default function FacultyReport() {
   );
   const totalCount = filteredStudents.length;
 
+  const handleExport = async () => { 
+    try {
+      const res = await axios.get(
+        `http://127.0.0.1:8000/api/solidarity/faculty/export`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
+          responseType: "blob"
+        }
+      );
+      const blob = new Blob([res.data], { type: 'application/pdf' });
+    
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      const contentDisposition = res.headers['content-disposition'];
+      let filename = 'document.pdf';
+      
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+        if (filenameMatch.length === 2) {
+          filename = filenameMatch[1];
+        }
+      }
+      
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      console.error("coudnt generate pdf, error:", err);
+    }
+  }
+
   return (
     <div className={styles.facultyReportPage}>
       <header className={styles.facultyHeader}>
@@ -148,8 +185,7 @@ export default function FacultyReport() {
           <div className={styles.tableHeader}>
             <h2>تفاصيل طلبات الطلاب</h2>
             <div className={styles.tableButtons}>
-              <button className={styles.printBtn}>🖨️ طباعة</button>
-              <button className={styles.exportBtn}>⬇️ تصدير</button>
+              <button className={styles.exportBtn} onClick={handleExport}>⬇️ تصدير</button>
             </div>
           </div>
 

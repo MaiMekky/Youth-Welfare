@@ -65,3 +65,61 @@
 .saveBtn:hover {
   background-color: #b58f27;
 }
+
+.inputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.discountInput {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.removeBtn {
+  background: #ff4757;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.removeBtn:hover {
+  background: #ff3742;
+}
+
+.addBtn {
+  background: #2ed573;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.addBtn:hover {
+  background: #27c965;
+}
+
+.editableSection {
+  margin-bottom: 16px;
+}
+
+.card h4 {
+  margin-bottom: 12px;
+}

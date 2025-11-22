@@ -10,11 +10,12 @@ export default function Header() {
   const router = useRouter();
 
   const handleLogout = () => {
-    // إزالة التوكن من التخزين المحلي
-    localStorage.removeItem("access");
-    localStorage.removeItem("refresh");
-
-    // إعادة التوجيه لصفحة تسجيل الدخول
+    localStorage.clear();
+      document.cookie = "access=; path=/; max-age=0; SameSite=Lax";
+  document.cookie = "refresh=; path=/; max-age=0; SameSite=Lax";
+  document.cookie = "user_type=; path=/; max-age=0; SameSite=Lax";
+  document.cookie = "roleKey=; path=/; max-age=0; SameSite=Lax";
+  document.cookie = "role=; path=/; max-age=0; SameSite=Lax";
     router.push("/");
   };
 

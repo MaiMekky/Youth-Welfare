@@ -11,12 +11,12 @@ export default function Header() {
 
   const handleLogout = () => {
   
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-
-  
-    localStorage.removeItem("user");
-
+   localStorage.clear();
+  document.cookie = "access=; path=/; max-age=0; SameSite=Lax";
+  document.cookie = "refresh=; path=/; max-age=0; SameSite=Lax";
+  document.cookie = "user_type=; path=/; max-age=0; SameSite=Lax";
+  document.cookie = "roleKey=; path=/; max-age=0; SameSite=Lax";
+  document.cookie = "role=; path=/; max-age=0; SameSite=Lax";
    
     router.push("/");
   };

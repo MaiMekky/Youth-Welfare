@@ -270,10 +270,12 @@ const [preApproved, setPreApproved] = useState(false);
     }
 
     await postAction("approve", "مقبول", "تمت الموافقة النهائية بنجاح");
+    window.location.reload();
   };
 
   const handleReject = async () => {
     await postAction("reject", "مرفوض", "تم رفض الطلب بنجاح");
+    window.location.reload();
   };
 
   // NEW: Direct initial approval function
@@ -311,6 +313,7 @@ const [preApproved, setPreApproved] = useState(false);
       }
     } finally {
       setActionLoading(false);
+      window.location.reload();
     }
   };
 
@@ -504,90 +507,93 @@ const [preApproved, setPreApproved] = useState(false);
         </div>
       </section>
 
-      <section className={styles.section}>
-        <h3>الخصومات المتاحة</h3>
-        <div className={styles.discountsBox}>
-          <div className={styles.discountSelect}>
-            <label>خصم مصاريف الكتب:</label>
-            <select 
-              value={selectedDiscounts.bk_discount} 
-              onChange={(e) => handleDiscountChange("bk_discount", e.target.value)}
-            >
-              <option value="none">لا يوجد</option>
-              {availableDiscounts.bk_discount.map((item, index) => ( 
-                <option key={index} value={item}>{item}</option>
-              ))}
-            </select>
+      { application?.req_status === "موافقة مبدئية" ?
+        <section className={styles.section}>
+          <h3>الخصومات المتاحة</h3>
+          <div className={styles.discountsBox}>
+            <div className={styles.discountSelect}>
+              <label>خصم مصاريف الكتب:</label>
+              <select 
+                value={selectedDiscounts.bk_discount} 
+                onChange={(e) => handleDiscountChange("bk_discount", e.target.value)}
+              >
+                <option value="none">لا يوجد</option>
+                {availableDiscounts.bk_discount.map((item, index) => ( 
+                  <option key={index} value={item}>{item}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className={styles.discountSelect}>
+              <label>خصم مصاريف الانتساب:</label>
+              <select 
+                value={selectedDiscounts.aff_discount} 
+                onChange={(e) => handleDiscountChange("aff_discount", e.target.value)}
+              >
+                <option value="none">لا يوجد</option>
+                {availableDiscounts.aff_discount.map((item, index) => ( 
+                  <option key={index} value={item}>{item}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className={styles.discountSelect}>
+              <label>خصم مصاريف الانتظام:</label>
+              <select 
+                value={selectedDiscounts.reg_discount} 
+                onChange={(e) => handleDiscountChange("reg_discount", e.target.value)}
+              >
+                <option value="none">لا يوجد</option>
+                {availableDiscounts.reg_discount.map((item, index) => ( 
+                  <option key={index} value={item}>{item}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className={styles.discountSelect}>
+              <label>خصم المصاريف كاملة:</label>
+              <select 
+                value={selectedDiscounts.full_discount} 
+                onChange={(e) => handleDiscountChange("full_discount", e.target.value)}
+              >
+                <option value="none">لا يوجد</option>
+                {availableDiscounts.full_discount.map((item, index) => ( 
+                  <option key={index} value={item}>{item}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          <div className={styles.discountSelect}>
-            <label>خصم مصاريف الانتساب:</label>
-            <select 
-              value={selectedDiscounts.aff_discount} 
-              onChange={(e) => handleDiscountChange("aff_discount", e.target.value)}
+          <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 12 }}>
+            <button
+              onClick={assignDiscounts}
+              disabled={actionLoading}
+              className={styles.btnApprove}
             >
-              <option value="none">لا يوجد</option>
-              {availableDiscounts.aff_discount.map((item, index) => ( 
-                <option key={index} value={item}>{item}</option>
-              ))}
-            </select>
-          </div>
+              {actionLoading ? "جاري الحفظ..." : "حفظ الخصومات"}
+            </button>
 
-          <div className={styles.discountSelect}>
-            <label>خصم مصاريف الانتظام:</label>
-            <select 
-              value={selectedDiscounts.reg_discount} 
-              onChange={(e) => handleDiscountChange("reg_discount", e.target.value)}
+            <button
+              onClick={() => {
+                // reset UI selections to none and reload from server if needed
+                setSelectedDiscounts({
+                  bk_discount: "none",
+                  reg_discount: "none", 
+                  aff_discount: "none",
+                  full_discount: "none"
+                });
+                fetchApplication();
+                showNotification("تم إعادة تعيين الاختيارات", "warning");
+              }}
+              className={styles.btnReject}
+              disabled={actionLoading}
             >
-              <option value="none">لا يوجد</option>
-              {availableDiscounts.reg_discount.map((item, index) => ( 
-                <option key={index} value={item}>{item}</option>
-              ))}
-            </select>
+              إعادة تعيين
+            </button>
           </div>
-
-          <div className={styles.discountSelect}>
-            <label>خصم المصاريف كاملة:</label>
-            <select 
-              value={selectedDiscounts.full_discount} 
-              onChange={(e) => handleDiscountChange("full_discount", e.target.value)}
-            >
-              <option value="none">لا يوجد</option>
-              {availableDiscounts.full_discount.map((item, index) => ( 
-                <option key={index} value={item}>{item}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 12 }}>
-          <button
-            onClick={assignDiscounts}
-            disabled={actionLoading}
-            className={styles.btnApprove}
-          >
-            {actionLoading ? "جاري الحفظ..." : "حفظ الخصومات"}
-          </button>
-
-          <button
-            onClick={() => {
-              // reset UI selections to none and reload from server if needed
-              setSelectedDiscounts({
-                bk_discount: "none",
-                reg_discount: "none", 
-                aff_discount: "none",
-                full_discount: "none"
-              });
-              fetchApplication();
-              showNotification("تم إعادة تعيين الاختيارات", "warning");
-            }}
-            className={styles.btnReject}
-            disabled={actionLoading}
-          >
-            إعادة تعيين
-          </button>
-        </div>
-      </section>
+        </section>
+        : <div></div>
+      }
 <div className={styles.actions}>
   {/* {canPreApprove(application?.req_status) && (
     <button onClick={handlePreApprove} disabled={actionLoading} className={styles.btnApprove}>

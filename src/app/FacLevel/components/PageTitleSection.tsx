@@ -70,11 +70,6 @@ export default function PageTitleSection() {
       </div>
 
       <div className={styles.pageActions}>
-        <button className={styles.btnSecondary}>
-          <Printer size={18} />
-          <span>طباعة</span>
-        </button>
-
         <button className={styles.btnSecondary} onClick={handleExport}>
           <FileText size={18} />
           <span>تصدير</span>

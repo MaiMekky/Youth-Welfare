@@ -63,6 +63,8 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
      localStorage.setItem('access', data.access);
     localStorage.setItem('refresh', data.refresh);
     // localStorage.setItem('user_type', data.user_type);
+    document.cookie = `access=${data.access}; path=/; max-age=604800`;
+    document.cookie = `refresh=${data.refresh}; path=/; max-age=604800`;
     localStorage.setItem("user", JSON.stringify({
   name:data.name,
   role: data.role,

@@ -9,32 +9,55 @@ export default function RequestDetailsPage() {
   const { id } = useParams();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[]>([]);
+
+useEffect(() => {
+  const fetchFaculties = async () => {
+    const token = localStorage.getItem("access");
+    if (!token) return;
+    const res = await fetch("http://127.0.0.1:8000/api/solidarity/super_dept/faculties/", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    setFaculties(data);
+  };
+  fetchFaculties();
+}, []);
+const getCollegeName = (id: number) => {
+  const faculty = faculties.find(f => f.faculty_id === id);
+  return faculty ? faculty.name : "غير محدد";
+};
 
   useEffect(() => {
     if (id) fetchDetails();
   }, [id]);
+const [originalDocuments, setOriginalDocuments] = useState<any[]>([]);
 
-  const fetchDetails = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("access");
+const fetchDetails = async () => {
+  try {
+    setLoading(true);
+    const token = localStorage.getItem("access");
 
-      const response = await fetch(
-        `http://127.0.0.1:8000/api/solidarity/student/${id}/detail/`,
-        {
-          method: "GET",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+    const response = await fetch(
+      `http://127.0.0.1:8000/api/solidarity/student/${id}/detail/`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
-      const res = await response.json();
-      setData(res);
-    } catch (err) {
-      console.error("Error loading details:", err);
-    } finally {
-      setLoading(false);
+    const res = await response.json();
+    setData(res);
+
+    // خزني الملفات لأول مرة فقط
+    if (originalDocuments.length === 0 && res.documents) {
+      setOriginalDocuments(res.documents);
     }
-  };
+
+  } catch (err) {
+    console.error("Error loading details:", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   if (loading || !data) return <p className={styles.pageTitle}>جاري التحميل...</p>;
 
@@ -47,7 +70,7 @@ export default function RequestDetailsPage() {
       <div className={styles.infoGrid}>
         <p><strong>الاسم:</strong> {data.student_name}</p>
         {/* <p><strong>الرقم القومي:</strong> {data.student_uid}</p> */}
-        {/* <p><strong>الكلية:</strong> {data.college_name}</p> */}
+        <p><strong>الكلية:</strong> {getCollegeName(data.faculty)}</p>
         {/* <p><strong>الفرقة:</strong> {data.AcademicYear}</p> */}
         {/* <p><strong>الهاتف:</strong> {data.phone}</p> */}
         {/* <p><strong>البريد الإلكتروني:</strong> {data.email}</p> */}
@@ -86,13 +109,13 @@ export default function RequestDetailsPage() {
       <p>{data.reason}</p>
     </div>
 
-  <div className={styles.section}>
+ <div className={styles.section}>
   <h3>الملفات المرفوعة</h3>
-  {data.documents && data.documents.length > 0 ? (
-    data.documents.map((doc: any) => (
+  {originalDocuments && originalDocuments.length > 0 ? (
+    originalDocuments.map((doc: any) => (
       <p key={doc.doc_id}>
         <strong>{doc.doc_type}:</strong>{" "}
-        <a href={doc.file_url}rel="noreferrer" className={styles.docLink}>
+        <a href={doc.file_url} rel="noreferrer" className={styles.docLink}>
           عرض الملف
         </a>
       </p>
@@ -101,6 +124,7 @@ export default function RequestDetailsPage() {
     <p>لا توجد ملفات مرفوعة</p>
   )}
 </div>
+
 
     </div>
   </div>

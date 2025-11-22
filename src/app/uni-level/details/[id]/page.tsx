@@ -59,7 +59,10 @@ export default function ApplicationDetailsPage() {
 
   return (
     <div className="details-container">
-      <button onClick={() => router.back()}>← العودة</button>
+    <button className="btnBack" onClick={() => router.back()}>
+  ← العودة
+</button>
+
       <h2 className="page-title">تفصيل طلب دعم مالي</h2>
 
       {/* البيانات الأساسية */}
@@ -115,7 +118,7 @@ export default function ApplicationDetailsPage() {
           <ul>
             {docs.map((doc) => (
               <li key={doc.doc_id}>
-                <a href={doc.file_url} target="_blank" rel="noreferrer">{doc.doc_type}</a>
+                <a href={doc.file_url} rel="noreferrer">{doc.doc_type}</a>
               </li>
             ))}
           </ul>

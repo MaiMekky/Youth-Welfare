@@ -198,15 +198,6 @@ const [preApproved, setPreApproved] = useState(false);
     }
   };
 
-<<<<<<< HEAD
-  // Status visibility helpers (adjust if backend uses different status strings)
-const canPreApprove = (status?: string | null) =>
-  status ? ["pending", "new"].includes(status.toLowerCase()) : false;
-
-const canApprove = (status?: string | null) =>
-  status ? ["received", "pre_approved", "pre-approved"].includes(status.toLowerCase()) : false;
-
-=======
   // UPDATED: Status visibility helpers with Arabic status values
   const canPreApprove = (status?: string | null) => {
     if (!status) return false;
@@ -218,7 +209,6 @@ const canApprove = (status?: string | null) =>
     return status === "موافقة مبدئية"; // Only show for "موافقة مبدئية" status
   };
   
->>>>>>> 2ee1b76351b864e903957db610c761c24073d3dc
   const canReject = (status?: string | null) => {
     if (!status) return true;
     return status !== "مقبول" && status !== "مرفوض"; // Hide for final states
@@ -265,25 +255,6 @@ const canApprove = (status?: string | null) =>
     }
   };
 
-<<<<<<< HEAD
-const handlePreApprove = async () => {
-  await postAction("pre_approve", "received", "تمت الموافقة المبدئية بنجاح");
-  setPreApproved(true); 
-};
-
-  const handleApprove = async () => {
- const hasDiscount =
-    selectedDiscounts.full_discount !== "none" ||
-    selectedDiscounts.bk_discount !== "none" ||
-    selectedDiscounts.aff_discount !== "none" ||
-    selectedDiscounts.reg_discount !== "none" ||
-    (application?.total_discount && Number(application.total_discount) > 0);
-
-  if (!hasDiscount) {
-    showNotification("يجب اختيار خصم قبل الموافقة النهائية", "warning");
-    return;
-  }
-=======
   const handleApprove = async () => {
     // تحقق من وجود خصم
     const hasDiscount =
@@ -297,7 +268,6 @@ const handlePreApprove = async () => {
       showNotification("يجب اختيار نوع خصم أو تطبيق خصم قبل الموافقة النهائية", "warning");
       return;
     }
->>>>>>> 2ee1b76351b864e903957db610c761c24073d3dc
 
     await postAction("approve", "مقبول", "تمت الموافقة النهائية بنجاح");
   };
@@ -619,28 +589,12 @@ const handlePreApprove = async () => {
         </div>
       </section>
 <div className={styles.actions}>
-  {canPreApprove(application?.req_status) && (
+  {/* {canPreApprove(application?.req_status) && (
     <button onClick={handlePreApprove} disabled={actionLoading} className={styles.btnApprove}>
       {actionLoading ? "جاري..." : "موافقة مبدئية"}
     </button>
-  )}
+  )} */}
 
-<<<<<<< HEAD
-  {canApprove(application?.req_status) && (
-    <button onClick={handleApprove} disabled={actionLoading} className={styles.btnApprove}>
-      {actionLoading ? "جاري..." : "قبول"}
-    </button>
-  )}
-
-  {canReject(application?.req_status) && (
-    <button onClick={handleReject} disabled={actionLoading} className={styles.btnReject}>
-      {actionLoading ? "جاري..." : "رفض"}
-    </button>
-  )}
-</div>
-
-
-=======
       <div className={styles.actions}>
         {/* NEW: Initial Approval Button - shows for "منتظر" status */}
         {canPreApprove(application?.req_status) && (
@@ -652,7 +606,7 @@ const handlePreApprove = async () => {
         {/* Final approval button - shows for "موافقة مبدئية" status */}
         {canApprove(application?.req_status) && (
           <button onClick={handleApprove} disabled={actionLoading} className={styles.btnApprove}>
-            {actionLoading ? "جاري..." : "موافقة نهائية"}
+            {actionLoading ? "جاري..." : "مقبول"}
           </button>
         )}
 
@@ -663,7 +617,6 @@ const handlePreApprove = async () => {
           </button>
         )}
       </div>
->>>>>>> 2ee1b76351b864e903957db610c761c24073d3dc
 
       {/* Show final status message */}
       {application?.req_status === "مقبول" && <div className={styles.btnReceived}>✅ تم اعتماد الطلب نهائيًا</div>}
@@ -675,5 +628,6 @@ const handlePreApprove = async () => {
         </button>
       </div>
     </div>
+  </div>
   );
 }

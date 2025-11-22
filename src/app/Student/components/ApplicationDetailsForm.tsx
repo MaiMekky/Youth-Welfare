@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState , useEffect } from "react";
 import { Upload } from "lucide-react";
 import Image from "next/image";
 import "../styles/applyForm.css";
@@ -12,7 +12,7 @@ export default function ApplicationDetailsForm({ onSuccess }: ApplicationDetails
   const [formData, setFormData] = useState({
     studentName: "",
     nationalId: "",
-    college: "",
+    faculty: "",
     year: "",
     phone: "",
     email: "",
@@ -37,6 +37,7 @@ export default function ApplicationDetailsForm({ onSuccess }: ApplicationDetails
   const [documents, setDocuments] = useState<{ [key: string]: File | null }>({});
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [showSuccess, setShowSuccess] = useState(false);
+const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[]>([]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -54,7 +55,7 @@ export default function ApplicationDetailsForm({ onSuccess }: ApplicationDetails
     if (!formData.studentName.trim()) newErrors.studentName = "الاسم الكامل مطلوب";
     if (!/^\d{14}$/.test(formData.nationalId))
       newErrors.nationalId = "الرقم القومي يجب أن يكون 14 رقمًا";
-    if (!formData.college.trim()) newErrors.college = "الكلية مطلوبة";
+    if (!formData.faculty.trim()) newErrors.college = "الكلية مطلوبة";
     if (!formData.year.trim()) newErrors.year = "الفرقة مطلوبة";
     if (!/^\+20\d{10}$/.test(formData.phone))
       newErrors.phone = "رقم الهاتف يجب أن يكون بصيغة +20XXXXXXXXXX";
@@ -79,6 +80,18 @@ export default function ApplicationDetailsForm({ onSuccess }: ApplicationDetails
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+useEffect(() => {
+  const fetchFaculties = async () => {
+    const token = localStorage.getItem("access");
+    if (!token) return;
+    const res = await fetch("http://127.0.0.1:8000/api/solidarity/super_dept/faculties/", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    setFaculties(data);
+  };
+  fetchFaculties();
+}, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,6 +113,7 @@ formPayload.append("grade", formData.gpa);
 formPayload.append("address", formData.address);
 formPayload.append("housing_status", formData.housingStatus);
 formPayload.append("req_type", "financial_aid");
+formPayload.append("faculty_id", formData.faculty); // أو "faculty_id" حسب API
 
  const fileKeyMap: Record<string, string> = {
   socialResearch: "social_research_file",
@@ -236,17 +250,24 @@ formPayload.append("req_type", "financial_aid");
             )}
           </div>
 
-          <div className="form-group">
-            <label style={{color:"#2C3A5F"}}>الكلية</label>
-            <input
-              type="text"
-              name="college"
-              value={formData.college}
-              onChange={handleChange}
-              placeholder="اكتب اسم كليتك"
-            />
-            {errors.college && <span className="error">{errors.college}</span>}
-          </div>
+       <div className="form-group">
+  <label style={{ color: "#2C3A5F" }}>الكلية</label>
+  <select
+    name="faculty"
+    style={{ color: "#2C3A5F" }}
+    value={formData.faculty}  // هنا نخزن faculty_id مش الاسم
+    onChange={handleChange}
+  >
+    <option value=""hidden>اختر...</option>
+    {faculties.map((f) => (
+      <option key={f.faculty_id} value={f.faculty_id.toString()}>
+        {f.name}
+      </option>
+    ))}
+  </select>
+  {errors.college && <span className="error">{errors.college}</span>}
+</div>
+
 
           <div className="form-group">
             <label  style={{color:"#2C3A5F"}}>الفرقة الدراسية</label>

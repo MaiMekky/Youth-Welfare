@@ -20,7 +20,7 @@ export default function FiltersSection({
           <Search className={styles.searchIcon} size={20} />
           <input
             type="text"
-            placeholder="ابحث بالاسم أو رقم الطالب..."
+            placeholder="ابحث بالاسم أو رقم الطلب..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={styles.searchInput}

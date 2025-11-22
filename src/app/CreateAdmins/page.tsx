@@ -230,7 +230,9 @@ export default function AccessPrivileges() {
                   <td>
                     <div className={styles.modifiedInfo}>
                       <div className={styles.date}>{user.lastModified}</div>
-                      <div className={styles.modifiedBy}>{user.modifiedBy}</div>
+                      { 
+                        // <div className={styles.modifiedBy}>{user.modifiedBy}</div>
+                      }
                     </div>
                   </td>
                   <td>

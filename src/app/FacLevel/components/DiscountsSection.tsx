@@ -103,6 +103,22 @@ export default function DiscountsSection() {
     });
   };
 
+  const handleAddDiscount = (type: keyof DiscountsState) => {
+    setDiscounts((prev) => ({
+      ...prev,
+      [type]: [...prev[type], ""] // Add empty string for new discount
+    }));
+  };
+
+  const handleRemoveDiscount = (type: keyof DiscountsState, index: number) => {
+    if (discounts[type].length <= 1) return; // Keep at least one input
+    
+    setDiscounts((prev) => ({
+      ...prev,
+      [type]: prev[type].filter((_, i) => i !== index)
+    }));
+  };
+
   const handleSave = async () => {
     setSaving(true);
     setError(null);
@@ -151,39 +167,57 @@ export default function DiscountsSection() {
 
   const renderInputs = (type: keyof DiscountsState) =>
     (discounts[type].length ? discounts[type] : [""]).map((val, idx) => (
-      <input
-        key={idx}
-        type="text"
-        value={val}
-        onChange={(e) => handleChange(type, idx, e.target.value)}
-        className={styles.discountInput}
-      />
+      <div key={idx} className={styles.inputWrapper}>
+        <input
+          type="text"
+          value={val}
+          onChange={(e) => handleChange(type, idx, e.target.value)}
+          className={styles.discountInput}
+          placeholder="أدخل قيمة الخصم"
+        />
+        {isEditing && discounts[type].length > 1 && (
+          <button 
+            type="button"
+            className={styles.removeBtn}
+            onClick={() => handleRemoveDiscount(type, idx)}
+            title="إزالة الخصم"
+          >
+            ×
+          </button>
+        )}
+      </div>
     ));
+
+  const renderCard = (type: keyof DiscountsState, title: string) => (
+    <div className={styles.card}>
+      <h4>{title}</h4>
+      {isEditing ? (
+        <div className={styles.editableSection}>
+          {renderInputs(type)}
+          <button 
+            type="button"
+            className={styles.addBtn}
+            onClick={() => handleAddDiscount(type)}
+            title="إضافة خصم جديد"
+          >
+            + إضافة خصم
+          </button>
+        </div>
+      ) : (
+        discounts[type].map((d, i) => <p key={i}>{d}</p>)
+      )}
+    </div>
+  );
 
   return (
     <div className={styles.container}>
       {loading && <div>جارٍ التحميل...</div>}
 
       <div className={styles.cards}>
-        <div className={styles.card}>
-          <h4>خصم مصاريف الكتب</h4>
-          {isEditing ? renderInputs("books") : discounts.books.map((d, i) => <p key={i}>{d}</p>)}
-        </div>
-
-        <div className={styles.card}>
-          <h4>خصم مصاريف انتساب</h4>
-          {isEditing ? renderInputs("distant") : discounts.distant.map((d, i) => <p key={i}>{d}</p>)}
-        </div>
-
-        <div className={styles.card}>
-          <h4>خصم مصاريف انتظام</h4>
-          {isEditing ? renderInputs("regular") : discounts.regular.map((d, i) => <p key={i}>{d}</p>)}
-        </div>
-
-        <div className={styles.card}>
-          <h4>خصم المصاريف الكاملة</h4>
-          {isEditing ? renderInputs("full") : discounts.full.map((d, i) => <p key={i}>{d}</p>)}
-        </div>
+        {renderCard("books", "خصم مصاريف الكتب")}
+        {renderCard("distant", "خصم مصاريف انتساب")}
+        {renderCard("regular", "خصم مصاريف انتظام")}
+        {renderCard("full", "خصم المصاريف الكاملة")}
       </div>
 
       <div className={styles.actions}>

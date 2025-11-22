@@ -113,16 +113,8 @@ else if (typeof data.dept_name === "string") {
               ...(data.can_delete ? ['D'] : [])
             ],
             status: data.acc_status === 'active',
-<<<<<<< HEAD
-            faculty: Object.keys(facultyMap).find(k => facultyMap[k] === data.faculty) || '',
-           departments:
-            data.role === "مدير ادارة"
-              ? [String(data.dept)]
-              : deptNames,
-=======
             faculty: facultyId,
             departments: data.dept_fac_ls
->>>>>>> 2ee1b76351b864e903957db610c761c24073d3dc
           });
         })
         .catch(err => console.error('Error fetching admin data:', err));

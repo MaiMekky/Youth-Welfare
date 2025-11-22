@@ -38,7 +38,7 @@ export default function ApplicationDetailsForm({ onSuccess }: ApplicationDetails
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [showSuccess, setShowSuccess] = useState(false);
 const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[]>([]);
-
+const requiredDocs = ["socialResearch", "salaryProof", "fatherId", "studentId"];
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -52,15 +52,15 @@ const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[
   const validate = () => {
     const newErrors: { [key: string]: string } = {};
 
-    if (!formData.studentName.trim()) newErrors.studentName = "الاسم الكامل مطلوب";
-    if (!/^\d{14}$/.test(formData.nationalId))
-      newErrors.nationalId = "الرقم القومي يجب أن يكون 14 رقمًا";
-    if (!formData.faculty.trim()) newErrors.college = "الكلية مطلوبة";
-    if (!formData.year.trim()) newErrors.year = "الفرقة مطلوبة";
-    if (!/^\+20\d{10}$/.test(formData.phone))
-      newErrors.phone = "رقم الهاتف يجب أن يكون بصيغة +20XXXXXXXXXX";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-      newErrors.email = "البريد الإلكتروني غير صالح";
+    // if (!formData.studentName.trim()) newErrors.studentName = "الاسم الكامل مطلوب";
+    // if (!/^\d{14}$/.test(formData.nationalId))
+    //   newErrors.nationalId = "الرقم القومي يجب أن يكون 14 رقمًا";
+    // if (!formData.faculty.trim()) newErrors.college = "الكلية مطلوبة";
+    // if (!formData.year.trim()) newErrors.year = "الفرقة مطلوبة";
+    // if (!/^\+20\d{10}$/.test(formData.phone))
+    //   newErrors.phone = "رقم الهاتف يجب أن يكون بصيغة +20XXXXXXXXXX";
+    // if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
+    //   newErrors.email = "البريد الإلكتروني غير صالح";
     if (!formData.gpa.trim()) newErrors.gpa = "التقدير مطلوب";
     if (!formData.address.trim()) newErrors.address = "العنوان مطلوب";
     if (!formData.fatherStatus) newErrors.fatherStatus = "حالة الأب مطلوبة";
@@ -76,7 +76,11 @@ const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[
     if (!formData.disability) newErrors.disability = "يرجى تحديد حالة الإعاقة";
     if (!formData.housingStatus) newErrors.housingStatus = "يرجى تحديد حالة المسكن";
     if (!formData.supportReason.trim()) newErrors.supportReason = "يرجى إدخال سبب طلب الدعم";
-
+requiredDocs.forEach((docKey) => {
+  if (!documents[docKey]) {
+    newErrors[docKey] = "هذا المستند مطلوب";
+  }
+});
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -159,6 +163,7 @@ formPayload.append("faculty_id", formData.faculty); // أو "faculty_id" حسب 
   onDocumentsChange,
 }: {
   files: Record<string, File | null>;
+  errors?: Record<string, string>;
   onDocumentsChange?: (files: Record<string, File | null>) => void;
 }) => {
   const documentsList = [
@@ -189,7 +194,9 @@ formPayload.append("faculty_id", formData.faculty); // أو "faculty_id" حسب 
               {doc.required && <span className="required-badge">مطلوب</span>}
             </div>
             <p className="document-desc">{doc.description}</p>
-
+              {errors[doc.id] && (
+                <span className="error">{errors[doc.id]}</span>
+              )}
             <label className="upload-btn">
               <Upload size={18} />
               <span>{files[doc.id] ? files[doc.id]?.name : "رفع المستند"}</span>
@@ -221,7 +228,7 @@ formPayload.append("faculty_id", formData.faculty); // أو "faculty_id" حسب 
       <form className="apply-form" onSubmit={handleSubmit}>
         <h4 className="section-title">معلومات الطالب</h4>
         <div className="grid-2">
-          <div className="form-group">
+          {/* <div className="form-group">
             <label  style={{color:"#2C3A5F"}}>الاسم الكامل</label>
             <input
               type="text"
@@ -304,7 +311,7 @@ formPayload.append("faculty_id", formData.faculty); // أو "faculty_id" حسب 
               placeholder="example@email.com"
             />
             {errors.email && <span className="error">{errors.email}</span>}
-          </div>
+          </div> */}
 <div className="form-group">
   <label style={{ color: "#2C3A5F" }}>التقدير</label>
   <select style={{ color: "#2C3A5F" }}
@@ -353,10 +360,10 @@ formPayload.append("faculty_id", formData.faculty); // أو "faculty_id" حسب 
     onChange={handleChange}
   >
     <option value="" disabled hidden>اختر...</option>
-    <option value="working">يعمل</option>
-    <option value="retired">بالمعاش</option>
-    <option value="sick">مريض</option>
-    <option value="deceased">متوفى</option>
+    <option value="يعمل">يعمل</option>
+    <option value="بالمعاش">بالمعاش</option>
+    <option value="مريض">مريض</option>
+    <option value="متوفى">متوفى</option>
   </select>
   {errors.fatherStatus && (
     <span className="error">{errors.fatherStatus}</span>
@@ -372,10 +379,10 @@ formPayload.append("faculty_id", formData.faculty); // أو "faculty_id" حسب 
     onChange={handleChange}
   >
     <option value="" disabled hidden>اختر...</option>
-    <option value="working">تعمل</option>
-    <option value="retired">بالمعاش</option>
-    <option value="sick">مريضة</option>
-    <option value="deceased">متوفاة</option>
+    <option value="تعمل">تعمل</option>
+    <option value="بالمعاش">بالمعاش</option>
+    <option value="مريضة">مريضة</option>
+    <option value="متوفاة">متوفاة</option>
   </select>
   {errors.motherStatus && (
     <span className="error">{errors.motherStatus}</span>
@@ -553,11 +560,13 @@ formPayload.append("faculty_id", formData.faculty); // أو "faculty_id" حسب 
         </div>
   <DocumentUploadForm 
   files={documents}
+   errors={errors}
   onDocumentsChange={(updated) => {
     setDocuments(updated);
     console.log("📁 الملفات الحالية:", updated);
   }} 
 />
+
 {/* <DocumentUploadForm/> */}
         <div className="form-actions">
           <button type="submit" className="submit-btn">إرسال الطلب</button>

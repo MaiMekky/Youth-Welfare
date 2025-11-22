@@ -55,8 +55,12 @@ const StudentNavbar: React.FC = () => {
   const router = useRouter(); // router جوا الcomponent
 
   const handleLogout = () => {
-    localStorage.removeItem("access");
-    localStorage.removeItem("refresh");
+    localStorage.clear();
+      document.cookie = "access=; path=/; max-age=0; SameSite=Lax";
+  document.cookie = "refresh=; path=/; max-age=0; SameSite=Lax";
+  document.cookie = "user_type=; path=/; max-age=0; SameSite=Lax";
+  document.cookie = "roleKey=; path=/; max-age=0; SameSite=Lax";
+  document.cookie = "role=; path=/; max-age=0; SameSite=Lax";
     router.push("/");
   }
   const navItems: NavItem[] = [

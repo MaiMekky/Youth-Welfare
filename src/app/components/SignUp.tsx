@@ -17,13 +17,18 @@ interface FormData {
   confirmPassword: string;
   studentId: string;
   studentCode: string;
-  faculty: string;
+  faculty: string; // This will now store the faculty ID as string
   department: string;
   level: string;
   phone: string;
   address: string;
   gender: string;
   grade: string; 
+}
+
+interface Faculty {
+  faculty_id: number;
+  name: string;
 }
 
 export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
@@ -54,6 +59,29 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
     {}
   );
   const [loading, setLoading] = useState(false);
+  const [faculties, setFaculties] = useState<Faculty[]>([]);
+  const [facultiesLoading, setFacultiesLoading] = useState(true);
+
+  // Fetch faculties on component mount
+  useEffect(() => {
+    const fetchFaculties = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/api/solidarity/super_dept/faculties/");
+        if (response.ok) {
+          const data = await response.json();
+          setFaculties(data);
+        } else {
+          console.error("Failed to fetch faculties");
+        }
+      } catch (error) {
+        console.error("Error fetching faculties:", error);
+      } finally {
+        setFacultiesLoading(false);
+      }
+    };
+
+    fetchFaculties();
+  }, []);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target as any;
@@ -84,9 +112,6 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
     if (!formData.fullNameEn.trim()) {
       newErrors.fullNameEn = "الاسم باللغة العربية مطلوب";
     }
-    // } else if (!/^[A-Za-z\s]+$/.test(formData.fullNameEn)) {
-    //   newErrors.fullNameEn = "برجاء ادخال الاسم باللغة الإنجليزية";
-    // }
 
     // email
     if (!formData.email.trim()) {
@@ -102,10 +127,10 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
       newErrors.password = "كلمة المرور يجب أن تكون بين 6 و 14 حرفًا";
     } else if (
       !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]+$/.test(formData.password)
-     ) 
-    //   newErrors.password =
-    //     "كلمة المرور يجب أن تحتوي على حرف كبير وحرف صغير ورقم باللغة الإنجليزية فقط";
-    // }
+    ) {
+      newErrors.password =
+        "كلمة المرور يجب أن تحتوي على حرف كبير وحرف صغير ورقم باللغة الإنجليزية فقط";
+    }
 
     // confirm password
     if (formData.confirmPassword !== formData.password) {
@@ -140,91 +165,85 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
     if (!formData.level.trim()) {
       newErrors.level = "الفرقة مطلوبة";
     }
-// phone (optional but validate when present)
-if (
-  formData.phone &&
-  !/^\+20[1][0125][0-9]{8}$/.test(formData.phone)
-) {
-  newErrors.phone = "رقم الهاتف غير صحيح، يجب أن يبدأ بـ +20";
-}
 
+    // phone (optional but validate when present)
+    if (
+      formData.phone &&
+      !/^\+20[1][0125][0-9]{8}$/.test(formData.phone)
+    ) {
+      newErrors.phone = "رقم الهاتف غير صحيح، يجب أن يبدأ بـ +20";
+    }
 
     // address
     if (!formData.address.trim()) {
       newErrors.address = "العنوان مطلوب";
     }
+
     // grade
-if (!formData.grade.trim()) {
-  newErrors.grade = "التقدير مطلوب";
-}
-
-
-    // gender (optional) - no validation required but can be enforced if needed
+    if (!formData.grade.trim()) {
+      newErrors.grade = "التقدير مطلوب";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-const handleSubmit = async (e: FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
 
-  if (!validateForm()) return;
+    if (!validateForm()) return;
 
-  const formDataToSend = new FormData();
+    const formDataToSend = new FormData();
 
-  // Append text fields
-  formDataToSend.append("name", formData.fullNameEn);
-  formDataToSend.append("email", formData.email);
-  formDataToSend.append("password", formData.password);
-  formDataToSend.append("faculty", String(formData.faculty));
-  formDataToSend.append("gender", formData.gender);
-  formDataToSend.append("nid", formData.studentId);
-  formDataToSend.append("uid", formData.studentCode);
-  formDataToSend.append("phone_number", formData.phone);
-  formDataToSend.append("address", formData.address);
-  formDataToSend.append("acd_year", formData.level);
-  formDataToSend.append("grade", formData.grade);
-  formDataToSend.append("major", formData.department);
+    // Append text fields
+    formDataToSend.append("name", formData.fullNameEn);
+    formDataToSend.append("email", formData.email);
+    formDataToSend.append("password", formData.password);
+    formDataToSend.append("faculty", formData.faculty); // This is now the faculty ID
+    formDataToSend.append("gender", formData.gender);
+    formDataToSend.append("nid", formData.studentId);
+    formDataToSend.append("uid", formData.studentCode);
+    formDataToSend.append("phone_number", formData.phone);
+    formDataToSend.append("address", formData.address);
+    formDataToSend.append("acd_year", formData.level);
+    formDataToSend.append("grade", formData.grade);
+    formDataToSend.append("major", formData.department);
 
-  // Append file if user uploaded one
-  const profileFileInput = document.getElementById("profileUpload") as HTMLInputElement;
-  if (profileFileInput?.files?.[0]) {
-    formDataToSend.append("profile_image", profileFileInput.files[0]);
-  }
-
-  setLoading(true);
-
-  try {
-    const response = await fetch("http://127.0.0.1:8000/api/auth/signUp/", {
-      method: "POST",
-      body: formDataToSend, // FormData automatically sets Content-Type
-      headers: {
-        // DO NOT set Content-Type manually
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("API Error:", errorData);
-      alert("حدث خطأ أثناء إنشاء الحساب ❌");
-      return;
+    // Append file if user uploaded one
+    const profileFileInput = document.getElementById("profileUpload") as HTMLInputElement;
+    if (profileFileInput?.files?.[0]) {
+      formDataToSend.append("profile_image", profileFileInput.files[0]);
     }
 
-    const data = await response.json();
-    if (data.access) {
-      localStorage.setItem("access", data.access);
+    setLoading(true);
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/auth/signUp/", {
+        method: "POST",
+        body: formDataToSend,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("API Error:", errorData);
+        alert("حدث خطأ أثناء إنشاء الحساب ❌");
+        return;
+      }
+
+      const data = await response.json();
+      if (data.access) {
+        localStorage.setItem("access", data.access);
+      }
+
+      alert("تم إنشاء الحساب بنجاح 🎉");
+      onClose();
+    } catch (err) {
+      console.error(err);
+      alert("حدث خطأ، حاول مرة أخرى");
+    } finally {
+      setLoading(false);
     }
-
-    alert("تم إنشاء الحساب بنجاح 🎉");
-    onClose();
-  } catch (err) {
-    console.error(err);
-    alert("حدث خطأ، حاول مرة أخرى");
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   return (
     <div className={styles.loginBox}>
@@ -255,10 +274,7 @@ const handleSubmit = async (e: FormEvent) => {
           accept="image/*"
           onChange={handleImageUpload}
           style={{ display: "none" }}
-           />
-            {/* <p className="upload-text">
-               يرجى رفع صورة شخصية (اختياري)<span className="required"></span>
-             </p> */}
+        />
 
         {/* English full name */}
         <input
@@ -328,15 +344,24 @@ const handleSubmit = async (e: FormEvent) => {
         />
         {errors.studentCode && <p className={styles.errorMsg}>{errors.studentCode}</p>}
 
-        {/* faculty */}
-        <input
+        {/* faculty - Now a dropdown */}
+        <select
           name="faculty"
-          type="text"
-          placeholder="الكلية"
           value={formData.faculty}
           onChange={handleChange}
-          className={errors.faculty ? styles.invalid : ""}
-        />
+          className={errors.faculty ? styles.invalid : styles.input}
+        >
+          <option value="" disabled hidden>اختر الكلية</option>
+          {facultiesLoading ? (
+            <option value="" disabled>جاري تحميل الكليات...</option>
+          ) : (
+            faculties.map((faculty) => (
+              <option key={faculty.faculty_id} value={faculty.faculty_id}>
+                {faculty.name}
+              </option>
+            ))
+          )}
+        </select>
         {errors.faculty && <p className={styles.errorMsg}>{errors.faculty}</p>}
 
         {/* department */}
@@ -382,24 +407,24 @@ const handleSubmit = async (e: FormEvent) => {
           className={errors.address ? styles.invalid : ""}
         />
         {errors.address && <p className={styles.errorMsg}>{errors.address}</p>}
-        {/* grade */}
-<select
-  name="grade"
-  value={formData.grade}
-  onChange={handleChange}
-  className={errors.grade ? styles.invalid : styles.input}
->
-  <option value="" disabled hidden>اختر التقدير</option>
-   <option value="امتياز">امتياز</option>
-    <option value="جيد جدا">جيد جدًا</option>
-    <option value="جيد">جيد</option>
-    <option value="مقبول">مقبول</option>
-</select>
 
-{errors.grade && <p className={styles.errorMsg}>{errors.grade}</p>}
+        {/* grade */}
+        <select
+          name="grade"
+          value={formData.grade}
+          onChange={handleChange}
+          className={errors.grade ? styles.invalid : styles.input}
+        >
+          <option value="" disabled hidden>اختر التقدير</option>
+          <option value="امتياز">امتياز</option>
+          <option value="جيد جدا">جيد جدًا</option>
+          <option value="جيد">جيد</option>
+          <option value="مقبول">مقبول</option>
+        </select>
+        {errors.grade && <p className={styles.errorMsg}>{errors.grade}</p>}
 
         {/* gender */}
-        <div style={{ display: "flex", gap: 12,color: "#2C3A5F", marginTop: 8 }}>
+        <div style={{ display: "flex", gap: 12, color: "#2C3A5F", marginTop: 8 }}>
           <label style={{ cursor: "pointer" }}>
             <input
               type="radio"

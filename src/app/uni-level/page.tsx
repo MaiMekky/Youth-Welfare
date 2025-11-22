@@ -20,16 +20,7 @@ interface Application {
 }
 
 export default function ApplicationsPage() {
-  // const [applications] = useState<Application[]>([
-  //   { id: "REQ001", requestNumber: "57001", studentName: "أحمد محمد علي", department: "البرنامج التحضيري", college: "الهندسة", amount: "1500", date: "04/06/1970", status: "مكتمل" },
-  //   { id: "REQ002", requestNumber: "57002", studentName: "فاطمة حسن", department: "البرنامج التحضيري", college: "الطب", amount: "1200", date: "04/06/1975", status: "مكتمل" },
-  //   { id: "REQ003", requestNumber: "57003", studentName: "عمر خالد", department: "البرنامج التحضيري", college: "الصيدلة", amount: "1000", date: "04/06/1970", status: "مكتمل" },
-  //   { id: "REQ004", requestNumber: "57004", studentName: "أميرة سعيد", department: "البرنامج التحضيري", college: "الهندسة", amount: "1800", date: "04/06/1976", status: "مكتمل" },
-  //   { id: "REQ005", requestNumber: "57005", studentName: "محمد يوسف", department: "البرنامج التحضيري", college: "الآداب", amount: "800", date: "04/06/1970", status: "مكتمل" },
-  //   { id: "REQ006", requestNumber: "57006", studentName: "مريم عبد الرحمن", department: "البرنامج التحضيري", college: "العلوم", amount: "1300", date: "04/06/1976", status: "مكتمل" },
-  //   { id: "REQ007", requestNumber: "57007", studentName: "ياسمين عادل", department: "البرنامج التحضيري", college: "الصيدلة", amount: "1400", date: "04/06/1977", status: "مكتمل" },
-  //   { id: "REQ008", requestNumber: "57008", studentName: "محمود خالد", department: "البرنامج التحضيري", college: "الحقوق", amount: "1100", date: "04/06/1970", status: "مكتمل" },
-  // ]);
+
 
  interface Application {
   amount: string;

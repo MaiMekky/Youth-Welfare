@@ -65,8 +65,12 @@ const requiredDocs = ["socialResearch", "salaryProof", "fatherId", "studentId"];
     if (!formData.address.trim()) newErrors.address = "العنوان مطلوب";
     if (!formData.fatherStatus) newErrors.fatherStatus = "حالة الأب مطلوبة";
     if (!formData.motherStatus) newErrors.motherStatus = "حالة الأم مطلوبة";
-    if (!formData.FatherIncome.trim()) newErrors.FatherIncome = "دخل الأب مطلوب";
-    if (!formData.MotherIncome.trim()) newErrors.MotherIncome = "دخل الأم مطلوب";
+    if (formData.fatherStatus !== "متوفى" && !formData.FatherIncome.trim())
+      newErrors.FatherIncome = "دخل الأب مطلوب";
+
+    if (formData.motherStatus !== "متوفاة" && !formData.MotherIncome.trim())
+      newErrors.MotherIncome = "دخل الأم مطلوب";
+
     if (!formData.familyMembers.trim()) newErrors.familyMembers = "عدد أفراد الأسرة مطلوب";
     if (!formData.siblingOrder.trim()) newErrors.siblingOrder = "الترتيب بين الإخوات مطلوب";
     if (!/^\+20\d{10}$/.test(formData.fatherPhone))
@@ -104,8 +108,13 @@ const formPayload = new FormData();
 formPayload.append("family_numbers", String(formData.familyMembers));
 formPayload.append("father_status", formData.fatherStatus);
 formPayload.append("mother_status", formData.motherStatus);
-formPayload.append("father_income", String(formData.FatherIncome));
-formPayload.append("mother_income", String(formData.MotherIncome)); 
+if (formData.fatherStatus !== "متوفى") {
+  formPayload.append("father_income", String(formData.FatherIncome));
+}
+
+if (formData.motherStatus !== "متوفاة") {
+  formPayload.append("mother_income", String(formData.MotherIncome));
+}
 formPayload.append("arrange_of_brothers", String(formData.siblingOrder));
 formPayload.append("f_phone_num", formData.fatherPhone);
 formPayload.append("m_phone_num", formData.motherPhone);
@@ -321,7 +330,7 @@ formPayload.append("faculty_id", formData.faculty); // أو "faculty_id" حسب 
   >
     <option value="" hidden>اختر...</option>
     <option value="امتياز">امتياز</option>
-    <option value="جيد جدا">جيد جدًا</option>
+    <option value="جيد جدا">جيد جدا</option>
     <option value="جيد">جيد</option>
     <option value="مقبول">مقبول</option>
   </select>
@@ -390,33 +399,36 @@ formPayload.append("faculty_id", formData.faculty); // أو "faculty_id" حسب 
 </div>
 
 
-          <div className="form-group">
-            <label  style={{color:"#2C3A5F"}}>دخل الأب</label>
-            <input
-              type="number"
-              name="FatherIncome"
-              value={formData.FatherIncome}
-              onChange={handleChange}
-              placeholder="أدخل دخل الأب"
-            />
-            {errors.FatherIncome && (
-              <span className="error">{errors.FatherIncome}</span>
-            )}
-          </div>
+         <div className="form-group">
+          <label style={{ color: "#2C3A5F" }}>دخل الأب</label>
+          <input
+            type="number"
+            name="FatherIncome"
+            value={formData.fatherStatus === "متوفى" ? "" : formData.FatherIncome}
+            onChange={handleChange}
+            placeholder="أدخل دخل الأب"
+            disabled={formData.fatherStatus === "متوفى"} 
+          />
+          {errors.FatherIncome && (
+            <span className="error">{errors.FatherIncome}</span>
+          )}
+        </div>
 
-          <div className="form-group">
-            <label  style={{color:"#2C3A5F"}}>دخل الأم</label>
-            <input
-              type="number"
-              name="MotherIncome"
-              value={formData.MotherIncome}
-              onChange={handleChange}
-              placeholder="أدخل دخل الأم"
-            />
-            {errors.MotherIncome && (
-              <span className="error">{errors.MotherIncome}</span>
-            )}
-          </div>
+        <div className="form-group">
+          <label style={{ color: "#2C3A5F" }}>دخل الأم</label>
+          <input
+            type="number"
+            name="MotherIncome"
+            value={formData.motherStatus === "متوفاة" ? "" : formData.MotherIncome}
+            onChange={handleChange}
+            placeholder="أدخل دخل الأم"
+            disabled={formData.motherStatus === "متوفاة"}
+          />
+          {errors.MotherIncome && (
+            <span className="error">{errors.MotherIncome}</span>
+          )}
+        </div>
+
 
           <div className="form-group">
             <label  style={{color:"#2C3A5F"}}>عدد أفراد الأسرة</label>

@@ -6,16 +6,25 @@ const protectedRoutes = [
   "/uni-level",
   "/FacLevel",
   "/Student",
+  "/ActivityLogs",
+  "/CreateAdmins",
+  "/admin/add-user",
+  // "/requests",
+  // "/my-requests",
+  // "/students",
+  "/FacultyReport",
+  // "/uni-level/details",
+  "/uni-level/reports",
 ];
 
 const allowedByRoleKey: { [userType: string]: { [roleKey: string]: string[] } } = {
   admin: {
-    super_admin: ["/SuperAdmin"],
-    uni_manager: ["/uni-level"],
-    fac_manager: ["/FacLevel"],
+    super_admin: ["/SuperAdmin", "/admin/add-user", "/CreateAdmins","/ActivityLogs"],
+    uni_manager: ["/uni-level", "/uni-level/reports", "/uni-level/details"],
+    fac_manager: ["/FacLevel","/requests","/FacultyReport"],
   },
   student: {
-    "": ["/Student"],
+    "": ["/Student", "/my-requests"],
   },
 };
 
@@ -43,19 +52,23 @@ export function middleware(req: NextRequest) {
   const rulesForUserType = allowedByRoleKey[userType];
   if (!rulesForUserType) return NextResponse.next();
 
-  if (userType === "admin") {
-    const allowedRoutes = rulesForUserType[roleKey] || [];
-    if (!allowedRoutes.includes(path)) {
-      return NextResponse.redirect(new URL(allowedRoutes[0] || "/", req.url));
-    }
+ if (userType === "admin") {
+  const allowedRoutes = rulesForUserType[roleKey] || [];
+  const isAllowed = allowedRoutes.some(route => path.startsWith(route));
+  if (!isAllowed) {
+    return NextResponse.redirect(new URL(allowedRoutes[0] || "/", req.url));
   }
+}
 
-  if (userType === "student") {
-    const allowedRoutes = rulesForUserType[""] || ["/Student"];
-    if (!allowedRoutes.includes(path)) {
-      return NextResponse.redirect(new URL(allowedRoutes[0], req.url));
-    }
+
+if (userType === "student") {
+  const allowedRoutes = rulesForUserType[""] || ["/Student"];
+  const isAllowed = allowedRoutes.some(route => path.startsWith(route));
+  if (!isAllowed) {
+    return NextResponse.redirect(new URL(allowedRoutes[0], req.url));
   }
+}
+
 
   return NextResponse.next();
 }

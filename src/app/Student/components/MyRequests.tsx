@@ -233,8 +233,8 @@ export default function MyRequests({ onStatusesLoaded }: any) {
                         circleContent = <CheckCircle size={18} color="#ffffff" />;
                         circleColor = "#ffffff";
                       } else if (req.status === "rejected") {
-                        circleBackground = "#ef4444";
-                        circleContent = <X size={22} color="#ffffff" />;
+                        circleBackground = "#ef4444" ;
+                        circleContent = <X size={22} color="#ffffff"/>             
                         circleColor = "#ffffff";
                       } else if (step === req.currentStep) {
                         circleBackground = "#3b82f6"; // أزرق للموافقة المبدئية
@@ -248,17 +248,26 @@ export default function MyRequests({ onStatusesLoaded }: any) {
                     }
 
   return (
-    <div
-      key={index}
-      className={`progress-step`}
-    >
+   <div
+  key={index}
+  className={`progress-step ${
+    step < req.currentStep
+      ? "completed"
+      : step === req.currentStep
+      ? "active current-step"
+      : ""
+  }`}
+>
+
       <div
-        className="step-circle"
-        style={{
-          background: circleBackground,
-          color: circleColor,
-        }}
-      >
+  className="step-circle"
+  style={{
+    background: circleBackground,
+    color: circleColor,
+    ...(index === 2 && req.status === "rejected" && { marginRight: "6px" }),
+  }}
+>
+
         {circleContent}
       </div>
 

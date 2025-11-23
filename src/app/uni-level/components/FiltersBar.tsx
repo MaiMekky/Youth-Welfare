@@ -78,21 +78,31 @@ export default function FiltersBar({ filters, setFilters, onApply, onSearchChang
           </select>
 
           {/* Housing status */}
-          <select value={filters.housingStatus || ""} onChange={(e) => handleChange("housingStatus", e.target.value)} className={styles.select}>
-            <option value="" disabled hidden>حالة السكن</option>
-            <option value="none">لا يوجد</option>
-            <option value="owned">ملك</option>
-            <option value="rented">ايجار</option>
-          </select>
+                <select
+          value={filters.housingStatus || ""}
+          onChange={(e) => handleChange("housingStatus", e.target.value)}
+          className={styles.select}
+        >
+          <option value="" disabled hidden>حالة السكن</option>
+          <option value="none">لا يوجد</option>
+          <option value="ملك">ملك</option>
+          <option value="ايجار">ايجار</option>
+        </select>
+
 
           {/* Brothers */}
-          <select value={filters.brothers || ""} onChange={(e) => handleChange("brothers", e.target.value)} className={styles.select}>
-            <option value="" disabled hidden>عدد افراد الاسرة</option>
-            <option value="none">لا يوجد</option>
-            <option value="1-2">1-2</option>
-            <option value="3-5">3-5</option>
-            <option value="6+">6 فأكثر</option>
-          </select>
+          <select
+          value={filters.brothers || ""}
+          onChange={(e) => handleChange("brothers", e.target.value)}
+          className={styles.select}
+        >
+          <option value="" disabled hidden>عدد أفراد الأسرة</option>
+          <option value="none">لا يوجد</option>
+          <option value="few">1–2</option>
+          <option value="moderate">3–5</option>
+          <option value="many">6 فأكثر</option>
+        </select>
+
 
           {/* Total Income */}
           <select value={filters.totalIncome || ""} onChange={(e) => handleChange("totalIncome", e.target.value)} className={styles.select}>
@@ -106,30 +116,42 @@ export default function FiltersBar({ filters, setFilters, onApply, onSearchChang
           {/* Faculty */}
           <select value={filters.faculty || ""} onChange={(e) => handleChange("faculty", e.target.value)} className={styles.select}>
             <option value="" disabled hidden>الكلية</option>
+            <option value="none">لا يوجد</option>
             {Object.keys(facultyMap).map((fac) => <option key={fac} value={fac}>{fac}</option>)}
           </select>
 
           {/* Grade */}
-          <select value={filters.grade || ""} onChange={(e) => handleChange("grade", e.target.value)} className={styles.select}>
-            <option value="" disabled hidden>التقدير</option>
-            <option value="none">لا يوجد</option>
-            <option value="1">امتياز</option>
-            <option value="2">جيد جدًا</option>
-            <option value="3">جيد</option>
-            <option value="4">مقبول</option>
-          </select>
+         {/* <select
+          value={filters.grade || ""}
+          onChange={(e) => handleChange("grade", e.target.value)}
+          className={styles.select}
+        >
+          <option value="" disabled hidden>التقدير</option>
+          <option value="none">لا يوجد</option>
+          <option value="امتياز">امتياز</option>
+          <option value="جيد جدا">جيد جدا</option>
+          <option value="جيد">جيد</option>
+          <option value="مقبول">مقبول</option>
+        </select> */}
+
 
           {/* Disability */}
-          <select value={filters.disability || ""} onChange={(e) => handleChange("disability", e.target.value)} className={styles.select}>
-            <option value="" disabled hidden>ذوي الهمم</option>
-            <option value="none">لا يوجد</option>
-            <option value="yes">نعم</option>
-            <option value="no">لا</option>
-          </select>
+         <select
+          value={filters.disability || ""}
+          onChange={(e) => handleChange("disability", e.target.value)}
+          className={styles.select}
+        >
+          <option value="" disabled hidden>ذوي الهمم</option>
+          <option value="none">لا يوجد</option>
+          <option value="نعم">نعم</option>
+          <option value="لا">لا</option>
+        </select>
+
 
           {/* Request status */}
           <select value={filters.status || ""} onChange={(e) => handleChange("status", e.target.value)} className={styles.select}>
             <option value="" disabled hidden>حالة الطلب</option>
+            <option value="none">لا يوجد</option>
             <option value="موافقة مبدئية">موافقة مبدئية</option>
             <option value="مقبول">مقبول</option>
             <option value="منتظر">منتظر</option>

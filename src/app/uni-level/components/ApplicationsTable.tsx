@@ -46,25 +46,61 @@ export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (ap
       if (!token) return;
 
       const query = Object.entries(appliedFilters)
-        .filter(([_, value]) => value && value !== "none")
-        .map(([key, value]) => {
-          let apiKey = key;
-          let apiValue = value;
+  .filter(([_, value]) => value && value !== "none")
+  .map(([key, value]) => {
+    let apiKey = key;
+    let apiValue = value;
 
-          switch (key) {
-            case "disability": apiKey = "disabilities"; break;
-            case "faculty": apiKey = "faculty"; apiValue = facultyMap[value as string] ?? ""; break;
-            case "brothers": apiKey = "family_numbers"; break;
-            case "fatherStatus": apiKey = "father_status"; break;
-            case "motherStatus": apiKey = "mother_status"; break;
-            case "housingStatus": apiKey = "housing_status"; break;
-            case "grade": apiKey = "grade"; break;
-            case "status": apiKey = "status"; break;
-            case "totalIncome": apiKey = "total_income"; break;
-          }
-          return `${apiKey}=${encodeURIComponent(apiValue as string)}`;
-        })
-        .join("&");
+    switch (key) {
+      case "disability":
+        apiKey = "disabilities";
+        apiValue = value; 
+        break;
+
+      case "faculty":
+        apiKey = "faculty";
+        apiValue = facultyMap[value as string] ?? "";
+        break;
+
+      case "brothers":
+        apiKey = "family_numbers"; 
+        apiValue = value; 
+        break;
+
+      case "fatherStatus":
+        apiKey = "father_status";
+        break;
+
+      case "motherStatus":
+        apiKey = "mother_status";
+        break;
+
+      case "housingStatus":
+        apiKey = "housing_status";
+        apiValue = value; 
+        break;
+
+      case "grade":
+        apiKey = "grade";
+        apiValue = value;
+        break;
+
+      case "status":
+        apiKey = "status";
+        break;
+
+      case "totalIncome":
+        apiKey = "total_income";
+        break;
+
+      case "search":
+        apiKey = "student_id";
+        break;
+    }
+
+    return `${apiKey}=${encodeURIComponent(apiValue as string)}`;
+  })
+  .join("&");
 
       const url = `http://127.0.0.1:8000/api/solidarity/super_dept/all_applications/${query ? `?${query}` : ""}`;
 

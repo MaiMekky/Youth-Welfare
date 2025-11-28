@@ -3,7 +3,8 @@ import React, { useState, useEffect, useRef } from "react";
 import "../styles/studentNavbar.css"; // ensure this is imported somewhere (or in _app.tsx)
 import Image from "next/image";
 import Logo from "@/app/assets/logo1.png";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 type NavItem = {
   key: string;
   label: string;
@@ -24,8 +25,12 @@ const IconUnion = () => (
 );
 const IconFamily = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-    <path d="M12 12a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+    <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="1.6"/>
+    <path d="M22 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M2 21v-2a4 4 0 0 1 3-3.87" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M8 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 const IconTakafol = () => (
@@ -46,11 +51,27 @@ const IconManage = () => (
     <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.82 2.82l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.82-2.82l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09c.7 0 1.28-.34 1.51-1a1.65 1.65 0 00-.33-1.82L4.3 3.89A2 2 0 017.12 1.06l.06.06c.46.46 1.1.66 1.71.56.6-.1 1.07-.59 1.22-1.18l.18-.7A2 2 0 0113.9.18l.18.7c.15.59.62 1.08 1.22 1.18.61.1 1.25-.1 1.71-.56l.06-.06A2 2 0 0119.7 3.9l-.06.06c-.46.46-.66 1.1-.56 1.71.1.6.59 1.07 1.18 1.22l.7.18a2 2 0 01.12 3.72l-.7.18c-.59.15-1.08.62-1.18 1.22-.1.61.1 1.25.56 1.71z" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
+const IconActivities = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <path d="M9 11l3 3L22 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+const IconFamilyManage = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <path d="M17 21v-2a3 3 0 00-3-3H8a3 3 0 00-3 3v2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+    <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="1.6"/>
+    <path d="M23 21v-2a3 3 0 00-2.5-2.94" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M16 3.13a4 4 0 010 7.75" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+    <circle cx="19" cy="19" r="2" stroke="currentColor" strokeWidth="1.6" fill="currentColor" fillOpacity="0.2"/>
+  </svg>
+);
   
 const StudentNavbar: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const pathname = usePathname();
 
   const router = useRouter(); // router جوا الcomponent
 
@@ -59,14 +80,20 @@ const StudentNavbar: React.FC = () => {
     localStorage.removeItem("refresh");
     router.push("/");
   }
-  const navItems: NavItem[] = [
-    { key: "home", label: "الرئيسية", icon: <IconHome /> },
-    { key: "union", label: "اتحاد الطلبة", icon: <IconUnion /> },
-    { key: "families", label: "الأسر الطلابية", icon: <IconFamily /> },
-    { key: "takafol", label: "التكافل الاجتماعي", icon: <IconTakafol /> },
-    { key: "profile", label: "ملفي الشخصي", icon: <IconProfile /> },
-    { key: "manage", label: "إدارة الأسرة", icon: <IconManage /> },
+  
+  const navItems: (NavItem & { href: string })[] = [
+    { key: "home", label: "الرئيسية", icon: <IconHome />, href: "/Student/MainPage" },
+    { key: "activities", label: "الأنشطة", icon: <IconActivities />, href: "/Student/Activities" },
+    { key: "union", label: "اتحاد الطلبة", icon: <IconUnion />, href: "/Student/StudentUnion" },
+    { key: "families", label: "الأسر الطلابية", icon: <IconFamily />, href: "/Student/families" },
+    { key: "familyManage", label: "ادارة الاسر", icon: <IconFamilyManage />, href: "/Student/manage" },
+    { key: "takafol", label: "التكافل الاجتماعي", icon: <IconTakafol />, href: "/Student/takafol" },
+    { key: "profile", label: "ملفي الشخصي", icon: <IconProfile />, href: "/Student/profile" },
   ];
+  
+  const isActive = (href: string) => {
+    return pathname === href || pathname?.startsWith(href + "/");
+  };
 
   // simple resize listener
   useEffect(() => {
@@ -107,21 +134,22 @@ const StudentNavbar: React.FC = () => {
         {/* Center nav - hidden on mobile */}
         <nav className="nav" role="navigation" aria-label="قائمة التصفح">
           {navItems.map((item) => (
-            <button
+            <Link
               key={item.key}
+              href={item.href}
               className={
-                item.key === "takafol"
+                isActive(item.href)
                   ? "nav-link nav-link-with-icon active-pill"
                   : "nav-link nav-link-with-icon"
               }
-              aria-current={item.key === "takafol" ? "page" : undefined}
+              aria-current={isActive(item.href) ? "page" : undefined}
               title={item.label}
             >
               <span className="nav-icon" aria-hidden>
                 {item.icon}
               </span>
               <span className="nav-label">{item.label}</span>
-            </button>
+            </Link>
           ))}
         </nav>
 
@@ -156,11 +184,12 @@ const StudentNavbar: React.FC = () => {
       >
         <div className="mobile-menu-inner">
           {navItems.map((item) => (
-            <button
+            <Link
               key={item.key}
+              href={item.href}
               role="menuitem"
               className={
-                item.key === "takafol"
+                isActive(item.href)
                   ? "mobile-item mobile-item-active"
                   : "mobile-item"
               }
@@ -168,7 +197,7 @@ const StudentNavbar: React.FC = () => {
             >
               <span className="mobile-icon" aria-hidden>{item.icon}</span>
               <span className="mobile-label">{item.label}</span>
-            </button>
+            </Link>
           ))}
         </div>
       </div>

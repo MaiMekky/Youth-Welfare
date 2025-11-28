@@ -3,6 +3,7 @@ import React from "react";
 import "./styles/studentNavbar.css";
 import "./styles/headerCard.css";
 import StudentNavbar from "./components/StudentNavbar";
+import StudentFooter from "./components/StudentFooter";
 
 export const metadata = {
   title: "التكافل الاجتماعي - صفحة الطلاب",
@@ -15,12 +16,10 @@ export default function StudentLayout({
   children: React.ReactNode;
 }) {
   return (
-    
     <div className="student-app">
-      {/* Navbar and header can be included here if you want them on every subpage */}
+      <StudentNavbar />
       <div className="student-content">{children}</div>
-     
-      
+      <StudentFooter />
     </div>
   );
 }

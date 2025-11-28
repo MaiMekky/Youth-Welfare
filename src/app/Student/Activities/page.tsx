@@ -2,7 +2,7 @@
 
 import React from "react";
 
-export default function FamiliesPage() {
+export default function ActivitiesPage() {
   return (
     <div style={{ 
       padding: "40px 20px", 
@@ -18,7 +18,7 @@ export default function FamiliesPage() {
         color: "#2C3A5F",
         marginBottom: "20px"
       }}>
-        الأسر الطلابية
+        الأنشطة
       </h1>
       <p style={{ 
         fontSize: "1.2rem", 
@@ -26,7 +26,7 @@ export default function FamiliesPage() {
         maxWidth: "600px",
         lineHeight: "1.8"
       }}>
-        صفحة الأسر الطلابية - قريباً
+        صفحة الأنشطة - قريباً
       </p>
     </div>
   );

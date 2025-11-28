@@ -62,6 +62,16 @@ export default function ProfilePage() {
           const apiData: StudentProfileAPIResponse = await response.json();
           // Map API response to UI format
           const facultyName = faculties.find(f => f.faculty_id === apiData.faculty)?.name || "";
+          // Convert relative URL to absolute if needed
+          let profilePictureUrl = apiData.profile_photo_url || "/app/assets/profile.png";
+          if (profilePictureUrl && !profilePictureUrl.startsWith('http') && !profilePictureUrl.startsWith('/')) {
+            // If it's a relative URL, make it absolute
+            profilePictureUrl = `http://127.0.0.1:8000${profilePictureUrl.startsWith('/') ? '' : '/'}${profilePictureUrl}`;
+          } else if (profilePictureUrl && profilePictureUrl.startsWith('/media/')) {
+            // If it starts with /media/, add the base URL
+            profilePictureUrl = `http://127.0.0.1:8000${profilePictureUrl}`;
+          }
+          
           const mappedData: StudentProfile = {
             student_id: apiData.student_id,
             fullName: apiData.name,
@@ -76,7 +86,7 @@ export default function ProfilePage() {
             major: apiData.major || "",
             faculty: apiData.faculty,
             facultyName: facultyName,
-            profilePicture: apiData.profile_photo_url || "/app/assets/profile.png",
+            profilePicture: profilePictureUrl,
           };
           setProfileData(mappedData);
         } else {
@@ -127,6 +137,17 @@ export default function ProfilePage() {
         const apiData: StudentProfileAPIResponse = await response.json();
         // Map API response to UI format
         const facultyName = faculties.find(f => f.faculty_id === apiData.faculty)?.name || "";
+        
+        // Convert relative URL to absolute if needed
+        let profilePictureUrl = apiData.profile_photo_url || "/app/assets/profile.png";
+        if (profilePictureUrl && profilePictureUrl.startsWith('/media/')) {
+          // If it starts with /media/, add the base URL
+          profilePictureUrl = `http://127.0.0.1:8000${profilePictureUrl}`;
+        } else if (profilePictureUrl && !profilePictureUrl.startsWith('http') && !profilePictureUrl.startsWith('/app/')) {
+          // If it's a relative URL (not starting with /app/), make it absolute
+          profilePictureUrl = `http://127.0.0.1:8000${profilePictureUrl.startsWith('/') ? '' : '/'}${profilePictureUrl}`;
+        }
+        
         const mappedData: StudentProfile = {
           student_id: apiData.student_id,
           fullName: apiData.name,
@@ -141,7 +162,7 @@ export default function ProfilePage() {
           major: apiData.major || "",
           faculty: apiData.faculty,
           facultyName: facultyName,
-          profilePicture: apiData.profile_photo_url || "/app/assets/profile.png",
+          profilePicture: profilePictureUrl,
         };
         setProfileData(mappedData);
       } else {
@@ -206,6 +227,17 @@ export default function ProfilePage() {
         const apiData: StudentProfileAPIResponse = await response.json();
         // Map API response to UI format
         const facultyName = faculties.find(f => f.faculty_id === apiData.faculty)?.name || "";
+        
+        // Convert relative URL to absolute if needed
+        let profilePictureUrl = apiData.profile_photo_url || "/app/assets/profile.png";
+        if (profilePictureUrl && profilePictureUrl.startsWith('/media/')) {
+          // If it starts with /media/, add the base URL
+          profilePictureUrl = `http://127.0.0.1:8000${profilePictureUrl}`;
+        } else if (profilePictureUrl && !profilePictureUrl.startsWith('http') && !profilePictureUrl.startsWith('/app/')) {
+          // If it's a relative URL (not starting with /app/), make it absolute
+          profilePictureUrl = `http://127.0.0.1:8000${profilePictureUrl.startsWith('/') ? '' : '/'}${profilePictureUrl}`;
+        }
+        
         const mappedData: StudentProfile = {
           student_id: apiData.student_id,
           fullName: apiData.name,
@@ -220,7 +252,7 @@ export default function ProfilePage() {
           major: apiData.major || "",
           faculty: apiData.faculty,
           facultyName: facultyName,
-          profilePicture: apiData.profile_photo_url || "/app/assets/profile.png",
+          profilePicture: profilePictureUrl,
         };
         setProfileData(mappedData);
         setIsEditing(false);

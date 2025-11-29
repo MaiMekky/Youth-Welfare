@@ -245,7 +245,50 @@ body {
 }
 
 @media (max-width: 600px) {
-  .main-header-title { font-size: 1.6rem; }
-  .footer-button { font-size: 0.85rem; padding: 8px 15px; min-width: 100px; }
-  .structure-layout { flex-direction: column; }
+  .request-details-container {
+    padding-bottom: 80px;
+  }
+
+  .main-header-card {
+    width: 95%;
+    padding: 20px 15px;
+    margin-bottom: 15px;
+  }
+
+  .main-header-title { 
+    font-size: 1.4rem; 
+  }
+
+  .main-header-subtitle {
+    font-size: 0.85rem;
+  }
+
+  .content-area {
+    width: 98%;
+    gap: 15px;
+    padding: 0 5px;
+  }
+
+  .section-card {
+    padding: 12px;
+  }
+
+  .section-heading {
+    font-size: 1.1rem;
+  }
+
+  .footer-button { 
+    font-size: 0.85rem; 
+    padding: 8px 15px; 
+    min-width: 100px; 
+  }
+
+  .structure-layout { 
+    flex-direction: column; 
+  }
+
+  .action-footer {
+    padding: 10px 10px;
+    gap: 10px;
+  }
 }

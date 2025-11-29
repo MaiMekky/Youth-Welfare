@@ -1,8 +1,13 @@
 "use client";
-import React, { useCallback } from "react";
+import React from "react";
 import "../styles/RequestDetails.css";
 
-const RequestDetails: React.FC = () => {
+interface RequestDetailsProps {
+  onBack?: () => void;
+  onSubmit?: () => void;
+}
+
+const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => {
   const COLORS = {
     darkNavy: "#27285D",
     gold: "#B38E19",
@@ -13,13 +18,21 @@ const RequestDetails: React.FC = () => {
     sectionGreen: "#C8E6C9",
   };
 
-  const handleBackClick = useCallback(() => {
-    alert("Navigating Back (Router action not implemented).");
-  }, []);
+  const handleBackClick = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      alert("Navigating Back (Router action not implemented).");
+    }
+  };
 
-  const handleSubmitClick = useCallback(() => {
-    alert("Submitting Request (Form submission not implemented).");
-  }, []);
+  const handleSubmitClick = () => {
+    if (onSubmit) {
+      onSubmit();
+    } else {
+      alert("Submitting Request (Form submission not implemented).");
+    }
+  };
 
   const sections = [
     {

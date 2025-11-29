@@ -1,101 +1,182 @@
 'use client';
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import '../styles/mainpage.css'; 
+import '../styles/mainpage.css';
 
 export default function MainPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [joinedFamilies, setJoinedFamilies] = useState<any[]>([
+    {
+      id: 100,
+      title: 'أسرة الرواد الرياضيين',
+      subtitle: 'أسرة متخصصة في الأنشطة الرياضية والتنافس الشريف',
+      place: 'الصالة الرياضية',
+      views: '22/30 عضو',
+      createdAt: '2020',
+      deadline: '15 يناير 2025',
+      goals: 'تنظيم البطولات الرياضية، تدريب الفرق، نشر ثقافة الرياضة',
+      image: '/api/placeholder/300/200'
+    }
+  ]);
+
+  const [selectedFamily, setSelectedFamily] = useState<any>(null);
+
+  interface FormData {
+    name: string;
+    id: string;
+    level: string;
+    address: string;
+    studentId: string;
+    mobile: string;
+  }
+
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     id: '',
+    level: '',
     address: '',
+    studentId: '',
     mobile: ''
   });
 
   const programs = [
     {
+      id: 100,
+      title: 'أسرة الرواد الرياضيين',
+      subtitle: 'أسرة متخصصة في الأنشطة الرياضية والتنافس الشريف',
+      place: 'الصالة الرياضية',
+      views: '22/30 عضو',
+      deadline: '15 يناير 2025',
+      goals: 'تنظيم البطولات الرياضية، تدريب الفرق، نشر ثقافة الرياضة',
+      createdAt: '2020',
+      description:
+        'أسرة تهتم بتنمية مهارات الطلاب الرياضية وتنظيم مسابقات داخلية وخارجية.',
+      image: '/api/placeholder/300/200'
+    },
+    {
       id: 1,
       title: 'أسرة التطوع',
       subtitle: 'أسرتنا تهتم بمشاركتك وخدمتك للمجتمع وتطويره والنهوض',
       image: '/api/placeholder/300/200',
-      color: 'red',
-      views: '18/25',
+      views: '18/25 عضو',
       date: '15 يناير 2025',
-     
+      place: 'مركز الأنشطة',
+      goals: 'تنمية روح التطوع، دعم المجتمع، المساهمة في الأنشطة الخيرية',
+      createdAt: '2018',
+      description:
+        'أسرة اجتماعية تهدف إلى تعزيز روح العطاء والتعاون والمشاركة المجتمعية.'
     },
     {
       id: 2,
       title: 'أسرة الوعي الصحي',
       subtitle: 'أسرتنا المتخصصة في النشاط الصحية والتثقيف الصحي المختلف',
       image: '/api/placeholder/300/200',
-      color: 'green',
-      views: '23/30',
+      views: '23/30 عضو',
       date: '15 يناير 2025',
-    
-    },
-    {
-      id: 3,
-      title: 'أسرة المهنيين',
-      subtitle: 'أسرة مهتمة بتطوير المهارات والمعرفة بالتقنيات والحرف',
-      image: '/api/placeholder/300/200',
-      color: 'blue',
-      views: '15/25',
-      date: '27 يناير 2025',
-    
+      place: 'المبنى B',
+      goals: 'التوعية الصحية – حملات تبرع – دعم الصحة النفسية',
+      createdAt: '2019',
+      description:
+        'أسرة تثقيفية تهدف لرفع مستوى الوعي الصحي بين الطلاب وتنظيم حملات صحية.'
     }
   ];
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = () => {
     if (!formData.name || !formData.id || !formData.address || !formData.mobile) {
-      alert('يرجى ملء جميع الحقول');
+      alert("يرجى ملء جميع الحقول");
       return;
     }
-    console.log('Form submitted:', formData);
-    setFormData({ name: '', id: '', address: '', mobile: '' });
+
+    // إضافة الأسرة المنضم لها لقائمة الأسَر الحالية
+    setJoinedFamilies(prev => [...prev, selectedFamily]);
+
     setIsModalOpen(false);
-    alert('تم تسجيلك بنجاح');
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 2500);
   };
+  const isJoined = (id: number) => {
+  return joinedFamilies.some(fam => fam.id === id);
+};
+
 
   return (
     <div dir="rtl" className="container">
-      {/* Header */}
-      <header className="header">
-        <h1>الأسر الحالية</h1>
-       
-      </header>
 
-      {/* Notification */}
-      <section className="notification">
-        <div className="notification-content">
-          <div>
-            <h3>فرصة للانضمام للأسرة الذهبية</h3>
-            <p>اضغط هنا للاطلاع على الفرص المتاحة والتسجيل معنا</p>
-          </div>
-          <img src="/api/placeholder/60/60" alt="icon" />
+      {/* Success Alert */}
+      {showSuccess && (
+        <div className="success-alert">
+          <p>تم الانضمام للأسرة بنجاح 🎉</p>
         </div>
+      )}
+
+      {/* Joined Families Section */}
+      <section className="joined-section">
+        <header className="header">
+          <h1>أسرك الحالية</h1>
+        </header>
+        <div className="gold-line"></div>
+
+        {joinedFamilies.map(fam => (
+          <div key={fam.id} className="joined-card">
+            <h3>{fam.title}</h3>
+            <p>{fam.subtitle}</p>
+
+            <div className="joined-meta">
+              <span>الأعضاء: {fam.views}</span>
+            </div>
+
+            <p><strong>المكان:</strong> {fam.place}</p>
+          
+          </div>
+        ))}
       </section>
 
-      {/* Programs Grid */}
+      <header className="header">
+        <h1>الأسر المتاحة للانضمام</h1>
+      </header>
+      <div className="gold-line"></div>
+
+      {/* Programs */}
       <main className="programs-grid">
         {programs.map(program => (
           <div key={program.id} className="program-card">
             <div className="program-image">
               <img src={program.image} alt={program.title} />
-              <span style={{backgroundColor: program.color}} className="status">{program.status}</span>
             </div>
+
             <div className="program-content">
-              <h3>{program.title}</h3>
-              <p>{program.subtitle}</p>
+              <h3>{program.title}
+              </h3>
+              <span>
+              <p className='goals-title'>وصف الاسرة : {program.subtitle} </p>
+              <p className="goals-title"> الاهداف : {program.description}</p>
+               <p className="goals-title">العدد الحالي : {program.views}</p>
+               <p className="goals-title">المكان : {program.place}</p>
+               </span>
+
               <div className="meta">
-                <span>العدد: {program.views}</span>
-                <span>التاريخ: {program.date}</span>
+                <span>تاريخ انشاء الاسرة : {program.createdAt}</span>
               </div>
-              <button onClick={() => setIsModalOpen(true)}>انضم للاسرة</button>
+              <button
+  disabled={isJoined(program.id)}
+  className={isJoined(program.id) ? "joined-btn" : ""}
+  onClick={() => {
+    if (isJoined(program.id)) return; // حماية إضافية
+    setSelectedFamily(program);
+    setIsModalOpen(true);
+  }}
+>
+  {isJoined(program.id) ? "منضم بالفعل" : "انضم للأسرة"}
+</button>
+
+
+     
             </div>
           </div>
         ))}
@@ -106,24 +187,33 @@ export default function MainPage() {
         <div className="modal-overlay">
           <div className="modal">
             <div className="modal-header">
-              <h2>الانضمام للأسرة</h2>
-              <button onClick={() => setIsModalOpen(false)}><X size={24} /></button>
+              <h2>طلب الانضمام لـ {selectedFamily?.title}</h2>
+              <button onClick={() => setIsModalOpen(false)}>
+                <X size={24} />
+              </button>
             </div>
+
             <div className="modal-body">
-              {['name','id','address','mobile'].map((field, idx) => (
+              {[
+                { key: 'name', label: 'الاسم' },
+                { key: 'id', label: 'رقم الهوية / البطاقة' },
+                { key: 'level', label: 'الفرقة / المستوى' },
+                { key: 'address', label: 'العنوان' },
+                { key: 'studentId', label: 'كود الطالب' },
+                { key: 'mobile', label: 'رقم الموبايل' }
+              ].map((field, idx) => (
                 <div key={idx} className="form-group">
-                  <label>
-                    {field === 'name' ? 'الاسم' : field === 'id' ? 'الهوية / البطاقة' : field === 'address' ? 'العنوان' : 'رقم الجوال'}
-                  </label>
+                  <label>{field.label}</label>
                   <input
-                    type={field === 'mobile' ? 'tel' : 'text'}
-                    name={field}
-                    value={formData[field]}
+                    type={field.key === 'mobile' ? 'tel' : 'text'}
+                    name={field.key}
+                    value={formData[field.key as keyof FormData]}
                     onChange={handleInputChange}
-                    placeholder={`أدخل ${field === 'name' ? 'اسمك' : field === 'id' ? 'رقم هويتك' : field === 'address' ? 'عنوانك' : 'رقم جوالك'}`}
+                    placeholder={field.label}
                   />
                 </div>
               ))}
+
               <div className="modal-buttons">
                 <button onClick={() => setIsModalOpen(false)}>إلغاء</button>
                 <button onClick={handleSubmit}>تسجيل</button>

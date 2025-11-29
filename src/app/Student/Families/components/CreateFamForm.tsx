@@ -1,4 +1,10 @@
+"use client";
 import React, { useState } from 'react';
+
+interface CreateFamFormProps {
+  onBack?: () => void;
+  onSubmitSuccess?: () => void;
+}
 
 const COLORS = {
   darkNavy: '#171842ff',
@@ -28,7 +34,7 @@ interface FormErrors {
 
 const defaultPerson: Person = { fullName: '', nationalId: '', mobile: '' };
 
-const CreateFamForm = () => {
+const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }) => {
   const [familyName, setFamilyName] = useState('');
   const [familyGoals, setFamilyGoals] = useState('');
   const [familyDescription, setFamilyDescription] = useState('');
@@ -175,11 +181,11 @@ const CreateFamForm = () => {
     return isValid;
   };
 
-  const handleBoardChange = (key: string, field: string, value: string) => {
+  const handleBoardChange = (key: keyof typeof boardMembers, field: string, value: string) => {
     setBoardMembers(prev => ({ ...prev, [key]: { ...prev[key], [field]: value } }));
   };
 
-  const handleCommitteeChange = (committeeKey: string, role: string, field: string, value: string) => {
+  const handleCommitteeChange = (committeeKey: keyof typeof committees, role: 'secretary' | 'assistant', field: keyof Person, value: string) => {
     setCommittees(prev => ({
       ...prev,
       [committeeKey]: {
@@ -193,9 +199,30 @@ const CreateFamForm = () => {
     e.preventDefault();
 
     if (validateForm()) {
-      console.log({ familyName, familyGoals, familyDescription, boardMembers, committees });
+      // Save form data (you can replace this with API call later)
+      const formData = {
+        familyName,
+        familyGoals,
+        familyDescription,
+        boardMembers,
+        committees,
+        submittedAt: new Date().toISOString()
+      };
+      
+      console.log("Form submitted:", formData);
+      
+      // Save to localStorage for tracking
+      localStorage.setItem("familyRequestData", JSON.stringify(formData));
+      localStorage.setItem("familyRequestStatus", "pending");
+      localStorage.setItem("familyRequestSubmitted", "true");
+      
       setErrors({});
       setTouchedFields(new Set());
+      
+      // Call success callback if provided
+      if (onSubmitSuccess) {
+        onSubmitSuccess();
+      }
     }
   };
 
@@ -224,7 +251,7 @@ const CreateFamForm = () => {
 
   return (
     <div style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif", backgroundColor: COLORS.lightBg, minHeight: '100vh', padding: '20px', direction: 'rtl' }}>
-      <div style={{ maxWidth: '900px', margin: '0 auto', backgroundColor: COLORS.white, borderRadius: '12px', boxShadow: '0 6px 15px rgba(0, 0, 0, 0.1)', padding: '30px 40px' }} onSubmit={handleSubmit} as="form">
+      <form style={{ maxWidth: '900px', margin: '0 auto', backgroundColor: COLORS.white, borderRadius: '12px', boxShadow: '0 6px 15px rgba(0, 0, 0, 0.1)', padding: '30px 40px' }} onSubmit={handleSubmit}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '30px', paddingBottom: '20px', borderBottom: `3px solid ${COLORS.gold}` }}>
           <h1 style={{ color: COLORS.darkNavy, marginBottom: '8px', fontSize: '28px', fontWeight: '700' }}>نموذج طلب إنشاء أسرة طلابية</h1>
@@ -302,7 +329,7 @@ const CreateFamForm = () => {
                   <input
                     placeholder="الاسم الكامل"
                     value={person.fullName}
-                    onChange={e => handleBoardChange(key, 'fullName', e.target.value)}
+                    onChange={e => handleBoardChange(key as keyof typeof boardMembers, 'fullName', e.target.value)}
                     onBlur={() => handleFieldBlur(`board_${key}_name`)}
                     style={inputStyle(hasFieldError(`board_${key}_name`))}
                   />
@@ -316,7 +343,7 @@ const CreateFamForm = () => {
                     placeholder="14 رقم"
                     maxLength={14}
                     value={person.nationalId}
-                    onChange={e => handleBoardChange(key, 'nationalId', e.target.value.replace(/\D/g, ''))}
+                    onChange={e => handleBoardChange(key as keyof typeof boardMembers, 'nationalId', e.target.value.replace(/\D/g, ''))}
                     onBlur={() => handleFieldBlur(`board_${key}_nationalId`)}
                     style={inputStyle(hasFieldError(`board_${key}_nationalId`))}
                   />
@@ -330,7 +357,7 @@ const CreateFamForm = () => {
                     placeholder="01XXXXXXXXX"
                     maxLength={11}
                     value={person.mobile}
-                    onChange={e => handleBoardChange(key, 'mobile', e.target.value.replace(/\D/g, ''))}
+                    onChange={e => handleBoardChange(key as keyof typeof boardMembers, 'mobile', e.target.value.replace(/\D/g, ''))}
                     onBlur={() => handleFieldBlur(`board_${key}_mobile`)}
                     style={inputStyle(hasFieldError(`board_${key}_mobile`))}
                   />
@@ -358,7 +385,7 @@ const CreateFamForm = () => {
                     <input
                       placeholder="الاسم الكامل"
                       value={committee.secretary.fullName}
-                      onChange={e => handleCommitteeChange(key, 'secretary', 'fullName', e.target.value)}
+                      onChange={e => handleCommitteeChange(key as keyof typeof committees, 'secretary', 'fullName', e.target.value)}
                       onBlur={() => handleFieldBlur(`committee_${key}_secretary_name`)}
                       style={inputStyle(hasFieldError(`committee_${key}_secretary_name`))}
                     />
@@ -372,7 +399,7 @@ const CreateFamForm = () => {
                       placeholder="14 رقم"
                       maxLength={14}
                       value={committee.secretary.nationalId}
-                      onChange={e => handleCommitteeChange(key, 'secretary', 'nationalId', e.target.value.replace(/\D/g, ''))}
+                      onChange={e => handleCommitteeChange(key as keyof typeof committees, 'secretary', 'nationalId', e.target.value.replace(/\D/g, ''))}
                       onBlur={() => handleFieldBlur(`committee_${key}_secretary_nationalId`)}
                       style={inputStyle(hasFieldError(`committee_${key}_secretary_nationalId`))}
                     />
@@ -386,7 +413,7 @@ const CreateFamForm = () => {
                       placeholder="01XXXXXXXXX"
                       maxLength={11}
                       value={committee.secretary.mobile}
-                      onChange={e => handleCommitteeChange(key, 'secretary', 'mobile', e.target.value.replace(/\D/g, ''))}
+                      onChange={e => handleCommitteeChange(key as keyof typeof committees, 'secretary', 'mobile', e.target.value.replace(/\D/g, ''))}
                       onBlur={() => handleFieldBlur(`committee_${key}_secretary_mobile`)}
                       style={inputStyle(hasFieldError(`committee_${key}_secretary_mobile`))}
                     />
@@ -405,7 +432,7 @@ const CreateFamForm = () => {
                     <input
                       placeholder="الاسم الكامل"
                       value={committee.assistant.fullName}
-                      onChange={e => handleCommitteeChange(key, 'assistant', 'fullName', e.target.value)}
+                      onChange={e => handleCommitteeChange(key as keyof typeof committees, 'assistant', 'fullName', e.target.value)}
                       onBlur={() => handleFieldBlur(`committee_${key}_assistant_name`)}
                       style={inputStyle(hasFieldError(`committee_${key}_assistant_name`))}
                     />
@@ -419,7 +446,7 @@ const CreateFamForm = () => {
                       placeholder="14 رقم"
                       maxLength={14}
                       value={committee.assistant.nationalId}
-                      onChange={e => handleCommitteeChange(key, 'assistant', 'nationalId', e.target.value.replace(/\D/g, ''))}
+                      onChange={e => handleCommitteeChange(key as keyof typeof committees, 'assistant', 'nationalId', e.target.value.replace(/\D/g, ''))}
                       onBlur={() => handleFieldBlur(`committee_${key}_assistant_nationalId`)}
                       style={inputStyle(hasFieldError(`committee_${key}_assistant_nationalId`))}
                     />
@@ -433,7 +460,7 @@ const CreateFamForm = () => {
                       placeholder="01XXXXXXXXX"
                       maxLength={11}
                       value={committee.assistant.mobile}
-                      onChange={e => handleCommitteeChange(key, 'assistant', 'mobile', e.target.value.replace(/\D/g, ''))}
+                      onChange={e => handleCommitteeChange(key as keyof typeof committees, 'assistant', 'mobile', e.target.value.replace(/\D/g, ''))}
                       onBlur={() => handleFieldBlur(`committee_${key}_assistant_mobile`)}
                       style={inputStyle(hasFieldError(`committee_${key}_assistant_mobile`))}
                     />
@@ -451,7 +478,13 @@ const CreateFamForm = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '30px', paddingTop: '20px', borderTop: `2px solid ${COLORS.gold}`, gap: '15px' }}>
           <button
             type="button"
-            onClick={() => window.history.back()}
+            onClick={() => {
+              if (onBack) {
+                onBack();
+              } else {
+                window.history.back();
+              }
+            }}
             style={{ padding: '12px 30px', border: 'none', borderRadius: '8px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', backgroundColor: '#cccccc', color: COLORS.darkNavy, minWidth: '120px', transition: 'all 0.3s' }}
             onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#b3b3b3')}
             onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#cccccc')}
@@ -468,7 +501,7 @@ const CreateFamForm = () => {
             تقديم الطلب
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 };

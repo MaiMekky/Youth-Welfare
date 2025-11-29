@@ -9,12 +9,12 @@
 /* Global */
 .page-container {
   background-color: var(--color-light-bg);
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px 0;
-  color: var(--color-dark-navy);
+  padding: 20px 0 0 0;
+  color: var(---dark-navy);
+  margin-bottom: 0;
 }
 
 /* Header Card */
@@ -46,6 +46,7 @@
   font-size: 1.9rem;        /* smaller */
   font-weight: bold;
   margin: 10px 0;
+  color : white;
 }
 
 /* Description */
@@ -124,28 +125,56 @@
 
 /* Mobile */
 @media (max-width: 768px) {
+  .page-container {
+    padding: 15px 0;
+  }
+
   .header-card {
-    width: 90%;
+    width: 95%;
     padding: 20px 15px;
+    margin-top: 5px;
   }
 
   .main-title {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
+    margin: 8px 0;
+  }
+
+  .description-text {
+    font-size: 0.9rem;
+    margin: 12px 0;
   }
 
   .button-group {
     flex-direction: column;
-    gap: 12px;
-    width: 90%;
+    gap: 10px;
+    width: 95%;
+    margin-top: 20px;
   }
 
   .action-button {
     width: 100%;
     max-width: none;
     padding: 12px;
+    font-size: 0.85rem;
   }
 
   .icon {
     margin-left: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-card {
+    width: 98%;
+    padding: 15px 10px;
+  }
+
+  .main-title {
+    font-size: 1.3rem;
+  }
+
+  .description-text {
+    font-size: 0.85rem;
   }
 }

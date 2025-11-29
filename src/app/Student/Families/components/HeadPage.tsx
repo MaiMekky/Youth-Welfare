@@ -1,15 +1,31 @@
 "use client";
-import React, { useCallback } from "react";
+import React from "react";
+import { useRouter } from "next/navigation";
 import "../styles/HeadPage.css";
 
-const HeadPage: React.FC = () => {
-  const handleReviewClick = useCallback(() => {
-    alert("Navigating to Review Creation Request page.");
-  }, []);
+interface HeadPageProps {
+  onCreateClick?: () => void;
+  onReviewClick?: () => void;
+}
 
-  const handleCreateClick = useCallback(() => {
-    alert("Navigating to Create New Family page.");
-  }, []);
+const HeadPage: React.FC<HeadPageProps> = ({ onCreateClick, onReviewClick }) => {
+  const router = useRouter();
+
+  const handleReviewClick = () => {
+    if (onReviewClick) {
+      onReviewClick();
+    } else {
+      router.push("/Student/families/TrackRequest");
+    }
+  };
+
+  const handleCreateClick = () => {
+    if (onCreateClick) {
+      onCreateClick();
+    } else {
+      router.push("/Student/families/CreateFamForm");
+    }
+  };
 
   return (
     <div className="page-container">
@@ -25,12 +41,12 @@ const HeadPage: React.FC = () => {
 
       {/* Buttons */}
       <div className="button-group">
-           <button
+        <button
           className="action-button button-secondary"
           onClick={handleCreateClick}
         >
           <span className="icon">+</span>
-          طلب إنشاء أسرة
+          انشاء طلب اسرة
         </button>
         <button
           className="action-button button-primary"
@@ -39,8 +55,6 @@ const HeadPage: React.FC = () => {
           <span className="icon">📄</span>
           مراجعة طلب إنشاء أسرتك
         </button>
-
-     
       </div>
     </div>
   );

@@ -1,0 +1,151 @@
+/* --- Colors --- */
+:root {
+  --color-dark-navy: #27285d;
+  --color-gold: #b38e19;
+  --color-light-bg: #f3f5fd;
+  --color-white: #f3f5fd;
+}
+
+/* Global */
+.page-container {
+  background-color: var(--color-light-bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+  color: var(--color-dark-navy);
+}
+
+/* Header Card */
+.header-card {
+  direction: rtl;
+  background-color: var(--color-dark-navy);
+  color: var(--color-white);
+  padding: 25px 20px;            /* smaller padding */
+  margin-top: 10px;
+  width: 80%;                    /* smaller width */
+              /* reduced max width */
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  position: relative;
+}
+
+/* Location */
+.location-text {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+/* Title */
+.main-title {
+  font-size: 1.9rem;        /* smaller */
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+/* Description */
+.description-text {
+  font-size: 0.95rem;       /* smaller */
+  line-height: 1.5;
+  margin: 15px 0;
+  text-align: center;
+}
+
+/* Separator */
+.separator-line {
+  width: 45px;      /* smaller line */
+  height: 3px;
+  background-color: var(--color-gold);
+  margin: 10px auto 20px auto;
+}
+
+/* Buttons Container */
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 12px;                 /* smaller gap */
+  margin-top: 25px;
+  width: 75%;
+  max-width: 650px;
+}
+
+/* Buttons */
+.action-button {
+  font-size: 0.9rem;         /* smaller text */
+  font-weight: 600;
+  padding: 10px 15px;        /* smaller padding */
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;   /* ensure centered */
+  align-items: center;
+  white-space: nowrap;
+  width: 45%;                /* smaller width */
+  max-width: 200px;          /* reduced max width */
+  transition: 0.3s;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Hover */
+.action-button:hover {
+  transform: translateY(-2px);
+}
+
+/* Icon */
+.icon {
+  margin-left: 6px;
+  font-size: 1.1rem;
+}
+
+/* Colors */
+.button-primary {
+  background-color: var(--color-gold);
+  color: var(--color-dark-navy);
+}
+
+.button-primary:hover {
+  background-color: #9e7d17;
+}
+
+.button-secondary {
+  background-color: var(--color-dark-navy);
+  color: var(--color-white);
+}
+
+.button-secondary:hover {
+  background-color: #3c3e70;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .header-card {
+    width: 90%;
+    padding: 20px 15px;
+  }
+
+  .main-title {
+    font-size: 1.6rem;
+  }
+
+  .button-group {
+    flex-direction: column;
+    gap: 12px;
+    width: 90%;
+  }
+
+  .action-button {
+    width: 100%;
+    max-width: none;
+    padding: 12px;
+  }
+
+  .icon {
+    margin-left: 8px;
+  }
+}

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import "../styles/studentNavbar.css"; // ensure this is imported somewhere (or in _app.tsx)
+import "../styles/studentNavbar.css";
 import Image from "next/image";
 import Logo from "@/app/assets/logo1.png";
 import { useRouter, usePathname } from "next/navigation";

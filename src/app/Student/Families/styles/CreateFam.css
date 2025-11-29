@@ -1,0 +1,259 @@
+/* CreateFam.css */
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #F3F5FD;
+  margin: 0;
+  padding: 20px;
+  direction: rtl;
+}
+
+.create-fam-form {
+  max-width: 900px;
+  margin: 0 auto;
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  padding: 30px 40px;
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #B38E19;
+}
+
+.form-header h1 {
+  color: #27285D;
+  margin-bottom: 8px;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.form-header p {
+  color: #B38E19;
+  font-size: 16px;
+  margin: 0;
+}
+
+.form-section {
+  background-color: #FFF9C4;
+  padding: 25px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  border: 2px solid #E1BEE7;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-section h2 {
+  color: #27285D;
+  font-size: 22px;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #B38E19;
+  text-align: center;
+  font-weight: 700;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #27285D;
+  font-size: 14px;
+}
+
+.input-group input,
+.input-group textarea {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #E0E0E0;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s;
+  background-color: #FFFFFF;
+  box-sizing: border-box;
+}
+
+.input-group input:focus,
+.input-group textarea:focus {
+  border-color: #B38E19;
+  box-shadow: 0 0 8px rgba(179, 142, 25, 0.3);
+}
+
+.board-person {
+  background-color: #FFFFFF;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #E0E0E0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.board-person h3 {
+  font-size: 16px;
+  margin-bottom: 15px;
+  color: #27285D;
+  font-weight: 600;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #E1BEE7;
+}
+
+.person-inputs {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.person-inputs input {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: #FFFFFF;
+}
+
+.committee {
+  background-color: #FFFFFF;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 25px;
+  border: 1px solid #E0E0E0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.committee h3 {
+  background-color: #E1BEE7;
+  padding: 12px 15px;
+  border-radius: 8px;
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: #27285D;
+  text-align: center;
+  font-weight: 700;
+}
+
+.committee-person {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #F9FAFF;
+  border-radius: 8px;
+  border: 1px solid #E0E0E0;
+}
+
+.committee-person label {
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: block;
+  color: #27285D;
+  font-size: 14px;
+}
+
+.committee-person .person-inputs {
+  gap: 12px;
+}
+
+.committee-person .person-inputs input {
+  min-width: 180px;
+}
+
+.form-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 2px solid #B38E19;
+}
+
+.btn-back,
+.btn-submit {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  min-width: 120px;
+}
+
+.btn-back {
+  background-color: #cccccc;
+  color: #27285D;
+}
+
+.btn-back:hover {
+  background-color: #b3b3b3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-submit {
+  background-color: #27285D;
+  color: #fff;
+}
+
+.btn-submit:hover {
+  background-color: #1d1d4a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .create-fam-form {
+    padding: 20px;
+    margin: 10px;
+  }
+  
+  .person-inputs {
+    flex-direction: column;
+  }
+  
+  .person-inputs input {
+    min-width: 100%;
+  }
+  
+  .form-footer {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .btn-back,
+  .btn-submit {
+    width: 100%;
+  }
+  
+  .form-section {
+    padding: 15px;
+  }
+}
+
+/* Input placeholder styling */
+input::placeholder {
+  color: #999;
+  font-size: 13px;
+}
+
+textarea::placeholder {
+  color: #999;
+  font-size: 13px;
+}
+
+/* Specific styling for required fields */
+input:required, textarea:required {
+  border-left: 3px solid #B38E19;
+}
+
+/* Number input specific styling */
+input[type="text"] {
+  text-align: right;
+}

@@ -1,0 +1,49 @@
+"use client";
+import React, { useCallback } from "react";
+import "../styles/HeadPage.css";
+
+const HeadPage: React.FC = () => {
+  const handleReviewClick = useCallback(() => {
+    alert("Navigating to Review Creation Request page.");
+  }, []);
+
+  const handleCreateClick = useCallback(() => {
+    alert("Navigating to Create New Family page.");
+  }, []);
+
+  return (
+    <div className="page-container">
+      {/* Header Card */}
+      <div className="header-card">
+        <h1 className="main-title">الأسر الطلابية</h1>
+        <div className="separator-line"></div>
+
+        <p className="description-text">
+          انضم إلى الأسر الطلابية المتنوعة وكن جزءًا من مجتمع طلابي نشط
+        </p>
+      </div>
+
+      {/* Buttons */}
+      <div className="button-group">
+           <button
+          className="action-button button-secondary"
+          onClick={handleCreateClick}
+        >
+          <span className="icon">+</span>
+          طلب إنشاء أسرة
+        </button>
+        <button
+          className="action-button button-primary"
+          onClick={handleReviewClick}
+        >
+          <span className="icon">📄</span>
+          مراجعة طلب إنشاء أسرتك
+        </button>
+
+     
+      </div>
+    </div>
+  );
+};
+
+export default HeadPage;

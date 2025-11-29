@@ -1,0 +1,251 @@
+/* --- Colors --- */
+:root {
+  --color-dark-navy: #27285D;
+  --color-gold: #B38E19;
+  --color-light-bg: #F3F5FD;
+  --color-white: #FFFFFF;
+  --color-section-yellow: #FFF9C4;
+  --color-section-blue: #B3E5FC;
+  --color-section-green: #C8E6C9;
+}
+
+/* --- Global --- */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: var(--color-light-bg);
+}
+
+.request-details-container {
+  direction: rtl;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 100px; /* for fixed footer */
+  box-sizing: border-box;
+}
+
+/* --- Main Header --- */
+.main-header-card {
+  background-color: var(--color-dark-navy);
+  color: var(--color-white);
+  padding: 30px 20px;
+  width: 90%;
+  max-width: 700px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  margin-bottom: 25px;
+  border-radius: 10px;
+}
+
+.main-header-title {
+  font-size: 1.9rem;
+  font-weight: bold;
+  margin: 0 0 10px;
+}
+
+.main-header-subtitle {
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.separator-line-gold {
+  width: 50px;
+  height: 3px;
+  background-color: var(--color-gold);
+  margin: 12px auto;
+  border-radius: 2px;
+}
+
+/* --- Sections --- */
+.content-area {
+  width: 95%;
+  max-width: 1000px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  padding: 0 10px;
+}
+
+.section-card {
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.section-title-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.section-icon {
+  font-size: 1.4rem;
+  color: var(--color-dark-navy);
+  padding: 6px;
+  background-color: var(--color-gold);
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.section-heading {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--color-dark-navy);
+  margin: 0;
+  padding-bottom: 3px;
+  border-bottom: 2px solid var(--color-gold);
+}
+
+.section-body {
+  padding: 0 8px;
+}
+
+/* Checklist & Bullet */
+.checklist, .bullet-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0 0;
+}
+
+.checklist li::before {
+  content: '✓';
+  color: var(--color-gold);
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.bullet-list li::before {
+  content: '•';
+  color: var(--color-dark-navy);
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.checklist li, .bullet-list li {
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Structure layout */
+.structure-layout {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.role-column, .committee-column {
+  flex: 1;
+  min-width: 200px;
+}
+
+.column-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+  border-bottom: 1px dashed rgba(0,0,0,0.2);
+  padding-bottom: 3px;
+}
+
+/* Steps */
+.step-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.step-number {
+  background-color: var(--color-gold);
+  color: var(--color-dark-navy);
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.step-content .step-title {
+  font-weight: bold;
+  font-size: 0.95rem;
+  display: block;
+}
+
+.step-content p {
+  margin: 4px 0 0 0;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+/* Footer */
+.action-footer {
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 12px 15px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  z-index: 1000;
+}
+
+.footer-button {
+  padding: 10px 25px;
+  border-radius: 7px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 0.95rem;
+  min-width: 120px;
+}
+
+.button-back {
+  background-color: var(--color-white);
+  color: var(--color-dark-navy);
+  border: 2px solid var(--color-dark-navy);
+}
+
+.button-back:hover {
+  background-color: var(--color-light-bg);
+}
+
+.button-submit {
+  background-color: var(--color-dark-navy);
+  color: var(--color-white);
+}
+
+.button-submit:hover {
+  background-color: #3c3e70;
+}
+
+/* --- Responsive --- */
+@media (min-width: 768px) {
+  .content-area {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .main-header-title { font-size: 1.6rem; }
+  .footer-button { font-size: 0.85rem; padding: 8px 15px; min-width: 100px; }
+  .structure-layout { flex-direction: column; }
+}

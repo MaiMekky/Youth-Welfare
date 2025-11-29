@@ -109,3 +109,17 @@
 .logoutBtn:hover {
   background-color: #c0392b;
 }
+.navBtn {
+  background: white;
+  border: 1px solid #ddd;
+  padding: 8px 14px;
+  margin-left: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.navBtn:hover {
+  background-color: #f0f0f0;
+}

@@ -10,14 +10,13 @@ export default function Header() {
   const router = useRouter();
 
   const handleLogout = () => {
-  
-   localStorage.clear();
-  document.cookie = "access=; path=/; max-age=0; SameSite=Lax";
-  document.cookie = "refresh=; path=/; max-age=0; SameSite=Lax";
-  document.cookie = "user_type=; path=/; max-age=0; SameSite=Lax";
-  document.cookie = "roleKey=; path=/; max-age=0; SameSite=Lax";
-  document.cookie = "role=; path=/; max-age=0; SameSite=Lax";
-   
+    localStorage.clear();
+    document.cookie = "access=; path=/; max-age=0; SameSite=Lax";
+    document.cookie = "refresh=; path=/; max-age=0; SameSite=Lax";
+    document.cookie = "user_type=; path=/; max-age=0; SameSite=Lax";
+    document.cookie = "roleKey=; path=/; max-age=0; SameSite=Lax";
+    document.cookie = "role=; path=/; max-age=0; SameSite=Lax";
+
     router.push("/");
   };
 
@@ -29,12 +28,34 @@ export default function Header() {
             <Image className={styles.headerLogo} src={logo} alt="logo" />
           </div>
           <div className={styles.headerTitle}>
-            <h1 className={styles.headerTitleH1}>إدارة التكافل الاجتماعي</h1>
+            <h1 className={styles.headerTitleH1}>إدارة رعاية الشباب</h1>
             <p className={styles.headerTitleP}>جامعة حلوان - قسم خدمات الطلاب</p>
           </div>
         </div>
 
+        {/* NEW BUTTONS */}
         <div className={styles.headerRight}>
+          <button
+            className={styles.navBtn}
+            onClick={() => router.push("/FacLevel")}
+          >
+            التكافل الاجتماعي
+          </button>
+
+          <button
+            className={styles.navBtn}
+            onClick={() => router.push("/Family-Faclevel/events")}
+          >
+            الاسر الطلابية
+          </button>
+
+          <button
+            className={styles.navBtn}
+            onClick={() => router.push("/activities")}
+          >
+            الانشطة
+          </button>
+
           <button className={styles.logoutBtn} onClick={handleLogout}>
             تسجيل خروج
           </button>

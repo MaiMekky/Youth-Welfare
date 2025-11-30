@@ -9,19 +9,15 @@ const protectedRoutes = [
   "/ActivityLogs",
   "/CreateAdmins",
   "/admin/add-user",
-  // "/requests",
-  // "/my-requests",
-  // "/students",
   "/FacultyReport",
-  // "/uni-level/details",
   "/uni-level/reports",
 ];
 
 const allowedByRoleKey: { [userType: string]: { [roleKey: string]: string[] } } = {
   admin: {
-    super_admin: ["/SuperAdmin", "/admin/add-user", "/CreateAdmins","/ActivityLogs"],
+    super_admin: ["/SuperAdmin", "/admin/add-user", "/CreateAdmins", "/ActivityLogs"],
     uni_manager: ["/uni-level", "/uni-level/reports", "/uni-level/details"],
-    fac_manager: ["/FacLevel","/requests","/FacultyReport"],
+    fac_manager: ["/FacLevel", "/requests", "/FacultyReport"],
   },
   student: {
     "": ["/Student", "/my-requests"],
@@ -44,7 +40,12 @@ export function middleware(req: NextRequest) {
 
   // لو محمي ومفيش توكن
   if (isProtected && !token) {
-    return NextResponse.redirect(new URL("/", req.url));
+    const response = NextResponse.redirect(new URL("/", req.url));
+    // منع الكاش لتجنب عرض الصفحة القديمة عند الضغط على back
+    response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    response.headers.set("Pragma", "no-cache");
+    response.headers.set("Expires", "0");
+    return response;
   }
 
   if (!isProtected || !userType) return NextResponse.next();
@@ -52,25 +53,39 @@ export function middleware(req: NextRequest) {
   const rulesForUserType = allowedByRoleKey[userType];
   if (!rulesForUserType) return NextResponse.next();
 
- if (userType === "admin") {
-  const allowedRoutes = rulesForUserType[roleKey] || [];
-  const isAllowed = allowedRoutes.some(route => path.startsWith(route));
-  if (!isAllowed) {
-    return NextResponse.redirect(new URL(allowedRoutes[0] || "/", req.url));
+  if (userType === "admin") {
+    const allowedRoutes = rulesForUserType[roleKey] || [];
+    const isAllowed = allowedRoutes.some(route => path.startsWith(route));
+    if (!isAllowed) {
+      const response = NextResponse.redirect(new URL(allowedRoutes[0] || "/", req.url));
+      response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+      response.headers.set("Pragma", "no-cache");
+      response.headers.set("Expires", "0");
+      return response;
+    }
   }
-}
 
-
-if (userType === "student") {
-  const allowedRoutes = rulesForUserType[""] || ["/Student"];
-  const isAllowed = allowedRoutes.some(route => path.startsWith(route));
-  if (!isAllowed) {
-    return NextResponse.redirect(new URL(allowedRoutes[0], req.url));
+  if (userType === "student") {
+    const allowedRoutes = rulesForUserType[""] || ["/Student"];
+    const isAllowed = allowedRoutes.some(route => path.startsWith(route));
+    if (!isAllowed) {
+      const response = NextResponse.redirect(new URL(allowedRoutes[0], req.url));
+      response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+      response.headers.set("Pragma", "no-cache");
+      response.headers.set("Expires", "0");
+      return response;
+    }
   }
-}
 
+  const response = NextResponse.next();
+  if (isProtected) {
+    // منع الكاش للصفحات المحمية
+    response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    response.headers.set("Pragma", "no-cache");
+    response.headers.set("Expires", "0");
+  }
 
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {

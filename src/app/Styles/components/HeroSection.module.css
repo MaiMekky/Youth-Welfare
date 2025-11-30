@@ -14,7 +14,7 @@
   background: rgba(0, 0, 0, 0.55);
   width: 100%;
   height: 100%;
-  padding: 5vw 5%; /* responsive padding */
+  padding: 5vw 5%;
   display: flex;
   flex-direction: column;
   justify-content: center;

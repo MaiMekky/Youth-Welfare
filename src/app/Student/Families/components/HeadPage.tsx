@@ -46,7 +46,7 @@ const HeadPage: React.FC<HeadPageProps> = ({ onCreateClick, onReviewClick }) => 
           onClick={handleCreateClick}
         >
           <span className="icon">+</span>
-          انشاء طلب اسرة
+          انشاء طلب تكوين اسرة
         </button>
         <button
           className="action-button button-primary"

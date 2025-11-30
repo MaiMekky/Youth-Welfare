@@ -3,18 +3,18 @@
   background-size: cover;
   background-position: center;
   min-height: 100vh;
-  padding-top: 20px; /* keeps hero visible below navbar */
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  box-sizing: border-box;
 }
 
 .overlay {
   background: rgba(0, 0, 0, 0.55);
   width: 100%;
   height: 100%;
-  padding: 40px 20px;
+  padding: 5vw 5%; /* responsive padding */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -23,7 +23,8 @@
 }
 
 .heroContent {
-  max-width: 800px;
+  max-width: 90%;
+  width: 800px;
   color: white;
   margin-bottom: 60px;
 }
@@ -39,7 +40,8 @@
 }
 
 .separator {
-  width: 90px;
+  width: 10%;
+  max-width: 90px;
   height: 3px;
   background-color: #b38e19;
   margin: 0 auto 20px auto;
@@ -47,7 +49,7 @@
 }
 
 .mainTitle {
-  font-size: clamp(28px, 4vw, 42px);
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
   font-weight: bold;
   margin-bottom: 16px;
   color: #ffffff;
@@ -58,7 +60,7 @@
   font-size: clamp(16px, 2vw, 18px);
   color: #f3f5fd;
   line-height: 1.8;
-  margin-bottom: 35px;
+  margin-bottom: 2rem;
 }
 
 .buttons {
@@ -69,8 +71,8 @@
 }
 
 .btn {
-  padding: 12px 28px;
-  font-size: 16px;
+  padding: 0.75rem 1.75rem;
+  font-size: 1rem;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -107,27 +109,46 @@
 /* Stats wrapper below hero */
 .statsWrapper {
   width: 100%;
-  margin-top: 40px;
+  margin-top: 5vh;
 }
 
 /* Responsive tweaks */
+@media (max-width: 1024px) {
+  .hero {
+    padding-top: 100px;
+  }
+  .heroContent {
+    margin-bottom: 4vh;
+  }
+  .buttons {
+    gap: 0.75rem;
+  }
+}
+
 @media (max-width: 768px) {
   .hero {
-    padding-top: 120px; /* more space under fixed navbar */
+    padding-top: 120px;
   }
-
   .buttons {
     flex-direction: column;
-    gap: 10px;
+    gap: 0.5rem;
+  }
+  .heroContent {
+    margin-bottom: 3vh;
   }
 }
 
 /* Responsive tweaks */
 @media (max-width: 600px) {
   .hero {
-    padding-top: 120px; /* more space under fixed navbar */
+    padding-top: 140px;
+  }
+  .heroContent {
+    margin-bottom: 2vh;
   }
 }
+
+/* Full screen overlay - modal/background */
 .fullScreenOverlay {
   position: fixed;
   top: 0;
@@ -142,16 +163,7 @@
   justify-content: center;
 }
 
-/* .modalCard {
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  width: 420px;
-  max-width: 90%;
-  padding: 30px;
-  text-align: center;
-  animation: fadeIn 0.3s ease;
-} */
+/* Leave modalCard untouched for login popup */
 .modalCard {
   background: transparent;
   padding: 0;

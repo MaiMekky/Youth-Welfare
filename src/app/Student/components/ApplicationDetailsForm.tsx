@@ -6,9 +6,10 @@ import "../styles/applyForm.css";
 
 interface ApplicationDetailsFormProps {
   onSuccess?: () => void;
+  onNotify?: (message: string, type: "success" | "warning" | "error") => void; // new prop
 }
 
-export default function ApplicationDetailsForm({ onSuccess }: ApplicationDetailsFormProps) {
+export default function ApplicationDetailsForm({ onSuccess , onNotify  }: ApplicationDetailsFormProps) {
   const [formData, setFormData] = useState({
     studentName: "",
     nationalId: "",
@@ -33,7 +34,15 @@ export default function ApplicationDetailsForm({ onSuccess }: ApplicationDetails
     supportReason: "",
     documents: null as File | null,
   });
+  const [notification, setNotification] = useState<{ message: string; type: "success" | "warning" | "error" } | null>(null);
 
+  const showNotification = (message: string, type: "success" | "warning" | "error") => {
+    if (onNotify) onNotify(message, type);
+    else {
+      setNotification({ message, type });
+      setTimeout(() => setNotification(null), 3500);
+    }
+  };
   const [documents, setDocuments] = useState<{ [key: string]: File | null }>({});
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [showSuccess, setShowSuccess] = useState(false);
@@ -153,17 +162,17 @@ formPayload.append("faculty_id", formData.faculty); // أو "faculty_id" حسب 
       if (response.ok) {
         const data = await response.json().catch(() => ({}));
         console.log("Server response:", data);
-        alert("✅ تم إرسال الطلب بنجاح");
+       showNotification("تم إرسال الطلب بنجاح ✅", "success");
         setShowSuccess(true);
         if (onSuccess) onSuccess();
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.error("Submission error:", errorData);
-        alert("❌ حدث خطأ أثناء الإرسال، راجعي التفاصيل في Console");
+        showNotification("❌ حدث خطأ أثناء الإرسال", "error");
       }
     } catch (err) {
       console.error("Network error:", err);
-      alert("⚠️ فشل الاتصال بالسيرفر. تأكدي أن السيرفر شغّال وإعدادات CORS صحيحة.");
+     showNotification(" فشل الاتصال بالسيرفر. تأكدي أن السيرفر شغّال وإعدادات CORS صحيحة.⚠️", "error");
     }
   };
 
@@ -321,21 +330,21 @@ formPayload.append("faculty_id", formData.faculty); // أو "faculty_id" حسب 
             />
             {errors.email && <span className="error">{errors.email}</span>}
           </div> */}
-<div className="form-group">
-  <label style={{ color: "#2C3A5F" }}>التقدير</label>
-  <select style={{ color: "#2C3A5F" }}
-    name="gpa"
-    value={formData.gpa}
-    onChange={handleChange}
-  >
-    <option value="" hidden>اختر...</option>
-    <option value="امتياز">امتياز</option>
-    <option value="جيد جدا">جيد جدا</option>
-    <option value="جيد">جيد</option>
-    <option value="مقبول">مقبول</option>
-  </select>
-  {errors.gpa && <span className="error">{errors.gpa}</span>}
-</div>
+          <div className="form-group">
+            <label style={{ color: "#2C3A5F" }}>التقدير</label>
+            <select style={{ color: "#2C3A5F" }}
+              name="gpa"
+              value={formData.gpa}
+              onChange={handleChange}
+            >
+              <option value="" hidden>اختر...</option>
+              <option value="امتياز">امتياز</option>
+              <option value="جيد جدا">جيد جدا</option>
+              <option value="جيد">جيد</option>
+              <option value="مقبول">مقبول</option>
+            </select>
+            {errors.gpa && <span className="error">{errors.gpa}</span>}
+          </div>
 
           <div className="form-group">
             <label style={{color:"#2C3A5F"}}>النظام الاكاديمي</label>
@@ -360,43 +369,43 @@ formPayload.append("faculty_id", formData.faculty); // أو "faculty_id" حسب 
         ============================ */}
         <h4 className="section-title">بيانات الأسرة</h4>
         <div className="grid-2">
-    <div className="form-group">
-  <label style={{ color: "#2C3A5F" }}>حالة الأب</label>
-  <select
-    style={{ color: "#2C3A5F" }}
-    name="fatherStatus"
-    value={formData.fatherStatus}
-    onChange={handleChange}
-  >
-    <option value="" disabled hidden>اختر...</option>
-    <option value="يعمل">يعمل</option>
-    <option value="بالمعاش">بالمعاش</option>
-    <option value="مريض">مريض</option>
-    <option value="متوفى">متوفى</option>
-  </select>
-  {errors.fatherStatus && (
-    <span className="error">{errors.fatherStatus}</span>
-  )}
-</div>
+            <div className="form-group">
+          <label style={{ color: "#2C3A5F" }}>حالة الأب</label>
+          <select
+            style={{ color: "#2C3A5F" }}
+            name="fatherStatus"
+            value={formData.fatherStatus}
+            onChange={handleChange}
+          >
+            <option value="" disabled hidden>اختر...</option>
+            <option value="يعمل">يعمل</option>
+            <option value="بالمعاش">بالمعاش</option>
+            <option value="مريض">مريض</option>
+            <option value="متوفى">متوفى</option>
+          </select>
+          {errors.fatherStatus && (
+            <span className="error">{errors.fatherStatus}</span>
+          )}
+        </div>
 
-<div className="form-group">
-  <label style={{ color: "#2C3A5F" }}>حالة الأم</label>
-  <select
-    style={{ color: "#2C3A5F" }}
-    name="motherStatus"
-    value={formData.motherStatus}
-    onChange={handleChange}
-  >
-    <option value="" disabled hidden>اختر...</option>
-    <option value="تعمل">تعمل</option>
-    <option value="بالمعاش">بالمعاش</option>
-    <option value="مريضة">مريضة</option>
-    <option value="متوفاة">متوفاة</option>
-  </select>
-  {errors.motherStatus && (
-    <span className="error">{errors.motherStatus}</span>
-  )}
-</div>
+        <div className="form-group">
+          <label style={{ color: "#2C3A5F" }}>حالة الأم</label>
+          <select
+            style={{ color: "#2C3A5F" }}
+            name="motherStatus"
+            value={formData.motherStatus}
+            onChange={handleChange}
+          >
+            <option value="" disabled hidden>اختر...</option>
+            <option value="تعمل">تعمل</option>
+            <option value="بالمعاش">بالمعاش</option>
+            <option value="مريضة">مريضة</option>
+            <option value="متوفاة">متوفاة</option>
+          </select>
+          {errors.motherStatus && (
+            <span className="error">{errors.motherStatus}</span>
+          )}
+        </div>
 
 
          <div className="form-group">
@@ -584,6 +593,22 @@ formPayload.append("faculty_id", formData.faculty); // أو "faculty_id" حسب 
           <button type="submit" className="submit-btn">إرسال الطلب</button>
         </div>
       </form>
+        {notification && (
+        <div
+          style={{
+            position: "fixed",
+            top: 20,
+            right: 20,
+            padding: "12px 20px",
+            borderRadius: 8,
+            color: "#fff",
+            backgroundColor: notification.type === "success" ? "#22c55e" : notification.type === "error" ? "#ef4444" : "#facc15",
+            zIndex: 9999,
+          }}
+        >
+          {notification.message}
+        </div>
+      )}
     </div>
   );
 }

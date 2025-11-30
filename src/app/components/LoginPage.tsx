@@ -17,12 +17,9 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
- const [notification, setNotification] = useState<string | null>(null);
+
   router = useRouter();
-const showNotification = (message: string, type: "success" | "warning" | "error") => {
-    setNotification(`${type}:${message}`);
-    setTimeout(() => setNotification(null), 3500);
-  };
+
   // ======= Validation =======
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -52,7 +49,7 @@ const showNotification = (message: string, type: "success" | "warning" | "error"
     const data = await res.json();
 
     if (!res.ok) {
-      showNotification( "بريد الكتروني خاطئ او كلمة مرور خاطئة❌","error");
+      alert(data.message || "فشل تسجيل الدخول");
       setLoading(false);
       return;
     }
@@ -102,7 +99,7 @@ const showNotification = (message: string, type: "success" | "warning" | "error"
 
   } catch (error) {
     console.error(error);
-     showNotification( "حدث خطأ أثناء تسجيل الدخول ❌","error");
+    alert("حدث خطأ أثناء تسجيل الدخول");
   } finally {
     setLoading(false);
   }
@@ -121,19 +118,7 @@ const showNotification = (message: string, type: "success" | "warning" | "error"
       </div>
 
       <h2 className={styles.loginTitle}>تسجيل الدخول</h2>
-        {notification && (
-              <div
-                className={`${styles.notification} ${
-                  notification.startsWith("success")
-                    ? styles.success
-                    : notification.startsWith("warning")
-                    ? styles.warning
-                    : styles.error
-                }`}
-              >
-                {notification.split(":")[1]}
-              </div>
-            )}
+
       {/* Form */}
       <form onSubmit={handleLogin} className={styles.loginForm}>
         <input

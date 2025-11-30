@@ -6,8 +6,13 @@ import ApplicationDetailsForm from "./ApplicationDetailsForm";
 
 export default function ApplyForm({ onNavigateToRequests }: any) {
   const [showForm, setShowForm] = useState(false);
+   const [notification, setNotification] = useState<{ message: string; type: string } | null>(null);
+
+  const handleNotify = (message: string, type: "success" | "warning" | "error") => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3500);
+  };
   const handleSuccess = () => {
-    // نرسل للبارنت إن الطلب اتبعت
     onNavigateToRequests();
   };
   return (
@@ -42,8 +47,33 @@ export default function ApplyForm({ onNavigateToRequests }: any) {
       // if (changeTab) changeTab();
       handleSuccess();
     }}
+     onNotify={handleNotify}
   />
+  
 )}
+{notification && (
+  <div
+    className={`notification ${notification.type}`}
+    style={{
+      position: "fixed",
+      top: "20px",
+      right: "20px",
+      padding: "12px 20px",
+      borderRadius: "8px",
+      color: "#fff",
+      backgroundColor:
+        notification.type === "success"
+          ? "#22c55e"
+          : notification.type === "error"
+          ? "#ef4444"
+          : "#facc15",
+      zIndex: 9999,
+    }}
+  >
+    {notification.message}
+  </div>
+)}
+
 
     </div>
   );

@@ -23,13 +23,7 @@ export default function MyRequests({ onStatusesLoaded }: any) {
   const [filteredRequests, setFilteredRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
-  const [notification, setNotification] = useState<{ message: string; type: string } | null>(null);
   const router = useRouter();
-
-  const handleNotify = (message: string, type: "success" | "warning" | "error") => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3500);
-  };
 
   const mapStatus = (status: string) => {
     const st = status.trim();
@@ -298,7 +292,6 @@ export default function MyRequests({ onStatusesLoaded }: any) {
           ))
         )}
       </div>
-        {notification && <div className={`notification ${notification.type}`}>{notification.message}</div>}
     </div>
   );
 }

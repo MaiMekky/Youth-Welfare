@@ -5,8 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 export default function GoogleCallbackPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState<"info" | "error" | "success">("info");
 
   useEffect(() => {
     const handleGoogleCallback = async () => {
@@ -14,22 +14,20 @@ export default function GoogleCallbackPage() {
         const code = searchParams.get("code");
         const errorParam = searchParams.get("error");
 
-        // Handle Google errors
         if (errorParam) {
-          setError(`Google error: ${errorParam}`);
-          setLoading(false);
+          setMessageType("error");
+          setMessage("❌ حدث خطأ: " + errorParam);
+          setTimeout(() => router.push("/"), 2000);
           return;
         }
 
         if (!code) {
-          setError("No authorization code received from Google");
-          setLoading(false);
+          setMessageType("error");
+          setMessage("❌ لم يتم استلام كود التحقق");
+          setTimeout(() => router.push("/"), 2000);
           return;
         }
 
-        console.log("✅ Authorization code received:", code);
-
-        // Send code to backend for login
         const loginRes = await fetch("http://localhost:8000/api/auth/google/login/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -39,23 +37,30 @@ export default function GoogleCallbackPage() {
         const loginData = await loginRes.json();
 
         if (!loginRes.ok) {
-          // Check if account doesn't exist (404)
           if (loginRes.status === 404) {
-            console.log("Account doesn't exist, redirecting to signup");
-            sessionStorage.setItem("google_code", code);
-            sessionStorage.setItem("google_email", loginData.google_email || "");
-            router.push("/signup?method=google");
+            // ✅ Email not registered - show message and redirect
+            setMessageType("info");
+            setMessage("⚠️ هذا البريد غير مسجل في النظام. سيتم تحويلك للصفحة الرئيسية");
+            
+            // Clear any stored data
+            sessionStorage.removeItem("google_code");
+            sessionStorage.removeItem("google_email");
+            
+            // Redirect to home after 2 seconds
+            setTimeout(() => router.push("/"), 3000);
             return;
           }
 
-          setError(loginData.error || "Login failed");
-          setLoading(false);
+          setMessageType("error");
+          setMessage("❌ فشل تسجيل الدخول: " + (loginData.error || "حاول مرة أخرى"));
+          setTimeout(() => router.push("/"), 2000);
           return;
         }
 
-        console.log("✅ Login successful");
-
-        // Save tokens
+        // ✅ Success - login user
+        setMessageType("success");
+        setMessage("✅ تم تسجيل الدخول بنجاح");
+        
         localStorage.setItem("access", loginData.access_token);
         localStorage.setItem("refresh", loginData.refresh_token);
         localStorage.setItem("user", JSON.stringify({
@@ -67,80 +72,78 @@ export default function GoogleCallbackPage() {
         localStorage.setItem("student_id", loginData.user_id.toString());
         localStorage.setItem("name", loginData.name);
 
-        // Set cookies
         document.cookie = `access=${loginData.access_token}; path=/; max-age=604800; SameSite=Lax`;
         document.cookie = `refresh=${loginData.refresh_token}; path=/; max-age=604800; SameSite=Lax`;
         document.cookie = `user_type=student; path=/; max-age=604800; SameSite=Lax`;
 
         // Redirect to dashboard
-        router.push("/Student");
+        setTimeout(() => router.push("/Student"), 1500);
 
       } catch (error) {
-        console.error("❌ Error:", error);
-        setError("An error occurred during login");
-        setLoading(false);
+        console.error("Error:", error);
+        setMessageType("error");
+        setMessage("❌ حدث خطأ تقني");
+        setTimeout(() => router.push("/"), 2000);
       }
     };
 
     handleGoogleCallback();
   }, [searchParams, router]);
 
-  if (loading) {
-    return (
+  return (
+    <div style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "100vh",
+      backgroundColor: "#f5f5f5",
+      flexDirection: "column",
+      gap: "20px"
+    }}>
       <div style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        backgroundColor: "#f5f5f5"
+        textAlign: "center",
+        padding: "40px",
+        backgroundColor: "white",
+        borderRadius: "12px",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+        maxWidth: "400px"
       }}>
         <div style={{
-          textAlign: "center",
-          padding: "40px"
+          fontSize: "48px",
+          marginBottom: "15px"
         }}>
-          <h2>جاري معالجة دخولك...</h2>
-          <p>يرجى الانتظار</p>
+          {messageType === "success" ? "✅" : messageType === "error" ? "❌" : "⏳"}
         </div>
-      </div>
-    );
-  }
 
-  if (error) {
-    return (
-      <div style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        backgroundColor: "#f5f5f5"
-      }}>
-        <div style={{
-          textAlign: "center",
-          padding: "40px",
-          backgroundColor: "white",
-          borderRadius: "8px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+        <h2 style={{
+          color: messageType === "success" ? "#22c55e" : messageType === "error" ? "#dc2626" : "#2563eb",
+          margin: "0 0 10px",
+          fontSize: "18px"
         }}>
-          <h2 style={{ color: "red" }}>خطأ في عملية الدخول</h2>
-          <p>{error}</p>
-          <button
-            onClick={() => window.location.href = "/"}
-            style={{
-              marginTop: "20px",
-              padding: "10px 20px",
-              backgroundColor: "#4285F4",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer"
-            }}
-          >
-            العودة للرئيسية
-          </button>
-        </div>
-      </div>
-    );
-  }
+          {messageType === "success" 
+            ? "نجاح" 
+            : messageType === "error" 
+            ? "خطأ" 
+            : "جاري المعالجة"}
+        </h2>
 
-  return null;
+        <p style={{
+          color: "#666",
+          fontSize: "15px",
+          margin: "0 0 15px",
+          lineHeight: "1.6"
+        }}>
+          {message}
+        </p>
+
+        <p style={{
+          color: "#999",
+          fontSize: "12px",
+          margin: 0
+        }}>
+          سيتم تحويلك تلقائياً...
+        </p>
+      </div>
+    </div>
+  );
 }

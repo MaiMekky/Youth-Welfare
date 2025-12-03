@@ -1,0 +1,84 @@
+.activities-wrapper {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.activities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 25px;
+}
+
+.activity-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.07);
+  border: 1px solid #eee;
+  transition: 0.2s ease;
+}
+
+.activity-card:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
+/* Header (Status + Icon) */
+.activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.activity-status {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: bold;
+  color: white;
+}
+
+.status-upcoming {
+  background: #4c91ff;
+}
+
+.status-done {
+  background: #30b36b;
+}
+
+.activity-type-icon {
+  padding: 10px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Text */
+.activity-title {
+  margin: 10px 0 5px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+}
+
+.activity-desc {
+  font-size: 14px;
+  color: #777;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+/* Extra info */
+.activity-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #444;
+}

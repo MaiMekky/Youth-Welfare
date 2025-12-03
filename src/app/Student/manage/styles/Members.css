@@ -1,0 +1,100 @@
+.members-wrapper {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.members-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 25px;
+}
+
+/* Card */
+.member-card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 14px;
+  border: 1px solid #eee;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.07);
+  position: relative;
+  transition: 0.2s ease;
+}
+
+.member-card:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
+/* Online dot */
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  position: absolute;
+  left: 12px;
+  top: 12px;
+}
+
+.online {
+  background: #23c55e; /* أخضر */
+}
+
+.offline {
+  background: #c0c0c0; /* رمادي */
+}
+
+/* Header */
+.member-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.member-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #222;
+}
+
+.member-college {
+  color: #6a6a6a;
+  font-size: 14px;
+  margin: 7px 0;
+}
+
+/* Info section */
+.member-info {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #555;
+  line-height: 1.5;
+}
+
+/* Role Badge */
+.member-role-tag {
+  margin-top: 12px;
+  padding: 6px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: bold;
+  width: fit-content;
+}
+
+.member {
+  background: #ebefff;
+  color: #233b97;
+}
+
+.assistant {
+  background: #fff3d8;
+  color: #b87a05;
+}
+
+.founder {
+  background: #ffe6e6;
+  color: #c53030;
+}
+
+/* Joined + Last Active */
+.member-info p {
+  margin: 4px 0;
+}

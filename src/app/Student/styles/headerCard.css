@@ -1,6 +1,7 @@
 /* app/student/styles/headerCard.css */
 .header-card-container {
   padding: 24px;
+  align-items: center;
 }
 
 .header-card {

@@ -310,3 +310,35 @@ select::-ms-expand {
     width: 100%;
   }
 }
+.googleButton {
+  margin-top: 5px;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  direction: rtl;
+  transition: 0.2s ease;
+}
+
+.googleButton:hover {
+  background: #f7f7f7;
+  border-color: #ccc;
+}
+
+.googleIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.googleText {
+  color: #444;
+}

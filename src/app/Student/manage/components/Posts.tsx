@@ -5,7 +5,6 @@ import "../styles/Posts.css";
 // ========= Types ==========
 export type PostType = "Post" | "Reminder";
 
-
 export interface Post {
   id: number;
   author: string;
@@ -17,8 +16,13 @@ export interface Post {
   type: PostType;
 }
 
+// ========= Props Interface ==========
+interface PostsProps {
+  newPosts?: Post[];
+}
+
 // ========= Dummy Data (Replace with API later) ==========
-const postsData: Post[] = [
+const defaultPostsData: Post[] = [
   {
     id: 1,
     author: "أحمد محمد علي",
@@ -63,41 +67,39 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   return (
     <div className="post-card">
       <div className="post-content">
-  
-  <div className="text-section">
-    <div className="meta">
-      <div className="author-row">
-        <h3 className="author-name">{post.author}</h3>
-        <span className="author-role">{post.role}</span>
+        <div className="text-section">
+          <div className="meta">
+            <div className="author-row">
+              <h3 className="author-name">{post.author}</h3>
+              <span className="author-role">{post.role}</span>
+            </div>
+            <span className="date-time">
+              {post.time} · {post.date}
+            </span>
+          </div>
+          <div className="body">
+            <h2 className="post-title">{post.title}</h2>
+            <p className="post-text">{post.content}</p>
+          </div>
+        </div>
+        <div className="avatar">
+          <UserIcon />
+        </div>
       </div>
-      <span className="date-time">{post.time} · {post.date}</span>
     </div>
-
-    <div className="body">
-      <h2 className="post-title">{post.title}</h2>
-      <p className="post-text">{post.content}</p>
-    </div>
-  </div>
-
-  <div className="avatar">
-    <UserIcon />
-  </div>
-
-</div>
-
-      </div>
-  
   );
 };
 
 // ========= Posts Main Page Component ==========
-const Posts: React.FC = () => {
+const Posts: React.FC<PostsProps> = ({ newPosts = [] }) => {
+  // Combine new posts with default posts (new posts first)
+  const allPosts = [...newPosts, ...defaultPostsData];
+
   return (
     <div className="posts-page" dir="rtl">
       <div className="posts-container">
         <h1 className="page-title">آخر الأخبار والإعلانات</h1>
-
-        {postsData.map((post) => (
+        {allPosts.map((post) => (
           <PostCard key={post.id} post={post} />
         ))}
       </div>

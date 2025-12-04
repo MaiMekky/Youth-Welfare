@@ -32,6 +32,7 @@ body {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
+  
 }
 
 .btn {
@@ -281,4 +282,5 @@ body {
   .modal-box {
     max-height: 95vh;
   }
+  
 }

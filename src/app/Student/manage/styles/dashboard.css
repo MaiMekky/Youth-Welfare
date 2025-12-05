@@ -16,32 +16,140 @@ body {
   max-width: 1200px;
   margin: auto;
   padding: 20px;
+  font-size: 18px;
+  position: relative;
+}
+
+/* ========= NOTIFICATION STYLES ========= */
+.notification-container {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  width: 100%;
+  max-width: 600px;
+  padding: 0 20px;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.notification {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-right: 4px solid #ef4444;
+  direction: rtl;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notification-icon {
+  color: #ef4444;
+  flex-shrink: 0;
+}
+
+.notification-message {
+  flex: 1;
+  font-size: 17px;
+  font-weight: 500;
+  color: #27285D;
+  line-height: 1.5;
+}
+
+.notification-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.notification-close:hover {
+  background: #f3f4f6;
+  color: #27285D;
+}
+
+@media (max-width: 640px) {
+  .notification-container {
+    padding: 0 15px;
+    top: 15px;
+  }
+
+  .notification {
+    padding: 14px 16px;
+  }
+
+  .notification-message {
+    font-size: 16px;
+  }
 }
 
 .dashboard-header h1 {
   color: var(--dark-navy);
   margin-bottom: 5px;
+  font-size: 28px;
+  font-weight: bold;
 }
 
 .dashboard-header p {
   color: #555;
   margin-bottom: 15px;
+  font-size: 16px;
 }
 
 .dashboard-buttons {
   display: flex;
-  gap: 10px;
+  gap: 15px;
   margin-bottom: 20px;
-  
+  justify-content: center;
+  align-items: center;
 }
 
 .btn {
-  padding: 10px 20px;
+  padding: 14px 28px;
   border: none;
   cursor: pointer;
   font-weight: bold;
-  border-radius: 5px;
+  border-radius: 8px;
   color: white;
+  font-size: 18px;
+  transition: all 0.2s;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .create-activity {
@@ -67,24 +175,40 @@ body {
 }
 
 .summary-count {
-  font-size: 24px;
+  font-size: 32px;
   font-weight: bold;
   display: block;
   color: var(--gold);
+  margin-bottom: 5px;
+}
+
+.summary-box span:last-child {
+  font-size: 18px;
+  color: var(--dark-navy);
+  font-weight: 500;
 }
 
 .dashboard-tabs {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
+  margin-top: 80px;
+
 }
 
 .tab {
-  padding: 10px 20px;
+  padding: 12px 24px;
   background-color: white;
   border-radius: 8px;
   cursor: pointer;
   border: 1px solid #ccc;
+  font-size: 18px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.tab:hover {
+  background-color: #f3f4f6;
 }
 
 .tab.active {
@@ -126,7 +250,7 @@ body {
 }
 
 .modal-header h2 {
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 700;
   color: #27285D;
   margin: 0;
@@ -165,10 +289,10 @@ body {
 
 .form-group label {
   display: block;
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 600;
   color: #27285D;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   text-align: right;
 }
 
@@ -185,10 +309,10 @@ body {
 .form-textarea,
 .form-select {
   width: 100%;
-  padding: 10px 12px;
+  padding: 14px 16px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 17px;
   font-family: inherit;
   transition: border-color 0.2s;
   direction: rtl;
@@ -208,9 +332,9 @@ body {
 }
 
 .helper-text {
-  font-size: 12px;
+  font-size: 15px;
   color: #6b7280;
-  margin-top: 6px;
+  margin-top: 8px;
   text-align: right;
 }
 
@@ -224,12 +348,12 @@ body {
 }
 
 .btn-cancel {
-  padding: 10px 24px;
+  padding: 14px 28px;
   border: 1px solid #d1d5db;
   background: white;
   color: #374151;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
@@ -240,18 +364,18 @@ body {
 }
 
 .btn-submit {
-  padding: 10px 24px;
+  padding: 14px 28px;
   border: none;
   background: #B38E19;
   color: white;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .btn-submit:hover {
@@ -259,12 +383,12 @@ body {
 }
 
 .btn-submit-activity {
-  padding: 10px 24px;
+  padding: 14px 28px;
   border: none;
   background: #27285D;
   color: white;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;

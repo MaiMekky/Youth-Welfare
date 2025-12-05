@@ -5,11 +5,13 @@ import RequestDetails from "./components/RequestDetails";
 import CreateFamForm from "./components/CreateFamForm";
 import MainPage from "./components/MainPage";
 import TrackRequest from "./components/TrackRequest";
+import FamilyDetails from "./components/FamilyDetails";
 
-type View = "home" | "requestDetails" | "createForm" | "trackRequest";
+type View = "home" | "requestDetails" | "createForm" | "trackRequest" | "familyDetails";
 
 export default function FamiliesPage() {
   const [currentView, setCurrentView] = useState<View>("home");
+  const [selectedFamily, setSelectedFamily] = useState<any>(null);
 
   const handleNavigateToRequestDetails = () => {
     setCurrentView("requestDetails");
@@ -38,6 +40,11 @@ export default function FamiliesPage() {
     setCurrentView("trackRequest");
   };
 
+  const handleViewFamilyDetails = (family: any) => {
+    setSelectedFamily(family);
+    setCurrentView("familyDetails");
+  };
+
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#F3F5FD", width: "100%" }}>
       {currentView === "home" && (
@@ -46,7 +53,7 @@ export default function FamiliesPage() {
             onCreateClick={handleNavigateToRequestDetails}
             onReviewClick={handleNavigateToTrackRequest}
           />
-          <MainPage />
+          <MainPage onViewFamilyDetails={handleViewFamilyDetails} />
         </>
       )}
       {currentView === "requestDetails" && (
@@ -63,6 +70,12 @@ export default function FamiliesPage() {
       )}
       {currentView === "trackRequest" && (
         <TrackRequest onBack={handleNavigateBack} />
+      )}
+      {currentView === "familyDetails" && selectedFamily && (
+        <FamilyDetails 
+          family={selectedFamily} 
+          onBack={handleNavigateBack} 
+        />
       )}
     </div>
   );

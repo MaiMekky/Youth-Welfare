@@ -75,9 +75,19 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
     elected2: 'عضو منتخب (2)',
   };
 
-  const validateNationalId = (id: string) => /^\d{14}$/.test(id);
-  const validatePhoneNumber = (phone: string) => /^01\d{9}$/.test(phone);
-  const validateTextField = (text: string, minLength = 3) => text.trim().length >= minLength;
+  const validateNationalId = (id: string) => {
+    // Must be exactly 14 digits
+    return /^\d{14}$/.test(id);
+  };
+  
+  const validatePhoneNumber = (phone: string) => {
+    // Egyptian mobile format: 01XXXXXXXXX (11 digits starting with 01)
+    return /^01\d{9}$/.test(phone);
+  };
+  
+  const validateTextField = (text: string, minLength = 3) => {
+    return text.trim().length >= minLength;
+  };
 
   const addError = (fieldName: string, message: string) => {
     setErrors(prev => ({ ...prev, [fieldName]: message }));
@@ -98,19 +108,25 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
 
   const validateField = (fieldName: string) => {
     if (fieldName === 'familyName') {
-      if (!validateTextField(familyName, 3)) {
+      if (!familyName || !familyName.trim()) {
+        addError('familyName', 'اسم الأسرة مطلوب');
+      } else if (!validateTextField(familyName, 3)) {
         addError('familyName', 'اسم الأسرة يجب أن يكون 3 أحرف على الأقل');
       } else {
         clearError('familyName');
       }
     } else if (fieldName === 'familyGoals') {
-      if (!validateTextField(familyGoals, 10)) {
+      if (!familyGoals || !familyGoals.trim()) {
+        addError('familyGoals', 'أهداف الأسرة مطلوبة');
+      } else if (!validateTextField(familyGoals, 10)) {
         addError('familyGoals', 'أهداف الأسرة يجب أن تكون 10 أحرف على الأقل');
       } else {
         clearError('familyGoals');
       }
     } else if (fieldName === 'familyDescription') {
-      if (!validateTextField(familyDescription, 10)) {
+      if (!familyDescription || !familyDescription.trim()) {
+        addError('familyDescription', 'وصف الأسرة مطلوب');
+      } else if (!validateTextField(familyDescription, 10)) {
         addError('familyDescription', 'وصف الأسرة يجب أن يكون 10 أحرف على الأقل');
       } else {
         clearError('familyDescription');
@@ -121,22 +137,34 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
   const validatePerson = (person: Person, prefix: string): boolean => {
     let isValid = true;
 
-    if (!validateTextField(person.fullName, 3)) {
+    // Validate full name - required and must be at least 3 characters
+    if (!person.fullName || !person.fullName.trim()) {
+      addError(`${prefix}_name`, 'الاسم مطلوب');
+      isValid = false;
+    } else if (!validateTextField(person.fullName, 3)) {
       addError(`${prefix}_name`, 'الاسم يجب أن يكون 3 أحرف على الأقل');
       isValid = false;
     } else {
       clearError(`${prefix}_name`);
     }
 
-    if (!validateNationalId(person.nationalId)) {
-      addError(`${prefix}_nationalId`, 'الرقم القومي يجب أن يكون 14 رقم');
+    // Validate national ID - required and must be exactly 14 digits
+    if (!person.nationalId || !person.nationalId.trim()) {
+      addError(`${prefix}_nationalId`, 'الرقم القومي مطلوب');
+      isValid = false;
+    } else if (!validateNationalId(person.nationalId)) {
+      addError(`${prefix}_nationalId`, 'الرقم القومي يجب أن يكون بالضبط 14 رقم');
       isValid = false;
     } else {
       clearError(`${prefix}_nationalId`);
     }
 
-    if (!validatePhoneNumber(person.mobile)) {
-      addError(`${prefix}_mobile`, 'رقم الموبايل يجب أن يكون 01XXXXXXXXX');
+    // Validate mobile - required and must match Egyptian format
+    if (!person.mobile || !person.mobile.trim()) {
+      addError(`${prefix}_mobile`, 'رقم الموبايل مطلوب');
+      isValid = false;
+    } else if (!validatePhoneNumber(person.mobile)) {
+      addError(`${prefix}_mobile`, 'رقم الموبايل يجب أن يكون 01XXXXXXXXX (11 رقم)');
       isValid = false;
     } else {
       clearError(`${prefix}_mobile`);
@@ -147,28 +175,45 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
 
   const validateForm = (): boolean => {
     let isValid = true;
+    
+    // Clear all previous errors
+    setErrors({});
 
-    if (!validateTextField(familyName, 3)) {
+    // Validate family name - required
+    if (!familyName || !familyName.trim()) {
+      addError('familyName', 'اسم الأسرة مطلوب');
+      isValid = false;
+    } else if (!validateTextField(familyName, 3)) {
       addError('familyName', 'اسم الأسرة يجب أن يكون 3 أحرف على الأقل');
       isValid = false;
     }
 
-    if (!validateTextField(familyGoals, 10)) {
+    // Validate family goals - required
+    if (!familyGoals || !familyGoals.trim()) {
+      addError('familyGoals', 'أهداف الأسرة مطلوبة');
+      isValid = false;
+    } else if (!validateTextField(familyGoals, 10)) {
       addError('familyGoals', 'أهداف الأسرة يجب أن تكون 10 أحرف على الأقل');
       isValid = false;
     }
 
-    if (!validateTextField(familyDescription, 10)) {
+    // Validate family description - required
+    if (!familyDescription || !familyDescription.trim()) {
+      addError('familyDescription', 'وصف الأسرة مطلوب');
+      isValid = false;
+    } else if (!validateTextField(familyDescription, 10)) {
       addError('familyDescription', 'وصف الأسرة يجب أن يكون 10 أحرف على الأقل');
       isValid = false;
     }
 
+    // Validate all board members - all required
     Object.entries(boardMembers).forEach(([key, person]) => {
       if (!validatePerson(person, `board_${key}`)) {
         isValid = false;
       }
     });
 
+    // Validate all committee members - all required
     Object.entries(committees).forEach(([key, committee]) => {
       if (!validatePerson(committee.secretary, `committee_${key}_secretary`)) {
         isValid = false;
@@ -198,31 +243,62 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (validateForm()) {
-      // Save form data (you can replace this with API call later)
-      const formData = {
-        familyName,
-        familyGoals,
-        familyDescription,
-        boardMembers,
-        committees,
-        submittedAt: new Date().toISOString()
-      };
-      
-      console.log("Form submitted:", formData);
-      
-      // Save to localStorage for tracking
-      localStorage.setItem("familyRequestData", JSON.stringify(formData));
-      localStorage.setItem("familyRequestStatus", "pending");
-      localStorage.setItem("familyRequestSubmitted", "true");
-      
-      setErrors({});
-      setTouchedFields(new Set());
-      
-      // Call success callback if provided
-      if (onSubmitSuccess) {
-        onSubmitSuccess();
-      }
+    // Mark all fields as touched to show errors
+    const allFields = new Set<string>();
+    allFields.add('familyName');
+    allFields.add('familyGoals');
+    allFields.add('familyDescription');
+    
+    Object.keys(boardMembers).forEach(key => {
+      allFields.add(`board_${key}_name`);
+      allFields.add(`board_${key}_nationalId`);
+      allFields.add(`board_${key}_mobile`);
+    });
+    
+    Object.keys(committees).forEach(key => {
+      allFields.add(`committee_${key}_secretary_name`);
+      allFields.add(`committee_${key}_secretary_nationalId`);
+      allFields.add(`committee_${key}_secretary_mobile`);
+      allFields.add(`committee_${key}_assistant_name`);
+      allFields.add(`committee_${key}_assistant_nationalId`);
+      allFields.add(`committee_${key}_assistant_mobile`);
+    });
+    
+    setTouchedFields(allFields);
+
+    // Validate form - if invalid, prevent submission
+    const isValid = validateForm();
+    
+    // If validation failed, don't proceed
+    if (!isValid) {
+      // Scroll to top of form to show errors
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // All validations passed - proceed with submission
+    const formData = {
+      familyName,
+      familyGoals,
+      familyDescription,
+      boardMembers,
+      committees,
+      submittedAt: new Date().toISOString()
+    };
+    
+    console.log("Form submitted:", formData);
+    
+    // Save to localStorage for tracking
+    localStorage.setItem("familyRequestData", JSON.stringify(formData));
+    localStorage.setItem("familyRequestStatus", "pending");
+    localStorage.setItem("familyRequestSubmitted", "true");
+    
+    setErrors({});
+    setTouchedFields(new Set());
+    
+    // Call success callback if provided
+    if (onSubmitSuccess) {
+      onSubmitSuccess();
     }
   };
 

@@ -5,7 +5,8 @@ import "../styles/dashboard.css";
 import Activities from "./Activities";
 import Members from "./Members";
 import Posts from "./Posts";
-import { X, Upload } from "lucide-react";
+import Overview from "./Overview";
+import { X, Upload, AlertCircle } from "lucide-react";
 
 interface Member {
   id: number;
@@ -41,20 +42,29 @@ export interface Post {
   type: "Post" | "Reminder";
 }
 
+
 const Dashboard: React.FC = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
-  const [activeTab, setActiveTab] = useState<"overview" | "activities" | "members" | "posts">("overview");
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "activities" | "members" | "posts"
+  >("overview");
 
   const [showCreateContentForm, setShowCreateContentForm] = useState(false);
   const [showCreateActivityForm, setShowCreateActivityForm] = useState(false);
 
-  // Form states for Create Content
+  // Notification state
+  const [notification, setNotification] = useState<{
+    show: boolean;
+    message: string;
+  }>({ show: false, message: "" });
+
+  // Create Content Form
   const [contentTitle, setContentTitle] = useState("");
   const [contentBody, setContentBody] = useState("");
 
-  // Form states for Create Activity
+  // Create Activity Form
   const [activityData, setActivityData] = useState({
     title: "",
     type: "اجتماع",
@@ -65,30 +75,45 @@ const Dashboard: React.FC = () => {
     maxParticipants: "",
   });
 
-  // Fetch data
   useEffect(() => {
     async function fetchData() {
       try {
-        const membersData: Member[] = await fetch("/api/members").then((res) =>
-          res.json()
-        );
-        const activitiesData: Activity[] = await fetch("/api/activities").then(
-          (res) => res.json()
-        );
+        const membersResponse = await fetch("/api/members");
+        const activitiesResponse = await fetch("/api/activities");
 
-        setMembers(membersData);
-        setActivities(activitiesData);
+        if (membersResponse.ok) {
+          const membersData: Member[] = await membersResponse.json();
+          if (membersData && Array.isArray(membersData)) {
+            setMembers(membersData);
+          }
+        }
+
+        if (activitiesResponse.ok) {
+          const activitiesData: Activity[] = await activitiesResponse.json();
+          if (activitiesData && Array.isArray(activitiesData)) {
+            setActivities(activitiesData);
+          }
+        }
       } catch (error) {
-        console.log("Using dummy data:", error);
+        console.log("API not ready — Using empty arrays. Data will be populated when available.");
+        // Keep empty arrays - Overview will handle empty state gracefully
       }
     }
     fetchData();
   }, []);
 
-  // Handle Create Content Submit
+  // Show notification
+  const showNotification = (message: string) => {
+    setNotification({ show: true, message });
+    setTimeout(() => {
+      setNotification({ show: false, message: "" });
+    }, 4000);
+  };
+
+  // Submit Content
   const handleCreateContent = () => {
     if (!contentBody.trim()) {
-      alert("محتوى المنشور مطلوب");
+      showNotification("محتوى المنشور مطلوب");
       return;
     }
 
@@ -100,7 +125,6 @@ const Dashboard: React.FC = () => {
       time: now.toLocaleTimeString("ar-EG", {
         hour: "2-digit",
         minute: "2-digit",
-        second: "2-digit",
       }),
       date: now.toLocaleDateString("en-CA"),
       title: contentTitle || "منشور جديد",
@@ -109,13 +133,13 @@ const Dashboard: React.FC = () => {
     };
 
     setPosts([newPost, ...posts]);
-    setContentTitle("");
     setContentBody("");
+    setContentTitle("");
     setShowCreateContentForm(false);
-    setActiveTab("posts"); // Switch to posts tab
+    setActiveTab("posts");
   };
 
-  // Handle Create Activity Submit
+  // Submit Activity
   const handleCreateActivity = () => {
     if (
       !activityData.title ||
@@ -124,11 +148,12 @@ const Dashboard: React.FC = () => {
       !activityData.time ||
       !activityData.location
     ) {
-      alert("الرجاء ملء جميع الحقول المطلوبة");
+      showNotification("الرجاء ملء جميع الحقول المطلوبة");
       return;
     }
 
     const colors = ["#4CAF50", "#2196F3", "#FF9800", "#9C27B0", "#F44336"];
+
     const newActivity: Activity = {
       id: Date.now(),
       title: activityData.title,
@@ -145,6 +170,8 @@ const Dashboard: React.FC = () => {
     };
 
     setActivities([newActivity, ...activities]);
+
+    setShowCreateActivityForm(false);
     setActivityData({
       title: "",
       type: "اجتماع",
@@ -154,22 +181,35 @@ const Dashboard: React.FC = () => {
       location: "",
       maxParticipants: "",
     });
-    setShowCreateActivityForm(false);
-    setActiveTab("activities"); // Switch to activities tab
+
+    setActiveTab("activities");
   };
 
-const handleActivityChange = (
-  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-) => {
-  setActivityData({
-    ...activityData,
-    [e.target.name]: e.target.value,
-  });
-};
+  const handleActivityChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    setActivityData({ ...activityData, [e.target.name]: e.target.value });
+  };
 
   return (
     <div className="dashboard-container">
-      {/* Header */}
+      {/* NOTIFICATION */}
+      {notification.show && (
+        <div className="notification-container">
+          <div className="notification">
+            <AlertCircle size={20} className="notification-icon" />
+            <span className="notification-message">{notification.message}</span>
+            <button
+              className="notification-close"
+              onClick={() => setNotification({ show: false, message: "" })}
+            >
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* HEADER */}
       <header className="dashboard-header">
         <h1>إدارة الأسرة: أسرة المهندسين المبدعين</h1>
         <p>لوحة تحكم خاصة بمؤسس الأسرة لإدارة الأعضاء والفعاليات</p>
@@ -181,6 +221,7 @@ const handleActivityChange = (
           >
             إنشاء فعالية
           </button>
+
           <button
             onClick={() => setShowCreateContentForm(true)}
             className="btn publish-content"
@@ -190,19 +231,7 @@ const handleActivityChange = (
         </div>
       </header>
 
-      {/* Summary */}
-      <div className="dashboard-summary">
-        <div className="summary-box">
-          <span className="summary-count">{activities.length || 6}</span>
-          <span>فعالية</span>
-        </div>
-        <div className="summary-box">
-          <span className="summary-count">{members.length || 8}</span>
-          <span>عضو</span>
-        </div>
-      </div>
-
-      {/* Tabs */}
+      {/* TABS */}
       <div className="dashboard-tabs">
         <button
           className={activeTab === "overview" ? "tab active" : "tab"}
@@ -233,27 +262,25 @@ const handleActivityChange = (
         </button>
       </div>
 
-      {/* Content switching */}
+      {/* CONTENT SWITCHING */}
       <div className="dashboard-tabs-content">
         {activeTab === "overview" && (
-          <>
-            <Members members={members} />
-            <Activities activities={activities} />
-          </>
+          <Overview activities={activities} members={members}  />
         )}
 
-        {activeTab === "activities" && (
-          <Activities activities={activities} />
-        )}
+        {activeTab === "activities" && <Activities activities={activities} />}
 
         {activeTab === "members" && <Members members={members} />}
 
         {activeTab === "posts" && <Posts newPosts={posts} />}
       </div>
 
-      {/* Popup: Publish Content */}
+      {/* POPUP — CREATE CONTENT */}
       {showCreateContentForm && (
-        <div className="modal-overlay" onClick={() => setShowCreateContentForm(false)}>
+        <div
+          className="modal-overlay"
+          onClick={() => setShowCreateContentForm(false)}
+        >
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>نشر محتوى جديد</h2>
@@ -267,14 +294,12 @@ const handleActivityChange = (
 
             <div className="form-content">
               <div className="form-group">
-                <label>
-                  عنوان المنشور <span className="optional">(اختياري)</span>
-                </label>
+                <label>عنوان المنشور (اختياري)</label>
                 <input
                   type="text"
-                  placeholder="مثلاً: تحديث مهم"
                   value={contentTitle}
                   onChange={(e) => setContentTitle(e.target.value)}
+                  placeholder="مثلاً: إعلان مهم"
                   className="form-input"
                 />
               </div>
@@ -284,27 +309,24 @@ const handleActivityChange = (
                   محتوى المنشور <span className="required">*</span>
                 </label>
                 <textarea
-                  placeholder="اكتب محتوى المنشور هنا..."
+                  placeholder="اكتب محتوى المنشور..."
                   value={contentBody}
                   onChange={(e) => setContentBody(e.target.value)}
                   className="form-textarea"
                   rows={6}
                 />
-                <p className="helper-text">
-                  سيظهر هذا المنشور لجميع أعضاء الأسرة (18 عضو)
-                </p>
               </div>
 
               <div className="form-actions">
                 <button
-                  onClick={() => setShowCreateContentForm(false)}
                   className="btn-cancel"
+                  onClick={() => setShowCreateContentForm(false)}
                 >
                   إلغاء
                 </button>
-                <button onClick={handleCreateContent} className="btn-submit">
-                  <Upload size={18} />
-                  نشر
+
+                <button className="btn-submit" onClick={handleCreateContent}>
+                  <Upload size={18} /> نشر
                 </button>
               </div>
             </div>
@@ -312,9 +334,12 @@ const handleActivityChange = (
         </div>
       )}
 
-      {/* Popup: Create Activity */}
+      {/* POPUP — CREATE ACTIVITY */}
       {showCreateActivityForm && (
-        <div className="modal-overlay" onClick={() => setShowCreateActivityForm(false)}>
+        <div
+          className="modal-overlay"
+          onClick={() => setShowCreateActivityForm(false)}
+        >
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>إنشاء فعالية جديدة</h2>
@@ -327,25 +352,22 @@ const handleActivityChange = (
             </div>
 
             <div className="form-content">
+              {/* TITLE + TYPE */}
               <div className="form-row">
                 <div className="form-group">
-                  <label>
-                    عنوان الفعالية <span className="required">*</span>
-                  </label>
+                  <label>عنوان الفعالية *</label>
                   <input
                     type="text"
                     name="title"
-                    placeholder="مثلاً: اجتماع شهري"
                     value={activityData.title}
                     onChange={handleActivityChange}
+                    placeholder="مثلاً: اجتماع شهري"
                     className="form-input"
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>
-                    نوع الفعالية <span className="required">*</span>
-                  </label>
+                  <label>نوع الفعالية *</label>
                   <select
                     name="type"
                     value={activityData.type}
@@ -362,25 +384,22 @@ const handleActivityChange = (
                 </div>
               </div>
 
+              {/* DESCRIPTION */}
               <div className="form-group">
-                <label>
-                  وصف الفعالية <span className="required">*</span>
-                </label>
+                <label>وصف الفعالية *</label>
                 <textarea
                   name="description"
-                  placeholder="اكتب وصفاً مناسباً للفعالية..."
                   value={activityData.description}
                   onChange={handleActivityChange}
+                  placeholder="اكتب وصفاً للفعالية..."
                   className="form-textarea"
-                  rows={4}
                 />
               </div>
 
+              {/* DATE + TIME + MAX */}
               <div className="form-row">
                 <div className="form-group">
-                  <label>
-                    التاريخ <span className="required">*</span>
-                  </label>
+                  <label>التاريخ *</label>
                   <input
                     type="date"
                     name="date"
@@ -391,9 +410,7 @@ const handleActivityChange = (
                 </div>
 
                 <div className="form-group">
-                  <label>
-                    الوقت <span className="required">*</span>
-                  </label>
+                  <label>الوقت *</label>
                   <input
                     type="time"
                     name="time"
@@ -408,39 +425,38 @@ const handleActivityChange = (
                   <input
                     type="number"
                     name="maxParticipants"
-                    placeholder="اختياري"
                     value={activityData.maxParticipants}
                     onChange={handleActivityChange}
+                    placeholder="اختياري"
                     className="form-input"
-                    min="1"
                   />
                 </div>
               </div>
 
+              {/* LOCATION */}
               <div className="form-group">
-                <label>
-                  المكان <span className="required">*</span>
-                </label>
+                <label>المكان *</label>
                 <input
                   type="text"
                   name="location"
-                  placeholder="مثلاً: قاعة الاجتماعات - كلية الهندسة"
                   value={activityData.location}
                   onChange={handleActivityChange}
+                  placeholder="مثلاً: قاعة الاجتماعات - كلية الهندسة"
                   className="form-input"
                 />
               </div>
 
               <div className="form-actions">
                 <button
-                  onClick={() => setShowCreateActivityForm(false)}
                   className="btn-cancel"
+                  onClick={() => setShowCreateActivityForm(false)}
                 >
                   إلغاء
                 </button>
+
                 <button
-                  onClick={handleCreateActivity}
                   className="btn-submit-activity"
+                  onClick={handleCreateActivity}
                 >
                   إنشاء الفعالية والنشر الآن
                 </button>

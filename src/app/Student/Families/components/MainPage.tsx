@@ -1,24 +1,46 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import '../styles/mainpage.css';
 
-export default function MainPage() {
+interface MainPageProps {
+  onViewFamilyDetails?: (family: any) => void;
+}
+
+export default function MainPage(props: MainPageProps = {}) {
+  const { onViewFamilyDetails } = props;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [joinedFamilies, setJoinedFamilies] = useState<any[]>([
-    {
-      id: 100,
-      title: 'أسرة الرواد الرياضيين',
-      subtitle: 'أسرة متخصصة في الأنشطة الرياضية والتنافس الشريف',
-      place: 'الصالة الرياضية',
-      views: '22/30 عضو',
-      createdAt: '2020',
-      deadline: '15 يناير 2025',
-      goals: 'تنظيم البطولات الرياضية، تدريب الفرق، نشر ثقافة الرياضة',
-      image: '/api/placeholder/300/200'
+  
+  // Load joined families from localStorage or use default
+  const loadJoinedFamilies = (): any[] => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('joinedFamilies');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error('Error parsing joinedFamilies from localStorage', e);
+        }
+      }
     }
-  ]);
+    // Default family
+    return [
+      {
+        id: 100,
+        title: 'أسرة الرواد الرياضيين',
+        subtitle: 'أسرة متخصصة في الأنشطة الرياضية والتنافس الشريف',
+        place: 'الصالة الرياضية',
+        views: '22/30 عضو',
+        createdAt: '2020',
+        deadline: '15 يناير 2025',
+        goals: 'تنظيم البطولات الرياضية، تدريب الفرق، نشر ثقافة الرياضة',
+        image: '/api/placeholder/300/200'
+      }
+    ];
+  };
+
+  const [joinedFamilies, setJoinedFamilies] = useState<any[]>(loadJoinedFamilies);
 
   const [selectedFamily, setSelectedFamily] = useState<any>(null);
 
@@ -94,15 +116,34 @@ export default function MainPage() {
     }
 
     // إضافة الأسرة المنضم لها لقائمة الأسَر الحالية
-    setJoinedFamilies(prev => [...prev, selectedFamily]);
+    const updatedFamilies = [...joinedFamilies, selectedFamily];
+    setJoinedFamilies(updatedFamilies);
+    
+    // Save to localStorage to persist across navigation
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('joinedFamilies', JSON.stringify(updatedFamilies));
+    }
 
     setIsModalOpen(false);
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 2500);
   };
+  // Reload joined families from localStorage when component mounts or when returning from details page
+  useEffect(() => {
+    const saved = localStorage.getItem('joinedFamilies');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setJoinedFamilies(parsed);
+      } catch (e) {
+        console.error('Error parsing joinedFamilies from localStorage', e);
+      }
+    }
+  }, []);
+
   const isJoined = (id: number) => {
-  return joinedFamilies.some(fam => fam.id === id);
-};
+    return joinedFamilies.some(fam => fam.id === id);
+  };
 
 
   return (
@@ -132,7 +173,17 @@ export default function MainPage() {
             </div>
 
             <p><strong>المكان:</strong> {fam.place}</p>
-          
+            
+            <button
+              className="view-details-btn"
+              onClick={() => {
+                if (onViewFamilyDetails) {
+                  onViewFamilyDetails(fam);
+                }
+              }}
+            >
+              عرض التفاصيل
+            </button>
           </div>
         ))}
       </section>

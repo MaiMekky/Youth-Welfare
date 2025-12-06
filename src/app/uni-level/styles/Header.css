@@ -8,7 +8,7 @@
   top: 0;
   z-index: 1;
 }
-
+/* 
 .headerContent {
   max-width: 1400px;
   margin: 0 auto;
@@ -16,7 +16,7 @@
   justify-content: flex-start;
   align-items: center;
   gap: 16px;
-}
+} */
 
 .headerIcon {
   background-color: #B38E19;
@@ -44,8 +44,8 @@
   font-size: 13px;
   color: #B8C5E0;
 }
-.logoutBtn {
-  background-color: #e74c3c; /* أحمر */
+/* .logoutBtn {
+  background-color: #e74c3c;
   color: #fff;
   border: none;
   padding: 8px 14px;
@@ -59,4 +59,84 @@
 
 .logoutBtn:hover {
   background-color: #c0392b;
+} */
+/* Layout */
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* padding: 15px 25px; */
+}
+
+.rightButtons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap; 
+}
+
+.rightButtons button {
+  background: #1c5fa8;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: 0.2s;
+  white-space: nowrap;
+}
+
+.rightButtons button:hover {
+  background: #174d88;
+}
+
+.rightButtons .logoutBtn {
+  background-color: #e74c3c;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: 0.2s;
+  white-space: nowrap;
+}
+
+.rightButtons .logoutBtn:hover {
+  background-color: #c0392b;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .headerContent {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .rightButtons {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .rightButtons button,
+  .logoutBtn {
+    width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .rightButtons {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .rightButtons button,
+  .logoutBtn {
+    width: 100%;
+    text-align: center;
+  }
 }

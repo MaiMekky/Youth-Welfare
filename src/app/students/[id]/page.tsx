@@ -224,32 +224,42 @@ console.log("docs: ", docs)
             <p><strong>السبب:</strong> {data.reason}</p>
           </div>
         </section>
+        {/* ====== المستندات ====== */}
+        <section className={styles.section}>
+          <h3>المستندات المرفوعة</h3>
 
-  {/* ====== المستندات ====== */}
-<section className={styles.section}>
-  <h3>المستندات المرفوعة</h3>
+          {docs.length === 0 ? (
+            <p className={styles.noLink}>لا توجد مستندات.</p>
+          ) : (
+            <div className={styles.docsContainer}>
+              {docs.map((doc) => (
+                <div key={doc.doc_id} className={styles.docCard}>
+                  <p><strong>{doc.doc_type}</strong></p>
 
-  {docs.length === 0 ? (
-    <p>لا توجد مستندات.</p>
-  ) : (
-    <div className={styles.docsContainer}>
-      {docs.map((doc) => (
-        <div key={doc.doc_id} className={styles.docCard}>
-          <p><strong>{doc.doc_type}</strong></p>
+                  {doc.file_url ? (
+                    <a
+                      href={doc.file_url}
+                      rel="noopener noreferrer"
+                      className={styles.docLinkButton}
+                    >
+                      افتح الملف
+                    </a>
+                  ) : (
+                    <p className={styles.noLink}>لا يوجد رابط</p>
+                  )}
 
-         
-          <a href={doc.file_url} rel="noopener noreferrer">
-            افتح الملف
-          </a>
+                  <p className={styles.uploadDate}>
+                    تم الرفع: {doc.uploaded_at.slice(0, 10)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
 
-          <p className={styles.uploadDate}>
-            تم الرفع: {doc.uploaded_at.slice(0, 10)}
-          </p>
-        </div>
-      ))}
-    </div>
-  )}
+  {/* helper text under documents */}
+  <p className={styles.docsNote}>هذه المستندات تم رفعها من قبل المستخدم.</p>
 </section>
+
 
 
         {/* ====== الأزرار ====== */}

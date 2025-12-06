@@ -23,6 +23,8 @@
   top: 0;
   z-index: 80;
   direction: rtl; /* ensure RTL */
+  width: 100%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 .navbar-inner {
   display: flex;
@@ -111,6 +113,21 @@
   font-weight: 700;
   cursor: pointer;
   transition: background .12s ease, transform .08s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-right: 10px;
+  padding-left: 10px;
+
+}
+.logout-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.logout-text {
+  display: inline-block;
 }
 .logout:hover { background: rgba(209,59,59,0.04); transform: translateY(-1px); }
 
@@ -178,6 +195,17 @@
   .hamburger { display: inline-flex; }
   .brand-mark { width: 44px; height: 44px; font-size: 18px; border-radius: 10px; }
   .brand-name { font-size: 0.98rem; }
+  .logout-text {
+    display: none;
+  }
+  .logout {
+    padding: 8px;
+    min-width: 40px;
+    justify-content: center;
+  }
+  .logout-icon {
+    margin: 0;
+  }
 }
 
 /* Hamburger animation */
@@ -188,3 +216,22 @@
 /* Small tweaks */
 .nav-link .nav-label { white-space: nowrap; }
 .container { padding: 0 16px; }
+
+/* Student layout container */
+.student-app {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  direction: rtl;
+  background-color: #ffffff;
+}
+
+.student-content {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}

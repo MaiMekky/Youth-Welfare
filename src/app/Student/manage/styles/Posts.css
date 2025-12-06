@@ -12,7 +12,6 @@
   padding: 20px 30px;
   background: var(--background);
   direction: rtl;
-  font-family: "Inter", sans-serif;
 }
 
 .posts-page .posts-container {

@@ -24,7 +24,7 @@
   color: var(--color-white);
   padding: 25px 20px;            /* smaller padding */
   margin-top: 10px;
-  width: 80%;                    
+  width: 100%;                    
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   text-align: center;
@@ -70,13 +70,13 @@
   justify-content: center;
   gap: 12px;                 /* smaller gap */
   margin-top: 25px;
-  width: 75%;
+  width: 100%;
   max-width: 650px;
 }
 
 /* Buttons */
 .action-button {
-  font-size: 1.2rem;         /* smaller text */
+  font-size: 1rem;         /* smaller text */
   font-weight: 600;
   padding: 10px 15px;        /* smaller padding */
   border: none;

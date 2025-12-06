@@ -6,6 +6,10 @@
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .approvedBadge {
@@ -15,9 +19,43 @@
   padding: 8px 14px;
   border-radius: 8px;
   font-size: 14px;
+  white-space: nowrap;
 }
 
 .studentsCount {
   color: #555;
   font-size: 14px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .statusBar {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 12px 16px;
+  }
+
+  .approvedBadge {
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+
+  .studentsCount {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .statusBar {
+    padding: 10px 12px;
+  }
+
+  .approvedBadge {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+
+  .studentsCount {
+    font-size: 12px;
+  }
 }

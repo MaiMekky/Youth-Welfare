@@ -1,15 +1,30 @@
 .saSidebar {
-  width: 280px;
-background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);  color: #fff;
+  width: 260px;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+  color: #fff;
   padding: 30px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
+  z-index: 10;
 }
+
 .logoImage {
   object-fit: cover;
-   border-radius: 50%;
+  border-radius: 50%;
 }
+
+.profileSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  position: relative;
+  width: 100%;
+}
+
 .profileAvatar {
   width: 70px;
   height: 70px;
@@ -24,16 +39,20 @@ background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);  color: #fff;
   margin-bottom: 10px;
 }
 
+.profileInfo {
+  text-align: center;
+}
+
 .profileInfo h3 {
   font-size: 16px;
   font-weight: 700;
   margin-bottom: 2px;
+  text-align: center;
 }
 
 .profileInfo p {
   font-size: 13px;
-  color: rgba(255,255,255,0.8);
-  
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .sidebarMenu {
@@ -57,12 +76,105 @@ background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);  color: #fff;
 }
 
 .menuItem:hover {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .active {
   background: #C9A227;
   color: #2C2A6A;
   font-weight: 700;
-  box-shadow: 2px 2px 8px rgba(0,0,0,0.15);
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Close button - hidden by default */
+.closeBtn {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 1001;
+}
+
+/* Mobile menu button - hidden by default */
+.mobileMenuBtn {
+  display: none;
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  background: #2C3A5F;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  z-index: 100;
+  cursor: pointer;
+  padding: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Overlay - hidden by default */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: none;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .saSidebar {
+    position: fixed;
+    right: -260px;
+    top: 0;
+    height: 100vh;
+    transition: right 0.3s ease;
+    z-index: 1000;
+  }
+
+  .saSidebar.open {
+    right: 0;
+  }
+
+  .closeBtn {
+    display: block;
+  }
+
+  .mobileMenuBtn {
+    display: block;
+  }
+
+  .overlay {
+    display: block;
+  }
+}
+
+@media (max-width: 480px) {
+  .saSidebar {
+    width: 240px;
+    right: -240px;
+  }
+
+  .profileAvatar {
+    width: 60px;
+    height: 60px;
+    font-size: 20px;
+  }
+
+  .profileInfo h3 {
+    font-size: 15px;
+  }
+
+  .profileInfo p {
+    font-size: 12px;
+  }
+
+  .menuItem {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
 }

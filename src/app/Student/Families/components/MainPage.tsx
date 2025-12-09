@@ -233,7 +233,7 @@ export default function MainPage(props: MainPageProps = {}) {
         ))}
       </main>
 
-      {/* Modal */}
+      {/* Modal
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal">
@@ -242,9 +242,9 @@ export default function MainPage(props: MainPageProps = {}) {
               <button onClick={() => setIsModalOpen(false)}>
                 <X size={24} />
               </button>
-            </div>
+            </div> */}
 
-            <div className="modal-body">
+            {/* <div className="modal-body">
               {[
                 { key: 'name', label: 'الاسم' },
                 { key: 'id', label: 'رقم الهوية / البطاقة' },
@@ -268,11 +268,11 @@ export default function MainPage(props: MainPageProps = {}) {
               <div className="modal-buttons">
                 <button onClick={() => setIsModalOpen(false)}>إلغاء</button>
                 <button onClick={handleSubmit}>تسجيل</button>
-              </div>
-            </div>
+              </div> */}
+            {/* </div> */}
           </div>
-        </div>
-      )}
-    </div>
+      //   </div>
+      // )}
+    // </div>
   );
 }

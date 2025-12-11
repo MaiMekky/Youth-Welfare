@@ -1,6 +1,5 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
 import '../styles/mainpage.css';
 
 interface MainPageProps {
@@ -9,9 +8,8 @@ interface MainPageProps {
 
 export default function MainPage(props: MainPageProps = {}) {
   const { onViewFamilyDetails } = props;
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  
+
   // Load joined families from localStorage or use default
   const loadJoinedFamilies = (): any[] => {
     if (typeof window !== 'undefined') {
@@ -41,26 +39,6 @@ export default function MainPage(props: MainPageProps = {}) {
   };
 
   const [joinedFamilies, setJoinedFamilies] = useState<any[]>(loadJoinedFamilies);
-
-  const [selectedFamily, setSelectedFamily] = useState<any>(null);
-
-  interface FormData {
-    name: string;
-    id: string;
-    level: string;
-    address: string;
-    studentId: string;
-    mobile: string;
-  }
-
-  const [formData, setFormData] = useState<FormData>({
-    name: '',
-    id: '',
-    level: '',
-    address: '',
-    studentId: '',
-    mobile: ''
-  });
 
   const programs = [
     {
@@ -104,40 +82,13 @@ export default function MainPage(props: MainPageProps = {}) {
     }
   ];
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = () => {
-    if (!formData.name || !formData.id || !formData.address || !formData.mobile) {
-      alert("يرجى ملء جميع الحقول");
-      return;
-    }
-
-    // إضافة الأسرة المنضم لها لقائمة الأسَر الحالية
-    const updatedFamilies = [...joinedFamilies, selectedFamily];
-    setJoinedFamilies(updatedFamilies);
-    
-    // Save to localStorage to persist across navigation
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('joinedFamilies', JSON.stringify(updatedFamilies));
-    }
-
-    setIsModalOpen(false);
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 2500);
-  };
-  // Reload joined families from localStorage when component mounts or when returning from details page
+  // Reload joined from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem('joinedFamilies');
     if (saved) {
       try {
-        const parsed = JSON.parse(saved);
-        setJoinedFamilies(parsed);
-      } catch (e) {
-        console.error('Error parsing joinedFamilies from localStorage', e);
-      }
+        setJoinedFamilies(JSON.parse(saved));
+      } catch {}
     }
   }, []);
 
@@ -145,6 +96,20 @@ export default function MainPage(props: MainPageProps = {}) {
     return joinedFamilies.some(fam => fam.id === id);
   };
 
+  // join immediately without modal
+  const joinFamily = (family: any) => {
+    if (isJoined(family.id)) return;
+
+    const updatedFamilies = [...joinedFamilies, family];
+    setJoinedFamilies(updatedFamilies);
+
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('joinedFamilies', JSON.stringify(updatedFamilies));
+    }
+
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 2500);
+  };
 
   return (
     <div dir="rtl" className="container">
@@ -176,11 +141,7 @@ export default function MainPage(props: MainPageProps = {}) {
             
             <button
               className="view-details-btn"
-              onClick={() => {
-                if (onViewFamilyDetails) {
-                  onViewFamilyDetails(fam);
-                }
-              }}
+              onClick={() => onViewFamilyDetails?.(fam)}
             >
               عرض التفاصيل
             </button>
@@ -202,77 +163,30 @@ export default function MainPage(props: MainPageProps = {}) {
             </div>
 
             <div className="program-content">
-              <h3>{program.title}
-              </h3>
+              <h3>{program.title}</h3>
+
               <span>
-              <p className='goals-title'>وصف الاسرة : {program.subtitle} </p>
-              <p className="goals-title"> الاهداف : {program.description}</p>
-               <p className="goals-title">العدد الحالي : {program.views}</p>
-               <p className="goals-title">المكان : {program.place}</p>
-               </span>
+                <p className='goals-title'>وصف الاسرة : {program.subtitle}</p>
+                <p className="goals-title">الاهداف : {program.description}</p>
+                <p className="goals-title">العدد الحالي : {program.views}</p>
+                <p className="goals-title">المكان : {program.place}</p>
+              </span>
 
               <div className="meta">
                 <span>تاريخ انشاء الاسرة : {program.createdAt}</span>
               </div>
+
               <button
-  disabled={isJoined(program.id)}
-  className={isJoined(program.id) ? "joined-btn" : ""}
-  onClick={() => {
-    if (isJoined(program.id)) return; // حماية إضافية
-    setSelectedFamily(program);
-    setIsModalOpen(true);
-  }}
->
-  {isJoined(program.id) ? "منضم بالفعل" : "انضم للأسرة"}
-</button>
-
-
-     
+                disabled={isJoined(program.id)}
+                className={isJoined(program.id) ? "joined-btn" : ""}
+                onClick={() => joinFamily(program)}
+              >
+                {isJoined(program.id) ? "منضم بالفعل" : "انضم للأسرة"}
+              </button>
             </div>
           </div>
         ))}
       </main>
-
-      {/* Modal
-      {isModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <div className="modal-header">
-              <h2>طلب الانضمام لـ {selectedFamily?.title}</h2>
-              <button onClick={() => setIsModalOpen(false)}>
-                <X size={24} />
-              </button>
-            </div> */}
-
-            {/* <div className="modal-body">
-              {[
-                { key: 'name', label: 'الاسم' },
-                { key: 'id', label: 'رقم الهوية / البطاقة' },
-                { key: 'level', label: 'الفرقة / المستوى' },
-                { key: 'address', label: 'العنوان' },
-                { key: 'studentId', label: 'كود الطالب' },
-                { key: 'mobile', label: 'رقم الموبايل' }
-              ].map((field, idx) => (
-                <div key={idx} className="form-group">
-                  <label>{field.label}</label>
-                  <input
-                    type={field.key === 'mobile' ? 'tel' : 'text'}
-                    name={field.key}
-                    value={formData[field.key as keyof FormData]}
-                    onChange={handleInputChange}
-                    placeholder={field.label}
-                  />
-                </div>
-              ))}
-
-              <div className="modal-buttons">
-                <button onClick={() => setIsModalOpen(false)}>إلغاء</button>
-                <button onClick={handleSubmit}>تسجيل</button>
-              </div> */}
-            {/* </div> */}
-          </div>
-      //   </div>
-      // )}
-    // </div>
+    </div>
   );
 }

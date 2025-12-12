@@ -122,17 +122,19 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
     }
   };
 
-  const validatePerson = (person: Person, prefix: string, isFullInfo: boolean): boolean => {
+  const validatePerson = (person: Person, prefix: string, isFullInfo: boolean, needsName: boolean = true): boolean => {
     let isValid = true;
 
-    if (!person.fullName || !person.fullName.trim()) {
-      addError(`${prefix}_name`, 'الاسم مطلوب');
-      isValid = false;
-    } else if (!validateTextField(person.fullName, 3)) {
-      addError(`${prefix}_name`, 'الاسم يجب أن يكون 3 أحرف على الأقل');
-      isValid = false;
-    } else {
-      clearError(`${prefix}_name`);
+    if (needsName) {
+      if (!person.fullName || !person.fullName.trim()) {
+        addError(`${prefix}_name`, 'الاسم مطلوب');
+        isValid = false;
+      } else if (!validateTextField(person.fullName, 3)) {
+        addError(`${prefix}_name`, 'الاسم يجب أن يكون 3 أحرف على الأقل');
+        isValid = false;
+      } else {
+        clearError(`${prefix}_name`);
+      }
     }
 
     if (isFullInfo) {
@@ -200,16 +202,17 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
 
     Object.entries(boardMembers).forEach(([key, person]) => {
       const isFullInfo = requiresFullInfo.includes(key);
-      if (!validatePerson(person, `board_${key}`, isFullInfo)) {
+      const needsName = requiresFullInfo.includes(key);
+      if (!validatePerson(person, `board_${key}`, isFullInfo, needsName)) {
         isValid = false;
       }
     });
 
     Object.entries(committees).forEach(([key, committee]) => {
-      if (!validatePerson(committee.secretary, `committee_${key}_secretary`, false)) {
+      if (!validatePerson(committee.secretary, `committee_${key}_secretary`, false, false)) {
         isValid = false;
       }
-      if (!validatePerson(committee.assistant, `committee_${key}_assistant`, false)) {
+      if (!validatePerson(committee.assistant, `committee_${key}_assistant`, false, false)) {
         isValid = false;
       }
     });
@@ -255,8 +258,8 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
     allFields.add('familyDescription');
 
     Object.keys(boardMembers).forEach(key => {
-      allFields.add(`board_${key}_name`);
       if (requiresFullInfo.includes(key)) {
+        allFields.add(`board_${key}_name`);
         allFields.add(`board_${key}_nationalId`);
         allFields.add(`board_${key}_mobile`);
       } else {
@@ -265,9 +268,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
     });
 
     Object.keys(committees).forEach(key => {
-      allFields.add(`committee_${key}_secretary_name`);
       allFields.add(`committee_${key}_secretary_studentId`);
-      allFields.add(`committee_${key}_assistant_name`);
       allFields.add(`committee_${key}_assistant_studentId`);
     });
 
@@ -383,19 +384,21 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
                 <h3 className="board-member-title">{boardLabels[key as keyof typeof boardLabels]}</h3>
 
                 <div className="member-fields">
-                  <div className="field-wrapper">
-                    <label>الاسم *</label>
-                    <input
-                      className={hasFieldError(`board_${key}_name`) ? 'error' : ''}
-                      placeholder="الاسم الكامل"
-                      value={person.fullName}
-                      onChange={e => handleBoardChange(key as keyof typeof boardMembers, 'fullName', e.target.value)}
-                      onBlur={() => handleFieldBlur(`board_${key}_name`)}
-                    />
-                    {hasFieldError(`board_${key}_name`) && (
-                      <div className="field-error">⚠️ {getFieldError(`board_${key}_name`)}</div>
-                    )}
-                  </div>
+                  {isFullInfo && (
+                    <div className="field-wrapper">
+                      <label>الاسم *</label>
+                      <input
+                        className={hasFieldError(`board_${key}_name`) ? 'error' : ''}
+                        placeholder="الاسم الكامل"
+                        value={person.fullName}
+                        onChange={e => handleBoardChange(key as keyof typeof boardMembers, 'fullName', e.target.value)}
+                        onBlur={() => handleFieldBlur(`board_${key}_name`)}
+                      />
+                      {hasFieldError(`board_${key}_name`) && (
+                        <div className="field-error">⚠️ {getFieldError(`board_${key}_name`)}</div>
+                      )}
+                    </div>
+                  )}
 
                   {isFullInfo ? (
                     <>

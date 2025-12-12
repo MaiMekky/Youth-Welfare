@@ -114,11 +114,14 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
     try {
-      // Step 1: Get authorization URL
-      const initRes = await fetch("http://localhost:8000/api/auth/google/init/", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" }
-      });
+      // Step 1: Get the Google authorization URL from your backend
+      const initRes = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google/init/`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
       const initData = await initRes.json();
       

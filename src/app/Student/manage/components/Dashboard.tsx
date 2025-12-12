@@ -54,6 +54,10 @@ const Dashboard: React.FC = () => {
   const [showCreateContentForm, setShowCreateContentForm] = useState(false);
   const [showCreateActivityForm, setShowCreateActivityForm] = useState(false);
 
+  // Student ID for API calls
+  const [studentId, setStudentId] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // Notification state
   const [notification, setNotification] = useState<{
     show: boolean;
@@ -74,6 +78,29 @@ const Dashboard: React.FC = () => {
     location: "",
     maxParticipants: "",
   });
+
+  // Fetch student ID on mount
+  useEffect(() => {
+    const fetchStudentId = async () => {
+      const token = localStorage.getItem("access");
+      if (!token) return;
+
+      try {
+        const response = await fetch("http://127.0.0.1:8000/api/auth/profile/", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setStudentId(data.student_id);
+        }
+      } catch (error) {
+        console.error("Error fetching student ID:", error);
+      }
+    };
+
+    fetchStudentId();
+  }, []);
 
   useEffect(() => {
     async function fetchData() {
@@ -111,36 +138,62 @@ const Dashboard: React.FC = () => {
   };
 
   // Submit Content
-  const handleCreateContent = () => {
+  const handleCreateContent = async () => {
     if (!contentBody.trim()) {
       showNotification("محتوى المنشور مطلوب");
       return;
     }
 
-    const now = new Date();
-    const newPost: Post = {
-      id: Date.now(),
-      author: "أحمد محمد علي",
-      role: "مؤسس الأسرة",
-      time: now.toLocaleTimeString("ar-EG", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      date: now.toLocaleDateString("en-CA"),
-      title: contentTitle || "منشور جديد",
-      content: contentBody,
-      type: "Post",
-    };
+    if (!studentId) {
+      showNotification("لم يتم العثور على معرف الطالب");
+      return;
+    }
 
-    setPosts([newPost, ...posts]);
-    setContentBody("");
-    setContentTitle("");
-    setShowCreateContentForm(false);
-    setActiveTab("posts");
+    const token = localStorage.getItem("access");
+    if (!token) {
+      showNotification("يرجى تسجيل الدخول أولاً");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/family/student/${studentId}/post/`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            title: contentTitle || "منشور جديد",
+            description: contentBody,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        showNotification("✅ تم نشر المحتوى بنجاح");
+        setContentBody("");
+        setContentTitle("");
+        setShowCreateContentForm(false);
+        setActiveTab("posts");
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Error creating post:", errorData);
+        showNotification("❌ حدث خطأ أثناء نشر المحتوى");
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+      showNotification("⚠️ فشل الاتصال بالسيرفر");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Submit Activity
-  const handleCreateActivity = () => {
+  const handleCreateActivity = async () => {
     if (
       !activityData.title ||
       !activityData.description ||
@@ -152,37 +205,66 @@ const Dashboard: React.FC = () => {
       return;
     }
 
-    const colors = ["#4CAF50", "#2196F3", "#FF9800", "#9C27B0", "#F44336"];
+    if (!studentId) {
+      showNotification("لم يتم العثور على معرف الطالب");
+      return;
+    }
 
-    const newActivity: Activity = {
-      id: Date.now(),
-      title: activityData.title,
-      type: activityData.type,
-      date: activityData.date,
-      time: activityData.time,
-      location: activityData.location,
-      description: activityData.description,
-      participants: activityData.maxParticipants
-        ? `${activityData.maxParticipants} عضو`
-        : "غير محدد",
-      status: "قادمة",
-      color: colors[Math.floor(Math.random() * colors.length)],
-    };
+    const token = localStorage.getItem("access");
+    if (!token) {
+      showNotification("يرجى تسجيل الدخول أولاً");
+      return;
+    }
 
-    setActivities([newActivity, ...activities]);
+    setIsSubmitting(true);
 
-    setShowCreateActivityForm(false);
-    setActivityData({
-      title: "",
-      type: "اجتماع",
-      description: "",
-      date: "",
-      time: "",
-      location: "",
-      maxParticipants: "",
-    });
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/family/student/${studentId}/event_request/`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            title: activityData.title,
+            description: activityData.description,
+            type: activityData.type,
+            st_date: activityData.date,
+            end_date: activityData.date,
+            location: activityData.location,
+            s_limit: activityData.maxParticipants ? parseInt(activityData.maxParticipants) : 0,
+          }),
+        }
+      );
 
-    setActiveTab("activities");
+      if (response.ok) {
+        showNotification("✅ تم إنشاء الفعالية بنجاح");
+        
+        setShowCreateActivityForm(false);
+        setActivityData({
+          title: "",
+          type: "اجتماع",
+          description: "",
+          date: "",
+          time: "",
+          location: "",
+          maxParticipants: "",
+        });
+
+        setActiveTab("activities");
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Error creating activity:", errorData);
+        showNotification("❌ حدث خطأ أثناء إنشاء الفعالية");
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+      showNotification("⚠️ فشل الاتصال بالسيرفر");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleActivityChange = (
@@ -265,7 +347,7 @@ const Dashboard: React.FC = () => {
       {/* CONTENT SWITCHING */}
       <div className="dashboard-tabs-content">
         {activeTab === "overview" && (
-          <Overview activities={activities} members={members}  />
+          <Overview activities={activities} members={members} />
         )}
 
         {activeTab === "activities" && <Activities activities={activities} />}
@@ -325,8 +407,12 @@ const Dashboard: React.FC = () => {
                   إلغاء
                 </button>
 
-                <button className="btn-submit" onClick={handleCreateContent}>
-                  <Upload size={18} /> نشر
+                <button 
+                  className="btn-submit" 
+                  onClick={handleCreateContent}
+                  disabled={isSubmitting}
+                >
+                  <Upload size={18} /> {isSubmitting ? "جاري النشر..." : "نشر"}
                 </button>
               </div>
             </div>
@@ -457,8 +543,9 @@ const Dashboard: React.FC = () => {
                 <button
                   className="btn-submit-activity"
                   onClick={handleCreateActivity}
+                  disabled={isSubmitting}
                 >
-                  إنشاء الفعالية والنشر الآن
+                  {isSubmitting ? "جاري الإنشاء..." : "إنشاء الفعالية والنشر الآن"}
                 </button>
               </div>
             </div>

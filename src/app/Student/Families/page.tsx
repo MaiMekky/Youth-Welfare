@@ -29,10 +29,6 @@ export default function FamiliesPage() {
     setCurrentView("home");
   };
 
-  const handleNavigateToRequestDetailsFromForm = () => {
-    setCurrentView("requestDetails");
-  };
-
   const handleFormSubmitSuccess = () => {
     // After successful form submission, save status to localStorage
     localStorage.setItem("familyRequestStatus", "pending");
@@ -49,7 +45,7 @@ export default function FamiliesPage() {
     <div style={{ minHeight: "100vh", backgroundColor: "#F3F5FD", width: "100%" }}>
       {currentView === "home" && (
         <>
-          <HeadPage 
+          <HeadPage
             onCreateClick={handleNavigateToRequestDetails}
             onReviewClick={handleNavigateToTrackRequest}
           />
@@ -63,8 +59,8 @@ export default function FamiliesPage() {
         />
       )}
       {currentView === "createForm" && (
-        <CreateFamForm 
-          onBack={handleNavigateToRequestDetailsFromForm}
+        <CreateFamForm
+          onBack={handleNavigateBack}
           onSubmitSuccess={handleFormSubmitSuccess}
         />
       )}
@@ -72,9 +68,9 @@ export default function FamiliesPage() {
         <TrackRequest onBack={handleNavigateBack} />
       )}
       {currentView === "familyDetails" && selectedFamily && (
-        <FamilyDetails 
-          family={selectedFamily} 
-          onBack={handleNavigateBack} 
+        <FamilyDetails
+          family={selectedFamily}
+          onBack={handleNavigateBack}
         />
       )}
     </div>

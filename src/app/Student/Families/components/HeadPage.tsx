@@ -1,10 +1,22 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
+import FamilyAdBanner from "./FamilyAdBanner";
 import "../styles/HeadPage.css";
 
-export default function HeadPage() {
+interface HeadPageProps {
+  onCreateClick?: () => void;
+  onReviewClick?: () => void;
+}
+
+export default function HeadPage({ onCreateClick }: HeadPageProps) {
   const router = useRouter();
+
+  const handleLearnMore = () => {
+    if (onCreateClick) {
+      onCreateClick();
+    }
+  };
 
   return (
     <div className="page-container">
@@ -17,6 +29,9 @@ export default function HeadPage() {
           انضم إلى الأسر الطلابية المتنوعة وكن جزءًا من مجتمع طلابي نشط
         </p>
       </div>
+
+      {/* Advertisement Banner */}
+      <FamilyAdBanner onLearnMore={handleLearnMore} />
     </div>
   );
 }

@@ -452,77 +452,47 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
           })}
         </section>
 
-        {/* Committees */}
-        <section className="form-section">
-          <h2 className="section-title">اللجان النوعية</h2>
-          {Object.entries(committees).map(([key, committee]) => (
-            <div key={key} className="committee-card">
-              <div className="committee-name-header">{committee.name}</div>
+        {Object.entries(committees).map(([key, committee]) => (
+  <div key={key} className="committee-card">
+    <div className="committee-name-header">{committee.name}</div>
 
-              <div className="committee-role-section">
-                <h4 className="committee-role-title">أمين اللجنة</h4>
-                <div className="member-fields">
-                  <div className="field-wrapper">
-                    <label>الاسم *</label>
-                    <input
-                      className={hasFieldError(`committee_${key}_secretary_name`) ? 'error' : ''}
-                      placeholder="الاسم الكامل"
-                      value={committee.secretary.fullName}
-                      onChange={e => handleCommitteeChange(key, 'secretary', 'fullName', e.target.value)}
-                      onBlur={() => handleFieldBlur(`committee_${key}_secretary_name`)}
-                    />
-                    {hasFieldError(`committee_${key}_secretary_name`) && (
-                      <div className="field-error">⚠️ {getFieldError(`committee_${key}_secretary_name`)}</div>
-                    )}
-                  </div>
-                  <div className="field-wrapper">
-                    <label>كود الطالب *</label>
-                    <input
-                      className={hasFieldError(`committee_${key}_secretary_studentId`) ? 'error' : ''}
-                      placeholder="أدخل كود الطالب"
-                      value={committee.secretary.studentId || ''}
-                      onChange={e => handleCommitteeChange(key, 'secretary', 'studentId', e.target.value)}
-                      onBlur={() => handleFieldBlur(`committee_${key}_secretary_studentId`)}
-                    />
-                    {hasFieldError(`committee_${key}_secretary_studentId`) && (
-                      <div className="field-error">⚠️ {getFieldError(`committee_${key}_secretary_studentId`)}</div>
-                    )}
-                  </div>
-                </div>
-              </div>
+    <div className="committee-role-section">
+      <h4 className="committee-role-title">أمين اللجنة</h4>
+      <div className="member-fields">
+        <div className="field-wrapper">
+          <label>كود الطالب *</label>
+          <input
+            className={hasFieldError(`committee_${key}_secretary_studentId`) ? 'error' : ''}
+            placeholder="أدخل كود الطالب"
+            value={committee.secretary.studentId || ''}
+            onChange={e => handleCommitteeChange(key, 'secretary', 'studentId', e.target.value)}
+            onBlur={() => handleFieldBlur(`committee_${key}_secretary_studentId`)}
+          />
+          {hasFieldError(`committee_${key}_secretary_studentId`) && (
+            <div className="field-error">⚠️ {getFieldError(`committee_${key}_secretary_studentId`)}</div>
+          )}
+        </div>
+      </div>
+    </div>
 
-              <div className="committee-role-section">
-                <h4 className="committee-role-title">أمين مساعد اللجنة</h4>
-                <div className="member-fields">
-                  <div className="field-wrapper">
-                    <label>الاسم *</label>
-                    <input
-                      className={hasFieldError(`committee_${key}_assistant_name`) ? 'error' : ''}
-                      placeholder="الاسم الكامل"
-                      value={committee.assistant.fullName}
-                      onChange={e => handleCommitteeChange(key, 'assistant', 'fullName', e.target.value)}
-                      onBlur={() => handleFieldBlur(`committee_${key}_assistant_name`)}
-                    />
-                    {hasFieldError(`committee_${key}_assistant_name`) && (
-                      <div className="field-error">⚠️ {getFieldError(`committee_${key}_assistant_name`)}</div>
-                    )}
-                  </div>
-                  <div className="field-wrapper">
-                    <label>كود الطالب *</label>
-                    <input
-                      className={hasFieldError(`committee_${key}_assistant_studentId`) ? 'error' : ''}
-                      placeholder="أدخل كود الطالب"
-                      value={committee.assistant.studentId || ''}
-                      onChange={e => handleCommitteeChange(key, 'assistant', 'studentId', e.target.value)}
-                      onBlur={() => handleFieldBlur(`committee_${key}_assistant_studentId`)}
-                    />
-                    {hasFieldError(`committee_${key}_assistant_studentId`) && (
-                      <div className="field-error">⚠️ {getFieldError(`committee_${key}_assistant_studentId`)}</div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
+    <div className="committee-role-section">
+      <h4 className="committee-role-title">أمين مساعد اللجنة</h4>
+      <div className="member-fields">
+        <div className="field-wrapper">
+          <label>كود الطالب *</label>
+          <input
+            className={hasFieldError(`committee_${key}_assistant_studentId`) ? 'error' : ''}
+            placeholder="أدخل كود الطالب"
+            value={committee.assistant.studentId || ''}
+            onChange={e => handleCommitteeChange(key, 'assistant', 'studentId', e.target.value)}
+            onBlur={() => handleFieldBlur(`committee_${key}_assistant_studentId`)}
+          />
+          {hasFieldError(`committee_${key}_assistant_studentId`) && (
+            <div className="field-error">⚠️ {getFieldError(`committee_${key}_assistant_studentId`)}</div>
+          )}
+        </div>
+      </div>
+    </div>
               <div className="committee-optional-fields">
                 <div className="form-group">
                   <label>الخطة <span className="optional-label">(اختياري)</span></label>
@@ -557,7 +527,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
               </div>
             </div>
           ))}
-        </section>
+    
 
         {/* Footer Buttons */}
         <div className="form-footer">

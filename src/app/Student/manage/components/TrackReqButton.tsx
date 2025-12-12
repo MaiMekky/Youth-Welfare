@@ -1,48 +1,40 @@
+"use client";
 import React from "react";
-import { useRouter } from "next/navigation";
-// import "..//../styles/HeadPage.css";
+import styles from "../styles/TrackReqButton.module.css";
 
-interface HeadPageProps {
+interface TrackReqButtonProps {
   onCreateClick?: () => void;
   onReviewClick?: () => void;
 }
 
-const HeadPage: React.FC<HeadPageProps> = ({ onCreateClick, onReviewClick }) => {
-  const router = useRouter();
+const TrackReqButton: React.FC<TrackReqButtonProps> = ({ onCreateClick, onReviewClick }) => {
+  const handleCreateClick = () => {
+    if (onCreateClick) {
+      onCreateClick();
+    }
+  };
 
   const handleReviewClick = () => {
     if (onReviewClick) {
       onReviewClick();
-    } else {
-      router.push("/Student/Families/TrackRequest");
-    }
-  };
-
-  const handleCreateClick = () => {
-    if (onCreateClick) {
-      onCreateClick();
-    } else {
-      router.push("/Student/Families/CreateFamForm");
     }
   };
 
   return (
-    <div className="page-container">
-      {/* Buttons */}
-      <div className="button-group">
+    <div className={styles.pageContainer}>
+      <div className={styles.buttonGroup}>
         <button
-          className="action-button button-secondary"
+          className={`${styles.actionButton} ${styles.buttonSecondary}`}
           onClick={handleCreateClick}
         >
-          <span className="icon">+</span>
+          <span className={styles.icon}>+</span>
           انشاء طلب تكوين اسرة
         </button>
-
         <button
-          className="action-button button-primary"
+          className={`${styles.actionButton} ${styles.buttonPrimary}`}
           onClick={handleReviewClick}
         >
-          <span className="icon">📄</span>
+          <span className={styles.icon}>📄</span>
           مراجعة طلب إنشاء أسرتك
         </button>
       </div>
@@ -50,4 +42,4 @@ const HeadPage: React.FC<HeadPageProps> = ({ onCreateClick, onReviewClick }) => 
   );
 };
 
-export default HeadPage;
+export default TrackReqButton;

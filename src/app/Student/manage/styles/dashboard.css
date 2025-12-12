@@ -37,6 +37,7 @@ body {
     opacity: 0;
     transform: translateX(-50%) translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
@@ -61,6 +62,7 @@ body {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -99,64 +101,72 @@ body {
   color: #27285D;
 }
 
-@media (max-width: 640px) {
-  .notification-container {
-    padding: 0 15px;
-    top: 15px;
-  }
-
-  .notification {
-    padding: 14px 16px;
-  }
-
-  .notification-message {
-    font-size: 16px;
-  }
+/* ========= HEADER ========= */
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 30px;
 }
 
 .dashboard-header h1 {
   color: var(--dark-navy);
-  margin-bottom: 5px;
+  margin-bottom: 8px;
   font-size: 28px;
   font-weight: bold;
 }
 
 .dashboard-header p {
   color: #555;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   font-size: 16px;
 }
 
+/* ========= BUTTONS ========= */
 .dashboard-buttons {
   display: flex;
-  gap: 15px;
-  margin-bottom: 20px;
+  gap: 20px;
   justify-content: center;
   align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
 }
 
 .btn {
-  padding: 14px 28px;
+  padding: 14px 32px;
   border: none;
   cursor: pointer;
-  font-weight: bold;
-  border-radius: 8px;
+  font-weight: 600;
+  border-radius: 10px;
   color: white;
-  font-size: 18px;
-  transition: all 0.2s;
+  font-size: 17px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  min-width: 160px;
 }
 
 .btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .create-activity {
-  background-color: var(--dark-navy);
+  background: linear-gradient(135deg, var(--dark-navy) 0%, #3A3B7A 100%);
+}
+
+.create-activity:hover {
+  background: linear-gradient(135deg, #1e1f4a 0%, var(--dark-navy) 100%);
 }
 
 .publish-content {
-  background-color: var(--gold);
+  background: linear-gradient(135deg, var(--gold) 0%, #D4A927 100%);
+}
+
+.publish-content:hover {
+  background: linear-gradient(135deg, #9a7615 0%, var(--gold) 100%);
 }
 
 .dashboard-summary {
@@ -187,32 +197,57 @@ body {
   font-weight: 500;
 }
 
+/* ========= TABS ========= */
 .dashboard-tabs {
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 25px;
   margin-top: 80px;
+  overflow-x: auto;
+  padding-bottom: 5px;
+}
 
+.dashboard-tabs::-webkit-scrollbar {
+  height: 6px;
+}
+
+.dashboard-tabs::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.dashboard-tabs::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.dashboard-tabs::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 
 .tab {
   padding: 12px 24px;
   background-color: white;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  border: 1px solid #ccc;
-  font-size: 18px;
+  border: 2px solid transparent;
+  font-size: 17px;
   font-weight: 600;
   transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .tab:hover {
-  background-color: #f3f4f6;
+  background-color: #f8f9ff;
+  border-color: var(--gold);
 }
 
 .tab.active {
-  background-color: var(--gold);
+  background: linear-gradient(135deg, var(--gold) 0%, #D4A927 100%);
   color: white;
+  border-color: var(--gold);
+  box-shadow: 0 4px 10px rgba(179, 142, 25, 0.3);
 }
 
 /* ========= MODAL STYLES ========= */
@@ -249,7 +284,7 @@ body {
 }
 
 .modal-header h2 {
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 700;
   color: #27285D;
   margin: 0;
@@ -288,7 +323,7 @@ body {
 
 .form-group label {
   display: block;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 600;
   color: #27285D;
   margin-bottom: 10px;
@@ -308,11 +343,11 @@ body {
 .form-textarea,
 .form-select {
   width: 100%;
-  padding: 14px 16px;
-  border: 1px solid #d1d5db;
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
   border-radius: 8px;
-  font-size: 17px;
-  transition: border-color 0.2s;
+  font-size: 16px;
+  transition: all 0.2s;
   direction: rtl;
   text-align: right;
 }
@@ -322,6 +357,7 @@ body {
 .form-select:focus {
   outline: none;
   border-color: #B38E19;
+  box-shadow: 0 0 0 3px rgba(179, 142, 25, 0.1);
 }
 
 .form-textarea {
@@ -330,7 +366,7 @@ body {
 }
 
 .helper-text {
-  font-size: 15px;
+  font-size: 14px;
   color: #6b7280;
   margin-top: 8px;
   text-align: right;
@@ -343,15 +379,16 @@ body {
   margin-top: 24px;
   padding-top: 20px;
   border-top: 1px solid #e5e7eb;
+  flex-wrap: wrap;
 }
 
 .btn-cancel {
-  padding: 14px 28px;
-  border: 1px solid #d1d5db;
+  padding: 12px 24px;
+  border: 2px solid #d1d5db;
   background: white;
   color: #374151;
   border-radius: 8px;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
@@ -359,50 +396,217 @@ body {
 
 .btn-cancel:hover {
   background: #f3f4f6;
+  border-color: #9ca3af;
 }
 
 .btn-submit {
-  padding: 14px 28px;
+  padding: 12px 24px;
   border: none;
-  background: #B38E19;
+  background: linear-gradient(135deg, #B38E19 0%, #D4A927 100%);
   color: white;
   border-radius: 8px;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .btn-submit:hover {
-  background: #9a7615;
+  background: linear-gradient(135deg, #9a7615 0%, #B38E19 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(179, 142, 25, 0.3);
 }
 
 .btn-submit-activity {
-  padding: 14px 28px;
+  padding: 12px 24px;
   border: none;
-  background: #27285D;
+  background: linear-gradient(135deg, #27285D 0%, #3A3B7A 100%);
   color: white;
   border-radius: 8px;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .btn-submit-activity:hover {
-  background: #1e1f4a;
+  background: linear-gradient(135deg, #1e1f4a 0%, #27285D 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(39, 40, 93, 0.3);
 }
 
-@media (max-width: 640px) {
-  .form-row {
+/* ========= RESPONSIVE DESIGN ========= */
+
+/* Tablet - 768px to 1024px */
+@media (max-width: 1024px) {
+  .dashboard-container {
+    padding: 18px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 26px;
+  }
+
+  .dashboard-buttons {
+    gap: 15px;
+  }
+
+  .btn {
+    font-size: 16px;
+    padding: 12px 24px;
+  }
+}
+
+/* Tablet Portrait - 768px */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 15px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 24px;
+  }
+
+  .dashboard-header p {
+    font-size: 15px;
+  }
+
+  .dashboard-buttons {
     flex-direction: column;
+    gap: 12px;
+  }
+
+  .btn {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .dashboard-tabs {
+    gap: 8px;
+    margin-top: 60px;
+  }
+
+  .tab {
+    padding: 10px 18px;
+    font-size: 16px;
   }
 
   .modal-box {
     max-height: 95vh;
   }
-  
+
+  .modal-header h2 {
+    font-size: 22px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .btn-cancel,
+  .btn-submit,
+  .btn-submit-activity {
+    width: 100%;
+  }
+}
+
+/* Mobile - 480px */
+@media (max-width: 480px) {
+  .dashboard-container {
+    padding: 12px;
+    font-size: 16px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 22px;
+    margin-bottom: 6px;
+  }
+
+  .dashboard-header p {
+    font-size: 14px;
+    margin-bottom: 15px;
+  }
+
+  .btn {
+    font-size: 15px;
+    padding: 12px 20px;
+    min-width: unset;
+  }
+
+  .dashboard-tabs {
+    gap: 6px;
+    margin-top: 50px;
+  }
+
+  .tab {
+    padding: 10px 16px;
+    font-size: 15px;
+  }
+
+  .notification-container {
+    padding: 0 12px;
+    top: 15px;
+  }
+
+  .notification {
+    padding: 12px 16px;
+  }
+
+  .notification-message {
+    font-size: 15px;
+  }
+
+  .modal-header {
+    padding: 16px 20px;
+  }
+
+  .modal-header h2 {
+    font-size: 20px;
+  }
+
+  .form-content {
+    padding: 20px;
+  }
+
+  .form-group label {
+    font-size: 15px;
+  }
+
+  .form-input,
+  .form-textarea,
+  .form-select {
+    padding: 10px 14px;
+    font-size: 15px;
+  }
+
+  .btn-cancel,
+  .btn-submit,
+  .btn-submit-activity {
+    padding: 11px 20px;
+    font-size: 15px;
+  }
+}
+
+/* Extra Small Mobile - 360px */
+@media (max-width: 360px) {
+  .dashboard-container {
+    padding: 10px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 20px;
+  }
+
+  .tab {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
 }

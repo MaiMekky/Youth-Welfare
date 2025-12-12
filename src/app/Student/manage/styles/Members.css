@@ -17,11 +17,12 @@
   border: 1px solid #eee;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.07);
   position: relative;
-  transition: 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .member-card:hover {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
 }
 
 /* Online dot */
@@ -35,11 +36,13 @@
 }
 
 .online {
-  background: #23c55e; /* أخضر */
+  background: #23c55e;
+  /* أخضر */
 }
 
 .offline {
-  background: #c0c0c0; /* رمادي */
+  background: #c0c0c0;
+  /* رمادي */
 }
 
 /* Header */
@@ -97,4 +100,101 @@
 /* Joined + Last Active */
 .member-info p {
   margin: 4px 0;
+}
+
+/* ========= RESPONSIVE DESIGN ========= */
+
+/* Tablet - 1024px */
+@media (max-width: 1024px) {
+  .members-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+}
+
+/* Tablet Portrait - 768px */
+@media (max-width: 768px) {
+  .members-wrapper {
+    margin-top: 15px;
+  }
+
+  .members-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
+  }
+
+  .member-card {
+    padding: 18px;
+  }
+
+  .member-name {
+    font-size: 17px;
+  }
+
+  .member-college {
+    font-size: 13px;
+  }
+
+  .member-info {
+    font-size: 13px;
+  }
+
+  .member-role-tag {
+    font-size: 12px;
+    padding: 5px 12px;
+  }
+}
+
+/* Mobile - 480px */
+@media (max-width: 480px) {
+  .members-wrapper {
+    margin-top: 12px;
+  }
+
+  .members-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .member-card {
+    padding: 16px;
+  }
+
+  .member-name {
+    font-size: 16px;
+  }
+
+  .member-college {
+    font-size: 13px;
+    margin: 5px 0;
+  }
+
+  .member-info {
+    font-size: 13px;
+    margin-top: 6px;
+  }
+
+  .member-role-tag {
+    margin-top: 10px;
+    padding: 5px 12px;
+    font-size: 12px;
+  }
+
+  .status-dot {
+    width: 10px;
+    height: 10px;
+    left: 10px;
+    top: 10px;
+  }
+}
+
+/* Extra Small Mobile - 360px */
+@media (max-width: 360px) {
+  .member-card {
+    padding: 14px;
+  }
+
+  .member-name {
+    font-size: 15px;
+  }
 }

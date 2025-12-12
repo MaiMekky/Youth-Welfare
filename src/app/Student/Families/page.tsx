@@ -2,9 +2,9 @@
 import React, { useState } from "react";
 import HeadPage from "./components/HeadPage";
 import RequestDetails from "./components/RequestDetails";
-import CreateFamForm from "./components/CreateFamForm";
+import CreateFamForm from "../manage/components/CreateFamForm";
 import MainPage from "./components/MainPage";
-import TrackRequest from "./components/TrackRequest";
+import TrackRequest from "../manage/components/TrackRequest";
 import FamilyDetails from "./components/FamilyDetails";
 
 type View = "home" | "requestDetails" | "createForm" | "trackRequest" | "familyDetails";

@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/Posts.css";
 
 // ========= Types ==========
@@ -16,36 +16,23 @@ export interface Post {
   type: PostType;
 }
 
-// ========= Props Interface ==========
-interface PostsProps {
-  newPosts?: Post[];
+interface ApiPost {
+  post_id: number;
+  title: string;
+  description: string;
+  family: number;
+  family_name: string;
+  faculty: number;
+  faculty_name: string;
+  created_at: string;
+  updated_at: string;
 }
 
-// ========= Dummy Data (Replace with API later) ==========
-const defaultPostsData: Post[] = [
-  {
-    id: 1,
-    author: "أحمد محمد علي",
-    role: "مؤسس الأسرة",
-    time: "10:30:00",
-    date: "2025-01-10",
-    title: "أهلاً بكم في أسرة المهندسين المبدعين!",
-    content:
-      "مرحباً بجميع الأعضاء الجدد والقدامى في أسرتنا. نحن سعداء بوجودكم معنا ونتطلع إلى تحقيق إنجازات كبيرة معًا.",
-    type: "Post",
-  },
-  {
-    id: 2,
-    author: "أحمد محمد علي",
-    role: "مؤسس الأسرة",
-    time: "14:20:00",
-    date: "2025-01-12",
-    title: "تذكير: ورشة البرمجة المتقدمة",
-    content:
-      "تذكركم بورشة البرمجة المتقدمة يوم 20 يناير الساعة 2 مساء في معمل الحاسوب.",
-    type: "Reminder",
-  },
-];
+// ========= Props Interface ==========
+interface PostsProps {
+  familyId?: number;
+  refreshTrigger?: number;
+}
 
 // ========= Avatar Icon ==========
 const UserIcon: React.FC = () => (
@@ -90,16 +77,119 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   );
 };
 
+const mapApiPostToPost = (apiPost: ApiPost): Post => {
+  const createdDate = new Date(apiPost.created_at);
+  const time = createdDate.toLocaleTimeString('ar-EG', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+  const date = createdDate.toLocaleDateString('ar-EG', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+
+  return {
+    id: apiPost.post_id,
+    title: apiPost.title,
+    content: apiPost.description,
+    author: apiPost.family_name || 'مستخدم',
+    role: 'عضو الأسرة',
+    time,
+    date,
+    type: 'Post',
+  };
+};
+
 // ========= Posts Main Page Component ==========
-const Posts: React.FC<PostsProps> = ({ newPosts = [] }) => {
-  // Combine new posts with default posts (new posts first)
-  const allPosts = [...newPosts, ...defaultPostsData];
+const Posts: React.FC<PostsProps> = ({ familyId, refreshTrigger = 0 }) => {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchPosts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const token = localStorage.getItem('access');
+      if (!token) {
+        console.warn('No access token found');
+        setPosts([]);
+        setLoading(false);
+        return;
+      }
+
+      if (!familyId) {
+        console.warn('No familyId provided to Posts component');
+        setPosts([]);
+        setLoading(false);
+        return;
+      }
+
+      const endpoint = `http://127.0.0.1:8000/api/family/student/${familyId}/posts/`;
+      console.log('Fetching posts from:', endpoint);
+
+      const response = await fetch(endpoint, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!response.ok) {
+        console.error('Failed to fetch posts, status:', response.status);
+        throw new Error(`Failed to fetch posts: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('Posts data received:', data);
+      
+      let postsArray: ApiPost[] = [];
+      if (Array.isArray(data)) {
+        postsArray = data;
+      } else if (data.posts && Array.isArray(data.posts)) {
+        postsArray = data.posts;
+      }
+      
+      const mappedPosts = postsArray.map(mapApiPostToPost);
+      console.log('Mapped posts:', mappedPosts);
+      setPosts(mappedPosts);
+    } catch (err) {
+      console.error('Error fetching posts:', err);
+      setError('فشل في تحميل المنشورات');
+      setPosts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, [familyId]);
+
+  useEffect(() => {
+    fetchPosts();
+  }, [refreshTrigger]);
+
+  if (loading) {
+    return (
+      <div className="posts-page" dir="rtl">
+        <div className="posts-container">
+          <h1 className="page-title">آخر الأخبار والإعلانات</h1>
+          <p style={{ textAlign: 'center', padding: '40px' }}>جاري تحميل المنشورات...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="posts-page" dir="rtl">
       <div className="posts-container">
         <h1 className="page-title">آخر الأخبار والإعلانات</h1>
-        {allPosts.map((post) => (
+        {error && <p style={{ color: 'red', textAlign: 'center', padding: '20px' }}>{error}</p>}
+        {posts.length === 0 && !error && (
+          <p style={{ textAlign: 'center', padding: '40px' }}>لا توجد منشورات حالياً</p>
+        )}
+        {posts.map((post) => (
           <PostCard key={post.id} post={post} />
         ))}
       </div>

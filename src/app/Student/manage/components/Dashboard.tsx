@@ -54,9 +54,14 @@ const Dashboard: React.FC = () => {
   const [showCreateContentForm, setShowCreateContentForm] = useState(false);
   const [showCreateActivityForm, setShowCreateActivityForm] = useState(false);
 
-  // Student ID for API calls
+  // Student ID and Family ID for API calls
   const [studentId, setStudentId] = useState<number | null>(null);
+  const [familyId, setFamilyId] = useState<number | null>(null);
+  const [deptId, setDeptId] = useState<number | null>(null);
+  const [profileLoading, setProfileLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [postRefreshTrigger, setPostRefreshTrigger] = useState(0);
+  const [activityRefreshTrigger, setActivityRefreshTrigger] = useState(0);
 
   // Notification state
   const [notification, setNotification] = useState<{
@@ -74,16 +79,24 @@ const Dashboard: React.FC = () => {
     type: "اجتماع",
     description: "",
     date: "",
+    endDate: "",
     time: "",
     location: "",
     maxParticipants: "",
+    cost: "",
+    restrictions: "",
+    reward: "",
   });
 
-  // Fetch student ID on mount
+  // Fetch student ID and Family ID on mount
   useEffect(() => {
-    const fetchStudentId = async () => {
+    const fetchProfileData = async () => {
       const token = localStorage.getItem("access");
-      if (!token) return;
+      if (!token) {
+        console.warn('No access token found');
+        setProfileLoading(false);
+        return;
+      }
 
       try {
         const response = await fetch("http://127.0.0.1:8000/api/auth/profile/", {
@@ -92,14 +105,31 @@ const Dashboard: React.FC = () => {
 
         if (response.ok) {
           const data = await response.json();
+          console.log('Profile data:', data);
           setStudentId(data.student_id);
+          if (data.family_id) {
+            setFamilyId(data.family_id);
+            console.log('Family ID found:', data.family_id);
+          } else {
+            console.warn('No family_id in profile - using studentId as fallback');
+          }
+          if (data.dept_id) {
+            setDeptId(data.dept_id);
+            console.log('Dept ID found:', data.dept_id);
+          } else {
+            console.warn('No dept_id in profile');
+          }
+        } else {
+          console.error('Profile fetch returned status:', response.status);
         }
       } catch (error) {
-        console.error("Error fetching student ID:", error);
+        console.error("Error fetching profile:", error);
+      } finally {
+        setProfileLoading(false);
       }
     };
 
-    fetchStudentId();
+    fetchProfileData();
   }, []);
 
   useEffect(() => {
@@ -179,6 +209,9 @@ const Dashboard: React.FC = () => {
         setContentTitle("");
         setShowCreateContentForm(false);
         setActiveTab("posts");
+        setTimeout(() => {
+          setPostRefreshTrigger(prev => prev + 1);
+        }, 500);
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.error("Error creating post:", errorData);
@@ -198,15 +231,16 @@ const Dashboard: React.FC = () => {
       !activityData.title ||
       !activityData.description ||
       !activityData.date ||
-      !activityData.time ||
+      !activityData.endDate ||
       !activityData.location
     ) {
       showNotification("الرجاء ملء جميع الحقول المطلوبة");
       return;
     }
 
-    if (!studentId) {
-      showNotification("لم يتم العثور على معرف الطالب");
+    const idToUse = familyId || studentId;
+    if (!idToUse) {
+      showNotification("لم يتم العثور على معرف الأسرة أو الطالب");
       return;
     }
 
@@ -219,25 +253,37 @@ const Dashboard: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(
-        `http://127.0.0.1:8000/api/family/student/${studentId}/event_request/`,
-        {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            title: activityData.title,
-            description: activityData.description,
-            type: activityData.type,
-            st_date: activityData.date,
-            end_date: activityData.date,
-            location: activityData.location,
-            s_limit: activityData.maxParticipants ? parseInt(activityData.maxParticipants) : 0,
-          }),
-        }
-      );
+      const endpoint = `http://127.0.0.1:8000/api/family/student/${idToUse}/event_request/`;
+      const payload = {
+        title: activityData.title,
+        description: activityData.description,
+        type: activityData.type,
+        st_date: activityData.date,
+        end_date: activityData.endDate,
+        location: activityData.location,
+        s_limit: activityData.maxParticipants ? parseInt(activityData.maxParticipants) : 0,
+        cost: activityData.cost ? activityData.cost.toString() : "0",
+        restrictions: activityData.restrictions || "",
+        reward: activityData.reward || "",
+        dept_id: deptId || 0,
+      };
+
+      console.log('=== CREATING ACTIVITY ===');
+      console.log('Endpoint:', endpoint);
+      console.log('Payload:', payload);
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      console.log('Response status:', response.status);
+      const responseData = await response.json();
+      console.log('Response data:', responseData);
 
       if (response.ok) {
         showNotification("✅ تم إنشاء الفعالية بنجاح");
@@ -248,16 +294,22 @@ const Dashboard: React.FC = () => {
           type: "اجتماع",
           description: "",
           date: "",
+          endDate: "",
           time: "",
           location: "",
           maxParticipants: "",
+          cost: "",
+          restrictions: "",
+          reward: "",
         });
 
         setActiveTab("activities");
+        setTimeout(() => {
+          setActivityRefreshTrigger(prev => prev + 1);
+        }, 500);
       } else {
-        const errorData = await response.json().catch(() => ({}));
-        console.error("Error creating activity:", errorData);
-        showNotification("❌ حدث خطأ أثناء إنشاء الفعالية");
+        console.error("Error creating activity:", responseData);
+        showNotification("❌ حدث خطأ أثناء إنشاء الفعالية: " + (responseData?.detail || responseData?.error || "Unknown error"));
       }
     } catch (error) {
       console.error("Network error:", error);
@@ -350,11 +402,11 @@ const Dashboard: React.FC = () => {
           <Overview activities={activities} members={members} />
         )}
 
-        {activeTab === "activities" && <Activities activities={activities} />}
+        {activeTab === "activities" && <Activities familyId={familyId || studentId || undefined} refreshTrigger={activityRefreshTrigger} />}
 
         {activeTab === "members" && <Members members={members} />}
 
-        {activeTab === "posts" && <Posts newPosts={posts} />}
+        {activeTab === "posts" && <Posts familyId={familyId || studentId || undefined} refreshTrigger={postRefreshTrigger} />}
       </div>
 
       {/* POPUP — CREATE CONTENT */}
@@ -410,9 +462,10 @@ const Dashboard: React.FC = () => {
                 <button 
                   className="btn-submit" 
                   onClick={handleCreateContent}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || profileLoading}
+                  title={profileLoading ? "جاري تحميل بيانات الملف الشخصي..." : ""}
                 >
-                  <Upload size={18} /> {isSubmitting ? "جاري النشر..." : "نشر"}
+                  <Upload size={18} /> {profileLoading ? "جاري التحميل..." : isSubmitting ? "جاري النشر..." : "نشر"}
                 </button>
               </div>
             </div>
@@ -485,7 +538,7 @@ const Dashboard: React.FC = () => {
               {/* DATE + TIME + MAX */}
               <div className="form-row">
                 <div className="form-group">
-                  <label>التاريخ *</label>
+                  <label>تاريخ البداية *</label>
                   <input
                     type="date"
                     name="date"
@@ -496,11 +549,11 @@ const Dashboard: React.FC = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>الوقت *</label>
+                  <label>تاريخ النهاية *</label>
                   <input
-                    type="time"
-                    name="time"
-                    value={activityData.time}
+                    type="date"
+                    name="endDate"
+                    value={activityData.endDate}
                     onChange={handleActivityChange}
                     className="form-input"
                   />
@@ -532,6 +585,46 @@ const Dashboard: React.FC = () => {
                 />
               </div>
 
+              {/* OPTIONAL FIELDS */}
+              <div className="form-row">
+                <div className="form-group">
+                  <label>التكلفة</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    name="cost"
+                    value={activityData.cost}
+                    onChange={handleActivityChange}
+                    placeholder="اختياري"
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>القيود</label>
+                  <input
+                    type="text"
+                    name="restrictions"
+                    value={activityData.restrictions}
+                    onChange={handleActivityChange}
+                    placeholder="اختياري"
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>المكافأة</label>
+                  <input
+                    type="text"
+                    name="reward"
+                    value={activityData.reward}
+                    onChange={handleActivityChange}
+                    placeholder="اختياري"
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
               <div className="form-actions">
                 <button
                   className="btn-cancel"
@@ -543,9 +636,10 @@ const Dashboard: React.FC = () => {
                 <button
                   className="btn-submit-activity"
                   onClick={handleCreateActivity}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || profileLoading}
+                  title={profileLoading ? "جاري تحميل بيانات الملف الشخصي..." : ""}
                 >
-                  {isSubmitting ? "جاري الإنشاء..." : "إنشاء الفعالية والنشر الآن"}
+                  {profileLoading ? "جاري التحميل..." : isSubmitting ? "جاري الإنشاء..." : "إنشاء الفعالية والنشر الآن"}
                 </button>
               </div>
             </div>

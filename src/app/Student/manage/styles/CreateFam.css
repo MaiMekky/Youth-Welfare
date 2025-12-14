@@ -264,12 +264,57 @@
   color: var(--white);
 }
 
-.btn-submit:hover {
+.btn-submit:hover:not(:disabled) {
   background-color: #1d1d4a;
+}
+
+.btn-back:disabled,
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Notification */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 16px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  z-index: 1000;
+  animation: slideIn 0.3s ease-out;
+}
+
+.notification.success {
+  background-color: #4caf50;
+  color: white;
+}
+
+.notification.error {
+  background-color: #f44336;
+  color: white;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .notification {
+    right: 10px;
+    left: 10px;
+    width: auto;
+  }
+
   .create-fam-container {
     padding: 15px;
   }

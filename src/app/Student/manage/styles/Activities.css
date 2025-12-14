@@ -42,6 +42,10 @@
   background: #4c91ff;
 }
 
+.status-pending {
+  background: #f59e0b;
+}
+
 .status-done {
   background: #30b36b;
 }

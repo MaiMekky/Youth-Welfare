@@ -404,7 +404,7 @@ const Dashboard: React.FC = () => {
 
         {activeTab === "activities" && <Activities familyId={familyId || studentId || undefined} refreshTrigger={activityRefreshTrigger} />}
 
-        {activeTab === "members" && <Members members={members} />}
+        {activeTab === "members" && <Members studentId={studentId || undefined} />}
 
         {activeTab === "posts" && <Posts familyId={familyId || studentId || undefined} refreshTrigger={postRefreshTrigger} />}
       </div>

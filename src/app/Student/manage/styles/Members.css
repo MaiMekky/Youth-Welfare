@@ -49,7 +49,15 @@
 .member-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.member-name-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
 }
 
 .member-name {
@@ -66,20 +74,50 @@
 
 /* Info section */
 .member-info {
-  margin-top: 8px;
-  font-size: 14px;
+  margin-top: 12px;
+  font-size: 13px;
   color: #555;
-  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  line-height: 1.5em; 
+  
+}
+
+.info-row {
+  display: block;
+  justify-content: space-between;
+  
+  gap: 10px;
+  padding: 4px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #666;
+  min-width: 70px;
+}
+
+.info-value {
+  color: #333;
+  text-align: right;
+  flex: 1;
+  word-break: break-word;
 }
 
 /* Role Badge */
 .member-role-tag {
-  margin-top: 12px;
-  padding: 6px 14px;
-  border-radius: 10px;
-  font-size: 13px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
   font-weight: bold;
   width: fit-content;
+  white-space: nowrap;
 }
 
 .member {
@@ -95,6 +133,21 @@
 .founder {
   background: #ffe6e6;
   color: #c53030;
+}
+
+.leader {
+  background: #e8d5ff;
+  color: #6b21a8;
+}
+
+.secretary {
+  background: #cffafe;
+  color: #0e7490;
+}
+
+.assistant-secretary {
+  background: #fef3c7;
+  color: #92400e;
 }
 
 /* Joined + Last Active */
@@ -136,12 +189,16 @@
   }
 
   .member-info {
-    font-size: 13px;
+    font-size: 12px;
+  }
+
+  .info-label {
+    min-width: 60px;
   }
 
   .member-role-tag {
-    font-size: 12px;
-    padding: 5px 12px;
+    font-size: 11px;
+    padding: 4px 10px;
   }
 }
 
@@ -164,20 +221,18 @@
     font-size: 16px;
   }
 
-  .member-college {
-    font-size: 13px;
-    margin: 5px 0;
+  .member-info {
+    font-size: 12px;
+    margin-top: 12px;
   }
 
-  .member-info {
-    font-size: 13px;
-    margin-top: 6px;
+  .info-label {
+    min-width: 50px;
   }
 
   .member-role-tag {
-    margin-top: 10px;
-    padding: 5px 12px;
-    font-size: 12px;
+    padding: 4px 10px;
+    font-size: 11px;
   }
 
   .status-dot {

@@ -1,119 +1,137 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/Members.css";
 import { UserRound } from "lucide-react";
 
 interface Member {
-  id: number;
-  name: string;
-  joinedAt: string;
-  role: "عضو" | "مساعد" | "مؤسس";
-  
+  student_id: number;
+  student_name: string;
+  national_id: number;
+  u_id: number;
+  email: string;
+  phone: string;
+  role: string;
+  status: string;
+  joined_at: string;
+  dept: number | null;
+  dept_name: string | null;
 }
 
 interface MembersProps {
-  members?: Member[];
+  studentId?: number;
 }
 
-// Dummy data
-const dummyMembers: Member[] = [
-  {
-    id: 1,
-    name: "أحمد محمد علي",
-    joinedAt: "2024-01-15",
-    role: "مؤسس",
-   
-  },
-  {
-    id: 2,
-    name: "فاطمة أحمد حسن",
-    joinedAt: "2024-02-20",
-    role: "مساعد",
-   
-  },
-  {
-    id: 3,
-    name: "محمود خالد سعيد",
-    joinedAt: "2024-03-10",
-    
-    role: "عضو",
-    
-  },
-  {
-    id: 4,
-    name: "سارة عبدالله إبراهيم",
-    joinedAt: "2024-03-15",
-   
-    role: "مساعد",
-    
-  },
-  {
-    id: 5,
-    name: "محمد حسن علي",
-    joinedAt: "2024-04-01",
-   
-    role: "عضو",
-    
-  },
-  {
-    id: 6,
-    name: "نور الدين يوسف",
-    joinedAt: "2024-04-10",
-    role: "عضو",
-  
-  },
-  {
-    id: 7,
-    name: "ليلى محمود أحمد",
-    joinedAt: "2024-05-05",
-    role: "عضو",
-    
-  },
-  {
-    id: 8,
-    name: "عمر سامي حسين",
-    joinedAt: "2024-05-20",
-    role: "عضو",
-    
-  },
-];
+const Members: React.FC<MembersProps> = ({ studentId }) => {
+  const [members, setMembers] = useState<Member[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-const Members: React.FC<MembersProps> = ({ members }) => {
-  // Use passed members or fall back to dummy data
-  const displayMembers = members && members.length > 0 ? members : dummyMembers;
+  useEffect(() => {
+    const fetchMembers = async () => {
+      if (!studentId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem("access");
+        const response = await fetch(
+          `http://127.0.0.1:8000/api/family/student/${studentId}/members/`,
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.members && Array.isArray(data.members)) {
+            setMembers(data.members);
+          }
+        } else {
+          setError("فشل تحميل الأعضاء");
+        }
+      } catch (err) {
+        console.error("Error fetching members:", err);
+        setError("حدث خطأ في الاتصال");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMembers();
+  }, [studentId]);
+
+  if (loading) {
+    return (
+      <div className="members-wrapper">
+        <div className="members-grid">
+          <p>جاري تحميل الأعضاء...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="members-wrapper">
+        <div className="members-grid">
+          <p style={{ color: "red" }}>{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  const getRoleClass = (role: string): string => {
+    if (role === "أخ أكبر" || role === "أخت كبرى") {
+      return "leader";
+    } else if (role === "أمين لجنة") {
+      return "secretary";
+    } else if (role === "أمين مساعد لجنة") {
+      return "assistant-secretary";
+    }
+    return "member";
+  };
+
+  const displayMembers = members.length > 0 ? members : [];
 
   return (
     <div className="members-wrapper">
       <div className="members-grid">
         {displayMembers.map((m) => (
-          <div key={m.id} className="member-card">
-           
-
-            {/* Name + Role */}
+          <div key={m.student_id} className="member-card">
+            {/* Name + Role Badge + Icon */}
             <div className="member-header">
-              <div className="member-name">{m.name}</div>
+              <div className="member-name-section">
+                <div className="member-name">{m.student_name}</div>
+                <div className={`member-role-tag ${getRoleClass(m.role)}`}>
+                  {m.role}
+                </div>
+              </div>
               <div className="member-role-icon">
                 <UserRound size={20} color="#5a67d8" />
               </div>
             </div>
 
-          
-          
+            {/* Member Info */}
             <div className="member-info">
-              <p>انضم في: {m.joinedAt}</p>
-            </div>
-
-            {/* Role Tag */}
-            <div
-              className={`member-role-tag ${
-                m.role === "مؤسس"
-                  ? "founder"
-                  : m.role === "مساعد"
-                  ? "assistant"
-                  : "member"
-              }`}
-            >
-              {m.role}
+              <div className="info-row">
+                <span className="info-label">البريد:</span>
+                <span className="info-value">{m.email}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">الهاتف:</span>
+                <span className="info-value">{m.phone}</span>
+              </div>
+              {m.dept_name && (
+                <div className="info-row">
+                  <span className="info-label">القسم:</span>
+                  <span className="info-value">{m.dept_name}</span>
+                </div>
+              )}
+              <div className="info-row">
+                <span className="info-label">انضم في:</span>
+                <span className="info-value">{new Date(m.joined_at).toLocaleDateString("ar-EG")}</span>
+              </div>
             </div>
           </div>
         ))}

@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import "../styles/Activities.css";
-import { Calendar, Users, Briefcase } from "lucide-react";
+import { Calendar, Users, Briefcase, MapPin } from "lucide-react";
+import { decodeToken } from "@/utils/tokenUtils";
 
 interface Activity {
   id: number;
@@ -12,20 +13,44 @@ interface Activity {
   location: string;
   description: string;
   participants: string;
-  status: "قادمة" | "مكتملة";
+  status: "قادمة" | "مكتملة" | "منتظر";
   color: string;
+  familyName?: string;
+  facultyName?: string;
+  createdBy?: string;
 }
 
-interface ApiActivity {
-  id: number;
+interface ApiEventRequest {
+  event_id: number;
   title: string;
   description: string;
   type: string;
   st_date: string;
+  end_date: string;
   location: string;
   s_limit?: number;
-  created_at?: string;
+  cost?: number | null;
+  restrictions?: string;
+  reward?: string;
   status?: string;
+  family?: number;
+  family_name?: string;
+  faculty?: number;
+  faculty_name?: string;
+  created_by?: number;
+  created_by_admin_info?: {
+    admin_id: number;
+    name: string;
+    email: string;
+    role: string;
+  };
+  created_by_student_info?: {
+    student_id: number;
+    name: string;
+    email: string;
+  };
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface ActivitiesProps {
@@ -109,21 +134,35 @@ const dummyActivities: Activity[] = [
   },
 ];
 
-const mapApiActivityToActivity = (apiActivity: ApiActivity): Activity => {
+const mapApiActivityToActivity = (apiEvent: ApiEventRequest): Activity => {
   const colors = ["#4CAF50", "#2196F3", "#FF9800", "#9C27B0", "#F44336", "#00BCD4"];
-  const colorIndex = Math.abs(apiActivity.id) % colors.length;
+  const colorIndex = Math.abs(apiEvent.event_id) % colors.length;
+  
+  const createdByName = apiEvent.created_by_admin_info?.name || 
+                        apiEvent.created_by_student_info?.name || 
+                        "غير معروف";
+  
+  let status: "قادمة" | "مكتملة" | "منتظر" = "قادمة";
+  if (apiEvent.status === "منتظر") {
+    status = "منتظر";
+  } else if (apiEvent.status === "approved") {
+    status = "مكتملة";
+  }
   
   return {
-    id: apiActivity.id,
-    title: apiActivity.title,
-    type: apiActivity.type,
-    date: apiActivity.st_date,
+    id: apiEvent.event_id,
+    title: apiEvent.title,
+    type: apiEvent.type,
+    date: apiEvent.st_date,
     time: "00:00",
-    location: apiActivity.location,
-    description: apiActivity.description,
-    participants: apiActivity.s_limit ? `${apiActivity.s_limit} عضو` : "غير محدد",
-    status: apiActivity.status === "completed" ? "مكتملة" : "قادمة",
+    location: apiEvent.location,
+    description: apiEvent.description,
+    participants: apiEvent.s_limit ? `${apiEvent.s_limit} عضو` : "غير محدد",
+    status,
     color: colors[colorIndex],
+    familyName: apiEvent.family_name,
+    facultyName: apiEvent.faculty_name,
+    createdBy: createdByName,
   };
 };
 
@@ -131,6 +170,18 @@ const Activities: React.FC<ActivitiesProps> = ({ familyId, refreshTrigger = 0 })
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [facultyId, setFacultyId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('access');
+    if (token) {
+      const decoded = decodeToken(token);
+      if (decoded?.faculty_id) {
+        setFacultyId(decoded.faculty_id);
+        console.log('Faculty ID from token:', decoded.faculty_id);
+      }
+    }
+  }, []);
 
   const fetchActivities = async () => {
     try {
@@ -152,37 +203,43 @@ const Activities: React.FC<ActivitiesProps> = ({ familyId, refreshTrigger = 0 })
         return;
       }
 
-      const endpoint = `http://127.0.0.1:8000/api/family/student/${familyId}/events/`;
-      console.log('Fetching activities from:', endpoint);
+      const endpoint = `http://127.0.0.1:8000/api/family/student/${familyId}/event_requests/`;
+      console.log('Fetching event requests from:', endpoint);
+      console.log('Faculty ID:', facultyId);
 
       const response = await fetch(endpoint, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       if (!response.ok) {
-        console.error('Failed to fetch activities, status:', response.status);
+        console.error('Failed to fetch event requests, status:', response.status);
+        const errorData = await response.text();
+        console.error('Error response:', errorData);
         setActivities(dummyActivities);
         setLoading(false);
         return;
       }
 
       const data = await response.json();
-      console.log('Activities data received:', data);
+      console.log('Event requests data received:', data);
 
-      let activitiesArray: ApiActivity[] = [];
+      let eventsArray: ApiEventRequest[] = [];
       if (Array.isArray(data)) {
-        activitiesArray = data;
+        eventsArray = data;
       } else if (data?.events && Array.isArray(data.events)) {
-        activitiesArray = data.events;
+        eventsArray = data.events;
       } else if (data?.results && Array.isArray(data.results)) {
-        activitiesArray = data.results;
+        eventsArray = data.results;
       }
 
-      const mappedActivities = activitiesArray.map(mapApiActivityToActivity);
+      const mappedActivities = eventsArray.map(mapApiActivityToActivity);
       console.log('Mapped activities:', mappedActivities);
       setActivities(mappedActivities.length > 0 ? mappedActivities : dummyActivities);
     } catch (err) {
-      console.error('Error fetching activities:', err);
+      console.error('Error fetching event requests:', err);
       setError('فشل في تحميل الفعاليات');
       setActivities(dummyActivities);
     } finally {
@@ -214,7 +271,9 @@ const Activities: React.FC<ActivitiesProps> = ({ familyId, refreshTrigger = 0 })
             <div className="activity-header">
               <span
                 className={`activity-status ${
-                  act.status === "قادمة" ? "status-upcoming" : "status-done"
+                  act.status === "قادمة" ? "status-upcoming" : 
+                  act.status === "منتظر" ? "status-pending" : 
+                  "status-done"
                 }`}
               >
                 {act.status}
@@ -240,13 +299,31 @@ const Activities: React.FC<ActivitiesProps> = ({ familyId, refreshTrigger = 0 })
                 {act.date} - {act.time}
               </div>
               <div className="info-item">
-                <Users size={16} />
+                <MapPin size={16} />
                 {act.location}
               </div>
               <div className="info-item">
-                <Briefcase size={16} />
+                <Users size={16} />
                 {act.participants}
               </div>
+              {act.familyName && (
+                <div className="info-item">
+                  <Briefcase size={16} />
+                  الأسرة: {act.familyName}
+                </div>
+              )}
+              {act.facultyName && (
+                <div className="info-item">
+                  <Briefcase size={16} />
+                  الكلية: {act.facultyName}
+                </div>
+              )}
+              {act.createdBy && (
+                <div className="info-item">
+                  <Users size={16} />
+                  منشئ الفعالية: {act.createdBy}
+                </div>
+              )}
             </div>
           </div>
         ))}

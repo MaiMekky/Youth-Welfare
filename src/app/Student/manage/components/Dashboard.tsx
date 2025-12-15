@@ -88,7 +88,7 @@ const Dashboard: React.FC = () => {
     reward: "",
   });
 
-  // Fetch student ID and Family ID on mount
+  // Fetch student ID on mount
   useEffect(() => {
     const fetchProfileData = async () => {
       const token = localStorage.getItem("access");
@@ -105,13 +105,21 @@ const Dashboard: React.FC = () => {
 
         if (response.ok) {
           const data = await response.json();
-          console.log('Profile data:', data);
+          console.log('=== PROFILE API RESPONSE ===');
+          console.log('Full data:', JSON.stringify(data, null, 2));
+          console.log('student_id:', data.student_id);
+          console.log('family_id:', data.family_id);
+          console.log('family:', data.family);
+          console.log('familyId:', data.familyId);
+          
           setStudentId(data.student_id);
-          if (data.family_id) {
-            setFamilyId(data.family_id);
-            console.log('Family ID found:', data.family_id);
+          
+          const fid = data.family_id || data.family || data.familyId;
+          if (fid) {
+            setFamilyId(fid);
+            console.log('✅ Family ID set to:', fid);
           } else {
-            console.warn('No family_id in profile - using studentId as fallback');
+            console.log('Family ID will be extracted from event requests response');
           }
           if (data.dept_id) {
             setDeptId(data.dept_id);
@@ -402,7 +410,7 @@ const Dashboard: React.FC = () => {
           <Overview activities={activities} members={members} />
         )}
 
-        {activeTab === "activities" && <Activities familyId={familyId || studentId || undefined} refreshTrigger={activityRefreshTrigger} />}
+        {activeTab === "activities" && <Activities studentId={studentId || undefined} refreshTrigger={activityRefreshTrigger} />}
 
         {activeTab === "members" && <Members studentId={studentId || undefined} />}
 

@@ -85,7 +85,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
   // Fetch department mapping from database - Generic function
   const fetchDepartmentMapping = async (token: string) => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/departments/', {
+      const response = await fetch('http://127.0.0.1:8000/api/family/departments/', {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -100,13 +100,13 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         if (Array.isArray(data)) {
           data.forEach((dept: any) => {
             if (dept.name) {
-              mapping[dept.name] = dept.id;
+              mapping[dept.name] = dept.dept_id;
             }
           });
         } else if (data.results && Array.isArray(data.results)) {
           data.results.forEach((dept: any) => {
             if (dept.name) {
-              mapping[dept.name] = dept.id;
+              mapping[dept.name] = dept.dept_id;
             }
           });
         }
@@ -198,152 +198,8 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
 
   const requiresFullInfo = ['leader', 'viceLeader', 'responsible', 'treasurer'];
 
-  const validateNationalId = (id: string) => /^\d{14}$/.test(id);
-  const validatePhoneNumber = (phone: string) => /^01\d{9}$/.test(phone);
-  const validateStudentId = (id: string) => id.trim().length >= 3;
-  const validateTextField = (text: string, minLength = 3) => text.trim().length >= minLength;
-
-  const addError = (fieldName: string, message: string) => {
-    setErrors(prev => ({ ...prev, [fieldName]: message }));
-  };
-
-  const clearError = (fieldName: string) => {
-    setErrors(prev => {
-      const newErrors = { ...prev };
-      delete newErrors[fieldName];
-      return newErrors;
-    });
-  };
-
   const handleFieldBlur = (fieldName: string) => {
     setTouchedFields(prev => new Set([...prev, fieldName]));
-    validateField(fieldName);
-  };
-
-  const validateField = (fieldName: string) => {
-    if (fieldName === 'familyName') {
-      if (!familyName || !familyName.trim()) {
-        addError('familyName', 'اسم الأسرة مطلوب');
-      } else if (!validateTextField(familyName, 3)) {
-        addError('familyName', 'اسم الأسرة يجب أن يكون 3 أحرف على الأقل');
-      } else {
-        clearError('familyName');
-      }
-    } else if (fieldName === 'familyGoals') {
-      if (!familyGoals || !familyGoals.trim()) {
-        addError('familyGoals', 'أهداف الأسرة مطلوبة');
-      } else if (!validateTextField(familyGoals, 10)) {
-        addError('familyGoals', 'أهداف الأسرة يجب أن تكون 10 أحرف على الأقل');
-      } else {
-        clearError('familyGoals');
-      }
-    } else if (fieldName === 'familyDescription') {
-      if (!familyDescription || !familyDescription.trim()) {
-        addError('familyDescription', 'وصف الأسرة مطلوب');
-      } else if (!validateTextField(familyDescription, 10)) {
-        addError('familyDescription', 'وصف الأسرة يجب أن يكون 10 أحرف على الأقل');
-      } else {
-        clearError('familyDescription');
-      }
-    }
-  };
-
-  const validatePerson = (person: Person, prefix: string, isFullInfo: boolean, needsName: boolean = true): boolean => {
-    let isValid = true;
-
-    if (needsName) {
-      if (!person.fullName || !person.fullName.trim()) {
-        addError(`${prefix}_name`, 'الاسم مطلوب');
-        isValid = false;
-      } else if (!validateTextField(person.fullName, 3)) {
-        addError(`${prefix}_name`, 'الاسم يجب أن يكون 3 أحرف على الأقل');
-        isValid = false;
-      } else {
-        clearError(`${prefix}_name`);
-      }
-    }
-
-    if (isFullInfo) {
-      if (!person.nationalId || !person.nationalId.trim()) {
-        addError(`${prefix}_nationalId`, 'الرقم القومي مطلوب');
-        isValid = false;
-      } else if (!validateNationalId(person.nationalId)) {
-        addError(`${prefix}_nationalId`, 'الرقم القومي يجب أن يكون بالضبط 14 رقم');
-        isValid = false;
-      } else {
-        clearError(`${prefix}_nationalId`);
-      }
-
-      if (!person.mobile || !person.mobile.trim()) {
-        addError(`${prefix}_mobile`, 'رقم الموبايل مطلوب');
-        isValid = false;
-      } else if (!validatePhoneNumber(person.mobile)) {
-        addError(`${prefix}_mobile`, 'رقم الموبايل يجب أن يكون 01XXXXXXXXX (11 رقم)');
-        isValid = false;
-      } else {
-        clearError(`${prefix}_mobile`);
-      }
-    } else {
-      if (!person.studentId || !person.studentId.trim()) {
-        addError(`${prefix}_studentId`, 'كود الطالب مطلوب');
-        isValid = false;
-      } else if (!validateStudentId(person.studentId)) {
-        addError(`${prefix}_studentId`, 'كود الطالب غير صالح');
-        isValid = false;
-      } else {
-        clearError(`${prefix}_studentId`);
-      }
-    }
-
-    return isValid;
-  };
-
-  const validateForm = (): boolean => {
-    let isValid = true;
-    setErrors({});
-
-    if (!familyName || !familyName.trim()) {
-      addError('familyName', 'اسم الأسرة مطلوب');
-      isValid = false;
-    } else if (!validateTextField(familyName, 3)) {
-      addError('familyName', 'اسم الأسرة يجب أن يكون 3 أحرف على الأقل');
-      isValid = false;
-    }
-
-    if (!familyGoals || !familyGoals.trim()) {
-      addError('familyGoals', 'أهداف الأسرة مطلوبة');
-      isValid = false;
-    } else if (!validateTextField(familyGoals, 10)) {
-      addError('familyGoals', 'أهداف الأسرة يجب أن تكون 10 أحرف على الأقل');
-      isValid = false;
-    }
-
-    if (!familyDescription || !familyDescription.trim()) {
-      addError('familyDescription', 'وصف الأسرة مطلوب');
-      isValid = false;
-    } else if (!validateTextField(familyDescription, 10)) {
-      addError('familyDescription', 'وصف الأسرة يجب أن يكون 10 أحرف على الأقل');
-      isValid = false;
-    }
-
-    Object.entries(boardMembers).forEach(([key, person]) => {
-      const isFullInfo = requiresFullInfo.includes(key);
-      const needsName = requiresFullInfo.includes(key);
-      if (!validatePerson(person, `board_${key}`, isFullInfo, needsName)) {
-        isValid = false;
-      }
-    });
-
-    Object.entries(committees).forEach(([key, committee]) => {
-      if (!validatePerson(committee.secretary, `committee_${key}_secretary`, false, false)) {
-        isValid = false;
-      }
-      if (!validatePerson(committee.assistant, `committee_${key}_assistant`, false, false)) {
-        isValid = false;
-      }
-    });
-
-    return isValid;
   };
 
   const handleBoardChange = (key: keyof typeof boardMembers, field: string, value: string) => {
@@ -463,7 +319,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         }
       }
 
-      committeesData.push({
+      const committeeData = {
         committee_key: committeeKeys[key] || key,
         head: {
           uid: parseInt(committee.secretary.studentId || '0'),
@@ -474,7 +330,9 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
           dept_id: deptId,
         },
         activities,
-      });
+      };
+      console.log(`📋 Committee "${key}" payload:`, committeeData);
+      committeesData.push(committeeData);
     });
 
     return {
@@ -523,27 +381,27 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
 
     setTouchedFields(allFields);
 
-    const isValid = validateForm();
+    // const isValid = validateForm();
 
-    if (!isValid) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
+    // if (!isValid) {
+    //   window.scrollTo({ top: 0, behavior: 'smooth' });
+    //   return;
+    // }
 
-    if (!studentId) {
-      showNotification('error', 'لم يتم العثور على معرف الطالب');
-      return;
-    }
+    // if (!studentId) {
+    //   showNotification('error', 'لم يتم العثور على معرف الطالب');
+    //   return;
+    // }
 
-    if (!facultyId || facultyId === 0) {
-      console.warn('=== Faculty ID Validation Failed ===');
-      console.warn('Faculty ID:', facultyId);
-      console.warn('Student ID:', studentId);
-      console.log('Check browser console for profile data logs');
-      showNotification('error', `❌ لم يتم العثور على الكلية (${facultyId}). يرجى فحص وحدة التحكم (F12) وإعادة تحميل الصفحة`);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
+    // if (!facultyId || facultyId === 0) {
+    //   console.warn('=== Faculty ID Validation Failed ===');
+    //   console.warn('Faculty ID:', facultyId);
+    //   console.warn('Student ID:', studentId);
+    //   console.log('Check browser console for profile data logs');
+    //   showNotification('error', `❌ لم يتم العثور على الكلية (${facultyId}). يرجى فحص وحدة التحكم (F12) وإعادة تحميل الصفحة`);
+    //   window.scrollTo({ top: 0, behavior: 'smooth' });
+    //   return;
+    // }
 
     setIsSubmitting(true);
 
@@ -607,6 +465,12 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
           } else if (errors.default_roles) {
             errorMessage = `خطأ في بيانات مجلس الإدارة: ${JSON.stringify(errors.default_roles)}`;
           } else if (errors.committees) {
+            console.error("=== Committee Errors Details ===");
+            if (Array.isArray(errors.committees)) {
+              errors.committees.forEach((error: any, index: number) => {
+                console.error(`Committee ${index}:`, error);
+              });
+            }
             errorMessage = `خطأ في بيانات اللجان: ${JSON.stringify(errors.committees)}`;
           } else {
             // Show first error found
@@ -629,9 +493,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
     }
   };
 
-  const getFieldError = (fieldName: string) => errors[fieldName] || '';
-  const isFieldTouched = (fieldName: string) => touchedFields.has(fieldName);
-  const hasFieldError = (fieldName: string) => isFieldTouched(fieldName) && !!errors[fieldName];
+
 
   return (
     <div className="create-fam-container">
@@ -654,54 +516,36 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
           <div className="form-group">
             <label>اسم الأسرة *</label>
             <input
-              className={`form-input ${hasFieldError('familyName') ? 'error' : ''}`}
+              className="form-input"
               value={familyName}
               onChange={e => setFamilyName(e.target.value)}
               onBlur={() => handleFieldBlur('familyName')}
               placeholder="أدخل اسم الأسرة"
             />
-            {hasFieldError('familyName') && (
-              <div className="error-message">
-                <span>⚠️</span>
-                <span>{getFieldError('familyName')}</span>
-              </div>
-            )}
           </div>
 
           <div className="form-group">
             <label>أهداف الأسرة *</label>
             <textarea
-              className={`form-textarea ${hasFieldError('familyGoals') ? 'error' : ''}`}
+              className="form-textarea"
               value={familyGoals}
               onChange={e => setFamilyGoals(e.target.value)}
               onBlur={() => handleFieldBlur('familyGoals')}
               rows={4}
               placeholder="اذكر أهداف الأسرة بشكل واضح ومفصل"
             />
-            {hasFieldError('familyGoals') && (
-              <div className="error-message">
-                <span>⚠️</span>
-                <span>{getFieldError('familyGoals')}</span>
-              </div>
-            )}
           </div>
 
           <div className="form-group">
             <label>وصف الأسرة *</label>
             <textarea
-              className={`form-textarea ${hasFieldError('familyDescription') ? 'error' : ''}`}
+              className="form-textarea"
               value={familyDescription}
               onChange={e => setFamilyDescription(e.target.value)}
               onBlur={() => handleFieldBlur('familyDescription')}
               rows={5}
               placeholder="قدم وصفاً تفصيلياً للأسرة ونشاطاتها"
             />
-            {hasFieldError('familyDescription') && (
-              <div className="error-message">
-                <span>⚠️</span>
-                <span>{getFieldError('familyDescription')}</span>
-              </div>
-            )}
           </div>
         </section>
 
@@ -719,15 +563,11 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
                     <div className="field-wrapper">
                       <label>الاسم *</label>
                       <input
-                        className={hasFieldError(`board_${key}_name`) ? 'error' : ''}
                         placeholder="الاسم الكامل"
                         value={person.fullName}
                         onChange={e => handleBoardChange(key as keyof typeof boardMembers, 'fullName', e.target.value)}
                         onBlur={() => handleFieldBlur(`board_${key}_name`)}
                       />
-                      {hasFieldError(`board_${key}_name`) && (
-                        <div className="field-error">⚠️ {getFieldError(`board_${key}_name`)}</div>
-                      )}
                     </div>
                   )}
 
@@ -736,45 +576,33 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
                       <div className="field-wrapper">
                         <label>الرقم القومي *</label>
                         <input
-                          className={hasFieldError(`board_${key}_nationalId`) ? 'error' : ''}
                           placeholder="14 رقم"
                           maxLength={14}
                           value={person.nationalId || ''}
                           onChange={e => handleBoardChange(key as keyof typeof boardMembers, 'nationalId', e.target.value.replace(/\D/g, ''))}
                           onBlur={() => handleFieldBlur(`board_${key}_nationalId`)}
                         />
-                        {hasFieldError(`board_${key}_nationalId`) && (
-                          <div className="field-error">⚠️ {getFieldError(`board_${key}_nationalId`)}</div>
-                        )}
                       </div>
                       <div className="field-wrapper">
                         <label>رقم الموبايل *</label>
                         <input
-                          className={hasFieldError(`board_${key}_mobile`) ? 'error' : ''}
                           placeholder="01XXXXXXXXX"
                           maxLength={11}
                           value={person.mobile || ''}
                           onChange={e => handleBoardChange(key as keyof typeof boardMembers, 'mobile', e.target.value.replace(/\D/g, ''))}
                           onBlur={() => handleFieldBlur(`board_${key}_mobile`)}
                         />
-                        {hasFieldError(`board_${key}_mobile`) && (
-                          <div className="field-error">⚠️ {getFieldError(`board_${key}_mobile`)}</div>
-                        )}
                       </div>
                     </>
                   ) : (
                     <div className="field-wrapper">
                       <label>كود الطالب *</label>
                       <input
-                        className={hasFieldError(`board_${key}_studentId`) ? 'error' : ''}
                         placeholder="أدخل كود الطالب"
                         value={person.studentId || ''}
                         onChange={e => handleBoardChange(key as keyof typeof boardMembers, 'studentId', e.target.value)}
                         onBlur={() => handleFieldBlur(`board_${key}_studentId`)}
                       />
-                      {hasFieldError(`board_${key}_studentId`) && (
-                        <div className="field-error">⚠️ {getFieldError(`board_${key}_studentId`)}</div>
-                      )}
                     </div>
                   )}
                 </div>
@@ -793,15 +621,11 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         <div className="field-wrapper">
           <label>كود الطالب *</label>
           <input
-            className={hasFieldError(`committee_${key}_secretary_studentId`) ? 'error' : ''}
             placeholder="أدخل كود الطالب"
             value={committee.secretary.studentId || ''}
             onChange={e => handleCommitteeChange(key, 'secretary', 'studentId', e.target.value)}
             onBlur={() => handleFieldBlur(`committee_${key}_secretary_studentId`)}
           />
-          {hasFieldError(`committee_${key}_secretary_studentId`) && (
-            <div className="field-error">⚠️ {getFieldError(`committee_${key}_secretary_studentId`)}</div>
-          )}
         </div>
       </div>
     </div>
@@ -812,15 +636,11 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         <div className="field-wrapper">
           <label>كود الطالب *</label>
           <input
-            className={hasFieldError(`committee_${key}_assistant_studentId`) ? 'error' : ''}
             placeholder="أدخل كود الطالب"
             value={committee.assistant.studentId || ''}
             onChange={e => handleCommitteeChange(key, 'assistant', 'studentId', e.target.value)}
             onBlur={() => handleFieldBlur(`committee_${key}_assistant_studentId`)}
           />
-          {hasFieldError(`committee_${key}_assistant_studentId`) && (
-            <div className="field-error">⚠️ {getFieldError(`committee_${key}_assistant_studentId`)}</div>
-          )}
         </div>
       </div>
     </div>

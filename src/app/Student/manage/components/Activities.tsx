@@ -61,7 +61,7 @@ interface ApiEventRequest {
 }
 
 interface ActivitiesProps {
-  familyId?: number;
+  studentId?: number;
   refreshTrigger?: number;
 }
 
@@ -103,64 +103,54 @@ const dummyActivities: Activity[] = [
     status: "مكتملة",
     color: "#FF9800",
   },
-  {
-    id: 4,
-    title: "رحلة ترفيهية",
-    type: "رحلة",
-    date: "2024-11-25",
-    time: "08:00",
-    location: "الإسكندرية",
-    description: "رحلة ترفيهية لأعضاء الأسرة لتعزيز الروابط الاجتماعية",
-    participants: "50 عضو",
-    status: "مكتملة",
-    color: "#9C27B0",
-  },
-  {
-    id: 5,
-    title: "محاضرة الذكاء الاصطناعي",
-    type: "محاضرة",
-    date: "2024-12-20",
-    time: "18:00",
-    location: "المدرج الرئيسي",
-    description: "محاضرة عن تطبيقات الذكاء الاصطناعي في الصناعة",
-    participants: "60 عضو",
-    status: "قادمة",
-    color: "#F44336",
-  },
-  {
-    id: 6,
-    title: "مشروع تطوعي",
-    type: "تطوع",
-    date: "2024-12-18",
-    time: "09:00",
-    location: "دار الأيتام",
-    description: "مبادرة تطوعية لمساعدة الأطفال وتقديم الدعم",
-    participants: "20 عضو",
-    status: "قادمة",
-    color: "#00BCD4",
-  },
 ];
 
 const mapApiActivityToActivity = (apiEvent: ApiEventRequest, deptMap: Record<number, string> = {}): Activity => {
   const colors = ["#4CAF50", "#2196F3", "#FF9800", "#9C27B0", "#F44336", "#00BCD4"];
   const colorIndex = Math.abs(apiEvent.event_id) % colors.length;
   
-
+  // Map status
   let status: "قادمة" | "مكتملة" | "منتظر" = "قادمة";
-  if (apiEvent.status === "منتظر") {
+  if (apiEvent.status === "منتظر" || apiEvent.status === "pending") {
     status = "منتظر";
-  } else if (apiEvent.status === "approved") {
+  } else if (apiEvent.status === "approved" || apiEvent.status === "مكتملة") {
     status = "مكتملة";
   }
   
+  // Get department name
   const deptName = apiEvent.dept_id ? deptMap[apiEvent.dept_id] : undefined;
+  
+  // Extract creator name
+  let createdBy = "";
+  if (apiEvent.created_by_admin_info) {
+    if (typeof apiEvent.created_by_admin_info === 'string') {
+      createdBy = apiEvent.created_by_admin_info;
+    } else {
+      createdBy = apiEvent.created_by_admin_info.name;
+    }
+  } else if (apiEvent.created_by_student_info) {
+    if (typeof apiEvent.created_by_student_info === 'string') {
+      createdBy = apiEvent.created_by_student_info;
+    } else {
+      createdBy = apiEvent.created_by_student_info.name;
+    }
+  }
+  
+  // Extract time from st_date if it contains time
+  let time = "00:00";
+  let date = apiEvent.st_date;
+  if (apiEvent.st_date.includes('T')) {
+    const [datePart, timePart] = apiEvent.st_date.split('T');
+    date = datePart;
+    time = timePart.substring(0, 5); // Extract HH:MM
+  }
   
   return {
     id: apiEvent.event_id,
     title: apiEvent.title,
     type: apiEvent.type,
-    date: apiEvent.st_date,
-    time: "00:00",
+    date: date,
+    time: time,
     location: apiEvent.location,
     description: apiEvent.description,
     participants: apiEvent.s_limit ? `${apiEvent.s_limit} عضو` : "غير محدد",
@@ -169,30 +159,18 @@ const mapApiActivityToActivity = (apiEvent: ApiEventRequest, deptMap: Record<num
     familyName: apiEvent.family_name,
     facultyName: apiEvent.faculty_name,
     deptName,
-  
+    createdBy,
   };
 };
 
 const Activities: React.FC<ActivitiesProps> = ({ studentId, refreshTrigger = 0 }) => {
-  const [activities, setActivities] = useState<Activity[]>([]);
+  const [activities, setActivities] = useState<Activity[]>(dummyActivities);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [facultyId, setFacultyId] = useState<number | null>(null);
-  const [familyId, setFamilyId] = useState<number | null>(null);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [deptMap, setDeptMap] = useState<Record<number, string>>({});
 
-  useEffect(() => {
-    const token = localStorage.getItem('access');
-    if (token) {
-      const decoded = decodeToken(token);
-      if (decoded?.faculty_id) {
-        setFacultyId(decoded.faculty_id);
-        console.log('Faculty ID from token:', decoded.faculty_id);
-      }
-    }
-  }, []);
-
+  // Fetch departments
   const fetchDepartments = async () => {
     try {
       const token = localStorage.getItem('access');
@@ -221,10 +199,10 @@ const Activities: React.FC<ActivitiesProps> = ({ studentId, refreshTrigger = 0 }
           map[dept.dept_id] = dept.name;
         });
         setDeptMap(map);
-        console.log('Departments fetched:', depts);
+        console.log('✅ Departments loaded:', depts.length);
       }
     } catch (err) {
-      console.error('Error fetching departments:', err);
+      console.error('❌ Error fetching departments:', err);
     }
   };
 
@@ -232,70 +210,121 @@ const Activities: React.FC<ActivitiesProps> = ({ studentId, refreshTrigger = 0 }
     fetchDepartments();
   }, []);
 
+  // Fetch activities
   const fetchActivities = async () => {
+    if (!studentId) {
+      console.warn('⚠️ No studentId provided');
+      setActivities(dummyActivities);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
 
       const token = localStorage.getItem('access');
       if (!token) {
-        console.warn('No access token found');
+        console.error('❌ No access token found');
+        setError('لا يوجد توكن وصول');
         setActivities(dummyActivities);
         setLoading(false);
         return;
       }
 
-      if (!studentId) {
-        console.warn('No studentId provided to Activities component');
-        setActivities(dummyActivities);
-        setLoading(false);
-        return;
-      }
-
-      console.log('Using studentId:', studentId);
-      const endpoint = `http://127.0.0.1:8000/api/family/student/${studentId}/event_requests/`;
-      console.log('Fetching event requests from:', endpoint);
+      const endpoint = `http://127.0.0.1:8000/api/family/student/4/event_requests/`;
+      console.log('📡 Fetching from:', endpoint);
 
       const response = await fetch(endpoint, {
+        method: 'GET',
         headers: { 
-          Authorization: `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
 
+      console.log('📊 Response status:', response.status);
+
       if (!response.ok) {
-        console.error('Failed to fetch event requests, status:', response.status);
-        const errorData = await response.text();
-        console.error('Error response:', errorData);
+        const errorText = await response.text();
+        console.error('❌ API Error:', errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Raw API Response:', data);
+      console.log('🔍 Response type:', typeof data);
+      console.log('🔍 Is Array?:', Array.isArray(data));
+      
+      // If it's an object, log all keys
+      if (typeof data === 'object' && !Array.isArray(data)) {
+        console.log('🔍 Response keys:', Object.keys(data));
+        Object.keys(data).forEach(key => {
+          const value = data[key];
+          if (Array.isArray(value)) {
+            console.log(`🔑 "${key}": Array with ${value.length} items`);
+            if (value.length > 0) {
+              console.log(`   First item:`, value[0]);
+            }
+          } else {
+            console.log(`🔑 "${key}":`, typeof value);
+          }
+        });
+      }
+
+      // Handle different response structures
+      let eventsArray: ApiEventRequest[] = [];
+      
+      if (Array.isArray(data)) {
+        eventsArray = data;
+        console.log('✅ Using direct array');
+      } else if (data?.event_requests && Array.isArray(data.event_requests)) {
+        eventsArray = data.event_requests;
+        console.log('✅ Using data.event_requests');
+      } else if (data?.events && Array.isArray(data.events)) {
+        eventsArray = data.events;
+        console.log('✅ Using data.events');
+      } else if (data?.results && Array.isArray(data.results)) {
+        eventsArray = data.results;
+        console.log('✅ Using data.results');
+      } else if (data?.data && Array.isArray(data.data)) {
+        eventsArray = data.data;
+        console.log('✅ Using data.data');
+      } else {
+        // Try to find ANY array in the response
+        console.log('🔍 Searching for arrays in response...');
+        for (const key of Object.keys(data)) {
+          if (Array.isArray(data[key])) {
+            console.log(`🎯 Found array in key "${key}" with ${data[key].length} items`);
+            eventsArray = data[key];
+            break;
+          }
+        }
+      }
+
+      console.log('📋 Total events found:', eventsArray.length);
+
+      if (eventsArray.length === 0) {
+        console.log('ℹ️ No events found, showing dummy data');
         setActivities(dummyActivities);
         setLoading(false);
         return;
       }
 
-      const data = await response.json();
-      console.log('Event requests data received:', data);
+      console.log('📝 First event sample:', eventsArray[0]);
 
-      let eventsArray: ApiEventRequest[] = [];
-      if (Array.isArray(data)) {
-        eventsArray = data;
-      } else if (data?.events && Array.isArray(data.events)) {
-        eventsArray = data.events;
-      } else if (data?.results && Array.isArray(data.results)) {
-        eventsArray = data.results;
-      }
-
-      if (eventsArray.length > 0 && eventsArray[0]?.family) {
-        setFamilyId(eventsArray[0].family);
-        console.log('✅ Family ID extracted from response:', eventsArray[0].family);
-      }
-
-      const mappedActivities = eventsArray.map(event => mapApiActivityToActivity(event, deptMap));
-      console.log('Mapped activities:', mappedActivities);
-      console.log('Total events loaded:', mappedActivities.length);
-      setActivities(mappedActivities.length > 0 ? mappedActivities : dummyActivities);
+      // Map API events to Activity format
+      const mappedActivities = eventsArray.map(event => 
+        mapApiActivityToActivity(event, deptMap)
+      );
+      
+      console.log('✅ Successfully mapped activities:', mappedActivities.length);
+      console.log('📝 First mapped activity:', mappedActivities[0]);
+      
+      setActivities(mappedActivities);
+      setError(null);
     } catch (err) {
-      console.error('Error fetching event requests:', err);
-      setError('فشل في تحميل الفعاليات');
+      console.error('❌ Error fetching activities:', err);
+      setError(err instanceof Error ? err.message : 'فشل في تحميل الفعاليات');
       setActivities(dummyActivities);
     } finally {
       setLoading(false);
@@ -303,21 +332,34 @@ const Activities: React.FC<ActivitiesProps> = ({ studentId, refreshTrigger = 0 }
   };
 
   useEffect(() => {
-    fetchActivities();
-  }, [studentId, refreshTrigger]);
-
-  // Use fetched activities or fall back to dummy data
-  const displayActivities = activities.length > 0 ? activities : dummyActivities;
+    if (studentId) {
+      fetchActivities();
+    }
+  }, [studentId, refreshTrigger, deptMap]);
 
   return (
     <div className="activities-wrapper">
-      {error && (
-        <div style={{ color: '#c00', padding: '15px', textAlign: 'center' }}>
-          {error}
+      {loading && (
+        <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+          جاري التحميل...
         </div>
       )}
+      
+      {error && (
+        <div style={{ 
+          color: '#c00', 
+          padding: '15px', 
+          textAlign: 'center',
+          backgroundColor: '#fee',
+          borderRadius: '8px',
+          margin: '10px 0'
+        }}>
+          ⚠️ {error}
+        </div>
+      )}
+      
       <div className="activities-grid">
-        {displayActivities.map((act) => (
+        {activities.map((act) => (
           <div key={act.id} className="activity-card">
             <div className="activity-header">
               <span

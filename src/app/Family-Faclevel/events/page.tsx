@@ -1,122 +1,87 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Header from "@/app/FacLevel/components/Header";
 import Footer from "@/app/FacLevel/components/Footer";
 import ActivityCard from "./components/ActivityCard";
 import styles from "./styles/Activities.module.css";
 
-const activities = [
-  {
-    title: "ورشة البرمجة المتقدمة",
-    subtitle: "منظم بواسطة: أسرة التقنية",
-    description: "ورشة عمل تفاعلية حول أحدث تقنيات البرمجة والذكاء الاصطناعي",
-    date: "1447/8/15 هـ",
-    time: "14:00",
-    location: "قاعة المحاضرات الكبرى",
-    participants: "75 مشارك متوقع",
-    type: "علمي",
-  },
-  {
-    title: "مسابقة الشعر العربي",
-    subtitle: "منظم بواسطة: أسرة الأدب",
-    description: "مسابقة شعرية بين طلاب الجامعة في مختلف أنواع الشعر العربي",
-    date: "1447/8/20 هـ",
-    time: "19:00",
-    location: "المسرح الجامعي",
-    participants: "150 مشارك متوقع",
-    type: "ثقافي",
-  },
-  {
-    title: "دوري كرة القدم",
-    subtitle: "منظم بواسطة: أسرة الرياضة",
-    description: "بطولة كرة القدم السنوية بين الأسر الطلابية",
-    date: "1447/8/25 هـ",
-    time: "16:00",
-    location: "الملعب الرئيسي",
-    participants: "200 مشارك متوقع",
-    type: "رياضي",
-  },
-  {
-    title: "ورشة البرمجة المتقدمة",
-    subtitle: "منظم بواسطة: أسرة التقنية",
-    description: "ورشة عمل تفاعلية حول أحدث تقنيات البرمجة والذكاء الاصطناعي",
-    date: "1447/8/15 هـ",
-    time: "14:00",
-    location: "قاعة المحاضرات الكبرى",
-    participants: "75 مشارك متوقع",
-    type: "علمي",
-  },
-  {
-    title: "مسابقة الشعر العربي",
-    subtitle: "منظم بواسطة: أسرة الأدب",
-    description: "مسابقة شعرية بين طلاب الجامعة في مختلف أنواع الشعر العربي",
-    date: "1447/8/20 هـ",
-    time: "19:00",
-    location: "المسرح الجامعي",
-    participants: "150 مشارك متوقع",
-    type: "ثقافي",
-  },
-  {
-    title: "دوري كرة القدم",
-    subtitle: "منظم بواسطة: أسرة الرياضة",
-    description: "بطولة كرة القدم السنوية بين الأسر الطلابية",
-    date: "1447/8/25 هـ",
-    time: "16:00",
-    location: "الملعب الرئيسي",
-    participants: "200 مشارك متوقع",
-    type: "رياضي",
-  },
-  {
-    title: "ورشة البرمجة المتقدمة",
-    subtitle: "منظم بواسطة: أسرة التقنية",
-    description: "ورشة عمل تفاعلية حول أحدث تقنيات البرمجة والذكاء الاصطناعي",
-    date: "1447/8/15 هـ",
-    time: "14:00",
-    location: "قاعة المحاضرات الكبرى",
-    participants: "75 مشارك متوقع",
-    type: "علمي",
-  },
-  {
-    title: "مسابقة الشعر العربي",
-    subtitle: "منظم بواسطة: أسرة الأدب",
-    description: "مسابقة شعرية بين طلاب الجامعة في مختلف أنواع الشعر العربي",
-    date: "1447/8/20 هـ",
-    time: "19:00",
-    location: "المسرح الجامعي",
-    participants: "150 مشارك متوقع",
-    type: "ثقافي",
-  },
-  {
-    title: "دوري كرة القدم",
-    subtitle: "منظم بواسطة: أسرة الرياضة",
-    description: "بطولة كرة القدم السنوية بين الأسر الطلابية",
-    date: "1447/8/25 هـ",
-    time: "16:00",
-    location: "الملعب الرئيسي",
-    participants: "200 مشارك متوقع",
-    type: "رياضي",
-  },
-];
+interface Event {
+  event_id: number;
+  title: string;
+  description: string;
+  st_date: string;
+  end_date: string;
+  location: string;
+  s_limit: number;
+  type: string;
+}
 
 export default function ActivitiesPage() {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const token = localStorage.getItem("access"); 
+
+            const res = await fetch(
+        "http://127.0.0.1:8000/api/family/faculty_events/pending/",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+
+        if (!res.ok) throw new Error("Unauthorized or failed request");
+
+        const data = await res.json();
+        setEvents(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
   return (
     <div className={styles.pageWrapper}>
       <Header />
 
       <main className={styles.container}>
-        {/* Page header */}
         <div className={styles.pageHeader}>
           <h1 className={styles.mainTitle}>اعتماد الفعاليات</h1>
-          <span className={styles.badgeWaiting}>{activities.length} فعالية في الانتظار</span>
+          <span className={styles.badgeWaiting}>
+            {events.length} فعالية في الانتظار
+          </span>
         </div>
 
-        {/* Activities grid */}
-        <div className={styles.eventsContainer}>
-          {activities.map((activity, index) => (
-            <ActivityCard key={index} {...activity} />
-          ))}
-        </div>
+        {loading ? (
+          <p>جاري تحميل الفعاليات...</p>
+        ) : (
+          <div className={styles.eventsContainer}>
+            {events.map((event) => (
+              <ActivityCard
+                key={event.event_id}
+                eventId={event.event_id}
+                title={event.title}
+                description={event.description}
+                startDate={event.st_date}
+                endDate={event.end_date}
+                location={event.location}
+                participantsLimit={event.s_limit}
+                type={event.type}
+              />
+            ))}
+          </div>
+        )}
       </main>
 
       <Footer />

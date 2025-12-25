@@ -12,63 +12,81 @@ export default function ReportCard({ family }: any) {
     alert(`تم حذف الأسرة: ${family.name}`);
   };
 
+  // Determine badge color based on status
+  const statusColor =
+    family.status === "مقبول"
+      ? "#4caf50" 
+      : family.status === "مرفوض"
+      ? "#f44336" 
+      : "#ff9800"; 
+
   return (
     <div className={styles.reportCard}>
       <div className={styles.reportContent}>
-        <div className={styles.reportMainInfo}>
+        {/* --- Family Name with Status Badge --- */}
+        <div className={styles.reportHeader}>
           <h2 className={styles.familyName}>{family.name}</h2>
+        <span
+        className={styles.statusBadge}
+        style={{ backgroundColor: statusColor }}
+      >
+        {family.status}
+      </span>
 
-          <div className={styles.reportDetailsGrid}>
-            <div className={styles.detailRow}>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>الاخت الكبري:</span>
-                <span className={styles.detailValue}>{family.coordinator}</span>
-              </div>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>الاخ الاكبر:</span>
-                <span className={styles.detailValue}>{family.supervisor}</span>
-              </div>
-            </div>
-
-            <div className={styles.detailRow}>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>عدد الأعضاء:</span>
-                <span className={styles.detailValue}>
-                  {family.membersCount} عضو
-                </span>
-              </div>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>تاريخ التأسيس:</span>
-                <span className={styles.detailValue}>{family.foundingDate}</span>
-              </div>
-            </div>
-
-            <div className={`${styles.detailRow} ${styles.singleItem}`}>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>الفئة:</span>
-                <span className={styles.detailValue}>{family.category}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.statsRow}>
-            <div className={`${styles.statItem} ${styles.goals}`}>
-              <span className={styles.statIcon}></span>
-              <span className={styles.statText}>{family.goals} أهداف</span>
-            </div>
-            <div className={`${styles.statItem} ${styles.activities}`}>
-              <span className={styles.statIcon}></span>
-              <span className={styles.statText}>{family.activities} أنشطة</span>
-            </div>
-            <div className={`${styles.statItem} ${styles.enrolled}`}>
-              <span className={styles.statIcon}></span>
-              <span className={styles.statText}>
-                {family.enrolled} طلاب مسجلين
-              </span>
-            </div>
-          </div>
         </div>
 
+        {/* --- Details Grid --- */}
+        <div className={styles.reportDetailsGrid}>
+          <div className={styles.detailRow}>
+            <div className={styles.detailItem}>
+              <span className={styles.detailLabel}>عدد الأعضاء:</span>
+              <span className={styles.detailValue}>
+                {family.membersCount} عضو
+              </span>
+            </div>
+            <div className={styles.detailItem}>
+              <span className={styles.detailLabel}>تاريخ التأسيس:</span>
+              <span className={styles.detailValue}>{family.foundingDate}</span>
+            </div>
+          </div>
+
+          <div className={`${styles.detailRow} ${styles.singleItem}`}>
+            <div className={styles.detailItem}>
+              <span className={styles.detailLabel}>الفئة:</span>
+              <span className={styles.detailValue}>{family.category}</span>
+            </div>
+          </div>
+
+          {/* --- Family Description below Category --- */}
+          {family.description && (
+            <div className={styles.detailRow}>
+              <div className={styles.detailItem}>
+                <span className={styles.detailLabel}>وصف الأسرة:</span>
+                <span className={styles.detailValue}>{family.description}</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* --- Stats Row --- */}
+        {/* <div className={styles.statsRow}>
+          <div className={`${styles.statItem} ${styles.goals}`}>
+            <span className={styles.statIcon}></span>
+            <span className={styles.statText}>{family.goals} أهداف</span>
+          </div>
+          <div className={`${styles.statItem} ${styles.activities}`}>
+            <span className={styles.statIcon}></span>
+            <span className={styles.statText}>{family.activities} أنشطة</span>
+          </div>
+          <div className={`${styles.statItem} ${styles.enrolled}`}>
+            <span className={styles.statIcon}></span>
+            <span className={styles.statText}>
+              {family.enrolled} طلاب مسجلين
+            </span>
+          </div>
+        </div> */}
+
+        {/* --- Actions Row --- */}
         <div className={styles.actionsRow}>
           <button
             className={styles.viewDetailsBtn}

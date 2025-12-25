@@ -81,7 +81,7 @@
 /* Stats Grid */
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
   margin-bottom: 30px;
 }
@@ -104,8 +104,8 @@
 
 .statIcon {
   font-size: 2.5rem;
-  width: 60px;
-  height: 60px;
+  width: 70px;
+  height: 70px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -141,7 +141,7 @@
 }
 
 .statLabel {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #6c757d;
   font-weight: 600;
 }
@@ -364,7 +364,7 @@
 .studentsTable th,
 .studentsTable td {
   padding: 15px;
-  text-align: right;
+  text-align: center;
   font-size: 0.95rem;
   border-bottom: 1px solid #f1f3f5;
 }
@@ -376,6 +376,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   padding: 5px 10px;
+  color: red;
 }
 
 .deleteBtn:hover {
@@ -405,4 +406,59 @@
   .statValue { font-size: 1.5rem; }
   .statIcon { font-size: 2rem; width: 50px; height: 50px; }
   .cardTitle { font-size: 1.2rem; }
+}
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 25px;
+  width: 280px;
+  background: #fff;
+  padding: 14px 16px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  font-weight: 600;
+  color: #333;
+  z-index: 9999;
+  animation: fadeIn 0.4s ease forwards;
+  overflow: hidden;
+}
+
+
+.success {
+  border-right: 6px solid #4caf50;
+}
+
+.error {
+  border-right: 6px solid #f44336;
+}
+
+.notification::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background-color: #d4a017;
+  animation: progress 2.5s linear forwards;
+  transform-origin: left;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
 }

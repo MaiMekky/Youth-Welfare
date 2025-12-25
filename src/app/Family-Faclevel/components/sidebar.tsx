@@ -109,6 +109,15 @@ export default function FacLevelSidebar() {
             <PlusCircle size={18} />
             <span>إنشاء أسرة أصدقاء البيئة</span>
           </button>
+            <button
+            onClick={() => handleNavigation("/Family-Faclevel/leaders")}
+            className={
+              pathname === "/Family-Faclevel/leaders" ? styles.active : ""
+            }
+          >
+            <User size={18} />
+            <span>قادة الاسر</span>
+          </button>
         </nav>
 
         <div className={styles.footer}>

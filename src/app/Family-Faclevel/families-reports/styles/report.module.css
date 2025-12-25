@@ -5,7 +5,7 @@
   min-height: 100vh;
   background-color: #f5f7fa;
   direction: rtl;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
   color: #2C3A5F;
 }
 /* Global container */
@@ -15,6 +15,13 @@
   padding: 20px;
   width: 100%;
 }
+.reportHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* space between name and badge */
+  flex-wrap: wrap; /* optional: if the name is long */
+}
+
 
 /* Page Header */
 .pageHeaderReports {
@@ -219,4 +226,12 @@ padding: 10px 22px;
 
 .btnIcon {
   font-size: 1.2rem;
+}
+.statusBadge {
+  margin-right: 5px;
+  padding: 5px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #fff;
+  margin-left: 10px;
 }

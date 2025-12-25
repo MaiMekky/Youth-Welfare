@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './details.module.css';
 import { useParams, useRouter } from "next/navigation";
 import Header from "@/app/FacLevel/components/Header";
@@ -27,10 +27,11 @@ interface Activity {
 }
 
 interface Student {
+  memberId: number;
   name: string;
   id: string;
   major: string;
-  year: string;
+  role: string;
   joinDate: string;
 }
 
@@ -38,60 +39,140 @@ export default function FamilyDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
-  
-  console.log("Family ID:", id);
 
-  // Mock database - in production, fetch from API
-  const familiesDatabase: Record<string, FamilyData> = {
-    "1": {
-      name: 'أسرة التقنية والابتكار',
-      totalMembers: 85,
-      activities: 3,
-      goals: 4,
-      participation: '78%',
-      foundingDate: 'الجمعة، 30 صفر 1445 هـ',
-      coordinator: 'أحمد محمد العلي',
-      supervisor: 'فاطمة سعد الأحمد',
-      category: 'فني',
-      description: 'أسرة تركز على تطوير المهارات التقنية والابتكار بين الطلاب',
-    },
-    "2": {
-      name: 'أسرة الأدب والثقافة',
-      totalMembers: 65,
-      activities: 3,
-      goals: 4,
-      participation: '72%',
-      foundingDate: 'الأحد، 11 ربيع الأول 1445 هـ',
-      coordinator: 'عبدالرحمن خالد النصار',
-      supervisor: 'نورا عبدالعزيز المطيري',
-      category: 'ثقافي',
-      description: 'أسرة تركز على تطوير المهارات الأدبية والثقافية بين الطلاب',
+  const [familyData, setFamilyData] = useState<FamilyData>({
+    name: '',
+    totalMembers: 0,
+    activities: 0,
+    goals: 0,
+    participation: '0%',
+    foundingDate: '',
+    coordinator: '',
+    supervisor: '',
+    category: '',
+    description: '',
+  });
+
+  const [activitiesData, setActivitiesData] = useState<Activity[]>([]);
+  const [studentsData, setStudentsData] = useState<Student[]>([]);
+  const [goalsData, setGoalsData] = useState<string[]>([]);
+const [notification, setNotification] = useState<{
+  message: string;
+  type: "success" | "error";
+} | null>(null);
+
+const showNotification = (message: string, type: "success" | "error") => {
+  setNotification({ message, type });
+  setTimeout(() => setNotification(null), 2500);
+};
+
+  useEffect(() => {
+  const fetchFamilyDetails = async () => {
+    try {
+      const token = localStorage.getItem("access");
+      const res = await fetch(`http://localhost:8000/api/family/faculty/${id}/details/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!res.ok) throw new Error("Failed to fetch family details");
+
+      const data = await res.json();
+
+      // Find coordinator and supervisor
+      const coordinatorMember = data.family_members.find(
+        (member: any) => member.role === "أخ أكبر"
+      );
+      const supervisorMember = data.family_members.find(
+        (member: any) => member.role === "أخت كبرى"
+      );
+
+      setFamilyData({
+        name: data.name,
+        totalMembers: data.family_members.length,
+        activities: data.family_events.length,
+        goals: data.type ? 4 : 0,
+        participation: '0%',
+        foundingDate: new Date(data.created_at).toLocaleDateString("ar-EG"),
+        coordinator: coordinatorMember ? coordinatorMember.student_name : '-',
+        supervisor: supervisorMember ? supervisorMember.student_name : '-',
+        category: data.type,
+        description: data.description,
+      });
+
+      setActivitiesData(
+        data.family_events.map((event: any) => ({
+          name: event.title,
+          date: new Date(event.st_date).toLocaleDateString("ar-EG"),
+          type: event.type,
+          participants: Number(event.cost),
+        }))
+      );
+
+      setStudentsData(
+        data.family_members.map((member: any) => ({
+          memberId: member.student_id,
+          name: member.student_name,
+          id: member.u_id,
+          major: member.dept_name,
+          role: member.role, 
+          joinDate: new Date(member.joined_at).toLocaleDateString("ar-EG"),
+        }))
+      );
+
+      setGoalsData(['هدف 1', 'هدف 2', 'هدف 3', 'هدف 4']);
+
+    } catch (err) {
+      console.error(err);
+      alert("حدث خطأ أثناء جلب تفاصيل الأسرة");
     }
   };
 
-  const familyData = familiesDatabase[id] || familiesDatabase["1"];
+  fetchFamilyDetails();
+}, [id]);
 
-  const goalsData = [
-    'تطوير المهارات التقنية لدى الطلاب',
-    'نشر ثقافة الابتكار والإبداع',
-    'تنظيم ورش عمل متخصصة في التقنية',
-    'بناء شراكات مع الشركات التقنية',
-  ];
 
-  const activitiesData: Activity[] = [
-    { name: 'ورشة البرمجة المتقدمة', date: 'الجمعة، 10 رجب 1446 هـ', type: 'علمي', participants: 45 },
-    { name: 'هاكاثون الابتكار', date: 'الأحد، 5 رجب 1446 هـ', type: 'علمي', participants: 60 },
-    { name: 'لقاء تعارفي', date: 'الجمعة، 19 جمادى الآخرة 1446 هـ', type: 'اجتماعي', participants: 70 },
-  ];
+  const handleBack = () => router.push('/Family-Faclevel/families-reports');
+  const handleRemoveMember = async (memberId: number) => {
+  try {
+    const token = localStorage.getItem("access");
 
-  const studentsData: Student[] = [
-    { name: 'سارة أحمد محمد', id: '202012345', major: 'علوم الحاسب', year: 'السنة 3', joinDate: 'الأحد، 28 صفر 1446 هـ' },
-    { name: 'محمد عبدالله السالم', id: '202012346', major: 'هندسة البرمجيات', year: 'السنة 2', joinDate: 'الأحد، 28 صفر 1446 هـ' },
-  ];
+    const res = await fetch(
+      `http://127.0.0.1:8000/api/family/faculty_members/families/${id}/members/${memberId}/`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-  const handleBack = () => {
-    router.push('/Family-Faclevel/families-reports');
-  };
+    if (!res.ok) throw new Error("Failed to delete member");
+
+    
+    setStudentsData(prev =>
+      prev.filter(student => student.memberId !== memberId)
+    );
+
+    
+    setFamilyData(prev => ({
+      ...prev,
+      totalMembers: prev.totalMembers - 1,
+    }));
+
+    
+    showNotification("✅ تم حذف الطالب بنجاح", "success");
+
+  } catch (err) {
+    console.error(err);
+
+   
+    showNotification("❌ فشل حذف الطالب", "error");
+  }
+};
+
 
   // SVG icons
   const icons = {
@@ -112,14 +193,6 @@ export default function FamilyDetailsPage() {
         <path d="M12 6v6l4 2"></path>
       </svg>
     ),
-    participation: (
-       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-        <path d="M3 3v18h18"></path>
-        <path d="M3 14h6v4H3z"></path>
-        <path d="M9 10h6v8H9z"></path>
-        <path d="M15 6h6v12h-6z"></path>
-      </svg>
-    ),
     goalItem: (
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="10"></circle>
@@ -136,6 +209,18 @@ export default function FamilyDetailsPage() {
   return (
     <>
       <Header />
+            {notification && (
+        <div
+          className={`${styles.notification} ${
+            notification.type === "success"
+              ? styles.success
+              : styles.error
+          }`}
+        >
+          {notification.message}
+        </div>
+      )}
+
       <div className={styles.detailsPage}>
         <header className={styles.detailsHeader}>
           <h1 className={styles.detailsTitle}>تفاصيل الأسرة: {familyData.name}</h1>
@@ -155,18 +240,17 @@ export default function FamilyDetailsPage() {
                 </svg>
               </span>طباعة
             </button>
-          <button 
-          className={`${styles.actionBtn} ${styles.back}`} 
-          onClick={handleBack}
-        >
-          <span className={styles.btnIcon}>←</span>
-          العودة للقائمة
-        </button>
-
+            <button 
+              className={`${styles.actionBtn} ${styles.back}`} 
+              onClick={handleBack}
+            >
+              <span className={styles.btnIcon}>←</span>
+              العودة للقائمة
+            </button>
           </div>
         </header>
 
-        {/* Statistics Cards */}
+        {/* --- Statistics Cards --- */}
         <div className={styles.statsGrid}>
           <div className={styles.statCard}>
             <div className={`${styles.statIcon} ${styles.members}`}>{icons.members}</div>
@@ -182,23 +266,9 @@ export default function FamilyDetailsPage() {
               <div className={styles.statLabel}>الأنشطة المنجزة</div>
             </div>
           </div>
-          <div className={styles.statCard}>
-            <div className={`${styles.statIcon} ${styles.goals}`}>{icons.goals}</div>
-            <div className={styles.statContent}>
-              <div className={styles.statValue}>{familyData.goals}</div>
-              <div className={styles.statLabel}>الأهداف المحددة</div>
-            </div>
-          </div>
-          <div className={styles.statCard}>
-            <div className={`${styles.statIcon} ${styles.participation}`}>{icons.participation}</div>
-            <div className={styles.statContent}>
-              <div className={styles.statValue}>{familyData.participation}</div>
-              <div className={styles.statLabel}>معدل المشاركة</div>
-            </div>
-          </div>
         </div>
 
-        {/* Content Grid */}
+        {/* --- Content Grid --- */}
         <div className={styles.contentGrid}>
           <div className={styles.infoCard}>
             <h2 className={styles.cardTitle}>معلومات عامة</h2>
@@ -222,25 +292,7 @@ export default function FamilyDetailsPage() {
             </div>
           </div>
 
-          <div className={styles.infoCard}>
-            <h2 className={styles.cardTitle}>أهداف الأسرة</h2>
-            <ul className={styles.goalsList}>
-              {goalsData.map((goal, idx) => (
-                <li key={idx} className={styles.goalItem}>
-                  <span className={styles.goalIcon}>{icons.goalItem}</span>{goal}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* Description */}
-        <div className={styles.descriptionCard}>
-          <h2 className={styles.cardTitle}>وصف الأسرة</h2>
-          <p className={styles.descriptionText}>{familyData.description}</p>
-        </div>
-
-        {/* Activities */}
+ {/* --- Activities --- */}
         <div className={styles.activitiesCard}>
           <h2 className={styles.cardTitle}>الأنشطة والفعاليات</h2>
           <div className={styles.activitiesList}>
@@ -263,8 +315,25 @@ export default function FamilyDetailsPage() {
             ))}
           </div>
         </div>
+          {/* <div className={styles.infoCard}>
+            <h2 className={styles.cardTitle}>أهداف الأسرة</h2>
+            <ul className={styles.goalsList}>
+              {goalsData.map((goal, idx) => (
+                <li key={idx} className={styles.goalItem}>
+                  <span className={styles.goalIcon}>{icons.goalItem}</span>{goal}
+                </li>
+              ))}
+            </ul>
+          </div> */}
+        </div>
 
-        {/* Students Table */}
+        {/* --- Description --- */}
+        <div className={styles.descriptionCard}>
+          <h2 className={styles.cardTitle}>وصف الأسرة</h2>
+          <p className={styles.descriptionText}>{familyData.description}</p>
+        </div>
+
+        {/* --- Students Table --- */}
         <div className={styles.studentsCard}>
           <h2 className={styles.cardTitle}>الطلاب المسجلون</h2>
           <div className={styles.tableContainer}>
@@ -274,7 +343,7 @@ export default function FamilyDetailsPage() {
                   <th>الاسم</th>
                   <th>الرقم الجامعي</th>
                   <th>التخصص</th>
-                  <th>السنة</th>
+                  <th>الدور</th>
                   <th>تاريخ الانضمام</th>
                   <th>الإجراءات</th>
                 </tr>
@@ -285,10 +354,10 @@ export default function FamilyDetailsPage() {
                     <td>{student.name}</td>
                     <td>{student.id}</td>
                     <td>{student.major}</td>
-                    <td>{student.year}</td>
+                    <td>{student.role}</td>
                     <td>{student.joinDate}</td>
                     <td>
-                      <button className={styles.deleteBtn} title="حذف">
+                      <button className={styles.deleteBtn} title="حذف"  onClick={() => handleRemoveMember(student.memberId)}>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="16"

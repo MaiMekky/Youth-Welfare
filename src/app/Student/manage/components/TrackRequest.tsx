@@ -1,88 +1,124 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import styles from "../styles/TrackRequest.module.css";
 
-interface TrackRequestProps {
-  status?: "accepted" | "pending" | "rejected";
-  onBack?: () => void;
+interface FamilyRequest {
+  family_id: number;
+  name: string;
+  description: string;
+  faculty: number;
+  faculty_name: string;
+  type: string;
+  status: string;
+  created_at: string;
 }
 
-const TrackRequest: React.FC<TrackRequestProps> = ({ status, onBack }) => {
-  const [requestStatus, setRequestStatus] = useState<"accepted" | "pending" | "rejected" | null>(null);
-  const [submitted, setSubmitted] = useState(false);
+const TrackRequest: React.FC = () => {
+  const [requests, setRequests] = useState<FamilyRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  useEffect(() => {
-    // Check if request was submitted
-    const isSubmitted = localStorage.getItem("familyRequestSubmitted") === "true";
-    setSubmitted(isSubmitted);
-    
-    // Get status from localStorage or use prop
-    if (status) {
-      setRequestStatus(status);
-    } else if (isSubmitted) {
-      const storedStatus = localStorage.getItem("familyRequestStatus") as "accepted" | "pending" | "rejected" | null;
-      setRequestStatus(storedStatus || "pending");
-    }
-  }, [status]);
+ useEffect(() => {
+  const fetchRequests = async () => {
+    try {
+      const token = localStorage.getItem("access");
+      console.log("ACCESS TOKEN:", token);
 
-  const getMessage = () => {
-    if (!submitted) {
-      return {
-        title: "لا يوجد طلب إنشاء مُقدّم",
-        description: "لم تقم بتقديم طلب إنشاء أسرة بعد",
-        icon: "📄",
-        color: "#777"
-      };
-    }
+      const res = await fetch(
+        "http://localhost:8000/api/family/student/family_creation_request/",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, 
+          },
+        }
+      );
 
-    switch (requestStatus) {
-      case "accepted":
-        return {
-          title: "تم قبول طلب إنشاء أسرة",
-          description: "تمت الموافقة على طلبك بنجاح. يمكنك الآن البدء في إدارة أسرتك.",
-          icon: "✅",
-          color: "#388e3c"
-        };
-      case "rejected":
-        return {
-          title: "تم رفض طلب إنشاء أسرة",
-          description: "عذراً، لم تتم الموافقة على الطلب. يرجى مراجعة الشروط والمتطلبات وإعادة المحاولة.",
-          icon: "❌",
-          color: "#d32f2f"
-        };
-      case "pending":
-      default:
-        return {
-          title: "طلبك قيد المراجعة",
-          description: "تم استلام طلبك بنجاح وهو الآن قيد المراجعة من قبل إدارة رعاية الشباب. سيتم إشعارك عند اتخاذ القرار.",
-          icon: "⏳",
-          color: "#B38E19"
-        };
+      console.log("STATUS:", res.status);
+
+      const text = await res.text();
+      if (!res.ok) {
+        throw new Error("فشل تحميل طلبات الأسر");
+      }
+
+      const data = JSON.parse(text);
+      setRequests(data.requests || []);
+    } catch (err: any) {
+      console.error("ERROR:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const { title, description, icon, color } = getMessage();
+  fetchRequests();
+}, []);
 
-  const handleBack = () => {
-    if (onBack) {
-      onBack();
-    }
-  };
+
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.card}>جاري التحميل...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.card}>{error}</div>
+      </div>
+    );
+  }
+
+  if (requests.length === 0) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.card}>
+          <h2 className={styles.title}>لا توجد طلبات</h2>
+          <p className={styles.description}>
+            لم تقم بتقديم أي طلب إنشاء أسرة حتى الآن
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
-        <div className={styles.icon} style={{ color }}>{icon}</div>
-        <h2 className={styles.title}>{title}</h2>
-        <p className={styles.description}>{description}</p>
-        {submitted && requestStatus === "pending" && (
-          <div className={styles.statusBadge}>
-            <span className={styles.badgeText}>قيد المراجعة</span>
+      <div className={styles.cardsWrapper}>
+        {requests.map((req) => (
+          <div key={req.family_id} className={styles.card}>
+            <h2 className={styles.title}>{req.name}</h2>
+
+            <p className={styles.description}>{req.description}</p>
+
+            <div className={styles.infoRow}>
+              <span>🏫 الكلية:</span>
+              <span>{req.faculty_name}</span>
+            </div>
+
+            <div className={styles.infoRow}>
+              <span>👥 نوع الأسرة:</span>
+              <span>{req.type}</span>
+            </div>
+
+            <div className={styles.infoRow}>
+              <span>📅 تاريخ الإنشاء:</span>
+              <span>
+                {new Date(req.created_at).toLocaleDateString("ar-EG")}
+              </span>
+            </div>
+
+            <div
+              className={styles.statusBadge}
+              data-status={req.status}
+            >
+              {req.status}
+            </div>
           </div>
-        )}
-        <button className={styles.backButton} onClick={handleBack}>
-          العودة
-        </button>
+        ))}
       </div>
     </div>
   );

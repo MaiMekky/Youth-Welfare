@@ -42,6 +42,23 @@ export interface Post {
   type: "Post" | "Reminder";
 }
 
+interface Family {
+  family_id: number;
+  name: string;
+  description: string;
+  faculty_name: string | null;
+  type: string;
+  status: string;
+  role: string;
+  member_status: string;
+  joined_at: string;
+  member_count: number;
+}
+
+interface Department {
+  dept_id: number;
+  name: string;
+}
 
 const Dashboard: React.FC = () => {
   const [members, setMembers] = useState<Member[]>([]);
@@ -54,9 +71,12 @@ const Dashboard: React.FC = () => {
   const [showCreateContentForm, setShowCreateContentForm] = useState(false);
   const [showCreateActivityForm, setShowCreateActivityForm] = useState(false);
 
-  // Student ID and Family ID for API calls
+  // Family data
+  const [selectedFamilyId, setSelectedFamilyId] = useState<number | null>(null);
+  const [familyName, setFamilyName] = useState<string>("أسرة المهندسين المبدعين");
+  const [departments, setDepartments] = useState<Department[]>([]);
+  
   const [studentId, setStudentId] = useState<number | null>(null);
-  const [familyId, setFamilyId] = useState<number | null>(null);
   const [deptId, setDeptId] = useState<number | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -76,7 +96,7 @@ const Dashboard: React.FC = () => {
   // Create Activity Form
   const [activityData, setActivityData] = useState({
     title: "",
-    type: "اجتماع",
+    type: "",
     description: "",
     date: "",
     endDate: "",
@@ -86,59 +106,130 @@ const Dashboard: React.FC = () => {
     cost: "",
     restrictions: "",
     reward: "",
+    dept_id: "",
   });
 
-  // Fetch student ID on mount
+  const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
+
+  // Fetch family ID and name from families API
   useEffect(() => {
-    const fetchProfileData = async () => {
-      const token = localStorage.getItem("access");
-      if (!token) {
-        console.warn('No access token found');
-        setProfileLoading(false);
-        return;
-      }
+    if (!token) {
+      console.error("No token found");
+      setProfileLoading(false);
+      return;
+    }
 
+    const fetchFamilyData = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/api/auth/profile/", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        console.log("🔵 Fetching family data...");
+        
+        const res = await fetch(
+          `http://127.0.0.1:8000/api/family/student/families/`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-        if (response.ok) {
-          const data = await response.json();
-          console.log('=== PROFILE API RESPONSE ===');
-          console.log('Full data:', JSON.stringify(data, null, 2));
-          console.log('student_id:', data.student_id);
-          console.log('family_id:', data.family_id);
-          console.log('family:', data.family);
-          console.log('familyId:', data.familyId);
-          
-          setStudentId(data.student_id);
-          
-          const fid = data.family_id || data.family || data.familyId;
-          if (fid) {
-            setFamilyId(fid);
-            console.log('✅ Family ID set to:', fid);
-          } else {
-            console.log('Family ID will be extracted from event requests response');
-          }
-          if (data.dept_id) {
-            setDeptId(data.dept_id);
-            console.log('Dept ID found:', data.dept_id);
-          } else {
-            console.warn('No dept_id in profile');
-          }
-        } else {
-          console.error('Profile fetch returned status:', response.status);
+        console.log("📊 Families Response Status:", res.status);
+
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error("❌ API Error:", errorText);
+          throw new Error(`فشل تحميل قائمة الأسر (Status: ${res.status})`);
         }
-      } catch (error) {
-        console.error("Error fetching profile:", error);
+
+        const response = await res.json();
+        console.log("✅ Families API Response:", response);
+
+        // Check different possible response structures
+        let families: Family[] = [];
+        
+        if (Array.isArray(response)) {
+          families = response;
+        } else if (response.data && Array.isArray(response.data)) {
+          families = response.data;
+        } else if (response.results && Array.isArray(response.results)) {
+          families = response.results;
+        } else if (response.families && Array.isArray(response.families)) {
+          families = response.families;
+        }
+
+        console.log("📋 Families array:", families);
+
+        if (families.length === 0) {
+          showNotification("لا توجد أسر متاحة");
+          setProfileLoading(false);
+          return;
+        }
+
+        // البحث عن أول أسرة بدور "أخ أكبر"
+        const elderBrotherFamily = families.find(f => f.role === "أخ أكبر");
+        
+        if (elderBrotherFamily) {
+          console.log("✅ Found family with 'أخ أكبر':", elderBrotherFamily);
+          setSelectedFamilyId(elderBrotherFamily.family_id);
+          setFamilyName(elderBrotherFamily.name);
+        } else {
+          showNotification("لا توجد أسرة بدور 'أخ أكبر'");
+          setProfileLoading(false);
+        }
+      } catch (err: any) {
+        console.error("❌ Error fetching families:", err);
+        showNotification(err.message || "حصل خطأ أثناء تحميل قائمة الأسر");
       } finally {
         setProfileLoading(false);
       }
     };
 
-    fetchProfileData();
-  }, []);
+    fetchFamilyData();
+  }, [token]);
+
+  // Fetch departments
+  useEffect(() => {
+    if (!token) return;
+
+    const fetchDepartments = async () => {
+      try {
+        console.log("🔵 Fetching departments...");
+        
+        const res = await fetch(
+          `http://127.0.0.1:8000/api/family/departments/`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!res.ok) {
+          console.error("❌ Departments API Error:", res.status);
+          return;
+        }
+
+        const response = await res.json();
+        console.log("✅ Departments API Response:", response);
+
+        let depts: Department[] = [];
+        
+        if (Array.isArray(response)) {
+          depts = response;
+        } else if (response.departments && Array.isArray(response.departments)) {
+          depts = response.departments;
+        } else if (response.results && Array.isArray(response.results)) {
+          depts = response.results;
+        }
+
+        console.log("📋 Departments:", depts);
+        setDepartments(depts);
+      } catch (err) {
+        console.error("❌ Error fetching departments:", err);
+      }
+    };
+
+    fetchDepartments();
+  }, [token]);
 
   useEffect(() => {
     async function fetchData() {
@@ -160,8 +251,7 @@ const Dashboard: React.FC = () => {
           }
         }
       } catch (error) {
-        console.log("API not ready — Using empty arrays. Data will be populated when available.");
-        // Keep empty arrays - Overview will handle empty state gracefully
+        console.log("API not ready — Using empty arrays.");
       }
     }
     fetchData();
@@ -182,8 +272,8 @@ const Dashboard: React.FC = () => {
       return;
     }
 
-    if (!studentId) {
-      showNotification("لم يتم العثور على معرف الطالب");
+    if (!selectedFamilyId) {
+      showNotification("لم يتم العثور على معرف الأسرة");
       return;
     }
 
@@ -196,8 +286,10 @@ const Dashboard: React.FC = () => {
     setIsSubmitting(true);
 
     try {
+      console.log("📤 Creating post for family ID:", selectedFamilyId);
+      
       const response = await fetch(
-        `http://127.0.0.1:8000/api/family/student/${studentId}/post/`,
+        `http://127.0.0.1:8000/api/family/student/${selectedFamilyId}/post/`,
         {
           method: "POST",
           headers: {
@@ -237,18 +329,28 @@ const Dashboard: React.FC = () => {
   const handleCreateActivity = async () => {
     if (
       !activityData.title ||
+      !activityData.type ||
       !activityData.description ||
       !activityData.date ||
       !activityData.endDate ||
-      !activityData.location
+      !activityData.location ||
+      !activityData.dept_id
     ) {
       showNotification("الرجاء ملء جميع الحقول المطلوبة");
       return;
     }
 
-    const idToUse = familyId || studentId;
-    if (!idToUse) {
-      showNotification("لم يتم العثور على معرف الأسرة أو الطالب");
+    // Validate dates
+    const startDate = new Date(activityData.date);
+    const endDate = new Date(activityData.endDate);
+    
+    if (endDate < startDate) {
+      showNotification("❌ تاريخ النهاية يجب أن يكون بعد تاريخ البداية");
+      return;
+    }
+
+    if (!selectedFamilyId) {
+      showNotification("لم يتم العثور على معرف الأسرة");
       return;
     }
 
@@ -261,7 +363,7 @@ const Dashboard: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const endpoint = `http://127.0.0.1:8000/api/family/student/${idToUse}/event_request/`;
+      const endpoint = `http://127.0.0.1:8000/api/family/student/${selectedFamilyId}/event_request/`;
       const payload = {
         title: activityData.title,
         description: activityData.description,
@@ -270,10 +372,10 @@ const Dashboard: React.FC = () => {
         end_date: activityData.endDate,
         location: activityData.location,
         s_limit: activityData.maxParticipants ? parseInt(activityData.maxParticipants) : 0,
-        cost: activityData.cost ? activityData.cost.toString() : "0",
+        cost: activityData.cost || "0",
         restrictions: activityData.restrictions || "",
         reward: activityData.reward || "",
-        dept_id: deptId || 0,
+        dept_id: parseInt(activityData.dept_id),
       };
 
       console.log('=== CREATING ACTIVITY ===');
@@ -299,7 +401,7 @@ const Dashboard: React.FC = () => {
         setShowCreateActivityForm(false);
         setActivityData({
           title: "",
-          type: "اجتماع",
+          type: "",
           description: "",
           date: "",
           endDate: "",
@@ -309,6 +411,7 @@ const Dashboard: React.FC = () => {
           cost: "",
           restrictions: "",
           reward: "",
+          dept_id: "",
         });
 
         setActiveTab("activities");
@@ -317,7 +420,24 @@ const Dashboard: React.FC = () => {
         }, 500);
       } else {
         console.error("Error creating activity:", responseData);
-        showNotification("❌ حدث خطأ أثناء إنشاء الفعالية: " + (responseData?.detail || responseData?.error || "Unknown error"));
+        
+        // Extract error message
+        let errorMsg = "حدث خطأ أثناء إنشاء الفعالية";
+        
+        if (responseData?.errors?.non_field_errors) {
+          errorMsg = responseData.errors.non_field_errors.join(", ");
+        } else if (responseData?.errors) {
+          const firstError = Object.values(responseData.errors)[0];
+          if (Array.isArray(firstError)) {
+            errorMsg = firstError.join(", ");
+          }
+        } else if (responseData?.detail) {
+          errorMsg = responseData.detail;
+        } else if (responseData?.error) {
+          errorMsg = responseData.error;
+        }
+        
+        showNotification("❌ " + errorMsg);
       }
     } catch (error) {
       console.error("Network error:", error);
@@ -353,13 +473,14 @@ const Dashboard: React.FC = () => {
 
       {/* HEADER */}
       <header className="dashboard-header">
-        <h1>إدارة الأسرة: أسرة المهندسين المبدعين</h1>
+        <h1>إدارة الأسرة: {familyName}</h1>
         <p>لوحة تحكم خاصة بمؤسس الأسرة لإدارة الأعضاء والفعاليات</p>
 
         <div className="dashboard-buttons">
           <button
             onClick={() => setShowCreateActivityForm(true)}
             className="btn create-activity"
+            disabled={!selectedFamilyId || profileLoading}
           >
             إنشاء فعالية
           </button>
@@ -367,6 +488,7 @@ const Dashboard: React.FC = () => {
           <button
             onClick={() => setShowCreateContentForm(true)}
             className="btn publish-content"
+            disabled={!selectedFamilyId || profileLoading}
           >
             نشر محتوى
           </button>
@@ -407,14 +529,14 @@ const Dashboard: React.FC = () => {
       {/* CONTENT SWITCHING */}
       <div className="dashboard-tabs-content">
         {activeTab === "overview" && (
-          <Overview activities={activities} members={members} />
+          <Overview />
         )}
 
-        {activeTab === "activities" && <Activities studentId={studentId || undefined} refreshTrigger={activityRefreshTrigger} />}
+        {activeTab === "activities" && <Activities refreshTrigger={activityRefreshTrigger} />}
 
-        {activeTab === "members" && <Members studentId={studentId || undefined} />}
+        {activeTab === "members" && <Members />}
 
-        {activeTab === "posts" && <Posts familyId={familyId || studentId || undefined} refreshTrigger={postRefreshTrigger} />}
+        {activeTab === "posts" && <Posts refreshTrigger={postRefreshTrigger} />}
       </div>
 
       {/* POPUP — CREATE CONTENT */}
@@ -471,7 +593,7 @@ const Dashboard: React.FC = () => {
                   className="btn-submit" 
                   onClick={handleCreateContent}
                   disabled={isSubmitting || profileLoading}
-                  title={profileLoading ? "جاري تحميل بيانات الملف الشخصي..." : ""}
+                  title={profileLoading ? "جاري تحميل بيانات الأسرة..." : ""}
                 >
                   <Upload size={18} /> {profileLoading ? "جاري التحميل..." : isSubmitting ? "جاري النشر..." : "نشر"}
                 </button>
@@ -515,20 +637,33 @@ const Dashboard: React.FC = () => {
 
                 <div className="form-group">
                   <label>نوع الفعالية *</label>
-                  <select
+                  <input
+                    type="text"
                     name="type"
                     value={activityData.type}
                     onChange={handleActivityChange}
-                    className="form-select"
-                  >
-                    <option value="اجتماع">اجتماع</option>
-                    <option value="مسابقة">مسابقة</option>
-                    <option value="ورشة عمل">ورشة عمل</option>
-                    <option value="رحلة">رحلة</option>
-                    <option value="محاضرة">محاضرة</option>
-                    <option value="تطوع">تطوع</option>
-                  </select>
+                    placeholder="مثلاً: اجتماع، ورشة عمل، مسابقة"
+                    className="form-input"
+                  />
                 </div>
+              </div>
+
+              {/* DEPARTMENT */}
+              <div className="form-group">
+                <label>اللجنة *</label>
+                <select
+                  name="dept_id"
+                  value={activityData.dept_id}
+                  onChange={handleActivityChange}
+                  className="form-select"
+                >
+                  <option value="">اختر اللجنة</option>
+                  {departments.map(dept => (
+                    <option key={dept.dept_id} value={dept.dept_id}>
+                      {dept.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* DESCRIPTION */}
@@ -645,7 +780,7 @@ const Dashboard: React.FC = () => {
                   className="btn-submit-activity"
                   onClick={handleCreateActivity}
                   disabled={isSubmitting || profileLoading}
-                  title={profileLoading ? "جاري تحميل بيانات الملف الشخصي..." : ""}
+                  title={profileLoading ? "جاري تحميل بيانات الأسرة..." : ""}
                 >
                   {profileLoading ? "جاري التحميل..." : isSubmitting ? "جاري الإنشاء..." : "إنشاء الفعالية والنشر الآن"}
                 </button>

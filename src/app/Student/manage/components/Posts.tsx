@@ -28,9 +28,21 @@ interface ApiPost {
   updated_at: string;
 }
 
+interface Family {
+  family_id: number;
+  name: string;
+  description: string;
+  faculty_name: string | null;
+  type: string;
+  status: string;
+  role: string;
+  member_status: string;
+  joined_at: string;
+  member_count: number;
+}
+
 // ========= Props Interface ==========
 interface PostsProps {
-  familyId?: number;
   refreshTrigger?: number;
 }
 
@@ -103,72 +115,127 @@ const mapApiPostToPost = (apiPost: ApiPost): Post => {
 };
 
 // ========= Posts Main Page Component ==========
-const Posts: React.FC<PostsProps> = ({ familyId, refreshTrigger = 0 }) => {
+const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedFamilyId, setSelectedFamilyId] = useState<number | null>(null);
 
-  const fetchPosts = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
 
-      const token = localStorage.getItem('access');
-      if (!token) {
-        console.warn('No access token found');
-        setPosts([]);
-        setLoading(false);
-        return;
-      }
-
-      if (!familyId) {
-        console.warn('No familyId provided to Posts component');
-        setPosts([]);
-        setLoading(false);
-        return;
-      }
-
-      const endpoint = `http://127.0.0.1:8000/api/family/student/${familyId}/posts/`;
-      console.log('Fetching posts from:', endpoint);
-
-      const response = await fetch(endpoint, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (!response.ok) {
-        console.error('Failed to fetch posts, status:', response.status);
-        throw new Error(`Failed to fetch posts: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      console.log('Posts data received:', data);
-      
-      let postsArray: ApiPost[] = [];
-      if (Array.isArray(data)) {
-        postsArray = data;
-      } else if (data.posts && Array.isArray(data.posts)) {
-        postsArray = data.posts;
-      }
-      
-      const mappedPosts = postsArray.map(mapApiPostToPost);
-      console.log('Mapped posts:', mappedPosts);
-      setPosts(mappedPosts);
-    } catch (err) {
-      console.error('Error fetching posts:', err);
-      setError('فشل في تحميل المنشورات');
-      setPosts([]);
-    } finally {
+  // First useEffect: Fetch family ID from families API
+  useEffect(() => {
+    if (!token) {
+      setError("غير مصرح");
       setLoading(false);
+      return;
     }
-  };
 
-  useEffect(() => {
-    fetchPosts();
-  }, [familyId]);
+    const fetchFamilyId = async () => {
+      try {
+        const res = await fetch(
+          `http://127.0.0.1:8000/api/family/student/families/`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
+        if (!res.ok) throw new Error("فشل تحميل قائمة الأسر");
+
+        const response = await res.json();
+        
+        // Debug: Log the response structure
+        console.log("Families API Response:", response);
+        console.log("Is Array?", Array.isArray(response));
+        
+        // Check different possible response structures
+        let families: Family[] = [];
+        
+        if (Array.isArray(response)) {
+          families = response;
+        } else if (response.data && Array.isArray(response.data)) {
+          families = response.data;
+        } else if (response.results && Array.isArray(response.results)) {
+          families = response.results;
+        } else if (response.families && Array.isArray(response.families)) {
+          families = response.families;
+        }
+        
+        console.log("Families array:", families);
+        
+        if (families.length === 0) {
+          setError("لا توجد أسر متاحة");
+          setLoading(false);
+          return;
+        }
+        
+        // البحث عن أول أسرة بدور "أخ أكبر"
+        const elderBrotherFamily = families.find(f => f.role === "أخ أكبر");
+        
+        if (elderBrotherFamily) {
+          console.log("Found family with 'أخ أكبر':", elderBrotherFamily);
+          setSelectedFamilyId(elderBrotherFamily.family_id);
+        } else {
+          setError("لا توجد أسرة بدور 'أخ أكبر'");
+          setLoading(false);
+        }
+      } catch (err: any) {
+        console.error("Error fetching families:", err);
+        setError(err.message || "حصل خطأ أثناء تحميل قائمة الأسر");
+        setLoading(false);
+      }
+    };
+
+    fetchFamilyId();
+  }, [token]);
+
+  // Second useEffect: Fetch posts using the selected family ID
   useEffect(() => {
+    if (!selectedFamilyId || !token) return;
+
+    const fetchPosts = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const endpoint = `http://127.0.0.1:8000/api/family/student/${selectedFamilyId}/posts/`;
+        console.log('Fetching posts from:', endpoint);
+
+        const response = await fetch(endpoint, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+          console.error('Failed to fetch posts, status:', response.status);
+          throw new Error(`Failed to fetch posts: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('Posts data received:', data);
+        
+        let postsArray: ApiPost[] = [];
+        if (Array.isArray(data)) {
+          postsArray = data;
+        } else if (data.posts && Array.isArray(data.posts)) {
+          postsArray = data.posts;
+        }
+        
+        const mappedPosts = postsArray.map(mapApiPostToPost);
+        console.log('Mapped posts:', mappedPosts);
+        setPosts(mappedPosts);
+      } catch (err) {
+        console.error('Error fetching posts:', err);
+        setError('فشل في تحميل المنشورات');
+        setPosts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchPosts();
-  }, [refreshTrigger]);
+  }, [selectedFamilyId, token, refreshTrigger]);
 
   if (loading) {
     return (

@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import "../styles/Activities.css";
 import { Calendar, Users, Briefcase, MapPin } from "lucide-react";
-import { decodeToken } from "@/utils/tokenUtils";
 
 interface Activity {
   id: number;
@@ -60,8 +59,20 @@ interface ApiEventRequest {
   updated_at?: string;
 }
 
+interface Family {
+  family_id: number;
+  name: string;
+  description: string;
+  faculty_name: string | null;
+  type: string;
+  status: string;
+  role: string;
+  member_status: string;
+  joined_at: string;
+  member_count: number;
+}
+
 interface ActivitiesProps {
-  studentId?: number;
   refreshTrigger?: number;
 }
 
@@ -163,179 +174,234 @@ const mapApiActivityToActivity = (apiEvent: ApiEventRequest, deptMap: Record<num
   };
 };
 
-const Activities: React.FC<ActivitiesProps> = ({ studentId, refreshTrigger = 0 }) => {
+const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
   const [activities, setActivities] = useState<Activity[]>(dummyActivities);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [deptMap, setDeptMap] = useState<Record<number, string>>({});
+  const [selectedFamilyId, setSelectedFamilyId] = useState<number | null>(null);
 
-  // Fetch departments
-  const fetchDepartments = async () => {
-    try {
-      const token = localStorage.getItem('access');
-      if (!token) return;
+  const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
 
-      const response = await fetch('http://127.0.0.1:8000/api/family/departments/', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        let depts: Department[] = [];
-        
-        if (Array.isArray(data)) {
-          depts = data;
-        } else if (data?.departments && Array.isArray(data.departments)) {
-          depts = data.departments;
-        } else if (data?.results && Array.isArray(data.results)) {
-          depts = data.results;
-        }
-
-        setDepartments(depts);
-        
-        const map: Record<number, string> = {};
-        depts.forEach(dept => {
-          map[dept.dept_id] = dept.name;
-        });
-        setDeptMap(map);
-        console.log('✅ Departments loaded:', depts.length);
-      }
-    } catch (err) {
-      console.error('❌ Error fetching departments:', err);
-    }
-  };
-
+  // First useEffect: Fetch family ID from families API
   useEffect(() => {
-    fetchDepartments();
-  }, []);
-
-  // Fetch activities
-  const fetchActivities = async () => {
-    if (!studentId) {
-      console.warn('⚠️ No studentId provided');
-      setActivities(dummyActivities);
+    if (!token) {
+      setError("غير مصرح");
+      setLoading(false);
       return;
     }
 
-    try {
-      setLoading(true);
-      setError(null);
+    const fetchFamilyId = async () => {
+      try {
+        const res = await fetch(
+          `http://127.0.0.1:8000/api/family/student/families/`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-      const token = localStorage.getItem('access');
-      if (!token) {
-        console.error('❌ No access token found');
-        setError('لا يوجد توكن وصول');
-        setActivities(dummyActivities);
-        setLoading(false);
-        return;
-      }
+        if (!res.ok) throw new Error("فشل تحميل قائمة الأسر");
 
-      const endpoint = `http://127.0.0.1:8000/api/family/student/4/event_requests/`;
-      console.log('📡 Fetching from:', endpoint);
-
-      const response = await fetch(endpoint, {
-        method: 'GET',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+        const response = await res.json();
+        
+        // Debug: Log the response structure
+        console.log("Families API Response:", response);
+        console.log("Is Array?", Array.isArray(response));
+        
+        // Check different possible response structures
+        let families: Family[] = [];
+        
+        if (Array.isArray(response)) {
+          families = response;
+        } else if (response.data && Array.isArray(response.data)) {
+          families = response.data;
+        } else if (response.results && Array.isArray(response.results)) {
+          families = response.results;
+        } else if (response.families && Array.isArray(response.families)) {
+          families = response.families;
         }
-      });
-
-      console.log('📊 Response status:', response.status);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ API Error:', errorText);
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
+        
+        console.log("Families array:", families);
+        
+        if (families.length === 0) {
+          setError("لا توجد أسر متاحة");
+          setLoading(false);
+          return;
+        }
+        
+        // البحث عن أول أسرة بدور "أخ أكبر"
+        const elderBrotherFamily = families.find(f => f.role === "أخ أكبر");
+        
+        if (elderBrotherFamily) {
+          console.log("Found family with 'أخ أكبر':", elderBrotherFamily);
+          setSelectedFamilyId(elderBrotherFamily.family_id);
+        } else {
+          setError("لا توجد أسرة بدور 'أخ أكبر'");
+          setLoading(false);
+        }
+      } catch (err: any) {
+        console.error("Error fetching families:", err);
+        setError(err.message || "حصل خطأ أثناء تحميل قائمة الأسر");
+        setLoading(false);
       }
+    };
 
-      const data = await response.json();
-      console.log('✅ Raw API Response:', data);
-      console.log('🔍 Response type:', typeof data);
-      console.log('🔍 Is Array?:', Array.isArray(data));
-      
-      // If it's an object, log all keys
-      if (typeof data === 'object' && !Array.isArray(data)) {
-        console.log('🔍 Response keys:', Object.keys(data));
-        Object.keys(data).forEach(key => {
-          const value = data[key];
-          if (Array.isArray(value)) {
-            console.log(`🔑 "${key}": Array with ${value.length} items`);
-            if (value.length > 0) {
-              console.log(`   First item:`, value[0]);
-            }
-          } else {
-            console.log(`🔑 "${key}":`, typeof value);
+    fetchFamilyId();
+  }, [token]);
+
+  // Fetch departments
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        if (!token) return;
+
+        const response = await fetch('http://127.0.0.1:8000/api/family/departments/', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          let depts: Department[] = [];
+          
+          if (Array.isArray(data)) {
+            depts = data;
+          } else if (data?.departments && Array.isArray(data.departments)) {
+            depts = data.departments;
+          } else if (data?.results && Array.isArray(data.results)) {
+            depts = data.results;
+          }
+
+          setDepartments(depts);
+          
+          const map: Record<number, string> = {};
+          depts.forEach(dept => {
+            map[dept.dept_id] = dept.name;
+          });
+          setDeptMap(map);
+          console.log('✅ Departments loaded:', depts.length);
+        }
+      } catch (err) {
+        console.error('❌ Error fetching departments:', err);
+      }
+    };
+
+    fetchDepartments();
+  }, [token]);
+
+  // Fetch activities using the selected family ID
+  useEffect(() => {
+    if (!selectedFamilyId || !token) return;
+
+    const fetchActivities = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const endpoint = `http://127.0.0.1:8000/api/family/student/${selectedFamilyId}/event_requests/`;
+        console.log('📡 Fetching from:', endpoint);
+
+        const response = await fetch(endpoint, {
+          method: 'GET',
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
         });
-      }
 
-      // Handle different response structures
-      let eventsArray: ApiEventRequest[] = [];
-      
-      if (Array.isArray(data)) {
-        eventsArray = data;
-        console.log('✅ Using direct array');
-      } else if (data?.event_requests && Array.isArray(data.event_requests)) {
-        eventsArray = data.event_requests;
-        console.log('✅ Using data.event_requests');
-      } else if (data?.events && Array.isArray(data.events)) {
-        eventsArray = data.events;
-        console.log('✅ Using data.events');
-      } else if (data?.results && Array.isArray(data.results)) {
-        eventsArray = data.results;
-        console.log('✅ Using data.results');
-      } else if (data?.data && Array.isArray(data.data)) {
-        eventsArray = data.data;
-        console.log('✅ Using data.data');
-      } else {
-        // Try to find ANY array in the response
-        console.log('🔍 Searching for arrays in response...');
-        for (const key of Object.keys(data)) {
-          if (Array.isArray(data[key])) {
-            console.log(`🎯 Found array in key "${key}" with ${data[key].length} items`);
-            eventsArray = data[key];
-            break;
+        console.log('📊 Response status:', response.status);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('❌ API Error:', errorText);
+          throw new Error(`HTTP ${response.status}: ${errorText}`);
+        }
+
+        const data = await response.json();
+        console.log('✅ Raw API Response:', data);
+        console.log('🔍 Response type:', typeof data);
+        console.log('🔍 Is Array?:', Array.isArray(data));
+        
+        // If it's an object, log all keys
+        if (typeof data === 'object' && !Array.isArray(data)) {
+          console.log('🔍 Response keys:', Object.keys(data));
+          Object.keys(data).forEach(key => {
+            const value = data[key];
+            if (Array.isArray(value)) {
+              console.log(`🔑 "${key}": Array with ${value.length} items`);
+              if (value.length > 0) {
+                console.log(`   First item:`, value[0]);
+              }
+            } else {
+              console.log(`🔑 "${key}":`, typeof value);
+            }
+          });
+        }
+
+        // Handle different response structures
+        let eventsArray: ApiEventRequest[] = [];
+        
+        if (Array.isArray(data)) {
+          eventsArray = data;
+          console.log('✅ Using direct array');
+        } else if (data?.event_requests && Array.isArray(data.event_requests)) {
+          eventsArray = data.event_requests;
+          console.log('✅ Using data.event_requests');
+        } else if (data?.events && Array.isArray(data.events)) {
+          eventsArray = data.events;
+          console.log('✅ Using data.events');
+        } else if (data?.results && Array.isArray(data.results)) {
+          eventsArray = data.results;
+          console.log('✅ Using data.results');
+        } else if (data?.data && Array.isArray(data.data)) {
+          eventsArray = data.data;
+          console.log('✅ Using data.data');
+        } else {
+          // Try to find ANY array in the response
+          console.log('🔍 Searching for arrays in response...');
+          for (const key of Object.keys(data)) {
+            if (Array.isArray(data[key])) {
+              console.log(`🎯 Found array in key "${key}" with ${data[key].length} items`);
+              eventsArray = data[key];
+              break;
+            }
           }
         }
-      }
 
-      console.log('📋 Total events found:', eventsArray.length);
+        console.log('📋 Total events found:', eventsArray.length);
 
-      if (eventsArray.length === 0) {
-        console.log('ℹ️ No events found, showing dummy data');
+        if (eventsArray.length === 0) {
+          console.log('ℹ️ No events found, showing dummy data');
+          setActivities(dummyActivities);
+          setLoading(false);
+          return;
+        }
+
+        console.log('📝 First event sample:', eventsArray[0]);
+
+        // Map API events to Activity format
+        const mappedActivities = eventsArray.map(event => 
+          mapApiActivityToActivity(event, deptMap)
+        );
+        
+        console.log('✅ Successfully mapped activities:', mappedActivities.length);
+        console.log('📝 First mapped activity:', mappedActivities[0]);
+        
+        setActivities(mappedActivities);
+        setError(null);
+      } catch (err) {
+        console.error('❌ Error fetching activities:', err);
+        setError(err instanceof Error ? err.message : 'فشل في تحميل الفعاليات');
         setActivities(dummyActivities);
+      } finally {
         setLoading(false);
-        return;
       }
+    };
 
-      console.log('📝 First event sample:', eventsArray[0]);
-
-      // Map API events to Activity format
-      const mappedActivities = eventsArray.map(event => 
-        mapApiActivityToActivity(event, deptMap)
-      );
-      
-      console.log('✅ Successfully mapped activities:', mappedActivities.length);
-      console.log('📝 First mapped activity:', mappedActivities[0]);
-      
-      setActivities(mappedActivities);
-      setError(null);
-    } catch (err) {
-      console.error('❌ Error fetching activities:', err);
-      setError(err instanceof Error ? err.message : 'فشل في تحميل الفعاليات');
-      setActivities(dummyActivities);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (studentId) {
-      fetchActivities();
-    }
-  }, [studentId, refreshTrigger, deptMap]);
+    fetchActivities();
+  }, [selectedFamilyId, token, refreshTrigger, deptMap]);
 
   return (
     <div className="activities-wrapper">

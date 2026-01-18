@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/CreateFam.css';
 
-// Generic function to decode JWT token
 const decodeToken = (token: string) => {
   try {
     const base64Url = token.split('.')[1];
@@ -41,6 +40,11 @@ interface Committee {
   fundingSources?: string;
 }
 
+interface Department {
+  dept_id: number;
+  name: string;
+}
+
 interface FormErrors {
   [key: string]: string;
 }
@@ -56,7 +60,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
 
   const [studentId, setStudentId] = useState<number | null>(null);
   const [facultyId, setFacultyId] = useState<number | null>(null);
-  const [deptMapping, setDeptMapping] = useState<{ [key: string]: number }>({});
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
@@ -72,60 +76,64 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
     elected2: { ...defaultPerson },
   });
 
-  const [committees, setCommittees] = useState<{ [key: string]: Committee }>({
-    cultural: { name: 'اللجنة الثقافية', secretary: { ...defaultPerson }, assistant: { ...defaultPerson }, plan: '', executionDate: '', fundingSources: '' },
-    wall: { name: 'لجنة صحف الحائط', secretary: { ...defaultPerson }, assistant: { ...defaultPerson }, plan: '', executionDate: '', fundingSources: '' },
-    social: { name: 'اللجنة الاجتماعية والرحلات', secretary: { ...defaultPerson }, assistant: { ...defaultPerson }, plan: '', executionDate: '', fundingSources: '' },
-    technical: { name: 'اللجنة الفنية', secretary: { ...defaultPerson }, assistant: { ...defaultPerson }, plan: '', executionDate: '', fundingSources: '' },
-    scientific: { name: 'اللجنة العلمية', secretary: { ...defaultPerson }, assistant: { ...defaultPerson }, plan: '', executionDate: '', fundingSources: '' },
-    service: { name: 'لجنة الخدمة العامة والمعسكرات', secretary: { ...defaultPerson }, assistant: { ...defaultPerson }, plan: '', executionDate: '', fundingSources: '' },
-    sports: { name: 'اللجنة الرياضية', secretary: { ...defaultPerson }, assistant: { ...defaultPerson }, plan: '', executionDate: '', fundingSources: '' },
+  const [committees, setCommittees] = useState<{ [key: string]: Committee & { selectedDeptId?: string } }>({
+    cultural: { name: 'اللجنة الثقافية', secretary: { ...defaultPerson }, assistant: { ...defaultPerson }, plan: '', executionDate: '', fundingSources: '', selectedDeptId: '' },
+    wall: { name: 'لجنة صحف الحائط', secretary: { ...defaultPerson }, assistant: { ...defaultPerson }, plan: '', executionDate: '', fundingSources: '', selectedDeptId: '' },
+    social: { name: 'اللجنة الاجتماعية والرحلات', secretary: { ...defaultPerson }, assistant: { ...defaultPerson }, plan: '', executionDate: '', fundingSources: '', selectedDeptId: '' },
+    technical: { name: 'اللجنة الفنية', secretary: { ...defaultPerson }, assistant: { ...defaultPerson }, plan: '', executionDate: '', fundingSources: '', selectedDeptId: '' },
+    scientific: { name: 'اللجنة العلمية', secretary: { ...defaultPerson }, assistant: { ...defaultPerson }, plan: '', executionDate: '', fundingSources: '', selectedDeptId: '' },
+    service: { name: 'لجنة الخدمة العامة والمعسكرات', secretary: { ...defaultPerson }, assistant: { ...defaultPerson }, plan: '', executionDate: '', fundingSources: '', selectedDeptId: '' },
+    sports: { name: 'اللجنة الرياضية', secretary: { ...defaultPerson }, assistant: { ...defaultPerson }, plan: '', executionDate: '', fundingSources: '', selectedDeptId: '' },
   });
 
-  // Fetch department mapping from database - Generic function
-  const fetchDepartmentMapping = async (token: string) => {
-    try {
-      const response = await fetch('http://127.0.0.1:8000/api/family/departments/', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+  const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
 
-      if (response.ok) {
-        const data = await response.json();
-        const mapping: { [key: string]: number } = {};
+  // Fetch departments
+  useEffect(() => {
+    if (!token) return;
 
-        console.log('=== Department API Response ===');
-        console.log('Raw response:', data);
+    const fetchDepartments = async () => {
+      try {
+        console.log('🔵 Fetching departments...');
+        
+        const res = await fetch('http://127.0.0.1:8000/api/family/departments/', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-        // Map departments by name to ID - Generic approach
-        if (Array.isArray(data)) {
-          data.forEach((dept: any) => {
-            if (dept.name) {
-              mapping[dept.name] = dept.dept_id;
-            }
-          });
-        } else if (data.results && Array.isArray(data.results)) {
-          data.results.forEach((dept: any) => {
-            if (dept.name) {
-              mapping[dept.name] = dept.dept_id;
-            }
-          });
+        if (!res.ok) {
+          console.error('❌ Departments API Error:', res.status);
+          return;
         }
 
-        console.log('✓ Department Mapping created:', mapping);
-        setDeptMapping(mapping);
+        const response = await res.json();
+        console.log('✅ Departments API Response:', response);
+
+        let depts: Department[] = [];
+        
+        if (Array.isArray(response)) {
+          depts = response;
+        } else if (response.departments && Array.isArray(response.departments)) {
+          depts = response.departments;
+        } else if (response.results && Array.isArray(response.results)) {
+          depts = response.results;
+        }
+
+        console.log('📋 Departments loaded:', depts);
+        setDepartments(depts);
+      } catch (error) {
+        console.error('❌ Error fetching departments:', error);
       }
-    } catch (error) {
-      console.error('Error fetching departments:', error);
-    }
-  };
+    };
 
+    fetchDepartments();
+  }, [token]);
+
+  // Fetch profile data
   useEffect(() => {
-    const fetchProfileData = async () => {
-      const token = localStorage.getItem("access");
-      if (!token) return;
+    if (!token) return;
 
+    const fetchProfileData = async () => {
       try {
-        // Decode token to get faculty ID
         const decodedToken = decodeToken(token);
         console.log('=== Decoded Token ===');
         console.log('Token payload:', decodedToken);
@@ -138,11 +146,9 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
           const data = await response.json();
           console.log('=== Profile Data ===');
           console.log('Full response:', data);
-          console.log('Available keys:', Object.keys(data));
           
           setStudentId(data.student_id);
           
-          // Use 'faculty' field from profile or fallback to token
           let faculId = null;
           if (data.faculty && data.faculty !== 0) {
             faculId = data.faculty;
@@ -155,11 +161,8 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
           if (faculId) {
             setFacultyId(faculId);
           } else {
-            console.warn('⚠️ No valid faculty ID found in profile or token');
+            console.warn('⚠️ No valid faculty ID found');
           }
-
-          // Fetch department mapping
-          await fetchDepartmentMapping(token);
         }
       } catch (error) {
         console.error("Error fetching profile:", error);
@@ -167,7 +170,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
     };
 
     fetchProfileData();
-  }, []);
+  }, [token]);
 
   const showNotification = (type: 'success' | 'error', message: string) => {
     setNotification({ type, message });
@@ -188,9 +191,9 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
 
   const committeeKeys: { [key: string]: string } = {
     cultural: 'cultural',
-    wall: 'wall',
+    wall: 'newspaper',
     social: 'social',
-    technical: 'technical',
+    technical: 'arts',
     scientific: 'scientific',
     service: 'service',
     sports: 'sports',
@@ -227,6 +230,16 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
       [committeeKey]: {
         ...prev[committeeKey],
         [field]: value,
+      },
+    }));
+  };
+
+  const handleCommitteeDeptChange = (committeeKey: string, deptId: string) => {
+    setCommittees(prev => ({
+      ...prev,
+      [committeeKey]: {
+        ...prev[committeeKey],
+        selectedDeptId: deptId,
       },
     }));
   };
@@ -286,38 +299,8 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         });
       }
 
-      // Generic dept_id mapping: Use deptMapping if available, otherwise use faculty ID
-      let deptId = facultyId || 0;
-      
-      // Committee to department name mapping - handle various database structures
-      const committeeDeptMapping: { [key: string]: string[] } = {
-        sports: ['الأنشطة الرياضية', 'activities sports', 'sports activities'],
-        cultural: ['الأنشطة الثقافية', 'activities cultural', 'cultural activities'],
-        social: ['الأنشطة الاجتماعية', 'activities social', 'social activities'],
-        scientific: ['الأنشطة العلمية', 'activities scientific', 'scientific activities'],
-        wall: ['الأنشطة الثقافية', 'activities cultural'], // wall is under cultural
-        technical: ['الأنشطة الثقافية', 'activities cultural'], // technical is under cultural
-        service: ['الأنشطة الاجتماعية', 'activities social'], // service is under social
-      };
-
-      if (deptMapping && Object.keys(deptMapping).length > 0) {
-        const possibleDepts = committeeDeptMapping[key] || [];
-        
-        // Try to find matching department
-        const matchedDept = Object.entries(deptMapping).find(([deptName]) =>
-          possibleDepts.some(pd => 
-            deptName.includes(pd) || pd.includes(deptName) || 
-            deptName.toLowerCase().includes(pd.toLowerCase())
-          )
-        );
-
-        if (matchedDept) {
-          deptId = matchedDept[1];
-          console.log(`✓ Mapped committee "${key}" to dept "${matchedDept[0]}" (ID: ${deptId})`);
-        } else {
-          console.warn(`⚠️ No dept found for committee "${key}". Available depts:`, Object.keys(deptMapping));
-        }
-      }
+      // Use selected department ID or fallback to faculty ID
+      const deptId = committee.selectedDeptId ? parseInt(committee.selectedDeptId) : (facultyId || 0);
 
       const committeeData = {
         committee_key: committeeKeys[key] || key,
@@ -331,6 +314,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         },
         activities,
       };
+      
       console.log(`📋 Committee "${key}" payload:`, committeeData);
       committeesData.push(committeeData);
     });
@@ -359,54 +343,15 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const allFields = new Set<string>();
-    allFields.add('familyName');
-    allFields.add('familyGoals');
-    allFields.add('familyDescription');
-
-    Object.keys(boardMembers).forEach(key => {
-      if (requiresFullInfo.includes(key)) {
-        allFields.add(`board_${key}_name`);
-        allFields.add(`board_${key}_nationalId`);
-        allFields.add(`board_${key}_mobile`);
-      } else {
-        allFields.add(`board_${key}_studentId`);
-      }
-    });
-
-    Object.keys(committees).forEach(key => {
-      allFields.add(`committee_${key}_secretary_studentId`);
-      allFields.add(`committee_${key}_assistant_studentId`);
-    });
-
-    setTouchedFields(allFields);
-
-    // const isValid = validateForm();
-
-    // if (!isValid) {
-    //   window.scrollTo({ top: 0, behavior: 'smooth' });
-    //   return;
-    // }
-
-    // if (!studentId) {
-    //   showNotification('error', 'لم يتم العثور على معرف الطالب');
-    //   return;
-    // }
-
-    // if (!facultyId || facultyId === 0) {
-    //   console.warn('=== Faculty ID Validation Failed ===');
-    //   console.warn('Faculty ID:', facultyId);
-    //   console.warn('Student ID:', studentId);
-    //   console.log('Check browser console for profile data logs');
-    //   showNotification('error', `❌ لم يتم العثور على الكلية (${facultyId}). يرجى فحص وحدة التحكم (F12) وإعادة تحميل الصفحة`);
-    //   window.scrollTo({ top: 0, behavior: 'smooth' });
-    //   return;
-    // }
+    if (!familyName || !familyDescription) {
+      showNotification('error', 'الرجاء ملء جميع البيانات المطلوبة');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
 
     setIsSubmitting(true);
 
     try {
-      const token = localStorage.getItem("access");
       if (!token) {
         showNotification('error', 'يرجى تسجيل الدخول أولاً');
         setIsSubmitting(false);
@@ -415,15 +360,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
 
       const apiPayload = transformFormDataToAPI();
       console.log('=== API Request ===');
-      console.log('Full payload:', apiPayload);
-      console.log('Faculty ID being sent:', apiPayload.faculty_id);
-      console.log('Faculty ID state:', facultyId);
-      console.log('Department mapping used:', deptMapping);
-      console.log('Committees dept_ids:', apiPayload.committees.map((c: any) => ({
-        committee: c.committee_key,
-        head_dept: c.head.dept_id,
-        assistant_dept: c.assistant.dept_id,
-      })));
+      console.log('Full payload:', JSON.stringify(apiPayload, null, 2));
 
       const response = await fetch(
         `http://127.0.0.1:8000/api/family/student/create/`,
@@ -437,8 +374,11 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         }
       );
 
+      console.log('Response status:', response.status);
+
       if (response.ok) {
         const data = await response.json();
+        console.log('Success response:', data);
         showNotification('success', '✅ تم إنشاء الأسرة بنجاح');
         
         setErrors({});
@@ -461,19 +401,12 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
           console.error("Detailed errors:", errors);
           
           if (errors.faculty_id) {
-            errorMessage = errors.faculty_id[0] || 'خطأ في الكلية';
+            errorMessage = `خطأ في الكلية: ${errors.faculty_id[0]}`;
           } else if (errors.default_roles) {
             errorMessage = `خطأ في بيانات مجلس الإدارة: ${JSON.stringify(errors.default_roles)}`;
           } else if (errors.committees) {
-            console.error("=== Committee Errors Details ===");
-            if (Array.isArray(errors.committees)) {
-              errors.committees.forEach((error: any, index: number) => {
-                console.error(`Committee ${index}:`, error);
-              });
-            }
             errorMessage = `خطأ في بيانات اللجان: ${JSON.stringify(errors.committees)}`;
           } else {
-            // Show first error found
             const firstError = Object.entries(errors)[0];
             if (firstError) {
               errorMessage = `${firstError[0]}: ${JSON.stringify(firstError[1])}`;
@@ -481,6 +414,8 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
           }
         } else if (errorData?.detail) {
           errorMessage = errorData.detail;
+        } else if (errorData?.error) {
+          errorMessage = errorData.error;
         }
         
         showNotification('error', `❌ ${errorMessage}`);
@@ -492,8 +427,6 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
       setIsSubmitting(false);
     }
   };
-
-
 
   return (
     <div className="create-fam-container">
@@ -611,39 +544,60 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
           })}
         </section>
 
-        {Object.entries(committees).map(([key, committee]) => (
-  <div key={key} className="committee-card">
-    <div className="committee-name-header">{committee.name}</div>
+        {/* Committees */}
+        <section className="form-section">
+          <h2 className="section-title">اللجان</h2>
+          {Object.entries(committees).map(([key, committee]) => (
+            <div key={key} className="committee-card">
+              <div className="committee-name-header">{committee.name}</div>
 
-    <div className="committee-role-section">
-      <h4 className="committee-role-title">أمين اللجنة</h4>
-      <div className="member-fields">
-        <div className="field-wrapper">
-          <label>كود الطالب *</label>
-          <input
-            placeholder="أدخل كود الطالب"
-            value={committee.secretary.studentId || ''}
-            onChange={e => handleCommitteeChange(key, 'secretary', 'studentId', e.target.value)}
-            onBlur={() => handleFieldBlur(`committee_${key}_secretary_studentId`)}
-          />
-        </div>
-      </div>
-    </div>
+              {/* Department Selection */}
+              <div className="form-group">
+                <label>القسم المسؤول *</label>
+                <select
+                  className="form-select"
+                  value={committee.selectedDeptId || ''}
+                  onChange={e => handleCommitteeDeptChange(key, e.target.value)}
+                >
+                  <option value="">اختر القسم</option>
+                  {departments.map(dept => (
+                    <option key={dept.dept_id} value={dept.dept_id}>
+                      {dept.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-    <div className="committee-role-section">
-      <h4 className="committee-role-title">أمين مساعد اللجنة</h4>
-      <div className="member-fields">
-        <div className="field-wrapper">
-          <label>كود الطالب *</label>
-          <input
-            placeholder="أدخل كود الطالب"
-            value={committee.assistant.studentId || ''}
-            onChange={e => handleCommitteeChange(key, 'assistant', 'studentId', e.target.value)}
-            onBlur={() => handleFieldBlur(`committee_${key}_assistant_studentId`)}
-          />
-        </div>
-      </div>
-    </div>
+              <div className="committee-role-section">
+                <h4 className="committee-role-title">أمين اللجنة</h4>
+                <div className="member-fields">
+                  <div className="field-wrapper">
+                    <label>كود الطالب *</label>
+                    <input
+                      placeholder="أدخل كود الطالب"
+                      value={committee.secretary.studentId || ''}
+                      onChange={e => handleCommitteeChange(key, 'secretary', 'studentId', e.target.value)}
+                      onBlur={() => handleFieldBlur(`committee_${key}_secretary_studentId`)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="committee-role-section">
+                <h4 className="committee-role-title">أمين مساعد اللجنة</h4>
+                <div className="member-fields">
+                  <div className="field-wrapper">
+                    <label>كود الطالب *</label>
+                    <input
+                      placeholder="أدخل كود الطالب"
+                      value={committee.assistant.studentId || ''}
+                      onChange={e => handleCommitteeChange(key, 'assistant', 'studentId', e.target.value)}
+                      onBlur={() => handleFieldBlur(`committee_${key}_assistant_studentId`)}
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="committee-optional-fields">
                 <div className="form-group">
                   <label>الخطة <span className="optional-label">(اختياري)</span></label>
@@ -659,7 +613,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
                   <label>موعد التنفيذ <span className="optional-label">(اختياري)</span></label>
                   <input
                     className="form-input"
-                    type="text"
+                    type="date"
                     placeholder="أدخل موعد التنفيذ"
                     value={committee.executionDate || ''}
                     onChange={e => handleCommitteeFieldChange(key, 'executionDate', e.target.value)}
@@ -678,7 +632,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
               </div>
             </div>
           ))}
-    
+        </section>
 
         {/* Footer Buttons */}
         <div className="form-footer">

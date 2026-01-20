@@ -635,17 +635,31 @@ const Dashboard: React.FC = () => {
                   />
                 </div>
 
-                <div className="form-group">
-                  <label>نوع الفعالية *</label>
-                  <input
-                    type="text"
-                    name="type"
-                    value={activityData.type}
-                    onChange={handleActivityChange}
-                    placeholder="مثلاً: اجتماع، ورشة عمل، مسابقة"
-                    className="form-input"
-                  />
-                </div>
+              <div className="form-group">
+  <label>نوع الفعالية *</label>
+  <select
+    name="type"
+    value={activityData.type}
+    onChange={handleActivityChange}
+    className="form-input"
+    required
+  >
+    <option value="">-- اختار نوع الفعالية --</option>
+    <option value="داخلي">داخلي</option>
+    <option value="خارجي">خارجي</option>
+    <option value="نشاط رياضي">نشاط رياضي</option>
+    <option value="نشاط ثقافي">نشاط ثقافي</option>
+    <option value="نشاط بيئي">نشاط بيئي</option>
+    <option value="نشاط اجتماعي">نشاط اجتماعي</option>
+    <option value="نشاط علمي">نشاط علمي</option>
+    <option value="نشاط خدمة عامة">نشاط خدمة عامة</option>
+    <option value="نشاط فني">نشاط فني</option>
+    <option value="نشاط معسكرات">نشاط معسكرات</option>
+    <option value="اسر">اسر</option>
+    <option value="اخر">اخر</option>
+  </select>
+</div>
+
               </div>
 
               {/* DEPARTMENT */}

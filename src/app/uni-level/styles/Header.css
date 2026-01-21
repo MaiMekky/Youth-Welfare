@@ -8,15 +8,6 @@
   top: 0;
   z-index: 1;
 }
-/* 
-.headerContent {
-  max-width: 1400px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 16px;
-} */
 
 .headerIcon {
   background-color: #B38E19;
@@ -44,28 +35,12 @@
   font-size: 13px;
   color: #B8C5E0;
 }
-/* .logoutBtn {
-  background-color: #e74c3c;
-  color: #fff;
-  border: none;
-  padding: 8px 14px;
-  margin-left: 12px;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
- margin-right: 70%;
-}
 
-.logoutBtn:hover {
-  background-color: #c0392b;
-} */
 /* Layout */
 .headerContent {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* padding: 15px 25px; */
 }
 
 .rightButtons {
@@ -75,36 +50,45 @@
   flex-wrap: nowrap; 
 }
 
+/* كل الأزرار الرئيسية */
 .rightButtons button {
-  background: #1c5fa8;
-  color: white;
+  background: #B38E19; /* اللون الأساسي */
+  color: #F3F5FD;      /* لون النص */
   border: none;
   padding: 10px 16px;
-  border-radius: 8px;
+  border-radius: 12px; /* شكل أجمل */
   cursor: pointer;
   font-size: 0.9rem;
-  transition: 0.2s;
+  transition: 0.3s;
   white-space: nowrap;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* ظل خفيف */
 }
 
+/* تأثير Hover */
 .rightButtons button:hover {
-  background: #174d88;
+  background: #27285D; /* تغيير اللون عند المرور */
+  color: #F3F5FD;
+  transform: translateY(-2px); /* رفع بسيط */
 }
 
+/* زر تسجيل الخروج */
 .rightButtons .logoutBtn {
-  background-color: #e74c3c;
-  color: #fff;
+  background-color: #27285D;
+  color: #F3F5FD;
   border: none;
   padding: 10px 16px;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: 0.2s;
+  transition: 0.3s;
   white-space: nowrap;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
 .rightButtons .logoutBtn:hover {
-  background-color: #c0392b;
+  background-color: #B38E19;
+  color: #27285D;
+  transform: translateY(-2px);
 }
 
 /* Responsive Design */

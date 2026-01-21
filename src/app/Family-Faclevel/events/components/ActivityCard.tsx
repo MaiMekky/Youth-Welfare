@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import styles from "../styles/Activities.module.css";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
+import { useRouter } from "next/navigation";
 
 interface ActivityCardProps {
   eventId: number;
@@ -41,7 +42,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 2500);
   };
-
+const router = useRouter();
   const handleAction = async (action: "approve" | "reject") => {
     setLoading(true);
     const token = localStorage.getItem("access");
@@ -185,24 +186,27 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
         </div>
       </div>
 
-       {status === "pending" && (
-          <div className={styles.eventActions}>
-            <button
-              className={styles.btnApprove}
-              onClick={() => handleAction("approve")}
-              disabled={loading}
-            >
-              اعتماد الفعالية
-            </button>
-            <button
-              className={styles.btnReject}
-              onClick={() => handleAction("reject")}
-              disabled={loading}
-            >
-              رفض الفعالية
-            </button>
-          </div>
-        )}
+      <div className={styles.eventActions}>
+  {/* approve & reject row */}
+  <div className={styles.actionRow}>
+    <button
+      className={styles.btnApprove}
+      onClick={() => handleAction("approve")}
+      disabled={loading}
+    >
+      اعتماد الفعالية
+    </button>
+
+    <button
+      className={styles.btnReject}
+      onClick={() => handleAction("reject")}
+      disabled={loading}
+    >
+      رفض الفعالية
+    </button>
+  </div>
+</div>
+
     </div>
     </>
   );

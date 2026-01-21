@@ -3,12 +3,19 @@
 import React, { useState } from "react";
 import styles from "../styles/famRequests.module.css";
 
+type Status = "منتظر" | "موافقة مبدئية" | "مرفوض";
+
 const FamRequests = ({ request }: { request: any }) => {
   const [minMembers, setMinMembers] = useState(
     request.min_limit?.toString() || ""
   );
   const [closeDate, setCloseDate] = useState("");
   const [loading, setLoading] = useState(false);
+
+  
+  const [status, setStatus] = useState<Status>(
+    request.status || "منتظر"
+  );
 
   const [notification, setNotification] = useState<{
     message: string;
@@ -22,7 +29,6 @@ const FamRequests = ({ request }: { request: any }) => {
 
   // ====== Approve ======
   const handleApprove = async () => {
-    // ✅ Validation
     if (!minMembers || Number(minMembers) <= 0) {
       showNotification("❌ يجب إدخال الحد الأدنى للأعضاء", "error");
       return;
@@ -46,14 +52,15 @@ const FamRequests = ({ request }: { request: any }) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            min_limit: Number(minMembers), // ✅ Number
-            closing_date: closeDate,       // ✅ key الصحيح
+            min_limit: Number(minMembers),
+            closing_date: closeDate,
           }),
         }
       );
 
       if (!res.ok) throw new Error("Approve failed");
 
+      setStatus("موافقة مبدئية"); 
       showNotification("✅ تم اعتماد طلب إنشاء الأسرة بنجاح", "success");
     } catch (error) {
       console.error(error);
@@ -81,6 +88,7 @@ const FamRequests = ({ request }: { request: any }) => {
 
       if (!res.ok) throw new Error("Reject failed");
 
+      setStatus("مرفوض"); 
       showNotification("❌ تم رفض طلب إنشاء الأسرة", "error");
     } catch (error) {
       console.error(error);
@@ -112,8 +120,16 @@ const FamRequests = ({ request }: { request: any }) => {
 
           <span className={styles.creationBadge}>طلب إنشاء</span>
 
-          {request.status === "pending" && (
+          {status === "منتظر" && (
             <span className={styles.waitingBadge}>في الانتظار</span>
+          )}
+
+          {status === "موافقة مبدئية" && (
+            <span className={styles.approvedBadge}>✔ تمت الموافقة</span>
+          )}
+
+          {status === "مرفوض" && (
+            <span className={styles.rejectedBadge}>✖ مرفوض</span>
           )}
         </div>
       </div>
@@ -160,45 +176,50 @@ const FamRequests = ({ request }: { request: any }) => {
         </div>
       </div>
 
-      {/* ===== Minimum Members ===== */}
-      <div className={styles.inputBox}>
-        <label>تعيين عدد الأعضاء الأدنى</label>
-        <input
-          type="number"
-          placeholder="مثال: 10"
-          value={minMembers}
-          onChange={(e) => setMinMembers(e.target.value)}
-        />
-      </div>
+      {/* ===== Inputs (تظهر فقط في pending) ===== */}
+      {status === "منتظر" && (
+        <>
+          <div className={styles.inputBox}>
+            <label>تعيين عدد الأعضاء الأدنى</label>
+            <input
+              type="number"
+              placeholder="مثال: 10"
+              value={minMembers}
+              onChange={(e) => setMinMembers(e.target.value)}
+            />
+          </div>
 
-      {/* ===== Close Date ===== */}
-      <div className={styles.inputBox}>
-        <label>تعيين تاريخ إغلاق التسجيل</label>
-        <input
-          type="date"
-          value={closeDate}
-          onChange={(e) => setCloseDate(e.target.value)}
-        />
-      </div>
+          <div className={styles.inputBox}>
+            <label>تعيين تاريخ إغلاق التسجيل</label>
+            <input
+              type="date"
+              value={closeDate}
+              onChange={(e) => setCloseDate(e.target.value)}
+            />
+          </div>
+        </>
+      )}
 
-      {/* ===== Actions ===== */}
-      <div className={styles.cardActions}>
-        <button
-          className={styles.rejectBtn}
-          onClick={handleReject}
-          disabled={loading}
-        >
-          ✕ رفض الطلب
-        </button>
+      {/* ===== Actions (تختفي بعد القرار) ===== */}
+      {status === "منتظر" && (
+        <div className={styles.cardActions}>
+          <button
+            className={styles.rejectBtn}
+            onClick={handleReject}
+            disabled={loading}
+          >
+            ✕ رفض الطلب
+          </button>
 
-        <button
-          className={styles.approveBtn}
-          onClick={handleApprove}
-          disabled={loading}
-        >
-          ✓ موافقة على الإنشاء
-        </button>
-      </div>
+          <button
+            className={styles.approveBtn}
+            onClick={handleApprove}
+            disabled={loading}
+          >
+            ✓ موافقة على الإنشاء
+          </button>
+        </div>
+      )}
     </div>
   );
 };

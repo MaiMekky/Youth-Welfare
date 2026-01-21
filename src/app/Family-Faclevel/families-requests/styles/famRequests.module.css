@@ -478,4 +478,20 @@ body {
   to {
     width: 100%;
   }
+}.approvedBadge {
+  background: #e6f7f0;
+  color: #0f8a5f;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.rejectedBadge {
+  background: #fdecec;
+  color: #c0392b;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
 }

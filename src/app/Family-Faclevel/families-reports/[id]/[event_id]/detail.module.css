@@ -9,7 +9,7 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 20px;
-  font-family: 'Segoe UI', 'Cairo', Tahoma, Geneva, Verdana, sans-serif;
+  /* font-family: 'Segoe UI', 'Cairo', Tahoma, Geneva, Verdana, sans-serif; */
   background: #f5f7fa;
   direction: rtl;
   color: #2c3e50;
@@ -149,7 +149,7 @@
 /* Content Grid */
 .contentGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 25px;
   margin-bottom: 25px;
 }
@@ -287,7 +287,6 @@
   display: flex;
   align-items: center;
   gap: 15px;
-  padding-top: 10px;
 }
 
 .activityIcon {
@@ -317,8 +316,6 @@
   display: flex;
   gap: 12px;
   align-items: center;
-  margin-left: 6px;
-  margin-bottom: 3px;
 }
 
 .activityType {
@@ -465,32 +462,3 @@
     width: 100%;
   }
 }
-
-/* Second row: view details */
-.detailsRow {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  /* margin-top: 20px; not full width */
-}
-
-/* Make sure view details doesn't stretch */
-.viewDetailsBtn {
-  width: auto;
-  align-self: flex-end;
-  background: linear-gradient(135deg, #ffc25f 0%, #d4af37 100%);
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  align-items: center;
-  margin-right: 25px;
-    flex: none;           
-  padding: 5px 25px;      
-  font-size: 0.85rem;    
-  border-radius: 20px;    
-  border:none; 
-}
-

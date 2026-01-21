@@ -139,19 +139,50 @@
 
 .icon { font-size: 1.1rem; }
 
-/* Event Actions */
+/* Actions container */
 .eventActions {
   display: flex;
-  justify-content: flex-start; /* align buttons to the right */
-  gap: 10px;
+  flex-direction: column;
+  gap: 12px;
   margin-top: 20px;
-  flex-wrap: wrap; /* wrap on small screens */
+}
+
+/* First row: approve + reject */
+.actionRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Second row: view details */
+.detailsRow {
+  display: flex;
+  justify-content: flex-start; /* not full width */
+}
+
+/* Make sure view details doesn't stretch */
+.viewDetailsBtn {
+  width: auto;
+  align-self: flex-start;
+  background: linear-gradient(135deg, #ffc25f 0%, #d4af37 100%);
+  color: white;
+  /* padding: 10px 18px;  */
+  border: none;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  margin-right: 25px;
 }
 
 .eventActions button {
   flex: none;               /* don't stretch */
   width: auto;              /* let width fit content */
-  padding: 10px 18px;        /* smaller padding */
+  padding: 10px 25px;        /* smaller padding */
   font-size: 0.85rem;       /* smaller font */
   border-radius: 8px;    
   border:none;   /* slightly smaller radius */
@@ -159,7 +190,7 @@
 
 
 .btnApprove {
-  background: linear-gradient(135deg, #f3cf5c 0%, #d4af37 100%);
+  background: linear-gradient(135deg, #4caf50 0%, #5ad35e 100%);
   color: white;
 }
 
@@ -293,4 +324,7 @@
   to {
     width: 100%;
   }
+}
+.btnIcon {
+  font-size: 1.2rem;
 }

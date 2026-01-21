@@ -7,6 +7,7 @@ import Header from "@/app/FacLevel/components/Header";
 import Footer from "@/app/FacLevel/components/Footer";
 
 interface FamilyData {
+  eventId: number;
   name: string;
   totalMembers: number;
   activities: number;
@@ -20,6 +21,7 @@ interface FamilyData {
 }
 
 interface Activity {
+  eventId: number;
   name: string;
   date: string;
   type: string;
@@ -41,6 +43,7 @@ export default function FamilyDetailsPage() {
   const id = params.id as string;
 
   const [familyData, setFamilyData] = useState<FamilyData>({
+    eventId: 0,
     name: '',
     totalMembers: 0,
     activities: 0,
@@ -90,6 +93,7 @@ const showNotification = (message: string, type: "success" | "error") => {
       );
 
       setFamilyData({
+        eventId: data.event_id,
         name: data.name,
         totalMembers: data.family_members.length,
         activities: data.family_events.length,
@@ -205,6 +209,48 @@ const showNotification = (message: string, type: "success" | "error") => {
       </svg>
     ),
   };
+const handleExport = async () => {
+  try {
+    const token = localStorage.getItem("access");
+
+    if (!token) {
+      showNotification("❌ غير مصرح، يرجى تسجيل الدخول", "error");
+      return;
+    }
+
+    const res = await fetch(
+      `http://localhost:8000/api/family/faculty/${id}/export/`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "*/*",
+        },
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error("Export failed");
+    }
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `family_${familyData.name}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+
+    link.remove();
+    window.URL.revokeObjectURL(url);
+
+    showNotification("✅ تم تصدير ملف PDF بنجاح", "success");
+  } catch (error) {
+    console.error(error);
+    showNotification("❌ فشل تصدير ملف PDF", "error");
+  }
+};
 
   return (
     <>
@@ -225,12 +271,26 @@ const showNotification = (message: string, type: "success" | "error") => {
         <header className={styles.detailsHeader}>
           <h1 className={styles.detailsTitle}>تفاصيل الأسرة: {familyData.name}</h1>
           <div className={styles.headerActions}>
-            <button className={`${styles.actionBtn} ${styles.export}`}>
+           <button
+              className={`${styles.actionBtn} ${styles.export}`}
+              onClick={handleExport}
+            >
               <span className={styles.btnIcon}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  viewBox="0 0 24 24"
+                >
                   <path d="M12 5v14m7-7H5"></path>
                 </svg>
-              </span>تصدير
+              </span>
+              تصدير
             </button>
             <button className={`${styles.actionBtn} ${styles.print}`}>
               <span className={styles.btnIcon}>
@@ -311,6 +371,31 @@ const showNotification = (message: string, type: "success" | "error") => {
                     <span className={styles.activityParticipants}>{act.participants} مشارك</span>
                   </div>
                 </div>
+                            {/* view details row */}
+              <div className={styles.detailsRow}>
+                <button className={styles.viewDetailsBtn} 
+                title="عرض جميع تفاصيل الفعالية"
+                onClick={() => router.push(`/Family-Faclevel/families-reports/${id}/${act.eventId}`)}
+                >
+                  <span className={styles.btnIcon}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle cx="12" cy="12" r="3"></circle>
+                      <path d="M2 12s4-8 10-8 10 8 10 8-4 8-10 8-10-8-10-8z"></path>
+                    </svg>
+                  </span>
+                  عرض التفاصيل الكاملة
+                </button>
+              </div>
               </div>
             ))}
           </div>

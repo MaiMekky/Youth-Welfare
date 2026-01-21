@@ -194,7 +194,7 @@ export default function Page() {
         </p>
       </header>
 
-      <StatsGrid stats={stats} />
+      {/* <StatsGrid stats={stats} /> */}
 
       <Tabs
         activeTab={activeTab}

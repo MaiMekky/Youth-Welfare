@@ -20,7 +20,6 @@ export default function FamilyCard({
 
   if (!family) return null;
 
-  // دالة لتحديد لون الحالة
   const getStatusColor = (status: string) => {
     switch (status) {
       case "موافقة مبدئية":
@@ -38,8 +37,12 @@ export default function FamilyCard({
     onReject?.(family.family_id);
   };
 
+  const handleViewDetails = () => {
+    // ✅ Use the dynamic route instead
+    router.push(`/uni-level-family/details/${family.family_id}`);
+  };
+
   return (
-    
     <div className={styles.familyCard}>
       {/* Header */}
       <div className={styles.cardHeader}>
@@ -47,7 +50,6 @@ export default function FamilyCard({
           <h3 className={styles.familyTitle}>{family.name}</h3>
           <p className={styles.familyDescription}>{family.description}</p>
         </div>
-
         <div className={styles.statusBadges}>
           <span
             className={styles.badge}
@@ -92,7 +94,6 @@ export default function FamilyCard({
             >
               موافقة نهائية
             </button>
-
             <button
               className={`${styles.btn} ${styles.btnReject}`}
               onClick={handleReject}
@@ -101,13 +102,11 @@ export default function FamilyCard({
             </button>
           </div>
         )}
-
+        
         {/* زر التفاصيل دايمًا موجود */}
         <button
           className={`${styles.btn} ${styles.btnDetails}`}
-          onClick={() =>
-            router.push(`/family-details?id=${family.family_id}`)
-          }
+          onClick={handleViewDetails}
         >
           عرض التفاصيل
         </button>

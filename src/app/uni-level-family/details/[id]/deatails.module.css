@@ -1,39 +1,49 @@
-/* app/family-details/FamilyDetails.module.css */
+/* app/family-details/deatails.module.css */
 
+/* ============================================
+   PAGE CONTAINER & LAYOUT
+============================================ */
 .pageContainer {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 30px;
   direction: rtl;
-  background-color: white;
-  border-radius: 20px;
+  font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
 }
 
-/* Header Section */
+/* ============================================
+   HEADER SECTION
+============================================ */
 .header {
   position: relative;
+  background: linear-gradient(135deg, #2C3A5F 0%, #3d5278 100%);
+  padding: 40px;
+  border-radius: 16px;
   margin-bottom: 30px;
+  box-shadow: 0 4px 20px rgba(44, 58, 95, 0.15);
 }
 
 .closeButton {
   position: absolute;
-  left: 0;
-  top: 0;
-  width: 36px;
-  height: 36px;
+  left: 20px;
+  top: 20px;
+  width: 40px;
+  height: 40px;
   border: none;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
   font-size: 20px;
-  color: #6c757d;
+  color: white;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
 }
 
 .closeButton:hover {
-  color: #2C3A5F;
+  background: rgba(255, 255, 255, 0.3);
   transform: scale(1.1);
 }
 
@@ -45,148 +55,206 @@
   display: flex;
   align-items: center;
   gap: 15px;
-  margin-bottom: 10px;
-  flex-direction: row;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
 }
 
 .title {
-  font-size: 2rem;
+  font-size: 2.25rem;
   font-weight: 700;
-  color: #2C3A5F;
+  color: white;
   margin: 0;
-}
-
-.statusBadge {
-  background: #ffd147;
-  color: #856404;
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  line-height: 1.3;
 }
 
 .description {
-  font-size: 1rem;
-  color: #6c757d;
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
-  line-height: 1.6;
+  line-height: 1.8;
+  max-width: 800px;
 }
 
-/* Info Cards */
+/* ============================================
+   BADGES & STATUS
+============================================ */
+.statusBadge,
+.infoBadge,
+.infoBadgeGreen,
+.infoBadgeYellow,
+.infoBadgeRed {
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.infoBadgeYellow {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.infoBadgeGreen {
+  background: #d4edda;
+  color: #155724;
+}
+
+.infoBadgeRed {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.infoBadge {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* ============================================
+   INFO CARDS
+============================================ */
 .infoCards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
   margin-bottom: 30px;
 }
 
 .infoCard {
   background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   display: flex;
-  align-items: center;
-  gap: 12px;
-  transition: all 0.3s;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.3s ease;
+  border: 1px solid #f0f0f0;
 }
 
 .infoCard:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+  border-color: #2C3A5F;
 }
 
 .infoIcon {
-  font-size: 1.5rem;
+  font-size: 2rem;
+  margin-bottom: 5px;
 }
 
 .infoLabel {
   color: #6c757d;
   font-size: 0.95rem;
+  margin-bottom: 5px;
 }
 
 .infoValue {
   color: #2C3A5F;
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1.5rem;
 }
 
-.infoBadge {
-  background: #d4edda;
-  color: #155724;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
+/* ============================================
+   TABS (if you have them)
+============================================ */
+/* Add your tabs styles here if needed */
 
-/* Content Area */
+/* ============================================
+   CONTENT AREA
+============================================ */
 .contentArea {
   background: white;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   margin-top: 20px;
 }
 
 .sectionTitle {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #2C3A5F;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 3px solid #2C3A5F;
+  display: inline-block;
 }
 
-/* Overview Content */
+/* ============================================
+   OVERVIEW CONTENT
+============================================ */
 .overviewContent {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 30px;
+}
+
+.goalsSection {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 30px;
+  border-radius: 16px;
+  border-right: 5px solid #2C3A5F;
+}
+
+.goalsTitle {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #2C3A5F;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.goalsText {
+  line-height: 2;
+  color: #495057;
+  font-size: 1.05rem;
+  text-align: justify;
 }
 
 .statsSection,
 .infoSection {
   background: #f8f9fa;
-  padding: 25px;
-  border-radius: 12px;
+  padding: 30px;
+  border-radius: 16px;
+  border: 1px solid #e9ecef;
 }
 
 .statsGrid {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
 }
 
 .statItem {
-  display: flex;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #e9ecef;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  transition: all 0.3s ease;
 }
 
-.statItem:last-child {
-  border-bottom: none;
+.statItem:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .statLabel {
   color: #6c757d;
   font-size: 0.95rem;
+  display: block;
+  margin-bottom: 10px;
 }
 
 .statValue {
   color: #2C3A5F;
   font-weight: 700;
-  font-size: 1.5rem;
-   margin-right: 10px;
-}
-
-.statValueHighlight {
-  background: #ffc107;
-  color: #856404;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 0.9rem;
-  font-weight: 600;
-   margin-right: 10px;
+  font-size: 2rem;
+  display: block;
 }
 
 .infoGrid {
@@ -197,47 +265,33 @@
 
 .infoRow {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #e9ecef;
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
-.infoRow:last-child {
-  border-bottom: none;
+.infoRow:hover {
+  background: #f0f4ff;
 }
 
 .infoRowLabel {
   color: #6c757d;
-  font-size: 0.95rem;
+  font-size: 1rem;
+  font-weight: 500;
 }
 
 .infoRowValue {
   color: #2C3A5F;
   font-weight: 600;
-   margin-right: 10px;
+  font-size: 1rem;
 }
 
-.infoBadgeGreen {
-  background: #d4edda;
-  color: #155724;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  font-weight: 600;
-   margin-right: 10px;
-}
-
-.infoBadgeYellow {
-  background: #fff3cd;
-  color: #856404;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  font-weight: 600;
-   margin-right: 10px;
-}
-
-/* Members Content */
+/* ============================================
+   MEMBERS CONTENT
+============================================ */
 .membersContent {
   text-align: right;
 }
@@ -245,49 +299,146 @@
 .membersSubtitle {
   color: #6c757d;
   margin-bottom: 25px;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-right: 4px solid #2C3A5F;
 }
 
 .membersTable {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   margin-top: 20px;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .membersTable thead {
-  background: #f8f9fa;
-  border-bottom: 2px solid #e9ecef;
+  background: linear-gradient(135deg, #2C3A5F 0%, #3d5278 100%);
 }
 
 .membersTable th {
-  padding: 15px;
+  padding: 18px 15px;
   text-align: right;
   font-weight: 600;
-  color: #2C3A5F;
-  font-size: 0.95rem;
+  color: white;
+  font-size: 1rem;
+  border-bottom: 3px solid #1a2540;
 }
 
 .membersTable tbody tr {
-  border-bottom: 1px solid #e9ecef;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.membersTable tbody tr:nth-child(even) {
+  background: #f8f9fa;
+}
+
+.membersTable tbody tr:hover {
+  background: #e3f2fd;
+  transform: scale(1.01);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .membersTable td {
-  padding: 15px;
+  padding: 18px 15px;
   text-align: right;
   color: #495057;
+  font-size: 0.95rem;
+  border-bottom: 1px solid #e9ecef;
+}
+.membersTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 20px;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.membersTable th {
+  padding: 18px 15px;
+  text-align: center; /* ✅ مهم */
+  font-weight: 600;
+  color: white;
+  font-size: 1rem;
+  border-bottom: 3px solid #1a2540;
+}
+
+.membersTable td {
+  padding: 18px 15px;
+  text-align: center; /* ✅ يخلي الأزرار تحت العنوان */
+  color: #495057;
+  font-size: 0.95rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+
+.memberActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.btnApprove,
+.btnReject {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btnApprove {
+  background: #28a745;
+  color: white;
+}
+
+.btnApprove:hover {
+  background: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.btnReject {
+  background: #dc3545;
+  color: white;
+}
+
+.btnReject:hover {
+  background: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.btnApprove:disabled,
+.btnReject:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .emptyState {
   text-align: center !important;
-  padding: 60px 20px !important;
+  padding: 80px 20px !important;
   color: #6c757d;
-  font-size: 1rem;
+  font-size: 1.1rem;
 }
 
-/* Responsive Design */
+/* ============================================
+   RESPONSIVE DESIGN
+============================================ */
 @media (max-width: 1024px) {
-  .overviewContent {
-    grid-template-columns: 1fr;
+  .statsGrid {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
@@ -296,8 +447,12 @@
     padding: 15px;
   }
 
+  .header {
+    padding: 30px 20px;
+  }
+
   .title {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
   }
 
   .infoCards {
@@ -305,7 +460,11 @@
   }
 
   .contentArea {
-    padding: 20px;
+    padding: 25px 20px;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
   }
 
   .membersTable {
@@ -314,31 +473,53 @@
 
   .membersTable th,
   .membersTable td {
-    padding: 10px;
+    padding: 12px 10px;
+  }
+
+  .memberActions {
+    flex-direction: column;
+  }
+
+  .btnApprove,
+  .btnReject {
+    width: 100%;
   }
 }
 
 @media (max-width: 480px) {
   .title {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
   }
 
   .titleSection {
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  .infoCard {
-    flex-direction: column;
-    align-items: flex-start;
+    gap: 10px;
   }
 
   .contentArea {
-    padding: 15px;
+    padding: 20px 15px;
+  }
+
+  .sectionTitle {
+    font-size: 1.25rem;
   }
 
   .membersTable {
     display: block;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .goalsSection {
+    padding: 20px;
+  }
+
+  .goalsTitle {
+    font-size: 1.15rem;
+  }
+
+  .goalsText {
+    font-size: 0.95rem;
   }
 }

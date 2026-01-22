@@ -1,4 +1,4 @@
-/* app/family-details/deatails.module.css */
+/* app/family-details/details.module.css */
 
 /* ============================================
    PAGE CONTAINER & LAYOUT
@@ -6,7 +6,7 @@
 .pageContainer {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 30px;
+  padding: clamp(15px, 3vw, 30px);
   direction: rtl;
   font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
 }
@@ -17,23 +17,23 @@
 .header {
   position: relative;
   background: linear-gradient(135deg, #2C3A5F 0%, #3d5278 100%);
-  padding: 40px;
-  border-radius: 16px;
-  margin-bottom: 30px;
+  padding: clamp(25px, 5vw, 40px);
+  border-radius: clamp(12px, 2vw, 16px);
+  margin-bottom: clamp(20px, 3vw, 30px);
   box-shadow: 0 4px 20px rgba(44, 58, 95, 0.15);
 }
 
 .closeButton {
   position: absolute;
-  left: 20px;
-  top: 20px;
-  width: 40px;
-  height: 40px;
+  left: clamp(15px, 2vw, 20px);
+  top: clamp(15px, 2vw, 20px);
+  width: clamp(35px, 5vw, 40px);
+  height: clamp(35px, 5vw, 40px);
   border: none;
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
   border-radius: 50%;
-  font-size: 20px;
+  font-size: clamp(16px, 2.5vw, 20px);
   color: white;
   cursor: pointer;
   display: flex;
@@ -54,13 +54,13 @@
 .titleSection {
   display: flex;
   align-items: center;
-  gap: 15px;
-  margin-bottom: 15px;
+  gap: clamp(10px, 2vw, 15px);
+  margin-bottom: clamp(10px, 2vw, 15px);
   flex-wrap: wrap;
 }
 
 .title {
-  font-size: 2.25rem;
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
   font-weight: 700;
   color: white;
   margin: 0;
@@ -68,7 +68,7 @@
 }
 
 .description {
-  font-size: 1.05rem;
+  font-size: clamp(0.95rem, 2vw, 1.05rem);
   color: rgba(255, 255, 255, 0.9);
   margin: 0;
   line-height: 1.8;
@@ -83,9 +83,9 @@
 .infoBadgeGreen,
 .infoBadgeYellow,
 .infoBadgeRed {
-  padding: 8px 18px;
+  padding: clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 18px);
   border-radius: 20px;
-  font-size: 0.9rem;
+  font-size: clamp(0.8rem, 1.8vw, 0.9rem);
   font-weight: 600;
   display: inline-block;
   white-space: nowrap;
@@ -116,15 +116,15 @@
 ============================================ */
 .infoCards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  gap: clamp(15px, 2vw, 20px);
+  margin-bottom: clamp(20px, 3vw, 30px);
 }
 
 .infoCard {
   background: white;
-  padding: 25px;
-  border-radius: 16px;
+  padding: clamp(20px, 3vw, 25px);
+  border-radius: clamp(12px, 2vw, 16px);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
@@ -140,44 +140,39 @@
 }
 
 .infoIcon {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 3vw, 2rem);
   margin-bottom: 5px;
 }
 
 .infoLabel {
   color: #6c757d;
-  font-size: 0.95rem;
+  font-size: clamp(0.85rem, 1.8vw, 0.95rem);
   margin-bottom: 5px;
 }
 
 .infoValue {
   color: #2C3A5F;
   font-weight: 700;
-  font-size: 1.5rem;
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
 }
-
-/* ============================================
-   TABS (if you have them)
-============================================ */
-/* Add your tabs styles here if needed */
 
 /* ============================================
    CONTENT AREA
 ============================================ */
 .contentArea {
   background: white;
-  padding: 40px;
-  border-radius: 16px;
+  padding: clamp(25px, 4vw, 40px);
+  border-radius: clamp(12px, 2vw, 16px);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  margin-top: 20px;
+  margin-top: clamp(15px, 2vw, 20px);
 }
 
 .sectionTitle {
-  font-size: 1.5rem;
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
   font-weight: 700;
   color: #2C3A5F;
-  margin-bottom: 25px;
-  padding-bottom: 15px;
+  margin-bottom: clamp(20px, 3vw, 25px);
+  padding-bottom: clamp(12px, 2vw, 15px);
   border-bottom: 3px solid #2C3A5F;
   display: inline-block;
 }
@@ -188,21 +183,21 @@
 .overviewContent {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: clamp(20px, 3vw, 30px);
 }
 
 .goalsSection {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  padding: 30px;
-  border-radius: 16px;
+  padding: clamp(20px, 3vw, 30px);
+  border-radius: clamp(12px, 2vw, 16px);
   border-right: 5px solid #2C3A5F;
 }
 
 .goalsTitle {
-  font-size: 1.35rem;
+  font-size: clamp(1.15rem, 2.5vw, 1.35rem);
   font-weight: 700;
   color: #2C3A5F;
-  margin-bottom: 15px;
+  margin-bottom: clamp(12px, 2vw, 15px);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -211,27 +206,27 @@
 .goalsText {
   line-height: 2;
   color: #495057;
-  font-size: 1.05rem;
+  font-size: clamp(0.95rem, 2vw, 1.05rem);
   text-align: justify;
 }
 
 .statsSection,
 .infoSection {
   background: #f8f9fa;
-  padding: 30px;
-  border-radius: 16px;
+  padding: clamp(20px, 3vw, 30px);
+  border-radius: clamp(12px, 2vw, 16px);
   border: 1px solid #e9ecef;
 }
 
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: clamp(15px, 2vw, 20px);
 }
 
 .statItem {
   background: white;
-  padding: 20px;
+  padding: clamp(15px, 2.5vw, 20px);
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   text-align: center;
@@ -245,7 +240,7 @@
 
 .statLabel {
   color: #6c757d;
-  font-size: 0.95rem;
+  font-size: clamp(0.85rem, 1.8vw, 0.95rem);
   display: block;
   margin-bottom: 10px;
 }
@@ -253,24 +248,26 @@
 .statValue {
   color: #2C3A5F;
   font-weight: 700;
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 3vw, 2rem);
   display: block;
 }
 
 .infoGrid {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: clamp(12px, 2vw, 15px);
 }
 
 .infoRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px;
+  padding: clamp(12px, 2vw, 15px);
   background: white;
   border-radius: 8px;
   transition: all 0.2s ease;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .infoRow:hover {
@@ -279,18 +276,18 @@
 
 .infoRowLabel {
   color: #6c757d;
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 1.8vw, 1rem);
   font-weight: 500;
 }
 
 .infoRowValue {
   color: #2C3A5F;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 1.8vw, 1rem);
 }
 
 /* ============================================
-   MEMBERS CONTENT
+   MEMBERS CONTENT - FULLY RESPONSIVE
 ============================================ */
 .membersContent {
   text-align: right;
@@ -298,22 +295,31 @@
 
 .membersSubtitle {
   color: #6c757d;
-  margin-bottom: 25px;
-  font-size: 1.05rem;
-  padding: 15px;
+  margin-bottom: clamp(20px, 3vw, 25px);
+  font-size: clamp(0.95rem, 2vw, 1.05rem);
+  padding: clamp(12px, 2vw, 15px);
   background: #f8f9fa;
   border-radius: 8px;
   border-right: 4px solid #2C3A5F;
 }
 
-.membersTable {
+/* Table Container for Horizontal Scroll on Small Screens */
+.tableContainer {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   margin-top: 20px;
-  overflow: hidden;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.membersTable {
+  width: 100%;
+  min-width: 600px; /* Ensures table doesn't get too cramped */
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border-radius: 12px;
 }
 
 .membersTable thead {
@@ -321,12 +327,13 @@
 }
 
 .membersTable th {
-  padding: 18px 15px;
-  text-align: right;
+  padding: clamp(12px, 2vw, 18px) clamp(10px, 1.5vw, 15px);
+  text-align: center;
   font-weight: 600;
   color: white;
-  font-size: 1rem;
+  font-size: clamp(0.85rem, 1.8vw, 1rem);
   border-bottom: 3px solid #1a2540;
+  white-space: nowrap;
 }
 
 .membersTable tbody tr {
@@ -345,56 +352,31 @@
 }
 
 .membersTable td {
-  padding: 18px 15px;
-  text-align: right;
+  padding: clamp(12px, 2vw, 18px) clamp(10px, 1.5vw, 15px);
+  text-align: center;
   color: #495057;
-  font-size: 0.95rem;
+  font-size: clamp(0.8rem, 1.6vw, 0.95rem);
   border-bottom: 1px solid #e9ecef;
 }
-.membersTable {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  margin-top: 20px;
-  overflow: hidden;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.membersTable th {
-  padding: 18px 15px;
-  text-align: center; /* ✅ مهم */
-  font-weight: 600;
-  color: white;
-  font-size: 1rem;
-  border-bottom: 3px solid #1a2540;
-}
-
-.membersTable td {
-  padding: 18px 15px;
-  text-align: center; /* ✅ يخلي الأزرار تحت العنوان */
-  color: #495057;
-  font-size: 0.95rem;
-  border-bottom: 1px solid #e9ecef;
-}
-
 
 .memberActions {
   display: flex;
-  gap: 10px;
-  justify-content: flex-end;
+  gap: clamp(8px, 1.5vw, 10px);
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .btnApprove,
 .btnReject {
-  padding: 8px 16px;
+  padding: clamp(6px, 1.5vw, 8px) clamp(12px, 2vw, 16px);
   border: none;
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: clamp(0.8rem, 1.6vw, 0.9rem);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   white-space: nowrap;
+  min-width: 70px;
 }
 
 .btnApprove {
@@ -428,98 +410,132 @@
 
 .emptyState {
   text-align: center !important;
-  padding: 80px 20px !important;
+  padding: clamp(40px, 8vw, 80px) 20px !important;
   color: #6c757d;
-  font-size: 1.1rem;
+  font-size: clamp(1rem, 2vw, 1.1rem);
 }
 
 /* ============================================
-   RESPONSIVE DESIGN
+   CARD-BASED TABLE FOR MOBILE
 ============================================ */
-@media (max-width: 1024px) {
-  .statsGrid {
-    grid-template-columns: 1fr 1fr;
+@media (max-width: 768px) {
+  /* Hide the regular table on mobile */
+  .membersTable {
+    display: none;
+  }
+
+  /* Show card-based layout instead */
+  .mobileCards {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .memberCard {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+  }
+
+  .memberCard:nth-child(even) {
+    background: #f8f9fa;
+  }
+
+  .cardRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .cardRow:last-child {
+    border-bottom: none;
+  }
+
+  .cardLabel {
+    color: #6c757d;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .cardValue {
+    color: #2C3A5F;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-align: left;
+  }
+
+  .cardActions {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 2px solid #e9ecef;
+  }
+
+  .cardActions .memberActions {
+    justify-content: stretch;
+  }
+
+  .cardActions .btnApprove,
+  .cardActions .btnReject {
+    flex: 1;
   }
 }
 
-@media (max-width: 768px) {
-  .pageContainer {
-    padding: 15px;
+/* Show regular table on larger screens, hide mobile cards */
+@media (min-width: 769px) {
+  .mobileCards {
+    display: none;
   }
+}
 
-  .header {
-    padding: 30px 20px;
-  }
-
-  .title {
-    font-size: 1.75rem;
-  }
-
-  .infoCards {
-    grid-template-columns: 1fr;
-  }
-
-  .contentArea {
-    padding: 25px 20px;
-  }
-
+/* ============================================
+   RESPONSIVE BREAKPOINTS
+============================================ */
+@media (max-width: 1024px) {
   .statsGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .membersTable {
-    font-size: 0.85rem;
-  }
-
-  .membersTable th,
-  .membersTable td {
-    padding: 12px 10px;
-  }
-
-  .memberActions {
-    flex-direction: column;
-  }
-
-  .btnApprove,
-  .btnReject {
-    width: 100%;
+    grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
   }
 }
 
 @media (max-width: 480px) {
-  .title {
-    font-size: 1.5rem;
-  }
-
   .titleSection {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
 
-  .contentArea {
-    padding: 20px 15px;
-  }
-
-  .sectionTitle {
-    font-size: 1.25rem;
+  /* Ensure horizontal scroll for table if card view is not used */
+  .tableContainer {
+    margin-left: -15px;
+    margin-right: -15px;
+    width: calc(100% + 30px);
+    border-radius: 0;
   }
 
   .membersTable {
-    display: block;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    min-width: 500px;
+  }
+}
+
+/* ============================================
+   PRINT STYLES (BONUS)
+============================================ */
+@media print {
+  .closeButton,
+  .memberActions {
+    display: none;
   }
 
-  .goalsSection {
-    padding: 20px;
+  .pageContainer {
+    padding: 0;
   }
 
-  .goalsTitle {
-    font-size: 1.15rem;
-  }
-
-  .goalsText {
-    font-size: 0.95rem;
+  .header {
+    background: #2C3A5F;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }

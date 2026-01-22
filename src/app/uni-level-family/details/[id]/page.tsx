@@ -43,11 +43,152 @@ interface FamilyData {
   family_events: FamilyEvent[];
 }
 
+interface AlertProps {
+  message: string;
+  type: 'success' | 'error' | 'warning' | 'info';
+  onClose: () => void;
+}
+
+const CustomAlert = ({ message, type, onClose }: AlertProps) => {
+  const alertStyles = {
+    success: {
+      background: 'linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%)',
+      border: '2px solid #28a745',
+      color: '#155724',
+      icon: '✓'
+    },
+    error: {
+      background: 'linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%)',
+      border: '2px solid #dc3545',
+      color: '#721c24',
+      icon: '✕'
+    },
+    warning: {
+      background: 'linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%)',
+      border: '2px solid #ffc107',
+      color: '#856404',
+      icon: '⚠'
+    },
+    info: {
+      background: 'linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%)',
+      border: '2px solid #17a2b8',
+      color: '#0c5460',
+      icon: 'ℹ'
+    }
+  };
+
+  const currentStyle = alertStyles[type];
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      zIndex: 9999,
+      minWidth: '400px',
+      maxWidth: '500px',
+      background: currentStyle.background,
+      border: currentStyle.border,
+      borderRadius: '16px',
+      padding: '30px',
+      boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
+      animation: 'slideIn 0.3s ease-out',
+      direction: 'rtl',
+      fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif"
+    }}>
+      {/* Backdrop */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(0, 0, 0, 0.5)',
+        zIndex: -1
+      }} onClick={onClose} />
+
+      {/* Icon */}
+      <div style={{
+        width: '60px',
+        height: '60px',
+        borderRadius: '50%',
+        background: 'white',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '30px',
+        fontWeight: 'bold',
+        color: currentStyle.color,
+        margin: '0 auto 20px',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+      }}>
+        {currentStyle.icon}
+      </div>
+
+      {/* Message */}
+      <p style={{
+        fontSize: '1.1rem',
+        fontWeight: 600,
+        color: currentStyle.color,
+        textAlign: 'center',
+        margin: '0 0 25px 0',
+        lineHeight: 1.6
+      }}>
+        {message}
+      </p>
+
+      {/* Button */}
+      <button
+        onClick={onClose}
+        style={{
+          width: '100%',
+          padding: '12px',
+          background: currentStyle.color,
+          color: 'white',
+          border: 'none',
+          borderRadius: '8px',
+          fontSize: '1rem',
+          fontWeight: 600,
+          cursor: 'pointer',
+          transition: 'all 0.3s ease',
+          fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif"
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = 'none';
+        }}
+      >
+        حسناً
+      </button>
+
+      <style jsx>{`
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translate(-50%, -60%);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, -50%);
+          }
+        }
+      `}</style>
+    </div>
+  );
+};
+
 export default function FamilyDetailsPage() {
   const [activeTab, setActiveTab] = useState('overview');
   const [familyData, setFamilyData] = useState<FamilyData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [alert, setAlert] = useState<{ message: string; type: 'success' | 'error' | 'warning' | 'info' } | null>(null);
   
   const router = useRouter();
   const params = useParams();
@@ -58,6 +199,16 @@ export default function FamilyDetailsPage() {
     { id: 'members', label: 'الأعضاء' },
     { id: 'events', label: 'الفعاليات' }
   ];
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchFamilyData = async () => {
@@ -106,7 +257,10 @@ export default function FamilyDetailsPage() {
     fetchFamilyData();
   }, [familyId]);
 
-  // ✅ Handle member approval
+  const showAlert = (message: string, type: 'success' | 'error' | 'warning' | 'info') => {
+    setAlert({ message, type });
+  };
+
   const handleApproveMember = async (studentId: number) => {
     try {
       const token = localStorage.getItem('access');
@@ -126,17 +280,17 @@ export default function FamilyDetailsPage() {
         throw new Error(errorData.error || 'فشل في الموافقة على العضو');
       }
 
-      alert('تمت الموافقة على العضو بنجاح');
-      // Refresh data
-      window.location.reload();
+      showAlert('تمت الموافقة على العضو بنجاح ✓', 'success');
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'فشل في الموافقة على العضو';
-      alert(errorMessage);
+      showAlert(errorMessage, 'error');
       console.error(err);
     }
   };
 
-  // ✅ Handle member rejection
   const handleRejectMember = async (studentId: number) => {
     try {
       const token = localStorage.getItem('access');
@@ -156,12 +310,13 @@ export default function FamilyDetailsPage() {
         throw new Error(errorData.error || 'فشل في رفض العضو');
       }
 
-      alert('تم رفض العضو');
-      // Refresh data
-      window.location.reload();
+      showAlert('تم رفض العضو بنجاح', 'warning');
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'فشل في رفض العضو';
-      alert(errorMessage);
+      showAlert(errorMessage, 'error');
       console.error(err);
     }
   };
@@ -221,6 +376,15 @@ export default function FamilyDetailsPage() {
 
   return (
     <div className={styles.pageContainer}>
+      {/* Custom Alert */}
+      {alert && (
+        <CustomAlert
+          message={alert.message}
+          type={alert.type}
+          onClose={() => setAlert(null)}
+        />
+      )}
+
       {/* Header Section */}
       <div className={styles.header}>
         <button className={styles.closeButton} onClick={() => router.back()}>✕</button>
@@ -250,13 +414,7 @@ export default function FamilyDetailsPage() {
           <span className={styles.infoLabel}>عدد الأعضاء</span>
           <span className={styles.infoValue}>{familyData.family_members.length}</span>
         </div>
-        
-        <div className={styles.infoCard}>
-          <span className={styles.infoIcon}>📋</span>
-          <span className={styles.infoLabel}>نوع الأسرة</span>
-          <span className={styles.infoBadge}>{familyData.type}</span>
-        </div>
-        
+
         <div className={styles.infoCard}>
           <span className={styles.infoIcon}>📅</span>
           <span className={styles.infoLabel}>تاريخ التأسيس</span>
@@ -275,7 +433,6 @@ export default function FamilyDetailsPage() {
       <div className={styles.contentArea}>
         {activeTab === 'overview' && (
           <div className={styles.overviewContent}>
-            {/* ✅ Improved Goals Section */}
             <div className={styles.goalsSection}>
               <h2 className={styles.goalsTitle}>
                 <span>🎯</span>
@@ -351,62 +508,120 @@ export default function FamilyDetailsPage() {
               أعضاء الأسرة من {familyData.faculty_name}
             </p>
             
-            <table className={styles.membersTable}>
-              <thead>
-                <tr>
-                  <th>الإجراءات</th>
-                  <th>الحالة</th>
-                  <th>تاريخ الانضمام</th>
-                  <th>القسم</th>
-                  <th>المنصب</th>
-                  <th>رقم الطالب</th>
-                  <th>الاسم</th>
-                </tr>
-              </thead>
-              <tbody>
-                {familyData.family_members.length > 0 ? (
-                  familyData.family_members.map((member) => (
-                    <tr key={member.student_id}>
-                      {/* ✅ Action Buttons */}
-                      <td>
-                        <div className={styles.memberActions}>
-                          <button
-                            className={styles.btnApprove}
-                            onClick={() => handleApproveMember(member.student_id)}
-                            disabled={member.status === 'مقبول'}
-                          >
-                            موافقة
-                          </button>
-                          <button
-                            className={styles.btnReject}
-                            onClick={() => handleRejectMember(member.student_id)}
-                            disabled={member.status === 'مرفوض'}
-                          >
-                            رفض
-                          </button>
-                        </div>
-                      </td>
-                      <td>
-                        <span className={getStatusColor(member.status)}>
-                          {member.status}
-                        </span>
-                      </td>
-                      <td>{formatDate(member.joined_at)}</td>
-                      <td>{member.dept_name || 'غير محدد'}</td>
-                      <td>{member.role}</td>
-                      <td>{member.u_id}</td>
-                      <td>{member.student_name}</td>
+            {/* Desktop Table View */}
+            {!isMobile && familyData.family_members.length > 0 && (
+              <div className={styles.tableContainer}>
+                <table className={styles.membersTable}>
+                  <thead>
+                    <tr>
+                      <th>الاسم</th>
+                      <th>رقم الطالب</th>
+                      <th>المنصب</th>
+                      <th>القسم</th>
+                      <th>تاريخ الانضمام</th>
+                      <th>الحالة</th>
+                      <th>الإجراءات</th>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={7} className={styles.emptyState}>
-                      لا توجد بيانات متاحة
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody>
+                    {familyData.family_members.map((member) => (
+                      <tr key={member.student_id}>
+                        <td>{member.student_name}</td>
+                        <td>{member.u_id}</td>
+                        <td>{member.role}</td>
+                        <td>{member.dept_name || 'غير محدد'}</td>
+                        <td>{formatDate(member.joined_at)}</td>
+                        <td>
+                          <span className={getStatusColor(member.status)}>
+                            {member.status}
+                          </span>
+                        </td>
+                        <td>
+                          <div className={styles.memberActions}>
+                            <button
+                              className={styles.btnApprove}
+                              onClick={() => handleApproveMember(member.student_id)}
+                              disabled={member.status === 'مقبول'}
+                            >
+                              قبول
+                            </button>
+                            <button
+                              className={styles.btnReject}
+                              onClick={() => handleRejectMember(member.student_id)}
+                              disabled={member.status === 'مرفوض'}
+                            >
+                              رفض
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Mobile Card View */}
+            {isMobile && familyData.family_members.length > 0 && (
+              <div className={styles.mobileCards}>
+                {familyData.family_members.map((member, index) => (
+                  <div 
+                    key={member.student_id} 
+                    className={styles.memberCard}
+                    style={{ background: index % 2 === 0 ? 'white' : '#f8f9fa' }}
+                  >
+                    <div className={styles.cardRow}>
+                      <span className={styles.cardLabel}>الاسم:</span>
+                      <span className={styles.cardValue}>{member.student_name}</span>
+                    </div>
+                    <div className={styles.cardRow}>
+                      <span className={styles.cardLabel}>رقم الطالب:</span>
+                      <span className={styles.cardValue}>{member.u_id}</span>
+                    </div>
+                    <div className={styles.cardRow}>
+                      <span className={styles.cardLabel}>المنصب:</span>
+                      <span className={styles.cardValue}>{member.role}</span>
+                    </div>
+                    <div className={styles.cardRow}>
+                      <span className={styles.cardLabel}>القسم:</span>
+                      <span className={styles.cardValue}>{member.dept_name || 'غير محدد'}</span>
+                    </div>
+                    <div className={styles.cardRow}>
+                      <span className={styles.cardLabel}>تاريخ الانضمام:</span>
+                      <span className={styles.cardValue}>{formatDate(member.joined_at)}</span>
+                    </div>
+                    <div className={styles.cardRow} style={{ borderBottom: 'none' }}>
+                      <span className={styles.cardLabel}>الحالة:</span>
+                      <span className={getStatusColor(member.status)}>{member.status}</span>
+                    </div>
+                    <div className={styles.cardActions}>
+                      <div className={styles.memberActions}>
+                        <button
+                          className={styles.btnApprove}
+                          onClick={() => handleApproveMember(member.student_id)}
+                          disabled={member.status === 'مقبول'}
+                        >
+                          قبول
+                        </button>
+                        <button
+                          className={styles.btnReject}
+                          onClick={() => handleRejectMember(member.student_id)}
+                          disabled={member.status === 'مرفوض'}
+                        >
+                          رفض
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {familyData.family_members.length === 0 && (
+              <div className={styles.emptyState}>
+                لا توجد بيانات متاحة
+              </div>
+            )}
           </div>
         )}
 
@@ -417,40 +632,77 @@ export default function FamilyDetailsPage() {
               جميع الفعاليات والأنشطة الخاصة بالأسرة
             </p>
             
-            <table className={styles.membersTable}>
-              <thead>
-                <tr>
-                  <th>الحالة</th>
-                  <th>التكلفة</th>
-                  <th>تاريخ البداية</th>
-                  <th>النوع</th>
-                  <th>العنوان</th>
-                </tr>
-              </thead>
-              <tbody>
-                {familyData.family_events.length > 0 ? (
-                  familyData.family_events.map((event) => (
-                    <tr key={event.event_id}>
-                      <td>
-                        <span className={getStatusColor(event.status)}>
-                          {event.status}
-                        </span>
-                      </td>
-                      <td>{event.cost ? `${event.cost} جنيه` : 'مجاني'}</td>
-                      <td>{formatDate(event.st_date)}</td>
-                      <td>{event.type}</td>
-                      <td>{event.title}</td>
+            {/* Desktop Table */}
+            {!isMobile && familyData.family_events.length > 0 && (
+              <div className={styles.tableContainer}>
+                <table className={styles.membersTable}>
+                  <thead>
+                    <tr>
+                      <th>العنوان</th>
+                      <th>النوع</th>
+                      <th>تاريخ البداية</th>
+                      <th>التكلفة</th>
+                      <th>الحالة</th>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={5} className={styles.emptyState}>
-                      لا توجد فعاليات متاحة
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody>
+                    {familyData.family_events.map((event) => (
+                      <tr key={event.event_id}>
+                        <td>{event.title}</td>
+                        <td>{event.type}</td>
+                        <td>{formatDate(event.st_date)}</td>
+                        <td>{event.cost ? `${event.cost} جنيه` : 'مجاني'}</td>
+                        <td>
+                          <span className={getStatusColor(event.status)}>
+                            {event.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Mobile Cards */}
+            {isMobile && familyData.family_events.length > 0 && (
+              <div className={styles.mobileCards}>
+                {familyData.family_events.map((event, index) => (
+                  <div 
+                    key={event.event_id} 
+                    className={styles.memberCard}
+                    style={{ background: index % 2 === 0 ? 'white' : '#f8f9fa' }}
+                  >
+                    <div className={styles.cardRow}>
+                      <span className={styles.cardLabel}>العنوان:</span>
+                      <span className={styles.cardValue}>{event.title}</span>
+                    </div>
+                    <div className={styles.cardRow}>
+                      <span className={styles.cardLabel}>النوع:</span>
+                      <span className={styles.cardValue}>{event.type}</span>
+                    </div>
+                    <div className={styles.cardRow}>
+                      <span className={styles.cardLabel}>تاريخ البداية:</span>
+                      <span className={styles.cardValue}>{formatDate(event.st_date)}</span>
+                    </div>
+                    <div className={styles.cardRow}>
+                      <span className={styles.cardLabel}>التكلفة:</span>
+                      <span className={styles.cardValue}>{event.cost ? `${event.cost} جنيه` : 'مجاني'}</span>
+                    </div>
+                    <div className={styles.cardRow} style={{ borderBottom: 'none' }}>
+                      <span className={styles.cardLabel}>الحالة:</span>
+                      <span className={getStatusColor(event.status)}>{event.status}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {familyData.family_events.length === 0 && (
+              <div className={styles.emptyState}>
+                لا توجد فعاليات متاحة
+              </div>
+            )}
           </div>
         )}
       </div>

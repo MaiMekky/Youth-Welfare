@@ -79,7 +79,7 @@ export default function ProfileDetailsSection({
             </div>
             <div className="profile-data-field">
               <label className="profile-field-label">كود الطالب</label>
-              <p className="profile-field-value">{profileData.student_id}</p>
+              <p className="profile-field-value">{profileData.uid}</p>
             </div>
           </div>
 

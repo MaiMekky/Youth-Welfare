@@ -121,7 +121,7 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
       setJoiningId(familyId);
 
       const res = await fetch(
-        `http://127.0.0.1:8000/api/family/student/${Id}/join/`,
+        `http://127.0.0.1:8000/api/family/student/${familyId}/join/`,
         {
           method: 'POST',
           headers: {

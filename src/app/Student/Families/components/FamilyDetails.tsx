@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ArrowRight, Users, Calendar, FileText, UserRound, Clock, MapPin, Briefcase } from "lucide-react";
 import "../styles/FamilyDetails.css";
 
@@ -19,111 +19,170 @@ interface FamilyDetailsProps {
   onBack: () => void;
 }
 
-interface Member {
+interface Post {
   id: number;
-  name: string;
-  joinedAt: string;
-  role: "عضو" | "مساعد" | "مؤسس";
+  title: string;
+  description: string;
+  created_at: string;
 }
 
 interface Activity {
-  id: number;
+  event_id: number;
   title: string;
-  type: string;
-  date: string;
-  time: string;
-  location: string;
   description: string;
-  participants: string;
-  status: "قادمة" | "مكتملة";
-  color: string;
-}
-
-interface Post {
-  id: number;
-  author: string;
-  role: string;
-  time: string;
-  date: string;
-  title: string;
-  content: string;
-  type: "Post" | "Reminder";
+  type: string;
+  st_date: string;
+  end_date: string;
+  location: string;
+  s_limit: number;
+  cost: string;
+  restrictions: string;
+  reward: string;
 }
 
 const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
-  const [activeTab, setActiveTab] = useState<"details" | "members" | "activities" | "posts">("details");
+  const [activeTab, setActiveTab] = useState<"details" | "activities" | "posts">("details");
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [loadingPosts, setLoadingPosts] = useState(false);
+  const [loadingActivities, setLoadingActivities] = useState(false);
+  const [registeringEventId, setRegisteringEventId] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // Dummy data - replace with API calls later
-  const members: Member[] = [
-    { id: 1, name: "أحمد محمد علي", joinedAt: "2024-01-15", role: "مؤسس" },
-    { id: 2, name: "فاطمة أحمد حسن", joinedAt: "2024-02-20", role: "مساعد" },
-    { id: 3, name: "محمود خالد سعيد", joinedAt: "2024-03-10", role: "عضو" },
-    { id: 4, name: "سارة عبدالله إبراهيم", joinedAt: "2024-03-15", role: "مساعد" },
-    { id: 5, name: "محمد حسن علي", joinedAt: "2024-04-01", role: "عضو" },
-    { id: 6, name: "نور الدين يوسف", joinedAt: "2024-04-10", role: "عضو" },
-  ];
+  const token = typeof window !== 'undefined' ? localStorage.getItem('access') : null;
 
-  const activities: Activity[] = [
-    {
-      id: 1,
-      title: "اجتماع دوري للأسرة",
-      type: "اجتماع",
-      date: "2024-12-10",
-      time: "14:00",
-      location: "قاعة المؤتمرات",
-      description: "مناقشة خطة العمل للشهر القادم والمشاريع الجديدة",
-      participants: "25 عضو",
-      status: "قادمة",
-      color: "#4CAF50",
-    },
-    {
-      id: 2,
-      title: "مسابقة البرمجة السنوية",
-      type: "مسابقة",
-      date: "2024-12-15",
-      time: "10:00",
-      location: "معمل الحاسب الآلي",
-      description: "مسابقة حل المشكلات البرمجية باستخدام Python و Java",
-      participants: "40 عضو",
-      status: "قادمة",
-      color: "#2196F3",
-    },
-    {
-      id: 3,
-      title: "ورشة عمل React و TypeScript",
-      type: "ورشة عمل",
-      date: "2024-11-30",
-      time: "16:00",
-      location: "القاعة الكبرى",
-      description: "تعلم أساسيات React و TypeScript وبناء تطبيقات حديثة",
-      participants: "30 عضو",
-      status: "مكتملة",
-      color: "#FF9800",
-    },
-  ];
+  // Fetch Posts
+  const fetchPosts = async () => {
+    if (!token) return;
+    
+    try {
+      setLoadingPosts(true);
+      setError(null);
+      
+      const res = await fetch(
+        `http://127.0.0.1:8000/api/family/student/${family.id}/posts/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-  const posts: Post[] = [
-    {
-      id: 1,
-      author: "أحمد محمد علي",
-      role: "مؤسس الأسرة",
-      time: "10:30",
-      date: "2025-01-10",
-      title: "أهلاً بكم في " + family.title + "!",
-      content: "مرحباً بجميع الأعضاء الجدد والقدامى في أسرتنا. نحن سعداء بوجودكم معنا ونتطلع إلى تحقيق إنجازات كبيرة معًا.",
-      type: "Post",
-    },
-    {
-      id: 2,
-      author: "أحمد محمد علي",
-      role: "مؤسس الأسرة",
-      time: "14:20",
-      date: "2025-01-12",
-      title: "تذكير: اجتماع شهري",
-      content: "تذكركم بالاجتماع الشهري يوم 15 يناير الساعة 2 مساء في " + family.place + ".",
-      type: "Reminder",
-    },
-  ];
+      if (!res.ok) throw new Error('فشل تحميل المنشورات');
+
+      const data = await res.json();
+      const postsArray = Array.isArray(data) ? data : data.results || data.posts || [];
+      setPosts(postsArray);
+    } catch (err: any) {
+      setError(err.message);
+      console.error('Error fetching posts:', err);
+    } finally {
+      setLoadingPosts(false);
+    }
+  };
+
+  // Fetch Activities/Events
+  const fetchActivities = async () => {
+    if (!token) return;
+    
+    try {
+      setLoadingActivities(true);
+      setError(null);
+      
+      const res = await fetch(
+        `http://127.0.0.1:8000/api/family/student/${family.id}/event_requests/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error('فشل تحميل الفعاليات');
+
+      const data = await res.json();
+      const activitiesArray = Array.isArray(data) ? data : data.results || data.events || [];
+      setActivities(activitiesArray);
+    } catch (err: any) {
+      setError(err.message);
+      console.error('Error fetching activities:', err);
+    } finally {
+      setLoadingActivities(false);
+    }
+  };
+
+  // Register for Event
+  const registerForEvent = async (eventId: number) => {
+    if (!token) {
+      alert('غير مصرح');
+      return;
+    }
+
+    try {
+      setRegisteringEventId(eventId);
+      
+      const res = await fetch(
+        `http://127.0.0.1:8000/api/family/student/${family.id}/events/${eventId}/register/`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!res.ok) {
+        let msg = 'فشل التسجيل في الفعالية';
+        try {
+          const err = await res.json();
+          msg = err.message || err.detail || msg;
+        } catch {}
+        throw new Error(msg);
+      }
+
+      alert('تم التسجيل في الفعالية بنجاح ✅');
+      
+      // Refresh activities list
+      await fetchActivities();
+    } catch (err: any) {
+      alert(err.message || 'حصل خطأ أثناء التسجيل');
+    } finally {
+      setRegisteringEventId(null);
+    }
+  };
+
+  // Load data when tab changes
+  useEffect(() => {
+    if (activeTab === 'posts' && posts.length === 0) {
+      fetchPosts();
+    } else if (activeTab === 'activities' && activities.length === 0) {
+      fetchActivities();
+    }
+  }, [activeTab]);
+
+  const formatDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleDateString('ar-EG', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  const formatTime = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleTimeString('ar-EG', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return '';
+    }
+  };
 
   return (
     <div className="family-details-page" dir="rtl">
@@ -148,13 +207,6 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
           التفاصيل
         </button>
         <button
-          className={`tab ${activeTab === "members" ? "active" : ""}`}
-          onClick={() => setActiveTab("members")}
-        >
-          <Users size={18} />
-          الأعضاء ({members.length})
-        </button>
-        <button
           className={`tab ${activeTab === "activities" ? "active" : ""}`}
           onClick={() => setActiveTab("activities")}
         >
@@ -169,6 +221,20 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
           المنشورات ({posts.length})
         </button>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="error-box" style={{ 
+          padding: '12px', 
+          margin: '16px 0', 
+          backgroundColor: '#fee', 
+          color: '#c33', 
+          borderRadius: '8px',
+          textAlign: 'center'
+        }}>
+          {error}
+        </div>
+      )}
 
       {/* Content */}
       <div className="details-content">
@@ -214,119 +280,130 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
 
             <div className="detail-card">
               <h2 className="section-title">أهداف الأسرة</h2>
-              <p className="goals-text">{family.goals}</p>
-            </div>
-          </div>
-        )}
-
-        {activeTab === "members" && (
-          <div className="members-section">
-            <div className="members-grid">
-              {members.map((member) => (
-                <div key={member.id} className="member-card">
-                  <div className="member-header">
-                    <div className="member-avatar">
-                      <UserRound size={24} color="#5a67d8" />
-                    </div>
-                    <div className="member-info">
-                      <h3 className="member-name">{member.name}</h3>
-                      <p className="member-joined">انضم في: {member.joinedAt}</p>
-                    </div>
-                  </div>
-                  <div
-                    className={`member-role-badge ${
-                      member.role === "مؤسس"
-                        ? "founder"
-                        : member.role === "مساعد"
-                        ? "assistant"
-                        : "member"
-                    }`}
-                  >
-                    {member.role}
-                  </div>
-                </div>
-              ))}
+              <p className="goals-text">{family.goals || family.subtitle}</p>
             </div>
           </div>
         )}
 
         {activeTab === "activities" && (
           <div className="activities-section">
-            <div className="activities-grid">
-              {activities.map((activity) => (
-                <div key={activity.id} className="activity-card">
-                  <div className="activity-header">
-                    <span
-                      className={`activity-status ${
-                        activity.status === "قادمة" ? "upcoming" : "completed"
-                      }`}
-                    >
-                      {activity.status}
-                    </span>
-                    <div
-                      className="activity-icon"
-                      style={{ backgroundColor: activity.color }}
-                    >
-                      {activity.type === "اجتماع" ? (
-                        <Users size={18} color="#fff" />
-                      ) : activity.type === "مسابقة" ? (
+            {loadingActivities ? (
+              <p style={{ textAlign: 'center', padding: '20px' }}>جاري تحميل الفعاليات...</p>
+            ) : activities.length === 0 ? (
+              <p style={{ textAlign: 'center', padding: '20px', color: '#666' }}>لا توجد فعاليات حالياً</p>
+            ) : (
+              <div className="activities-grid">
+                {activities.map((activity) => (
+                  <div key={activity.event_id} className="activity-card">
+                    <div className="activity-header">
+                      <span className="activity-status upcoming">
+                        {activity.type || 'فعالية'}
+                      </span>
+                      <div className="activity-icon" style={{ backgroundColor: '#4CAF50' }}>
                         <Calendar size={18} color="#fff" />
-                      ) : (
-                        <Briefcase size={18} color="#fff" />
+                      </div>
+                    </div>
+                    <h3 className="activity-title">{activity.title}</h3>
+                    <p className="activity-description">{activity.description}</p>
+                    <div className="activity-details">
+                      <div className="activity-detail-item">
+                        <Clock size={16} />
+                        <span>{formatDate(activity.st_date)} - {formatDate(activity.end_date)}</span>
+                      </div>
+                      <div className="activity-detail-item">
+                        <MapPin size={16} />
+                        <span>{activity.location}</span>
+                      </div>
+                      <div className="activity-detail-item">
+                        <Users size={16} />
+                        <span>الحد الأقصى: {activity.s_limit} عضو</span>
+                      </div>
+                      {activity.cost && parseFloat(activity.cost) > 0 && (
+                        <div className="activity-detail-item">
+                          <span>💰 التكلفة: {activity.cost} جنيه</span>
+                        </div>
+                      )}
+                      {activity.reward && (
+                        <div className="activity-detail-item">
+                          <span>🏆 المكافأة: {activity.reward}</span>
+                        </div>
                       )}
                     </div>
+                    <button
+                      className="register-event-btn"
+                      onClick={() => registerForEvent(activity.event_id)}
+                      disabled={registeringEventId === activity.event_id}
+                    >
+                      {registeringEventId === activity.event_id ? 'جاري التسجيل...' : 'تسجيل في الفعالية'}
+                    </button>
                   </div>
-                  <h3 className="activity-title">{activity.title}</h3>
-                  <p className="activity-description">{activity.description}</p>
-                  <div className="activity-details">
-                    <div className="activity-detail-item">
-                      <Clock size={16} />
-                      <span>{activity.date} - {activity.time}</span>
-                    </div>
-                    <div className="activity-detail-item">
-                      <MapPin size={16} />
-                      <span>{activity.location}</span>
-                    </div>
-                    <div className="activity-detail-item">
-                      <Users size={16} />
-                      <span>{activity.participants}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
         {activeTab === "posts" && (
           <div className="posts-section">
-            <div className="posts-list">
-              {posts.map((post) => (
-                <div key={post.id} className="post-card">
-                  <div className="post-header">
-                    <div className="post-author">
-                      <div className="author-avatar">
-                        <UserRound size={20} color="#5a67d8" />
-                      </div>
-                      <div className="author-info">
-                        <h4 className="author-name">{post.author}</h4>
-                        <span className="author-role">{post.role}</span>
+            {loadingPosts ? (
+              <p style={{ textAlign: 'center', padding: '20px' }}>جاري تحميل المنشورات...</p>
+            ) : posts.length === 0 ? (
+              <p style={{ textAlign: 'center', padding: '20px', color: '#666' }}>لا توجد منشورات حالياً</p>
+            ) : (
+              <div className="posts-list">
+                {posts.map((post) => (
+                  <div key={post.id} className="post-card-modern">
+                    <div className="post-header-modern">
+                      <div className="post-author-section">
+                        <div className="author-avatar-modern">
+                          <UserRound size={24} color="#fff" />
+                        </div>
+                        <div className="author-info-modern">
+                          <h4 className="author-name-modern">{family.title}</h4>
+                          <div className="post-meta">
+                            <span className="author-role-modern">إدارة الأسرة</span>
+                            <span className="dot-separator">•</span>
+                            <span className="post-time">
+                              {formatDate(post.created_at)} • {formatTime(post.created_at)}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <span className="post-date">
-                      {post.date} · {post.time}
-                    </span>
+                    <div className="post-body-modern">
+                      <h3 className="post-title-modern">{post.title}</h3>
+                      <p className="post-content-modern">{post.description}</p>
+                    </div>
+                    <div className="post-footer">
+                      <div className="post-actions">
+                        <button className="action-btn">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                          </svg>
+                          <span>إعجاب</span>
+                        </button>
+                        <button className="action-btn">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                          </svg>
+                          <span>تعليق</span>
+                        </button>
+                        <button className="action-btn">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="18" cy="5" r="3"></circle>
+                            <circle cx="6" cy="12" r="3"></circle>
+                            <circle cx="18" cy="19" r="3"></circle>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                          </svg>
+                          <span>مشاركة</span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="post-body">
-                    <h3 className="post-title">{post.title}</h3>
-                    <p className="post-content">{post.content}</p>
-                  </div>
-                  {post.type === "Reminder" && (
-                    <div className="post-type-badge reminder">تذكير</div>
-                  )}
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -335,4 +412,3 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
 };
 
 export default FamilyDetails;
-

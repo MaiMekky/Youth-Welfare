@@ -174,7 +174,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
 
   const showNotification = (type: 'success' | 'error', message: string) => {
     setNotification({ type, message });
-    setTimeout(() => setNotification(null), 4000);
+    setTimeout(() => setNotification(null), 5000);
   };
 
   const boardLabels = {
@@ -379,7 +379,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
       if (response.ok) {
         const data = await response.json();
         console.log('Success response:', data);
-        showNotification('success', '✅ تم إنشاء الأسرة بنجاح');
+        showNotification('success', 'تم ارسال طلبك بنجاح ويرجى مراجعته إلى أن يتم قبوله');
         
         setErrors({});
         setTouchedFields(new Set());
@@ -388,28 +388,30 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
           if (onSubmitSuccess) {
             onSubmitSuccess();
           }
-        }, 1500);
+        }, 2000);
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.error("=== API Error Response ===");
         console.error("Full error:", errorData);
         
-        let errorMessage = 'فشل إنشاء الأسرة';
+        let errorMessage = 'فشل ارسال الطلب. يرجى المحاولة مرة أخرى';
         
         if (errorData?.errors) {
           const errors = errorData.errors;
           console.error("Detailed errors:", errors);
           
           if (errors.faculty_id) {
-            errorMessage = `خطأ في الكلية: ${errors.faculty_id[0]}`;
+            errorMessage = `خطأ في بيانات الكلية: ${errors.faculty_id[0]}`;
           } else if (errors.default_roles) {
-            errorMessage = `خطأ في بيانات مجلس الإدارة: ${JSON.stringify(errors.default_roles)}`;
+            errorMessage = `خطأ في بيانات مجلس الإدارة. يرجى التحقق من جميع البيانات المطلوبة`;
           } else if (errors.committees) {
-            errorMessage = `خطأ في بيانات اللجان: ${JSON.stringify(errors.committees)}`;
+            errorMessage = `خطأ في بيانات اللجان. يرجى التحقق من جميع البيانات المطلوبة`;
+          } else if (errors.name) {
+            errorMessage = `خطأ في اسم الأسرة: ${errors.name[0]}`;
           } else {
             const firstError = Object.entries(errors)[0];
             if (firstError) {
-              errorMessage = `${firstError[0]}: ${JSON.stringify(firstError[1])}`;
+              errorMessage = `خطأ في ${firstError[0]}: ${Array.isArray(firstError[1]) ? firstError[1][0] : firstError[1]}`;
             }
           }
         } else if (errorData?.detail) {
@@ -418,11 +420,13 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
           errorMessage = errorData.error;
         }
         
-        showNotification('error', `❌ ${errorMessage}`);
+        showNotification('error', errorMessage);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } catch (error) {
       console.error("Network error:", error);
-      showNotification('error', '⚠️ فشل الاتصال بالسيرفر');
+      showNotification('error', 'فشل الاتصال بالخادم. يرجى التحقق من الاتصال بالإنترنت والمحاولة مرة أخرى');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setIsSubmitting(false);
     }
@@ -432,7 +436,12 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
     <div className="create-fam-container">
       {notification && (
         <div className={`notification ${notification.type}`}>
-          {notification.message}
+          <div className="notification-content">
+            <span className="notification-icon">
+              {notification.type === 'success' ? '✓' : '✕'}
+            </span>
+            <span className="notification-message">{notification.message}</span>
+          </div>
         </div>
       )}
       

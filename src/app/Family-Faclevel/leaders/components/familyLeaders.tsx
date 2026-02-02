@@ -148,7 +148,7 @@ const FamilyLeaders: React.FC = () => {
 
     try {
       await fetch(`http://localhost:8000/api/family/faculty/family-founder/${leader.nationalId}/remove/`, {
-        method: "POST",
+        method: "DELETE",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ national_id: leader.nationalId }),
       });
@@ -237,9 +237,9 @@ const FamilyLeaders: React.FC = () => {
                     <button className={styles.deleteButton} onClick={() => handleDelete(index)} disabled={loading}>
                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" > <polyline points="3 6 5 6 21 6" /> <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /> <path d="M10 11v6" /> <path d="M14 11v6" /> </svg>
                     </button>
-                    <button className={styles.editButton} onClick={() => handleOpenEdit(index)} disabled={loading}>
+                    {/* <button className={styles.editButton} onClick={() => handleOpenEdit(index)} disabled={loading}>
                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" > <path d="M12 20h9" /> <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" /> </svg>
-                    </button>
+                    </button> */}
                   </td>
                 </tr>
               ))}

@@ -7,7 +7,6 @@ import Header from "@/app/FacLevel/components/Header";
 import Footer from "@/app/FacLevel/components/Footer";
 
 interface FamilyData {
-  eventId: number;
   name: string;
   totalMembers: number;
   activities: number;
@@ -43,7 +42,6 @@ export default function FamilyDetailsPage() {
   const id = params.id as string;
 
   const [familyData, setFamilyData] = useState<FamilyData>({
-    eventId: 0,
     name: '',
     totalMembers: 0,
     activities: 0,
@@ -69,72 +67,78 @@ const showNotification = (message: string, type: "success" | "error") => {
   setTimeout(() => setNotification(null), 2500);
 };
 
-  useEffect(() => {
-  const fetchFamilyDetails = async () => {
+useEffect(() => {
+  if (!id) return;
+
+  const fetchFamilyInfo = async () => {
     try {
       const token = localStorage.getItem("access");
-      const res = await fetch(`http://localhost:8000/api/family/faculty/${id}/details/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      if (!token) throw new Error("غير مصرح");
 
-      if (!res.ok) throw new Error("Failed to fetch family details");
-
-      const data = await res.json();
-
-      // Find coordinator and supervisor
-      const coordinatorMember = data.family_members.find(
-        (member: any) => member.role === "أخ أكبر"
+      // Fetch family details
+      const resFamily = await fetch(
+        `http://localhost:8000/api/family/faculty/${id}/details/`,
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      const supervisorMember = data.family_members.find(
-        (member: any) => member.role === "أخت كبرى"
+      if (!resFamily.ok) throw new Error("فشل جلب تفاصيل الأسرة");
+      const dataFamily = await resFamily.json();
+
+      // Extract coordinator & supervisor
+      const coordinatorMember = dataFamily.family_members.find(
+        (m: any) => m.role === "أخ أكبر"
+      );
+      const supervisorMember = dataFamily.family_members.find(
+        (m: any) => m.role === "أخت كبرى"
       );
 
+      // Map students
+      const students = dataFamily.family_members.map((member: any) => ({
+        memberId: member.student_id,
+        name: member.student_name,
+        id: member.u_id,
+        major: member.dept_name,
+        role: member.role,
+        joinDate: new Date(member.joined_at).toLocaleDateString("ar-EG"),
+      }));
+      setStudentsData(students);
+
+      // Fetch activities
+      const resActivities = await fetch(
+        `http://localhost:8000/api/family/faculty_events/by-family/?family_id=${id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!resActivities.ok) throw new Error("فشل جلب الأنشطة");
+      const dataActivities = await resActivities.json();
+
+      const activities = dataActivities.map((event: any) => ({
+        eventId: event.event_id,
+        name: event.title,
+        date: new Date(event.st_date).toLocaleDateString("ar-EG"),
+        type: event.type,
+        participants: Number(event.s_limit),
+      }));
+      setActivitiesData(activities);
+
+      // Update family data once
       setFamilyData({
-        eventId: data.event_id,
-        name: data.name,
-        totalMembers: data.family_members.length,
-        activities: data.family_events.length,
-        goals: data.type ? 4 : 0,
-        participation: '0%',
-        foundingDate: new Date(data.created_at).toLocaleDateString("ar-EG"),
-        coordinator: coordinatorMember ? coordinatorMember.student_name : '-',
-        supervisor: supervisorMember ? supervisorMember.student_name : '-',
-        category: data.type,
-        description: data.description,
+        name: dataFamily.name,
+        totalMembers: students.length,
+        activities: activities.length, // ✅ correct count
+        goals: 0,
+        participation: "0%",
+        foundingDate: new Date(dataFamily.created_at).toLocaleDateString("ar-EG"),
+        coordinator: coordinatorMember?.student_name ?? "-",
+        supervisor: supervisorMember?.student_name ?? "-",
+        category: dataFamily.type,
+        description: dataFamily.description,
       });
-
-      setActivitiesData(
-        data.family_events.map((event: any) => ({
-          name: event.title,
-          date: new Date(event.st_date).toLocaleDateString("ar-EG"),
-          type: event.type,
-          participants: Number(event.cost),
-        }))
-      );
-
-      setStudentsData(
-        data.family_members.map((member: any) => ({
-          memberId: member.student_id,
-          name: member.student_name,
-          id: member.u_id,
-          major: member.dept_name,
-          role: member.role, 
-          joinDate: new Date(member.joined_at).toLocaleDateString("ar-EG"),
-        }))
-      );
-
-      setGoalsData(['هدف 1', 'هدف 2', 'هدف 3', 'هدف 4']);
-
     } catch (err) {
       console.error(err);
-      alert("حدث خطأ أثناء جلب تفاصيل الأسرة");
+      showNotification("❌ حدث خطأ أثناء جلب البيانات", "error");
     }
   };
 
-  fetchFamilyDetails();
+  fetchFamilyInfo();
 }, [id]);
 
 
@@ -375,8 +379,7 @@ const handleExport = async () => {
               <div className={styles.detailsRow}>
                 <button className={styles.viewDetailsBtn} 
                 title="عرض جميع تفاصيل الفعالية"
-                onClick={() => router.push(`/Family-Faclevel/families-reports/${id}/${act.eventId}`)}
-                >
+                onClick={() => router.push(`/Family-Faclevel/families-reports/${id}/${act.eventId}`)}>
                   <span className={styles.btnIcon}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

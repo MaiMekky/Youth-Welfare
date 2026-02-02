@@ -4,130 +4,287 @@ import React, { useState } from "react";
 import styles from "../styles/friends.module.css";
 
 export default function FriendsForm() {
-  const [members, setMembers] = useState({
-    الاسم: "",
-    "الرقم القومي": "",
-    "الرقم الجامعي": "",
-    "رقم الهاتف": "",
-    العنوان: "",
-    "الفرقة الدراسية": "",
+  
+  const [general, setGeneral] = useState({
+    name: "",
+    description: "",
+    min_limit: 15,
   });
+
+const [members, setMembers] = useState<{ nid: string }[]>(Array(general.min_limit).fill({ nid: "" }));
+
+const clearError = () => setHasError(false);
+
 
   const [assistants, setAssistants] = useState({
-    "رائد الأسرة": { الاسم: "", الدور: "" },
-    "نائب الرائد": { الاسم: "", الدور: "" },
-    "مسؤول الأسرة": { الاسم: "", الدور: "" },
-    "أمين الصندوق": { الاسم: "", الدور: "" },
-    "الأخ الأكبر": { الاسم: "", الدور: "" },
-    "الأخت الكبرى": { الاسم: "", الدور: "" },
-    "السكرتير / أمين السر": { الاسم: "", الدور: "" },
-    "عضو منتخب (1)": { الاسم: "", الدور: "" },
-    "عضو منتخب (2)": { الاسم: "", الدور: "" },
+    "رائد": { name: "", nid: "", ph_no: "" },
+    "نائب_رائد": { name: "", nid: "", ph_no: "" },
+    "مسؤول": { name: "", nid: "", ph_no: "" },
+    "أمين_صندوق": { name: "", nid: "", ph_no: "" },
+    "أخ_أكبر": { uid: "" },
+    "أخت_كبرى": { uid: "" },
+    "أمين_سر": { uid: "" },
+    "عضو_منتخب_1": { uid: "" },
+    "عضو_منتخب_2": { uid: "" },
   });
 
-  const [committees, setCommittees] = useState({
-    "اللجنة الثقافية": { الأمين: "", "الأمين المساعد": "" },
-    "لجنة صحف الحائط": { الأمين: "", "الأمين المساعد": "" },
-    "اللجنة الاجتماعية والرحلات": { الأمين: "", "الأمين المساعد": "" },
-    "اللجنة الفنية": { الأمين: "", "الأمين المساعد": "" },
-    "اللجنة العلمية": { الأمين: "", "الأمين المساعد": "" },
-    "لجنة الخدمة العامة والمعسكرات": { الأمين: "", "الأمين المساعد": "" },
-    "اللجنة الرياضية": { الأمين: "", "الأمين المساعد": "" },
+  
+  const [committees, setCommittees] = useState([
+    {
+      committee_key: "cultural",
+      head: { uid: "", dept_id: "4" },
+      assistant: { uid: "", dept_id: "4" },
+      activities: [{ title: "", description: "", st_date: "", end_date: "", location: "", cost: "" }],
+    },
+    {
+      committee_key: "newspaper",
+      head: { uid: "", dept_id: "4" },
+      assistant: { uid: "", dept_id: "4" },
+      activities: [{ title: "", description: "", st_date: "", end_date: "", location: "", cost: "" }],
+    },
+    {
+      committee_key: "social",
+      head: { uid: "", dept_id: "6" },
+      assistant: { uid: "", dept_id: "6" },
+      activities: [{ title: "", description: "", st_date: "", end_date: "", location: "", cost: "" }],
+    },
+    {
+      committee_key: "arts",
+      head: { uid: "", dept_id: "4" },
+      assistant: { uid: "", dept_id: "4" },
+      activities: [{ title: "", description: "", st_date: "", end_date: "", location: "", cost: "" }],
+    },
+    {
+      committee_key: "scientific",
+      head: { uid: "", dept_id: "7" },
+      assistant: { uid: "", dept_id: "7" },
+      activities: [{ title: "", description: "", st_date: "", end_date: "", location: "", cost: "" }],
+    },
+    {
+      committee_key: "service",
+      head: { uid: "", dept_id: "5" },
+      assistant: { uid: "", dept_id: "5" },
+      activities: [{ title: "", description: "", st_date: "", end_date: "", location: "", cost: "" }],
+    },
+    {
+      committee_key: "sports",
+      head: { uid: "", dept_id: "3" },
+      assistant: { uid: "", dept_id: "3" },
+      activities: [{ title: "", description: "", st_date: "", end_date: "", location: "", cost: "" }],
+    },
+  ]);
+const handleGeneralChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const { name, value } = e.target;
+  const newGeneral = { ...general, [name]: name === "min_limit" ? Number(value) : value };
+  setGeneral(newGeneral);
+
+  if (name === "min_limit") {
+    const newLength = Number(value);
+    const newMembers = [...members];
+
+    while (newMembers.length < newLength) newMembers.push({ nid: "" });
+
+    
+    if (newMembers.length > newLength) newMembers.length = newLength;
+
+    setMembers(newMembers);
+  }
+};
+
+const addActivity = (committeeIndex: number) => {
+  const newCommittees = [...committees];
+  newCommittees[committeeIndex].activities.push({
+    title: "",
+    description: "",
+    st_date: "",
+    end_date: "",
+    location: "",
+    cost: "",
   });
+  setCommittees(newCommittees);
+};
 
-  const [errors, setErrors] = useState({} as Record<string, string>);
+const removeActivity = (committeeIndex: number, activityIndex: number) => {
+  const newCommittees = [...committees];
+  newCommittees[committeeIndex].activities.splice(activityIndex, 1);
+  setCommittees(newCommittees);
+};
 
-
-  const validateField = (name: string, value: string) => {
-    const newErrors = { ...errors };
-    switch (name) {
-      case "الرقم القومي":
-        if (!/^\d{10}$/.test(value)) newErrors[`member-${name}`] = "الرقم القومي يجب أن يكون 10 أرقام";
-        else delete newErrors[`member-${name}`];
-        break;
-      case "الرقم الجامعي":
-        if (!/^\d{9}$/.test(value)) newErrors[`member-${name}`] = "الرقم الجامعي يجب أن يكون 9 أرقام";
-        else delete newErrors[`member-${name}`];
-        break;
-      default:
-        if (!value.trim()) newErrors[`member-${name}`] = "هذا الحقل مطلوب";
-        else delete newErrors[`member-${name}`];
-    }
-    setErrors(newErrors);
-  };
-
-
-  const handleMemberChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setMembers({ ...members, [name]: value });
-    validateField(name, value);
-  };
+const handleMemberChange = (index: number, value: string) => {
+  const newMembers = [...members];
+  newMembers[index].nid = value;
+  setMembers(newMembers);
+};
 
 
   const handleAssistantChange = (role: string, field: string, value: string) => {
-    setAssistants({ ...assistants, [role]: { ...assistants[role], [field]: value } });
-    if (!value.trim()) {
-      setErrors(prev => ({ ...prev, [`assistant-${role}`]: `يرجى تعيين شخص لهذا الدور` }));
-    } else {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[`assistant-${role}`];
-        return newErrors;
-      });
-    }
+    setAssistants({
+      ...assistants,
+      [role]: { ...assistants[role as keyof typeof assistants], [field]: value },
+    });
   };
 
-
-  const handleCommitteeChange = (committee: string, field: string, value: string) => {
-    setCommittees({ ...committees, [committee]: { ...committees[committee], [field]: value } });
-    const errorKey = `committee-${committee}-${field}`;
-    if (!value.trim()) {
-      setErrors(prev => ({ ...prev, [errorKey]: `هذا الحقل مطلوب` }));
+  const handleCommitteeChange = (index: number, field: string, subField: string, value: string) => {
+    const newCommittees = [...committees];
+    if (subField) {
+      (newCommittees[index][field as keyof typeof newCommittees[number]] as any)[subField] = value;
     } else {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[errorKey];
-        return newErrors;
-      });
+      (newCommittees[index] as any)[field] = value;
     }
+    setCommittees(newCommittees);
   };
 
-
-  const handleSubmit = () => {
-    const newErrors: Record<string, string> = {};
-
-
-    Object.entries(members).forEach(([key, value]) => {
-      if (!value.trim()) newErrors[`member-${key}`] = "هذا الحقل مطلوب";
-    });
-    if (!/^\d{10}$/.test(members["الرقم القومي"])) newErrors[`member-الرقم القومي`] = "الرقم القومي يجب أن يكون 10 أرقام";
-    if (!/^\d{9}$/.test(members["الرقم الجامعي"])) newErrors[`member-الرقم الجامعي`] = "الرقم الجامعي يجب أن يكون 9 أرقام";
-
-   
-    Object.entries(assistants).forEach(([role, assistant]) => {
-      if (!assistant.الدور.trim()) newErrors[`assistant-${role}`] = `يرجى تعيين شخص لهذا الدور`;
-    });
+  const handleActivityChange = (committeeIndex: number, activityIndex: number, field: string, value: string) => {
+    const newCommittees = [...committees];
+    newCommittees[committeeIndex].activities[activityIndex][field as keyof typeof newCommittees[number]["activities"][number]] = value;
+    setCommittees(newCommittees);
+  };
 
   
-    Object.entries(committees).forEach(([committeeName, committee]) => {
-      if (!committee.الأمين.trim()) newErrors[`committee-${committeeName}-الأمين`] = `اسم الأمين مطلوب`;
-      if (!committee["الأمين المساعد"].trim()) newErrors[`committee-${committeeName}-الأمين المساعد`] = `اسم الأمين المساعد مطلوب`;
-    });
+const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      alert("الرجاء ملء جميع الحقول المطلوبة للأعضاء، المساعدين، واللجان");
-      return;
+
+const showNotification = (message: string, type: "success" | "error") => {
+  setNotification({ message, type });
+  setTimeout(() => setNotification(null), 2500); 
+};
+
+
+const parseJWT = (token: string) => {
+  try {
+    const payload = token.split(".")[1]; 
+    return JSON.parse(atob(payload));   
+  } catch (e) {
+    console.error("خطأ في قراءة التوكن", e);
+    return null;
+  }
+};
+
+const buildRequestBody = () => {
+  const token = localStorage.getItem("access");
+  let faculty_id = 0;
+  if (token) {
+    const decoded = parseJWT(token);
+    if (decoded && decoded.faculty_id) {
+      faculty_id = decoded.faculty_id; 
+    }
+  }
+
+  return {
+    name: general.name,
+    description: general.description,
+    min_limit: general.min_limit,
+    faculty_id,          
+    family_type: "أصدقاء البيئة",
+    default_roles: assistants,
+    committees: committees.map((c) => ({
+      committee_key: c.committee_key,
+      head: { uid: Number(c.head.uid), dept_id: Number(c.head.dept_id) },
+      assistant: { uid: Number(c.assistant.uid), dept_id: Number(c.assistant.dept_id) },
+      activities: c.activities.map((a) => ({
+        title: a.title,
+        description: a.description,
+        st_date: a.st_date,
+        end_date: a.end_date,
+        location: a.location,
+        cost: a.cost,
+      })),
+    })),
+  };
+};
+const isValidNID = (nid: string) => {
+  return /^\d{14}$/.test(nid);
+};
+
+const validateForm = () => {
+  
+  if (!general.name.trim()) return "اسم الأسرة مطلوب";
+  if (!general.description.trim()) return "وصف الأسرة مطلوب";
+  if (!general.min_limit || general.min_limit <= 0) return "الحد الأدنى للأعضاء غير صحيح";
+
+  
+  for (let i = 0; i < members.length; i++) {
+    if (!members[i].nid.trim()) {
+      return `الرقم القومي للعضو رقم ${i + 1} مطلوب`;
+    }
+    if (!isValidNID(members[i].nid)) {
+      return `الرقم القومي للعضو رقم ${i + 1} يجب أن يكون 14 رقم`;
+    }
+  }
+
+  
+  for (let c of committees) {
+    if (!c.head.uid) {
+      return "الرقم الجامعي للأمين مطلوب في جميع اللجان";
+    }
+    if (!c.assistant.uid) {
+      return "الرقم الجامعي للأمين المساعد مطلوب في جميع اللجان";
     }
 
-    console.log({ members, assistants, committees });
-    alert("تم حفظ الأسرة بنجاح!");
-  };
+    
+    for (let a of c.activities) {
+      if (!a.title.trim()) return "عنوان النشاط مطلوب";
+      if (!a.st_date) return "تاريخ بداية النشاط مطلوب";
+      if (!a.end_date) return "تاريخ نهاية النشاط مطلوب";
+    }
+  }
 
-  const yearOptions = ["الفرقة الأولى", "الفرقة الثانية", "الفرقة الثالثة", "الفرقة الرابعة"];
+  return null; 
+};
+const [hasError, setHasError] = useState(false);
+
+
+const handleSubmit = async () => {
+  const errorMessage = validateForm();
+
+  if (errorMessage) {
+    setHasError(true);        
+    showNotification(`❌ ${errorMessage}`, "error");
+    return;
+  }
+
+  setHasError(false);        
+  const body = buildRequestBody();
+  const token = localStorage.getItem("access");
+
+  try {
+    const res = await fetch(
+      "http://localhost:8000/api/family/faculty/environment-family/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      }
+    );
+
+    if (!res.ok) {
+      showNotification("❌ يوجد خطأ في البيانات المرسلة", "error");
+      setHasError(true);
+    } else {
+      showNotification("✅ تم حفظ الأسرة بنجاح", "success");
+      setHasError(false);
+    }
+  } catch (err) {
+    showNotification("❌ خطأ في الاتصال بالسيرفر", "error");
+    setHasError(true);
+  }
+};
+
 
   return (
     <div className={styles.formContainer}>
+      {notification && (
+  <div
+    className={`${styles.notification} ${
+      notification.type === "success" ? styles.success : styles.error
+    }`}
+  >
+    {notification.message}
+  </div>
+)}
       <header className={styles.formHeader}>
         <div className={styles.formHeaderContent}>
           <h1 className={styles.formTitle}>إنشاء أسرة أصدقاء البيئة</h1>
@@ -136,104 +293,272 @@ export default function FriendsForm() {
       </header>
 
       <div className={styles["member-form-container"]}>
-        {/* Members Section */}
+        {/* الحقول العامة */}
+        <section className={styles["member-section"]}>
+          <h2 className={styles["member-section-title"]}>معلومات عامة عن الأسرة</h2>
+          <div className={styles["member-form-grid"]}>
+            <div className={styles["member-form-group"]}>
+              <label>اسم الأسرة</label>
+              <input name="name" placeholder="اسم الاسرة" value={general.name} onChange={(e) => {
+  clearError();
+  handleGeneralChange(e);
+}}
+  className={`${styles["member-input"]} ${
+    hasError ? styles.inputError : ""
+  }`}
+ />
+            </div>
+            <div className={styles["member-form-group"]}>
+              <label>الوصف</label>
+              <input name="description" placeholder="وصف الأسرة" value={general.description} onChange={(e) => {
+  clearError();
+  handleGeneralChange(e);
+}}
+  className={`${styles["member-input"]} ${
+    hasError ? styles.inputError : ""
+  }`}
+ />
+            </div>
+            <div className={styles["member-form-group"]}>
+              <label>الحد الأدنى للأعضاء</label>
+            <input
+              name="min_limit"
+              type="number"
+              min={1}
+              onKeyDown={(e) => {
+                if (e.key === "-" || e.key === "e") e.preventDefault();
+              }}
+              value={general.min_limit}
+              onChange={(e) => {
+                clearError();
+                handleGeneralChange(e);
+              }}
+
+                className={`${styles["member-input"]} ${
+hasError ? styles.inputError : ""
+  }`}
+
+            />
+            </div>
+          </div>
+        </section>
+
+        {/* أعضاء الأسرة */}
         <section className={styles["member-section"]}>
           <h2 className={styles["member-section-title"]}>الأعضاء</h2>
           <div className={styles["member-form-grid"]}>
-            {Object.keys(members).map((key) => (
-              <div key={key} className={styles["member-form-group"]}>
-                <label className={styles["member-label"]}>{key}</label>
-                {key === "الفرقة الدراسية" ? (
-                  <select
-                    name={key}
-                    value={(members as any)[key]}
-                    onChange={handleMemberChange}
-                    className={`${styles["member-input"]} ${errors[`member-${key}`] ? styles.error : ""}`}
-                  >
-                    <option value="" hidden disabled>اختر الفرقة الدراسية</option>
-                    {yearOptions.map((year) => (
-                      <option key={year} value={year}>{year}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <input
-                    name={key}
-                    value={(members as any)[key]}
-                    onChange={handleMemberChange}
-                    className={`${styles["member-input"]} ${errors[`member-${key}`] ? styles.error : ""}`}
-                    placeholder={`أدخل ${key}`}
-                  />
-                )}
-                {errors[`member-${key}`] && <span className={styles["error-message"]}>{errors[`member-${key}`]}</span>}
-              </div>
-            ))}
+           {members.map((member, index) => (
+          <div key={index} className={styles["member-form-group"]}>
+            <label>عضو {index + 1}</label>
+           <input
+            type="text"
+            placeholder="الرقم القومي"
+            value={member.nid}
+            maxLength={14}
+            inputMode="numeric"
+            pattern="[0-9]*"
+            onChange={(e) => {
+              clearError();
+              const val = e.target.value.replace(/\D/g, "");
+              if (val.length <= 14) handleMemberChange(index, val);
+            }}
+              className={`${styles["member-input"]} ${
+    hasError ? styles.inputError : ""
+  }`}
+
+          />
+
           </div>
-          <button className={styles["add-member-btn"]} onClick={handleSubmit}>
-            إضافة عضو
-          </button>
+        ))}
+
+          </div>
         </section>
 
-        {/* Assistants Section */}
+        {/* المساعدين */}
         <section className={styles["member-section"]}>
           <h2 className={styles["member-section-title"]}>المساعدين</h2>
-          <div className={styles["assistant-list"]}>
-            {Object.entries(assistants).map(([key, assistant]) => (
-              <div key={key}>
-                <h3 className={styles["assistant-title"]}>{key}</h3>
-                <div className={styles["assistant-inputs"]}>
-                  <input
-                    placeholder="تعيين شخص لهذا الدور"
-                    value={assistant.الدور}
-                    onChange={(e) => handleAssistantChange(key, "الدور", e.target.value)}
-                    className={`${styles["member-input"]} ${errors[`assistant-${key}`] ? styles.error : ""}`}
-                  />
-                  {errors[`assistant-${key}`] && (
-                    <span className={styles["error-message"]}>{errors[`assistant-${key}`]}</span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+          {Object.entries(assistants).map(([role, val]) => (
+            <div key={role} className={styles["assistant-inputs"]}>
+              <label>{role}</label>
+              {("name" in val) ? (
+                <>
+                  <input type="text" placeholder="الاسم" value={val.name} onChange={(e) => { clearError(); handleAssistantChange(role, "name", e.target.value); }}  className={`${styles["member-input"]} ${
+    hasError ? styles.inputError : ""
+  }`}
+ />
+                <input
+                type="text"
+                placeholder="الرقم القومي"
+                value={val.nid}
+                maxLength={14}
+                inputMode="numeric"
+                pattern="[0-9]*"
+                onChange={(e) => {
+                  clearError();
+                  const v = e.target.value.replace(/\D/g, "");
+                  if (v.length <= 14) handleAssistantChange(role, "nid", v);
+                }}
+                  className={`${styles["member-input"]} ${
+    hasError ? styles.inputError : ""
+  }`}
+
+              />
+
+                <input
+                type="text"
+                placeholder="رقم الهاتف"
+                value={val.ph_no}
+                maxLength={11}
+                inputMode="numeric"
+                pattern="[0-9]*"
+                onChange={(e) => {
+                  clearError();
+                  const v = e.target.value.replace(/\D/g, "");
+                  if (v.length <= 11) handleAssistantChange(role, "ph_no", v);
+                }}
+                  className={`${styles["member-input"]} ${
+    hasError ? styles.inputError : ""
+  }`}
+
+              />
+
+                </>
+              ) : (
+                <input
+                type="text"
+                placeholder="رقم الجامعي"
+                value={val.uid}
+                inputMode="numeric"
+                pattern="[0-9]*"
+                onChange={(e) => {
+                  clearError();
+                  const v = e.target.value.replace(/\D/g, "");
+                  if (v.length <= 14) handleAssistantChange(role, "uid", v);
+                }}
+                  className={`${styles["member-input"]} ${
+    hasError ? styles.inputError : ""
+  }`}
+
+              />
+
+              )}
+            </div>
+          ))}
         </section>
+<section className={styles["member-section"]}>
+  <h2 className={styles["member-section-title"]}>اللجان</h2>
+   {committees.map((c, i) => (
+  <div key={c.committee_key} className={styles["committee-inputs"]} style={{ marginBottom: "20px" }}>
+    <h3>
+      {(() => {
+        switch (c.committee_key) {
+          case "cultural": return "اللجنة الثقافية";
+          case "newspaper": return "لجنة صحف الحائط";
+          case "social": return "اللجنة الاجتماعية والرحلات";
+          case "arts": return "اللجنة الفنية";
+          case "scientific": return "اللجنة العلمية";
+          case "service": return "لجنة الخدمة العامة والمعسكرات";
+          case "sports": return "اللجنة الرياضية";
+          default: return c.committee_key;
+        }
+      })()}
+    </h3>
 
-        {/* Committees Section */}
-        <section className={styles["member-section"]}>
-          <h2 className={styles["member-section-title"]}>اللجان</h2>
-          <div className={styles["committee-list"]}>
-            {Object.entries(committees).map(([key, committee]) => (
-              <div key={key}>
-                <h3 className={styles["committee-title"]}>{key}</h3>
-                <div className={styles["committee-inputs"]}>
-                  <input
-                    placeholder="أدخل اسم الأمين"
-                    value={committee.الأمين}
-                    onChange={(e) => handleCommitteeChange(key, "الأمين", e.target.value)}
-                    className={`${styles["member-input"]} ${errors[`committee-${key}-الأمين`] ? styles.error : ""}`}
-                  />
-                  {errors[`committee-${key}-الأمين`] && (
-                    <span className={styles["error-message"]}>{errors[`committee-${key}-الأمين`]}</span>
-                  )}
+    {/* Head */}
+    <div className={styles["committee-head"]} style={{ marginBottom: "10px" }}>
+      <h4>الأمين</h4>
+   <input
+  type="text"
+  placeholder="الرقم الجامعي"
+  value={c.head.uid}
+  inputMode="numeric"
+  pattern="[0-9]*"
+  onChange={(e) => {
+    clearError();
+    const v = e.target.value.replace(/\D/g, "");
+    handleCommitteeChange(i, "head", "uid", v);
+  }}
+    className={`${styles["member-input"]} ${
+    hasError ? styles.inputError : ""
+  }`}
 
-                  <input
-                    placeholder="أدخل اسم الأمين المساعد"
-                    value={committee["الأمين المساعد"]}
-                    onChange={(e) => handleCommitteeChange(key, "الأمين المساعد", e.target.value)}
-                    className={`${styles["member-input"]} ${errors[`committee-${key}-الأمين المساعد`] ? styles.error : ""}`}
-                  />
-                  {errors[`committee-${key}-الأمين المساعد`] && (
-                    <span className={styles["error-message"]}>{errors[`committee-${key}-الأمين المساعد`]}</span>
-                  )}
-                </div>
-              </div>
-            ))}
+/>
+
+    </div>
+
+    {/* Assistant */}
+    <div className={styles["committee-assistant"]} style={{ marginBottom: "10px" }}>
+      <h4>الأمين المساعد</h4>
+    <input
+  type="text"
+  placeholder="الرقم الجامعي"
+  value={c.assistant.uid}
+  inputMode="numeric"
+  pattern="[0-9]*"
+  onChange={(e) => {
+    clearError();
+    const v = e.target.value.replace(/\D/g, "");
+    handleCommitteeChange(i, "assistant", "uid", v);
+  }}
+    className={`${styles["member-input"]} ${
+    hasError ? styles.inputError : ""
+  }`}
+
+/>
+
+    </div>
+
+    {/* الأنشطة */}
+    {c.activities.length > 0 ? (
+      c.activities.map((a, j) => (
+        <div key={j} className={styles["activity-section"]} style={{ marginBottom: "15px" }}>
+          <h4 style={{ marginBottom: "10px" }}>فعالية {j + 1}</h4>
+          <input placeholder="عنوان النشاط" style={{ marginBottom: "10px" }} value={a.title} onChange={(e) => { clearError(); handleActivityChange(i, j, "title", e.target.value); }}   className={`${styles["member-input"]} ${
+    hasError ? styles.inputError : ""
+  }`}
+ />
+          <input placeholder="وصف النشاط"style={{ marginBottom: "10px" }} value={a.description} onChange={(e) => { clearError(); handleActivityChange(i, j, "description", e.target.value); } }   className={`${styles["member-input"]} ${
+    hasError ? styles.inputError : ""
+  }`}
+ />
+          <input type="date" placeholder="تاريخ البداية"style={{ marginBottom: "10px" }} value={a.st_date} onChange={(e) => { clearError(); handleActivityChange(i, j, "st_date", e.target.value); }}   className={`${styles["member-input"]} ${
+    hasError ? styles.inputError : ""
+  }`}
+ />
+          <input type="date" placeholder="تاريخ النهاية" style={{ marginBottom: "10px" }}value={a.end_date} onChange={(e) => { clearError(); handleActivityChange(i, j, "end_date", e.target.value); }}   className={`${styles["member-input"]} ${
+    hasError ? styles.inputError : ""
+  }`}
+ />
+          <input placeholder="المكان"style={{ marginBottom: "10px" }} value={a.location} onChange={(e) => { clearError(); handleActivityChange(i, j, "location", e.target.value); }}   className={`${styles["member-input"]} ${
+    hasError ? styles.inputError : ""
+  }`}
+ />
+          <input placeholder="التكلفة"style={{ marginBottom: "10px" }} value={a.cost} onChange={(e) => { clearError(); handleActivityChange(i, j, "cost", e.target.value); }}   className={`${styles["member-input"]} ${
+    hasError ? styles.inputError : ""
+  }`}
+ />
+
+          <div className={styles["activity-buttons"]}>
+            <button type="button" onClick={() => addActivity(i)} className={styles["add-activity-btn"]}>
+              إضافة فعالية جديدة
+            </button>
+            <button type="button" onClick={() => removeActivity(i, j)} className={styles["delete-activity-btn"]}>
+              حذف الفعالية
+            </button>
           </div>
-        </section>
+        </div>
+      ))
+    ) : (
+      
+      <button type="button" onClick={() => addActivity(i)} className={styles["add-activity-btn"]} style={{ marginTop: 10 }}>
+        إضافة فعالية جديدة
+      </button>
+    )}
+  </div>
+))}
 
-        <button
-          className={styles["add-member-btn"]}
-          onClick={handleSubmit}
-          style={{ marginTop: "20px" }}
-        >
+</section>
+        <button onClick={handleSubmit} className={styles["add-member-btn"]} style={{ marginTop: 20 }}>
           حفظ الأسرة
         </button>
       </div>

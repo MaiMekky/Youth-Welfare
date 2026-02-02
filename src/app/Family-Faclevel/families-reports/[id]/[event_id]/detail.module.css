@@ -462,3 +462,72 @@
     width: 100%;
   }
 }
+.actionsRow {
+  display: flex;
+  gap: 6px; 
+  justify-content: center;
+  align-items: center;
+}
+
+.approveButton,
+.rejectButton,
+.deleteButton {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.approveButton {
+  background-color: #16a34a; /* أخضر */
+}
+
+.approveButton:hover {
+  background-color: #15803d;
+  transform: scale(1.1);
+}
+
+.rejectButton {
+  background-color: #dc2626; /* أحمر */
+}
+
+.rejectButton:hover {
+  background-color: #b91c1c;
+  transform: scale(1.1);
+}
+
+
+.approveButton svg,
+.rejectButton svg,
+.deleteButton svg {
+  width: 16px;
+  height: 16px;
+  stroke: #fff;
+}
+.studentsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* title left, button right */
+  margin-bottom: 10px;
+  margin-left: 60px;
+  
+}
+
+.approveAllButton {
+  background-color: #16a34a; /* green */
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.approveAllButton:hover {
+  background-color: #15803d;
+  transform: scale(1.05);
+}

@@ -21,15 +21,18 @@ interface EventData {
   endDate: string;
   participantsLimit: number;
   createdAt: string;
+  deptName: string;     
+  familyName: string;
 }
 
 interface Student {
-  memberId: number;
+  studentId: number;
   name: string;
-  id: string;
-  major: string;
-  role: string;
-  joinDate: string;
+  nationalId: string;
+  collegeId: string;
+  status: string;
+  rank: string | null;
+  reward: string | null;
 }
 
 /* ================= Page ================= */
@@ -37,22 +40,24 @@ interface Student {
 export default function EventDetailsPage() {
   const params = useParams();
   const router = useRouter();
-  const id = params.id as string;
+  const event_id = params.event_id as string;
 
-  const [eventData, setEventData] = useState<EventData>({
-    title: "",
-    description: "",
-    location: "",
-    restrictions: "",
-    reward: "",
-    status: "",
-    type: "",
-    cost: "",
-    startDate: "",
-    endDate: "",
-    participantsLimit: 0,
-    createdAt: "",
-  });
+const [eventData, setEventData] = useState<EventData>({
+  title: "",
+  description: "",
+  location: "",
+  restrictions: "",
+  reward: "",
+  status: "",
+  type: "",
+  cost: "",
+  startDate: "",
+  endDate: "",
+  participantsLimit: 0,
+  createdAt: "",
+  deptName: "",
+  familyName: "",
+});
 
   const [studentsData, setStudentsData] = useState<Student[]>([]);
 
@@ -74,7 +79,7 @@ export default function EventDetailsPage() {
         const token = localStorage.getItem("access");
 
         const res = await fetch(
-          `http://127.0.0.1:8000/api/family/faculty_events/${id}/`,
+          `http://127.0.0.1:8000/api/family/faculty_events/${event_id}/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -82,38 +87,39 @@ export default function EventDetailsPage() {
             },
           }
         );
-
         if (!res.ok) throw new Error("Failed to fetch event");
 
-        const data = await res.json();
+       const data = await res.json();
 
-        setEventData({
-          title: data.title,
-          description: data.description,
-          location: data.location,
-          restrictions: data.restrictions,
-          reward: data.reward,
-          status: data.status,
-          type: data.type,
-          cost: data.cost,
-          startDate: data.st_date,
-          endDate: data.end_date,
-          participantsLimit: data.s_limit,
-          createdAt: new Date(data.created_at).toLocaleDateString("ar-EG"),
-        });
+setEventData({
+  title: data.title,
+  description: data.description,
+  location: data.location,
+  restrictions: data.restrictions ?? "",
+  reward: data.reward ?? "",
+  status: data.status,
+  type: data.type,
+  cost: data.cost,
+  startDate: new Date(data.st_date).toLocaleDateString("ar-EG"),
+  endDate: new Date(data.end_date).toLocaleDateString("ar-EG"),
+  participantsLimit: data.participants_limit,
+  createdAt: data.created_at,
+  deptName: data.dept_name,
+  familyName: data.family_name,
+});
 
-        if (data.members) {
-          setStudentsData(
-            data.members.map((member: any) => ({
-              memberId: member.student_id,
-              name: member.student_name,
-              id: member.u_id,
-              major: member.dept_name,
-              role: member.role,
-              joinDate: new Date(member.joined_at).toLocaleDateString("ar-EG"),
-            }))
-          );
-        }
+setStudentsData(
+  data.registered_members.map((m: any) => ({
+    studentId: m.student_id,
+    name: m.student_name,
+    nationalId: m.student_nid,
+    collegeId: m.college_id,
+    status: m.status,
+    rank: m.rank,
+    reward: m.reward,
+  }))
+);
+
       } catch (err) {
         console.error(err);
         showNotification("❌ فشل تحميل تفاصيل الفعالية", "error");
@@ -121,17 +127,17 @@ export default function EventDetailsPage() {
     };
 
     fetchEventDetails();
-  }, [id]);
+  }, [event_id]);
 
   const handleBack = () =>
-    router.push("/Family-Faclevel/families-reports/" + id);
+    router.push("/Family-Faclevel/families-reports/" + params.id);
 
   const handleRemoveMember = async (memberId: number) => {
     try {
       const token = localStorage.getItem("access");
 
       const res = await fetch(
-        `http://127.0.0.1:8000/api/family/faculty_events/${id}/members/${memberId}/`,
+        `http://127.0.0.1:8000/api/family/faculty_events/${event_id}/members/${memberId}/`,
         {
           method: "DELETE",
           headers: {
@@ -142,9 +148,9 @@ export default function EventDetailsPage() {
 
       if (!res.ok) throw new Error("Failed to delete member");
 
-      setStudentsData((prev) =>
-        prev.filter((student) => student.memberId !== memberId)
-      );
+      // setStudentsData((prev) =>
+      //   prev.filter((student) => student.nationalId !== nationalId)
+      // );
 
       showNotification("✅ تم حذف الطالب بنجاح", "success");
     } catch (err) {
@@ -152,6 +158,82 @@ export default function EventDetailsPage() {
       showNotification("❌ فشل حذف الطالب", "error");
     }
   };
+  const handleParticipantAction = async (
+    studentId: number,
+  action: "approve" | "reject"
+) => {
+  try {
+    const token = localStorage.getItem("access");
+
+    const res = await fetch(
+      `http://127.0.0.1:8000/api/family/faculty_events/${event_id}/participants/${studentId}/${action}/`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error(errorText);
+      throw new Error("Action failed");
+    }
+
+    setStudentsData((prev) =>
+      prev.map((s) =>
+        s.studentId === studentId
+          ? {
+              ...s,
+              status: action === "approve" ? "مقبول" : "مرفوض",
+            }
+          : s
+      )
+    );
+
+    showNotification(
+      action === "approve"
+        ? "✅ تم اعتماد الطالب"
+        : "❌ تم رفض الطالب",
+      action === "approve" ? "success" : "error"
+    );
+  } catch (err) {
+    console.error(err);
+    showNotification("❌ فشل تنفيذ العملية", "error");
+  }
+};
+const handleApproveAll = async () => {
+  try {
+    const token = localStorage.getItem("access");
+
+    // Loop through students and approve each
+    for (const student of studentsData) {
+      if (student.status !== "approved") {
+        const res = await fetch(
+          `http://127.0.0.1:8000/api/family/faculty_events/${event_id}/approve-all-participants/`,
+          {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (!res.ok) throw new Error(`Failed to approve ${student.name}`);
+      }
+    }
+
+    // Update UI directly
+    setStudentsData((prev) =>
+      prev.map((s) => ({ ...s, status: "مقبول" }))
+    );
+
+    showNotification("✅ تم اعتماد جميع الطلاب", "success");
+  } catch (err) {
+    console.error(err);
+    showNotification("❌ فشل اعتماد الجميع", "error");
+  }
+};
+
 
   /* ================= Render ================= */
 
@@ -227,6 +309,15 @@ export default function EventDetailsPage() {
                 <span className={styles.infoLabel}>تاريخ الانتهاء:</span>
                 <span className={styles.infoValue}>{eventData.endDate}</span>
               </div>
+              <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>القسم:</span>
+              <span className={styles.infoValue}>{eventData.deptName}</span>
+            </div>
+
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>الأسرة:</span>
+              <span className={styles.infoValue}>{eventData.familyName}</span>
+            </div>
             </div>
           </div>
         </div>
@@ -239,43 +330,51 @@ export default function EventDetailsPage() {
 
         {/* ===== Students Table (unchanged) ===== */}
         <div className={styles.studentsCard}>
-          <h2 className={styles.cardTitle}>المشاركون</h2>
+    <h2 className={styles.cardTitle}>المشاركون</h2>
+     <div className={styles.studentsHeader}>
+    <button className={styles.approveAllButton} onClick={handleApproveAll}>
+      اعتماد الجميع
+    </button>
+  </div>
 
           <div className={styles.tableContainer}>
-            <table className={styles.studentsTable}>
-              <thead>
-                <tr>
-                  <th>الاسم</th>
-                  <th>الرقم الجامعي</th>
-                  <th>التخصص</th>
-                  <th>الدور</th>
-                  <th>تاريخ الانضمام</th>
-                  <th>الإجراءات</th>
-                </tr>
-              </thead>
-              <tbody>
-                {studentsData.map((student, idx) => (
-                  <tr key={idx}>
-                    <td>{student.name}</td>
-                    <td>{student.id}</td>
-                    <td>{student.major}</td>
-                    <td>{student.role}</td>
-                    <td>{student.joinDate}</td>
-                    <td>
-                      <button
-                        className={styles.deleteBtn}
-                        title="حذف"
-                        onClick={() =>
-                          handleRemoveMember(student.memberId)
-                        }
-                      >
-                        🗑
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+           <table className={styles.studentsTable}>
+  <thead>
+    <tr>
+      <th>الاسم</th>
+      <th>الرقم القومي</th>
+      <th>الرقم الجامعي</th>
+      <th>الحالة</th>
+      {/* <th>الترتيب</th>
+      <th>المكافأة</th> */}
+      <th>الإجراءات</th>
+    </tr>
+  </thead>
+  <tbody>
+    {studentsData.map((p, idx) => (
+      <tr key={idx}>
+        <td>{p.name}</td>
+        <td>{p.nationalId}</td>
+        <td>{p.collegeId}</td>
+        <td>{p.status}</td>
+        {/* <td>{p.rank ?? "-"}</td>
+        <td>{p.reward ?? "-"}</td> */}
+        <td>
+  <div className={styles.actionsRow}>
+    <button
+      className={styles.approveButton}
+      onClick={() => handleParticipantAction(p.studentId, "approve")}
+      title="اعتماد"
+    >
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"> <polyline points="20 6 9 17 4 12" /> </svg> </button> {/* Reject Button */} <button className={styles.rejectButton} onClick={() => handleParticipantAction(p.studentId, "reject")} title="رفض" > <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"> <line x1="18" y1="6" x2="6" y2="18" /> <line x1="6" y1="6" x2="18" y2="18" /> </svg> </button>
+  </div>
+</td>
+
+
+      </tr>
+    ))}
+  </tbody>
+</table>
           </div>
         </div>
       </div>

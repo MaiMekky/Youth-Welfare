@@ -186,27 +186,27 @@ const router = useRouter();
         </div>
       </div>
 
-      <div className={styles.eventActions}>
-  {/* approve & reject row */}
-  <div className={styles.actionRow}>
-    <button
-      className={styles.btnApprove}
-      onClick={() => handleAction("approve")}
-      disabled={loading}
-    >
-      اعتماد الفعالية
-    </button>
+      {status === "pending" && (
+        <div className={styles.eventActions}>
+          <div className={styles.actionRow}>
+            <button
+              className={styles.btnApprove}
+              onClick={() => handleAction("approve")}
+              disabled={loading}
+            >
+              اعتماد الفعالية
+            </button>
 
-    <button
-      className={styles.btnReject}
-      onClick={() => handleAction("reject")}
-      disabled={loading}
-    >
-      رفض الفعالية
-    </button>
-  </div>
-</div>
-
+            <button
+              className={styles.btnReject}
+              onClick={() => handleAction("reject")}
+              disabled={loading}
+            >
+              رفض الفعالية
+            </button>
+          </div>
+        </div>
+      )}
     </div>
     </>
   );

@@ -29,14 +29,20 @@ const Navbar: React.FC = () => {
               />
               <Search className={styles.searchIcon} size={16} />
             </div>
-
-            <button className={styles.topBtn} onClick={toggleLang}>
-              <Globe size={14} />
-              {lang === "ar" ? "English" : "العربية"}
-            </button>
-
-      
         </div>
+                <div className={styles.departmentInfo}>
+          <h2>
+            {lang === "ar"
+              ? "الإدارة العامة لرعاية الشباب"
+              : "General Administration of Youth Care"}
+          </h2>
+          <p>
+            {lang === "ar"
+              ? "Helwan University - Youth Care"
+              : "Helwan University - Youth Care"}
+          </p>
+        </div>
+      </div>
       </header>
 
       {/* ✅ Modal Popup */}

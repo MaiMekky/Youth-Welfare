@@ -29,11 +29,11 @@ export default function Tabs({ activeTab, setActiveTab, pendingCount = 0 }: Prop
           onClick={() => setActiveTab("quality")}
           style={{ position: "relative" }}
         >
-          <span className={styles.tabText}>أسر نوعية وأصدقاء البيئة</span>
+          <span className={styles.tabText}>أسر نوعية و أصدقاء البيئة</span>
 
-          {pendingCount > 0 && (
+          {/* {pendingCount > 0 && (
             <span className={styles.notificationBadge}>{pendingCount}</span>
-          )}
+          )} */}
         </button>
 
       </div>

@@ -1,212 +1,295 @@
 // File: app/page.tsx
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import styles from "./Styles/page.module.css";
 import StatsGrid from "./components/StatsGrid";
 import Tabs from "./components/Tabs";
 import Filters from "./components/Filters";
-import AddButton from "./components/AddButton";
 import FamiliesGrid from "./components/FamiliesGrid";
 
 export default function Page() {
-const [activeTab, setActiveTab] = useState<string>("central");
-const [selectedFaculty, setSelectedFaculty] = useState<string>("all");
-const [selectedFamilyType, setSelectedFamilyType] = useState<string>("all");
+  const [activeTab, setActiveTab] = useState<string>("central");
+  const [selectedFaculty, setSelectedFaculty] = useState<number>(-1);
+  const [selectedFamilyType, setSelectedFamilyType] = useState<string>("all");
 
+  const [families, setFamilies] = useState<any[]>([]);
+  const [loadingFamilies, setLoadingFamilies] = useState(false);
 
-function getStats() {
-  const totalFamilies = centralFamilies.length + qualityFamilies.length;
-  const centralCount = centralFamilies.length;
-  const pendingCount = qualityFamilies.filter(f => f.needsApproval).length;
-  const approvalRate = qualityFamilies.length
-    ? Math.round(((qualityFamilies.length - pendingCount) / qualityFamilies.length) * 100) + "%"
-    : "0%";
+  // Notification state
+  const [notification, setNotification] = useState<{
+    show: boolean;
+    message: string;
+    type: "success" | "error";
+  }>({ show: false, message: "", type: "success" });
 
-  return [
-    {
-      id: 1,
-      label: "إجمالي الأسر",
-      value: totalFamilies.toString(),
-      icon: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style={{ color: "#2C3A5F" }}>
-          <path d="M16 11c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM8 11c1.657 0 3-1.343 3-3S9.657 5 8 5 5 6.343 5 8s1.343 3 3 3z" />
-          <path d="M8 13c-2.67 0-8 1.337-8 4v2h9.5c.634-.744 2.02-2 6.5-2 4.48 0 5.866 1.256 6.5 2H24v-2c0-2.663-5.33-4-8-4H8z" />
-        </svg>
-      )
-    },
-    {
-      id: 2,
-      label: "الأسر المركزية",
-      value: centralCount.toString(),
-      icon: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style={{ color: "#B38E19" }}>
-          <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.103 0-2 .897-2 2v13c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2zM5 20V9h14l.002 11H5z" />
-        </svg>
-      )
-    },
-    {
-      id: 3,
-      label: "طلبات في الانتظار",
-      value: pendingCount.toString(),
-      icon: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style={{ color: "#B38E19" }}>
-          <path d="M12 1a11 11 0 100 22 11 11 0 000-22zm1 12.585V6h-2v8h6v-2h-4z" />
-        </svg>
-      )
-    },
-    {
-      id: 4,
-      label: "معدل الموافقة",
-      value: approvalRate,
-      icon: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style={{ color: "#B38E19" }}>
-          <path d="M3 17h2v4H3v-4zM8 11h2v10H8V11zM13 6h2v15h-2V6zM18 2h2v19h-2V2z" />
-        </svg>
-      )
+  // Show notification helper
+  const showNotification = (message: string, type: "success" | "error") => {
+    setNotification({ show: true, message, type });
+    setTimeout(() => {
+      setNotification({ show: false, message: "", type: "success" });
+    }, 2500);
+  };
+
+  /* ===================== Stats ===================== */
+  const stats = useMemo(() => {
+    const totalFamilies = families.length;
+    const centralCount = families.filter((f) => f.type === "مركزية").length;
+    const qualityCount = families.filter((f) => f.type === "نوعية").length;
+    const ecoCount = families.filter((f) => f.type === "اصدقاء البيئة").length;
+
+    return [
+      {
+        id: 1,
+        label: "إجمالي الأسر",
+        value: totalFamilies,
+        icon: (
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        ),
+      },
+      {
+        id: 2,
+        label: "الأسر المركزية",
+        value: centralCount,
+        icon: (
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        ),
+      },
+      {
+        id: 3,
+        label: "الأسر النوعية",
+        value: qualityCount,
+        icon: (
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+        ),
+      },
+      {
+        id: 4,
+        label: "الأسر الصديقة للبيئة",
+        value: ecoCount,
+        icon: (
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"></path>
+            <path d="M12 22V2"></path>
+            <path d="M17 12c0-2.76-2.24-5-5-5s-5 2.24-5 5 2.24 5 5 5"></path>
+            <path d="M2 12h20"></path>
+          </svg>
+        ),
+      },
+    ];
+  }, [families]);
+
+  /* ===================== API Mapping ===================== */
+  const mapFamilyFromApi = (f: any) => ({
+    id: f.family_id,
+    title: f.name,
+    description: f.description,
+    members: f.member_count,
+    scope: "على مستوى الجامعة",
+    createdBy: f.created_by_name || f.faculty_name,
+    faculty: f.faculty, 
+    type: f.type,
+    status: f.status,
+    // Status badge colors - matching the family badge style
+    statusColor:
+      f.status === "مقبول"
+        ? "#D4F4DD"  // Light green (same as eco-friendly badge)
+        : f.status === "منتظر"
+        ? "#FFF3E0"  // Light orange
+        : "#FFE0E0",  // Light red
+    statusTextColor:
+      f.status === "مقبول"
+        ? "#2E7D32"  // Dark green text
+        : f.status === "منتظر"
+        ? "#E65100"  // Dark orange text
+        : "#C62828",  // Dark red text
+    // Family type badge colors
+    badge: f.type === "اصدقاء البيئة" ? "صديقة للبيئة" : undefined,
+    badgeColor: f.type === "اصدقاء البيئة" ? "#D4F4DD" : undefined,
+    badgeTextColor: f.type === "اصدقاء البيئة" ? "#2E7D32" : undefined,
+    needsApproval: f.status === "منتظر",
+  });
+
+  /* ===================== Faculties ===================== */
+  interface Faculty {
+    faculty_id: number;
+    name: string;
+  }
+
+  const [faculties, setFaculties] = useState<Faculty[]>([{ faculty_id: -1, name: "الكل" }]);
+
+  useEffect(() => {
+    const fetchFaculties = async () => {
+      try {
+        const token = localStorage.getItem("access");
+        const res = await fetch(
+          "http://localhost:8000/api/solidarity/super_dept/faculties/",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!res.ok) {
+          throw new Error("فشل في تحميل الكليات");
+        }
+
+        const data: Faculty[] = await res.json();
+        setFaculties([{ faculty_id: -1, name: "الكل" }, ...data]);
+      } catch (error) {
+        console.error("Error fetching faculties:", error);
+        showNotification("فشل في تحميل قائمة الكليات", "error");
+      }
+    };
+
+    fetchFaculties();
+  }, []);
+
+  /* ===================== Families ===================== */
+  useEffect(() => {
+    const fetchFamilies = async () => {
+      setLoadingFamilies(true);
+      try {
+        const token = localStorage.getItem("access");
+
+        const params = new URLSearchParams();
+
+        // Only send faculty_id if it's a valid number and not -1 (all)
+        if (!isNaN(selectedFaculty) && selectedFaculty !== -1) {
+          params.append("faculty_id", selectedFaculty.toString());
+        }
+
+        const res = await fetch(
+          `http://localhost:8000/api/family/super_dept/?${params.toString()}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!res.ok) {
+          throw new Error("فشل في تحميل الأسر");
+        }
+
+        const data = await res.json();
+        setFamilies(data.map(mapFamilyFromApi));
+      } catch (error) {
+        console.error("Error fetching families:", error);
+        showNotification("فشل في تحميل بيانات الأسر", "error");
+        setFamilies([]);
+      } finally {
+        setLoadingFamilies(false);
+      }
+    };
+
+    fetchFamilies();
+  }, [selectedFaculty]);
+
+  /* ===================== Derived Lists ===================== */
+  const centralFamilies = useMemo(
+    () => families.filter((f) => f.type === "مركزية"),
+    [families]
+  );
+
+  const qualityFamilies = useMemo(
+    () => families.filter((f) => f.type !== "مركزية"),
+    [families]
+  );
+
+  const filteredQualityFamilies = useMemo(() => {
+    let filtered = qualityFamilies;
+
+    // Filter by faculty
+    if (selectedFaculty !== -1) {
+      filtered = filtered.filter((f) => f.faculty === selectedFaculty);
     }
-  ];
+
+    // Filter by family type
+    if (selectedFamilyType !== "all") {
+      filtered = filtered.filter((f) => f.type === selectedFamilyType);
+    }
+
+    return filtered;
+  }, [qualityFamilies, selectedFaculty, selectedFamilyType]);
+
+  const pendingCount = useMemo(
+    () => filteredQualityFamilies.filter((f) => f.needsApproval).length,
+    [filteredQualityFamilies]
+  );
+
+  /* ===================== UI ===================== */
+  return (
+    <div className={styles.container}>
+      {/* Notification */}
+      {notification.show && (
+        <div className={`${styles.notification} ${styles[notification.type]}`}>
+          {notification.message}
+        </div>
+      )}
+
+      <header className={styles.headerCard}>
+        <h1 className={styles.pageTitle}>إدارة الأسر الطلابية</h1>
+        <p className={styles.pageSubtitle}>
+          إدارة ومتابعة جميع الأسر الطلابية المركزية والنوعية وأصدقاء البيئة
+        </p>
+      </header>
+
+      <StatsGrid stats={stats} />
+
+      <section className={styles.controlsRow}>
+        <Tabs
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          pendingCount={pendingCount}
+        />
+      </section>
+
+      <main className={styles.tabContent}>
+        {activeTab === "central" && (
+          <div className={styles.contentSection}>
+            <p className={styles.sectionDescription}>
+              جميع الأسر المركزية التي تديرها الإدارة المركزية
+            </p>
+            <FamiliesGrid families={centralFamilies} showActions={false} />
+          </div>
+        )}
+
+        {activeTab === "quality" && (
+          <div className={styles.contentSection}>
+            <p className={styles.sectionDescription}>
+              طلبات الأسر النوعية وأصدقاء البيئة الواردة من الكليات
+            </p>
+
+            <Filters
+              faculties={faculties}
+              familyTypes={["all", "نوعية", "اصدقاء البيئة"]}
+              selectedFaculty={selectedFaculty}
+              setSelectedFaculty={setSelectedFaculty}
+              selectedFamilyType={selectedFamilyType}
+              setSelectedFamilyType={setSelectedFamilyType}
+            />
+
+            <FamiliesGrid
+              families={filteredQualityFamilies}
+              showActions={true}
+            />
+          </div>
+        )}
+      </main>
+    </div>
+  );
 }
-
-
-const centralFamilies = [
-{
-id: 1,
-title: "أسرة الإبداع والتميز",
-description: "أسرة مركزية تهدف إلى تطوير المواهب الإبداع...",
-status: "مركزية",
-statusColor: "#E8D4F4",
-members: 0,
-scope: "على مستوى الجامعة",
-createdBy: "الإدارة المركزية",
-faculty: "الإدارة المركزية"
-}
-];
-
-
-const qualityFamilies = [
-{
-id: 1,
-title: "أسرة الطب البشري",
-description: "أسرة تجمع طلاب كلية الطب لتبادل الخبرا...",
-status: "نوعية",
-statusColor: "#D4E8F4",
-members: 0,
-scope: "على مستوى الجامعة",
-createdBy: "إدارة كلية الطب",
-faculty: "كلية الطب",
-type: "نوعية",
-needsApproval: true
-},
-{
-id: 2,
-title: "أسرة علوم الحاسوب",
-description: "أسرة متخصصة في علوم الحاسوب...",
-status: "نوعية",
-statusColor: "#D4E8F4",
-members: 0,
-scope: "على مستوى الجامعة",
-createdBy: "إدارة كلية الحاسبات والمع...",
-faculty: "كلية الحاسبات",
-type: "نوعية",
-needsApproval: true
-},
-{
-id: 3,
-title: "أسرة إعادة التدوير الإبداعي",
-description: "أسرة تحول المواد المعاد تدويرها إلى...",
-status: "في الانتظار",
-statusColor: "#F5E6B3",
-members: 0,
-badge: "صديقة للبيئة",
-badgeColor: "#D4F4DD",
-scope: "على مستوى الجامعة",
-createdBy: "إدارة كلية الفنون التطبيق...",
-faculty: "كلية الفنون التطبيقية",
-type: "أصدقاء البيئة"
-}
-];
-
-const stats = useMemo(() => getStats(), [centralFamilies, qualityFamilies]);
-
-const faculties = [
-"الكل",
-"كلية الطب",
-"كلية الحاسبات",
-"كلية الفنون التطبيقية",
-"كلية الهندسة",
-"كلية الزراعة"
-];
-
-
-const familyTypes = ["الكل", "نوعية", "أصدقاء البيئة"];
-
-
-const filteredQualityFamilies = useMemo(() => {
-return qualityFamilies.filter((family) => {
-const facultyMatch =
-selectedFaculty === "all" || selectedFaculty === "الكل" || family.faculty === selectedFaculty;
-const typeMatch =
-selectedFamilyType === "all" || selectedFamilyType === "الكل" || family.type === selectedFamilyType;
-return facultyMatch && typeMatch;
-});
-}, [selectedFaculty, selectedFamilyType]);
-
-const pendingCount = useMemo(() => {
-  return qualityFamilies.filter(f => f.needsApproval).length +
-         qualityFamilies.filter(f => f.type === "أصدقاء البيئة" ).length;
-}, [qualityFamilies]);
-
-
-return (
-<div className={styles.container}>
-<header className={styles.headerCard}>
-<h1 className={styles.pageTitle}>إدارة الأسر الطلابية</h1>
-<p className={styles.pageSubtitle}>إدارة ومتابعة جميع الأسر الطلابية المركزية والنوعية وأصدقاء البيئة
-</p>
-</header>
-
-<StatsGrid stats={stats} />
-
-<section className={styles.controlsRow}>
-<Tabs activeTab={activeTab} setActiveTab={setActiveTab} pendingCount={pendingCount} />
-</section>
-
-
-<main className={styles.tabContent}>
-{activeTab === "central" && (
-<div className={styles.contentSection}>
-<p className={styles.sectionDescription}>جميع الأسر المركزية التي تديرها الإدارة المركزية</p>
-<div style={{ display: "flex", justifyContent: "flex-end" }}>
-{/* <AddButton /> */}
-</div>
-
-
-<FamiliesGrid families={centralFamilies} showActions={false} />
-</div>
-)}
-
-
-{activeTab === "quality" && (
-<div className={styles.contentSection}>
-<p className={styles.sectionDescription}>طلبات الأسر النوعية وأصدقاء البيئة الواردة من الكليات</p>
-
-
-<Filters
-faculties={faculties}
-familyTypes={familyTypes}
-selectedFaculty={selectedFaculty}
-setSelectedFaculty={setSelectedFaculty}
-selectedFamilyType={selectedFamilyType}
-setSelectedFamilyType={setSelectedFamilyType}
-/>
-
-
-<FamiliesGrid families={filteredQualityFamilies} showActions={true} />
-</div>
-)}
-</main>
-</div>
-);
-}
-

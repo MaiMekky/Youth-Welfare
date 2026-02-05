@@ -1,0 +1,128 @@
+.pageContainer {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 50px 16px;
+  background-color: #f5f7fa; 
+  min-height: 100vh;
+  color: #2C3A5F;
+}
+
+.formContainer {
+  background: #ffffff;
+  padding: 32px 24px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.formContainer h2 {
+  margin-bottom: 24px;
+  text-align: center;
+  color: #2C3A5F;
+}
+
+.formContainer label {
+  display: block;
+  margin-top: 16px;
+  margin-bottom: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #2C3A5F;
+}
+
+.formContainer input,
+.formContainer select,
+.formContainer textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  color: #2C3A5F;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.formContainer input:focus,
+.formContainer select:focus,
+.formContainer textarea:focus {
+  border-color: #2C3A5F;
+  box-shadow: 0 0 0 2px rgba(44, 44, 140, 0.2);
+}
+
+.formContainer textarea {
+  min-height: 100px;  
+  max-height: 200px; 
+  resize: none;       
+}
+
+.buttonGroup {
+  display: flex;
+  flex-direction: row; 
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.buttonGroup button {
+  width: 100%;
+  padding: 14px 0;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.buttonGroup button[type="submit"] {
+  background-color: #2c2c8c;
+  color: white;
+}
+
+.buttonGroup button[type="submit"]:hover {
+  background-color: #1f1f70;
+}
+
+.buttonGroup button[type="button"] {
+  background-color: #f0f0f0;
+  color: #2C3A5F;
+}
+
+.buttonGroup button[type="button"]:hover {
+  background-color: #e0e0e0;
+}
+.error {
+  color: #e63946;
+  font-size: 13px;
+  margin-top: 4px;
+  display: block;
+}
+.readOnlyInput {
+  cursor: not-allowed;
+  color: #2C3A5F;
+}
+.inputField {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  color: #2C3A5F;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.inputField:focus {
+  border-color: #2c2c8c;
+  box-shadow: 0 0 0 2px rgba(44, 44, 140, 0.2);
+}
+
+/* Error state */
+.invalid {
+  border-color: #e63946 !important; /* red border */
+  background-color: #ffe6e6;         /* optional light red background */
+}

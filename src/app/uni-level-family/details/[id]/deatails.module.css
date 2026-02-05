@@ -1,0 +1,541 @@
+/* app/family-details/details.module.css */
+
+/* ============================================
+   PAGE CONTAINER & LAYOUT
+============================================ */
+.pageContainer {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: clamp(15px, 3vw, 30px);
+  direction: rtl;
+  font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+}
+
+/* ============================================
+   HEADER SECTION
+============================================ */
+.header {
+  position: relative;
+  background: linear-gradient(135deg, #2C3A5F 0%, #3d5278 100%);
+  padding: clamp(25px, 5vw, 40px);
+  border-radius: clamp(12px, 2vw, 16px);
+  margin-bottom: clamp(20px, 3vw, 30px);
+  box-shadow: 0 4px 20px rgba(44, 58, 95, 0.15);
+}
+
+.closeButton {
+  position: absolute;
+  left: clamp(15px, 2vw, 20px);
+  top: clamp(15px, 2vw, 20px);
+  width: clamp(35px, 5vw, 40px);
+  height: clamp(35px, 5vw, 40px);
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  font-size: clamp(16px, 2.5vw, 20px);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.headerContent {
+  text-align: right;
+}
+
+.titleSection {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 2vw, 15px);
+  margin-bottom: clamp(10px, 2vw, 15px);
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.description {
+  font-size: clamp(0.95rem, 2vw, 1.05rem);
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  line-height: 1.8;
+  max-width: 800px;
+}
+
+/* ============================================
+   BADGES & STATUS
+============================================ */
+.statusBadge,
+.infoBadge,
+.infoBadgeGreen,
+.infoBadgeYellow,
+.infoBadgeRed {
+  padding: clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 18px);
+  border-radius: 20px;
+  font-size: clamp(0.8rem, 1.8vw, 0.9rem);
+  font-weight: 600;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.infoBadgeYellow {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.infoBadgeGreen {
+  background: #d4edda;
+  color: #155724;
+}
+
+.infoBadgeRed {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.infoBadge {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* ============================================
+   INFO CARDS
+============================================ */
+.infoCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  gap: clamp(15px, 2vw, 20px);
+  margin-bottom: clamp(20px, 3vw, 30px);
+}
+
+.infoCard {
+  background: white;
+  padding: clamp(20px, 3vw, 25px);
+  border-radius: clamp(12px, 2vw, 16px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.3s ease;
+  border: 1px solid #f0f0f0;
+}
+
+.infoCard:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+  border-color: #2C3A5F;
+}
+
+.infoIcon {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  margin-bottom: 5px;
+}
+
+.infoLabel {
+  color: #6c757d;
+  font-size: clamp(0.85rem, 1.8vw, 0.95rem);
+  margin-bottom: 5px;
+}
+
+.infoValue {
+  color: #2C3A5F;
+  font-weight: 700;
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
+}
+
+/* ============================================
+   CONTENT AREA
+============================================ */
+.contentArea {
+  background: white;
+  padding: clamp(25px, 4vw, 40px);
+  border-radius: clamp(12px, 2vw, 16px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  margin-top: clamp(15px, 2vw, 20px);
+}
+
+.sectionTitle {
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
+  font-weight: 700;
+  color: #2C3A5F;
+  margin-bottom: clamp(20px, 3vw, 25px);
+  padding-bottom: clamp(12px, 2vw, 15px);
+  border-bottom: 3px solid #2C3A5F;
+  display: inline-block;
+}
+
+/* ============================================
+   OVERVIEW CONTENT
+============================================ */
+.overviewContent {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(20px, 3vw, 30px);
+}
+
+.goalsSection {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: clamp(20px, 3vw, 30px);
+  border-radius: clamp(12px, 2vw, 16px);
+  border-right: 5px solid #2C3A5F;
+}
+
+.goalsTitle {
+  font-size: clamp(1.15rem, 2.5vw, 1.35rem);
+  font-weight: 700;
+  color: #2C3A5F;
+  margin-bottom: clamp(12px, 2vw, 15px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.goalsText {
+  line-height: 2;
+  color: #495057;
+  font-size: clamp(0.95rem, 2vw, 1.05rem);
+  text-align: justify;
+}
+
+.statsSection,
+.infoSection {
+  background: #f8f9fa;
+  padding: clamp(20px, 3vw, 30px);
+  border-radius: clamp(12px, 2vw, 16px);
+  border: 1px solid #e9ecef;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: clamp(15px, 2vw, 20px);
+}
+
+.statItem {
+  background: white;
+  padding: clamp(15px, 2.5vw, 20px);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.statItem:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.statLabel {
+  color: #6c757d;
+  font-size: clamp(0.85rem, 1.8vw, 0.95rem);
+  display: block;
+  margin-bottom: 10px;
+}
+
+.statValue {
+  color: #2C3A5F;
+  font-weight: 700;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  display: block;
+}
+
+.infoGrid {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 2vw, 15px);
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: clamp(12px, 2vw, 15px);
+  background: white;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.infoRow:hover {
+  background: #f0f4ff;
+}
+
+.infoRowLabel {
+  color: #6c757d;
+  font-size: clamp(0.9rem, 1.8vw, 1rem);
+  font-weight: 500;
+}
+
+.infoRowValue {
+  color: #2C3A5F;
+  font-weight: 600;
+  font-size: clamp(0.9rem, 1.8vw, 1rem);
+}
+
+/* ============================================
+   MEMBERS CONTENT - FULLY RESPONSIVE
+============================================ */
+.membersContent {
+  text-align: right;
+}
+
+.membersSubtitle {
+  color: #6c757d;
+  margin-bottom: clamp(20px, 3vw, 25px);
+  font-size: clamp(0.95rem, 2vw, 1.05rem);
+  padding: clamp(12px, 2vw, 15px);
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-right: 4px solid #2C3A5F;
+}
+
+/* Table Container for Horizontal Scroll on Small Screens */
+.tableContainer {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.membersTable {
+  width: 100%;
+  min-width: 600px; /* Ensures table doesn't get too cramped */
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.membersTable thead {
+  background: linear-gradient(135deg, #2C3A5F 0%, #3d5278 100%);
+}
+
+.membersTable th {
+  padding: clamp(12px, 2vw, 18px) clamp(10px, 1.5vw, 15px);
+  text-align: center;
+  font-weight: 600;
+  color: white;
+  font-size: clamp(0.85rem, 1.8vw, 1rem);
+  border-bottom: 3px solid #1a2540;
+  white-space: nowrap;
+}
+
+.membersTable tbody tr {
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.membersTable tbody tr:nth-child(even) {
+  background: #f8f9fa;
+}
+
+.membersTable tbody tr:hover {
+  background: #e3f2fd;
+  transform: scale(1.01);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.membersTable td {
+  padding: clamp(12px, 2vw, 18px) clamp(10px, 1.5vw, 15px);
+  text-align: center;
+  color: #495057;
+  font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+  border-bottom: 1px solid #e9ecef;
+}
+
+.memberActions {
+  display: flex;
+  gap: clamp(8px, 1.5vw, 10px);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btnApprove,
+.btnReject {
+  padding: clamp(6px, 1.5vw, 8px) clamp(12px, 2vw, 16px);
+  border: none;
+  border-radius: 8px;
+  font-size: clamp(0.8rem, 1.6vw, 0.9rem);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  min-width: 70px;
+}
+
+.btnApprove {
+  background: #28a745;
+  color: white;
+}
+
+.btnApprove:hover {
+  background: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.btnReject {
+  background: #dc3545;
+  color: white;
+}
+
+.btnReject:hover {
+  background: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.btnApprove:disabled,
+.btnReject:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.emptyState {
+  text-align: center !important;
+  padding: clamp(40px, 8vw, 80px) 20px !important;
+  color: #6c757d;
+  font-size: clamp(1rem, 2vw, 1.1rem);
+}
+
+/* ============================================
+   CARD-BASED TABLE FOR MOBILE
+============================================ */
+@media (max-width: 768px) {
+  /* Hide the regular table on mobile */
+  .membersTable {
+    display: none;
+  }
+
+  /* Show card-based layout instead */
+  .mobileCards {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .memberCard {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+  }
+
+  .memberCard:nth-child(even) {
+    background: #f8f9fa;
+  }
+
+  .cardRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .cardRow:last-child {
+    border-bottom: none;
+  }
+
+  .cardLabel {
+    color: #6c757d;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .cardValue {
+    color: #2C3A5F;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-align: left;
+  }
+
+  .cardActions {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 2px solid #e9ecef;
+  }
+
+  .cardActions .memberActions {
+    justify-content: stretch;
+  }
+
+  .cardActions .btnApprove,
+  .cardActions .btnReject {
+    flex: 1;
+  }
+}
+
+/* Show regular table on larger screens, hide mobile cards */
+@media (min-width: 769px) {
+  .mobileCards {
+    display: none;
+  }
+}
+
+/* ============================================
+   RESPONSIVE BREAKPOINTS
+============================================ */
+@media (max-width: 1024px) {
+  .statsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .titleSection {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  /* Ensure horizontal scroll for table if card view is not used */
+  .tableContainer {
+    margin-left: -15px;
+    margin-right: -15px;
+    width: calc(100% + 30px);
+    border-radius: 0;
+  }
+
+  .membersTable {
+    min-width: 500px;
+  }
+}
+
+/* ============================================
+   PRINT STYLES (BONUS)
+============================================ */
+@media print {
+  .closeButton,
+  .memberActions {
+    display: none;
+  }
+
+  .pageContainer {
+    padding: 0;
+  }
+
+  .header {
+    background: #2C3A5F;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

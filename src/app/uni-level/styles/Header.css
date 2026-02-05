@@ -9,15 +9,6 @@
   z-index: 1;
 }
 
-.headerContent {
-  max-width: 1400px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 16px;
-}
-
 .headerIcon {
   background-color: #B38E19;
   padding: 10px;
@@ -44,33 +35,92 @@
   font-size: 13px;
   color: #B8C5E0;
 }
-.logoutBtn {
-  background-color: #e74c3c;
-  color: #fff;
+
+/* Layout */
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rightButtons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap; 
+}
+
+/* كل الأزرار الرئيسية */
+.rightButtons button {
+  background: #B38E19; /* اللون الأساسي */
+  color: #F3F5FD;      /* لون النص */
   border: none;
-  padding: 8px 14px;
-  margin-inline-start: 12px;
-  margin-inline-end: auto;
-  border-radius: 6px;
+  padding: 10px 16px;
+  border-radius: 12px; /* شكل أجمل */
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: 0.3s;
+  white-space: nowrap;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* ظل خفيف */
+}
+
+/* تأثير Hover */
+.rightButtons button:hover {
+  background: #27285D; /* تغيير اللون عند المرور */
+  color: #F3F5FD;
+  transform: translateY(-2px); /* رفع بسيط */
+}
+
+/* زر تسجيل الخروج */
+.rightButtons .logoutBtn {
+  background-color: #27285D;
+  color: #F3F5FD;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 12px;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: 0.3s;
+  white-space: nowrap;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-.logoutBtn:hover {
-  background-color: #c0392b;
+.rightButtons .logoutBtn:hover {
+  background-color: #B38E19;
+  color: #27285D;
+  transform: translateY(-2px);
 }
 
+/* Responsive Design */
 @media (max-width: 768px) {
   .headerContent {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .rightButtons {
+    width: 100%;
     flex-wrap: wrap;
-    padding: 1rem;
+    justify-content: flex-start;
   }
-  .headerTitleH1 {
-    font-size: 1rem;
+
+  .rightButtons button,
+  .logoutBtn {
+    width: auto;
   }
-  .headerLogo {
-    width: 40px;
-    height: 40px;
+}
+
+@media (max-width: 480px) {
+  .rightButtons {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .rightButtons button,
+  .logoutBtn {
+    width: 100%;
+    text-align: center;
   }
 }

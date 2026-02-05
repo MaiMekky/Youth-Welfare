@@ -1,14 +1,21 @@
 /* app/student/styles/headerCard.css */
 .header-card-container {
-  padding: 24px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 20px;
+  align-items: center;
+  box-sizing: border-box;
 }
 
 .header-card {
- background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+  background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
   color: #fff;
   padding: 36px 20px;
   border-radius: 10px;
   text-align: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .header-title {
@@ -50,7 +57,49 @@
 
 /* responsive */
 @media (max-width: 768px) {
-  .header-card { padding: 24px 12px; }
-  .header-title { font-size: 22px; }
-  .tab-btn { padding: 6px 10px; font-size: 14px; }
+  .header-card-container {
+    padding: 16px 12px;
+  }
+  .header-card { 
+    padding: 24px 12px; 
+  }
+  .header-title { 
+    font-size: 22px; 
+  }
+  .header-subtitle {
+    font-size: 13px;
+  }
+  .tab-btn { 
+    padding: 6px 10px; 
+    font-size: 14px; 
+  }
+  .header-tabs {
+    gap: 6px;
+    margin-top: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-card-container {
+    padding: 12px 8px;
+  }
+  .header-card { 
+    padding: 20px 10px; 
+  }
+  .header-title { 
+    font-size: 18px; 
+  }
+  .header-subtitle {
+    font-size: 12px;
+  }
+  .tab-btn { 
+    padding: 6px 8px; 
+    font-size: 12px; 
+    flex: 1;
+    min-width: 0;
+  }
+  .header-tabs {
+    gap: 4px;
+    margin-top: 12px;
+  }
 }

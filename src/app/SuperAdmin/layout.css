@@ -1,0 +1,37 @@
+/* ===== ROOT LAYOUT ===== */
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  background: #f8fafc;
+}
+
+/* ===== SIDEBAR + MAIN CONTENT ===== */
+.layoutBody {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  min-height: calc(100vh - 140px); 
+}
+
+/* ===== MAIN CONTENT ===== */
+.main {
+  flex: 1;
+  width: 100%;
+  padding: 20px;
+  background: #f8fafc;
+  overflow-y: auto;
+  min-width: 0;
+}
+
+/* ======== RESPONSIVE ========= */
+@media (max-width: 900px) {
+  .layoutBody {
+    flex-direction: column;
+  }
+
+  .main {
+    padding: 14px;
+  }
+}

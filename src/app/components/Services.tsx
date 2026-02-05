@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from 'react';
+import styles from "../Styles/components/Services.module.css";
 
 interface ServiceItem {
   icon: string;
@@ -20,54 +21,6 @@ const Services: React.FC = () => {
     { icon: "✈️", title: "المنح والبعثات", description: "معلومات عن الفرص المتاحة", id: 6 },
   ];
 
-  const containerStyle: React.CSSProperties = {
-    direction: 'rtl',
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    padding: '2rem 1rem',
-    backgroundColor: '#f8f9fa',
-    minHeight: '100vh',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  };
-
-  const headerStyle: React.CSSProperties = {
-    textAlign: 'center',
-    marginBottom: '2rem',
-    width: '100%',
-  };
-
-  const titleStyle: React.CSSProperties = {
-    fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: '0.5rem',
-  };
-
-  const subtitleStyle: React.CSSProperties = {
-    fontSize: 'clamp(1rem, 2vw, 1.2rem)',
-    color: '#7f8c8d',
-    lineHeight: '1.6',
-    maxWidth: '600px',
-    margin: '0 auto',
-  };
-
-  // const dividerStyle: React.CSSProperties = {
-  //   width: '80%',
-  //   height: '2px',
-  //   backgroundColor: '#3498db',
-  //   margin: '1.5rem auto',
-  //   border: 'none',
-  // };
-
-   const servicesGridStyle: React.CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(3, 1fr)',
-  gap: '1.5rem',
-  maxWidth: '1000px',
-  margin: '0 auto',
-  width: '100%',
-};
 
   const serviceCardStyle: React.CSSProperties = {
     backgroundColor: 'white',
@@ -124,17 +77,15 @@ const Services: React.FC = () => {
   };
 
   return (
-    <div style={containerStyle}>
-      <div style={headerStyle}>
-        <h1 style={titleStyle}>الخدمات السريعة</h1>
-        <p style={subtitleStyle}>
+    <div className={styles.servicesContainer}>
+      <div className={styles.servicesHeader}>
+        <h1 className={styles.servicesTitle}>الخدمات السريعة</h1>
+        <p className={styles.servicesSubtitle}>
           وصول سريع لأهم الخدمات الطلابية
         </p>
       </div>
 
-      {/* <hr style={dividerStyle} /> */}
-
-      <div style={servicesGridStyle}>
+      <div className={styles.servicesGrid}>
         {servicesData.map((service) => (
           <div
             key={service.id}

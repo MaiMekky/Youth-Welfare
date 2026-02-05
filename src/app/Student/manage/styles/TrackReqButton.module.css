@@ -1,0 +1,95 @@
+/* TrackReqButton Component Styles */
+.pageContainer {
+    width: 100%;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.buttonGroup {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.actionButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 28px;
+    font-size: 18px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+}
+
+.actionButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.actionButton:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.buttonPrimary {
+    background: linear-gradient(135deg, #B38E19 0%, #D4A927 100%);
+    color: white;
+}
+
+.buttonPrimary:hover {
+    background: linear-gradient(135deg, #9a7615 0%, #B38E19 100%);
+}
+
+.buttonSecondary {
+    background: linear-gradient(135deg, #27285D 0%, #3A3B7A 100%);
+    color: white;
+}
+
+.buttonSecondary:hover {
+    background: linear-gradient(135deg, #1e1f4a 0%, #27285D 100%);
+}
+
+.icon {
+    font-size: 22px;
+    line-height: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .buttonGroup {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .actionButton {
+        width: 100%;
+        max-width: 400px;
+        padding: 16px 24px;
+        font-size: 17px;
+    }
+
+}
+
+@media (max-width: 480px) {
+    .pageContainer {
+        padding: 15px;
+    }
+
+    .actionButton {
+        padding: 14px 20px;
+        font-size: 16px;
+        min-width: unset;
+    }
+
+    .icon {
+        font-size: 20px;
+    }
+}

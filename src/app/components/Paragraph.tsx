@@ -8,14 +8,15 @@ const Paragraph: React.FC = () => {
   const paragraphStyle: React.CSSProperties = {
     textAlign: language === "ar" ? "right" : "left",
     direction: language === "ar" ? "rtl" : "ltr",
-    fontSize: "1.1rem",
+    fontSize: "clamp(1rem, 2vw, 1.1rem)",
     lineHeight: "1.8",
     color: "#333",
     backgroundColor: "rgba(255, 255, 255, 0.8)",
-    padding: "30px",
+    padding: "clamp(1.25rem, 4vw, 1.875rem)",
     borderRadius: "15px",
-    maxWidth: "1000px",
-    margin: "40px auto",
+    maxWidth: "min(1000px, 95vw)",
+    width: "100%",
+    margin: "clamp(1.5rem, 4vw, 2.5rem) auto",
     boxShadow: "0px 4px 15px rgba(0,0,0,0.1)",
     fontFamily:
       language === "ar" ? "'Cairo', sans-serif" : "'Poppins', sans-serif",
@@ -27,7 +28,7 @@ const Paragraph: React.FC = () => {
       : "We are committed to providing an exceptional educational and cultural environment that prepares a generation of young people capable of facing future challenges. Through our diverse programs and innovative activities, we strive to develop students' abilities and refine their talents in all fields.";
 
   return (
-    <section style={{ display: "flex", justifyContent: "center" }}>
+    <section style={{ display: "flex", justifyContent: "center", padding: "0 clamp(1rem, 4vw, 1.5rem)" }}>
       <p style={paragraphStyle}>{paragraphText}</p>
     </section>
   );

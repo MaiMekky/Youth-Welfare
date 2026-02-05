@@ -1,0 +1,446 @@
+/* Color Variables */
+:root {
+  --dark-navy: #171842ff;
+  --gold: #B38E19;
+  --light-bg: #F3F5FD;
+  --white: #FFFFFF;
+  --error: #d32f2f;
+  --error-light: #ffebee;
+  --success: #388e3c;
+  --success-light: #e8f5e9;
+  --border-gray: #E0E0E0;
+  --gray-bg: #cccccc;
+  --gray-hover: #b3b3b3;
+}
+
+/* Container */
+.create-fam-container {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--light-bg);
+  min-height: 100vh;
+  padding: 20px;
+  direction: rtl;
+}
+
+.create-fam-form {
+  max-width: 900px;
+  margin: 0 auto;
+  background-color: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  padding: 30px 40px;
+}
+
+/* Header */
+.form-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 3px solid var(--gold);
+}
+
+.form-header h1 {
+  color: var(--dark-navy);
+  margin-bottom: 8px;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.form-header p {
+  color: var(--dark-navy);
+  font-size: 16px;
+  margin: 0;
+}
+
+/* Sections */
+.form-section {
+  background-color: var(--light-bg);
+  padding: 25px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  border: 2px solid var(--gold);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+  color: var(--dark-navy);
+  font-size: 22px;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--gold);
+  text-align: center;
+  font-weight: 700;
+}
+
+/* Form Groups */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--dark-navy);
+  font-size: 14px;
+}
+
+.form-group label .optional-label {
+  font-weight: 400;
+  color: #666;
+  font-size: 12px;
+}
+
+/* Inputs */
+.form-input,
+.form-textarea,
+.form-select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid var(--border-gray);
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  background-color: var(--white);
+  box-sizing: border-box;
+  text-align: right;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(179, 142, 25, 0.1);
+}
+
+.form-input.error,
+.form-textarea.error {
+  border-color: var(--error);
+  background-color: var(--error-light);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Error Message */
+.error-message {
+  color: var(--error);
+  font-size: 13px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Board Member Card */
+.board-member-card,
+.committee-card {
+  background-color: var(--white);
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border-gray);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.board-member-title {
+  font-size: 16px;
+  margin-bottom: 15px;
+  color: var(--dark-navy);
+  font-weight: 600;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--gold);
+}
+
+.member-fields {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.field-wrapper label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dark-navy);
+  margin-bottom: 5px;
+  display: block;
+}
+
+.field-wrapper input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid var(--border-gray);
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.field-wrapper input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(179, 142, 25, 0.1);
+}
+
+.field-wrapper input.error {
+  border-color: var(--error);
+  background-color: var(--error-light);
+}
+
+.field-error {
+  color: var(--error);
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+/* Committee Specific */
+.committee-name-header {
+  background-color: var(--gold);
+  padding: 12px 15px;
+  border-radius: 8px;
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: var(--white);
+  text-align: center;
+  font-weight: 700;
+}
+
+.committee-role-section {
+  margin-bottom: 20px;
+}
+
+.committee-role-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dark-navy);
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--gold);
+}
+
+.committee-optional-fields {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px dashed var(--gold);
+}
+
+.committee-optional-fields .form-group {
+  margin-bottom: 15px;
+}
+
+/* Footer Buttons */
+.form-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 2px solid var(--gold);
+  gap: 15px;
+}
+
+.btn-back,
+.btn-submit {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 120px;
+  transition: all 0.3s;
+}
+
+.btn-back {
+  background-color: var(--gray-bg);
+  color: var(--dark-navy);
+}
+
+.btn-back:hover {
+  background-color: var(--gray-hover);
+}
+
+.btn-submit {
+  background-color: var(--dark-navy);
+  color: var(--white);
+}
+
+.btn-submit:hover:not(:disabled) {
+  background-color: #1d1d4a;
+}
+
+.btn-back:disabled,
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Enhanced Notification */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  left: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0;
+  border-radius: 12px;
+  z-index: 1000;
+  animation: slideDown 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.notification.success {
+  background-color: var(--success);
+  border: 2px solid #2e7d32;
+}
+
+.notification.error {
+  background-color: var(--error);
+  border: 2px solid #c62828;
+}
+
+.notification-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 18px 24px;
+}
+
+.notification-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.25);
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.notification-message {
+  color: white;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.5;
+  flex: 1;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .notification {
+    right: 10px;
+    left: 10px;
+    max-width: calc(100% - 20px);
+  }
+
+  .notification-content {
+    padding: 16px 20px;
+  }
+
+  .notification-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
+  }
+
+  .notification-message {
+    font-size: 14px;
+  }
+
+  .create-fam-container {
+    padding: 15px;
+  }
+
+  .create-fam-form {
+    padding: 20px 20px;
+  }
+
+  .form-header h1 {
+    font-size: 22px;
+  }
+
+  .form-header p {
+    font-size: 14px;
+  }
+
+  .section-title {
+    font-size: 18px;
+  }
+
+  .member-fields {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .form-footer {
+    flex-direction: column-reverse;
+  }
+
+  .btn-back,
+  .btn-submit {
+    width: 100%;
+  }
+
+  .form-section {
+    padding: 15px;
+  }
+
+  .board-member-card,
+  .committee-card {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-header h1 {
+    font-size: 20px;
+  }
+
+  .form-header p {
+    font-size: 13px;
+  }
+
+  .section-title {
+    font-size: 16px;
+  }
+
+  .form-input,
+  .form-textarea,
+  .form-select {
+    font-size: 13px;
+    padding: 10px 12px;
+  }
+
+  .notification-content {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+
+  .notification-icon {
+    width: 26px;
+    height: 26px;
+    font-size: 16px;
+  }
+
+  .notification-message {
+    font-size: 13px;
+  }
+}

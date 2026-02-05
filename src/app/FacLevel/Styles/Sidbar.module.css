@@ -1,11 +1,11 @@
 .sidebar {
-  width: 260px;
- background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+  width: min(260px, 85vw);
+  background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
   color: white;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 20px;
+  padding: clamp(1rem, 2vw, 1.25rem);
   transition: transform 0.3s ease-in-out;
   z-index: 1000;
 }

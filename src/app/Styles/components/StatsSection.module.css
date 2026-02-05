@@ -21,16 +21,15 @@
 }
 
 .statCard {
- flex: 1 1 25%;
+  flex: 1 1 min(280px, 100%);
   backdrop-filter: blur(12px);
   border-radius: 16px;
-  padding: 30px 20px;
-  width: 280px;
+  padding: clamp(1.25rem, 3vw, 1.875rem) clamp(1rem, 2vw, 1.25rem);
+  min-width: 0;
   text-align: center;
   color: white;
   box-shadow: 0 4px 15px rgba(49, 49, 49, 0.2);
   transition: transform 0.3s ease, background 0.3s ease;
-  flex: 1 1 22%; /* allow 4 per row nicely */
 }
 
 .statCard:hover {
@@ -45,36 +44,39 @@
 }
 
 .statValue {
-  font-size: 24px;
+  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
   font-weight: bold;
   margin-bottom: 6px;
 }
 
 .statLabel {
-  font-size: 18px;
+  font-size: clamp(1rem, 2vw, 1.125rem);
   color: #fbbf24;
   margin-bottom: 4px;
 }
 
 .statDesc {
-  font-size: 14px;
+  font-size: clamp(0.8125rem, 1.5vw, 0.875rem);
   color: #ddd;
 }
 
-/* ✅ Responsive behavior */
 @media (max-width: 1024px) {
   .statsContainer {
     flex-wrap: wrap;
     justify-content: center;
   }
   .statCard {
-    width: 45%; /* 2 per row on tablets */
-    margin-bottom: 20px;
+    flex: 1 1 calc(50% - 10px);
+    max-width: calc(50% - 10px);
   }
 }
 
 @media (max-width: 600px) {
+  .statsOverlay {
+    padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 4vw, 1.25rem);
+  }
   .statCard {
-    width: 100%; /* 1 per row on phones */
+    flex: 1 1 100%;
+    max-width: 100%;
   }
 }

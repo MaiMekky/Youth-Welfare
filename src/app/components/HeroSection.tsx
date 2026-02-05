@@ -1,7 +1,6 @@
 "use client";
 import React, { useState } from "react";
 import styles from "../Styles/components/HeroSection.module.css";
-import bgImage from "../assets/bgImg.png";
 import StatsSection from "./StatsSection";
 import LoginPage from "./LoginPage";
 import SignupPage from "./SignUp";
@@ -23,7 +22,13 @@ const HeroSection: React.FC = () => {
   return (
     <section
       className={styles.hero}
-      style={{ backgroundImage: `url(${bgImage.src})` }}
+      style={{ 
+        backgroundImage: 'url("/bgImg.png")',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      }}
     >
       <div className={styles.overlay}>
         <div className={styles.heroContent}>

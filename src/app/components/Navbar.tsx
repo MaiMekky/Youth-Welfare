@@ -29,15 +29,7 @@ const Navbar: React.FC = () => {
             <Search className={styles.searchIcon} size={16} />
           </div>
 
-          <button className={styles.topBtn} onClick={toggleLang}>
-            <Globe size={14} />
-            {lang === "ar" ? "English" : "العربية"}
-          </button>
-
-          <button className={styles.topBtn}>
-            <User size={14} />
-            {lang === "ar" ? "بوابة الطلاب" : "Student Portal"}
-          </button>
+      
         </div>
 
         {/* Left side: department info */}

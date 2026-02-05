@@ -1,10 +1,12 @@
 .container {
-  padding: 40px 20px;
-  max-width: 950px;
+  padding: clamp(1rem, 4vw, 2.5rem) clamp(1rem, 4vw, 1.25rem);
+  max-width: min(950px, 95vw);
+  width: 100%;
   margin: 0 auto;
   font-family: "Cairo", sans-serif;
   direction: rtl;
   color: #1e1e1e;
+  box-sizing: border-box;
 }
 
 .contentCard {
@@ -61,6 +63,15 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px 25px;
+}
+
+@media (max-width: 640px) {
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+  .actions {
+    flex-direction: column;
+  }
 }
 
 .infoGrid p {

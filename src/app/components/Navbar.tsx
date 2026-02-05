@@ -35,32 +35,7 @@ const Navbar: React.FC = () => {
               {lang === "ar" ? "English" : "العربية"}
             </button>
 
-            {/* ✅ Student Portal Button */}
-            <button
-              className={styles.topBtn}
-              onClick={() => {
-                setActiveScreen("signup"); // open signup by default
-                setShowModal(true);
-              }}
-            >
-              <User size={14} />
-              {lang === "ar" ? "بوابة الطلاب" : "Student Portal"}
-            </button>
-          </div>
-
-          {/* Left side: department info */}
-          <div className={styles.departmentInfo}>
-            <h2>
-              {lang === "ar"
-                ? "الإدارة العامة لرعاية الشباب"
-                : "General Administration of Youth Care"}
-            </h2>
-            <p>
-              {lang === "ar"
-                ? "Helwan University - Youth Care"
-                : "Helwan University - Youth Care"}
-            </p>
-          </div>
+      
         </div>
       </header>
 

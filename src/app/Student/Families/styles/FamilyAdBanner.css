@@ -1,0 +1,212 @@
+.ad-banner-container {
+    width: 100%;
+    padding: 2rem 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ad-banner-card {
+    background: linear-gradient(135deg, #27285D 0%, #3a3b7a 100%);
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 8px 24px rgba(39, 40, 93, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    max-width: 1200px;
+    width: 100%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.ad-banner-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(179, 142, 25, 0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.ad-banner-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(39, 40, 93, 0.25);
+}
+
+.ad-banner-icon {
+    background: linear-gradient(135deg, #B38E19 0%, #d4a91e 100%);
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    min-width: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(179, 142, 25, 0.3);
+}
+
+.ad-banner-icon svg {
+    width: 40px;
+    height: 40px;
+    color: #fff;
+}
+
+.ad-banner-content {
+    flex: 1;
+    text-align: right;
+    direction: rtl;
+}
+
+.ad-banner-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 0.75rem 0;
+    line-height: 1.3;
+}
+
+.ad-banner-description {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0;
+    line-height: 1.6;
+}
+
+.ad-banner-button {
+    background: linear-gradient(135deg, #B38E19 0%, #d4a91e 100%);
+    color: #fff;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(179, 142, 25, 0.3);
+    white-space: nowrap;
+}
+
+.ad-banner-button:hover {
+    background: linear-gradient(135deg, #d4a91e 0%, #B38E19 100%);
+    transform: translateX(-4px);
+    box-shadow: 0 6px 16px rgba(179, 142, 25, 0.4);
+}
+
+.ad-banner-button:active {
+    transform: translateX(-2px);
+}
+
+.arrow-icon {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease;
+}
+
+.ad-banner-button:hover .arrow-icon {
+    transform: translateX(-4px);
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .ad-banner-card {
+        gap: 1.5rem;
+        padding: 1.5rem;
+    }
+
+    .ad-banner-icon {
+        width: 70px;
+        height: 70px;
+        min-width: 70px;
+    }
+
+    .ad-banner-icon svg {
+        width: 35px;
+        height: 35px;
+    }
+
+    .ad-banner-title {
+        font-size: 1.5rem;
+    }
+
+    .ad-banner-description {
+        font-size: 0.95rem;
+    }
+
+    .ad-banner-button {
+        padding: 0.875rem 1.75rem;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .ad-banner-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 2rem 1.5rem;
+    }
+
+    .ad-banner-content {
+        text-align: center;
+    }
+
+    .ad-banner-title {
+        font-size: 1.35rem;
+    }
+
+    .ad-banner-description {
+        font-size: 0.9rem;
+    }
+
+    .ad-banner-button {
+        width: 100%;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    .ad-banner-button:hover {
+        transform: translateY(-2px);
+        transform: translateX(0);
+    }
+}
+
+@media (max-width: 480px) {
+    .ad-banner-container {
+        padding: 1.5rem 0.75rem;
+    }
+
+    .ad-banner-card {
+        padding: 1.5rem 1rem;
+    }
+
+    .ad-banner-icon {
+        width: 60px;
+        height: 60px;
+        min-width: 60px;
+    }
+
+    .ad-banner-icon svg {
+        width: 30px;
+        height: 30px;
+    }
+
+    .ad-banner-title {
+        font-size: 1.2rem;
+    }
+
+    .ad-banner-description {
+        font-size: 0.85rem;
+    }
+
+    .ad-banner-button {
+        font-size: 0.95rem;
+        padding: 0.875rem;
+    }
+}

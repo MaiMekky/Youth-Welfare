@@ -24,6 +24,9 @@ export default function Cards(_: Props) {
           min-height: 100vh;
           color: var(--text);
           box-sizing: border-box;
+          width: 100%;
+          max-width: 100%;
+          overflow-x: hidden;
         }
 
         .card{

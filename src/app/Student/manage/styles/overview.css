@@ -1,0 +1,276 @@
+/* Main wrapper */
+.overview-wrapper {
+  direction: rtl;
+  padding: 20px;
+}
+
+/* Main layout */
+.overview-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+  margin-top: 30px;
+}
+
+/* Card */
+.overview-card {
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* Section Header */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.section-header h3 {
+  font-size: 22px;
+  font-weight: bold;
+  color: #27285d;
+  margin: 0;
+}
+
+/* =============================
+      STATISTICS SECTION
+============================= */
+
+.statistics-section {
+  margin-bottom: 30px;
+}
+
+.statistics-title {
+  font-size: 26px;
+  font-weight: bold;
+  color: #27285d;
+  margin-bottom: 20px;
+  text-align: right;
+}
+
+.statistics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.stat-card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.members-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.activities-icon {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.upcoming-icon {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.completed-icon {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.stat-content {
+  flex-grow: 1;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: bold;
+  color: #27285d;
+  line-height: 1.2;
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  font-size: 16px;
+  color: #6c6db7;
+  font-weight: 500;
+}
+
+/* =============================
+      MEMBERS STYLING
+============================= */
+
+.members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.member-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #f8f9ff;
+  border-radius: 12px;
+}
+
+.member-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.member-avatar {
+  color: #6c6db7;
+}
+
+.member-name {
+  font-weight: 600;
+  color: #27285d;
+  font-size: 17px;
+  margin-bottom: 4px;
+}
+
+.member-college {
+  font-size: 15px;
+  color: #6c6db7;
+}
+
+/* Role badges */
+.role-badge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.founder {
+  background: #27285d;
+  color: #fff;
+}
+
+.assistant {
+  background: #d7d9ff;
+  color: #27285d;
+}
+
+.member {
+  background: #eceefe;
+  color: #27285d;
+}
+
+/* =============================
+      ACTIVITIES STYLING
+============================= */
+
+.activities-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px;
+  background: #f8f9ff;
+  border-radius: 12px;
+  justify-content: space-between;
+}
+
+.activity-info {
+  flex-grow: 1;
+}
+
+.activity-title {
+  font-weight: 600;
+  color: #27285d;
+  font-size: 17px;
+  margin-bottom: 4px;
+}
+
+.activity-time {
+  font-size: 15px;
+  color: #6c6db7;
+}
+
+/* Status badges */
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.upcoming {
+  background: #e8f3ff;
+  color: #1d73d1;
+}
+
+.done {
+  background: #e5f8eb;
+  color: #24a148;
+}
+
+/* Icon container */
+.activity-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c6db7;
+  font-size: 18px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .overview-container {
+    grid-template-columns: 1fr;
+  }
+
+  .statistics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+
+  .stat-value {
+    font-size: 28px;
+  }
+
+  .stat-label {
+    font-size: 14px;
+  }
+}

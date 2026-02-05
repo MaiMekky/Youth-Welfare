@@ -1,5 +1,5 @@
 .newsSection {
-  padding: 80px 20px;
+  padding: clamp(2rem, 6vw, 5rem) clamp(1rem, 4vw, 1.25rem);
   background-color: #fff;
   direction: rtl;
 }
@@ -15,14 +15,14 @@
 }
 
 .title {
-  font-size: 28px;
+  font-size: clamp(1.5rem, 4vw, 1.75rem);
   font-weight: 700;
   color: #1a1a40;
-  margin-bottom: 10px;
+  margin-bottom: 0.625rem;
 }
 
 .subtitle {
-  font-size: 17px;
+  font-size: clamp(0.9375rem, 2vw, 1.0625rem);
   color: #6c6c7d;
 }
 

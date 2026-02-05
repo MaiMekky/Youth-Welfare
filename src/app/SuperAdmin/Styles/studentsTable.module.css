@@ -1,9 +1,14 @@
 .studentsTable {
   background: #fff;
-  padding: 20px;
+  padding: clamp(1rem, 2vw, 1.25rem);
   border-radius: 14px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
   direction: rtl;
+  overflow-x: auto;
+}
+
+.studentsTable table {
+  min-width: 600px;
 }
 
 .studentsTable table {

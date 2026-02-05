@@ -35,9 +35,11 @@
 /* Content section */
 .layout-content {
   flex: 1;
-  padding: 24px 40px;
+  padding: clamp(1rem, 3vw, 1.5rem) clamp(1rem, 5vw, 2.5rem);
   overflow-y: auto;
+  overflow-x: hidden;
   box-sizing: border-box;
+  min-width: 0;
 }
 
 /* Footer */

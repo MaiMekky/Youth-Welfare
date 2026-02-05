@@ -391,7 +391,7 @@ background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);  border-radius: 1
   font-size: 14px;
   color: #9ca3af;
   transition: all 0.3s ease;
-  margin-right: auto;
+  /* margin-right: auto; */
 }
 
 .progress-step.completed .step-circle {

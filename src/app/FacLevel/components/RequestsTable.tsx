@@ -114,7 +114,7 @@ export default function RequestsTable({ onDataFetched, filteredRequests }: Reque
       studentId: item.student_uid,
       reqNumber: item.solidarity_id,
       date: new Date(item.created_at).toLocaleDateString("ar-EG"),
-      amount: item.total_income,
+      amount: item.total_discount,
       status: item.req_status,
     }));
     setRequests(formatted);
@@ -176,7 +176,7 @@ export default function RequestsTable({ onDataFetched, filteredRequests }: Reque
                   <td>{req.studentId}</td>
                   <td>{req.reqNumber}</td>
                   <td>{req.date}</td>
-                  <td>{req.amount}</td>
+                  <td>{req.amount || "---"}</td>
                   <td>
                     <span
                   className={`${styles.statusBadge} ${

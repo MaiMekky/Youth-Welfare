@@ -6,9 +6,10 @@ import "../styles/applyForm.css";
 
 interface ApplicationDetailsFormProps {
   onSuccess?: () => void;
+  onNotify?: (message: string, type: "success" | "warning" | "error") => void; // new prop
 }
 
-export default function ApplicationDetailsForm({ onSuccess }: ApplicationDetailsFormProps) {
+export default function ApplicationDetailsForm({ onSuccess , onNotify  }: ApplicationDetailsFormProps) {
   const [formData, setFormData] = useState({
     studentName: "",
     nationalId: "",
@@ -33,12 +34,20 @@ export default function ApplicationDetailsForm({ onSuccess }: ApplicationDetails
     supportReason: "",
     documents: null as File | null,
   });
+  const [notification, setNotification] = useState<{ message: string; type: "success" | "warning" | "error" } | null>(null);
 
+  const showNotification = (message: string, type: "success" | "warning" | "error") => {
+    if (onNotify) onNotify(message, type);
+    else {
+      setNotification({ message, type });
+      setTimeout(() => setNotification(null), 3500);
+    }
+  };
   const [documents, setDocuments] = useState<{ [key: string]: File | null }>({});
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [showSuccess, setShowSuccess] = useState(false);
 const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[]>([]);
-
+const requiredDocs = ["socialResearch", "salaryProof", "fatherId", "studentId"];
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -52,21 +61,25 @@ const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[
   const validate = () => {
     const newErrors: { [key: string]: string } = {};
 
-    if (!formData.studentName.trim()) newErrors.studentName = "الاسم الكامل مطلوب";
-    if (!/^\d{14}$/.test(formData.nationalId))
-      newErrors.nationalId = "الرقم القومي يجب أن يكون 14 رقمًا";
-    if (!formData.faculty.trim()) newErrors.college = "الكلية مطلوبة";
-    if (!formData.year.trim()) newErrors.year = "الفرقة مطلوبة";
-    if (!/^\+20\d{10}$/.test(formData.phone))
-      newErrors.phone = "رقم الهاتف يجب أن يكون بصيغة +20XXXXXXXXXX";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-      newErrors.email = "البريد الإلكتروني غير صالح";
+    // if (!formData.studentName.trim()) newErrors.studentName = "الاسم الكامل مطلوب";
+    // if (!/^\d{14}$/.test(formData.nationalId))
+    //   newErrors.nationalId = "الرقم القومي يجب أن يكون 14 رقمًا";
+    // if (!formData.faculty.trim()) newErrors.college = "الكلية مطلوبة";
+    // if (!formData.year.trim()) newErrors.year = "الفرقة مطلوبة";
+    // if (!/^\+20\d{10}$/.test(formData.phone))
+    //   newErrors.phone = "رقم الهاتف يجب أن يكون بصيغة +20XXXXXXXXXX";
+    // if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
+    //   newErrors.email = "البريد الإلكتروني غير صالح";
     if (!formData.gpa.trim()) newErrors.gpa = "التقدير مطلوب";
     if (!formData.address.trim()) newErrors.address = "العنوان مطلوب";
     if (!formData.fatherStatus) newErrors.fatherStatus = "حالة الأب مطلوبة";
     if (!formData.motherStatus) newErrors.motherStatus = "حالة الأم مطلوبة";
-    if (!formData.FatherIncome.trim()) newErrors.FatherIncome = "دخل الأب مطلوب";
-    if (!formData.MotherIncome.trim()) newErrors.MotherIncome = "دخل الأم مطلوب";
+    if (formData.fatherStatus !== "متوفى" && !formData.FatherIncome.trim())
+      newErrors.FatherIncome = "دخل الأب مطلوب";
+
+    if (formData.motherStatus !== "متوفاة" && !formData.MotherIncome.trim())
+      newErrors.MotherIncome = "دخل الأم مطلوب";
+
     if (!formData.familyMembers.trim()) newErrors.familyMembers = "عدد أفراد الأسرة مطلوب";
     if (!formData.siblingOrder.trim()) newErrors.siblingOrder = "الترتيب بين الإخوات مطلوب";
     if (!/^\+20\d{10}$/.test(formData.fatherPhone))
@@ -76,7 +89,11 @@ const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[
     if (!formData.disability) newErrors.disability = "يرجى تحديد حالة الإعاقة";
     if (!formData.housingStatus) newErrors.housingStatus = "يرجى تحديد حالة المسكن";
     if (!formData.supportReason.trim()) newErrors.supportReason = "يرجى إدخال سبب طلب الدعم";
-
+requiredDocs.forEach((docKey) => {
+  if (!documents[docKey]) {
+    newErrors[docKey] = "هذا المستند مطلوب";
+  }
+});
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -100,8 +117,13 @@ const formPayload = new FormData();
 formPayload.append("family_numbers", String(formData.familyMembers));
 formPayload.append("father_status", formData.fatherStatus);
 formPayload.append("mother_status", formData.motherStatus);
-formPayload.append("father_income", String(formData.FatherIncome));
-formPayload.append("mother_income", String(formData.MotherIncome)); 
+if (formData.fatherStatus !== "متوفى") {
+  formPayload.append("father_income", String(formData.FatherIncome));
+}
+
+if (formData.motherStatus !== "متوفاة") {
+  formPayload.append("mother_income", String(formData.MotherIncome));
+}
 formPayload.append("arrange_of_brothers", String(formData.siblingOrder));
 formPayload.append("f_phone_num", formData.fatherPhone);
 formPayload.append("m_phone_num", formData.motherPhone);
@@ -140,17 +162,17 @@ formPayload.append("faculty_id", formData.faculty); // أو "faculty_id" حسب 
       if (response.ok) {
         const data = await response.json().catch(() => ({}));
         console.log("Server response:", data);
-        alert("✅ تم إرسال الطلب بنجاح");
+       showNotification("تم إرسال الطلب بنجاح ✅", "success");
         setShowSuccess(true);
         if (onSuccess) onSuccess();
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.error("Submission error:", errorData);
-        alert("❌ حدث خطأ أثناء الإرسال، راجعي التفاصيل في Console");
+        showNotification("❌ حدث خطأ أثناء الإرسال", "error");
       }
     } catch (err) {
       console.error("Network error:", err);
-      alert("⚠️ فشل الاتصال بالسيرفر. تأكدي أن السيرفر شغّال وإعدادات CORS صحيحة.");
+     showNotification(" فشل الاتصال بالسيرفر. تأكدي أن السيرفر شغّال وإعدادات CORS صحيحة.⚠️", "error");
     }
   };
 
@@ -159,6 +181,7 @@ formPayload.append("faculty_id", formData.faculty); // أو "faculty_id" حسب 
   onDocumentsChange,
 }: {
   files: Record<string, File | null>;
+  errors?: Record<string, string>;
   onDocumentsChange?: (files: Record<string, File | null>) => void;
 }) => {
   const documentsList = [
@@ -189,7 +212,9 @@ formPayload.append("faculty_id", formData.faculty); // أو "faculty_id" حسب 
               {doc.required && <span className="required-badge">مطلوب</span>}
             </div>
             <p className="document-desc">{doc.description}</p>
-
+              {errors[doc.id] && (
+                <span className="error">{errors[doc.id]}</span>
+              )}
             <label className="upload-btn">
               <Upload size={18} />
               <span>{files[doc.id] ? files[doc.id]?.name : "رفع المستند"}</span>
@@ -221,7 +246,7 @@ formPayload.append("faculty_id", formData.faculty); // أو "faculty_id" حسب 
       <form className="apply-form" onSubmit={handleSubmit}>
         <h4 className="section-title">معلومات الطالب</h4>
         <div className="grid-2">
-          <div className="form-group">
+          {/* <div className="form-group">
             <label  style={{color:"#2C3A5F"}}>الاسم الكامل</label>
             <input
               type="text"
@@ -304,22 +329,22 @@ formPayload.append("faculty_id", formData.faculty); // أو "faculty_id" حسب 
               placeholder="example@email.com"
             />
             {errors.email && <span className="error">{errors.email}</span>}
+          </div> */}
+          <div className="form-group">
+            <label style={{ color: "#2C3A5F" }}>التقدير</label>
+            <select style={{ color: "#2C3A5F" }}
+              name="gpa"
+              value={formData.gpa}
+              onChange={handleChange}
+            >
+              <option value="" hidden>اختر...</option>
+              <option value="امتياز">امتياز</option>
+              <option value="جيد جدا">جيد جدا</option>
+              <option value="جيد">جيد</option>
+              <option value="مقبول">مقبول</option>
+            </select>
+            {errors.gpa && <span className="error">{errors.gpa}</span>}
           </div>
-<div className="form-group">
-  <label style={{ color: "#2C3A5F" }}>التقدير</label>
-  <select style={{ color: "#2C3A5F" }}
-    name="gpa"
-    value={formData.gpa}
-    onChange={handleChange}
-  >
-    <option value="" hidden>اختر...</option>
-    <option value="امتياز">امتياز</option>
-    <option value="جيد جدا">جيد جدًا</option>
-    <option value="جيد">جيد</option>
-    <option value="مقبول">مقبول</option>
-  </select>
-  {errors.gpa && <span className="error">{errors.gpa}</span>}
-</div>
 
           <div className="form-group">
             <label style={{color:"#2C3A5F"}}>النظام الاكاديمي</label>
@@ -344,72 +369,75 @@ formPayload.append("faculty_id", formData.faculty); // أو "faculty_id" حسب 
         ============================ */}
         <h4 className="section-title">بيانات الأسرة</h4>
         <div className="grid-2">
-    <div className="form-group">
-  <label style={{ color: "#2C3A5F" }}>حالة الأب</label>
-  <select
-    style={{ color: "#2C3A5F" }}
-    name="fatherStatus"
-    value={formData.fatherStatus}
-    onChange={handleChange}
-  >
-    <option value="" disabled hidden>اختر...</option>
-    <option value="working">يعمل</option>
-    <option value="retired">بالمعاش</option>
-    <option value="sick">مريض</option>
-    <option value="deceased">متوفى</option>
-  </select>
-  {errors.fatherStatus && (
-    <span className="error">{errors.fatherStatus}</span>
-  )}
-</div>
+            <div className="form-group">
+          <label style={{ color: "#2C3A5F" }}>حالة الأب</label>
+          <select
+            style={{ color: "#2C3A5F" }}
+            name="fatherStatus"
+            value={formData.fatherStatus}
+            onChange={handleChange}
+          >
+            <option value="" disabled hidden>اختر...</option>
+            <option value="يعمل">يعمل</option>
+            <option value="بالمعاش">بالمعاش</option>
+            <option value="مريض">مريض</option>
+            <option value="متوفى">متوفى</option>
+          </select>
+          {errors.fatherStatus && (
+            <span className="error">{errors.fatherStatus}</span>
+          )}
+        </div>
 
-<div className="form-group">
-  <label style={{ color: "#2C3A5F" }}>حالة الأم</label>
-  <select
-    style={{ color: "#2C3A5F" }}
-    name="motherStatus"
-    value={formData.motherStatus}
-    onChange={handleChange}
-  >
-    <option value="" disabled hidden>اختر...</option>
-    <option value="working">تعمل</option>
-    <option value="retired">بالمعاش</option>
-    <option value="sick">مريضة</option>
-    <option value="deceased">متوفاة</option>
-  </select>
-  {errors.motherStatus && (
-    <span className="error">{errors.motherStatus}</span>
-  )}
-</div>
+        <div className="form-group">
+          <label style={{ color: "#2C3A5F" }}>حالة الأم</label>
+          <select
+            style={{ color: "#2C3A5F" }}
+            name="motherStatus"
+            value={formData.motherStatus}
+            onChange={handleChange}
+          >
+            <option value="" disabled hidden>اختر...</option>
+            <option value="تعمل">تعمل</option>
+            <option value="بالمعاش">بالمعاش</option>
+            <option value="مريضة">مريضة</option>
+            <option value="متوفاة">متوفاة</option>
+          </select>
+          {errors.motherStatus && (
+            <span className="error">{errors.motherStatus}</span>
+          )}
+        </div>
 
 
-          <div className="form-group">
-            <label  style={{color:"#2C3A5F"}}>دخل الأب</label>
-            <input
-              type="number"
-              name="FatherIncome"
-              value={formData.FatherIncome}
-              onChange={handleChange}
-              placeholder="أدخل دخل الأب"
-            />
-            {errors.FatherIncome && (
-              <span className="error">{errors.FatherIncome}</span>
-            )}
-          </div>
+         <div className="form-group">
+          <label style={{ color: "#2C3A5F" }}>دخل الأب</label>
+          <input
+            type="number"
+            name="FatherIncome"
+            value={formData.fatherStatus === "متوفى" ? "" : formData.FatherIncome}
+            onChange={handleChange}
+            placeholder="أدخل دخل الأب"
+            disabled={formData.fatherStatus === "متوفى"} 
+          />
+          {errors.FatherIncome && (
+            <span className="error">{errors.FatherIncome}</span>
+          )}
+        </div>
 
-          <div className="form-group">
-            <label  style={{color:"#2C3A5F"}}>دخل الأم</label>
-            <input
-              type="number"
-              name="MotherIncome"
-              value={formData.MotherIncome}
-              onChange={handleChange}
-              placeholder="أدخل دخل الأم"
-            />
-            {errors.MotherIncome && (
-              <span className="error">{errors.MotherIncome}</span>
-            )}
-          </div>
+        <div className="form-group">
+          <label style={{ color: "#2C3A5F" }}>دخل الأم</label>
+          <input
+            type="number"
+            name="MotherIncome"
+            value={formData.motherStatus === "متوفاة" ? "" : formData.MotherIncome}
+            onChange={handleChange}
+            placeholder="أدخل دخل الأم"
+            disabled={formData.motherStatus === "متوفاة"}
+          />
+          {errors.MotherIncome && (
+            <span className="error">{errors.MotherIncome}</span>
+          )}
+        </div>
+
 
           <div className="form-group">
             <label  style={{color:"#2C3A5F"}}>عدد أفراد الأسرة</label>
@@ -553,16 +581,34 @@ formPayload.append("faculty_id", formData.faculty); // أو "faculty_id" حسب 
         </div>
   <DocumentUploadForm 
   files={documents}
+   errors={errors}
   onDocumentsChange={(updated) => {
     setDocuments(updated);
     console.log("📁 الملفات الحالية:", updated);
   }} 
 />
+
 {/* <DocumentUploadForm/> */}
         <div className="form-actions">
           <button type="submit" className="submit-btn">إرسال الطلب</button>
         </div>
       </form>
+        {notification && (
+        <div
+          style={{
+            position: "fixed",
+            top: 20,
+            right: 20,
+            padding: "12px 20px",
+            borderRadius: 8,
+            color: "#fff",
+            backgroundColor: notification.type === "success" ? "#22c55e" : notification.type === "error" ? "#ef4444" : "#facc15",
+            zIndex: 9999,
+          }}
+        >
+          {notification.message}
+        </div>
+      )}
     </div>
   );
 }

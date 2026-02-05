@@ -1,9 +1,15 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
+import LoginPage from "./LoginPage";
+import SignupPage from "./SignUp";
 import { useLanguage } from "../context/LanguageContext";
 
 const VisionSection: React.FC = () => {
   const { language } = useLanguage();
+
+  // ✅ Local state for modal
+  const [showModal, setShowModal] = useState(false);
+  const [activeScreen, setActiveScreen] = useState<"login" | "signup">("signup");
 
   const sectionStyle: React.CSSProperties = {
     display: "flex",
@@ -78,11 +84,10 @@ const VisionSection: React.FC = () => {
     backgroundColor: "#e6e6e6",
   };
 
-  const [hover, setHover] = React.useState(false);
+  const [hover, setHover] = useState(false);
 
   // Language content
-  const visionTitle =
-    language === "ar" ? "رؤيتنا ورسالتنا" : "Our Vision & Mission";
+  const visionTitle = language === "ar" ? "رؤيتنا ورسالتنا" : "Our Vision & Mission";
   const visionSubTitle = language === "ar" ? "رؤيتنا" : "Our Vision";
   const visionText =
     language === "ar"
@@ -110,6 +115,10 @@ const VisionSection: React.FC = () => {
           style={hover ? { ...buttonStyle, ...buttonHoverStyle } : buttonStyle}
           onMouseEnter={() => setHover(true)}
           onMouseLeave={() => setHover(false)}
+          onClick={() => {
+            setActiveScreen("signup"); // open signup
+            setShowModal(true);
+          }}
         >
           {buttonText}
         </button>
@@ -123,6 +132,46 @@ const VisionSection: React.FC = () => {
         <h3 style={subHeadingStyle}>{missionSubTitle}</h3>
         <p style={paragraphStyle}>{missionText}</p>
       </div>
+
+      {/* ✅ Modal Popup */}
+      {showModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 9999,
+          }}
+        >
+          <div
+            style={{
+              // backgroundColor: "#fff",
+              borderRadius: "15px",
+              padding: "30px",
+              maxWidth: "500px",
+              width: "90%",
+            }}
+          >
+            {activeScreen === "login" ? (
+              <LoginPage
+                onClose={() => setShowModal(false)}
+                onSwitchToSignup={() => setActiveScreen("signup")}
+              />
+            ) : (
+              <SignupPage
+                onClose={() => setShowModal(false)}
+                onSwitchToLogin={() => setActiveScreen("login")}
+              />
+            )}
+          </div>
+        </div>
+      )}
     </section>
   );
 };

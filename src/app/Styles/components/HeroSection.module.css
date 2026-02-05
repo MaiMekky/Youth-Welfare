@@ -8,6 +8,7 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  box-sizing: border-box;
 }
 
 .overlay {
@@ -43,7 +44,8 @@
 }
 
 .separator {
-  width: 90px;
+  width: 10%;
+  max-width: 90px;
   height: 3px;
   background-color: #b38e19;
   margin: 0 auto 20px auto;
@@ -62,7 +64,7 @@
   font-size: clamp(14px, 2vw, 18px);
   color: #f3f5fd;
   line-height: 1.8;
-  margin-bottom: 35px;
+  margin-bottom: 2rem;
 }
 
 .buttons {
@@ -122,7 +124,7 @@
 /* Stats wrapper below hero */
 .statsWrapper {
   width: 100%;
-  margin-top: 40px;
+  margin-top: 5vh;
 }
 
 /* Tablet screens */
@@ -160,7 +162,18 @@
   .description {
     margin-bottom: 25px;
   }
+  .heroContent {
+    margin-bottom: 4vh;
+  }
+  .buttons {
+    gap: 0.75rem;
+  }
+}
 
+@media (max-width: 768px) {
+  .hero {
+    padding-top: 120px;
+  }
   .buttons {
     flex-direction: column;
     gap: 12px;

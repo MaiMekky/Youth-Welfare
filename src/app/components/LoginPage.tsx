@@ -17,9 +17,12 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
-
+ const [notification, setNotification] = useState<string | null>(null);
   router = useRouter();
-
+const showNotification = (message: string, type: "success" | "warning" | "error") => {
+    setNotification(`${type}:${message}`);
+    setTimeout(() => setNotification(null), 3500);
+  };
   // ======= Validation =======
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -34,7 +37,7 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
     return Object.keys(newErrors).length === 0;
   };
   router = useRouter();
-  const handleLogin = async (e: React.FormEvent) => {
+ const handleLogin = async (e: React.FormEvent) => {
   e.preventDefault();
   if (!validate()) return;
   setLoading(true);
@@ -49,67 +52,61 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
     const data = await res.json();
 
     if (!res.ok) {
-      alert(data.message || "فشل تسجيل الدخول");
+      showNotification( "بريد الكتروني خاطئ او كلمة مرور خاطئة❌","error");
       setLoading(false);
       return;
     }
 
-    // data = { token: "JWT_TOKEN", role: "super_admin" }
+    console.log(data);
 
+    // تحويل role العربي لـ key انجليزي
+    let roleKey = "";
+    if (data.user_type === "admin") {
+      if (data.role === "مشرف النظام") roleKey = "super_admin";
+      else if (data.role === "مدير ادارة") roleKey = "uni_manager";
+      else if (data.role === "مسؤول كلية") roleKey = "fac_manager";
+    }
 
-    
-    console.log(data)
-    // حفظ التوكن في localStorage
-     localStorage.setItem('access', data.access);
+    // حفظ البيانات
+    localStorage.setItem('access', data.access);
     localStorage.setItem('refresh', data.refresh);
-    // localStorage.setItem('user_type', data.user_type);
-    document.cookie = `access=${data.access}; path=/; max-age=604800`;
-    document.cookie = `refresh=${data.refresh}; path=/; max-age=604800`;
     localStorage.setItem("user", JSON.stringify({
-  name:data.name,
-  role: data.role,
-  faculty_name: data.faculty_name,
-  admin_id:data.admin_id,
-  user_type:data.user_type
-}));
+      name: data.name,
+      role: data.role,
+      faculty_name: data.faculty_name,
+      admin_id: data.admin_id,
+      user_type: data.user_type
+    }));
     if (data.user_type === "student") {
       localStorage.setItem('student_id', data.student_id.toString());
-     }else { 
+    } else {
       localStorage.setItem('admin_id', data.admin_id.toString());
-     }
+    }
     localStorage.setItem('role', data.role);
     localStorage.setItem('name', data.name);
 
-    console.log("bruh")
-  // توجيه حسب الدور
-   if (data.user_type === "admin") {
-      if (data.role === "مشرف النظام") {
-        console.log("after")
-        router.push("/SuperAdmin");
-      } else if(data.role === "مدير ادارة") { 
-        router.push("/uni-level");
-      }
-      else if(data.role === "مسؤول كلية") { 
-        router.push("/FacLevel");
-      }
-    }
-    else if (data.user_type === "student") {
+    // حفظ cookies
+    document.cookie = `access=${data.access}; path=/; max-age=604800; SameSite=Lax`;
+    document.cookie = `refresh=${data.refresh}; path=/; max-age=604800; SameSite=Lax`;
+    document.cookie = `user_type=${data.user_type}; path=/; max-age=604800; SameSite=Lax`;
+    document.cookie = `roleKey=${roleKey}; path=/; max-age=604800; SameSite=Lax`;
+
+    // توجيه حسب الدور
+    if (data.user_type === "admin") {
+      if (roleKey === "super_admin") router.push("/SuperAdmin");
+      else if (roleKey === "uni_manager") router.push("/uni-level");
+      else if (roleKey === "fac_manager") router.push("/FacLevel");
+    } else if (data.user_type === "student") {
       router.push("/Student");
     }
 
-     console.log("after erelksdjfowei")
-    //  else if (data.role === "مدير ادارة") {
-    //   router.push("/");
-    //  }
-    
   } catch (error) {
     console.error(error);
-    alert("حدث خطأ أثناء تسجيل الدخول");
+     showNotification( "حدث خطأ أثناء تسجيل الدخول ❌","error");
   } finally {
     setLoading(false);
   }
 };
-
 
   return (
     <div className={styles.loginBox}>
@@ -124,7 +121,19 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
       </div>
 
       <h2 className={styles.loginTitle}>تسجيل الدخول</h2>
-
+        {notification && (
+              <div
+                className={`${styles.notification} ${
+                  notification.startsWith("success")
+                    ? styles.success
+                    : notification.startsWith("warning")
+                    ? styles.warning
+                    : styles.error
+                }`}
+              >
+                {notification.split(":")[1]}
+              </div>
+            )}
       {/* Form */}
       <form onSubmit={handleLogin} className={styles.loginForm}>
         <input

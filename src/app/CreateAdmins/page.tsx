@@ -184,7 +184,7 @@ export default function AccessPrivileges() {
                   <td>
   <div className={styles.actionButtons}>
     {/* زر حذف */}
-    <button className={`${styles.btnAction} ${styles.btnDelete}`} title="حذف">
+    {/* <button className={`${styles.btnAction} ${styles.btnDelete}`} title="حذف">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="16"
@@ -201,7 +201,7 @@ export default function AccessPrivileges() {
         <path d="M10 11v6"></path>
         <path d="M14 11v6"></path>
       </svg>
-    </button>
+    </button> */}
 
     {/* زر تعديل */}
     <button
@@ -230,7 +230,9 @@ export default function AccessPrivileges() {
                   <td>
                     <div className={styles.modifiedInfo}>
                       <div className={styles.date}>{user.lastModified}</div>
-                      <div className={styles.modifiedBy}>{user.modifiedBy}</div>
+                      { 
+                        // <div className={styles.modifiedBy}>{user.modifiedBy}</div>
+                      }
                     </div>
                   </td>
                   <td>

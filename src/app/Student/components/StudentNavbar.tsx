@@ -96,8 +96,16 @@ const StudentNavbar: React.FC = () => {
     { key: "familyManage", label: "ادارة الاسر", icon: <IconFamilyManage />, href: "/Student/manage" },
     { key: "takafol", label: "التكافل الاجتماعي", icon: <IconTakafol />, href: "/Student/takafol" },
     { key: "profile", label: "ملفي الشخصي", icon: <IconProfile />, href: "/Student/profile" },
-  ];
-  
+    
+  localStorage.clear();
+  document.cookie = "access=; path=/; max-age=0; SameSite=Lax";
+  document.cookie = "refresh=; path=/; max-age=0; SameSite=Lax";
+  document.cookie = "user_type=; path=/; max-age=0; SameSite=Lax";
+  document.cookie = "roleKey=; path=/; max-age=0; SameSite=Lax";
+  document.cookie = "role=; path=/; max-age=0; SameSite=Lax";
+  router.replace("/"); 
+  };
+
   const isActive = (href: string) => {
     return pathname === href || pathname?.startsWith(href + "/");
   };

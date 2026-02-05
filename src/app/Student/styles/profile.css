@@ -1,10 +1,12 @@
 /* Profile Page Styles */
 .profile-page {
-  padding: 24px;
-  max-width: 1200px;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  max-width: min(1200px, 100%);
+  width: 100%;
   margin: 0 auto;
   direction: rtl;
   font-family: 'Noto Kufi Arabic', 'Noto Sans', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  box-sizing: border-box;
 }
 
 /* Loading and Error States */
@@ -40,7 +42,7 @@
 }
 
 .profile-title {
-  font-size: 2.5rem;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
   color: #2C3A5F;
   margin: 0 0 8px 0;
   font-weight: 700;

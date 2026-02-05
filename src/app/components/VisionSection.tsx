@@ -11,50 +11,52 @@ const VisionSection: React.FC = () => {
     justifyContent: "center",
     alignItems: "center",
     flexWrap: "wrap",
-    gap: "40px",
-    padding: "70px 30px",
+    gap: "clamp(1.5rem, 4vw, 2.5rem)",
+    padding: "clamp(2rem, 6vw, 4.375rem) clamp(1rem, 4vw, 1.875rem)",
     background: "#f8f9fb",
     direction: language === "ar" ? "rtl" : "ltr",
   };
 
   const cardStyle: React.CSSProperties = {
-    flex: "1 1 350px",
+    flex: "1 1 min(350px, 100%)",
     background: "linear-gradient(135deg, #27285D, #B38E19)",
     color: "white",
     borderRadius: "20px",
-    padding: "40px 35px",
+    padding: "clamp(1.5rem, 4vw, 2.5rem) clamp(1.25rem, 3vw, 2.1875rem)",
     boxShadow: "0 6px 20px rgba(0,0,0,0.1)",
     textAlign: language === "ar" ? "right" : "left",
     fontFamily: language === "ar" ? "'Cairo', sans-serif" : "'Poppins', sans-serif",
-    maxWidth: "420px",
-    minHeight: "280px",
+    maxWidth: "min(420px, 100%)",
+    minHeight: "min(280px, auto)",
+    width: "100%",
   };
 
   const textContainerStyle: React.CSSProperties = {
-    flex: "1 1 450px",
-    maxWidth: "650px",
+    flex: "1 1 min(450px, 100%)",
+    maxWidth: "min(650px, 100%)",
+    width: "100%",
     color: "#333",
     fontFamily: language === "ar" ? "'Cairo', sans-serif" : "'Poppins', sans-serif",
     textAlign: language === "ar" ? "right" : "left",
   };
 
   const headingStyle: React.CSSProperties = {
-    fontSize: "2rem",
+    fontSize: "clamp(1.5rem, 3vw, 2rem)",
     fontWeight: "700",
     color: "#27285D",
-    marginBottom: "20px",
+    marginBottom: "1.25rem",
   };
 
   const subHeadingStyle: React.CSSProperties = {
-    fontSize: "1.4rem",
+    fontSize: "clamp(1.125rem, 2.5vw, 1.4rem)",
     fontWeight: "600",
     color: "#27285D",
-    marginTop: "20px",
-    marginBottom: "10px",
+    marginTop: "1.25rem",
+    marginBottom: "0.625rem",
   };
 
   const paragraphStyle: React.CSSProperties = {
-    fontSize: "1.05rem",
+    fontSize: "clamp(0.9375rem, 2vw, 1.05rem)",
     lineHeight: "1.8",
     color: "#444",
   };

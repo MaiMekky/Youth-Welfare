@@ -45,18 +45,32 @@
   color: #B8C5E0;
 }
 .logoutBtn {
-  background-color: #e74c3c; /* أحمر */
+  background-color: #e74c3c;
   color: #fff;
   border: none;
   padding: 8px 14px;
-  margin-left: 12px;
+  margin-inline-start: 12px;
+  margin-inline-end: auto;
   border-radius: 6px;
   font-size: 0.9rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
- margin-right: 70%;
 }
 
 .logoutBtn:hover {
   background-color: #c0392b;
+}
+
+@media (max-width: 768px) {
+  .headerContent {
+    flex-wrap: wrap;
+    padding: 1rem;
+  }
+  .headerTitleH1 {
+    font-size: 1rem;
+  }
+  .headerLogo {
+    width: 40px;
+    height: 40px;
+  }
 }

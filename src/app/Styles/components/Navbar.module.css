@@ -49,7 +49,9 @@
 /* Search box */
 .searchBox {
   position: relative;
-  width: 220px;
+  width: 100%;
+  min-width: 140px;
+  max-width: 220px;
 }
 .searchBox input {
   width: 100%;
@@ -96,24 +98,45 @@
   margin: 2px 0 0;
 }
 
-/* Responsive navbar */
 @media (max-width: 768px) {
   .header {
-    padding: 10px 20px;
+    padding: 10px 16px;
   }
 
   .navContent {
     flex-direction: column;
     align-items: flex-start;
-    gap: 10px;
+    gap: 12px;
   }
 
   .rightSide {
-    justify-content: center;
+    justify-content: flex-start;
     width: 100%;
+    gap: 10px;
   }
 
   .searchBox {
     width: 100%;
+    max-width: none;
+  }
+
+  .topBtn {
+    padding: 10px 14px;
+    font-size: 0.875rem;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 8px 12px;
+  }
+
+  .departmentInfo h2 {
+    font-size: 0.9rem;
+  }
+
+  .departmentInfo p {
+    font-size: 0.75rem;
   }
 }

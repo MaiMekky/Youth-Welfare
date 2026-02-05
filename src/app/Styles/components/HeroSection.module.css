@@ -2,8 +2,8 @@
   position: relative;
   background-size: cover;
   background-position: center;
-  min-height: 100vh;
-  padding-top: 20px; /* keeps hero visible below navbar */
+  min-height: min(100vh, 100dvh);
+  padding-top: 1.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14,7 +14,7 @@
   background: rgba(0, 0, 0, 0.55);
   width: 100%;
   height: 100%;
-  padding: 40px 20px;
+  padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 4vw, 1.25rem);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -23,9 +23,10 @@
 }
 
 .heroContent {
-  max-width: 800px;
+  max-width: min(800px, 95vw);
+  width: 100%;
   color: white;
-  margin-bottom: 60px;
+  margin-bottom: clamp(2rem, 5vw, 3.75rem);
 }
 
 .universityName {
@@ -69,12 +70,13 @@
 }
 
 .btn {
-  padding: 12px 28px;
-  font-size: 16px;
+  padding: clamp(0.75rem, 2vw, 0.875rem) clamp(1.25rem, 3vw, 1.75rem);
+  font-size: clamp(0.875rem, 2vw, 1rem);
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
+  min-height: 44px;
 }
 
 .primary {
@@ -110,22 +112,30 @@
   margin-top: 40px;
 }
 
-/* Responsive tweaks */
 @media (max-width: 768px) {
   .hero {
-    padding-top: 120px; /* more space under fixed navbar */
+    padding-top: 6rem;
   }
 
   .buttons {
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .btn {
+    width: 100%;
   }
 }
 
-/* Responsive tweaks */
-@media (max-width: 600px) {
+@media (max-width: 480px) {
   .hero {
-    padding-top: 120px; /* more space under fixed navbar */
+    padding-top: 5rem;
+  }
+
+  .universityName {
+    margin-top: 1rem;
   }
 }
 .fullScreenOverlay {

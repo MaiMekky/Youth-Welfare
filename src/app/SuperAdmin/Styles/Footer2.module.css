@@ -1,0 +1,465 @@
+/* Footer2.module.css - Fully Responsive */
+
+.footer {
+  background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+  color: #ffffff;
+  direction: rtl;
+  font-family: "Cairo", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 3vw, 2rem);
+  text-align: right;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+/* ===== FOOTER CONTENT GRID ===== */
+.footerContent {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: clamp(1.2rem, 3vw, 2rem);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  padding-bottom: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ===== FOOTER SECTIONS ===== */
+.footerSection {
+  min-width: 0; /* Prevents overflow */
+}
+
+.sectionTitle {
+  font-size: clamp(1.05rem, 2vw, 1.2rem);
+  font-weight: 700;
+  color: #f2c94c;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.footerSection p,
+.footerSection li {
+  color: #e5e7eb;
+  font-size: clamp(0.875rem, 1.5vw, 0.95rem);
+  margin-bottom: 0.6rem;
+  line-height: 1.7;
+  word-wrap: break-word;
+}
+
+.email {
+  color: #fbbf24;
+  font-weight: 600;
+  transition: color 0.3s ease;
+  cursor: pointer;
+}
+
+.email:hover {
+  color: #fde68a;
+}
+
+/* ===== LISTS ===== */
+.featuresList,
+.quickAccessList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.featuresList li,
+.quickAccessList li {
+  position: relative;
+  padding-right: 1.2rem;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.featuresList li::before,
+.quickAccessList li::before {
+  content: "▪";
+  position: absolute;
+  right: 0;
+  color: #f2c94c;
+  font-weight: bold;
+}
+
+.featuresList li:hover,
+.quickAccessList li:hover {
+  color: #fbbf24;
+  transform: translateX(-3px);
+}
+
+/* ===== DASHBOARD DESCRIPTION ===== */
+.dashboardDescription {
+  max-width: 100%;
+  color: #e0e7ff;
+  line-height: 1.8;
+  font-size: clamp(0.875rem, 1.5vw, 0.95rem);
+  word-wrap: break-word;
+}
+
+/* ===== FOOTER BOTTOM ===== */
+.footerBottom {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.copyright {
+  font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+  color: #d1d5db;
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+.footerBottomRow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(1rem, 3vw, 1.5rem);
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.status {
+  color: #ffffff;
+  font-weight: 500;
+  font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.statusDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #22c55e;
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+.poweredBy {
+  color: #9ca3af;
+  font-size: clamp(0.75rem, 1.5vw, 0.85rem);
+}
+
+/* ==================== LARGE DESKTOP (1440px+) ==================== */
+@media (min-width: 1440px) {
+  .footerContent {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2.5rem;
+  }
+}
+
+/* ==================== DESKTOP (1200px - 1439px) ==================== */
+@media (max-width: 1439px) {
+  .footerContent {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+
+/* ==================== LAPTOP/TABLET LANDSCAPE (1024px - 1199px) ==================== */
+@media (max-width: 1199px) {
+  .footer {
+    padding: 2.5rem 1.5rem;
+  }
+
+  .footerContent {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+/* ==================== TABLET (900px - 1023px) ==================== */
+@media (max-width: 1023px) {
+  .footer {
+    padding: 2rem 1.25rem;
+  }
+
+  .footerContent {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    text-align: center;
+  }
+
+  .footerSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .featuresList li,
+  .quickAccessList li {
+    padding-right: 0;
+    text-align: center;
+  }
+
+  .featuresList li::before,
+  .quickAccessList li::before {
+    display: none;
+  }
+
+  .dashboardDescription {
+    text-align: center;
+  }
+}
+
+/* ==================== TABLET PORTRAIT (768px - 899px) ==================== */
+@media (max-width: 899px) {
+  .footer {
+    padding: 2rem 1rem;
+  }
+
+  .footerContent {
+    gap: 1.25rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.1rem;
+  }
+}
+
+/* ==================== MOBILE LANDSCAPE / SMALL TABLET (600px - 767px) ==================== */
+@media (max-width: 767px) {
+  .footer {
+    padding: 1.75rem 1rem;
+  }
+
+  .footerContent {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    text-align: center;
+  }
+
+  .footerSection p,
+  .footerSection li {
+    font-size: 0.9rem;
+  }
+
+  .footerBottomRow {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .status {
+    flex-direction: row;
+  }
+}
+
+/* ==================== MOBILE (480px - 599px) ==================== */
+@media (max-width: 599px) {
+  .footer {
+    padding: 1.5rem 0.875rem;
+  }
+
+  .footerContent {
+    gap: 1.25rem;
+    padding-bottom: 1.25rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.05rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .footerSection p,
+  .footerSection li {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .copyright {
+    font-size: 0.8rem;
+  }
+
+  .footerBottom {
+    margin-top: 1.25rem;
+    padding-top: 0.875rem;
+  }
+
+  .footerBottomRow {
+    gap: 0.5rem;
+  }
+
+  .status,
+  .poweredBy {
+    font-size: 0.8rem;
+  }
+
+  .statusDot {
+    width: 7px;
+    height: 7px;
+  }
+}
+
+/* ==================== SMALL MOBILE (375px - 479px) ==================== */
+@media (max-width: 479px) {
+  .footer {
+    padding: 1.25rem 0.75rem;
+  }
+
+  .footerContent {
+    gap: 1rem;
+  }
+
+  .sectionTitle {
+    font-size: 1rem;
+  }
+
+  .footerSection p,
+  .footerSection li {
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  .copyright {
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+
+  .footerBottomRow {
+    gap: 0.4rem;
+  }
+}
+
+/* ==================== VERY SMALL MOBILE (320px - 374px) ==================== */
+@media (max-width: 374px) {
+  .footer {
+    padding: 1rem 0.5rem;
+  }
+
+  .footerContent {
+    gap: 0.875rem;
+  }
+
+  .sectionTitle {
+    font-size: 0.95rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .footerSection p,
+  .footerSection li {
+    font-size: 0.8rem;
+    margin-bottom: 0.4rem;
+    line-height: 1.5;
+  }
+
+  .dashboardDescription {
+    line-height: 1.6;
+  }
+
+  .copyright {
+    font-size: 0.7rem;
+  }
+
+  .status,
+  .poweredBy {
+    font-size: 0.75rem;
+  }
+
+  .statusDot {
+    width: 6px;
+    height: 6px;
+  }
+}
+
+/* ==================== EXTRA SMALL (< 320px) ==================== */
+@media (max-width: 319px) {
+  .footer {
+    padding: 0.875rem 0.375rem;
+  }
+
+  .footerContent {
+    gap: 0.75rem;
+  }
+
+  .sectionTitle {
+    font-size: 0.9rem;
+  }
+
+  .footerSection p,
+  .footerSection li {
+    font-size: 0.75rem;
+  }
+}
+
+/* ==================== LANDSCAPE MOBILE ==================== */
+@media (max-width: 767px) and (orientation: landscape) {
+  .footer {
+    padding: 1.25rem 1rem;
+  }
+
+  .footerContent {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .footerBottom {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+  }
+
+  .copyright {
+    font-size: 0.8rem;
+  }
+
+  .footerBottomRow {
+    flex-direction: row;
+    gap: 1rem;
+  }
+}
+
+/* ==================== ACCESSIBILITY ==================== */
+@media (prefers-reduced-motion: reduce) {
+  .statusDot {
+    animation: none;
+  }
+
+  .featuresList li:hover,
+  .quickAccessList li:hover {
+    transform: none;
+  }
+}
+
+/* ==================== PRINT ==================== */
+@media print {
+  .footer {
+    background: #2C3A5F;
+    color: #000;
+    page-break-inside: avoid;
+  }
+
+  .statusDot {
+    animation: none;
+  }
+}
+
+/* ==================== HIGH CONTRAST MODE ==================== */
+@media (prefers-contrast: high) {
+  .footer {
+    border-top: 3px solid #ffffff;
+  }
+
+  .sectionTitle {
+    color: #ffeb3b;
+  }
+
+  .email {
+    text-decoration: underline;
+  }
+}

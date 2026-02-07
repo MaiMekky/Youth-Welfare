@@ -1,3 +1,5 @@
+/* sidebar.module.css - Responsive Version */
+
 .saSidebar {
   width: min(280px, 100%);
   min-width: 200px;
@@ -7,11 +9,53 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+  height: 100%;
 }
+
+/* Close button - hidden on desktop */
+.closeButton {
+  display: none;
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  color: #fff;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+  z-index: 10;
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.closeButton:active {
+  transform: scale(0.95);
+}
+
 .logoImage {
   object-fit: cover;
-   border-radius: 50%;
+  border-radius: 50%;
 }
+
+.profileSection {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
 .profileAvatar {
   width: 70px;
   height: 70px;
@@ -24,18 +68,25 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.profileInfo {
+  width: 100%;
+  text-align: center;
 }
 
 .profileInfo h3 {
   font-size: 16px;
   font-weight: 700;
   margin-bottom: 2px;
+  line-height: 1.4;
 }
 
 .profileInfo p {
   font-size: 13px;
-  color: rgba(255,255,255,0.8);
-  
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.4;
 }
 
 .sidebarMenu {
@@ -44,6 +95,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex: 1;
 }
 
 .menuItem {
@@ -56,15 +108,227 @@
   color: #fff;
   text-decoration: none;
   transition: all 0.3s ease;
+  font-size: 15px;
+  white-space: nowrap;
+  position: relative;
 }
 
 .menuItem:hover {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(-2px);
+}
+
+.menuItem:active {
+  transform: translateX(-1px);
 }
 
 .active {
   background: #C9A227;
   color: #2C2A6A;
   font-weight: 700;
-  box-shadow: 2px 2px 8px rgba(0,0,0,0.15);
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* ======== TABLET (900px and below) ========= */
+@media (max-width: 900px) {
+  .saSidebar {
+    width: 240px;
+    min-width: 240px;
+    padding: 1.25rem 1rem;
+  }
+
+  .profileAvatar {
+    width: 60px;
+    height: 60px;
+    font-size: 20px;
+  }
+
+  .profileInfo h3 {
+    font-size: 15px;
+  }
+
+  .profileInfo p {
+    font-size: 12px;
+  }
+
+  .menuItem {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+}
+
+/* ======== MOBILE (768px and below) ========= */
+@media (max-width: 768px) {
+  .saSidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 280px;
+    max-width: 85vw;
+    z-index: 999;
+    transform: translateX(100%);
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.15);
+    padding-top: 70px; /* Space for close button */
+  }
+
+  .saSidebar.open {
+    transform: translateX(0);
+  }
+
+  /* Show close button on mobile */
+  .closeButton {
+    display: flex;
+  }
+
+  .profileSection {
+    margin-top: 0;
+  }
+
+  .profileAvatar {
+    width: 65px;
+    height: 65px;
+  }
+
+  .profileInfo h3 {
+    font-size: 15px;
+  }
+
+  .profileInfo p {
+    font-size: 12px;
+  }
+
+  .menuItem {
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+
+  /* Add touch-friendly spacing */
+  .sidebarMenu {
+    gap: 4px;
+  }
+}
+
+/* ======== SMALL MOBILE (480px and below) ========= */
+@media (max-width: 480px) {
+  .saSidebar {
+    width: 100%;
+    max-width: 90vw;
+  }
+
+  .profileAvatar {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 8px;
+  }
+
+  .profileInfo h3 {
+    font-size: 14px;
+  }
+
+  .profileInfo p {
+    font-size: 11px;
+  }
+
+  .menuItem {
+    padding: 11px 14px;
+    font-size: 14px;
+  }
+
+  .closeButton {
+    width: 36px;
+    height: 36px;
+    top: 12px;
+    left: 12px;
+  }
+}
+
+/* ======== VERY SMALL SCREENS (360px and below) ========= */
+@media (max-width: 360px) {
+  .saSidebar {
+    padding: 1rem 0.75rem;
+  }
+
+  .profileAvatar {
+    width: 55px;
+    height: 55px;
+    font-size: 18px;
+  }
+
+  .profileInfo h3 {
+    font-size: 13px;
+  }
+
+  .profileInfo p {
+    font-size: 10px;
+  }
+
+  .menuItem {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+}
+
+/* ======== SMOOTH SCROLLING ========= */
+.saSidebar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+.saSidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.saSidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.saSidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.saSidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* ======== ACCESSIBILITY ========= */
+@media (prefers-reduced-motion: reduce) {
+  .saSidebar,
+  .menuItem,
+  .closeButton {
+    transition: none;
+  }
+}
+
+/* ======== LANDSCAPE MOBILE ========= */
+@media (max-width: 768px) and (orientation: landscape) {
+  .saSidebar {
+    padding-top: 50px;
+  }
+
+  .profileAvatar {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 6px;
+  }
+
+  .profileInfo h3 {
+    font-size: 13px;
+    margin-bottom: 1px;
+  }
+
+  .profileInfo p {
+    font-size: 11px;
+  }
+
+  .sidebarMenu {
+    margin-top: 12px;
+    gap: 2px;
+  }
+
+  .menuItem {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
 }

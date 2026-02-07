@@ -1,51 +1,44 @@
-// "use client"; // لازم لتحويل الـ layout لـ Client Component
-// import React, { useState } from "react";
-// import "../globals.css";
-// import Header from "./components/header";
-// import Sidebar from "./components/sidebar";
-// import Footer from "./components/Footer2";
-
-
-// export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
-//   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-//   return (
-//     <div style={{ display: "flex", minHeight: "100vh", direction: "rtl" }}>
-//       {/* Sidebar */}
-//       <Sidebar isOpen={sidebarOpen} toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-
-//       {/* Main area */}
-//       <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-//         <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-//         {/* <main style={{ flex: 1, padding: "20px" }}>
-//           {children}
-//         </main> */}
-//          <main style={{ flex: 1, padding: "20px", background: "#f3f5fd" }}>{children}</main>
-//         <Footer />
-//       </div>
-//     </div>
-//   );
-// }
-// app/dashboard/layout.jsx
-import React from "react";
+// app/dashboard/layout.tsx
+"use client";
+import React, { useState } from "react";
 import Sidebar from "../SuperAdmin/components/sidebar";
 import Header from "../SuperAdmin/components/header";
 import Footer from "../SuperAdmin/components/Footer2";
-import styles from "../ActivityLogs/ACtivityLogs.module.css";
+import styles from "./layout.module.css";
 
-export const metadata = { title: "Dashboard" };
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
   return (
-    <div className={styles.dashboardContainer}>
-      <Header />
-      <div className={styles.dashboardContent}>
-        <Sidebar />
-        <main className={styles.mainContent}>{children}</main>
+    <div className={styles.layout}>
+      <Header toggleSidebar={toggleSidebar} />
+      
+      <div className={styles.layoutBody}>
+        <Sidebar isOpen={sidebarOpen} closeSidebar={closeSidebar} />
+        
+        {/* Overlay for mobile */}
+        {sidebarOpen && (
+          <div 
+            className={styles.overlay} 
+            onClick={closeSidebar}
+          />
+        )}
+        
+        <main className={styles.main}>
+          {children}
+        </main>
       </div>
+      
       <Footer />
     </div>
   );
 }
-
-

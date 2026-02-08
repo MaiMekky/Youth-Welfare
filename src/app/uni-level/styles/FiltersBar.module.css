@@ -1,38 +1,47 @@
 .filtersContainer {
   background: #fff;
   border-radius: 16px;
-  padding: 24px;
+  padding: clamp(1rem, 3vw, 1.5rem);
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .sectionTitle {
-  font-size: 16px;
+  font-size: clamp(0.9375rem, 2vw, 1rem);
   font-weight: 700;
-  color:  #2C3A5F;
-  margin-bottom: 16px;
+  color: #2C3A5F;
+  margin-bottom: clamp(0.75rem, 2vw, 1rem);
 }
 
 .searchField {
   border-radius: 10px;
   border: 1px solid #E2E5EF;
-  padding: 10px 14px;
+  padding: clamp(0.5rem, 1.5vw, 0.625rem) clamp(0.75rem, 2vw, 0.875rem);
   width: 100%;
-  margin-bottom: 14px;
+  margin-bottom: clamp(0.75rem, 2vw, 0.875rem);
   background: #FAFBFD;
+  font-size: clamp(0.875rem, 1.5vw, 0.9375rem);
+  box-sizing: border-box;
+  min-height: 44px;
 }
 
 .filterSelects {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(min(150px, 100%), 1fr));
+  gap: clamp(0.5rem, 1.5vw, 0.625rem);
 }
 
 .filterSelects select {
   border: 1px solid #E2E5EF;
-  padding: 10px;
+  padding: clamp(0.5rem, 1.5vw, 0.625rem);
   border-radius: 8px;
   background: #F8F9FB;
-  color:  #2C3A5F;
+  color: #2C3A5F;
+  font-size: clamp(0.875rem, 1.5vw, 0.9375rem);
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 44px;
 }
 
 .clearBtn {
@@ -69,19 +78,33 @@
   display: none; 
 }
 .applyBtn {
-  margin-top: 18px;
-background:  #2C3A5F;
+  margin-top: clamp(0.75rem, 2vw, 1.125rem);
+  background: #2C3A5F;
   border: none;
   border-radius: 8px;
-  padding: 10px 16px;
+  padding: clamp(0.5rem, 1.5vw, 0.625rem) clamp(0.75rem, 2vw, 1rem);
   font-weight: 600;
   color: #fff;
   cursor: pointer;
   transition: background 0.3s ease;
-  margin-right: 8px;
+  margin-right: clamp(0.375rem, 1vw, 0.5rem);
+  min-height: 44px;
+  font-size: clamp(0.875rem, 1.5vw, 0.9375rem);
+  width: 100%;
 }
 
 .applyBtn:hover {
   background: #d4af37;
   color: #fff;
+}
+
+@media (max-width: 640px) {
+  .filterSelects {
+    grid-template-columns: 1fr;
+  }
+  .clearBtn,
+  .applyBtn {
+    width: 100%;
+    margin-right: 0;
+  }
 }

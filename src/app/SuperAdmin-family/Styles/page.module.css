@@ -1,30 +1,36 @@
 .container {
-max-width: 1400px;
-margin: 0 auto;
-padding: 20px;
-direction: rtl;
-background-color: #F8F9FA;
-min-height: 100vh;
+  max-width: min(1400px, 100%);
+  margin: 0 auto;
+  padding: clamp(1rem, 3vw, 1.25rem);
+  direction: rtl;
+  background-color: #F8F9FA;
+  min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 .headerCard {
   background: linear-gradient(135deg, #d4af37 0%, #2C3A5F 100%);
   border-radius: 20px;
-  margin-bottom: 30px;
-  padding: 10px;
+  margin-bottom: clamp(1rem, 3vw, 1.875rem);
+  padding: clamp(0.5rem, 2vw, 0.625rem);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   color: white;
   text-align: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .pageTitle {
-  font-size: 2.5rem;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
   font-weight: 700;
-  margin-bottom: 10px;
+  margin-bottom: clamp(0.5rem, 1.5vw, 0.625rem);
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  word-wrap: break-word;
 }
 
 .pageSubtitle {
-  font-size: 1.1rem;
+  font-size: clamp(0.9375rem, 2vw, 1.1rem);
   opacity: 0.95;
   line-height: 1.6;
 }
@@ -42,11 +48,12 @@ min-height: 100vh;
 /* ✅ Notification positioned at top-right */
 .notification {
   position: fixed;
-  top: 20px;
-  right: 25px;
-  width: 280px;
+  top: clamp(1rem, 3vw, 1.25rem);
+  right: clamp(1rem, 3vw, 1.5625rem);
+  width: min(280px, calc(100% - 2rem));
+  max-width: 280px;
   background: #fff;
-  padding: 14px 16px;
+  padding: clamp(0.75rem, 2vw, 0.875rem) clamp(0.875rem, 2vw, 1rem);
   border-radius: 10px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
   font-weight: 600;
@@ -54,6 +61,8 @@ min-height: 100vh;
   z-index: 9999;
   animation: fadeIn 0.4s ease forwards;
   overflow: hidden;
+  box-sizing: border-box;
+  font-size: clamp(0.8125rem, 1.5vw, 0.875rem);
 }
 
 /* ✅ Success and Error colors */

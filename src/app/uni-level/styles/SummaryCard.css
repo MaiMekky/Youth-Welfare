@@ -1,40 +1,61 @@
 .summary-card {
   background: white;
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+  margin-bottom: clamp(0.75rem, 2vw, 1.5rem);
+  flex-wrap: wrap;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .summary-icon {
   background: #e8f5e9;
-  width: 60px;
-  height: 60px;
+  width: clamp(48px, 6vw, 60px);
+  height: clamp(48px, 6vw, 60px);
+  min-width: clamp(48px, 6vw, 60px);
+  min-height: clamp(48px, 6vw, 60px);
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .summary-info, .summary-total {
   flex: 1;
+  min-width: 0;
 }
 
 .label {
   color: #666;
-  font-size: 0.875rem;
+  font-size: clamp(0.75rem, 1.5vw, 0.875rem);
 }
 
 .value {
-  font-size: 1.5rem;
+  font-size: clamp(1.125rem, 2.5vw, 1.5rem);
   font-weight: 700;
+  word-wrap: break-word;
 }
 
 .export-btn {
   border: 1px solid #ddd;
   border-radius: 8px;
-  width: 48px;
-  height: 48px;
+  width: clamp(40px, 5vw, 48px);
+  height: clamp(40px, 5vw, 48px);
+  min-width: clamp(40px, 5vw, 48px);
+  min-height: clamp(40px, 5vw, 48px);
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .summary-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .export-btn {
+    align-self: flex-end;
+  }
 }

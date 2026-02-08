@@ -4,11 +4,13 @@
    PAGE CONTAINER & LAYOUT
 ============================================ */
 .pageContainer {
-  max-width: 1400px;
+  max-width: min(1400px, 100%);
   margin: 0 auto;
-  padding: clamp(15px, 3vw, 30px);
+  padding: clamp(1rem, 3vw, 1.875rem);
   direction: rtl;
   font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* ============================================

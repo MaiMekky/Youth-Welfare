@@ -54,22 +54,28 @@
   }
 }
 
-/* ======== TABLET RESPONSIVE (900px and below) ========= */
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .main {
-    padding: 16px;
+    margin-right: 240px;
   }
 }
 
-/* ======== MOBILE RESPONSIVE (768px and below) ========= */
+@media (max-width: 900px) {
+  .main {
+    padding: clamp(0.75rem, 2vw, 1rem);
+    margin-right: 240px;
+  }
+}
+
 @media (max-width: 768px) {
   .layoutBody {
     flex-direction: column;
   }
 
   .main {
-    padding: 12px;
+    padding: clamp(0.625rem, 2vw, 0.75rem);
     margin-right: 0 !important;
+    width: 100%;
   }
 
   .overlay {
@@ -77,9 +83,8 @@
   }
 }
 
-/* ======== SMALL MOBILE (480px and below) ========= */
 @media (max-width: 480px) {
   .main {
-    padding: 8px;
+    padding: clamp(0.5rem, 2vw, 0.625rem);
   }
 }

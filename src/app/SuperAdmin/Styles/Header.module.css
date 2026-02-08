@@ -2,11 +2,12 @@
   width: 100%;
   background: linear-gradient(180deg, #2c3a5f 0%, #3d4d75 100%);
   color: #fff;
-  padding: 15px 15px;
+  padding: clamp(0.75rem, 2vw, 0.9375rem);
   box-shadow: 0 6px 16px rgba(0,0,0,0.25);
   position: sticky;
   top: 0;
   z-index: 100;
+  box-sizing: border-box;
 }
 
 .inner {
@@ -28,8 +29,18 @@
   gap: 12px;
 }
 
-.title { font-size: 22px; font-weight: 800; margin: 0; color: #f2c94c; }
-.subtitle { font-size: 13px; margin: 0; color: rgba(255,255,255,0.75); }
+.title { 
+  font-size: clamp(1rem, 2.5vw, 1.375rem); 
+  font-weight: 800; 
+  margin: 0; 
+  color: #f2c94c; 
+  word-wrap: break-word;
+}
+.subtitle { 
+  font-size: clamp(0.75rem, 1.5vw, 0.8125rem); 
+  margin: 0; 
+  color: rgba(255,255,255,0.75); 
+}
 
 .controls {
   display: flex;
@@ -66,21 +77,63 @@
   cursor: pointer;
 }
 
-/* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
-  .inner { flex-direction: column; align-items: stretch; text-align: center; gap: 16px; }
+  .inner { 
+    flex-direction: column; 
+    align-items: stretch; 
+    text-align: center; 
+    gap: clamp(0.75rem, 2vw, 1rem); 
+  }
   .brand { justify-content: center; }
-  .controls { flex-direction: column; width: 100%; }
-  .exportBtn, .searchBox { width: 100%; justify-content: center; }
-  .mobileToggle { display: block; position: absolute; left: 20px; top: 18px; }
+  .controls { 
+    flex-direction: column; 
+    width: 100%; 
+    gap: 0.75rem;
+  }
+  .exportBtn, .searchBox { 
+    width: 100%; 
+    max-width: 100%;
+  }
+  .mobileToggle { 
+    display: block; 
+    position: absolute; 
+    left: clamp(1rem, 3vw, 1.25rem); 
+    top: clamp(0.875rem, 2vw, 1.125rem); 
+  }
 }
 
-@media (max-width: 600px) {
-  .header { padding: 14px 16px; }
-  .title { font-size: 18px; }
-  .subtitle { font-size: 11px; }
-  .exportBtn { padding: 8px 12px; font-size: 13px; }
-  .searchInput { font-size: 13px; height: 36px; padding: 8px 12px; }
+@media (max-width: 768px) {
+  .header { 
+    padding: clamp(0.75rem, 2vw, 0.875rem) clamp(0.875rem, 2vw, 1rem); 
+  }
+  .profileBox {
+    width: 100%;
+    justify-content: center;
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .header { 
+    padding: clamp(0.625rem, 2vw, 0.75rem) clamp(0.75rem, 2vw, 0.875rem); 
+  }
+  .exportBtn { 
+    padding: clamp(0.5rem, 1.5vw, 0.625rem) clamp(0.625rem, 1.5vw, 0.75rem); 
+    font-size: 0.8125rem; 
+  }
+  .profileBox {
+    padding: 0.75rem;
+  }
+  .profileIcon {
+    width: 36px;
+    height: 36px;
+  }
+  .profileName {
+    font-size: 0.8125rem;
+  }
+  .profileRole {
+    font-size: 0.75rem;
+  }
 }
 .logoutBtn {
   background-color: #e74c3c; /* أحمر */

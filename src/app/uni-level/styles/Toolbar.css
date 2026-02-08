@@ -2,47 +2,79 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: clamp(0.75rem, 2vw, 1.5rem);
   flex-wrap: wrap;
+  gap: clamp(0.5rem, 1.5vw, 0.75rem);
+  width: 100%;
 }
 
 .toolbar-left {
   display: flex;
-  gap: 1rem;
+  gap: clamp(0.5rem, 1.5vw, 1rem);
   flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
 }
 
 .filter-btn {
   background: white;
   border: 1px solid #ddd;
   border-radius: 8px;
-  padding: 0.75rem 1.5rem;
+  padding: clamp(0.5rem, 1.5vw, 0.75rem) clamp(0.75rem, 2vw, 1.5rem);
+  min-height: 44px;
+  font-size: clamp(0.875rem, 1.5vw, 0.9375rem);
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 .search-box {
   position: relative;
-  flex: 1;
+  flex: 1 1 100%;
+  min-width: min(200px, 100%);
 }
 
 .search-box input {
   width: 100%;
   border: 1px solid #ddd;
   border-radius: 8px;
-  padding: 0.75rem 2.5rem 0.75rem 1rem;
+  padding: clamp(0.5rem, 1.5vw, 0.75rem) clamp(2rem, 4vw, 2.5rem) clamp(0.5rem, 1.5vw, 0.75rem) clamp(0.75rem, 1.5vw, 1rem);
+  font-size: clamp(0.875rem, 1.5vw, 0.9375rem);
+  box-sizing: border-box;
+  min-height: 44px;
 }
 
 .search-icon {
   position: absolute;
-  right: 1rem;
+  right: clamp(0.75rem, 1.5vw, 1rem);
   top: 50%;
   transform: translateY(-50%);
+  pointer-events: none;
 }
 
 .add-btn {
   background: linear-gradient(135deg, #f4c430, #e6b522);
   border: none;
   border-radius: 8px;
-  padding: 0.75rem 2rem;
+  padding: clamp(0.5rem, 1.5vw, 0.75rem) clamp(1rem, 2.5vw, 2rem);
   font-weight: 600;
   cursor: pointer;
+  min-height: 44px;
+  font-size: clamp(0.875rem, 1.5vw, 0.9375rem);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .toolbar-left {
+    width: 100%;
+  }
+  .search-box {
+    width: 100%;
+  }
+  .add-btn {
+    width: 100%;
+  }
 }

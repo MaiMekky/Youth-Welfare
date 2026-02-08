@@ -2,21 +2,24 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 50px 16px;
+  padding: clamp(1rem, 4vw, 3.125rem) clamp(1rem, 3vw, 1rem);
   background-color: #f5f7fa; 
   min-height: 100vh;
   color: #2C3A5F;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .formContainer {
   background: #ffffff;
-  padding: 32px 24px;
+  padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 1.5rem);
   border-radius: 16px;
   width: 100%;
-  max-width: 500px;
+  max-width: min(500px, 95vw);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
 }
 
 .formContainer h2 {
@@ -55,27 +58,29 @@
 }
 
 .formContainer textarea {
-  min-height: 100px;  
-  max-height: 200px; 
+  min-height: clamp(80px, 15vw, 100px);  
+  max-height: clamp(150px, 25vw, 200px); 
   resize: none;       
 }
 
 .buttonGroup {
   display: flex;
   flex-direction: row; 
-  gap: 12px;
-  margin-top: 24px;
+  gap: clamp(0.75rem, 1.5vw, 0.75rem);
+  margin-top: clamp(1rem, 3vw, 1.5rem);
+  flex-wrap: wrap;
 }
 
 .buttonGroup button {
   width: 100%;
-  padding: 14px 0;
+  padding: clamp(0.75rem, 2vw, 0.875rem) 0;
   border-radius: 12px;
   border: none;
-  font-size: 16px;
+  font-size: clamp(0.875rem, 2vw, 1rem);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
+  min-height: 44px;
 }
 
 .buttonGroup button[type="submit"] {

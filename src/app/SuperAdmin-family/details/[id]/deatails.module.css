@@ -1,12 +1,14 @@
 /* app/family-details/FamilyDetails.module.css */
 
 .pageContainer {
-  max-width: 1400px;
+  max-width: min(1400px, 100%);
   margin: 0 auto;
-  padding: 20px;
+  padding: clamp(1rem, 3vw, 1.25rem);
   direction: rtl;
   background-color: white;
   border-radius: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Header Section */
@@ -50,10 +52,11 @@
 }
 
 .title {
-  font-size: 2rem;
+  font-size: clamp(1.25rem, 3vw, 2rem);
   font-weight: 700;
   color: #2C3A5F;
   margin: 0;
+  word-wrap: break-word;
 }
 
 .statusBadge {
@@ -75,20 +78,22 @@
 /* Info Cards */
 .infoCards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 15px;
-  margin-bottom: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+  gap: clamp(0.75rem, 2vw, 0.9375rem);
+  margin-bottom: clamp(1rem, 3vw, 1.875rem);
 }
 
 .infoCard {
   background: white;
-  padding: 20px;
+  padding: clamp(1rem, 2vw, 1.25rem);
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: clamp(0.75rem, 1.5vw, 0.75rem);
   transition: all 0.3s;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .infoCard:hover {

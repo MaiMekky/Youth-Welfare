@@ -1,41 +1,56 @@
+/* ========== TABLE WRAPPER ========== */
 .table-wrapper {
   background: #ffffff;
   border-radius: 14px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-  padding: clamp(1rem, 3vw, 1.25rem);
-  margin-top: clamp(1rem, 2vw, 1.25rem);
+  padding: clamp(0.875rem, 2.5vw, 1.25rem);
+  margin-top: clamp(0.875rem, 2vw, 1.25rem);
   direction: rtl;
   overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
 }
 
+/* ========== TABLE ACTIONS ========== */
 .table-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  margin-bottom: 15px;
+  gap: clamp(0.5rem, 1.5vw, 0.625rem);
+  margin-bottom: clamp(0.875rem, 2vw, 1rem);
+  flex-wrap: wrap;
 }
 
 .table-actions button {
   background: #f3f4f6;
   border: none;
-  padding: 8px 14px;
+  padding: clamp(0.5rem, 1.5vw, 0.625rem) clamp(0.75rem, 2vw, 0.875rem);
   border-radius: 8px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: clamp(0.8125rem, 1.5vw, 0.9rem);
   font-weight: 500;
   color: #333;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  min-height: 40px;
 }
 
 .table-actions .print-btn:hover {
   background-color: #e0e7ff;
   color: #1d4ed8;
+  transform: translateY(-1px);
 }
 
 .table-actions .export-btn:hover {
   background-color: #dcfce7;
   color: #166534;
+  transform: translateY(-1px);
 }
+
+.table-actions button:active {
+  transform: translateY(0);
+}
+
+/* ========== TABLE CONTAINER ========== */
 .table-container {
   width: 100%;
   border: 1px solid #ddd;
@@ -44,69 +59,72 @@
   background: #fff;
 }
 
+/* ========== TABLE ========== */
 table {
   width: 100%;
   border-collapse: collapse;
-}
-
-.tableFooter {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  border-top: 1px solid #ddd;
-  background: #fafafa;
+  min-width: 700px;
 }
 
 .table-container table {
   width: 100%;
   border-collapse: collapse;
   text-align: center;
-  font-size: 0.95rem;
+  font-size: clamp(0.8125rem, 1.5vw, 0.95rem);
 }
 
 .table-container th {
   background-color: #f9fafb;
   color: #333;
   font-weight: 600;
-  padding: 12px;
+  padding: clamp(0.625rem, 1.5vw, 0.75rem);
   border-bottom: 2px solid #e5e7eb;
+  white-space: nowrap;
+  font-size: clamp(0.8125rem, 1.5vw, 0.9375rem);
 }
 
 .table-container td {
-  padding: 10px 12px;
+  padding: clamp(0.625rem, 1.5vw, 0.75rem);
   border-bottom: 1px solid #e5e7eb;
   color: #555;
-  /* vertical-align: middle; */
-  margin-top: 10px;
+  font-size: clamp(0.8125rem, 1.5vw, 0.875rem);
 }
 
+/* ========== STUDENT INFO ========== */
 .student-info {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  gap: 2px;
 }
 
 .student-info .secondary {
-  font-size: 0.85rem;
+  font-size: clamp(0.75rem, 1.5vw, 0.85rem);
   color: #888;
 }
 
+/* ========== AMOUNT ========== */
 .amount {
   font-weight: 600;
   color: #2563eb;
+  font-size: clamp(0.8125rem, 1.5vw, 0.9375rem);
 }
 
-/* Buttons inside table */
+/* ========== BUTTONS INSIDE TABLE ========== */
 .status,
 .details {
   border: none;
   border-radius: 8px;
-  padding: 6px 12px;
-  font-size: 0.85rem;
+  padding: clamp(4px, 1vw, 6px) clamp(8px, 2vw, 12px);
+  font-size: clamp(0.75rem, 1.5vw, 0.85rem);
   cursor: pointer;
   transition: all 0.2s ease;
   margin: 2px;
+  white-space: nowrap;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Status button */
@@ -117,61 +135,34 @@ table {
 
 .status:hover {
   background-color: #bae6fd;
+  transform: translateY(-1px);
 }
 
 /* Details button */
 .details {
-  background-color:  #c48b23;
+  background-color: #c48b23;
   color: #f9fafb;
+  font-weight: 600;
 }
 
 .details:hover {
   background-color: #1e2a5a;
+  transform: translateY(-1px);
 }
 
-/* Hover effects for rows */
-.table-container tr:hover {
-  background-color: #f9fafb;
-  transition: background-color 0.2s ease;
+.status:active,
+.details:active {
+  transform: translateY(0);
 }
 
-@media (max-width: 768px) {
-  .table-actions {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5rem;
-  }
-
-  .table-actions button {
-    width: 100%;
-    min-height: 44px;
-  }
-
-  .table-container table {
-    font-size: 0.85rem;
-    min-width: 600px;
-  }
-
-  .table-container th,
-  .table-container td {
-    padding: 0.5rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .table-container th,
-  .table-container td {
-    font-size: 0.75rem;
-    padding: 0.375rem;
-  }
-}
-/* حالات الطلب */
+/* ========== STATUS BADGES ========== */
 .statusBadge {
   display: inline-block;
-  padding: 6px 12px;
+  padding: clamp(4px, 1vw, 6px) clamp(8px, 2vw, 12px);
   border-radius: 12px;
-  font-size: 13px;
+  font-size: clamp(0.75rem, 1.5vw, 0.8125rem);
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .statusInitial {
@@ -199,20 +190,22 @@ table {
   color: #000;
 }
 
-/* Gmail-style footer */
+/* ========== TABLE FOOTER (Gmail Style) ========== */
 .tableFooter {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 18px;
+  padding: clamp(0.75rem, 2vw, 0.875rem) clamp(0.875rem, 2.5vw, 1.125rem);
   border-top: 1px solid #ddd;
   background: #fafafa;
-  font-size: 14px;
+  font-size: clamp(0.8125rem, 1.5vw, 0.875rem);
   color: #444;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
 .footerLeft {
-  font-size: 14px;
+  font-size: clamp(0.8125rem, 1.5vw, 0.875rem);
   color: #444;
 }
 
@@ -224,33 +217,43 @@ table {
 .footerRight {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: clamp(0.625rem, 2vw, 0.875rem);
+  flex-wrap: wrap;
 }
 
 .footerRight label {
-  font-size: 14px;
+  font-size: clamp(0.8125rem, 1.5vw, 0.875rem);
   color: #444;
+  white-space: nowrap;
 }
 
 .footerRight select {
-  padding: 6px 10px;
+  padding: clamp(4px, 1vw, 6px) clamp(8px, 1.5vw, 10px);
   border: 1px solid #ccc;
   border-radius: 6px;
   background: #fff;
   cursor: pointer;
-  font-size: 14px;
+  font-size: clamp(0.8125rem, 1.5vw, 0.875rem);
+  min-height: 32px;
+  outline: none;
+  transition: border-color 0.2s ease;
 }
 
-/* Gmail pagination buttons */
+.footerRight select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+/* ========== PAGINATION BUTTONS ========== */
 .paginationButtons {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: clamp(4px, 1vw, 6px);
 }
 
 .paginationButtons button {
-  width: 34px;
-  height: 34px;
+  width: clamp(32px, 5vw, 34px);
+  height: clamp(32px, 5vw, 34px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -259,14 +262,309 @@ table {
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
 }
 
-.paginationButtons button:hover {
+.paginationButtons button:hover:not(:disabled) {
   background: #f1f1f1;
+  border-color: #999;
+}
+
+.paginationButtons button:active:not(:disabled) {
+  transform: scale(0.95);
 }
 
 .paginationButtons button:disabled {
   background: #f5f5f5;
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* ========== ROW HOVER EFFECTS ========== */
+.table-container tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.table-container tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+/* ========== SCROLLBAR STYLING ========== */
+.table-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ========== TABLET (1024px and below) ========== */
+@media (max-width: 1024px) {
+  table {
+    min-width: 600px;
+  }
+}
+
+/* ========== MOBILE (768px and below) ========== */
+@media (max-width: 768px) {
+  .table-wrapper {
+    padding: 0.875rem;
+    border-radius: 12px;
+  }
+
+  .table-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .table-actions button {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  table {
+    min-width: 550px;
+  }
+
+  .table-container table {
+    font-size: 0.85rem;
+  }
+
+  .table-container th,
+  .table-container td {
+    padding: 0.5rem;
+  }
+
+  .tableFooter {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    gap: 0.625rem;
+  }
+
+  .footerLeft {
+    order: 1;
+  }
+
+  .footerRight {
+    order: 2;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .footerRight select {
+    flex: 1;
+    max-width: 120px;
+  }
+
+  .paginationButtons {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+/* ========== SMALL MOBILE (480px and below) ========== */
+@media (max-width: 480px) {
+  .table-wrapper {
+    padding: 0.75rem;
+  }
+
+  table {
+    min-width: 450px;
+  }
+
+  .table-container th,
+  .table-container td {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.25rem;
+  }
+
+  .student-info .secondary {
+    font-size: 0.6875rem;
+  }
+
+  .statusBadge {
+    font-size: 0.6875rem;
+    padding: 3px 8px;
+  }
+
+  .status,
+  .details {
+    font-size: 0.6875rem;
+    padding: 4px 8px;
+    min-height: 28px;
+  }
+
+  .tableFooter {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .footerLeft,
+  .footerRight label {
+    font-size: 0.75rem;
+  }
+
+  .footerRight select {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    min-height: 28px;
+  }
+
+  .paginationButtons button {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8125rem;
+  }
+}
+
+/* ========== EXTRA SMALL (360px and below) ========== */
+@media (max-width: 360px) {
+  .table-wrapper {
+    padding: 0.625rem;
+  }
+
+  table {
+    min-width: 400px;
+  }
+
+  .table-container th,
+  .table-container td {
+    font-size: 0.6875rem;
+    padding: 0.3125rem 0.1875rem;
+  }
+
+  .table-actions button {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.625rem;
+    min-height: 40px;
+  }
+
+  .statusBadge {
+    font-size: 0.625rem;
+    padding: 2px 6px;
+  }
+
+  .status,
+  .details {
+    font-size: 0.625rem;
+    padding: 3px 6px;
+    min-height: 26px;
+  }
+
+  .paginationButtons button {
+    width: 26px;
+    height: 26px;
+    font-size: 0.75rem;
+  }
+}
+
+/* ========== LANDSCAPE MOBILE ========== */
+@media (max-width: 768px) and (orientation: landscape) {
+  .table-wrapper {
+    padding: 0.75rem;
+  }
+
+  .table-container th,
+  .table-container td {
+    padding: 0.375rem 0.5rem;
+  }
+
+  .tableFooter {
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+/* ========== ACCESSIBILITY ========== */
+@media (prefers-reduced-motion: reduce) {
+  .table-actions button,
+  .status,
+  .details,
+  .paginationButtons button,
+  .table-container tbody tr {
+    transition: none;
+  }
+}
+
+/* ========== TOUCH DEVICES ========== */
+@media (hover: none) and (pointer: coarse) {
+  .table-actions .print-btn:hover,
+  .table-actions .export-btn:hover {
+    transform: none;
+  }
+
+  .status:hover,
+  .details:hover {
+    transform: none;
+  }
+
+  .paginationButtons button:hover {
+    background: #fff;
+  }
+
+  .table-container tbody tr:hover {
+    background-color: transparent;
+  }
+}
+
+/* ========== PRINT STYLES ========== */
+@media print {
+  .table-wrapper {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+
+  .table-actions,
+  .tableFooter {
+    display: none;
+  }
+
+  .table-container {
+    border: none;
+  }
+
+  table {
+    min-width: 100%;
+  }
+
+  .table-container tbody tr:hover {
+    background-color: transparent;
+  }
+}
+
+/* ========== LOADING STATE (Optional) ========== */
+.table-loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.table-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #2563eb;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
 }

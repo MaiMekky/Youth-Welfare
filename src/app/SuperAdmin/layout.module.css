@@ -1,38 +1,30 @@
-/* layout.module.css */
-
-/* ===== ROOT LAYOUT ===== */
+/* ========== LAYOUT CONTAINER ========== */
 .layout {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  width: 100%;
-  background: #f8fafc;
-  direction: rtl;
+  background: #f5f6fa;
 }
 
-/* ===== SIDEBAR + MAIN CONTENT CONTAINER ===== */
+/* ========== LAYOUT BODY ========== */
 .layoutBody {
   display: flex;
   flex: 1;
-  width: 100%;
   position: relative;
-  min-height: calc(100vh - 140px);
+  overflow: hidden;
 }
 
-/* ===== MAIN CONTENT ===== */
+/* ========== MAIN CONTENT ========== */
 .main {
   flex: 1;
-  width: 100%;
-  margin-right: 280px; /* ← ADD THIS LINE - matches sidebar width */
-  padding: clamp(0.75rem, 2vw, 1.5rem);
-  background: #f3f5fd;
+  padding: clamp(1.25rem, 3vw, 2rem);
   overflow-y: auto;
-  overflow-x: hidden;
-  min-width: 0;
+  background: #f5f6fa;
+  min-height: calc(100vh - 140px); /* Adjust based on header/footer height */
   transition: margin-right 0.3s ease;
 }
 
-/* ===== OVERLAY FOR MOBILE ===== */
+/* ========== OVERLAY (Mobile only) ========== */
 .overlay {
   display: none;
   position: fixed;
@@ -42,40 +34,41 @@
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   z-index: 998;
+  backdrop-filter: blur(2px);
   animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-@media (max-width: 1024px) {
+/* ========== DESKTOP (Above 768px) ========== */
+@media (min-width: 769px) {
+  .layoutBody {
+    /* Sidebar stays visible on desktop */
+  }
+
   .main {
-    margin-right: 240px;
+    /* Main content automatically takes remaining space */
+  }
+
+  .overlay {
+    /* Never show overlay on desktop */
+    display: none !important;
   }
 }
 
-@media (max-width: 900px) {
-  .main {
-    padding: clamp(0.75rem, 2vw, 1rem);
-    margin-right: 240px;
-  }
-}
-
+/* ========== TABLET (768px and below) ========== */
 @media (max-width: 768px) {
   .layoutBody {
     flex-direction: column;
   }
 
   .main {
-    padding: clamp(0.625rem, 2vw, 0.75rem);
-    margin-right: 0 !important;
     width: 100%;
+    padding: clamp(1rem, 2.5vw, 1.5rem);
+    min-height: calc(100vh - 120px);
   }
 
   .overlay {
@@ -83,8 +76,59 @@
   }
 }
 
+/* ========== MOBILE (480px and below) ========== */
 @media (max-width: 480px) {
   .main {
-    padding: clamp(0.5rem, 2vw, 0.625rem);
+    padding: clamp(0.875rem, 2vw, 1.25rem);
+    min-height: calc(100vh - 100px);
   }
+}
+
+/* ========== EXTRA SMALL (360px and below) ========== */
+@media (max-width: 360px) {
+  .main {
+    padding: 0.75rem;
+  }
+}
+
+/* ========== LANDSCAPE MOBILE ========== */
+@media (max-width: 768px) and (orientation: landscape) {
+  .main {
+    padding: 1rem;
+    min-height: calc(100vh - 100px);
+  }
+}
+
+/* ========== ACCESSIBILITY ========== */
+@media (prefers-reduced-motion: reduce) {
+  .main,
+  .overlay {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* ========== SMOOTH SCROLLING ========== */
+.main {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.main::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.main::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.main::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.main::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }

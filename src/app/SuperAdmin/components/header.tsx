@@ -1,14 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import styles from "../Styles/Header.module.css";
-import { Menu, User } from "lucide-react";
+import { User } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-interface HeaderProps {
-  toggleSidebar: () => void;
-}
-
-export default function Header({ toggleSidebar }: HeaderProps) {
+export default function Header() {
   const router = useRouter();
   const [userData, setUserData] = useState<{
     name?: string;
@@ -50,15 +46,6 @@ export default function Header({ toggleSidebar }: HeaderProps) {
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
-        {/* Mobile Menu Toggle */}
-        <button
-          className={styles.mobileToggle}
-          onClick={toggleSidebar}
-          aria-label="فتح القائمة"
-        >
-          <Menu size={20} />
-        </button>
-
         {/* Brand Section */}
         <div className={styles.brand}>
           <div className={styles.brandText}>

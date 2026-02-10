@@ -3,7 +3,9 @@
   background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
   color: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
+
 .headerLogo {
   background-size: cover;
   background-position: center;
@@ -26,6 +28,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  flex-shrink: 0;
 }
 
 .headerIcon {
@@ -37,6 +40,7 @@
   justify-content: center;
   width: 55px;
   height: 55px;
+  flex-shrink: 0;
 }
 
 .headerTitleH1 {
@@ -54,6 +58,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .btnAddRequest {
@@ -94,8 +99,9 @@
   font-size: 12px;
   color: #B8C5E0;
 }
+
 .logoutBtn {
-  background-color: #e74c3c; /* أحمر */
+  background-color: #e74c3c;
   color: #fff;
   border: none;
   padding: 8px 14px;
@@ -104,13 +110,16 @@
   font-size: 0.9rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  white-space: nowrap;
 }
 
 .logoutBtn:hover {
   background-color: #c0392b;
 }
+
 .navBtn {
   background: white;
+  color: #2C3A5F;
   border: 1px solid #ddd;
   padding: 8px 14px;
   margin-left: 10px;
@@ -118,8 +127,256 @@
   cursor: pointer;
   font-size: 14px;
   transition: 0.2s;
+  white-space: nowrap;
 }
 
 .navBtn:hover {
   background-color: #f0f0f0;
+}
+
+/* Hamburger Menu */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 30px;
+  height: 25px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 10;
+}
+
+.hamburgerLine {
+  width: 30px;
+  height: 3px;
+  background-color: white;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.hamburgerLine.open:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburgerLine.open:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburgerLine.open:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -6px);
+}
+
+/* ==================== TABLET BREAKPOINT (max-width: 1024px) ==================== */
+@media (max-width: 1024px) {
+  .headerContent {
+    padding: 14px 20px;
+  }
+
+  .headerTitleH1 {
+    font-size: 18px;
+  }
+
+  .headerTitleP {
+    font-size: 12px;
+  }
+
+  .headerRight {
+    gap: 12px;
+  }
+
+  .navBtn,
+  .logoutBtn {
+    padding: 7px 12px;
+    font-size: 13px;
+    margin-left: 6px;
+  }
+}
+
+/* ==================== MOBILE BREAKPOINT (max-width: 768px) ==================== */
+@media (max-width: 768px) {
+  .headerContent {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    position: relative;
+  }
+
+  .headerLeft {
+    gap: 12px;
+  }
+
+  .headerIcon {
+    width: 45px;
+    height: 45px;
+    padding: 8px;
+  }
+
+  .headerLogo {
+    width: 40px;
+    height: 40px;
+  }
+
+  .headerTitleH1 {
+    font-size: 16px;
+  }
+
+  .headerTitleP {
+    font-size: 11px;
+  }
+
+  /* Show hamburger menu */
+  .hamburger {
+    display: flex;
+  }
+
+  /* Hide navigation by default on mobile */
+  .headerRight {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: linear-gradient(180deg, #3D4D75 0%, #2C3A5F 100%);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 9;
+  }
+
+  /* Show navigation when menu is open */
+  .headerRight.mobileMenuOpen {
+    max-height: 400px;
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .navBtn,
+  .logoutBtn {
+    width: 100%;
+    margin: 0;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .logoutBtn {
+    margin-top: 8px;
+  }
+}
+
+/* ==================== SMALL MOBILE BREAKPOINT (max-width: 480px) ==================== */
+@media (max-width: 480px) {
+  .headerContent {
+    padding: 10px 12px;
+  }
+
+  .headerLeft {
+    gap: 8px;
+  }
+
+  .headerIcon {
+    width: 40px;
+    height: 40px;
+    padding: 6px;
+  }
+
+  .headerLogo {
+    width: 35px;
+    height: 35px;
+  }
+
+  .headerTitle {
+    max-width: 180px;
+  }
+
+  .headerTitleH1 {
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+
+  .headerTitleP {
+    font-size: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .hamburger {
+    width: 26px;
+    height: 22px;
+  }
+
+  .hamburgerLine {
+    width: 26px;
+    height: 2.5px;
+  }
+
+  .navBtn,
+  .logoutBtn {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+}
+
+/* ==================== EXTRA SMALL DEVICES (max-width: 360px) ==================== */
+@media (max-width: 360px) {
+  .headerContent {
+    padding: 8px 10px;
+  }
+
+  .headerIcon {
+    width: 35px;
+    height: 35px;
+  }
+
+  .headerLogo {
+    width: 30px;
+    height: 30px;
+  }
+
+  .headerTitle {
+    max-width: 140px;
+  }
+
+  .headerTitleH1 {
+    font-size: 13px;
+  }
+
+  .headerTitleP {
+    font-size: 9px;
+  }
+}
+
+/* ==================== LANDSCAPE MODE FOR MOBILE ==================== */
+@media (max-height: 500px) and (orientation: landscape) {
+  .headerContent {
+    padding: 8px 16px;
+  }
+
+  .headerIcon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .headerLogo {
+    width: 35px;
+    height: 35px;
+  }
+
+  .headerTitleH1 {
+    font-size: 14px;
+  }
+
+  .headerTitleP {
+    font-size: 10px;
+  }
+
+  .headerRight.mobileMenuOpen {
+    max-height: 300px;
+    padding: 12px;
+  }
 }

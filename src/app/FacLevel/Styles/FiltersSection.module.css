@@ -1,28 +1,37 @@
-/* FiltersSection.module.css */
+/* ===== BASE STYLES ===== */
 .filtersSection {
   background-color: white;
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   margin-bottom: 24px;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .filtersHeader {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 12px;
- color: #2C3A5F;
+  margin-bottom: 16px;
+  color: #2C3A5F;
   font-weight: 600;
+}
+
+.filtersHeader h3 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.4;
 }
 
 .filtersContent {
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: stretch;
 }
 
+/* ===== SEARCH WRAPPER ===== */
 .searchWrapper {
   flex: 1;
   min-width: 250px;
@@ -35,6 +44,8 @@
   top: 50%;
   transform: translateY(-50%);
   color: #9CA3AF;
+  pointer-events: none;
+  transition: color 0.2s;
 }
 
 .searchInput {
@@ -43,7 +54,13 @@
   border: 1px solid #D1D5DB;
   border-radius: 8px;
   font-size: 14px;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
+  background-color: white;
+  color: #2C3A5F;
+}
+
+.searchInput::placeholder {
+  color: #9CA3AF;
 }
 
 .searchInput:focus {
@@ -52,6 +69,11 @@
   box-shadow: 0 0 0 3px rgba(61, 77, 117, 0.1);
 }
 
+.searchInput:focus + .searchIcon {
+  color: #3D4D75;
+}
+
+/* ===== FILTER SELECT ===== */
 .filterSelect {
   padding: 12px 16px;
   border: 1px solid #D1D5DB;
@@ -61,4 +83,366 @@
   cursor: pointer;
   min-width: 180px;
   color: #2C3A5F;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.filterSelect:hover {
+  border-color: #9CA3AF;
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: #3D4D75;
+  box-shadow: 0 0 0 3px rgba(61, 77, 117, 0.1);
+}
+
+.filterSelect option {
+  padding: 8px;
+  background-color: white;
+  color: #2C3A5F;
+}
+
+/* ==================== TABLET BREAKPOINT (max-width: 1024px) ==================== */
+@media (max-width: 1024px) {
+  .filtersSection {
+    padding: 18px;
+    border-radius: 10px;
+  }
+
+  .filtersHeader {
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .filtersHeader h3 {
+    font-size: 17px;
+  }
+
+  .filtersContent {
+    gap: 14px;
+  }
+
+  .searchWrapper {
+    min-width: 220px;
+  }
+
+  .searchInput,
+  .filterSelect {
+    font-size: 13px;
+    padding: 11px 14px 11px 42px;
+  }
+
+  .filterSelect {
+    min-width: 160px;
+    padding: 11px 14px;
+  }
+
+  .searchIcon {
+    left: 11px;
+  }
+}
+
+/* ==================== MOBILE BREAKPOINT (max-width: 768px) ==================== */
+@media (max-width: 768px) {
+  .filtersSection {
+    padding: 16px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+  }
+
+  .filtersHeader {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .filtersHeader h3 {
+    font-size: 16px;
+  }
+
+  .filtersHeader svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .filtersContent {
+    gap: 12px;
+  }
+
+  .searchWrapper {
+    min-width: 200px;
+    flex: 1 1 100%;
+  }
+
+  .searchInput {
+    padding: 11px 12px 11px 40px;
+    font-size: 13px;
+  }
+
+  .searchIcon {
+    left: 10px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .filterSelect {
+    min-width: 140px;
+    padding: 11px 12px;
+    font-size: 13px;
+    flex: 1;
+  }
+}
+
+/* ==================== SMALL MOBILE BREAKPOINT (max-width: 480px) ==================== */
+@media (max-width: 480px) {
+  .filtersSection {
+    padding: 14px;
+    border-radius: 8px;
+  }
+
+  .filtersHeader {
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .filtersHeader h3 {
+    font-size: 15px;
+  }
+
+  .filtersHeader svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .filtersContent {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .searchWrapper {
+    min-width: 100%;
+    width: 100%;
+  }
+
+  .searchInput {
+    padding: 10px 12px 10px 38px;
+    font-size: 14px;
+    border-radius: 6px;
+  }
+
+  .searchIcon {
+    left: 10px;
+    width: 16px;
+    height: 16px;
+  }
+
+  .filterSelect {
+    width: 100%;
+    min-width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border-radius: 6px;
+  }
+}
+
+/* ==================== EXTRA SMALL MOBILE (max-width: 360px) ==================== */
+@media (max-width: 360px) {
+  .filtersSection {
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  .filtersHeader {
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .filtersHeader h3 {
+    font-size: 14px;
+  }
+
+  .filtersHeader svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .filtersContent {
+    gap: 8px;
+  }
+
+  .searchInput {
+    padding: 9px 10px 9px 36px;
+    font-size: 13px;
+  }
+
+  .searchIcon {
+    left: 9px;
+    width: 15px;
+    height: 15px;
+  }
+
+  .filterSelect {
+    padding: 9px 10px;
+    font-size: 13px;
+  }
+}
+
+/* ==================== LANDSCAPE MODE FOR MOBILE ==================== */
+@media (max-height: 500px) and (orientation: landscape) {
+  .filtersSection {
+    padding: 12px 16px;
+  }
+
+  .filtersHeader {
+    margin-bottom: 8px;
+  }
+
+  .filtersHeader h3 {
+    font-size: 14px;
+  }
+
+  .filtersContent {
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .searchWrapper {
+    min-width: 180px;
+    flex: 1;
+  }
+
+  .searchInput {
+    padding: 8px 10px 8px 36px;
+    font-size: 13px;
+  }
+
+  .searchIcon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .filterSelect {
+    min-width: 140px;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+}
+
+/* ==================== LARGE SCREENS (min-width: 1440px) ==================== */
+@media (min-width: 1440px) {
+  .filtersSection {
+    padding: 24px;
+    border-radius: 14px;
+  }
+
+  .filtersHeader {
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .filtersHeader h3 {
+    font-size: 19px;
+  }
+
+  .filtersHeader svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .filtersContent {
+    gap: 18px;
+  }
+
+  .searchWrapper {
+    min-width: 280px;
+  }
+
+  .searchInput {
+    padding: 14px 14px 14px 46px;
+    font-size: 15px;
+    border-radius: 10px;
+  }
+
+  .searchIcon {
+    left: 14px;
+    width: 22px;
+    height: 22px;
+  }
+
+  .filterSelect {
+    min-width: 200px;
+    padding: 14px 18px;
+    font-size: 15px;
+    border-radius: 10px;
+  }
+}
+
+/* ==================== ULTRA WIDE SCREENS (min-width: 1920px) ==================== */
+@media (min-width: 1920px) {
+  .filtersSection {
+    max-width: 1600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* ==================== ACCESSIBILITY & STATES ==================== */
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .searchInput,
+  .filterSelect,
+  .searchIcon {
+    transition: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .searchInput,
+  .filterSelect {
+    border-width: 2px;
+  }
+
+  .searchInput:focus,
+  .filterSelect:focus {
+    outline: 2px solid #2C3A5F;
+    outline-offset: 2px;
+  }
+}
+
+/* Focus visible for keyboard navigation */
+.searchInput:focus-visible,
+.filterSelect:focus-visible {
+  outline: 3px solid #3D4D75;
+  outline-offset: 2px;
+}
+
+/* Disabled state (if needed in the future) */
+.searchInput:disabled,
+.filterSelect:disabled {
+  background-color: #F3F4F6;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Hover states for better UX */
+@media (hover: hover) {
+  .searchInput:hover {
+    border-color: #9CA3AF;
+  }
+
+  .filterSelect:hover {
+    border-color: #9CA3AF;
+    background-color: #F9FAFB;
+  }
+}
+
+/* Print styles */
+@media print {
+  .filtersSection {
+    box-shadow: none;
+    border: 1px solid #D1D5DB;
+  }
 }

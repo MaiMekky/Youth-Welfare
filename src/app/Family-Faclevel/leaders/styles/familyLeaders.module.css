@@ -9,6 +9,8 @@
   padding: 24px 16px;
   max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
+  padding: clamp(12px, 2vw, 24px) clamp(10px, 2vw, 16px);
 }
 
 /* Header */
@@ -20,6 +22,7 @@
   padding: 24px 20px;
   box-shadow: 0 10px 30px #0000001a;
   color: #fff;
+  padding: clamp(16px, 3vw, 24px) clamp(14px, 3vw, 20px);
 }
 
 .headerContentFamily {
@@ -31,12 +34,14 @@
   font-weight: 700;
   margin: 0 0 6px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15);
+  font-size: clamp(1.3rem, 3vw, 2rem);
 }
 
 .pageSubtitle {
   font-size: 0.95rem;
   opacity: 0.95;
   margin: 0;
+  font-size: clamp(0.85rem, 2vw, 0.95rem);
 }
 
 /* Controls row */
@@ -422,23 +427,25 @@
   }
 }
 
-/* ===== Table Container ===== */
 .tableContainer {
   width: 100%;
   background: #ffffff;
   border-radius: 16px;
   box-shadow: 0 6px 24px rgba(15, 23, 42, 0.08);
-  overflow: hidden; /* ❌ no scroll */
+
+  overflow-x: auto;      
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* ===== Table ===== */
 .studentsTable {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed; /* 🔑 يمنع التمدد */
+
+  min-width: 980px;  
+  table-layout: auto; 
 }
 
-/* ===== Cells ===== */
 .studentsTable th,
 .studentsTable td {
   padding: 12px 10px;
@@ -446,18 +453,25 @@
   font-size: 0.9rem;
   border-bottom: 1px solid #edf0f5;
 
-  /* 🔑 التحكم في النص */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: nowrap; 
 }
 
-/* ===== Header ===== */
+
 .studentsTable thead th {
+  position: sticky;
+  top: 0;
   background-color: #f8fafc;
-  font-weight: 600;
-  color: #475569;
+  z-index: 2;
 }
+
+.tableContainer::-webkit-scrollbar {
+  height: 10px;
+}
+.tableContainer::-webkit-scrollbar-thumb {
+  background: rgba(44, 58, 95, 0.25);
+  border-radius: 999px;
+}
+
 
 /* ===== Rows ===== */
 .studentsTable tbody tr:nth-child(even) {
@@ -557,5 +571,28 @@
   }
   to {
     width: 100%;
+  }
+}
+@media (max-width: 768px) {
+  .studentsTable {
+    min-width: 900px;
+  }
+
+  .studentsTable th,
+  .studentsTable td {
+    padding: 10px 8px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .studentsTable {
+    min-width: 860px;
+  }
+
+  .studentsTable th,
+  .studentsTable td {
+    padding: 8px 8px;
+    font-size: 0.8rem;
   }
 }

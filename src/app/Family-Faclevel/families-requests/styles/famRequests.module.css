@@ -1,37 +1,27 @@
-/* Global Reset & Base Styles */
-/* * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+/* =========================
+   Base Layout
+========================= */
 
-body {
-  font-family: 'Segoe UI', 'Cairo', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f5f7fa;
-  direction: rtl;
-  color: #2c3e50;
-  line-height: 1.6;
-} */
-
-/* Page Wrapper */
 .pageWrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #f5f7fa;
+  background: #f5f7fa;
   direction: rtl;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #2C3A5F;
+  color: #2c3e50;
 }
 
-/* Page Header */
+/* =========================
+   Page Header
+========================= */
+
 .pageHeaderFamily {
-  background: linear-gradient(135deg, #d4af37 0%, #2C3A5F 100%);
+  background: linear-gradient(135deg, #d4af37 0%, #2c3a5f 100%);
   border-radius: 20px;
-  margin: 25px;
   padding: 20px;
+  margin: 16px;
   box-shadow: 0 10px 30px #0000001a;
-  color: white;
+  color: #fff;
 }
 
 .headerContentFamily {
@@ -39,41 +29,45 @@ body {
 }
 
 .pageTitle {
-  font-size: 2.5rem;
+  font-size: clamp(1.4rem, 3vw, 2.5rem);
   font-weight: 700;
   margin-bottom: 10px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .pageSubtitle {
-  font-size: 1.1rem;
+  font-size: clamp(0.9rem, 2.2vw, 1.1rem);
   opacity: 0.95;
 }
 
-/* Tabs Section */
+/* =========================
+   Tabs
+========================= */
+
 .tabsContainer {
   display: flex;
   gap: 15px;
-  margin-bottom: 30px;
-  background: white;
+  background: #fff;
   padding: 15px;
   border-radius: 15px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  margin: 25px;
+  margin: 16px;
+  flex-wrap: wrap;
 }
 
 .tab {
   flex: 1;
+  min-width: 180px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 15px 25px;
+  padding: 14px 18px;
   background: #f8f9fa;
   border: 2px solid #e9ecef;
   border-radius: 12px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   font-size: 1rem;
   font-weight: 600;
   color: #495057;
@@ -81,15 +75,15 @@ body {
 
 .tab:hover {
   background: #e9ecef;
-  transform: translateY(-2px);
-  color: #2C3A5F;
+  transform: translateY(-1px);
+  color: #2c3a5f;
 }
 
 .active {
-  background: linear-gradient(135deg, #f3cf5c 0%, #2C3A5F 100%);
-  color: white;
-  border:none;
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+  background: linear-gradient(135deg, #f3cf5c 0%, #2c3a5f 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 0 5px 15px rgba(44, 58, 95, 0.2);
 }
 
 .tabIcon {
@@ -104,279 +98,137 @@ body {
   font-weight: 700;
 }
 
-/* Content Area */
+/* =========================
+   Content
+========================= */
+
 .contentArea {
   min-height: 400px;
 }
 
 .requestsGrid {
   display: grid;
-  gap: 25px;
+  gap: 16px;
 }
 
-/* Request Card */
+/* =========================
+   Request Card
+========================= */
+
 .requestCard {
-  background: white;
+  background: #fff;
   border-radius: 16px;
-  padding: 30px;
+  padding: 26px;
+  margin: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
   border: 1px solid #e8e8e8;
-  margin: 25px;
-  color: #2C3A5F;
+  transition: all 0.25s ease;
+  color: #2c3a5f;
 }
 
 .requestCard:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.12);
 }
 
-/* Card Header */
+/* Header line */
 .cardHeader {
-  margin-bottom: 25px;
-  padding-bottom: 20px;
+  margin-bottom: 18px;
+  padding-bottom: 16px;
   border-bottom: 2px solid #f1f3f5;
 }
 
-.titleSection {
+.titleRow {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
 .familyName {
-  font-size: 1.6rem;
+  font-size: clamp(1.2rem, 2.5vw, 1.6rem);
   font-weight: 700;
   color: #2c3e50;
+  line-height: 1.4;
+  word-break: break-word;
 }
 
-.requestBadge {
-  padding: 6px 16px;
+/* Badges */
+.creationBadge,
+.waitingBadge,
+.approvedBadge,
+.rejectedBadge {
+  padding: 6px 14px;
   border-radius: 20px;
   font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.creation {
-  background: #e3f2fd;
-  color: #1976d2;
-}
-
-.statusBadge {
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.waiting {
-  background: #fff3e0;
-  color: #f57c00;
-}
-
-/* Info Grid */
-.infoGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
-  margin-bottom: 20px;
-}
-
-.infoItem {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.fullWidth {
-  grid-column: span 2;
-}
-
-.label {
- font-size: 1.1rem;
   font-weight: 700;
-  color: #2c3e50;
-  margin-bottom: 12px;
-  margin-left: 7px;
-}
-
-.infoValue {
-  font-size: 0.95rem;
-  color: #2c3e50;
-  font-weight: 500;
-}
-
-/* Description */
-.descriptionSection {
-  margin-bottom: 20px;
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 10px;
-  border-right: 4px solid #667eea;
-}
-
-.description {
-  font-size: 0.95rem;
-  color: #495057;
-}
-
-/* ===== Goals Section (Clean & Simple) ===== */
-.goalsSection {
-  margin: 25px 0;
-}
-
-.goalsSection h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #2c3e50;
-  margin-bottom: 12px;
-}
-
-/* Vertical list */
-.goalsSection ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* Single goal */
-.goalsSection li {
-  font-size: 0.95rem;
-  color: #495057;
-  font-weight: 500;
-  line-height: 1.6;
-
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-/* Simple dash before goal */
-.goalsSection li::before {
-  content: "•";
-  color: #6c757d;
-}
-
-/* Buttons */
-.cardActions {
-  display: flex;
-  gap: 15px;
-}
-
-.cardActions button {
-  flex: 1;
-  padding: 14px;
-  border-radius: 12px;
-  border: none;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-/* APPROVE (Green) */
-.btnApprove {
-  background: linear-gradient(135deg, #6be171 0%, #42b148 100%); /* Green */
-  color: white;
-  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
-}
-
-.btnApprove:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(46, 125, 50, 0.35);
-  filter: brightness(1.05);
-}
-
-/* REJECT (Red) */
-.btnReject {
-  background: white;
-  color: #e53935;
-  border: 2px solid #e53935;
-  box-shadow: 0 4px 10px rgba(229, 57, 53, 0.15);
-}
-
-.btnReject:hover {
-  background: #e53935;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(229, 57, 53, 0.35);
-}
-
-
-/* Empty State */
-.emptyState {
-  text-align: center;
-  padding: 80px 20px;
-  background: white;
-  border-radius: 16px;
-  margin: 25px;
-}
-
-.emptyIcon {
-  font-size: 5rem;
-  opacity: 0.5;
-}
-
-.emptyText {
-  font-size: 1.2rem;
-  color: #6c757d;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .tabsContainer {
-    flex-direction: column;
-  }
-  .infoGrid {
-    grid-template-columns: 1fr;
-  }
-  .goalsList {
-    grid-template-columns: 1fr;
-  }
-  .cardActions {
-    flex-direction: column-reverse;
-  }
-}
-.badges {
-  display: flex;
-  gap: 10px;
+  white-space: nowrap;
 }
 
 .creationBadge {
   background: #e3f2fd;
   color: #1976d2;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
 }
 
 .waitingBadge {
   background: #fff3e0;
   color: #f57c00;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
 }
+
+.approvedBadge {
+  background: #e6f7f0;
+  color: #0f8a5f;
+}
+
+.rejectedBadge {
+  background: #fdecec;
+  color: #c0392b;
+}
+
+/* =========================
+   Info Grid
+========================= */
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-left: 6px;
+}
+
+.description {
+  display: inline;
+  margin-top: 6px;
+  line-height: 1.7;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  color: #495057;
+}
+
+/* =========================
+   Inputs
+========================= */
 
 .inputBox {
   background: #fffbe6;
   border: 1px solid #f3d36b;
-  padding: 20px;
+  padding: 16px;
   border-radius: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 
 .inputBox label {
   display: block;
-  font-weight: 700;
+  font-weight: 800;
   margin-bottom: 8px;
+  color: #2c3a5f;
 }
 
 .inputBox input {
@@ -384,62 +236,98 @@ body {
   padding: 12px;
   border-radius: 10px;
   border: 1px solid #ddd;
-  font-size: 1rem;
+  font-size: 16px; /* مهم للموبايل */
+  outline: none;
 }
+
+.inputBox input:focus {
+  border-color: #d4af37;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.12);
+}
+
+/* =========================
+   Actions
+========================= */
 
 .cardActions {
   display: flex;
-  justify-content: space-between;
-  gap: 15px;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.rejectBtn,
+.approveBtn {
+  flex: 1;
+  border: none;
+  padding: 14px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
 .rejectBtn {
-  flex: 1;
   background: #e53935;
-  color: white;
-  border: none;
-  padding: 14px;
-  border-radius: 12px;
-  font-weight: 700;
+  color: #fff;
+}
+
+.rejectBtn:hover {
+  filter: brightness(0.95);
+  transform: translateY(-1px);
 }
 
 .approveBtn {
-  flex: 1;
   background: #d4af37;
-  color: white;
-  border: none;
-  padding: 14px;
-  border-radius: 12px;
-  font-weight: 700;
-}
-.titleRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  color: #fff;
 }
 
-.familyName {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #2c3e50;
+.approveBtn:hover {
+  background: #b99728;
+  transform: translateY(-1px);
 }
+
+/* =========================
+   Empty State
+========================= */
+
+.emptyState {
+  text-align: center;
+  padding: 60px 16px;
+  background: #fff;
+  border-radius: 16px;
+  margin: 16px;
+}
+
+.emptyIcon {
+  font-size: 4rem;
+  opacity: 0.5;
+}
+
+.emptyText {
+  font-size: 1.1rem;
+  color: #6c757d;
+}
+
+/* =========================
+   Notification
+========================= */
+
 .notification {
   position: fixed;
-  top: 20px;
-  right: 25px;
-  width: 280px;
+  top: 12px;
+  right: 12px;
+  width: min(92vw, 320px);
   background: #fff;
   padding: 14px 16px;
   border-radius: 10px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-  font-weight: 600;
+  font-weight: 700;
   color: #333;
   z-index: 9999;
-  animation: fadeIn 0.4s ease forwards;
+  animation: fadeIn 0.35s ease forwards;
   overflow: hidden;
 }
-
 
 .success {
   border-right: 6px solid #4caf50;
@@ -461,37 +349,57 @@ body {
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateX(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(30px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes progress {
-  from {
-    width: 0%;
-  }
-  to {
-    width: 100%;
-  }
-}.approvedBadge {
-  background: #e6f7f0;
-  color: #0f8a5f;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 13px;
-  font-weight: 600;
+  from { width: 0%; }
+  to   { width: 100%; }
 }
 
-.rejectedBadge {
-  background: #fdecec;
-  color: #c0392b;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 13px;
-  font-weight: 600;
+/* =========================
+   Responsive Breakpoints
+========================= */
+
+@media (max-width: 768px) {
+  .pageHeaderFamily,
+  .tabsContainer,
+  .requestCard,
+  .emptyState {
+    margin: 12px;
+  }
+
+  .tab {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Buttons stack in mobile */
+  .cardActions {
+    flex-direction: column-reverse;
+  }
+
+  .rejectBtn,
+  .approveBtn {
+    width: 100%;
+    flex: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .pageHeaderFamily,
+  .tabsContainer,
+  .requestCard,
+  .emptyState {
+    margin: 10px;
+  }
+
+  .requestCard {
+    padding: 18px;
+  }
 }

@@ -493,4 +493,208 @@
   border-radius: 20px;    
   border:none; 
 }
+/* Container */
+.detailsPage {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: clamp(10px, 2vw, 20px);
+}
 
+/* Header */
+.detailsHeader {
+  gap: 12px;
+}
+
+.detailsTitle {
+  font-size: clamp(1.2rem, 2.6vw, 2rem);
+  word-break: break-word;
+}
+
+
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.actionBtn {
+  width: auto;       
+  flex: none;       
+  white-space: nowrap;
+}
+
+/* Stats */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.statCard {
+  padding: clamp(14px, 2.5vw, 25px);
+  gap: 14px;
+}
+
+.statIcon {
+  width: clamp(50px, 6vw, 70px);
+  height: clamp(50px, 6vw, 70px);
+}
+
+.statValue {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+}
+
+/* Content grid */
+.contentGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.infoCard,
+.activitiesCard,
+.studentsCard,
+.descriptionCard {
+  padding: clamp(16px, 2.5vw, 30px);
+}
+
+/* Info rows wrap */
+.infoRow {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.infoValue {
+  margin-right: 0;
+  word-break: break-word;
+}
+
+/* Activities */
+.activityHeader {
+  align-items: flex-start;
+}
+
+.activityInfo {
+  min-width: 0;
+}
+
+.activityName {
+  word-break: break-word;
+  margin: 0;
+}
+
+.activityMeta {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin-left: 0;
+  gap: 8px;
+}
+
+
+.viewDetailsBtn {
+  margin-right: 0;        
+  align-self: flex-start; 
+}
+
+.tableContainer {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.studentsTable {
+  min-width: 820px; 
+}
+
+
+.notification {
+  left: 12px;
+  right: 12px;
+  width: auto;
+  max-width: 420px;
+  margin: 0 auto;
+  top: 12px;
+}
+
+
+@media (max-width: 1024px) {
+  .contentGrid {
+    grid-template-columns: 1fr; 
+  }
+}
+
+
+@media (max-width: 768px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+
+  .headerActions {
+    width: 100%;
+  }
+
+  .actionBtn {
+    flex: 1;               
+    justify-content: center;
+  }
+
+  .activityHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .activityMeta {
+    justify-content: flex-start;
+  }
+
+  .viewDetailsBtn {
+    width: 100%;
+    justify-content: center;
+    align-self: stretch;
+  }
+}
+
+/* =========================
+   Small Mobile
+========================= */
+@media (max-width: 480px) {
+  .cardTitle {
+    font-size: 1.1rem;
+  }
+
+  .studentsTable th,
+  .studentsTable td {
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+}
+
+.activityActionsCenter {
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.activityMetaCenter {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;      
+}
+
+
+.viewDetailsBtn {
+  align-self: center;  
+  margin-right: 0;     
+}
+
+
+@media (max-width: 768px) {
+  .viewDetailsBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}

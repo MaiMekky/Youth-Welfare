@@ -114,7 +114,7 @@ font-size: 1.1rem;
 }
 
 .singleItem {
-  grid-template-columns: 3fr;
+  grid-template-columns: 1fr;
 }
 
 .detailItem {
@@ -221,19 +221,150 @@ padding: 10px 22px;
 
 .actionsRow {
   display: flex;
-  gap: 15px; /* space between buttons */
-  margin-top: 15px; /* optional spacing from content above */
-  flex-wrap: wrap; /* optional, for responsiveness */
+  gap: 15px; 
+  margin-top: 15px; 
+  flex-wrap: wrap; 
 }
 
 .btnIcon {
   font-size: 1.2rem;
 }
 .statusBadge {
-  margin-right: 5px;
   padding: 5px 14px;
   border-radius: 8px;
   font-size: 0.85rem;
   color: #fff;
-  margin-left: 10px;
+}
+
+.reportsPage {
+  padding: clamp(10px, 2vw, 20px);
+}
+
+
+.pageHeaderReports {
+  padding: clamp(14px, 3vw, 20px);
+  border-radius: clamp(12px, 2vw, 20px);
+}
+
+.pageTitleReports {
+  font-size: clamp(1.4rem, 3.2vw, 2.5rem);
+}
+
+.reportCard {
+  padding: clamp(16px, 3vw, 35px);
+  border-radius: clamp(12px, 2vw, 20px);
+}
+
+
+.familyName {
+  font-size: clamp(1.15rem, 2.6vw, 1.8rem);
+  line-height: 1.25;
+  margin: 0;
+  word-break: break-word;
+}
+
+.reportHeader {
+  align-items: center;
+  gap: 10px;
+}
+
+
+.statusBadge {
+  white-space: nowrap;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+
+.detailRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.detailItem {
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.detailLabel,
+.detailValue {
+  word-break: break-word;
+}
+
+
+.actionsRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.viewDetailsBtn,
+.deleteBtn {
+  width: auto;      
+  flex: none;        
+  white-space: nowrap;
+}
+
+@media (max-width: 1024px) {
+  .reportCard {
+    border-width: 1px;
+  }
+
+  .detailRow {
+    grid-template-columns: 1fr; 
+  }
+}
+@media (max-width: 768px) {
+  .reportsList {
+    gap: 14px;
+  }
+
+  .reportContent {
+    gap: 16px;
+  }
+
+  .detailRow {
+    grid-template-columns: 1fr; 
+  }
+
+
+  .actionsRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .viewDetailsBtn,
+  .deleteBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .reportHeader {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .detailLabel,
+  .detailValue {
+    font-size: 0.85rem;
+  }
+
+  .statusBadge {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+  }
+}
+
+.descriptionItem {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px; 
+}
+
+.descriptionItem .detailValue {
+  margin-right: 0;   
+  line-height: 1.6;
 }

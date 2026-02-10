@@ -1,66 +1,120 @@
+/* ===== BASE SIDEBAR STYLES ===== */
 .sidebar {
   width: 260px;
- background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+  background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
   color: white;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  transition: all 0.3s ease-in-out;
+  z-index: 1000;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.sidebarContent {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: 20px;
-  transition: transform 0.3s ease-in-out;
-  z-index: 1000;
+  height: 100%;
+  min-height: 100vh;
 }
 
-/* النص العلوي */
+/* ===== HEADER SECTION ===== */
 .header {
   margin-bottom: 20px;
   position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
 }
+
+.headerText {
+  flex: 1;
+}
+
 .header h2 {
   font-size: 18px;
   margin-bottom: 4px;
   color: #ffffff;
+  line-height: 1.3;
 }
+
 .header p {
   font-size: 13px;
   color: #d1d5db;
+  line-height: 1.4;
 }
+
 .closeBtn {
-  position: absolute;
-  left: 0;
-  top: 0;
-  background: none;
+  background: rgba(255, 255, 255, 0.1);
   border: none;
   color: white;
   cursor: pointer;
   display: none;
+  padding: 6px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
 }
 
-/* الملف الشخصي */
+.closeBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ===== PROFILE SECTION ===== */
 .profile {
   display: flex;
   align-items: center;
   gap: 12px;
- background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+  background: rgba(255, 255, 255, 0.08);
   padding: 12px;
   border-radius: 10px;
   margin-bottom: 20px;
+  transition: background-color 0.2s;
 }
+
+.profile:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.profileIcon {
+  flex-shrink: 0;
+}
+
+.profileInfo {
+  flex: 1;
+  min-width: 0;
+}
+
 .profile h3 {
   font-size: 15px;
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
 .profile p {
   font-size: 13px;
   color: #d1d5db;
-  margin: 0;
+  margin: 4px 0 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* التنقل */
+/* ===== NAVIGATION ===== */
 .nav {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  flex: 1;
 }
+
 .nav button {
   background: none;
   border: none;
@@ -69,29 +123,46 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
   text-align: right;
+  width: 100%;
 }
-.nav button:hover { background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+
+.nav button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(-4px);
 }
+
 .nav .active {
   background-color: #d4af37;
-   color: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+  color: #2C3A5F;
   font-weight: 600;
 }
 
-/* الفوتر */
+.nav .active:hover {
+  background-color: #c29f30;
+  transform: translateX(-4px);
+}
+
+.nav button span {
+  flex: 1;
+  white-space: nowrap;
+}
+
+/* ===== FOOTER ===== */
 .footer {
   font-size: 12px;
   color: #d1d5db;
   text-align: center;
   margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* ===== Responsive ===== */
+/* ===== MOBILE MENU BUTTON ===== */
 .mobileMenuBtn {
   position: fixed;
   top: 16px;
@@ -99,27 +170,98 @@
   background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
   color: white;
   border: none;
-  padding: 8px;
+  padding: 10px;
   border-radius: 8px;
   cursor: pointer;
   display: none;
   z-index: 1100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
 }
 
+.mobileMenuBtn:hover {
+  background: linear-gradient(180deg, #3D4D75 0%, #2C3A5F 100%);
+  transform: scale(1.05);
+}
+
+.mobileMenuBtn:active {
+  transform: scale(0.95);
+}
+
+/* ===== OVERLAY ===== */
 .overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0,0,0,0.4);
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: 900;
+  animation: fadeIn 0.3s ease;
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ===== SCROLLBAR STYLING ===== */
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ==================== TABLET BREAKPOINT (max-width: 1200px) ==================== */
+@media (max-width: 1200px) {
+  .sidebar {
+    width: 240px;
+  }
+
+  .sidebarContent {
+    padding: 18px;
+  }
+
+  .header h2 {
+    font-size: 17px;
+  }
+
+  .header p {
+    font-size: 12px;
+  }
+
+  .profile h3 {
+    font-size: 14px;
+  }
+
+  .nav button {
+    font-size: 14px;
+    padding: 11px 12px;
+  }
+}
+
+/* ==================== MEDIUM TABLET (max-width: 992px) ==================== */
 @media (max-width: 992px) {
   .sidebar {
     position: fixed;
     top: 0;
     right: 0;
-    height: 100%;
+    height: 100vh;
+    width: 280px;
     transform: translateX(100%);
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.2);
   }
 
   .sidebar.open {
@@ -127,10 +269,289 @@
   }
 
   .closeBtn {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .mobileMenuBtn {
     display: block;
+  }
+
+  .sidebarContent {
+    padding: 20px;
+  }
+}
+
+/* ==================== MOBILE BREAKPOINT (max-width: 768px) ==================== */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 75vw;
+    max-width: 320px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .closeBtn {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  .header h2 {
+    font-size: 16px;
+    padding-right: 30px;
+  }
+
+  .header p {
+    font-size: 12px;
+  }
+
+  .profile {
+    padding: 12px;
+  }
+
+  .profile h3 {
+    font-size: 14px;
+  }
+
+  .profile p {
+    font-size: 12px;
+  }
+
+  .nav button {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .footer {
+    font-size: 11px;
+  }
+
+  .mobileMenuBtn {
+    top: 12px;
+    right: 12px;
+    padding: 9px;
+  }
+}
+
+/* ==================== SMALL MOBILE (max-width: 480px) ==================== */
+@media (max-width: 480px) {
+  .sidebar {
+    width: 85vw;
+    max-width: 280px;
+  }
+
+  .sidebarContent {
+    padding: 16px;
+  }
+
+  .header {
+    margin-bottom: 16px;
+  }
+
+  .header h2 {
+    font-size: 15px;
+    padding-right: 28px;
+  }
+
+  .header p {
+    font-size: 11px;
+  }
+
+  .profile {
+    gap: 10px;
+    padding: 10px;
+    margin-bottom: 16px;
+  }
+
+  .profileIcon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .profile h3 {
+    font-size: 13px;
+  }
+
+  .profile p {
+    font-size: 11px;
+  }
+
+  .nav {
+    gap: 8px;
+  }
+
+  .nav button {
+    padding: 10px 12px;
+    font-size: 13px;
+    gap: 8px;
+  }
+
+  .nav button svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .footer {
+    font-size: 10px;
+    padding-top: 16px;
+  }
+
+  .mobileMenuBtn {
+    top: 10px;
+    right: 10px;
+    padding: 8px;
+  }
+
+  .mobileMenuBtn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .closeBtn {
+    padding: 5px;
+  }
+
+  .closeBtn svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* ==================== EXTRA SMALL MOBILE (max-width: 360px) ==================== */
+@media (max-width: 360px) {
+  .sidebar {
+    width: 90vw;
+    max-width: 260px;
+  }
+
+  .sidebarContent {
+    padding: 14px;
+  }
+
+  .header h2 {
+    font-size: 14px;
+  }
+
+  .header p {
+    font-size: 10px;
+  }
+
+  .profile {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .profile h3 {
+    font-size: 12px;
+  }
+
+  .profile p {
+    font-size: 10px;
+  }
+
+  .nav button {
+    padding: 9px 10px;
+    font-size: 12px;
+  }
+
+  .footer {
+    font-size: 9px;
+  }
+}
+
+/* ==================== LANDSCAPE MODE FOR MOBILE ==================== */
+@media (max-height: 500px) and (orientation: landscape) {
+  .sidebar {
+    width: 60vw;
+    max-width: 300px;
+  }
+
+  .sidebarContent {
+    padding: 12px;
+    min-height: auto;
+  }
+
+  .header {
+    margin-bottom: 12px;
+  }
+
+  .header h2 {
+    font-size: 14px;
+  }
+
+  .header p {
+    font-size: 11px;
+  }
+
+  .profile {
+    margin-bottom: 12px;
+    padding: 8px;
+  }
+
+  .profile h3 {
+    font-size: 13px;
+  }
+
+  .profile p {
+    font-size: 11px;
+  }
+
+  .nav {
+    gap: 6px;
+  }
+
+  .nav button {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .footer {
+    padding-top: 12px;
+    font-size: 10px;
+  }
+}
+
+/* ==================== LARGE SCREENS (min-width: 1440px) ==================== */
+@media (min-width: 1440px) {
+  .sidebar {
+    width: 280px;
+  }
+
+  .sidebarContent {
+    padding: 24px;
+  }
+
+  .header h2 {
+    font-size: 19px;
+  }
+
+  .header p {
+    font-size: 14px;
+  }
+
+  .profile {
+    padding: 14px;
+  }
+
+  .profile h3 {
+    font-size: 16px;
+  }
+
+  .profile p {
+    font-size: 14px;
+  }
+
+  .nav button {
+    font-size: 16px;
+    padding: 13px 16px;
+  }
+
+  .footer {
+    font-size: 13px;
   }
 }

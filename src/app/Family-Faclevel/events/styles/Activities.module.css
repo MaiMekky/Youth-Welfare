@@ -219,7 +219,7 @@
   .eventsContainer { grid-template-columns: 1fr; }
   .eventHeader { flex-direction: column; }
   .eventDetails { grid-template-columns: 1fr; }
-  .eventActions { flex-direction: column-reverse; }
+  .eventActions { flex-direction: column; }
   .eventActions button { width: 100%; }
 }
 
@@ -327,4 +327,169 @@
 }
 .btnIcon {
   font-size: 1.2rem;
+}
+
+.container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: clamp(10px, 2vw, 20px);
+}
+
+.pageHeader {
+  padding: clamp(16px, 3vw, 24px);
+  border-radius: clamp(12px, 2vw, 20px);
+  margin: 8px;
+  margin-bottom: clamp(14px, 3vw, 25px);
+}
+
+.mainTitle {
+  font-size: clamp(1.4rem, 3.2vw, 2.5rem);
+}
+
+.badgeWaiting {
+  font-size: clamp(0.9rem, 2.2vw, 1.1rem);
+}
+
+
+.eventCard {
+  padding: clamp(14px, 2.5vw, 25px);
+  border-radius: clamp(12px, 2vw, 16px);
+}
+
+
+.eventTitleSection {
+  gap: 10px;
+  align-items: center;
+}
+
+
+.eventTitle {
+  font-size: clamp(1.05rem, 2.4vw, 1.4rem);
+  word-break: break-word;
+}
+
+
+.eventType,
+.badgeApproved,
+.badgeRejected {
+  white-space: nowrap;
+}
+
+.eventDetails {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.detailItem {
+  min-width: 0;
+  word-break: break-word;
+}
+.detailItem svg {
+  flex-shrink: 0;
+  margin-left: 6px;  
+}
+
+
+.actionRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.eventActions button {
+    flex: none;         
+  width: auto;        
+  min-width: auto;   
+}
+
+/* Notification responsive */
+.notification {
+  right: 12px;
+  left: 12px;           
+  width: auto;           
+  max-width: 420px;
+  margin: 0 auto;
+  top: 12px;
+}
+
+/* =========================
+   Tablet
+========================= */
+@media (max-width: 1024px) {
+  .eventDetails {
+    grid-template-columns: 1fr;
+  }
+
+  .eventActions button {
+    min-width: 0;
+  }
+}
+
+/* =========================
+   Mobile
+========================= */
+@media (max-width: 768px) {
+  .eventsContainer {
+    gap: 14px;
+  }
+
+  .eventDetails {
+    grid-template-columns: 1fr;
+    padding: 12px;
+  }
+
+  .actionRow {
+    flex-direction: column;
+  }
+
+  .eventActions button {
+    width: 100%;
+  }
+
+  
+  .eventActions {
+    flex-direction: column;
+  }
+
+  .viewDetailsBtn {
+    margin-right: 0;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* =========================
+   Small Mobile
+========================= */
+@media (max-width: 480px) {
+  .eventDescription {
+    font-size: 0.9rem;
+  }
+
+  .detailItem {
+    font-size: 0.85rem;
+  }
+
+  .eventActions button {
+    padding: 10px 14px;
+    font-size: 0.85rem;
+  }
+}
+
+/* =========================
+   Landscape Mobile
+========================= */
+@media (max-height: 500px) and (orientation: landscape) {
+  .pageHeader {
+    margin-bottom: 12px;
+  }
+
+  .eventsContainer {
+    gap: 12px;
+  }
+
+  .eventCard:hover {
+    transform: none; 
+  }
 }

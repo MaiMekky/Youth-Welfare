@@ -511,10 +511,10 @@
 .studentsHeader {
   display: flex;
   align-items: center;
-  justify-content: flex-end; /* title left, button right */
+  justify-content: flex-end;
   margin-bottom: 10px;
-  margin-left: 60px;
-  
+  margin-left: 0;  
+  width: 100%;
 }
 
 .approveAllButton {
@@ -525,9 +525,126 @@
   border-radius: 6px;
   cursor: pointer;
   transition: 0.2s;
+  margin-left: 67px;  
 }
 
 .approveAllButton:hover {
   background-color: #15803d;
   transform: scale(1.05);
+}
+
+.detailsPage {
+  min-width: 0;
+}
+
+.detailsHeader {
+  align-items: flex-start;
+}
+
+.detailsTitle {
+  word-break: break-word;
+}
+
+.headerActions {
+  width: auto;
+}
+
+.tableContainer {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.studentsTable {
+  min-width: 800px;
+}
+
+.approveButton,
+.rejectButton,
+.deleteButton {
+  display: inline-flex; 
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 1024px) {
+  .detailsPage {
+    padding: 16px;
+  }
+
+  .infoCard,
+  .studentsCard,
+  .descriptionCard {
+    padding: 22px;
+  }
+
+  .detailsTitle {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .detailsHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .headerActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .actionBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .infoRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .infoValue {
+    margin-right: 0;
+    width: 100%;
+    word-break: break-word;
+  }
+
+  .studentsHeader {
+    justify-content: flex-start;
+  }
+
+  .approveAllButton {
+    width: 100%;
+    text-align: center;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .detailsPage {
+    padding: 12px;
+  }
+
+  .detailsTitle {
+    font-size: 1.3rem;
+  }
+
+  .cardTitle {
+    font-size: 1.15rem;
+  }
+
+  .studentsTable th,
+  .studentsTable td {
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+
+  .approveButton,
+  .rejectButton {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+  }
 }

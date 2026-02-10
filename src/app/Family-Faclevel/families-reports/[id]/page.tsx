@@ -370,16 +370,21 @@ const handleExport = async () => {
                       <p className={styles.activityDate}>{act.date}</p>
                     </div>
                   </div>
-                  <div className={styles.activityMeta}>
-                    <span className={styles.activityType}>{act.type}</span>
-                    <span className={styles.activityParticipants}>{act.participants} مشارك</span>
-                  </div>
+                  <div className={styles.activityActionsCenter}>
+                <div className={styles.activityMetaCenter}>
+                  <span className={styles.activityType}>{act.type}</span>
+                  <span className={styles.activityParticipants}>
+                    {act.participants} مشارك
+                  </span>
                 </div>
-                            {/* view details row */}
-              <div className={styles.detailsRow}>
-                <button className={styles.viewDetailsBtn} 
-                title="عرض جميع تفاصيل الفعالية"
-                onClick={() => router.push(`/Family-Faclevel/families-reports/${id}/${act.eventId}`)}>
+
+                <button
+                  className={styles.viewDetailsBtn}
+                  title="عرض جميع تفاصيل الفعالية"
+                  onClick={() =>
+                    router.push(`/Family-Faclevel/families-reports/${id}/${act.eventId}`)
+                  }
+                >
                   <span className={styles.btnIcon}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -399,6 +404,7 @@ const handleExport = async () => {
                   عرض التفاصيل الكاملة
                 </button>
               </div>
+                              </div>
               </div>
             ))}
           </div>

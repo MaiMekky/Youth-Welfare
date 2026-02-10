@@ -59,7 +59,7 @@ export default function ReportCard({ family }: any) {
 
           {/* --- Family Description below Category --- */}
           {family.description && (
-            <div className={styles.detailRow}>
+            <div className={`${styles.detailRow} ${styles.descriptionItem}`}>
               <div className={styles.detailItem}>
                 <span className={styles.detailLabel}>وصف الأسرة:</span>
                 <span className={styles.detailValue}>{family.description}</span>

@@ -106,6 +106,10 @@ const FamilyLeaders: React.FC = () => {
       showNotification("الرجاء إدخال الرقم القومي", "error");
       return;
     }
+    if (formData.nationalId.length !== 14) {
+    showNotification("الرقم القومي يجب أن يكون 14 رقم", "error");
+    return;
+  }
     setNationalIdError(false); // clear error if valid
   }
     setLoading(true);
@@ -122,15 +126,43 @@ const FamilyLeaders: React.FC = () => {
         setLeaders(updated);
         showNotification("تم تحديث بيانات القائد", "success");
       } else {
-        await fetch(`http://localhost:8000/api/family/faculty/family-founder/${formData.nationalId}/add/`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({
-            national_id: formData.nationalId,
-          }),
-        });
-        showNotification("تم إضافة القائد بنجاح", "success");
-        await fetchLeaders();
+      const res = await fetch(
+      `http://localhost:8000/api/family/faculty/family-founder/${formData.nationalId}/add/`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          national_id: formData.nationalId,
+        }),
+      }
+    );
+
+
+    let data: any = null;
+    try {
+      data = await res.json();
+    } catch {
+
+    }
+
+    if (!res.ok) {
+
+      if (data?.detail) {
+        showNotification(data.detail, "error");
+      } else if (data?.error) {
+        showNotification(data.error, "error");
+      } else {
+        showNotification("فشل إضافة القائد", "error");
+      }
+      return;
+    }
+
+
+    showNotification("تم إضافة القائد بنجاح", "success");
+    await fetchLeaders();
       }
       setIsModalOpen(false);
     } catch {
@@ -218,32 +250,32 @@ const FamilyLeaders: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredLeaders.map((leader, index) => (
-                <tr key={index}>
-                  <td>
-                    {leader.name}
-                  </td>
-                  <td>{leader.universityId}</td>
-                  <td>{leader.nationalId}</td>
-                  <td>{leader.phone}</td>
-                  <td>{leader.email}</td>
-                  <td>
-                    <span className={leader.role.includes("قائد") ? styles.roleLeader : styles.roleAssistant}>
-                      {leader.role}
-                    </span>
-                  </td>
-                  <td>{leader.createdAt}</td>
-                  <td className={styles.actionButtons}>
-                    <button className={styles.deleteButton} onClick={() => handleDelete(index)} disabled={loading}>
-                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" > <polyline points="3 6 5 6 21 6" /> <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /> <path d="M10 11v6" /> <path d="M14 11v6" /> </svg>
-                    </button>
-                    {/* <button className={styles.editButton} onClick={() => handleOpenEdit(index)} disabled={loading}>
-                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" > <path d="M12 20h9" /> <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" /> </svg>
-                    </button> */}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+            {filteredLeaders.map((leader, index) => (
+              <tr key={index}>
+                <td data-label="الاسم">{leader.name}</td>
+                <td data-label="الرقم الجامعي">{leader.universityId}</td>
+                <td data-label="الرقم القومي">{leader.nationalId}</td>
+                <td data-label="الهاتف">{leader.phone}</td>
+                <td data-label="البريد الإلكتروني">{leader.email}</td>
+                <td data-label="الدور">
+                  <span className={leader.role.includes("قائد") ? styles.roleLeader : styles.roleAssistant}>
+                    {leader.role}
+                  </span>
+                </td>
+                <td data-label="تاريخ الإنشاء">{leader.createdAt}</td>
+                <td data-label="الإجراءات" className={styles.actionButtons}>
+                  <button className={styles.deleteButton} onClick={() => handleDelete(index)} disabled={loading}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                      <path d="M10 11v6" />
+                      <path d="M14 11v6" />
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
           </table>
         </div>
 

@@ -53,28 +53,38 @@ export default function FacLevelSidebar() {
         <Menu size={24} />
       </button>
 
-      <aside
-        id="sidebar"
-        className={`${styles.sidebar} ${isOpen ? styles.open : ""}`}
-      >
+     <aside
+      id="sidebar"
+      className={`${styles.sidebar} ${isOpen ? styles.open : ""}`}
+    >
+      <div className={styles.sidebarContent}>
+        {/* ===== Header ===== */}
         <div className={styles.header}>
-          <h2>إدارة الاسر الطلابية</h2>
-          <p>جامعة حلوان - قسم خدمات الاسر الطلابية</p>
+          <div className={styles.headerText}>
+            <h2>إدارة الاسر الطلابية</h2>
+            <p>جامعة حلوان - قسم خدمات الاسر الطلابية</p>
+          </div>
+
           <button className={styles.closeBtn} onClick={() => setIsOpen(false)}>
             <X size={20} />
           </button>
         </div>
 
-        {userData && (
-          <div className={styles.profile}>
-            <User size={28} />
-            <div>
-              <h3>{userData.name}</h3>
-              <p>{userData.faculty_name}</p>
-            </div>
-          </div>
-        )}
+        {/* ===== Profile ===== */}
+       {userData && (
+      <div className={styles.profile}>
+        <div className={styles.profileIcon}>
+          <User size={28} />
+        </div>
 
+        <div className={styles.profileInfo}>
+          <h3>{userData.name}</h3>
+          <p>{userData.faculty_name}</p>
+        </div>
+      </div>
+    )}
+
+        {/* ===== Nav ===== */}
         <nav className={styles.nav}>
           <button
             onClick={() => handleNavigation("/Family-Faclevel/events")}
@@ -93,7 +103,7 @@ export default function FacLevelSidebar() {
           </button>
 
           <button
-          onClick={() => handleNavigation("/Family-Faclevel/families-requests")}
+            onClick={() => handleNavigation("/Family-Faclevel/families-requests")}
             className={pathname === "/Family-Faclevel/families-requests" ? styles.active : ""}
           >
             <ClipboardList size={18} />
@@ -102,28 +112,27 @@ export default function FacLevelSidebar() {
 
           <button
             onClick={() => handleNavigation("/Family-Faclevel/environment-friends")}
-            className={
-              pathname === "/Family-Faclevel/environment-friends" ? styles.active : ""
-            }
+            className={pathname === "/Family-Faclevel/environment-friends" ? styles.active : ""}
           >
             <PlusCircle size={18} />
             <span>إنشاء أسرة أصدقاء البيئة</span>
           </button>
-            <button
+
+          <button
             onClick={() => handleNavigation("/Family-Faclevel/leaders")}
-            className={
-              pathname === "/Family-Faclevel/leaders" ? styles.active : ""
-            }
+            className={pathname === "/Family-Faclevel/leaders" ? styles.active : ""}
           >
             <User size={18} />
             <span>قادة الاسر</span>
           </button>
         </nav>
-
+      </div>
+      
+        {/* ===== Footer ===== */}
         <div className={styles.footer}>
           <p>الإصدار 1.0.0 | النظام نشط</p>
         </div>
-      </aside>
+    </aside>
 
       {isOpen && (
         <div className={styles.overlay} onClick={() => setIsOpen(false)}></div>

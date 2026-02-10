@@ -1,0 +1,135 @@
+/* ========== LAYOUT CONTAINER ========== */
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f5f6fa;
+}
+
+/* ========== LAYOUT BODY ========== */
+.layoutBody {
+  display: flex;
+  flex: 1;
+  position: relative;
+  /* Allow vertical scrolling for sticky sidebar while preventing horizontal overflow */
+  overflow-x: hidden;
+}
+
+/* ========== MAIN CONTENT ========== */
+.main {
+  flex: 1;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  overflow-y: auto;
+  background: #f5f6fa;
+  min-height: calc(100vh - 140px); /* Adjust based on header/footer height */
+  transition: margin-right 0.3s ease;
+}
+
+/* ========== OVERLAY (Mobile only) ========== */
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  backdrop-filter: blur(2px);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ========== DESKTOP (Above 768px) ========== */
+@media (min-width: 769px) {
+  .layoutBody {
+    /* Sidebar stays visible on desktop */
+  }
+
+  .main {
+    /* Main content automatically takes remaining space */
+  }
+
+  .overlay {
+    /* Never show overlay on desktop */
+    display: none !important;
+  }
+}
+
+/* ========== TABLET (768px and below) ========== */
+@media (max-width: 768px) {
+  .layoutBody {
+    flex-direction: column;
+  }
+
+  .main {
+    width: 100%;
+    padding: clamp(1rem, 2.5vw, 1.5rem);
+    min-height: calc(100vh - 120px);
+  }
+
+  .overlay {
+    display: block;
+  }
+}
+
+/* ========== MOBILE (480px and below) ========== */
+@media (max-width: 480px) {
+  .main {
+    padding: clamp(0.875rem, 2vw, 1.25rem);
+    min-height: calc(100vh - 100px);
+  }
+}
+
+/* ========== EXTRA SMALL (360px and below) ========== */
+@media (max-width: 360px) {
+  .main {
+    padding: 0.75rem;
+  }
+}
+
+/* ========== LANDSCAPE MOBILE ========== */
+@media (max-width: 768px) and (orientation: landscape) {
+  .main {
+    padding: 1rem;
+    min-height: calc(100vh - 100px);
+  }
+}
+
+/* ========== ACCESSIBILITY ========== */
+@media (prefers-reduced-motion: reduce) {
+  .main,
+  .overlay {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* ========== SMOOTH SCROLLING ========== */
+.main {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.main::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.main::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.main::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.main::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

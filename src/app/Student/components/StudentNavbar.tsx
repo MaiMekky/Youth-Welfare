@@ -83,28 +83,31 @@ const StudentNavbar: React.FC = () => {
   const router = useRouter(); // router جوا الcomponent
 
   const handleLogout = () => {
-    localStorage.removeItem("access");
-    localStorage.removeItem("refresh");
-    router.push("/");
-  }
-  
-  const navItems: (NavItem & { href: string })[] = [
-    { key: "home", label: "الرئيسية", icon: <IconHome />, href: "/Student/MainPage" },
-    { key: "activities", label: "الأنشطة", icon: <IconActivities />, href: "/Student/Activities" },
-    { key: "union", label: "اتحاد الطلبة", icon: <IconUnion />, href: "/Student/StudentUnion" },
-    { key: "families", label: "الأسر الطلابية", icon: <IconFamily />, href: "/Student/Families" },
-    { key: "familyManage", label: "ادارة الاسر", icon: <IconFamilyManage />, href: "/Student/manage" },
-    { key: "takafol", label: "التكافل الاجتماعي", icon: <IconTakafol />, href: "/Student/takafol" },
-    { key: "profile", label: "ملفي الشخصي", icon: <IconProfile />, href: "/Student/profile" },
-    
+  // Clear localStorage
   localStorage.clear();
+
+  // Clear cookies
   document.cookie = "access=; path=/; max-age=0; SameSite=Lax";
   document.cookie = "refresh=; path=/; max-age=0; SameSite=Lax";
   document.cookie = "user_type=; path=/; max-age=0; SameSite=Lax";
   document.cookie = "roleKey=; path=/; max-age=0; SameSite=Lax";
   document.cookie = "role=; path=/; max-age=0; SameSite=Lax";
-  router.replace("/"); 
-  };
+
+  // Redirect
+  router.replace("/");
+};
+
+  
+const navItems: (NavItem & { href: string })[] = [
+  { key: "home", label: "الرئيسية", icon: <IconHome />, href: "/Student/MainPage" },
+  { key: "activities", label: "الأنشطة", icon: <IconActivities />, href: "/Student/Activities" },
+  { key: "union", label: "اتحاد الطلبة", icon: <IconUnion />, href: "/Student/StudentUnion" },
+  { key: "families", label: "الأسر الطلابية", icon: <IconFamily />, href: "/Student/Families" },
+  { key: "familyManage", label: "ادارة الاسر", icon: <IconFamilyManage />, href: "/Student/manage" },
+  { key: "takafol", label: "التكافل الاجتماعي", icon: <IconTakafol />, href: "/Student/takafol" },
+  { key: "profile", label: "ملفي الشخصي", icon: <IconProfile />, href: "/Student/profile" },
+];
+
 
   const isActive = (href: string) => {
     return pathname === href || pathname?.startsWith(href + "/");

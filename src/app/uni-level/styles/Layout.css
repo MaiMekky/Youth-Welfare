@@ -9,7 +9,7 @@
 
 /* Sidebar */
 .sidebar {
-  width: 260px;
+  width: min(260px, 85vw);
   background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
   color: white;
   flex-shrink: 0;
@@ -45,29 +45,24 @@
 /* Footer */
 footer {
   margin-top: auto;
-  padding: 16px 20px;
+  padding: clamp(0.75rem, 2vw, 1rem) clamp(1rem, 3vw, 1.25rem);
   text-align: center;
   background-color: #1e2a5a;
   color: #fff;
-  font-size: 0.9rem;
+  font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* ---------------- Responsive ---------------- */
 
 /* Medium screens (Tablets) */
-@media (max-width: 992px) {
-  .layout-container {
-    flex-direction: row; /* Keep as row to maintain sidebar visibility */
-  }
-
+@media (max-width: 1024px) {
   .sidebar {
-    width: 220px; /* Slightly smaller for tablets */
-    position: relative; /* Keep it in normal flow */
-    right: 0; /* Ensure it's visible */
+    width: min(220px, 80vw);
   }
-
   .layout-content {
-    padding: 20px 30px;
+    padding: clamp(1rem, 2.5vw, 1.25rem) clamp(1rem, 3vw, 1.875rem);
   }
 }
 
@@ -80,9 +75,10 @@ footer {
   .sidebar {
     position: fixed;
     top: 0;
-    right: -260px;
+    right: -100%;
     height: 100vh;
-    width: 260px;
+    width: min(260px, 85vw);
+    max-width: 85vw;
     z-index: 1000;
     transition: right 0.3s ease;
   }
@@ -97,7 +93,7 @@ footer {
   }
 
   .layout-content {
-    padding: 16px 20px;
+    padding: clamp(0.75rem, 2vw, 1rem) clamp(1rem, 3vw, 1.25rem);
   }
 }
 

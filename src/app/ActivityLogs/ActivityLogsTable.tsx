@@ -71,19 +71,21 @@ export default function ActivityLogsTable() {
     what: log.solidarity_id,
     status: log.action.includes("رفض") ? "فشل" : "نجاح",
     statusClass: log.action.includes("رفض") ? "failed" : "success",
-    activityType: log.target_type.includes("تكافل") ? "تكافل" : "أسر", // ✅ تعيين نوع النشاط
+    activityType: log.target_type.includes("تكافل") ? "تكافل" : "أسر",
   }));
 
   // 🔍 الفلاتر
   const filteredLogs = mappedLogs.filter((log) => {
-    const matchesSearch =
-      log.who.includes(search) ||
-      log.action.includes(search) ||
-      log.which.includes(search);
+   const term = search.trim().toLowerCase();
+   const matchesSearch =
+  log.who.toLowerCase().includes(term) ||
+  log.action.toLowerCase().includes(term) ||
+  log.which.toLowerCase().includes(term);
+
 
     const matchesAction =
       actionFilter === "all" || log.action === actionFilter;
-  const matchesActivity =
+    const matchesActivity =
       activityFilter === "all" || log.activityType === activityFilter;
     return matchesSearch && matchesAction && matchesActivity;
   });
@@ -115,12 +117,14 @@ export default function ActivityLogsTable() {
           <option value="عرض مستندات الطلب">عرض مستندات الطلب</option>
           <option value="عرض بيانات الطلب">عرض بيانات الطلب</option>
         </select>
-   {/* ✅ فلتر النشاط الجديد */}
+
+        {/* ✅ فلتر النشاط الجديد */}
         <select onChange={(e) => setActivityFilter(e.target.value)}>
           <option value="all">كل الأنشطة</option>
           <option value="تكافل">تكافل</option>
           <option value="أسر">أسر</option>
         </select>
+
         <input
           type="text"
           placeholder="ابحث بالاسم أو الإجراء أو الهدف"
@@ -129,53 +133,51 @@ export default function ActivityLogsTable() {
         />
       </div>
 
-      {/* TABLE */}
-      <table className={styles.logsTable}>
-        <thead>
-          <tr>
-            <th>من قام</th>
-            <th>ماذا فعل</th>
-            <th>متى</th>
-            <th>الدور</th>
-            <th>الكلية</th>
-            <th>عنوان IP</th>
-            <th>الهدف</th>
-            <th>رقم الطلب</th>
-            <th>الحالة</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {displayedLogs.map((log) => (
-            <tr key={log.id}>
-              <td>{log.who}</td>
-              <td>{log.action}</td>
-              <td>{log.when}</td>
-
-              <td>{log.role}</td>
-              <td>{log.faculty}</td>
-
-              <td>{log.ip}</td>
-              <td style={{ fontWeight: "bold" }}>{log.which}</td>
-              <td>{log.what}</td>
-
-              <td>
-                <span
-                  className={`${styles.statusTag} ${styles[log.statusClass]}`}
-                >
-                  {log.status}
-                </span>
-              </td>
+      {/* ✅ TABLE WRAPPER - Only wraps the table */}
+      <div className={styles.tableWrapper}>
+        <table className={styles.logsTable}>
+          <thead>
+            <tr>
+              <th>من قام</th>
+              <th>ماذا فعل</th>
+              <th>متى</th>
+              <th>الدور</th>
+              <th>الكلية</th>
+              <th>عنوان IP</th>
+              <th>الهدف</th>
+              <th>رقم الطلب</th>
+              <th>الحالة</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+
+          <tbody>
+            {displayedLogs.map((log) => (
+              <tr key={log.id}>
+                <td>{log.who}</td>
+                <td>{log.action}</td>
+                <td>{log.when}</td>
+                <td>{log.role}</td>
+                <td>{log.faculty}</td>
+                <td>{log.ip}</td>
+                <td style={{ fontWeight: "bold" }}>{log.which}</td>
+                <td>{log.what}</td>
+                <td>
+                  <span
+                    className={`${styles.statusTag} ${styles[log.statusClass]}`}
+                  >
+                    {log.status}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {/* FOOTER */}
       <div className={styles.gmailFooter}>
-        <div className="paginationInfo">
-          عرض{" "}
-          <strong>{(currentPage - 1) * logsPerPage + 1}</strong>-
+        <div className={styles.paginationInfo}>
+          عرض <strong>{(currentPage - 1) * logsPerPage + 1}</strong>-
           <strong>
             {Math.min(currentPage * logsPerPage, filteredLogs.length)}
           </strong>{" "}
@@ -194,9 +196,9 @@ export default function ActivityLogsTable() {
           <option value={25}>25</option>
         </select>
 
-        <div className="paginationControls">
+        <div className={styles.paginationControls}>
           <button
-            className="arrowBtn"
+            className={styles.arrowBtn}
             onClick={handlePrev}
             disabled={currentPage === 1}
           >
@@ -204,7 +206,7 @@ export default function ActivityLogsTable() {
           </button>
 
           <button
-            className="arrowBtn"
+            className={styles.arrowBtn}
             onClick={handleNext}
             disabled={currentPage === totalPages}
           >

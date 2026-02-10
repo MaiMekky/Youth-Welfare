@@ -1,27 +1,30 @@
 .page-header {
-  margin-bottom: 2rem;
+  margin-bottom: clamp(1rem, 3vw, 2rem);
   background: #fff;
-  padding: 1.5rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
   border-radius: 12px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   direction: rtl;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .page-header h2 {
-  font-size: 1.5rem;
+  font-size: clamp(1.125rem, 3vw, 1.5rem);
   color: #2d2863;
-  margin-bottom: 0.5rem;
+  margin-bottom: clamp(0.25rem, 1vw, 0.5rem);
+  word-wrap: break-word;
 }
 
 .breadcrumb {
   color: #555;
-  margin: 0.2rem 0;
-  font-size: 0.95rem;
+  margin: clamp(0.1rem, 0.5vw, 0.2rem) 0;
+  font-size: clamp(0.8125rem, 1.5vw, 0.95rem);
 }
 
 .subtext {
   color: #777;
-  font-size: 0.9rem;
+  font-size: clamp(0.8125rem, 1.5vw, 0.9rem);
 }
 
 /* ✅ Responsive text sizes */

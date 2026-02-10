@@ -11,7 +11,8 @@
   display: flex;
   flex: 1;
   position: relative;
-  overflow: hidden;
+  /* Allow vertical scrolling for sticky sidebar while preventing horizontal overflow */
+  overflow-x: hidden;
 }
 
 /* ========== MAIN CONTENT ========== */

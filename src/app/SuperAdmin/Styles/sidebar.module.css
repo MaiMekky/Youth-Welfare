@@ -14,6 +14,17 @@
   transition: transform 0.3s ease;
   overflow-y: auto;
   height: 100%;
+  /* Match uni-level behavior: full viewport height on desktop */
+  min-height: 100vh;
+}
+
+/* Desktop / tablet: keep sidebar visible and pinned alongside content */
+@media (min-width: 769px) {
+  .saSidebar {
+    position: sticky;
+    top: 0;
+    align-self: stretch;
+  }
 }
 
 /* Close button - hidden on desktop */

@@ -4,7 +4,7 @@
   color: #2C3A5F;
   background-color: #f8f9fc;
   border-radius: 20px;
-  min-height: 100vh;
+  min-height: auto;
   width: 100%;
   box-sizing: border-box;
 }
@@ -58,24 +58,21 @@
 .filters select {
   min-width: 150px;
 }
-
-/* Table Wrapper - enables horizontal scroll */
 .tableWrapper {
+  width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  margin-bottom: 20px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  background: #fff;
 }
 
-/* Table */
+
 .logsTable {
   width: 100%;
   border-collapse: collapse;
-  background-color: white;
-  border-radius: 8px;
-  min-width: 900px; /* Forces horizontal scroll on small screens */
+  min-width: 1100px;
 }
+
 
 .logsTable th,
 .logsTable td {
@@ -381,5 +378,15 @@
   .filters select {
     font-size: 12px;
     padding: 6px 8px;
+  }
+}
+@media (min-width: 1200px) {
+  .logsTable {
+    min-width: 100%;
+  }
+
+  .logsTable th,
+  .logsTable td {
+    white-space: normal; 
   }
 }

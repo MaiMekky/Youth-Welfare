@@ -146,7 +146,8 @@ export default function StudentsTable() {
       />
     <br />
       <div className={styles.studentsTable}>
-        <table>
+        <div className={styles.tableWrapper}>
+        <table className={styles.table}>
           <thead>
             <tr>
               <th>رقم</th>
@@ -188,6 +189,7 @@ export default function StudentsTable() {
       )}
           </tbody>
         </table>
+        </div>
 
         {/* Footer */}
         <div className={styles.tableFooter}>

@@ -1,9 +1,8 @@
-// app/dashboard/layout.jsx
 import React from "react";
 import Sidebar from "../SuperAdmin/components/sidebar";
 import Header from "../SuperAdmin/components/header";
 import Footer from "../SuperAdmin/components/Footer2";
-import styles from "./ACtivityLogs.module.css";
+import styles from "./layout.module.css";
 
 export const metadata = { title: "Dashboard" };
 
@@ -19,4 +18,3 @@ export default function DashboardLayout({ children }) {
     </div>
   );
 }
-

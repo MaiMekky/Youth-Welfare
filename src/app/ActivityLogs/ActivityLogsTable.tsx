@@ -76,10 +76,12 @@ export default function ActivityLogsTable() {
 
   // 🔍 الفلاتر
   const filteredLogs = mappedLogs.filter((log) => {
-    const matchesSearch =
-      log.who.includes(search) ||
-      log.action.includes(search) ||
-      log.which.includes(search);
+   const term = search.trim().toLowerCase();
+   const matchesSearch =
+  log.who.toLowerCase().includes(term) ||
+  log.action.toLowerCase().includes(term) ||
+  log.which.toLowerCase().includes(term);
+
 
     const matchesAction =
       actionFilter === "all" || log.action === actionFilter;

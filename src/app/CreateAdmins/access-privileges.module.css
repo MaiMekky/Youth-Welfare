@@ -1,6 +1,6 @@
 /* Base styles - Mobile First Approach */
 .pageWrapper {
-  min-height: 100vh;
+  min-height: auto;
   padding: 15px;
   background: #f5f7fa;
   font-family: 'Segoe UI', sans-serif;
@@ -67,18 +67,16 @@
 }
 
 .tableContainer {
+  width: 100%;
+  max-width: 100%;
   overflow-x: auto;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   -webkit-overflow-scrolling: touch;
 }
 
 .usersTable {
   width: 100%;
   border-collapse: collapse;
-  min-width: 100%;
-  font-size: 13px;
+  min-width: 900px; 
 }
 
 .usersTable th,
@@ -667,5 +665,15 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+@media (min-width: 1200px) {
+  .usersTable {
+    min-width: 100%;
+  }
+
+  .usersTable th,
+  .usersTable td {
+    white-space: normal; 
   }
 }

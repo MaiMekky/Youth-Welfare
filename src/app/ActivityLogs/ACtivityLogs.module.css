@@ -39,6 +39,11 @@
   color: #fff;
   border: none;
   cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.filters button:hover {
+  background-color: #a68c2a;
 }
 
 .filters input[type="date"] {
@@ -47,48 +52,77 @@
 
 .filters input[type="text"] {
   flex: 1;
+  min-width: 200px;
+}
+
+.filters select {
   min-width: 150px;
 }
 
-/* Table */
+/* Table Wrapper - enables horizontal scroll */
 .tableWrapper {
-  overflow-x: auto; /* scroll on small screens */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+/* Table */
 .logsTable {
   width: 100%;
   border-collapse: collapse;
   background-color: white;
   border-radius: 8px;
-  min-width: 800px; /* ensure table doesn’t shrink too much */
+  min-width: 900px; /* Forces horizontal scroll on small screens */
 }
 
 .logsTable th,
 .logsTable td {
-  padding: 10px;
+  padding: 12px 10px;
   text-align: center;
   border-bottom: 1px solid #eee;
+  white-space: nowrap;
 }
 
 .logsTable th {
   background-color: #f1f1f1;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
+.logsTable tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Status Tags */
 .statusTag {
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 5px;
   font-size: 12px;
   display: inline-block;
+  font-weight: 500;
 }
 
-.statusTag.success { background-color: #d4edda; color: #155724; }
-.statusTag.failed { background-color: #f8d7da; color: #721c24; }
+.statusTag.success { 
+  background-color: #d4edda; 
+  color: #155724; 
+}
 
+.statusTag.failed { 
+  background-color: #f8d7da; 
+  color: #721c24; 
+}
+
+/* Action Tags */
 .actionTag {
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 5px;
   font-size: 12px;
   display: inline-block;
+  font-weight: 500;
 }
 
 .actionTag.create { background-color: #d4edda; }
@@ -96,29 +130,29 @@
 .actionTag.update { background-color: #cce5ff; }
 .actionTag.login { background-color: #e2d9f3; }
 .actionTag.logout { background-color: #d4edda; }
-.actionTag.change-permissions { background-color: #ffe5b4; }
+.actionTag.changePermissions { background-color: #ffe5b4; }
 
-/* Gmail-style Pagination */
+/* Gmail-style Pagination Footer */
 .gmailFooter {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   margin-top: 20px;
-  padding: 10px 15px;
+  padding: 12px 16px;
   background-color: #f1f3f4;
   border-radius: 8px;
   font-size: 14px;
   color: #2C3A5F;
-  gap: 10px;
+  gap: 15px;
 }
 
-.gmailFooter .paginationInfo {
+.paginationInfo {
   font-weight: 500;
 }
 
 .gmailFooter select {
-  padding: 5px 8px;
+  padding: 6px 10px;
   border-radius: 4px;
   border: 1px solid #dcdcdc;
   background-color: white;
@@ -127,8 +161,14 @@
   color: #2C3A5F;
 }
 
-.gmailFooter .arrowBtn {
-  padding: 5px 10px;
+.paginationControls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.arrowBtn {
+  padding: 6px 12px;
   background-color: white;
   border: 1px solid #dcdcdc;
   border-radius: 4px;
@@ -137,16 +177,19 @@
   font-weight: bold;
   color: #2C3A5F;
   transition: background-color 0.2s, border-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.gmailFooter .arrowBtn:hover:not(:disabled) {
+.arrowBtn:hover:not(:disabled) {
   background-color: #e8eaed;
   border-color: #c6c6c6;
 }
 
-.gmailFooter .arrowBtn:disabled {
-  opacity: 0.5;
-  cursor: default;
+.arrowBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 /* Dashboard Layout */
@@ -169,41 +212,174 @@
   border-radius: 8px;
 }
 
-/* Responsive Adjustments */
-@media (max-width: 1024px) {
-  .logsTable { min-width: 700px; }
-}
+/* ========================================
+   RESPONSIVE BREAKPOINTS
+   ======================================== */
 
-@media (max-width: 768px) {
-  .filters {
-    flex-direction: column;
-    gap: 8px;
+/* Large tablets and smaller laptops */
+@media (max-width: 1024px) {
+  .activityLogsContainer {
+    padding: 15px;
   }
 
-  .logsTable { min-width: 100%; }
+  .logsTable {
+    min-width: 800px;
+  }
 
+  .filters input[type="text"] {
+    min-width: 150px;
+  }
+}
+
+/* Tablets */
+@media (max-width: 768px) {
+  .activityLogsContainer {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .logsHeader {
+    font-size: 20px;
+    margin-bottom: 15px;
+  }
+
+  /* Stack filters vertically */
+  .filters {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .filters button,
+  .filters input,
+  .filters select {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .filters input[type="date"],
+  .filters input[type="text"],
+  .filters select {
+    max-width: 100%;
+    min-width: 100%;
+  }
+
+  /* Table adjustments */
+  .logsTable {
+    min-width: 700px;
+    font-size: 13px;
+  }
+
+  .logsTable th,
+  .logsTable td {
+    padding: 10px 8px;
+  }
+
+  /* Stack pagination */
   .gmailFooter {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .paginationInfo {
+    text-align: center;
+    width: 100%;
   }
 
   .gmailFooter select {
-    margin: 0;
-    margin-top: 10px;
+    width: 100%;
   }
 
-  .gmailFooter .paginationControls {
-    margin-top: 10px;
+  .paginationControls {
+    justify-content: center;
+    width: 100%;
   }
 }
 
+/* Mobile devices */
 @media (max-width: 480px) {
-  .logsHeader { font-size: 20px; }
+  .activityLogsContainer {
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  .logsHeader {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+
+  /* Filters */
+  .filters {
+    gap: 8px;
+  }
+
   .filters button,
   .filters input,
-  .filters select { font-size: 13px; padding: 6px 10px; }
+  .filters select {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+
+  /* Table */
+  .logsTable {
+    min-width: 600px;
+    font-size: 12px;
+  }
+
   .logsTable th,
-  .logsTable td { padding: 6px; font-size: 12px; }
-  .gmailFooter { font-size: 13px; padding: 8px 12px; }
-  .gmailFooter .arrowBtn { font-size: 14px; padding: 4px 8px; }
+  .logsTable td {
+    padding: 8px 6px;
+  }
+
+  .statusTag,
+  .actionTag {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+
+  /* Pagination */
+  .gmailFooter {
+    font-size: 12px;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .arrowBtn {
+    font-size: 14px;
+    padding: 5px 10px;
+  }
+
+  .gmailFooter select {
+    font-size: 13px;
+    padding: 6px 8px;
+  }
+}
+
+/* Very small devices */
+@media (max-width: 360px) {
+  .activityLogsContainer {
+    padding: 8px;
+  }
+
+  .logsHeader {
+    font-size: 16px;
+  }
+
+  .logsTable {
+    min-width: 550px;
+    font-size: 11px;
+  }
+
+  .logsTable th,
+  .logsTable td {
+    padding: 6px 4px;
+  }
+
+  .filters button,
+  .filters input,
+  .filters select {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
 }

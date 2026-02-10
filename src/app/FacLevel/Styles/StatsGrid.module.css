@@ -22,12 +22,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
 }
 
 .statLabel {
   font-size: 15px;
   color: #6B7280;
   margin-bottom: 6px;
+  word-wrap: break-word;
 }
 
 .statValue {
@@ -42,6 +44,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 /* ألوان مختلفة لكل نوع */
@@ -50,6 +53,100 @@
 .statReview { background-color: #FED7AA; color: #C2410C; }
 .statApproved { background-color: #D1FAE5; color: #047857; }
 .statRejected {
-  background-color: #f87171; /* red tone */
+  background-color: #f87171;
   color: white;
+}
+
+/* Tablet (768px and below) */
+@media (max-width: 768px) {
+  .statsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+  }
+
+  .statCard {
+    padding: 16px;
+  }
+
+  .statLabel {
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+
+  .statValue {
+    font-size: 24px;
+  }
+
+  .statIcon {
+    padding: 12px;
+  }
+  
+  .statIcon svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* Mobile (480px and below) */
+@media (max-width: 480px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin: 16px 0;
+  }
+
+  .statCard {
+    padding: 14px;
+  }
+
+  .statContent {
+    gap: 10px;
+  }
+
+  .statLabel {
+    font-size: 13px;
+  }
+
+  .statValue {
+    font-size: 22px;
+  }
+
+  .statIcon {
+    padding: 10px;
+  }
+  
+  .statIcon svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Small mobile (360px and below) */
+@media (max-width: 360px) {
+  .statsGrid {
+    gap: 8px;
+    margin: 12px 0;
+  }
+
+  .statCard {
+    padding: 12px;
+  }
+
+  .statLabel {
+    font-size: 12px;
+  }
+
+  .statValue {
+    font-size: 20px;
+  }
+
+  .statIcon {
+    padding: 8px;
+  }
+  
+  .statIcon svg {
+    width: 16px;
+    height: 16px;
+  }
 }

@@ -1,3 +1,4 @@
+
 .facultyReportPage {
   background: #f6f7fb;
   min-height: 100vh;
@@ -16,12 +17,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 12px;
+  flex-wrap: wrap; 
 }
 
 .facultyHeader h1 {
-  font-size: 22px;
+  font-size: clamp(16px, 2.2vw, 22px); /* ✅ responsive */
   margin: 0;
 }
 
@@ -30,25 +31,33 @@
   opacity: 0.8;
   margin: 3px 0 0;
 }
-
+/* ===== Main ===== */
+.facultyMain {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1200px;  
+  margin: 0 auto;
+  padding: 0 16px 24px; 
+}
 /* ===== Stats Section ===== */
 .statsSection {
-  display: flex;
-  gap: clamp(1rem, 2vw, 1.25rem);
-  margin: clamp(1rem, 3vw, 1.5625rem);
-  flex-wrap: wrap;
+  display: grid;                 /* ✅ بدل flex */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 20px 0;
 }
 
 .statBox {
-  flex: 1 1 min(220px, 100%);
-  min-width: 0;
   background: #fff;
   border-radius: 14px;
   border: 1px solid #ddd;
-  padding: clamp(0.9375rem, 2vw, 1rem) clamp(1rem, 2vw, 1.25rem);
+  padding: 14px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  min-width: 0;
 }
 
 .yellow {
@@ -64,7 +73,10 @@
 }
 
 .icon {
-  font-size: 30px;
+  display: inline-flex;         
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 /* ===== Search Bar ===== */
@@ -72,17 +84,18 @@
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 14px;
-  margin: 0 25px 25px;
-  padding: 10px 15px;
+  margin: 0 0 16px;   /* ✅ بدل 25px */
+  padding: 10px 12px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 10px;
 }
 
 .searchBar input {
   border: none;
   outline: none;
   flex: 1;
+  min-width: 0;
   font-size: 14px;
   background: transparent;
 }
@@ -127,20 +140,73 @@
   color: white;
 }
 
-.printBtn {
-  background: #1c1e58;
+/* ===== Table Section ===== */
+.tableContainer {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #ddd;
+  overflow: hidden;
+  color: #1c1e58;
+}
+
+.tableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #eee;
+  flex-wrap: wrap; /* ✅ */
+}
+
+.tableHeader h2 {
+  margin: 0;
+  font-size: 16px;
+  color: #1c1e58;
+}
+
+.tableButtons button {
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  color: white;
+}
+
+.tableButtons {
+  display: flex;
+  align-items: center;
 }
 
 .exportBtn {
+  display: inline-flex;      
+  align-items: center;     
+  gap: 8px;                  
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: none;
   background: #d9c31d;
   color: #222;
+  white-space: nowrap;
 }
 
-/* ===== Table ===== */
+.exportBtn svg {
+  flex-shrink: 0;           
+}
+
+.tableScroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .reportTable {
   width: 100%;
   border-collapse: collapse;
   text-align: center;
+  min-width: 640px;
 }
 
 .reportTable th {
@@ -148,12 +214,14 @@
   padding: 10px;
   font-size: 14px;
   border-bottom: 1px solid #ddd;
+  white-space: nowrap;
 }
 
 .reportTable td {
   padding: 10px;
   border-bottom: 1px solid #eee;
   font-size: 14px;
+  white-space: nowrap;
 }
 
 .reportTable tr:hover {
@@ -244,35 +312,33 @@
     padding: 0.5rem;
     font-size: 0.8125rem;
   }
-}
+}/* ===== Gmail Footer ===== */
 /* ===== Gmail Footer matching Table Footer Theme ===== */
 .gmailFooter {
-  background: #fafafa;          /* match table footer */
-  border: 1px solid #ddd;       /* same border */
-  border-top: 1px solid #ddd;   /* like tableFooter, not none */
-  border-radius: 0 0 8px 8px;   /* same as tableFooter */
-  margin: 12px 25px 25px;       /* similar spacing */
-  padding: 10px 16px;           /* match tableFooter */
+  background: #fafafa;
+  border-top: 1px solid #ddd;
+  padding: 10px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 14px;
-  color: #2c3a5f;               /* match tableFooter text color */
+  color: #2c3a5f;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-/* Info section strong text */
-.gmailFooter .paginationInfo strong {
+.paginationInfo strong {
   color: #2c3a5f;
 }
 
-/* Controls section */
-.gmailFooter .paginationControls {
+.paginationControls {
   display: flex;
   align-items: center;
-  gap: 12px;                    /* match tableFooter .footerRight gap */
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.gmailFooter .paginationControls select {
+.paginationControls select {
   border: 1px solid #ccc;
   border-radius: 6px;
   padding: 5px 8px;
@@ -282,8 +348,7 @@
   color: #2c3a5f;
 }
 
-/* Arrow buttons */
-.gmailFooter .arrowBtn {
+.arrowBtn {
   background: #f1f1f1;
   border: none;
   border-radius: 6px;
@@ -291,23 +356,33 @@
   cursor: pointer;
   transition: 0.2s;
   color: #2c3a5f;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.gmailFooter .arrowBtn:hover:not(:disabled) {
+.arrowBtn:hover:not(:disabled) {
   background: #ddd;
 }
 
-.gmailFooter .arrowBtn:disabled {
+.arrowBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.facultyMain {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
+/* ✅ Responsive for mobile */
+@media (max-width: 768px) {
+  .gmailFooter {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
 
-.gmailFooter {
-  margin-top: auto; /* keep it pushed down inside the main area */
+  .paginationControls {
+    justify-content: center;
+  }
+
+  .paginationControls select {
+    width: 100%;
+  }
 }

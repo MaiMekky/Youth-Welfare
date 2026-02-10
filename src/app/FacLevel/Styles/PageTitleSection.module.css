@@ -1,7 +1,6 @@
+/* ===== BASE STYLES ===== */
 .pageTitleSection {
-  /* background-color: white; */
   border-radius: 12px;
-  /* box-shadow: 0 1px 3px rgba(0,0,0,0.1); */
   padding: 24px;
   margin-bottom: 24px;
   display: flex;
@@ -9,12 +8,15 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 16px;
+  max-width: 100%;
 }
 
 .pageTitleLeft {
   display: flex;
   align-items: center;
   gap: 16px;
+  flex: 1;
+  min-width: 0;
 }
 
 .pageIcon {
@@ -25,23 +27,35 @@
   align-items: center;
   justify-content: center;
   color: white;
+  flex-shrink: 0;
+  transition: background-color 0.2s;
+}
+
+.pageIcon:hover {
+  background-color: #c29f30;
 }
 
 .pageTitleH2 {
   font-size: 22px;
   font-weight: 700;
   color: #2C3A5F;
-  margin-bottom: 4px;
+  margin: 0 0 4px 0;
+  line-height: 1.3;
+  word-wrap: break-word;
 }
 
 .pageTitleP {
   font-size: 14px;
   color: #6B7280;
+  margin: 0;
+  line-height: 1.5;
 }
 
 .pageActions {
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .btnSecondary {
@@ -55,9 +69,464 @@
   cursor: pointer;
   font-size: 14px;
   color: #374151;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  white-space: nowrap;
+  font-weight: 500;
 }
 
 .btnSecondary:hover {
   background-color: #F9FAFB;
+  border-color: #9CA3AF;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.btnSecondary:active {
+  transform: translateY(0);
+}
+
+.btnSecondary svg {
+  flex-shrink: 0;
+}
+
+/* ==================== LARGE DESKTOP (max-width: 1200px) ==================== */
+@media (max-width: 1200px) {
+  .pageTitleSection {
+    padding: 22px;
+  }
+
+  .pageTitleH2 {
+    font-size: 21px;
+  }
+
+  .pageTitleP {
+    font-size: 13px;
+  }
+}
+
+/* ==================== TABLET BREAKPOINT (max-width: 1024px) ==================== */
+@media (max-width: 1024px) {
+  .pageTitleSection {
+    padding: 20px;
+    gap: 14px;
+  }
+
+  .pageTitleLeft {
+    gap: 14px;
+  }
+
+  .pageIcon {
+    padding: 11px;
+  }
+
+  .pageTitleH2 {
+    font-size: 20px;
+  }
+
+  .pageTitleP {
+    font-size: 13px;
+  }
+
+  .pageActions {
+    gap: 10px;
+  }
+
+  .btnSecondary {
+    padding: 9px 14px;
+    font-size: 13px;
+  }
+
+  .btnSecondary svg {
+    width: 17px;
+    height: 17px;
+  }
+}
+
+/* ==================== MEDIUM TABLET (max-width: 900px) ==================== */
+@media (max-width: 900px) {
+  .pageTitleSection {
+    padding: 18px;
+  }
+
+  .pageTitleH2 {
+    font-size: 19px;
+  }
+
+  .pageActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+/* ==================== MOBILE BREAKPOINT (max-width: 768px) ==================== */
+@media (max-width: 768px) {
+  .pageTitleSection {
+    padding: 16px;
+    gap: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pageTitleLeft {
+    width: 100%;
+    gap: 12px;
+  }
+
+  .pageIcon {
+    padding: 10px;
+  }
+
+  .pageIcon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .pageTitleH2 {
+    font-size: 18px;
+    margin-bottom: 3px;
+  }
+
+  .pageTitleP {
+    font-size: 13px;
+  }
+
+  .pageActions {
+    width: 100%;
+    gap: 10px;
+    justify-content: flex-start;
+  }
+
+  .btnSecondary {
+    padding: 9px 14px;
+    font-size: 13px;
+  }
+
+  .btnSecondary svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* ==================== SMALL MOBILE BREAKPOINT (max-width: 480px) ==================== */
+@media (max-width: 480px) {
+  .pageTitleSection {
+    padding: 14px 12px;
+    gap: 10px;
+  }
+
+  .pageTitleLeft {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .pageIcon {
+    padding: 9px;
+    align-self: flex-start;
+  }
+
+  .pageIcon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .pageTitleH2 {
+    font-size: 16px;
+    margin-bottom: 2px;
+  }
+
+  .pageTitleP {
+    font-size: 12px;
+  }
+
+  .pageActions {
+    width: 100%;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .btnSecondary {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  .btnSecondary svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* ==================== EXTRA SMALL MOBILE (max-width: 360px) ==================== */
+@media (max-width: 360px) {
+  .pageTitleSection {
+    padding: 12px 10px;
+    gap: 8px;
+  }
+
+  .pageTitleLeft {
+    gap: 8px;
+  }
+
+  .pageIcon {
+    padding: 8px;
+  }
+
+  .pageIcon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .pageTitleH2 {
+    font-size: 15px;
+  }
+
+  .pageTitleP {
+    font-size: 11px;
+  }
+
+  .pageActions {
+    gap: 6px;
+  }
+
+  .btnSecondary {
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+
+  .btnSecondary svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+/* ==================== LANDSCAPE MODE FOR MOBILE ==================== */
+@media (max-height: 500px) and (orientation: landscape) {
+  .pageTitleSection {
+    padding: 12px 16px;
+    gap: 10px;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .pageTitleLeft {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+  }
+
+  .pageIcon {
+    padding: 8px;
+  }
+
+  .pageIcon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .pageTitleH2 {
+    font-size: 15px;
+    margin-bottom: 2px;
+  }
+
+  .pageTitleP {
+    font-size: 12px;
+  }
+
+  .pageActions {
+    width: auto;
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .btnSecondary {
+    width: auto;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .btnSecondary svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* ==================== LARGE SCREENS (min-width: 1440px) ==================== */
+@media (min-width: 1440px) {
+  .pageTitleSection {
+    padding: 28px;
+    gap: 20px;
+  }
+
+  .pageTitleLeft {
+    gap: 18px;
+  }
+
+  .pageIcon {
+    padding: 14px;
+  }
+
+  .pageIcon svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .pageTitleH2 {
+    font-size: 24px;
+    margin-bottom: 6px;
+  }
+
+  .pageTitleP {
+    font-size: 15px;
+  }
+
+  .pageActions {
+    gap: 14px;
+  }
+
+  .btnSecondary {
+    padding: 12px 18px;
+    font-size: 15px;
+  }
+
+  .btnSecondary svg {
+    width: 19px;
+    height: 19px;
+  }
+}
+
+/* ==================== ULTRA WIDE SCREENS (min-width: 1920px) ==================== */
+@media (min-width: 1920px) {
+  .pageTitleSection {
+    padding: 32px;
+    max-width: 1600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .pageTitleH2 {
+    font-size: 26px;
+  }
+
+  .pageTitleP {
+    font-size: 16px;
+  }
+
+  .btnSecondary {
+    padding: 13px 20px;
+    font-size: 16px;
+  }
+
+  .btnSecondary svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* ==================== ACCESSIBILITY & STATES ==================== */
+
+/* Focus visible for keyboard navigation */
+.btnSecondary:focus-visible {
+  outline: 3px solid #D4AF37;
+  outline-offset: 2px;
+}
+
+/* Disabled state */
+.btnSecondary:disabled {
+  background-color: #F3F4F6;
+  border-color: #E5E7EB;
+  color: #9CA3AF;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btnSecondary:disabled:hover {
+  background-color: #F3F4F6;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Loading state (add loading class when needed) */
+.btnSecondary.loading {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+}
+
+.btnSecondary.loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 50%;
+  margin-left: -8px;
+  margin-top: -8px;
+  border: 2px solid #D1D5DB;
+  border-radius: 50%;
+  border-top-color: #374151;
+  animation: spinner 0.6s linear infinite;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .btnSecondary,
+  .pageIcon {
+    transition: none;
+  }
+
+  .btnSecondary.loading::after {
+    animation: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .btnSecondary {
+    border-width: 2px;
+  }
+
+  .btnSecondary:focus-visible {
+    outline-width: 4px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .pageActions {
+    display: none;
+  }
+
+  .pageTitleSection {
+    box-shadow: none;
+    border: 1px solid #D1D5DB;
+  }
+}
+
+/* Ensure proper text rendering */
+.pageTitleH2,
+.pageTitleP,
+.btnSecondary {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Prevent text selection on buttons */
+.btnSecondary {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Ensure icons align properly in RTL */
+[dir="rtl"] .btnSecondary {
+  flex-direction: row-reverse;
 }

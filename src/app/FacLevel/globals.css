@@ -1,76 +1,29 @@
-/* Global & Base Styles */
+/* =========================
+   Global Reset
+========================= */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+html, body {
+  height: 100%;
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-family: "Tajawal", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-.page-wrapper {
-  min-height: 100vh;
-  background-color: #E6E8EB;
-  direction: rtl;
-}
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .header-content,
-  .page-title-section,
-  .filters-section,
-  .table-section,
-  .footer-content {
-    padding: 16px;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  }
-}
-
-@media (max-width: 768px) {
-  .header-content {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .page-title-section {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .filters-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .requests-table {
-    display: none;
-  }
-
-  .mobile-cards {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .footer-content {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-}
-/* ====== App Layout Styling ====== */
-.app-body {
-  margin: 0;
-  font-family: "Tajawal", sans-serif;
-  background-color: #f3f4f6;
+  background: #f3f4f6;
   color: #1f2937;
+  direction: rtl;
+  overflow-x: hidden;
 }
 
+/* =========================
+   App Layout (Sidebar + Main)
+========================= */
 .app-container {
   display: flex;
   min-height: 100vh;
@@ -78,24 +31,68 @@ body {
   overflow-x: hidden;
 }
 
-/* Sidebar ثابتة على اليمين */
+/* Sidebar ثابت */
 .app-container > *:first-child {
   flex-shrink: 0;
 }
 
-/* الجزء الرئيسي */
+/* المنطقة الرئيسية جنب الـSidebar */
 .main-content {
   flex: 1;
+  min-width: 0; /* مهم يمنع overflow */
   display: flex;
   flex-direction: column;
-  background-color: #f9fafb;
-  min-height: 100vh;
+  background: #f9fafb;
 }
 
-/* الكونتينر الداخلي */
+/* Wrapper داخلي للصفحات */
 .page-wrapper {
   flex: 1;
   display: flex;
   flex-direction: column;
-  /* padding-right: 130px; */
+  min-height: 100vh;
+  background: #E6E8EB;
+}
+
+/* =========================
+   Page Content Container
+   (ده اللي هيتطبق على <main className="page-content">)
+========================= */
+.page-content {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px;
+  min-width: 0;
+}
+
+/* =========================
+   Generic Table Responsiveness
+========================= */
+.table-section,
+.tableSection {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* =========================
+   Breakpoints
+========================= */
+@media (max-width: 1024px) {
+  .page-content {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-content {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-content {
+    padding: 10px;
+  }
 }

@@ -1,0 +1,495 @@
+/* Global Card Styles for Activities Page */
+.pageWrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f5f7fa;
+  direction: rtl;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #2C3A5F;
+}
+
+.container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  flex: 1;
+  box-sizing: border-box;
+}
+
+/* Page Header */
+.pageHeader {
+   background: linear-gradient(135deg, #d4af37 0%, #2C3A5F 100%);
+  border-radius: 20px;
+  margin: 3px;
+  margin-bottom: 25px;
+  padding: 20px;
+  box-shadow: 0 10px 30px #0000001a;
+  color: white;
+   text-align: center;
+}
+
+.mainTitle {
+   font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+ 
+}
+
+.badgeWaiting {
+ font-size: 1.1rem;
+  opacity: 0.95;
+}
+
+/* Events Container */
+.eventsContainer {
+  display: flex;           /* switch from grid to flex */
+  flex-direction: column;  /* vertical list */
+  gap: 25px;               /* spacing between cards */
+  width: 100%;
+}
+/* Event Card */
+.eventCard {
+  width: 100%;
+  background: #fff;
+  border-radius: 16px;
+  padding: 25px;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-sizing: border-box;
+}
+
+.eventCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Event Header */
+
+.eventHeader {
+  display: flex;
+  flex-direction: column; /* stack title/type above organizer */
+  gap: 5px;
+  margin-bottom: 15px;
+}
+
+/* Title + Type wrapper */
+.eventTitleSection {
+  display: flex;
+  align-items: center;   /* align title and type horizontally */
+  gap: 10px;             /* space between title and type */
+  flex-wrap: wrap;       /* wrap on small screens */
+}
+
+.eventTitle {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #2C3A5F;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.eventType {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 12px;
+  background: #67acf0;
+  color: #2C3A5F;
+  border: 1px solid #e0e0e0;
+  white-space: nowrap;
+}
+
+
+.eventOrganizer {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+  display: block;
+  margin-top: 5px;
+}
+/* Event Description */
+.eventDescription {
+  color: #555;
+  line-height: 1.7;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+}
+
+/* Event Details */
+.eventDetails {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.detailItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #2C3A5F;
+}
+
+.icon { font-size: 1.1rem; }
+
+/* Actions container */
+.eventActions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* First row: approve + reject */
+.actionRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Second row: view details */
+.detailsRow {
+  display: flex;
+  justify-content: flex-start; /* not full width */
+}
+
+/* Make sure view details doesn't stretch */
+.viewDetailsBtn {
+  width: auto;
+  align-self: flex-start;
+  background: linear-gradient(135deg, #ffc25f 0%, #d4af37 100%);
+  color: white;
+  /* padding: 10px 18px;  */
+  border: none;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  margin-right: 25px;
+}
+
+.eventActions button {
+  flex: none;               /* don't stretch */
+  width: auto;              /* let width fit content */
+  padding: 10px 25px;        /* smaller padding */
+  font-size: 0.85rem;       /* smaller font */
+  border-radius: 8px;    
+  border:none;   /* slightly smaller radius */
+}
+
+
+.btnApprove {
+  background: linear-gradient(135deg, #4caf50 0%, #5ad35e 100%);
+  color: white;
+}
+
+.btnApprove:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btnReject {
+  background: #fff;
+  color: #e74c3c;
+  border: 2px solid #e74c3c;
+}
+
+.btnReject:hover {
+  background: #e74c3c;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .mainTitle { font-size: 1.8rem; }
+  .pageHeader { padding: 30px 20px; }
+  .eventsContainer { grid-template-columns: 1fr; }
+  .eventHeader { flex-direction: column; }
+  .eventDetails { grid-template-columns: 1fr; }
+  .eventActions { flex-direction: column; }
+  .eventActions button { width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .container { padding: 10px; }
+  .mainTitle { font-size: 1.5rem; }
+  .eventCard { padding: 20px; }
+  .eventTitle { font-size: 1.2rem; }
+}
+/* Badge Styles */
+.badgeApproved,
+.badgeRejected {
+  display: inline-block;
+  color: #fff;
+  text-align: center;
+  min-width: 70px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 12px;
+}
+
+/* Approved badge */
+.badgeApproved {
+  background-color: #28a745; /* green */
+  border: 1px solid #218838;
+}
+
+/* Rejected badge */
+.badgeRejected {
+  background-color: #dc3545; /* red */
+  border: 1px solid #c82333;
+}
+
+/* Optional: add a small fade-in animation */
+@keyframes fadeInBadge {
+  0% {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.badgeApproved,
+.badgeRejected {
+  animation: fadeInBadge 0.3s ease-in-out;
+}
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 25px;
+  width: 280px;
+  background: #fff;
+  padding: 14px 16px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  font-weight: 600;
+  color: #333;
+  z-index: 9999;
+  animation: fadeIn 0.4s ease forwards;
+  overflow: hidden;
+}
+
+
+.success {
+  border-right: 6px solid #4caf50;
+}
+
+.error {
+  border-right: 6px solid #f44336;
+}
+
+.notification::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background-color: #d4a017;
+  animation: progress 2.5s linear forwards;
+  transform-origin: left;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+.btnIcon {
+  font-size: 1.2rem;
+}
+
+.container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: clamp(10px, 2vw, 20px);
+}
+
+.pageHeader {
+  padding: clamp(16px, 3vw, 24px);
+  border-radius: clamp(12px, 2vw, 20px);
+  margin: 8px;
+  margin-bottom: clamp(14px, 3vw, 25px);
+}
+
+.mainTitle {
+  font-size: clamp(1.4rem, 3.2vw, 2.5rem);
+}
+
+.badgeWaiting {
+  font-size: clamp(0.9rem, 2.2vw, 1.1rem);
+}
+
+
+.eventCard {
+  padding: clamp(14px, 2.5vw, 25px);
+  border-radius: clamp(12px, 2vw, 16px);
+}
+
+
+.eventTitleSection {
+  gap: 10px;
+  align-items: center;
+}
+
+
+.eventTitle {
+  font-size: clamp(1.05rem, 2.4vw, 1.4rem);
+  word-break: break-word;
+}
+
+
+.eventType,
+.badgeApproved,
+.badgeRejected {
+  white-space: nowrap;
+}
+
+.eventDetails {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.detailItem {
+  min-width: 0;
+  word-break: break-word;
+}
+.detailItem svg {
+  flex-shrink: 0;
+  margin-left: 6px;  
+}
+
+
+.actionRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.eventActions button {
+    flex: none;         
+  width: auto;        
+  min-width: auto;   
+}
+
+/* Notification responsive */
+.notification {
+  right: 12px;
+  left: 12px;           
+  width: auto;           
+  max-width: 420px;
+  margin: 0 auto;
+  top: 12px;
+}
+
+/* =========================
+   Tablet
+========================= */
+@media (max-width: 1024px) {
+  .eventDetails {
+    grid-template-columns: 1fr;
+  }
+
+  .eventActions button {
+    min-width: 0;
+  }
+}
+
+/* =========================
+   Mobile
+========================= */
+@media (max-width: 768px) {
+  .eventsContainer {
+    gap: 14px;
+  }
+
+  .eventDetails {
+    grid-template-columns: 1fr;
+    padding: 12px;
+  }
+
+  .actionRow {
+    flex-direction: column;
+  }
+
+  .eventActions button {
+    width: 100%;
+  }
+
+  
+  .eventActions {
+    flex-direction: column;
+  }
+
+  .viewDetailsBtn {
+    margin-right: 0;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* =========================
+   Small Mobile
+========================= */
+@media (max-width: 480px) {
+  .eventDescription {
+    font-size: 0.9rem;
+  }
+
+  .detailItem {
+    font-size: 0.85rem;
+  }
+
+  .eventActions button {
+    padding: 10px 14px;
+    font-size: 0.85rem;
+  }
+}
+
+/* =========================
+   Landscape Mobile
+========================= */
+@media (max-height: 500px) and (orientation: landscape) {
+  .pageHeader {
+    margin-bottom: 12px;
+  }
+
+  .eventsContainer {
+    gap: 12px;
+  }
+
+  .eventCard:hover {
+    transform: none; 
+  }
+}

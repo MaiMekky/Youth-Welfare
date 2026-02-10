@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import styles from "./FacultyReport.module.css";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, Wallet, Users , FileText } from "lucide-react";
 import axios from "axios";
 
 interface StudentType {
@@ -156,7 +156,9 @@ export default function FacultyReport() {
               <p>إجمالي المبلغ</p>
               <h2>{totalAmount.toLocaleString()} ج.م</h2>
             </div>
-            <span className={styles.icon}>💰</span>
+           <span className={styles.icon} aria-hidden="true">
+          <Wallet size={28} />
+        </span>
           </div>
 
           <div className={`${styles.statBox} ${styles.blue}`}>
@@ -164,7 +166,9 @@ export default function FacultyReport() {
               <p>إجمالي الطلبات</p>
               <h2>{totalCount}</h2>
             </div>
-            <span className={styles.icon}>👥</span>
+           <span className={styles.icon} aria-hidden="true">
+            <Users size={28} />
+          </span>
           </div>
         </section>
 
@@ -185,10 +189,13 @@ export default function FacultyReport() {
           <div className={styles.tableHeader}>
             <h2>تفاصيل طلبات الطلاب</h2>
             <div className={styles.tableButtons}>
-              <button className={styles.exportBtn} onClick={handleExport}>⬇️ تصدير</button>
+              <button className={styles.exportBtn} onClick={handleExport}>
+                 <FileText size={18} />
+                <span>تصدير</span>  
+                 </button>
             </div>
           </div>
-
+<div className={styles.tableScroll}>
           <table className={styles.reportTable}>
             <thead>
               <tr>
@@ -213,12 +220,12 @@ export default function FacultyReport() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6}>لا توجد نتائج مطابقة</td>
+                  <td colSpan={4}>لا توجد نتائج مطابقة</td>
                 </tr>
               )}
             </tbody>
           </table>
-
+     </div>
           <div className={styles.gmailFooter}>
             <div className={styles.paginationInfo}>
               عرض <strong>{startIndex + 1}</strong>–

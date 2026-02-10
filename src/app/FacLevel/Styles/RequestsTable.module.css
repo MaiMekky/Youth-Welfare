@@ -1,3 +1,4 @@
+/* ===== BASE STYLES ===== */
 .tableSection {
   background-color: #ffffff;
   border-radius: 16px;
@@ -5,6 +6,7 @@
   padding: clamp(1rem, 3vw, 1.5rem);
   overflow-x: auto;
   direction: rtl;
+  max-width: 100%;
 }
 
 .tableHeader {
@@ -12,6 +14,8 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .tableTitle {
@@ -24,15 +28,28 @@
 .tableTitle h3 {
   font-size: 18px;
   font-weight: 700;
+  margin: 0;
+  line-height: 1.4;
 }
 
 .tableSubtitle {
   color: #6b7280;
   font-size: 14px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ===== TABLE WRAPPER ===== */
+.tableWrapper {
+  overflow-x: auto;
+  margin: 0 -24px;
+  padding: 0 24px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .requestsTable {
   width: 100%;
+  min-width: 900px;
   border-collapse: collapse;
 }
 
@@ -42,21 +59,31 @@
   padding: 12px;
   border-bottom: 1px solid #e5e7eb;
   font-size: 14px;
+  white-space: nowrap;
 }
 
 .requestsTable th {
   background-color: #f9fafb;
   color: #374151;
   font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.requestsTable tbody tr {
+  transition: background-color 0.2s;
 }
 
 .requestsTable tr:hover {
   background-color: #fff8e7;
 }
 
+/* ===== BUTTONS ===== */
 .btnDetails {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   background-color: #d4af37;
   color: #fff;
@@ -65,15 +92,22 @@
   padding: 6px 14px;
   font-size: 13px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.2s;
+  white-space: nowrap;
+  font-weight: 500;
 }
 
 .btnDetails:hover {
   background-color: #b99728;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(212, 175, 55, 0.3);
 }
 
-/* ========== Status Badges ========== */
+.btnDetails:active {
+  transform: translateY(0);
+}
 
+/* ===== STATUS BADGES ===== */
 .statusBadge {
   padding: 6px 12px;
   border-radius: 8px;
@@ -82,42 +116,37 @@
   display: inline-block;
   text-align: center;
   min-width: 80px;
+  transition: all 0.2s;
 }
 
-/* 🟡 منتظر */
 .statusWait {
   background-color: #fff3cd;
   color: #856404;
   border: 1px solid #ffeeba;
 }
 
-/* 🔵 موافقة مبدئية */
 .statusReview {
   background-color: #cde4ff;
   color: #0d4c91;
   border: 1px solid #b5d7ff;
 }
 
-/* 🟢 مقبول */
 .statusApproved {
   background-color: #d4edda;
   color: #155724;
   border: 1px solid #c3e6cb;
 }
 
-/* 🔴 مرفوض */
 .statusRejected {
   background-color: #f8d7da;
   color: #721c24;
   border: 1px solid #f5c6cb;
 }
 
-/* ====== Footer Pagination ====== */
+/* ===== TABLE FOOTER (PAGINATION) ===== */
 .tableFooter {
-  margin-top: 12px;
-  padding: clamp(0.5rem, 2vw, 0.625rem) clamp(0.75rem, 2vw, 1rem);
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  margin-top: 16px;
+  padding: 12px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -126,49 +155,104 @@
   border-radius: 0 0 8px 8px;
   font-size: 14px;
   color: #2c3a5f;
-  
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footerLeft {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .footerRight {
   display: flex;
   align-items: center;
   gap: 12px;
-  
+  flex-wrap: wrap;
 }
 
+.footerRight label {
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.footerRight select,
 .rowsSelect {
   border: 1px solid #ccc;
   border-radius: 6px;
-  padding: 5px 8px;
+  padding: 6px 10px;
   font-size: 13px;
   background: white;
   outline: none;
   color: #2c3a5f;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.footerRight select:hover,
+.rowsSelect:hover {
+  border-color: #999;
+}
+
+.footerRight select:focus,
+.rowsSelect:focus {
+  border-color: #d4af37;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
+.footerRight > div {
+  display: flex;
+  gap: 6px;
 }
 
 .paginationButtons {
   display: flex;
-  gap: 5px;
-  
+  gap: 6px;
 }
 
-.paginationButtons button {
+.paginationButtons button,
+.footerRight button {
   background: #f1f1f1;
   border: none;
   border-radius: 6px;
-  padding: 5px 8px;
+  padding: 6px 10px;
   cursor: pointer;
-  transition: 0.2s;
+  transition: all 0.2s;
   color: #2c3a5f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.paginationButtons button:hover {
+.paginationButtons button:hover,
+.footerRight button:hover {
   background: #ddd;
 }
 
-.paginationButtons button:disabled {
-  opacity: 0.5;
+.paginationButtons button:disabled,
+.footerRight button:disabled {
+  opacity: 0.4;
   cursor: not-allowed;
+}
+
+.paginationButtons button:disabled:hover,
+.footerRight button:disabled:hover {
+  background: #f1f1f1;
+}
+
+/* ===== FILTERS SECTION ===== */
+.filtersSection {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .filtersHeader {
@@ -180,18 +264,6 @@
 }
 
 .filtersContent {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-.filtersSection {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 14px 18px;
-  margin-bottom: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -211,6 +283,7 @@
   top: 50%;
   transform: translateY(-50%);
   color: #aaa;
+  pointer-events: none;
 }
 
 .searchInput {
@@ -219,21 +292,507 @@
   border: 1px solid #ddd;
   border-radius: 8px;
   outline: none;
+  transition: border-color 0.2s;
 }
 
 .searchInput:focus {
   border-color: #d4af37;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
 }
 
 .filterSelect {
   border: 1px solid #ddd;
   border-radius: 8px;
-  padding: 8px;
+  padding: 8px 12px;
   background: white;
   outline: none;
   color: #2c3a5f;
+  cursor: pointer;
+  transition: border-color 0.2s;
 }
 
+.filterSelect:hover {
+  border-color: #999;
+}
 
+.filterSelect:focus {
+  border-color: #d4af37;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
 
+/* ==================== LARGE DESKTOP (max-width: 1200px) ==================== */
+@media (max-width: 1200px) {
+  .tableSection {
+    padding: 22px;
+  }
 
+  .tableWrapper {
+    margin: 0 -22px;
+    padding: 0 22px;
+  }
+
+  .requestsTable {
+    min-width: 850px;
+  }
+
+  .tableTitle h3 {
+    font-size: 17px;
+  }
+
+  .tableSubtitle {
+    font-size: 13px;
+  }
+}
+
+/* ==================== TABLET BREAKPOINT (max-width: 1024px) ==================== */
+@media (max-width: 1024px) {
+  .tableSection {
+    padding: 20px;
+    border-radius: 14px;
+  }
+
+  .tableWrapper {
+    margin: 0 -20px;
+    padding: 0 20px;
+  }
+
+  .requestsTable {
+    min-width: 800px;
+  }
+
+  .requestsTable th,
+  .requestsTable td {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .tableTitle h3 {
+    font-size: 16px;
+  }
+
+  .tableSubtitle {
+    font-size: 13px;
+  }
+
+  .btnDetails {
+    padding: 5px 12px;
+    font-size: 12px;
+  }
+
+  .statusBadge {
+    padding: 5px 10px;
+    font-size: 12px;
+    min-width: 70px;
+  }
+
+  .tableFooter {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+}
+
+/* ==================== MOBILE BREAKPOINT (max-width: 768px) ==================== */
+@media (max-width: 768px) {
+  .tableSection {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .tableHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .tableTitle {
+    gap: 6px;
+  }
+
+  .tableTitle svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .tableTitle h3 {
+    font-size: 16px;
+  }
+
+  .tableSubtitle {
+    font-size: 12px;
+  }
+
+  .tableWrapper {
+    margin: 0 -16px;
+    padding: 0 16px;
+  }
+
+  .requestsTable {
+    min-width: 750px;
+  }
+
+  .requestsTable th,
+  .requestsTable td {
+    padding: 9px;
+    font-size: 12px;
+  }
+
+  .btnDetails {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+
+  .statusBadge {
+    padding: 4px 8px;
+    font-size: 11px;
+    min-width: 65px;
+  }
+
+  .tableFooter {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px;
+    font-size: 12px;
+  }
+
+  .footerLeft {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .footerRight {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .footerRight label {
+    text-align: center;
+  }
+
+  .footerRight select {
+    width: 100%;
+  }
+
+  .footerRight > div {
+    justify-content: center;
+  }
+}
+
+/* ==================== SMALL MOBILE BREAKPOINT (max-width: 480px) ==================== */
+@media (max-width: 480px) {
+  .tableSection {
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .tableHeader {
+    gap: 6px;
+  }
+
+  .tableTitle h3 {
+    font-size: 15px;
+  }
+
+  .tableTitle svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .tableSubtitle {
+    font-size: 11px;
+  }
+
+  .tableWrapper {
+    margin: 0 -12px;
+    padding: 0 12px;
+  }
+
+  .requestsTable {
+    min-width: 700px;
+  }
+
+  .requestsTable th,
+  .requestsTable td {
+    padding: 8px;
+    font-size: 11px;
+  }
+
+  .btnDetails {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  .btnDetails svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .statusBadge {
+    padding: 4px 6px;
+    font-size: 10px;
+    min-width: 60px;
+  }
+
+  .tableFooter {
+    padding: 10px;
+    font-size: 11px;
+    gap: 10px;
+  }
+
+  .footerRight select {
+    padding: 5px 8px;
+    font-size: 12px;
+  }
+
+  .paginationButtons button,
+  .footerRight button {
+    padding: 5px 8px;
+  }
+
+  .paginationButtons button svg,
+  .footerRight button svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* ==================== EXTRA SMALL MOBILE (max-width: 360px) ==================== */
+@media (max-width: 360px) {
+  .tableSection {
+    padding: 10px;
+  }
+
+  .tableHeader {
+    gap: 4px;
+  }
+
+  .tableTitle h3 {
+    font-size: 14px;
+  }
+
+  .tableTitle svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .tableSubtitle {
+    font-size: 10px;
+  }
+
+  .tableWrapper {
+    margin: 0 -10px;
+    padding: 0 10px;
+  }
+
+  .requestsTable {
+    min-width: 650px;
+  }
+
+  .requestsTable th,
+  .requestsTable td {
+    padding: 7px;
+    font-size: 10px;
+  }
+
+  .btnDetails {
+    padding: 4px 6px;
+    font-size: 10px;
+  }
+
+  .statusBadge {
+    padding: 3px 5px;
+    font-size: 9px;
+    min-width: 55px;
+  }
+
+  .tableFooter {
+    padding: 8px;
+    font-size: 10px;
+  }
+}
+
+/* ==================== LANDSCAPE MODE FOR MOBILE ==================== */
+@media (max-height: 500px) and (orientation: landscape) {
+  .tableSection {
+    padding: 12px 16px;
+  }
+
+  .tableHeader {
+    margin-bottom: 10px;
+  }
+
+  .tableTitle h3 {
+    font-size: 14px;
+  }
+
+  .tableWrapper {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .requestsTable th {
+    position: sticky;
+    top: 0;
+    background-color: #f9fafb;
+    z-index: 10;
+  }
+
+  .tableFooter {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}
+
+/* ==================== LARGE SCREENS (min-width: 1440px) ==================== */
+@media (min-width: 1440px) {
+  .tableSection {
+    padding: 28px;
+    border-radius: 18px;
+  }
+
+  .tableWrapper {
+    margin: 0 -28px;
+    padding: 0 28px;
+  }
+
+  .tableTitle h3 {
+    font-size: 19px;
+  }
+
+  .tableTitle svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .tableSubtitle {
+    font-size: 15px;
+  }
+
+  .requestsTable th,
+  .requestsTable td {
+    padding: 14px;
+    font-size: 15px;
+  }
+
+  .btnDetails {
+    padding: 7px 16px;
+    font-size: 14px;
+  }
+
+  .statusBadge {
+    padding: 7px 14px;
+    font-size: 14px;
+    min-width: 90px;
+  }
+
+  .tableFooter {
+    padding: 14px 18px;
+    font-size: 15px;
+  }
+}
+
+/* ==================== ACCESSIBILITY & STATES ==================== */
+
+/* Focus visible for keyboard navigation */
+.btnDetails:focus-visible,
+.footerRight button:focus-visible,
+.footerRight select:focus-visible {
+  outline: 3px solid #d4af37;
+  outline-offset: 2px;
+}
+
+/* Smooth scrolling for table */
+.tableWrapper {
+  scroll-behavior: smooth;
+}
+
+/* Scrollbar styling */
+.tableWrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.tableWrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.tableWrapper::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.tableWrapper::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .requestsTable tr,
+  .btnDetails,
+  .statusBadge,
+  .footerRight button,
+  .searchInput,
+  .filterSelect {
+    transition: none;
+  }
+
+  .tableWrapper {
+    scroll-behavior: auto;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .requestsTable th,
+  .requestsTable td {
+    border-bottom-width: 2px;
+  }
+
+  .statusBadge {
+    border-width: 2px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .tableSection {
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .tableWrapper {
+    overflow: visible;
+    margin: 0;
+    padding: 0;
+  }
+
+  .requestsTable {
+    min-width: auto;
+  }
+
+  .tableFooter,
+  .btnDetails {
+    display: none;
+  }
+
+  .requestsTable tr:hover {
+    background-color: transparent;
+  }
+}
+
+/* Loading state */
+.tableSection > p {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+/* Empty state */
+.requestsTable tbody tr td[colspan] {
+  text-align: center;
+  padding: 40px 20px;
+  color: #9ca3af;
+  font-style: italic;
+}

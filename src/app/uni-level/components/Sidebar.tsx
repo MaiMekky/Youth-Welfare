@@ -8,22 +8,36 @@ import logo from "../../assets/logo1.png";
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-const [adminInfo, setAdminInfo] = useState({
+  
+  const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
     role: "",
   });
 
+  // Check if mobile on mount and resize
   useEffect(() => {
-    // جلب البيانات من الـ localStorage
-    const tokenData = localStorage.getItem("access"); // أو لو خزنتِ كامل الـ JSON في localStorage
-    const userDataString = localStorage.getItem("user"); // لو خزنت الـ JSON كامل باسم userData
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkIfMobile);
+    };
+  }, []);
+
+  useEffect(() => {
+    const tokenData = localStorage.getItem("access");
+    const userDataString = localStorage.getItem("user");
     if (userDataString) {
       try {
         const userData = JSON.parse(userDataString);
-
         setAdminInfo({
           name: userData.name || "مدير النظام",
           email: userData.email || "admin@helwan.edu.eg",
@@ -34,14 +48,15 @@ const [adminInfo, setAdminInfo] = useState({
       }
     }
   }, []);
+
   const handleReportsClick = () => {
     router.push("/uni-level/reports");
-    setIsOpen(false);
+    if (isMobile) setIsOpen(false);
   };
 
   const handleAllApplicationsClick = () => {
     router.push("/uni-level");
-    setIsOpen(false);
+    if (isMobile) setIsOpen(false);
   };
 
   useEffect(() => {
@@ -51,15 +66,28 @@ const [adminInfo, setAdminInfo] = useState({
         setIsOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.body.style.overflow = 'unset';
+    };
   }, [isOpen]);
 
   return (
     <>
-      <button className="mobileMenuBtn" onClick={() => setIsOpen(true)}>
-        <Menu size={24} />
-      </button>
+      {/* Mobile menu button - only show on mobile */}
+      {isMobile && (
+        <button className="mobileMenuBtn" onClick={() => setIsOpen(true)}>
+          <Menu size={24} />
+        </button>
+      )}
 
       <aside id="sidebar" className={`sidebar ${isOpen ? "open" : ""}`}>
         <div className="sidebar-header">
@@ -68,21 +96,24 @@ const [adminInfo, setAdminInfo] = useState({
           <div className="headerIcon">
             <Image src={logo} alt="logo" className="headerLogo" width={50} height={50} />
           </div>
-          <button className="closeBtn" onClick={() => setIsOpen(false)}>
-            <X size={20} />
-          </button>
+          {/* Close button - only show on mobile */}
+          {isMobile && (
+            <button className="closeBtn" onClick={() => setIsOpen(false)}>
+              <X size={20} />
+            </button>
+          )}
         </div>
 
         <div className="profile-card">
           <div className="profile-icon">
             <User size={22} />
           </div>
-         <div className="admin-info">
-      <h3>{adminInfo.name}</h3>
-      {adminInfo.role && <p>{adminInfo.role}</p>}
-      {/* <p>{adminInfo.email}</p> */}
-    </div>
+          <div className="admin-info">
+            <h3>{adminInfo.name}</h3>
+            {adminInfo.role && <p>{adminInfo.role}</p>}
+          </div>
         </div>
+        
         <nav className="nav">
           <button
             className={pathname === "/uni-level/reports" ? "active" : ""}
@@ -102,7 +133,8 @@ const [adminInfo, setAdminInfo] = useState({
         </nav>
       </aside>
 
-      {isOpen && <div className="overlay" onClick={() => setIsOpen(false)} />}
+      {/* Overlay - only show on mobile when sidebar is open */}
+      {isMobile && isOpen && <div className="overlay" onClick={() => setIsOpen(false)} />}
     </>
   );
 }

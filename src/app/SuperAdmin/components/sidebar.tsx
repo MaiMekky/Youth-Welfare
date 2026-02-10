@@ -15,6 +15,7 @@ export default function Sidebar() {
     { label: "إدارة الفعاليات", href: "#" },
     { label: "إحصائيات الزوار", href: "#" },
     { label: "التكافل الاجتماعي", href: "/SuperAdmin" },
+    { label: "الاسر الطلابية", href: "/SuperAdmin-family" },
   ];
 
   return (

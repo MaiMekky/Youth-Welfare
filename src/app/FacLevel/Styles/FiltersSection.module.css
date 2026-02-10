@@ -33,8 +33,8 @@
 
 /* ===== SEARCH WRAPPER ===== */
 .searchWrapper {
-  flex: 1;
-  min-width: 250px;
+  flex: 1 1 100%;
+  min-width: min(250px, 100%);
   position: relative;
 }
 
@@ -81,7 +81,7 @@
   font-size: 14px;
   background-color: white;
   cursor: pointer;
-  min-width: 180px;
+  min-width: min(180px, 100%);
   color: #2C3A5F;
   transition: all 0.2s;
   font-weight: 500;

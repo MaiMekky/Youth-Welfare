@@ -1,9 +1,15 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
+import LoginPage from "./LoginPage";
+import SignupPage from "./SignUp";
 import { useLanguage } from "../context/LanguageContext";
 
 const VisionSection: React.FC = () => {
   const { language } = useLanguage();
+
+  // ✅ Local state for modal
+  const [showModal, setShowModal] = useState(false);
+  const [activeScreen, setActiveScreen] = useState<"login" | "signup">("signup");
 
   const sectionStyle: React.CSSProperties = {
     display: "flex",
@@ -11,50 +17,52 @@ const VisionSection: React.FC = () => {
     justifyContent: "center",
     alignItems: "center",
     flexWrap: "wrap",
-    gap: "40px",
-    padding: "70px 30px",
+    gap: "clamp(1.5rem, 4vw, 2.5rem)",
+    padding: "clamp(2rem, 6vw, 4.375rem) clamp(1rem, 4vw, 1.875rem)",
     background: "#f8f9fb",
     direction: language === "ar" ? "rtl" : "ltr",
   };
 
   const cardStyle: React.CSSProperties = {
-    flex: "1 1 350px",
+    flex: "1 1 min(350px, 100%)",
     background: "linear-gradient(135deg, #27285D, #B38E19)",
     color: "white",
     borderRadius: "20px",
-    padding: "40px 35px",
+    padding: "clamp(1.5rem, 4vw, 2.5rem) clamp(1.25rem, 3vw, 2.1875rem)",
     boxShadow: "0 6px 20px rgba(0,0,0,0.1)",
     textAlign: language === "ar" ? "right" : "left",
     fontFamily: language === "ar" ? "'Cairo', sans-serif" : "'Poppins', sans-serif",
-    maxWidth: "420px",
-    minHeight: "280px",
+    maxWidth: "min(420px, 100%)",
+    minHeight: "min(280px, auto)",
+    width: "100%",
   };
 
   const textContainerStyle: React.CSSProperties = {
-    flex: "1 1 450px",
-    maxWidth: "650px",
+    flex: "1 1 min(450px, 100%)",
+    maxWidth: "min(650px, 100%)",
+    width: "100%",
     color: "#333",
     fontFamily: language === "ar" ? "'Cairo', sans-serif" : "'Poppins', sans-serif",
     textAlign: language === "ar" ? "right" : "left",
   };
 
   const headingStyle: React.CSSProperties = {
-    fontSize: "2rem",
+    fontSize: "clamp(1.5rem, 3vw, 2rem)",
     fontWeight: "700",
     color: "#27285D",
-    marginBottom: "20px",
+    marginBottom: "1.25rem",
   };
 
   const subHeadingStyle: React.CSSProperties = {
-    fontSize: "1.4rem",
+    fontSize: "clamp(1.125rem, 2.5vw, 1.4rem)",
     fontWeight: "600",
     color: "#27285D",
-    marginTop: "20px",
-    marginBottom: "10px",
+    marginTop: "1.25rem",
+    marginBottom: "0.625rem",
   };
 
   const paragraphStyle: React.CSSProperties = {
-    fontSize: "1.05rem",
+    fontSize: "clamp(0.9375rem, 2vw, 1.05rem)",
     lineHeight: "1.8",
     color: "#444",
   };
@@ -76,11 +84,10 @@ const VisionSection: React.FC = () => {
     backgroundColor: "#e6e6e6",
   };
 
-  const [hover, setHover] = React.useState(false);
+  const [hover, setHover] = useState(false);
 
   // Language content
-  const visionTitle =
-    language === "ar" ? "رؤيتنا ورسالتنا" : "Our Vision & Mission";
+  const visionTitle = language === "ar" ? "رؤيتنا ورسالتنا" : "Our Vision & Mission";
   const visionSubTitle = language === "ar" ? "رؤيتنا" : "Our Vision";
   const visionText =
     language === "ar"
@@ -108,6 +115,10 @@ const VisionSection: React.FC = () => {
           style={hover ? { ...buttonStyle, ...buttonHoverStyle } : buttonStyle}
           onMouseEnter={() => setHover(true)}
           onMouseLeave={() => setHover(false)}
+          onClick={() => {
+            setActiveScreen("signup"); // open signup
+            setShowModal(true);
+          }}
         >
           {buttonText}
         </button>
@@ -121,6 +132,46 @@ const VisionSection: React.FC = () => {
         <h3 style={subHeadingStyle}>{missionSubTitle}</h3>
         <p style={paragraphStyle}>{missionText}</p>
       </div>
+
+      {/* ✅ Modal Popup */}
+      {showModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 9999,
+          }}
+        >
+          <div
+            style={{
+              // backgroundColor: "#fff",
+              borderRadius: "15px",
+              padding: "30px",
+              maxWidth: "500px",
+              width: "90%",
+            }}
+          >
+            {activeScreen === "login" ? (
+              <LoginPage
+                onClose={() => setShowModal(false)}
+                onSwitchToSignup={() => setActiveScreen("signup")}
+              />
+            ) : (
+              <SignupPage
+                onClose={() => setShowModal(false)}
+                onSwitchToLogin={() => setActiveScreen("login")}
+              />
+            )}
+          </div>
+        </div>
+      )}
     </section>
   );
 };

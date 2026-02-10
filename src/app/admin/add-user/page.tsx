@@ -13,7 +13,7 @@ export default function AddUser() {
 
   const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
-
+ const [notification, setNotification] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -24,7 +24,10 @@ export default function AddUser() {
     faculty: '', // This will store faculty ID as string
     departments: [] as string[],
   });
-
+ const showNotification = (message: string, type: "success" | "warning" | "error") => {
+    setNotification(`${type}:${message}`);
+    setTimeout(() => setNotification(null), 3500);
+  };
   const departmentsMap: { [key: string]: number } = {
     'فني و ثقافي': 1,
     'رياضي': 2,
@@ -65,7 +68,7 @@ export default function AddUser() {
         setFaculties(facultiesData);
       } catch (error) {
         console.error('Error fetching faculties:', error);
-        alert('حدث خطأ في تحميل الكليات');
+       showNotification("حدث خطاء في تحميل الكليات" , "error");
       } finally {
         setLoading(false);
       }
@@ -216,16 +219,15 @@ else if (typeof data.dept_name === "string") {
 
       if (!res.ok) {
         const errorText = await res.text();
-        alert("خطأ: " + errorText);
+     showNotification("حدث خطأ" + errorText, "error" );
         return;
       }
-
-      alert(isEdit ? "تم التحديث" : "تم الإنشاء");
+     showNotification( isEdit ? "تم التحديث بنجاح 🎉" : "تم الإنشاء بنجاح 🎉" , "success");
       router.push('/CreateAdmins');
 
     } catch (err) {
       console.error(err);
-      alert('حدث خطأ ما.');
+     showNotification("حدث خطأ ما.", "error" );
     }
   };
 
@@ -248,7 +250,19 @@ else if (typeof data.dept_name === "string") {
           <h2 className={styles.formTitle}>
             {isEdit ? "تعديل المستخدم" : "إنشاء مستخدم جديد"}
           </h2>
-
+    {notification && (
+        <div
+          className={`${styles.notification} ${
+            notification.startsWith("success")
+              ? styles.success
+              : notification.startsWith("warning")
+              ? styles.warning
+              : styles.error
+          }`}
+        >
+          {notification.split(":")[1]}
+        </div>
+      )}
           <form onSubmit={handleSubmit} className={styles.formContent}>
             <h3 className={styles.sectionTitle}>معلومات المستخدم</h3>
 

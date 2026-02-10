@@ -1,7 +1,9 @@
 .saSidebar {
-  width: 280px;
-background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);  color: #fff;
-  padding: 30px 20px;
+  width: min(280px, 100%);
+  min-width: 200px;
+  background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+  color: #fff;
+  padding: clamp(1.25rem, 3vw, 1.875rem) clamp(1rem, 2vw, 1.25rem);
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -1,5 +1,14 @@
 /* globals.css */
 
+:root {
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --font-size-base: 1rem;
+  --spacing-unit: 0.25rem;
+}
+
 html, body {
   padding: 0;
   margin: 0;
@@ -7,6 +16,11 @@ html, body {
   font-family: "Cairo", sans-serif;
   background-color: #ffffff;
   color: #000000;
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+  width: 100%;
+  min-height: 100%;
 }
 
 *, *::before, *::after {
@@ -17,6 +31,16 @@ button {
   font-family: inherit;
   cursor: pointer;
 }
+
+input, select, textarea {
+  font-size: 1rem;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
 html {
   scroll-behavior: smooth;
 }

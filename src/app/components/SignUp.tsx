@@ -61,6 +61,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
   const [loading, setLoading] = useState(false);
   const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [facultiesLoading, setFacultiesLoading] = useState(true);
+ const [notification, setNotification] = useState<string | null>(null);
 
   // Fetch faculties on component mount
   useEffect(() => {
@@ -82,12 +83,28 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
 
     fetchFaculties();
   }, []);
-
+ const showNotification = (message: string, type: "success" | "warning" | "error") => {
+    setNotification(`${type}:${message}`);
+    setTimeout(() => setNotification(null), 3500);
+  };
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target as any;
     const numericFields = ["studentId", "studentCode", "phone"];
+     let newValue = value;
+  if (numericFields.includes(name)) {
+    // Remove non-digits except "+" for phone
+    newValue = value.replace(/[^\d+]/g, "");
+  }
 
-    const newValue =
+  // Enforce max length
+  if (name === "studentId") newValue = newValue.slice(0, 14); // 14 digits max
+  if (name === "studentCode") newValue = newValue.slice(0, 14); // adjust if needed
+  if (name === "phone") {
+    // Ensure +20 at start
+    if (!newValue.startsWith("+20")) newValue = "+20";
+    newValue = newValue.slice(0, 13); // +20 + 11 digits = 13 chars
+  }
+    newValue =
       type === "radio"
         ? value
         : numericFields.includes(name)
@@ -147,7 +164,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
     // studentCode
     if (!formData.studentCode.trim()) {
       newErrors.studentCode = "كود الطالب مطلوب";
-    } else if (!/^[0-9]{4,14}$/.test(formData.studentCode)) {
+    } else if (!/^[0-9]{4,8}$/.test(formData.studentCode)) {
       newErrors.studentCode = "كود الطالب غير صحيح";
     }
 
@@ -226,7 +243,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
       if (!response.ok) {
         const errorData = await response.json();
         console.error("API Error:", errorData);
-        alert("حدث خطأ أثناء إنشاء الحساب ❌");
+      showNotification( "حدث خطأ أثناء إنشاء الحساب ❌","error");
         return;
       }
 
@@ -235,16 +252,19 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
         localStorage.setItem("access", data.access);
       }
 
-      alert("تم إنشاء الحساب بنجاح 🎉");
-      onClose();
+     showNotification( "تم إنشاء الحساب بنجاح 🎉" , "success");
+
+      setTimeout(() => {
+        onClose();
+      }, 1500);
     } catch (err) {
       console.error(err);
-      alert("حدث خطأ، حاول مرة أخرى");
+      showNotification("حدث خطأ، حاول مرة أخرى", "error" );
     } finally {
       setLoading(false);
     }
   };
-
+  
   return (
     <div className={styles.loginBox}>
       <button className={styles.closeBtn} onClick={onClose} aria-label="close">
@@ -256,6 +276,19 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
       </div>
 
       <h2 className={styles.loginTitle}>إنشاء حساب جديد</h2>
+     {notification && (
+        <div
+          className={`${styles.notification} ${
+            notification.startsWith("success")
+              ? styles.success
+              : notification.startsWith("warning")
+              ? styles.warning
+              : styles.error
+          }`}
+        >
+          {notification.split(":")[1]}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className={styles.loginForm} noValidate>
         {/* profile upload */}
@@ -330,6 +363,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
           value={formData.studentId}
           onChange={handleChange}
           className={errors.studentId ? styles.invalid : ""}
+          maxLength={14}
         />
         {errors.studentId && <p className={styles.errorMsg}>{errors.studentId}</p>}
 
@@ -341,6 +375,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
           value={formData.studentCode}
           onChange={handleChange}
           className={errors.studentCode ? styles.invalid : ""}
+          maxLength={8}
         />
         {errors.studentCode && <p className={styles.errorMsg}>{errors.studentCode}</p>}
 
@@ -394,6 +429,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
           value={formData.phone}
           onChange={handleChange}
           className={errors.phone ? styles.invalid : ""}
+          maxLength={13}
         />
         {errors.phone && <p className={styles.errorMsg}>{errors.phone}</p>}
 

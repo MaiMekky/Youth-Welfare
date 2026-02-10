@@ -1,10 +1,11 @@
 .pageWrapper { min-height:100vh; padding:20px; background:#f5f7fa; font-family:'Segoe UI', sans-serif; color:#2C3A5F; display:flex; flex-direction:column; gap:20px; }
 .controlsBar { display:flex; gap:15px; justify-content:space-between; align-items:center; flex-wrap:wrap; }
+.selectWrapper { min-width: 0; flex: 1 1 min(200px, 100%); }
+.searchWrapper { min-width: 0; flex: 1 1 min(250px, 100%); }
 .btnAddUser { background:#f2c94c; color:#2C3A5F; padding:8px 15px; border:none; border-radius:6px; cursor:pointer; }
 .btnAddUser:hover { background:#e0b943; }
-.selectWrapper { flex:1; max-width:200px; }
 .roleSelect { width:100%; padding:8px 10px; border:1px solid #2C3A5F; border-radius:6px; cursor:pointer; }
-.searchWrapper { flex:1; max-width:250px; display:flex; align-items:center; background:#fff; border:1px solid #2C3A5F; border-radius:6px; padding:5px 10px; }
+.searchWrapper { display:flex; align-items:center; background:#fff; border:1px solid #2C3A5F; border-radius:6px; padding:5px 10px; }
 .searchInput { border:none; outline:none; flex:1; padding:6px 8px; }
 .tableContainer { overflow-x:auto; background:#fff; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
 .usersTable { width:100%; border-collapse:collapse; min-width:800px; }
@@ -63,9 +64,10 @@
 }
 
 .formCard {
-  width: 480px;
+  width: min(480px, 95vw);
+  max-width: 100%;
   background: #fff;
-  padding: 25px 30px;
+  padding: clamp(1.25rem, 3vw, 1.5625rem) clamp(1rem, 3vw, 1.875rem);
   border-radius: 15px;
   box-shadow: 0px 4px 12px rgba(0,0,0,0.10);
   border: 1px solid #e5e7eb;
@@ -142,4 +144,60 @@
 
 .btnAddUser:hover {
   background: #d9b13f;
+}
+.notification {
+  position: fixed;
+  top: 25px;
+  right: 25px;
+  width: 300px;
+  background: #fff;
+  padding: 14px 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  font-weight: 600;
+  color: #333;
+  z-index: 9999;
+  border-right: 6px solid transparent;
+  overflow: hidden;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.success {
+  border-right-color: #22c55e;
+}
+.warning {
+  border-right-color: #f59e0b;
+}
+.error {
+  border-right-color: #dc2626;
+}
+
+.notification::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background-color: #facc15;
+  animation: progress 3s linear forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
 }

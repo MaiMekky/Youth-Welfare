@@ -392,3 +392,18 @@
     padding: 12px;
   }
 }
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+    position: absolute;
+    left: 16px;     
+    right: auto;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+
+  .headerLeft {
+    padding-left: 48px; 
+  }
+}

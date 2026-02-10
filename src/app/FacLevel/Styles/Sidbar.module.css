@@ -1,15 +1,21 @@
 /* ===== BASE SIDEBAR STYLES ===== */
 .sidebar {
   width: 260px;
+  flex: 0 0 260px;            
+  max-width: 260px;
   background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
   color: white;
+
   display: flex;
   flex-direction: column;
-  height: 100vh;
+
+  min-height: 100vh;       
   position: sticky;
   top: 0;
-  transition: all 0.3s ease-in-out;
+
+  transition: transform 0.3s ease-in-out;
   z-index: 1000;
+
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -19,9 +25,9 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 20px;
-  height: 100%;
   min-height: 100vh;
 }
+
 
 /* ===== HEADER SECTION ===== */
 .header {
@@ -178,7 +184,22 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   transition: all 0.2s;
 }
+/* ===== MOBILE MENU BUTTON ===== */
+.mobileMenuBtn {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
 
+  display: none;            
+  z-index: 1100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
 .mobileMenuBtn:hover {
   background: linear-gradient(180deg, #3D4D75 0%, #2C3A5F 100%);
   transform: scale(1.05);
@@ -187,7 +208,6 @@
 .mobileMenuBtn:active {
   transform: scale(0.95);
 }
-
 /* ===== OVERLAY ===== */
 .overlay {
   position: fixed;
@@ -224,48 +244,41 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* ==================== TABLET BREAKPOINT (max-width: 1200px) ==================== */
+/* ==================== TABLET (max-width: 1200px) ==================== */
 @media (max-width: 1200px) {
   .sidebar {
     width: 240px;
+    flex: 0 0 240px;
+    max-width: 240px;
   }
 
   .sidebarContent {
     padding: 18px;
   }
-
-  .header h2 {
-    font-size: 17px;
-  }
-
-  .header p {
-    font-size: 12px;
-  }
-
-  .profile h3 {
-    font-size: 14px;
-  }
-
-  .nav button {
-    font-size: 14px;
-    padding: 11px 12px;
-  }
 }
 
-/* ==================== MEDIUM TABLET (max-width: 992px) ==================== */
+/* ==================== MOBILE/TABLET OFF-CANVAS (max-width: 992px) ==================== */
 @media (max-width: 992px) {
   .sidebar {
     position: fixed;
     top: 0;
     right: 0;
-    height: 100vh;
+    bottom: 0;
+
     width: 280px;
-    transform: translateX(100%);
-    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.2);
+    max-width: 85vw;
+    flex: unset;
+
+    transform: translateX(110%); 
+    box-shadow: -6px 0 18px rgba(0, 0, 0, 0.25);
   }
 
   .sidebar.open {
     transform: translateX(0);
+  }
+
+  .mobileMenuBtn {
+    display: block;             
   }
 
   .closeBtn {
@@ -273,246 +286,17 @@
     align-items: center;
     justify-content: center;
   }
-
-  .mobileMenuBtn {
-    display: block;
-  }
-
-  .sidebarContent {
-    padding: 20px;
-  }
-}
-
-/* ==================== MOBILE BREAKPOINT (max-width: 768px) ==================== */
-@media (max-width: 768px) {
-  .sidebar {
-    width: 75vw;
-    max-width: 320px;
-  }
-
-  .header {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .closeBtn {
-    position: absolute;
-    left: 0;
-    top: 0;
-  }
-
-  .header h2 {
-    font-size: 16px;
-    padding-right: 30px;
-  }
-
-  .header p {
-    font-size: 12px;
-  }
-
-  .profile {
-    padding: 12px;
-  }
-
-  .profile h3 {
-    font-size: 14px;
-  }
-
-  .profile p {
-    font-size: 12px;
-  }
-
-  .nav button {
-    padding: 12px;
-    font-size: 14px;
-  }
-
-  .footer {
-    font-size: 11px;
-  }
-
-  .mobileMenuBtn {
-    top: 12px;
-    right: 12px;
-    padding: 9px;
-  }
 }
 
 /* ==================== SMALL MOBILE (max-width: 480px) ==================== */
 @media (max-width: 480px) {
   .sidebar {
-    width: 85vw;
-    max-width: 280px;
-  }
-
-  .sidebarContent {
-    padding: 16px;
-  }
-
-  .header {
-    margin-bottom: 16px;
-  }
-
-  .header h2 {
-    font-size: 15px;
-    padding-right: 28px;
-  }
-
-  .header p {
-    font-size: 11px;
-  }
-
-  .profile {
-    gap: 10px;
-    padding: 10px;
-    margin-bottom: 16px;
-  }
-
-  .profileIcon svg {
-    width: 24px;
-    height: 24px;
-  }
-
-  .profile h3 {
-    font-size: 13px;
-  }
-
-  .profile p {
-    font-size: 11px;
-  }
-
-  .nav {
-    gap: 8px;
-  }
-
-  .nav button {
-    padding: 10px 12px;
-    font-size: 13px;
-    gap: 8px;
-  }
-
-  .nav button svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  .footer {
-    font-size: 10px;
-    padding-top: 16px;
-  }
-
-  .mobileMenuBtn {
-    top: 10px;
-    right: 10px;
-    padding: 8px;
-  }
-
-  .mobileMenuBtn svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  .closeBtn {
-    padding: 5px;
-  }
-
-  .closeBtn svg {
-    width: 18px;
-    height: 18px;
-  }
-}
-
-/* ==================== EXTRA SMALL MOBILE (max-width: 360px) ==================== */
-@media (max-width: 360px) {
-  .sidebar {
     width: 90vw;
-    max-width: 260px;
-  }
-
-  .sidebarContent {
-    padding: 14px;
-  }
-
-  .header h2 {
-    font-size: 14px;
-  }
-
-  .header p {
-    font-size: 10px;
-  }
-
-  .profile {
-    padding: 8px;
-    gap: 8px;
-  }
-
-  .profile h3 {
-    font-size: 12px;
-  }
-
-  .profile p {
-    font-size: 10px;
-  }
-
-  .nav button {
-    padding: 9px 10px;
-    font-size: 12px;
-  }
-
-  .footer {
-    font-size: 9px;
-  }
-}
-
-/* ==================== LANDSCAPE MODE FOR MOBILE ==================== */
-@media (max-height: 500px) and (orientation: landscape) {
-  .sidebar {
-    width: 60vw;
     max-width: 300px;
   }
 
   .sidebarContent {
-    padding: 12px;
-    min-height: auto;
-  }
-
-  .header {
-    margin-bottom: 12px;
-  }
-
-  .header h2 {
-    font-size: 14px;
-  }
-
-  .header p {
-    font-size: 11px;
-  }
-
-  .profile {
-    margin-bottom: 12px;
-    padding: 8px;
-  }
-
-  .profile h3 {
-    font-size: 13px;
-  }
-
-  .profile p {
-    font-size: 11px;
-  }
-
-  .nav {
-    gap: 6px;
-  }
-
-  .nav button {
-    padding: 8px 10px;
-    font-size: 13px;
-  }
-
-  .footer {
-    padding-top: 12px;
-    font-size: 10px;
+    padding: 16px;
   }
 }
 
@@ -520,38 +304,11 @@
 @media (min-width: 1440px) {
   .sidebar {
     width: 280px;
+    flex: 0 0 280px;
+    max-width: 280px;
   }
 
   .sidebarContent {
     padding: 24px;
-  }
-
-  .header h2 {
-    font-size: 19px;
-  }
-
-  .header p {
-    font-size: 14px;
-  }
-
-  .profile {
-    padding: 14px;
-  }
-
-  .profile h3 {
-    font-size: 16px;
-  }
-
-  .profile p {
-    font-size: 14px;
-  }
-
-  .nav button {
-    font-size: 16px;
-    padding: 13px 16px;
-  }
-
-  .footer {
-    font-size: 13px;
   }
 }

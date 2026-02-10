@@ -127,10 +127,10 @@ export default function Sidebar() {
             </button>
           </nav>
 
-          <div className={styles.footer}>
+        </div>
+         <div className={styles.footer}>
             <p>الإصدار 1.0.0 | النظام نشط</p>
           </div>
-        </div>
       </aside>
 
       {/* Overlay for mobile */}

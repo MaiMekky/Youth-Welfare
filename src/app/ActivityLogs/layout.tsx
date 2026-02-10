@@ -6,7 +6,7 @@ import styles from "./layout.module.css";
 
 export const metadata = { title: "Dashboard" };
 
-export default function DashboardLayout({ children }) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className={styles.dashboardContainer}>
       <Header />

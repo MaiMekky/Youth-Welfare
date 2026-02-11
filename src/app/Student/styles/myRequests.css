@@ -5,10 +5,25 @@
 ============================================ */
 .my-requests-container {
   direction: rtl;
-  max-width: 1200px;
+  max-width: 1400px;
+  width: 95%;
   margin: 0 auto;
   padding: 40px 20px;
   font-family: "Cairo", sans-serif;
+}
+
+@media (min-width: 1600px) {
+  .my-requests-container {
+    max-width: 1600px;
+    width: 90%;
+  }
+}
+
+@media (min-width: 1920px) {
+  .my-requests-container {
+    max-width: 1800px;
+    width: 85%;
+  }
 }
 
 /* ============================================
@@ -510,6 +525,51 @@ background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);  border-radius: 1
 /* ============================================
    Responsive Design
 ============================================ */
+
+/* Large Desktop (1200px - 1599px) */
+@media (min-width: 1200px) and (max-width: 1599px) {
+  .my-requests-container {
+    width: 92%;
+    padding: 35px 25px;
+  }
+  
+  .request-details {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Tablet Large (992px - 1199px) */
+@media (min-width: 992px) and (max-width: 1199px) {
+  .my-requests-container {
+    width: 90%;
+    padding: 30px 20px;
+  }
+  
+  .request-details {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Tablet (768px - 991px) */
+@media (max-width: 991px) {
+  .my-requests-container {
+    width: 95%;
+    padding: 25px 15px;
+  }
+  
+  .requests-header {
+    padding: 25px 25px;
+  }
+
+  .requests-header h2 {
+    font-size: 22px;
+  }
+  
+  .request-details {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .my-requests-container {
     padding: 20px 15px;
@@ -574,6 +634,11 @@ background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);  border-radius: 1
 }
 
 @media (max-width: 480px) {
+  .my-requests-container {
+    width: 100%;
+    padding: 15px 10px;
+  }
+  
   .requests-header {
     padding: 15px;
   }

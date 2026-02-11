@@ -69,12 +69,6 @@
   gap: clamp(0.5rem, 1.5vw, 0.625rem) clamp(1rem, 2vw, 1.25rem);
 }
 
-@media (max-width: 640px) {
-  .infoGrid {
-    grid-template-columns: 1fr;
-  }
-}
-
 /* Summary / Cards */
 .summary-grid {
   display: flex;
@@ -105,6 +99,60 @@
 /* ===========================
    Documents Section
    =========================== */
+.documents {
+  margin-bottom: 25px;
+}
+
+.documents h3 {
+  color: #1f2937;
+  border-right: 5px solid #facc15;
+  padding-right: 8px;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+}
+
+.documents p {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.documents ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.documents li {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.documents li:hover {
+  background-color: #f3f4f6;
+  transform: translateY(-1px);
+}
+
+.documents a {
+  color: #0070f3;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.documents a:hover {
+  color: #0059c8;
+  text-decoration: underline;
+}
+
 .docsContainer {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -120,23 +168,6 @@
   text-align: center;
 }
 
-.docLinkButton {
-  display: inline-block;
-  margin: 10px 0;
-  padding: 8px 12px;
-  background: #0070f3;
-  color: white;
-  border-radius: 6px;
-  text-decoration: none;
-  font-size: 13px;
-  transition: background-color 0.15s, transform 0.08s;
-}
-
-.docLinkButton:hover {
-  background: #0059c8;
-  transform: translateY(-1px);
-}
-
 .uploadDate {
   font-size: 0.85rem;
   color: #777;
@@ -149,7 +180,7 @@
 }
 
 /* Badges */
-.docBadge {
+.docBadge, .documents .docBadge {
   display: inline-block;
   padding: 4px 8px;
   font-size: 12px;
@@ -157,6 +188,63 @@
   background: #eef2ff;
   color: #1e3a8a;
   margin-left: 8px;
+}
+
+.documents .docBadge {
+  padding: 2px 6px;
+  font-size: 11px;
+  margin-left: 10px;
+}
+
+/* =========================
+   Document Link Button
+   ========================= */
+
+.docLinkButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #2c3a5f;
+  color: #fff;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  margin: 10px 0;
+}
+
+.docLinkButton:hover {
+  background: #1f2a44;
+  transform: translateY(-1px);
+}
+
+/* =========================
+   Unified Buttons
+   ========================= */
+
+.btnBack {
+  min-width: 140px;
+  height: 44px;
+  padding: 0 22px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: none;
+  background-color: #d4af37;
+  color: #fff;
+}
+
+.btnBack:hover {
+  background-color: #b8962d;
+  transform: translateY(-2px);
 }
 
 /* ===========================
@@ -222,101 +310,6 @@
   .pageTitle, .details-container .page-title {
     font-size: 1.5rem;
   }
-}
-/* زر الرجوع */
-.btnBack {
-  background-color: #d4af37; /* ذهبي */
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 22px;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-block;
-  transition: all 0.3s ease;
-}
-
-/* تأثير عند المرور بالماوس */
-.btnBack:hover {
-  background-color: #b8962d;
-  transform: scale(1.05);
-}
-
-/* إمكانية التركيز (keyboard accessibility) */
-.btnBack:focus {
-  outline: 3px solid rgba(250,204,21,0.25);
-  outline-offset: 2px;
-}
-/* ===========================
-   Documents Section
-   =========================== */
-.documents {
-  margin-bottom: 25px;
-}
-
-.documents h3 {
-  color: #1f2937; /* نفس لون العناوين */
-  border-right: 5px solid #facc15; /* نفس ستايل الأقسام */
-  padding-right: 8px;
-  margin-bottom: 15px;
-  font-size: 1.1rem;
-}
-
-.documents p {
-  color: #6b7280; /* نص ثانوي */
-  font-size: 0.95rem;
-}
-
-.documents ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.documents li {
-  background: #f9fafb; /* خلفية خفيفة */
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 10px 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-}
-
-.documents li:hover {
-  background-color: #f3f4f6;
-  transform: translateY(-1px);
-}
-
-.documents a {
-  color: #0070f3;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s ease;
-}
-
-.documents a:hover {
-  color: #0059c8;
-  text-decoration: underline;
-}
-
-/* أيقونات أو علامات MIME Type (اختياري) */
-.documents .docBadge {
-  display: inline-block;
-  padding: 2px 6px;
-  font-size: 11px;
-  border-radius: 999px;
-  background: #eef2ff;
-  color: #1e3a8a;
-  margin-left: 10px;
-}
-
-/* Responsive */
-@media (max-width: 820px) {
   .documents li {
     flex-direction: column;
     align-items: flex-start;
@@ -324,4 +317,17 @@
   .documents a {
     font-size: 0.95rem;
   }
+}
+
+@media (max-width: 640px) {
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Accessibility: focus outlines for keyboard users */
+.docLinkButton:focus,
+.btnBack:focus {
+  outline: 3px solid rgba(250,204,21,0.25);
+  outline-offset: 2px;
 }

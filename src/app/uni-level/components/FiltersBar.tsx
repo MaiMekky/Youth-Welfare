@@ -158,9 +158,18 @@ export default function FiltersBar({ filters, setFilters, onApply, onSearchChang
             <option value="مرفوض">مرفوض</option>
           </select>
         </div>
+        <div className={styles.buttonsWrapper}>
+  <button onClick={clearAllFilters} className={styles.clearBtn}>
+    مسح جميع الفلاتر
+  </button>
 
-        <button onClick={clearAllFilters} className={styles.clearBtn}>مسح جميع الفلاتر</button>
-        <button onClick={onApply} className={styles.applyBtn}>تطبيق الفلاتر</button>
+  <button onClick={onApply} className={styles.applyBtn}>
+    تطبيق الفلاتر
+  </button>
+</div>
+
+
+        
       </div>
     </div>
   );

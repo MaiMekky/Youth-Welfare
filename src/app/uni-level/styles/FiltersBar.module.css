@@ -44,67 +44,73 @@
   min-height: 44px;
 }
 
+/* ===== Buttons ===== */
+
+.buttonsWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center; /* مهم عشان يكونوا نفس المستوى */
+  gap: 14px;
+  margin-top: 20px;
+}
+
+/* زرار المسح */
 .clearBtn {
-  margin-top: 12px;
   background: #F3F4F9;
-  border: none;
+  border: 1px solid #E2E5EF;
   border-radius: 8px;
-  padding: 10px 16px;
+  padding: 0.65rem 1.5rem;
   font-weight: 600;
-  color:  #2C3A5F;
+  color: #2C3A5F;
   cursor: pointer;
-}
-.filter-selects select {
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  background: #f9f9f9;
-  color: #555;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  height: 44px; /* نفس ارتفاع زرار التطبيق */
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-
-.activeSelect {
-  background-color: #d4af37; 
-  color: #fff;
-  border-color: #b89125;
+.clearBtn:hover {
+  background: #E6E9F5;
 }
 
-
-.filter-selects select option[disabled] {
-  color: #aaa;
-  display: none; 
-}
+/* زرار التطبيق */
 .applyBtn {
-  margin-top: clamp(0.75rem, 2vw, 1.125rem);
   background: #2C3A5F;
   border: none;
   border-radius: 8px;
-  padding: clamp(0.5rem, 1.5vw, 0.625rem) clamp(0.75rem, 2vw, 1rem);
+  padding: 0.65rem 1.7rem;
   font-weight: 600;
   color: #fff;
   cursor: pointer;
-  transition: background 0.3s ease;
-  margin-right: clamp(0.375rem, 1vw, 0.5rem);
-  min-height: 44px;
-  font-size: clamp(0.875rem, 1.5vw, 0.9375rem);
-  width: 100%;
+  height: 44px; /* نفس الارتفاع */
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .applyBtn:hover {
-  background: #d4af37;
-  color: #fff;
+  background: #1f2a44;
+  transform: translateY(-1px);
 }
+
+/* ===== Responsive ===== */
 
 @media (max-width: 640px) {
   .filterSelects {
     grid-template-columns: 1fr;
   }
+
+  .buttonsWrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .clearBtn,
   .applyBtn {
     width: 100%;
-    margin-right: 0;
   }
 }

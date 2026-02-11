@@ -112,12 +112,11 @@ export default function ReportCard({ family }: any) {
             عرض التفاصيل الكاملة
           </button>
 
-          <button
+          {/* <button
             className={styles.deleteBtn}
             onClick={handleDelete}
           >
             <span className={styles.btnIcon}>
-              {/* Trash SVG icon */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -136,7 +135,7 @@ export default function ReportCard({ family }: any) {
               </svg>
             </span>
             حذف
-          </button>
+          </button> */}
         </div>
       </div>
     </div>

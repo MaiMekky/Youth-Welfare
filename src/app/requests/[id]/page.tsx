@@ -415,6 +415,8 @@ const [preApproved, setPreApproved] = useState(false);
 
   return (
     <div className={styles.container}>
+      <div className={styles.contentCard}>
+        
       {notification && (
         <div
           className={`${styles.notification} ${
@@ -428,7 +430,12 @@ const [preApproved, setPreApproved] = useState(false);
           {notification.split(":")[1]}
         </div>
       )}
-
+       <button
+          onClick={() => router.back()}
+          className={styles.backBtn}
+        >
+          العودة ←
+        </button>
       <h2 className={styles.pageTitle}>تفاصيل الطالب - {application?.student_name ?? "جارٍ التحميل..."}</h2>
 
       {loading && <p>جارٍ التحميل...</p>}
@@ -628,12 +635,8 @@ const [preApproved, setPreApproved] = useState(false);
       {application?.req_status === "مقبول" && <div className={styles.btnReceived}>✅ تم اعتماد الطلب نهائيًا</div>}
       {application?.req_status === "مرفوض" && <div className={styles.btnReceived}>❌ تم رفض الطلب</div>}
 
-      <div className={styles.backContainer}>
-        <button onClick={() => router.back()} className={styles.btnBack}>
-          رجوع
-        </button>
-      </div>
     </div>
+  </div>
   </div>
   );
 }

@@ -195,6 +195,7 @@
   font-size: 0.9rem;
   white-space: nowrap;
   border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  text-align: center;
 }
 
 .membersTable thead tr th:first-child {
@@ -223,6 +224,7 @@
   text-align: right;
   color: #495057;
   font-size: 0.875rem;
+  text-align: center;
 }
 
 .statusCell {

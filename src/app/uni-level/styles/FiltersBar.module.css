@@ -5,6 +5,7 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   width: 100%;
   box-sizing: border-box;
+   margin-bottom: clamp(1rem, 3vw, 2rem);
 }
 
 .sectionTitle {
@@ -48,8 +49,8 @@
 
 .buttonsWrapper {
   display: flex;
-  justify-content: center;
-  align-items: center; /* مهم عشان يكونوا نفس المستوى */
+  justify-content: flex-start;
+  align-items: center; 
   gap: 14px;
   margin-top: 20px;
 }

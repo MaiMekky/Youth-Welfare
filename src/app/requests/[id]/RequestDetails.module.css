@@ -1,45 +1,73 @@
 /* Base container & layout */
 .container {
-  background: white;
-  padding: clamp(1rem, 4vw, 1.875rem);
-  border-radius: 16px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
-  direction: rtl;
-  max-width: min(900px, 95vw);
+  padding: clamp(1rem, 4vw, 2.5rem) clamp(1rem, 4vw, 1.25rem);
+  max-width: min(950px, 95vw);
   width: 100%;
-  margin: clamp(1rem, 4vw, 2.5rem) auto;
-  border: 3px solid #f1c40f;
+  margin: 0 auto;
+  direction: rtl;
+  color: #1e1e1e;
   box-sizing: border-box;
+}
+.contentCard {
+  border: 2px solid #d4a017;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  padding: 35px 40px 30px;
+  position: relative;
+  background: white;
 }
 
 .pageTitle {
-  font-size: 24px;
-  color: #2c3a5f;
-  margin-bottom: 25px;
   text-align: center;
-  border-bottom: 2px solid #f1c40f;
-  padding-bottom: 10px;
+  font-size: 26px;
+  font-weight: 800;
+  color: #2c2a6a;
+  margin-bottom: 30px;
+  border-bottom: 0; /* كان موجود عندك */
+  padding-bottom: 0; /* كان موجود عندك */
 }
 
+/* الأقسام */
 .section {
   margin-bottom: 25px;
+  border-bottom: 1px solid #e0c97d;
+  padding-bottom: 12px;
 }
 
 .section h3 {
-  color: #1f2937;
+  font-size: 18px;
+  color: #2c2a6a;
   margin-bottom: 10px;
-  border-right: 5px solid #facc15;
+  font-weight: 700;
+  border-right: 4px solid #d4a017;
   padding-right: 8px;
 }
 
+/* ✅ نفس شبكة البيانات (بدون الخلفية الرمادي اللي كانت عندك) */
 .infoGrid {
-  background: #f9fafb;
-  border-radius: 10px;
-  padding: 15px 20px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px 20px;
+  gap: 12px 25px;
+
+  /* (كان عندك background/padding كبير) */
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
 }
+
+.infoGrid p {
+  font-size: 15px;
+  margin: 0;
+  line-height: 1.7;
+}
+
+.infoGrid strong {
+  color: #2c2a6a;
+}
+
+/* =========================
+   (CSS زيادة - سيبناها زي ما هي)
+   ========================= */
 
 .longText {
   background: #fff8dc;
@@ -455,4 +483,20 @@
 .btnBack:focus {
   outline: 3px solid rgba(250,204,21,0.25);
   outline-offset: 2px;
+}
+.backBtn {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  background: none;
+  border: none;
+  color: #2c2a6a;
+  font-size: 15px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.backBtn:hover {
+  text-decoration: underline;
 }

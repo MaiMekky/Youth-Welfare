@@ -55,9 +55,10 @@ export default function Page() {
   );
 
   const qualityFamilies = useMemo(
-    () => families.filter((f) => f.type === "نوعية"),
-    [families]
-  );
+  () => families.filter((f) => f.type !== "مركزية"),
+  [families]
+);
+
 
   const ecoFamilies = useMemo(
     () => families.filter((f) => f.type === "اصدقاء البيئة"),

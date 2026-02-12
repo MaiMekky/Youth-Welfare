@@ -3,7 +3,6 @@
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 15px;
   margin: 24px 0;
-  direction: rtl;
 }
 
 .statCard {

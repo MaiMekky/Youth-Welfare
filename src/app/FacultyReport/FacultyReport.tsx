@@ -1,8 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import styles from "./FacultyReport.module.css";
-import { ChevronLeft, ChevronRight, Search, Wallet, Users , FileText } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, Wallet, Users, FileText } from "lucide-react";
 import axios from "axios";
+import Footer from "../FacLevel/components/Footer";
+import { useRouter } from "next/navigation";
 
 interface StudentType {
   name: string;
@@ -18,6 +20,25 @@ export default function FacultyReport() {
   const [searchQuery, setSearchQuery] = useState("");
   const [token, setToken] = useState<string | null>(null);
   const [userData, setUserData] = useState<any>(null);
+  const router = useRouter();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    document.cookie = "access=; path=/; max-age=0; SameSite=Lax";
+    document.cookie = "refresh=; path=/; max-age=0; SameSite=Lax";
+    document.cookie = "user_type=; path=/; max-age=0; SameSite=Lax";
+    document.cookie = "roleKey=; path=/; max-age=0; SameSite=Lax";
+    document.cookie = "role=; path=/; max-age=0; SameSite=Lax";
+    router.push("/");
+  };
+
+  const toggleMenu = () => setIsMenuOpen((p) => !p);
+
+  const handleNavClick = (path: string) => {
+    router.push(path);
+    setIsMenuOpen(false);
+  };
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -140,15 +161,48 @@ export default function FacultyReport() {
   return (
     <div className={styles.facultyReportPage}>
       <header className={styles.facultyHeader}>
+      <div className={styles.headerLeft}>
         <div>
-          <h1>
-          التقرير الشامل - {userData?.faculty_name || ""}
-        </h1>
-
+          <h1>التقرير الشامل - {userData?.faculty_name || ""}</h1>
           <p>Engineering Faculty - Comprehensive Report</p>
         </div>
-      </header>
+      </div>
 
+      {/* Hamburger (Mobile) */}
+      <button
+        className={styles.hamburger}
+        onClick={toggleMenu}
+        aria-label="Toggle menu"
+        aria-expanded={isMenuOpen}
+        type="button"
+      >
+        <span className={`${styles.hamburgerLine} ${isMenuOpen ? styles.open : ""}`}></span>
+        <span className={`${styles.hamburgerLine} ${isMenuOpen ? styles.open : ""}`}></span>
+        <span className={`${styles.hamburgerLine} ${isMenuOpen ? styles.open : ""}`}></span>
+      </button>
+
+      {/* Buttons */}
+      <nav
+        className={`${styles.headerRight} ${isMenuOpen ? styles.mobileMenuOpen : ""}`}
+        aria-label="Main navigation"
+      >
+        <button className={styles.navBtn} onClick={() => handleNavClick("/FacLevel")} type="button">
+          التكافل الاجتماعي
+        </button>
+
+        <button className={styles.navBtn} onClick={() => handleNavClick("/Family-Faclevel/events")} type="button">
+          الاسر الطلابية
+        </button>
+
+        <button className={styles.navBtn} onClick={() => handleNavClick("/activities")} type="button">
+          الانشطة
+        </button>
+
+        <button className={styles.logoutBtn} onClick={handleLogout} type="button">
+          تسجيل خروج
+        </button>
+      </nav>
+    </header>
       <main className={styles.facultyMain}>
         <section className={styles.statsSection}>
           <div className={`${styles.statBox} ${styles.yellow}`}>
@@ -266,6 +320,7 @@ export default function FacultyReport() {
           </div>
         </div>
       </main>
+      <Footer/>
     </div>
   );
 }

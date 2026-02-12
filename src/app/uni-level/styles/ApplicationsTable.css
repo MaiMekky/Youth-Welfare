@@ -251,7 +251,7 @@ table td {
 .tableFooter {
   padding: 10px 18px;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   background: #fafafa;
   border: 1px solid #ddd;
@@ -276,7 +276,7 @@ table td {
 .footerRight {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .footerRight label {
@@ -321,10 +321,15 @@ table td {
   justify-content: center;
   min-width: 32px;
   min-height: 32px;
+    background: transparent;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  transition: .2s ease;
 }
 
 .paginationButtons button:hover:not(:disabled) {
-  background: #ddd;
+ background:#e5e7eb;
 }
 
 .paginationButtons button:disabled {

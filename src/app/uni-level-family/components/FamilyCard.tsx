@@ -67,7 +67,7 @@ export default function FamilyCard({
       {/* Members */}
       <div className={styles.familyMeta}>
         <div className={styles.metaItem}>
-          <span className={styles.metaIcon}>👥</span>
+          <span className={styles.metaIcon}></span>
           <span>{family.member_count} عضو</span>
         </div>
       </div>

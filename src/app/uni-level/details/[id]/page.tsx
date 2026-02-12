@@ -53,15 +53,15 @@ export default function ApplicationDetailsPage() {
     fetchData();
   }, [id]);
 
-  if (loading) return <p>جاري التحميل...</p>;
-  if (errorMsg) return <p style={{ color: "red" }}>{errorMsg}</p>;
-  if (!data) return <p>لا توجد بيانات للطلب</p>;
+  if (loading) return <p className="loading">جاري التحميل...</p>;
+  if (errorMsg) return <p style={{ color: "red", textAlign: "center", padding: "2rem" }}>{errorMsg}</p>;
+  if (!data) return <p style={{ textAlign: "center", padding: "2rem" }}>لا توجد بيانات للطلب</p>;
 
   return (
     <div className="details-container">
-    <button className="btnBack" onClick={() => router.back()}>
-  ← العودة
-</button>
+      <button className="btnBack" onClick={() => router.back()}>
+        ← العودة
+      </button>
 
       <h2 className="page-title">تفصيل طلب دعم مالي</h2>
 
@@ -111,18 +111,28 @@ export default function ApplicationDetailsPage() {
         </ul>
       </section>
 
-      {/* المستندات */}
+      {/* المستندات المرفوعة */}
       <section className="section documents">
-        <h3>المستندات</h3>
-        {docs.length === 0 ? <p>لا توجد مستندات.</p> :
-          <ul>
+        <h3>المستندات المرفوعة</h3>
+        {docs.length === 0 ? (
+          <p>لا توجد مستندات.</p>
+        ) : (
+          <div className="docsContainer">
             {docs.map((doc) => (
-              <li key={doc.doc_id}>
-                <a href={doc.file_url} rel="noreferrer">{doc.doc_type}</a>
-              </li>
+              <div key={doc.doc_id} className="docCard">
+                <p><strong>{doc.doc_type}</strong></p>
+                
+                <a href={doc.file_url} rel="noopener noreferrer">
+                  افتح الملف
+                </a>
+                
+                <p className="uploadDate">
+                  تم الرفع: {doc.uploaded_at ? doc.uploaded_at.slice(0, 10) : "-"}
+                </p>
+              </div>
             ))}
-          </ul>
-        }
+          </div>
+        )}
       </section>
     </div>
   );

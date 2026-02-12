@@ -137,8 +137,78 @@
 }
 
 /* ============================
-   Documents section enhancements
+   Documents section - Card Grid Layout
    ============================ */
+
+.docsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin-top: 15px;
+}
+
+.docCard {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  text-align: center;
+  transition: all 0.25s ease;
+  border: 1px solid #e5e7eb;
+}
+
+.docCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.docCard p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.docCard p strong {
+  color: #2c3a6a;
+}
+
+.docCard a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #2c3a5f;
+  color: #fff;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  margin: 8px 0;
+}
+
+.docCard a:hover {
+  background: #1f2a44;
+  transform: translateY(-1px);
+}
+
+.uploadDate {
+  font-size: 0.85rem;
+  color: #777;
+  margin-top: 8px;
+}
+
+.noLink {
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+.docsNote {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 8px;
+}
 
 .docsTable {
   width: 100%;
@@ -201,37 +271,6 @@
   border: 1px solid #e6eef7;
   display: block;
   margin-top: 8px;
-}
-
-.noLink {
-  color: #9ca3af;
-  font-size: 13px;
-}
-
-.docsNote {
-  font-size: 13px;
-  color: #6b7280;
-  margin-top: 8px;
-}
-
-.docsContainer {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 16px;
-  margin-top: 15px;
-}
-
-.docCard {
-  background: #fff;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  text-align: center;
-}
-
-.uploadDate {
-  font-size: 0.85rem;
-  color: #777;
 }
 
 /* =========================

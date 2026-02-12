@@ -119,8 +119,8 @@ export default function FamilyDetailsPage() {
     fetchFamily();
   }, [id]);
 
-  if (loading) return <p>جاري التحميل...</p>;
-  if (!family) return <p>لا توجد بيانات</p>;
+  if (loading) return <p className={styles.loadingText}>جاري التحميل...</p>;
+  if (!family) return <p className={styles.loadingText}>لا توجد بيانات</p>;
 
   return (
     <div className={styles.pageContainer}>
@@ -199,44 +199,44 @@ export default function FamilyDetailsPage() {
       {/* ================= Members ================= */}
       {activeTab === 'members' && (
         <div className={styles.contentArea}>
-          <table className={styles.membersTable}>
-            <thead>
-              <tr>
-                <th>الاسم</th>
-                <th>الرقم الجامعي</th>
-                <th>الرقم القومي</th>
-                <th>اللجنة</th>
-                <th>المنصب</th>
-                <th>الحالة</th>
-                <th>تاريخ الانضمام</th>
-              </tr>
-            </thead>
-            <tbody>
-              {family.family_members.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className={styles.emptyState}>
-                    لا توجد بيانات
-                  </td>
-                </tr>
-              ) : (
-                family.family_members.map((m: any) => (
-                  <tr key={m.student_id}>
-                    <td>{m.student_name}</td>
-                    <td>{m.u_id}</td>
-                    <td>{m.national_id}</td>
-                    <td>{m.dept_name ?? '—'}</td>
-                    <td>{m.role}</td>
-                    <td>{m.status}</td>
-                    <td>
-                      {new Date(m.joined_at).toLocaleDateString(
-                        'ar-EG'
-                      )}
-                    </td>
+          {family.family_members.length === 0 ? (
+            <div className={styles.emptyStateContainer}>
+              <p className={styles.emptyStateText}>لا توجد أعضاء حالياً</p>
+            </div>
+          ) : (
+            <div className={styles.tableContainer}>
+              <table className={styles.membersTable}>
+                <thead>
+                  <tr>
+                    <th>الاسم</th>
+                    <th>الرقم الجامعي</th>
+                    <th>الرقم القومي</th>
+                    <th>اللجنة</th>
+                    <th>المنصب</th>
+                    <th>الحالة</th>
+                    <th>تاريخ الانضمام</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                </thead>
+                <tbody>
+                  {family.family_members.map((m: any) => (
+                    <tr key={m.student_id}>
+                      <td data-label="الاسم">{m.student_name}</td>
+                      <td data-label="الرقم الجامعي">{m.u_id}</td>
+                      <td data-label="الرقم القومي">{m.national_id}</td>
+                      <td data-label="اللجنة">{m.dept_name ?? '—'}</td>
+                      <td data-label="المنصب">{m.role}</td>
+                      <td data-label="الحالة">
+                        <span className={styles.statusCell}>{m.status}</span>
+                      </td>
+                      <td data-label="تاريخ الانضمام">
+                        {new Date(m.joined_at).toLocaleDateString('ar-EG')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 
@@ -248,9 +248,9 @@ export default function FamilyDetailsPage() {
           </h2>
 
           {family.family_events.length === 0 ? (
-            <p className={styles.membersSubtitle}>
-              لا توجد فعاليات حالياً
-            </p>
+            <div className={styles.emptyStateContainer}>
+              <p className={styles.emptyStateText}>لا توجد فعاليات حالياً</p>
+            </div>
           ) : (
             <div className={styles.eventsGrid}>
               {family.family_events.map((event: any) => (
@@ -258,14 +258,7 @@ export default function FamilyDetailsPage() {
                   key={event.event_id}
                   className={styles.eventCard}
                 >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      marginBottom: '10px',
-                    }}
-                  >
+                  <div className={styles.eventHeader}>
                     <h3 className={styles.eventTitle}>
                       {event.title}
                     </h3>

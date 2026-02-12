@@ -17,15 +17,15 @@ export default function FamilyCard({
   onReject,
 }: FamilyCardProps) {
   const router = useRouter();
-
+  
   if (!family) return null;
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "موافقة مبدئية":
-        return "#F3F5FD"; 
+        return "#F3F5FD";
       default:
-        return "#E8EAF0"; 
+        return "#E8EAF0";
     }
   };
 
@@ -38,7 +38,6 @@ export default function FamilyCard({
   };
 
   const handleViewDetails = () => {
-    // ✅ Use the dynamic route instead
     router.push(`/uni-level-family/details/${family.family_id}`);
   };
 
@@ -102,8 +101,7 @@ export default function FamilyCard({
             </button>
           </div>
         )}
-        
-        {/* زر التفاصيل دايمًا موجود */}
+
         <button
           className={`${styles.btn} ${styles.btnDetails}`}
           onClick={handleViewDetails}

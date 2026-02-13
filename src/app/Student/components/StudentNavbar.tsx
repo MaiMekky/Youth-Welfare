@@ -104,20 +104,34 @@ const StudentNavbar: React.FC = () => {
     { key: "profile", label: "ملفي الشخصي", icon: <IconProfile />, href: "/Student/profile" },
   ];
 
-  const handleLogout = () => {
-    // Clear localStorage
-    localStorage.clear();
+   const handleLogout = () => {
+ 
+  localStorage.clear();
 
-    // Clear cookies
-    document.cookie = "access=; path=/; max-age=0; SameSite=Lax";
-    document.cookie = "refresh=; path=/; max-age=0; SameSite=Lax";
-    document.cookie = "user_type=; path=/; max-age=0; SameSite=Lax";
-    document.cookie = "roleKey=; path=/; max-age=0; SameSite=Lax";
-    document.cookie = "role=; path=/; max-age=0; SameSite=Lax";
+  const isProd = process.env.NODE_ENV === "production";
+  const cookieEnd = `path=/; max-age=0; SameSite=Lax${isProd ? "; Secure" : ""}`;
+ 
+  document.cookie = `access=; ${cookieEnd}`;
+  document.cookie = `refresh=; ${cookieEnd}`;
+  document.cookie = `user_type=; ${cookieEnd}`;
+  document.cookie = `roleKey=; ${cookieEnd}`;
+  document.cookie = `role=; ${cookieEnd}`;
 
-    // Redirect
-    router.replace("/");
-  };
+  window.location.replace("/");
+};
+
+
+  
+const navItems: (NavItem & { href: string })[] = [
+  { key: "home", label: "الرئيسية", icon: <IconHome />, href: "/Student/MainPage" },
+  { key: "activities", label: "الأنشطة", icon: <IconActivities />, href: "/Student/Activities" },
+  { key: "union", label: "اتحاد الطلبة", icon: <IconUnion />, href: "/Student/StudentUnion" },
+  { key: "families", label: "الأسر الطلابية", icon: <IconFamily />, href: "/Student/Families" },
+  { key: "familyManage", label: "ادارة الاسر", icon: <IconFamilyManage />, href: "/Student/manage" },
+  { key: "takafol", label: "التكافل الاجتماعي", icon: <IconTakafol />, href: "/Student/takafol" },
+  { key: "profile", label: "ملفي الشخصي", icon: <IconProfile />, href: "/Student/profile" },
+];
+
 
   const isActive = (href: string) => {
     return pathname === href || pathname?.startsWith(href + "/");

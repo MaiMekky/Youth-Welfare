@@ -214,32 +214,6 @@ const Dashboard: React.FC = () => {
     fetchDepartments();
   }, [token]);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const membersResponse = await fetch("/api/members");
-        const activitiesResponse = await fetch("/api/activities");
-
-        if (membersResponse.ok) {
-          const membersData: Member[] = await membersResponse.json();
-          if (membersData && Array.isArray(membersData)) {
-            setMembers(membersData);
-          }
-        }
-
-        if (activitiesResponse.ok) {
-          const activitiesData: Activity[] = await activitiesResponse.json();
-          if (activitiesData && Array.isArray(activitiesData)) {
-            setActivities(activitiesData);
-          }
-        }
-      } catch (error) {
-        // Silently handle error
-      }
-    }
-    fetchData();
-  }, []);
-
   // Show notification
   const showNotification = (message: string) => {
     setNotification({ show: true, message });

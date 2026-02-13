@@ -5,6 +5,46 @@
   --light: #F3F5FD;
   --white: #ffffff;
   --gray: #777;
+  --success: #10b981;
+  --error: #ef4444;
+  --info: #3b82f6;
+}
+
+/* ====== LOADING STATES ====== */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--gray);
+}
+
+.spinner-large {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(179, 142, 25, 0.2);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 16px;
+}
+
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin-left: 8px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ====== Joined Families Section ====== */
@@ -71,18 +111,6 @@
   font-weight: 700;
   line-height: 1.3;
   flex: 1;
-}
-
-.joined-badge {
-  background: linear-gradient(135deg, var(--gold) 0%, #d4a927 100%);
-  color: white;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 2px 8px rgba(179, 142, 25, 0.3);
 }
 
 .joined-card p {
@@ -163,6 +191,9 @@
   text-align: center;
   padding: 60px 20px;
   color: var(--gray);
+  background: rgba(179, 142, 25, 0.03);
+  border-radius: 16px;
+  border: 2px dashed rgba(179, 142, 25, 0.2);
 }
 
 .empty-state svg {
@@ -173,18 +204,11 @@
   margin-bottom: 16px;
 }
 
-@keyframes fadeInOut {
-  0% { opacity: 0; transform: translateX(-50%) translateY(-15px); }
-  10% { opacity: 1; transform: translateX(-50%) translateY(0); }
-  80% { opacity: 1; }
-  100% { opacity: 0; transform: translateX(-50%) translateY(-15px); }
-}
-
 /* Golden Separator */
 .gold-line {
   width: 140px;
   height: 4px;
-  background: var(--gold);
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
   margin: 10px auto 25px;
   border-radius: 6px;
 }
@@ -196,15 +220,15 @@
   margin: 0 auto 60px;
   padding: 0 20px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 28px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
 }
 
 /* Card */
 .program-card {
   background: var(--white);
-  border-radius: 18px;
-  box-shadow: 0 6px 24px rgba(39, 40, 93, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(39, 40, 93, 0.08);
   overflow: hidden;
   border: 1px solid rgba(39, 40, 93, 0.08);
   transition: all 0.35s ease;
@@ -218,50 +242,85 @@
   border-color: rgba(179, 142, 25, 0.3);
 }
 
-/* Image */
-.program-image {
-  height: 180px;
-  background: var(--light);
-  overflow: hidden;
-}
-
-.program-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.4s ease;
-}
-
-.program-card:hover .program-image img {
-  transform: scale(1.08);
-}
-
 /* Content */
 .program-content {
-  padding: 20px 22px 24px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 20px;
   flex: 1;
 }
 
-.program-content h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--navy);
+/* Card Header Section */
+.card-header-section {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid rgba(179, 142, 25, 0.1);
 }
 
-.program-content .goals-title {
+.card-header-section h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.3;
+  flex: 1;
+}
+
+.family-badge {
+  background: linear-gradient(135deg, var(--gold) 0%, #d4a927 100%);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(179, 142, 25, 0.3);
+}
+
+/* Card Info Section */
+.card-info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--navy);
+  font-weight: 600;
   font-size: 14px;
+}
+
+.info-label svg {
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+.info-value {
+  margin: 0;
+  padding-right: 26px;
   color: #555;
-  line-height: 1.5;
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 /* Join Button */
 .join-btn {
   margin-top: auto;
-  padding: 14px 0;
+  padding: 14px 20px;
   border-radius: 12px;
   border: none;
   font-size: 15px;
@@ -271,40 +330,74 @@
   background: linear-gradient(135deg, var(--gold) 0%, #d4a927 100%);
   transition: all 0.3s ease;
   box-shadow: 0 4px 14px rgba(179, 142, 25, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.join-btn svg {
+  flex-shrink: 0;
 }
 
 .join-btn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(179, 142, 25, 0.45);
+  background: linear-gradient(135deg, #d4a927 0%, var(--gold) 100%);
+}
+
+.join-btn:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .join-btn:disabled {
-  background: #ccc;
+  background: linear-gradient(135deg, #ccc 0%, #aaa 100%);
   cursor: not-allowed;
   box-shadow: none;
+  opacity: 0.7;
 }
 
 /* Error Box */
 .error-box {
   max-width: 900px;
   margin: 20px auto;
-  padding: 14px 18px;
-  background: rgba(179, 142, 25, 0.08);
-  border-right: 4px solid var(--gold);
+  padding: 16px 20px;
+  background: rgba(239, 68, 68, 0.1);
+  border-right: 4px solid var(--error);
   color: var(--navy);
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-/* Section Header (reuse) */
+.error-box svg {
+  color: var(--error);
+  flex-shrink: 0;
+}
+
+.error-box p {
+  margin: 0;
+}
+
+/* Section Header */
 .header h1 {
   text-align: center;
   color: var(--navy);
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 800;
+  margin: 40px 0 0;
 }
 
 /* ====== RESPONSIVE DESIGN ====== */
+
+/* Large screens */
+@media (min-width: 1400px) {
+  .programs-grid {
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  }
+}
 
 /* Tablets and smaller laptops */
 @media (max-width: 1024px) {
@@ -314,13 +407,21 @@
   }
 
   .programs-grid {
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
+  }
+
+  .header h1 {
+    font-size: 24px;
   }
 }
 
-/* Mobile devices */
+/* Tablets portrait */
 @media (max-width: 768px) {
+  .toast-container {
+    width: 95%;
+  }
+
   .joined-section {
     margin: 20px auto;
     padding: 0 16px;
@@ -363,25 +464,50 @@
     margin: 0 auto 40px;
   }
 
-  .program-card:hover {
-    transform: translateY(-4px);
+  .program-card {
+    border-radius: 14px;
   }
 
   .program-content {
-    padding: 18px 20px 20px;
+    padding: 20px;
+    gap: 16px;
   }
 
-  .program-content h3 {
-    font-size: 16px;
+  .card-header-section {
+    padding-bottom: 12px;
   }
 
-  .program-content .goals-title {
+  .card-header-section h3 {
+    font-size: 18px;
+  }
+
+  .family-badge {
+    padding: 5px 12px;
+    font-size: 11px;
+  }
+
+  .info-label {
     font-size: 13px;
   }
 
+  .info-label svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .info-value {
+    font-size: 13px;
+    padding-right: 24px;
+  }
+
   .join-btn {
-    padding: 12px 0;
+    padding: 12px 18px;
     font-size: 14px;
+  }
+
+  .join-btn svg {
+    width: 16px;
+    height: 16px;
   }
 
   .header h1 {
@@ -404,8 +530,17 @@
 
   .error-box {
     margin: 16px;
-    padding: 12px 16px;
+    padding: 14px 18px;
     font-size: 13px;
+  }
+
+  .loading-state {
+    padding: 40px 20px;
+  }
+
+  .spinner-large {
+    width: 40px;
+    height: 40px;
   }
 }
 
@@ -413,15 +548,16 @@
 @media (max-width: 480px) {
   .joined-section {
     padding: 0 12px;
+    margin: 16px auto;
   }
 
   .joined-card {
-    padding: 16px;
+    padding: 18px;
     border-radius: 12px;
   }
 
   .joined-card h3 {
-    font-size: 16px;
+    font-size: 17px;
   }
 
   .joined-card p {
@@ -430,66 +566,105 @@
 
   .joined-meta {
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
   }
 
   .joined-meta-item {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .view-details-btn {
-    padding: 10px 0;
+    padding: 11px 0;
     font-size: 13px;
     border-radius: 10px;
   }
 
   .programs-grid {
     padding: 0 12px;
+    gap: 14px;
   }
 
   .program-card {
-    border-radius: 14px;
-  }
-
-  .program-image {
-    height: 160px;
+    border-radius: 12px;
   }
 
   .program-content {
-    padding: 16px;
+    padding: 18px;
+    gap: 14px;
   }
 
-  .program-content h3 {
-    font-size: 15px;
+  .card-header-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
 
-  .program-content .goals-title {
+  .card-header-section h3 {
+    font-size: 17px;
+  }
+
+  .family-badge {
+    align-self: flex-start;
+  }
+
+  .card-info-section {
+    gap: 14px;
+  }
+
+  .info-label {
     font-size: 12px;
   }
 
+  .info-label svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .info-value {
+    font-size: 12px;
+    padding-right: 23px;
+  }
+
   .join-btn {
-    padding: 11px 0;
+    padding: 11px 16px;
     font-size: 13px;
     border-radius: 10px;
   }
 
+  .join-btn svg {
+    width: 15px;
+    height: 15px;
+  }
+
   .header h1 {
     font-size: 20px;
+    margin: 30px 0 0;
   }
 
   .gold-line {
     width: 80px;
+    height: 3px;
+  }
+
+  .error-box {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .spinner {
+    width: 14px;
+    height: 14px;
   }
 }
 
 /* Touch device optimizations */
 @media (hover: none) and (pointer: coarse) {
   .joined-card:hover {
-    transform: none;
+    transform: translateY(-4px);
   }
 
   .program-card:hover {
-    transform: none;
+    transform: translateY(-4px);
   }
 
   .view-details-btn:hover {
@@ -500,7 +675,20 @@
     transform: none;
   }
 
-  .program-card:hover .program-image img {
-    transform: none;
+  /* Increase touch targets */
+  .join-btn,
+  .view-details-btn {
+    min-height: 44px;
+  }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

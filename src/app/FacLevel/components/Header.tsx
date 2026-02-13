@@ -9,15 +9,22 @@ export default function Header() {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const handleLogout = () => {
-    localStorage.clear();
-    document.cookie = "access=; path=/; max-age=0; SameSite=Lax";
-    document.cookie = "refresh=; path=/; max-age=0; SameSite=Lax";
-    document.cookie = "user_type=; path=/; max-age=0; SameSite=Lax";
-    document.cookie = "roleKey=; path=/; max-age=0; SameSite=Lax";
-    document.cookie = "role=; path=/; max-age=0; SameSite=Lax";
-    router.push("/");
-  };
+ const handleLogout = () => {
+ 
+  localStorage.clear();
+
+  const isProd = process.env.NODE_ENV === "production";
+  const cookieEnd = `path=/; max-age=0; SameSite=Lax${isProd ? "; Secure" : ""}`;
+ 
+  document.cookie = `access=; ${cookieEnd}`;
+  document.cookie = `refresh=; ${cookieEnd}`;
+  document.cookie = `user_type=; ${cookieEnd}`;
+  document.cookie = `roleKey=; ${cookieEnd}`;
+  document.cookie = `role=; ${cookieEnd}`;
+
+  window.location.replace("/");
+};
+
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);

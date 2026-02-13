@@ -82,20 +82,22 @@ const StudentNavbar: React.FC = () => {
 
   const router = useRouter(); // router جوا الcomponent
 
-  const handleLogout = () => {
-  // Clear localStorage
+   const handleLogout = () => {
+ 
   localStorage.clear();
 
-  // Clear cookies
-  document.cookie = "access=; path=/; max-age=0; SameSite=Lax";
-  document.cookie = "refresh=; path=/; max-age=0; SameSite=Lax";
-  document.cookie = "user_type=; path=/; max-age=0; SameSite=Lax";
-  document.cookie = "roleKey=; path=/; max-age=0; SameSite=Lax";
-  document.cookie = "role=; path=/; max-age=0; SameSite=Lax";
+  const isProd = process.env.NODE_ENV === "production";
+  const cookieEnd = `path=/; max-age=0; SameSite=Lax${isProd ? "; Secure" : ""}`;
+ 
+  document.cookie = `access=; ${cookieEnd}`;
+  document.cookie = `refresh=; ${cookieEnd}`;
+  document.cookie = `user_type=; ${cookieEnd}`;
+  document.cookie = `roleKey=; ${cookieEnd}`;
+  document.cookie = `role=; ${cookieEnd}`;
 
-  // Redirect
-  router.replace("/");
+  window.location.replace("/");
 };
+
 
   
 const navItems: (NavItem & { href: string })[] = [

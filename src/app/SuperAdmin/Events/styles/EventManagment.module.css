@@ -1,0 +1,506 @@
+/* Events/styles/EventManagment.module.css */
+
+/* ====== Page Theme (match ActivityLogs) ====== */
+.page {
+  min-height: 100vh;
+  background: #f8f9fc;
+  color: #2C3A5F;
+  font-family: "Cairo", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+}
+
+.container {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* ===== Stats ===== */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.statCard {
+  background: #ffffff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 18px 20px;        
+  border-radius: 16px;
+  gap: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+}
+
+.statIconWrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: #f4efe2;
+  color: #bfa032;            /* same gold */
+  border: 1px solid #efe3c1;
+}
+
+.statIcon {
+  width: 26px;
+  height: 26px;
+}
+
+.statMeta {
+  display: grid;
+  gap: 2px;
+}
+
+.statLabel {
+  font-size: 15px;
+  color: #2C3A5F;
+  opacity: 0.75;
+  font-weight: 600;
+}
+
+.statValue {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0;
+  color: #2C3A5F;
+}
+
+/* ===== Panel ===== */
+.panel {
+  background: #ffffff;
+  border: 1px solid #eee;
+  border-radius: 20px; /* closer to ActivityLogs container */
+  overflow: hidden;
+}
+
+/* header: title then search full width under it */
+.panelHeader {
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.panelTitle {
+  margin: 0;
+  font-size: 25px;   /* like logsHeader vibe */
+  font-weight: 800;
+  color: #2C3A5F;
+}
+
+/* Search row full width */
+.searchRow {
+  width: 100%;
+}
+
+.searchWrapFull {
+  position: relative;
+  width: 100%;
+}
+
+.searchIcon {
+  width: 18px;
+  height: 18px;
+  color: #2C3A5F;
+  opacity: 0.55;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.searchInput {
+  width: 100%;
+  height: 40px;
+  padding: 0 40px 0 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;   /* like ActivityLogs inputs */
+  outline: none;
+  background: #fff;
+  font-size: 14px;
+  color: #2C3A5F;
+  box-sizing: border-box;
+}
+
+.searchInput:focus {
+  border-color: #bfa032;
+  box-shadow: 0 0 0 3px rgba(191, 160, 50, 0.18);
+}
+
+/* ===== Filters (match ActivityLogs) ===== */
+.filters {
+  padding: 0 16px 16px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.select {
+  width: 100%;
+  min-width: 0;       
+  padding: 8px 12px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  height: 44px;
+  color: #2C3A5F;
+  background: #fff;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.select:focus {
+  border-color: #bfa032;
+  box-shadow: 0 0 0 3px rgba(191, 160, 50, 0.18);
+}
+
+/* ===== Table Wrapper (match logs) ===== */
+.tableWrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  background: #fff;
+  border-radius: 12px;
+  padding: 0;
+}
+
+/* Table */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1100px; /* same style as logsTable */
+}
+
+.th,
+.td {
+  padding: 12px 10px;
+  text-align: center;         /* like logs */
+  border-bottom: 1px solid #eee;
+  white-space: nowrap;
+  font-size: 16px;  
+  line-height: 1.6;
+  color: #2C3A5F;
+}
+
+.th {
+  background-color: #f1f1f1;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Cells */
+.capacityCell {
+  display: grid;
+  gap: 2px;
+}
+
+.capacityValue {
+  font-weight: 800;
+}
+
+.capacityHint {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.dateCell {
+  display: grid;
+  gap: 4px;
+  max-width: 260px;
+  margin: 0 auto;
+}
+
+.dateRange {
+  font-weight: 700;
+}
+
+.locationText {
+  font-size: 15px;
+  opacity: 0.75;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.deptCell {
+  display: grid;
+  gap: 2px;
+}
+
+.deptTop {
+  font-weight: 800;
+}
+
+.deptBottom {
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+.detailsCell {
+  display: grid;
+  gap: 4px;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.detailsTitle {
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detailsDesc {
+  font-size: 15px;
+  opacity: 0.75;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detailsBy {
+  font-size: 15px;
+  opacity: 0.75;
+}
+
+/* ===== Buttons & Badges ===== */
+.viewBtn {
+  padding: 8px 12px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background: #bfa032; /* same gold button */
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.viewBtn:hover {
+  background: #a68c2a;
+}
+
+.btnDot {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  display: inline-block;
+  font-weight: 600;
+  border: none;
+}
+
+/* same feel as statusTag/actionTag */
+.badgeActive {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.badgeCompleted {
+  background-color: #e2e3e5;
+  color: #383d41;
+}
+
+.badgeGlobal {
+  background-color: #e2d9f3;
+  color: #3b2a63;
+}
+
+.badgeInternal {
+  background-color: #ffe5b4;
+  color: #7a4c00;
+}
+
+.eventIdPill {
+  padding: 4px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  display: inline-block;
+  font-weight: 700;
+  background: #f4efe2;
+  color: #7a5f10;
+  border: 1px solid #efe3c1;
+}
+
+/* ===== Mobile layout ===== */
+.mobileList {
+  display: none;
+  padding: 16px;
+  gap: 10px;
+}
+
+.mobileCard {
+  background: #ffffff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.mobileTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.mobileTitle {
+  font-weight: 800;
+  font-size: 15px;
+  color: #2C3A5F;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobileMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mobileChip {
+  padding: 4px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #f1f3f4;
+  color: #2C3A5F;
+  border: 1px solid #e6e6e6;
+}
+
+.mobileRow {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.mobileLabel {
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.75;
+}
+
+.mobileValue {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mobileDesc,
+.mobileBy {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.viewBtnMobile {
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: none;
+  background: #bfa032;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.viewBtnMobile:hover {
+  background: #a68c2a;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1024px) {
+  .container {
+    padding: 15px;
+  }
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .table {
+    min-width: 900px;
+  }
+  .filters {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .panel {
+    border-radius: 12px;
+  }
+
+   .filters {
+    grid-template-columns: 1fr;
+  }
+
+  .select {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .table {
+    min-width: 700px;
+    font-size: 13px;
+  }
+
+  .th,
+  .td {
+    padding: 10px 8px;
+  }
+}
+
+@media (max-width: 720px) {
+  .tableWrap {
+    display: block;          
+    overflow-x: auto;       
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table {
+    min-width: 900px;     
+  }
+
+  .mobileList {
+    display: none;         
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+@media (max-width: 480px) {
+  .container {
+    padding: 10px;
+  }
+  .panelTitle {
+    font-size: 18px;
+  }
+  .searchInput {
+    font-size: 13px;
+  }
+}

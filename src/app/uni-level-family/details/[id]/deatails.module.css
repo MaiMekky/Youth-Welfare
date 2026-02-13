@@ -320,92 +320,41 @@
   cursor: not-allowed;
 }
 
-/* Responsive table on mobile (same as super) */
+/* Responsive table on mobile - Scrollable */
 @media (max-width: 768px) {
   .tableContainer {
-    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    margin: 0 -5px; /* Allow slight overflow for better visibility */
   }
 
   .membersTable {
-    min-width: 100%;
-    border: 0;
+    font-size: 0.8rem;
   }
 
-  .membersTable thead {
-    display: none;
-  }
-
-  .membersTable tbody tr {
-    display: block;
-    margin-bottom: 15px;
-    border: 1px solid #e9ecef;
-    border-radius: 12px;
-    padding: 15px;
-    background: white;
+  .membersTable thead tr th {
+    padding: 12px 8px;
+    font-size: 0.8rem;
+    min-width: 100px; /* Ensure readable column width */
   }
 
   .membersTable tbody td {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid #f0f2f5;
-    text-align: right;
+    padding: 10px 8px;
+    font-size: 0.8rem;
+    min-width: 100px;
   }
 
-  .membersTable tbody td:last-child {
-    border-bottom: none;
-  }
-
-  .membersTable tbody td::before {
-    content: attr(data-label);
-    font-weight: 600;
-    color: #2C3A5F;
-    margin-left: 10px;
-  }
-
-  /* Dept mobile cards لو لسه مستخدمها */
-  .mobileCards {
-    display: flex;
+  /* Make action buttons stack vertically on very small screens */
+  .memberActions {
     flex-direction: column;
-    gap: 15px;
+    gap: 6px;
   }
 
-  .memberCard {
-    background: white;
-    border-radius: 12px;
-    padding: 18px;
-    border: 1px solid #e9ecef;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  }
-
-  .cardRow {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid #f0f2f5;
-  }
-
-  .cardRow:last-child {
-    border-bottom: none;
-  }
-
-  .cardLabel {
-    color: #2C3A5F;
-    font-weight: 700;
-    font-size: 0.9rem;
-  }
-
-  .cardValue {
-    color: #495057;
-    font-weight: 500;
-    font-size: 0.9rem;
-    text-align: left;
-  }
-
-  .cardActions {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid #e9ecef;
+  .btnApprove,
+  .btnReject {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+    width: 100%;
   }
 }
 

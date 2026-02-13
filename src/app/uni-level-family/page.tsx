@@ -12,10 +12,17 @@ const API_URL = "http://localhost:8000/api";
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState<string>("central");
-  const [selectedFaculty, setSelectedFaculty] = useState<string>("الكل");
+  const [selectedFaculty, setSelectedFaculty] = useState<string>("الكل"); // Changed to string for faculty name
+  const [selectedFamilyType, setSelectedFamilyType] = useState<string>("all"); // Added family type filter
 
   const [families, setFamilies] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+
+  /* ================= Reset filters when switching tabs ================= */
+  useEffect(() => {
+    setSelectedFaculty("الكل");
+    setSelectedFamilyType("all");
+  }, [activeTab]);
 
   /* ================= API ================= */
 
@@ -64,19 +71,57 @@ export default function Page() {
     [families]
   );
 
-  /* ================= فلترة حسب الكلية ================= */
+  /* ================= فلترة حسب الكلية ونوع الأسرة ================= */
 
   const filteredQualityFamilies = useMemo(() => {
-    return qualityFamilies.filter(
-      (f) => selectedFaculty === "الكل" || f.faculty_name === selectedFaculty
-    );
-  }, [qualityFamilies, selectedFaculty]);
+    let filtered = qualityFamilies;
+
+    // Filter by faculty name
+    if (selectedFaculty !== "الكل") {
+      filtered = filtered.filter((f) => f.faculty_name === selectedFaculty);
+    }
+
+    // Filter by family type (if not "all")
+    if (selectedFamilyType !== "all") {
+      filtered = filtered.filter((f) => f.type === selectedFamilyType);
+    }
+
+    return filtered;
+  }, [qualityFamilies, selectedFaculty, selectedFamilyType]);
 
   const filteredEcoFamilies = useMemo(() => {
-    return ecoFamilies.filter(
-      (f) => selectedFaculty === "الكل" || f.faculty_name === selectedFaculty
-    );
-  }, [ecoFamilies, selectedFaculty]);
+    let filtered = ecoFamilies;
+
+    // Filter by faculty name
+    if (selectedFaculty !== "الكل") {
+      filtered = filtered.filter((f) => f.faculty_name === selectedFaculty);
+    }
+
+    // Filter by family type (if not "all")
+    if (selectedFamilyType !== "all") {
+      filtered = filtered.filter((f) => f.type === selectedFamilyType);
+    }
+
+    return filtered;
+  }, [ecoFamilies, selectedFaculty, selectedFamilyType]);
+
+  /* ================= Combined filtered families for "quality" and "eco" tabs ================= */
+  
+  const filteredNonCentralFamilies = useMemo(() => {
+    let filtered = families.filter((f) => f.type !== "مركزية");
+
+    // Filter by faculty name
+    if (selectedFaculty !== "الكل") {
+      filtered = filtered.filter((f) => f.faculty_name === selectedFaculty);
+    }
+
+    // Filter by family type
+    if (selectedFamilyType !== "all") {
+      filtered = filtered.filter((f) => f.type === selectedFamilyType);
+    }
+
+    return filtered;
+  }, [families, selectedFaculty, selectedFamilyType]);
 
   /* ================= approve / reject ================= */
 
@@ -92,7 +137,7 @@ export default function Page() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({}), // بعض الـ APIs يحتاج body حتى لو فاضي
+          body: JSON.stringify({}),
         }
       );
 
@@ -167,15 +212,6 @@ export default function Page() {
 
   const stats = useMemo(() => getStats(), [families]);
 
-  const faculties = [
-    "الكل",
-    "كلية الطب",
-    "كلية الحاسبات",
-    "كلية الهندسة",
-    "كلية الزراعة",
-    "كلية الفنون التطبيقية",
-  ];
-
   const qualityPendingCount = qualityFamilies.filter(
     (f) => f.status === "في الانتظار"
   ).length;
@@ -218,12 +254,13 @@ export default function Page() {
         {activeTab === "quality" && (
           <>
             <Filters
-              faculties={faculties}
               selectedFaculty={selectedFaculty}
               setSelectedFaculty={setSelectedFaculty}
+              selectedFamilyType={selectedFamilyType}
+              setSelectedFamilyType={setSelectedFamilyType}
             />
             <FamiliesGrid
-              families={filteredQualityFamilies}
+              families={filteredNonCentralFamilies}
               showActions={true}
               onApprove={handleApproveFamily}
               onReject={handleRejectFamily}
@@ -234,12 +271,13 @@ export default function Page() {
         {activeTab === "eco" && (
           <>
             <Filters
-              faculties={faculties}
               selectedFaculty={selectedFaculty}
               setSelectedFaculty={setSelectedFaculty}
+              selectedFamilyType={selectedFamilyType}
+              setSelectedFamilyType={setSelectedFamilyType}
             />
             <FamiliesGrid
-              families={filteredEcoFamilies}
+              families={filteredNonCentralFamilies}
               showActions={true}
               onApprove={handleApproveFamily}
               onReject={handleRejectFamily}

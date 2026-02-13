@@ -38,6 +38,7 @@ export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (ap
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  
   // fetch البيانات مع الفلاتر فقط عند الضغط على زر "تطبيق الفلاتر"
   const fetchApplications = async (appliedFilters: any = {}) => {
     try {
@@ -154,6 +155,7 @@ export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (ap
       app.id.toString().includes(term)
     );
   });
+  
   const totalPages = Math.ceil(filteredApps.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage + 1;
   const endIndex = Math.min(currentPage * rowsPerPage, filteredApps.length);
@@ -175,117 +177,120 @@ export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (ap
         onSearchChange={setSearchTerm} // البحث التلقائي
       />
 
-      <div className="table-wrapper">
-        <div className="table-actions">
-          <button className="print-btn">طباعة</button>
-          <button className="export-btn">تصدير</button>
-        </div>
+    
 
-       <div className="table-container">
-  <table>
-    <thead>
-      <tr>
-        <th>رقم الطلب</th>
-        <th>بيانات الطالب</th>
-        <th>الكلية</th>
-        <th>المبلغ</th>
-        <th>تاريخ الاعتماد</th>
-        <th>حالة الطلب</th>
-        <th>الإجراءات</th>
-      </tr>
-    </thead>
+        {/* Table container with scrollable wrapper */}
+        <div className="table-container">
+          {/* Only the table scrolls, not the footer */}
+          <div className="table-scroll-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>رقم الطلب</th>
+                  <th>بيانات الطالب</th>
+                  <th>الكلية</th>
+                  <th>المبلغ</th>
+                  <th>تاريخ الاعتماد</th>
+                  <th>حالة الطلب</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
 
-    <tbody>
-      {paginatedApps.map((app) => (
-        <tr key={app.id}>
-          <td>{app.id}</td>
+              <tbody>
+                {paginatedApps.map((app) => (
+                  <tr key={app.id}>
+                    <td>{app.id}</td>
 
-          <td>
-            <div className="student-info">
-              <div>{app.studentName}</div>
-              <div className="secondary">الرقم: {app.requestNumber}</div>
+                    <td>
+                      <div className="student-info">
+                        <div>{app.studentName}</div>
+                        <div className="secondary">الرقم: {app.requestNumber}</div>
+                      </div>
+                    </td>
+
+                    <td>{app.college}</td>
+                    <td className="amount">{app.amount}</td>
+                    <td>{app.date}</td>
+
+                    <td>
+                      <span
+                        className={`statusBadge ${
+                          app.status === "منتظر"
+                            ? "statusPending"
+                            : app.status === "موافقة مبدئية"
+                            ? "statusInitial"
+                            : app.status === "مقبول"
+                            ? "statusFinal"
+                            : app.status === "مرفوض"
+                            ? "statusRejected"
+                            : app.status === "تم الاستلام"
+                            ? "statusReceived"
+                            : ""
+                        }`}
+                      >
+                        {app.status}
+                      </span>
+                    </td>
+
+                    <td>
+                      <button className="details" onClick={() => handleNavigate(app)}>
+                        التفاصيل
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+
+                {paginatedApps.length === 0 && (
+                  <tr>
+                    <td colSpan={7} style={{ textAlign: "center", padding: "20px" }}>
+                      لا توجد بيانات مطابقة
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Footer is OUTSIDE the scrollable wrapper */}
+          <div className="tableFooter">
+            <div className="footerLeft">
+              <strong>عرض</strong> {startIndex}–{endIndex} <strong>من</strong> {filteredApps.length}
             </div>
-          </td>
 
-          <td>{app.college}</td>
-          <td className="amount">{app.amount}</td>
-          <td>{app.date}</td>
+            <div className="footerRight">
+              <label>عدد العناصر في الصفحة:</label>
 
-          <td
-            className={`statusBadge ${
-              app.status === "منتظر"
-                ? "statusPending"
-                : app.status === "موافقة مبدئية"
-                ? "statusInitial"
-                : app.status === "مقبول"
-                ? "statusFinal"
-                : app.status === "مرفوض"
-                ? "statusRejected"
-                : app.status === "تم الاستلام"
-                ? "statusReceived"
-                : ""
-            }`}
-          >
-            {app.status}
-          </td>
+              <select
+                value={rowsPerPage}
+                onChange={(e) => {
+                  setRowsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+              </select>
 
-          <td>
-            <button className="details" onClick={() => handleNavigate(app)}>
-              التفاصيل
-            </button>
-          </td>
-        </tr>
-      ))}
+              <div className="paginationButtons">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronRight size={18} />
+                </button>
 
-      {paginatedApps.length === 0 && (
-        <tr>
-          <td colSpan={7} style={{ textAlign: "center", padding: "20px" }}>
-            لا توجد بيانات مطابقة
-          </td>
-        </tr>
-      )}
-    </tbody>
-  </table>
-
- <div className="tableFooter">
-  <div className="footerLeft">
-    <strong>عرض</strong> {startIndex}–{endIndex} <strong>من</strong> {filteredApps.length}
-  </div>
-
-  <div className="footerRight">
-    <label>عدد العناصر في الصفحة:</label>
-
-    <select
-      value={rowsPerPage}
-      onChange={(e) => {
-        setRowsPerPage(Number(e.target.value));
-        setCurrentPage(1);
-      }}
-    >
-      <option value={5}>5</option>
-      <option value={10}>10</option>
-      <option value={25}>25</option>
-    </select>
-
-    <div className="paginationButtons">
-      <button
-        onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-        disabled={currentPage === 1}
-      >
-        <ChevronRight size={18} />
-      </button>
-
-      <button
-        onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-        disabled={currentPage === totalPages}
-      >
-        <ChevronLeft size={18} />
-      </button>
-    </div>
-  </div>
-</div>
-</div>
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                >
+                  <ChevronLeft size={18} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    
   );
 }

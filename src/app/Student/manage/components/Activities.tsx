@@ -76,46 +76,6 @@ interface ActivitiesProps {
   refreshTrigger?: number;
 }
 
-// Dummy data
-const dummyActivities: Activity[] = [
-  {
-    id: 1,
-    title: "اجتماع دوري للأسرة",
-    type: "اجتماع",
-    date: "2024-12-10",
-    time: "14:00",
-    location: "قاعة المؤتمرات",
-    description: "مناقشة خطة العمل للشهر القادم والمشاريع الجديدة",
-    participants: "25 عضو",
-    status: "قادمة",
-    color: "#4CAF50",
-  },
-  {
-    id: 2,
-    title: "مسابقة البرمجة السنوية",
-    type: "مسابقة",
-    date: "2024-12-15",
-    time: "10:00",
-    location: "معمل الحاسب الآلي",
-    description: "مسابقة حل المشكلات البرمجية باستخدام Python و Java",
-    participants: "40 عضو",
-    status: "قادمة",
-    color: "#2196F3",
-  },
-  {
-    id: 3,
-    title: "ورشة عمل React و TypeScript",
-    type: "ورشة عمل",
-    date: "2024-11-30",
-    time: "16:00",
-    location: "القاعة الكبرى",
-    description: "تعلم أساسيات React و TypeScript وبناء تطبيقات حديثة",
-    participants: "30 عضو",
-    status: "مكتملة",
-    color: "#FF9800",
-  },
-];
-
 const mapApiActivityToActivity = (apiEvent: ApiEventRequest, deptMap: Record<number, string> = {}): Activity => {
   const colors = ["#4CAF50", "#2196F3", "#FF9800", "#9C27B0", "#F44336", "#00BCD4"];
   const colorIndex = Math.abs(apiEvent.event_id) % colors.length;
@@ -175,7 +135,7 @@ const mapApiActivityToActivity = (apiEvent: ApiEventRequest, deptMap: Record<num
 };
 
 const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
-  const [activities, setActivities] = useState<Activity[]>(dummyActivities);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -207,10 +167,6 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
 
         const response = await res.json();
         
-        // Debug: Log the response structure
-        console.log("Families API Response:", response);
-        console.log("Is Array?", Array.isArray(response));
-        
         // Check different possible response structures
         let families: Family[] = [];
         
@@ -224,8 +180,6 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
           families = response.families;
         }
         
-        console.log("Families array:", families);
-        
         if (families.length === 0) {
           setError("لا توجد أسر متاحة");
           setLoading(false);
@@ -236,14 +190,12 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
         const elderBrotherFamily = families.find(f => f.role === "أخ أكبر");
         
         if (elderBrotherFamily) {
-          console.log("Found family with 'أخ أكبر':", elderBrotherFamily);
           setSelectedFamilyId(elderBrotherFamily.family_id);
         } else {
           setError("لا توجد أسرة بدور 'أخ أكبر'");
           setLoading(false);
         }
       } catch (err: any) {
-        console.error("Error fetching families:", err);
         setError(err.message || "حصل خطأ أثناء تحميل قائمة الأسر");
         setLoading(false);
       }
@@ -281,10 +233,9 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
             map[dept.dept_id] = dept.name;
           });
           setDeptMap(map);
-          console.log('✅ Departments loaded:', depts.length);
         }
       } catch (err) {
-        console.error('❌ Error fetching departments:', err);
+        // Silently handle errors
       }
     };
 
@@ -301,7 +252,6 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
         setError(null);
 
         const endpoint = `http://127.0.0.1:8000/api/family/student/${selectedFamilyId}/event_requests/`;
-        console.log('📡 Fetching from:', endpoint);
 
         const response = await fetch(endpoint, {
           method: 'GET',
@@ -311,90 +261,51 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
           }
         });
 
-        console.log('📊 Response status:', response.status);
-
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error('❌ API Error:', errorText);
-          throw new Error(`HTTP ${response.status}: ${errorText}`);
+          throw new Error(`HTTP ${response.status}`);
         }
 
         const data = await response.json();
-        console.log('✅ Raw API Response:', data);
-        console.log('🔍 Response type:', typeof data);
-        console.log('🔍 Is Array?:', Array.isArray(data));
-        
-        // If it's an object, log all keys
-        if (typeof data === 'object' && !Array.isArray(data)) {
-          console.log('🔍 Response keys:', Object.keys(data));
-          Object.keys(data).forEach(key => {
-            const value = data[key];
-            if (Array.isArray(value)) {
-              console.log(`🔑 "${key}": Array with ${value.length} items`);
-              if (value.length > 0) {
-                console.log(`   First item:`, value[0]);
-              }
-            } else {
-              console.log(`🔑 "${key}":`, typeof value);
-            }
-          });
-        }
 
         // Handle different response structures
         let eventsArray: ApiEventRequest[] = [];
         
         if (Array.isArray(data)) {
           eventsArray = data;
-          console.log('✅ Using direct array');
         } else if (data?.event_requests && Array.isArray(data.event_requests)) {
           eventsArray = data.event_requests;
-          console.log('✅ Using data.event_requests');
         } else if (data?.events && Array.isArray(data.events)) {
           eventsArray = data.events;
-          console.log('✅ Using data.events');
         } else if (data?.results && Array.isArray(data.results)) {
           eventsArray = data.results;
-          console.log('✅ Using data.results');
         } else if (data?.data && Array.isArray(data.data)) {
           eventsArray = data.data;
-          console.log('✅ Using data.data');
         } else {
           // Try to find ANY array in the response
-          console.log('🔍 Searching for arrays in response...');
           for (const key of Object.keys(data)) {
             if (Array.isArray(data[key])) {
-              console.log(`🎯 Found array in key "${key}" with ${data[key].length} items`);
               eventsArray = data[key];
               break;
             }
           }
         }
 
-        console.log('📋 Total events found:', eventsArray.length);
-
         if (eventsArray.length === 0) {
-          console.log('ℹ️ No events found, showing dummy data');
-          setActivities(dummyActivities);
+          setActivities([]);
           setLoading(false);
           return;
         }
-
-        console.log('📝 First event sample:', eventsArray[0]);
 
         // Map API events to Activity format
         const mappedActivities = eventsArray.map(event => 
           mapApiActivityToActivity(event, deptMap)
         );
         
-        console.log('✅ Successfully mapped activities:', mappedActivities.length);
-        console.log('📝 First mapped activity:', mappedActivities[0]);
-        
         setActivities(mappedActivities);
         setError(null);
       } catch (err) {
-        console.error('❌ Error fetching activities:', err);
         setError(err instanceof Error ? err.message : 'فشل في تحميل الفعاليات');
-        setActivities(dummyActivities);
+        setActivities([]);
       } finally {
         setLoading(false);
       }
@@ -421,6 +332,17 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
           margin: '10px 0'
         }}>
           ⚠️ {error}
+        </div>
+      )}
+      
+      {!loading && !error && activities.length === 0 && (
+        <div style={{ 
+          padding: '40px', 
+          textAlign: 'center', 
+          color: '#666',
+          fontSize: '16px'
+        }}>
+          لا توجد فعاليات متاحة حالياً
         </div>
       )}
       

@@ -38,15 +38,12 @@
 .tabsWrapper {
   display: flex;
   gap: clamp(0.75rem, 2vw, 0.9375rem);
-  overflow-x: auto;
   flex: 1;
-  min-width: 0;
-  scrollbar-width: thin;
+  width: 100%;
 }
 
 .tab {
-  flex: 0 0 auto;
-  min-width: min(150px, 100%);
+  flex: 1; /* Changed: Equal distribution */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -63,6 +60,7 @@
   white-space: nowrap;
   position: relative;
   min-height: 44px;
+  text-align: center; /* Added: Center text */
 }
 
 .tab:hover {

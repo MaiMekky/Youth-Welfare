@@ -146,10 +146,6 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
 
         const response = await res.json();
         
-        // Debug: Log the response structure
-        console.log("Families API Response:", response);
-        console.log("Is Array?", Array.isArray(response));
-        
         // Check different possible response structures
         let families: Family[] = [];
         
@@ -163,8 +159,6 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
           families = response.families;
         }
         
-        console.log("Families array:", families);
-        
         if (families.length === 0) {
           setError("لا توجد أسر متاحة");
           setLoading(false);
@@ -175,14 +169,12 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
         const elderBrotherFamily = families.find(f => f.role === "أخ أكبر");
         
         if (elderBrotherFamily) {
-          console.log("Found family with 'أخ أكبر':", elderBrotherFamily);
           setSelectedFamilyId(elderBrotherFamily.family_id);
         } else {
           setError("لا توجد أسرة بدور 'أخ أكبر'");
           setLoading(false);
         }
       } catch (err: any) {
-        console.error("Error fetching families:", err);
         setError(err.message || "حصل خطأ أثناء تحميل قائمة الأسر");
         setLoading(false);
       }
@@ -201,19 +193,16 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
         setError(null);
 
         const endpoint = `http://127.0.0.1:8000/api/family/student/${selectedFamilyId}/posts/`;
-        console.log('Fetching posts from:', endpoint);
 
         const response = await fetch(endpoint, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
         if (!response.ok) {
-          console.error('Failed to fetch posts, status:', response.status);
           throw new Error(`Failed to fetch posts: ${response.statusText}`);
         }
 
         const data = await response.json();
-        console.log('Posts data received:', data);
         
         let postsArray: ApiPost[] = [];
         if (Array.isArray(data)) {
@@ -223,10 +212,8 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
         }
         
         const mappedPosts = postsArray.map(mapApiPostToPost);
-        console.log('Mapped posts:', mappedPosts);
         setPosts(mappedPosts);
       } catch (err) {
-        console.error('Error fetching posts:', err);
         setError('فشل في تحميل المنشورات');
         setPosts([]);
       } finally {

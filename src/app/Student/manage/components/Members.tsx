@@ -61,10 +61,6 @@ const Members: React.FC = () => {
 
         const response = await res.json();
         
-        // Debug: Log the response structure
-        console.log("API Response:", response);
-        console.log("Is Array?", Array.isArray(response));
-        
         // Check different possible response structures
         let families: Family[] = [];
         
@@ -78,8 +74,6 @@ const Members: React.FC = () => {
           families = response.families;
         }
         
-        console.log("Families array:", families);
-        
         if (families.length === 0) {
           setError("لا توجد أسر متاحة");
           setLoading(false);
@@ -90,14 +84,12 @@ const Members: React.FC = () => {
         const elderBrotherFamily = families.find(f => f.role === "أخ أكبر");
         
         if (elderBrotherFamily) {
-          console.log("Found family with 'أخ أكبر':", elderBrotherFamily);
           setSelectedFamilyId(elderBrotherFamily.family_id);
         } else {
           setError("لا توجد أسرة بدور 'أخ أكبر'");
           setLoading(false);
         }
       } catch (err: any) {
-        console.error("Error fetching families:", err);
         setError(err.message || "حصل خطأ أثناء تحميل قائمة الأسر");
         setLoading(false);
       }
@@ -127,15 +119,12 @@ const Members: React.FC = () => {
 
         const data = await response.json();
         
-        console.log("Members API Response:", data);
-        
         if (data.members && Array.isArray(data.members)) {
           setMembers(data.members);
         } else {
           setMembers([]);
         }
       } catch (err: any) {
-        console.error("Error fetching members:", err);
         setError(err.message || "حدث خطأ في الاتصال");
       } finally {
         setLoading(false);

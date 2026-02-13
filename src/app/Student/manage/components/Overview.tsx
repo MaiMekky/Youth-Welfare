@@ -100,7 +100,6 @@ const Overview: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [statistics, setStatistics] = useState({
     totalMembers: 0,
-    eventsCount: 0,
     postsCount: 0,
     activeMembers: 0,
   });
@@ -229,7 +228,6 @@ const Overview: React.FC = () => {
         // Extract statistics
         setStatistics({
           totalMembers: data.statistics.total_members || 0,
-          eventsCount: data.statistics.events_count || 0,
           postsCount: data.statistics.posts_count || 0,
           activeMembers: data.members.active || 0,
         });
@@ -304,13 +302,6 @@ const Overview: React.FC = () => {
             <div className="stat-content">
               <div className="stat-value">{statistics.totalMembers}</div>
               <div className="stat-label">إجمالي الأعضاء</div>
-            </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon activities-icon"><Calendar size={28} /></div>
-            <div className="stat-content">
-              <div className="stat-value">{statistics.eventsCount}</div>
-              <div className="stat-label">إجمالي الفعاليات</div>
             </div>
           </div>
           <div className="stat-card">

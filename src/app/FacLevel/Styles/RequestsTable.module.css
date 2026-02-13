@@ -5,7 +5,6 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
   padding: clamp(1rem, 3vw, 1.5rem);
   overflow-x: auto;
-  direction: rtl;
   max-width: 100%;
 }
 

@@ -114,15 +114,12 @@ const Dashboard: React.FC = () => {
   // Fetch family ID and name from families API
   useEffect(() => {
     if (!token) {
-      console.error("No token found");
       setProfileLoading(false);
       return;
     }
 
     const fetchFamilyData = async () => {
       try {
-        console.log("🔵 Fetching family data...");
-        
         const res = await fetch(
           `http://127.0.0.1:8000/api/family/student/families/`,
           {
@@ -132,16 +129,11 @@ const Dashboard: React.FC = () => {
           }
         );
 
-        console.log("📊 Families Response Status:", res.status);
-
         if (!res.ok) {
-          const errorText = await res.text();
-          console.error("❌ API Error:", errorText);
           throw new Error(`فشل تحميل قائمة الأسر (Status: ${res.status})`);
         }
 
         const response = await res.json();
-        console.log("✅ Families API Response:", response);
 
         // Check different possible response structures
         let families: Family[] = [];
@@ -156,8 +148,6 @@ const Dashboard: React.FC = () => {
           families = response.families;
         }
 
-        console.log("📋 Families array:", families);
-
         if (families.length === 0) {
           showNotification("لا توجد أسر متاحة");
           setProfileLoading(false);
@@ -168,7 +158,6 @@ const Dashboard: React.FC = () => {
         const elderBrotherFamily = families.find(f => f.role === "أخ أكبر");
         
         if (elderBrotherFamily) {
-          console.log("✅ Found family with 'أخ أكبر':", elderBrotherFamily);
           setSelectedFamilyId(elderBrotherFamily.family_id);
           setFamilyName(elderBrotherFamily.name);
         } else {
@@ -176,7 +165,6 @@ const Dashboard: React.FC = () => {
           setProfileLoading(false);
         }
       } catch (err: any) {
-        console.error("❌ Error fetching families:", err);
         showNotification(err.message || "حصل خطأ أثناء تحميل قائمة الأسر");
       } finally {
         setProfileLoading(false);
@@ -192,8 +180,6 @@ const Dashboard: React.FC = () => {
 
     const fetchDepartments = async () => {
       try {
-        console.log("🔵 Fetching departments...");
-        
         const res = await fetch(
           `http://127.0.0.1:8000/api/family/departments/`,
           {
@@ -204,12 +190,10 @@ const Dashboard: React.FC = () => {
         );
 
         if (!res.ok) {
-          console.error("❌ Departments API Error:", res.status);
           return;
         }
 
         const response = await res.json();
-        console.log("✅ Departments API Response:", response);
 
         let depts: Department[] = [];
         
@@ -221,41 +205,14 @@ const Dashboard: React.FC = () => {
           depts = response.results;
         }
 
-        console.log("📋 Departments:", depts);
         setDepartments(depts);
       } catch (err) {
-        console.error("❌ Error fetching departments:", err);
+        // Silently handle error
       }
     };
 
     fetchDepartments();
   }, [token]);
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const membersResponse = await fetch("/api/members");
-        const activitiesResponse = await fetch("/api/activities");
-
-        if (membersResponse.ok) {
-          const membersData: Member[] = await membersResponse.json();
-          if (membersData && Array.isArray(membersData)) {
-            setMembers(membersData);
-          }
-        }
-
-        if (activitiesResponse.ok) {
-          const activitiesData: Activity[] = await activitiesResponse.json();
-          if (activitiesData && Array.isArray(activitiesData)) {
-            setActivities(activitiesData);
-          }
-        }
-      } catch (error) {
-        console.log("API not ready — Using empty arrays.");
-      }
-    }
-    fetchData();
-  }, []);
 
   // Show notification
   const showNotification = (message: string) => {
@@ -286,8 +243,6 @@ const Dashboard: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      console.log("📤 Creating post for family ID:", selectedFamilyId);
-      
       const response = await fetch(
         `http://127.0.0.1:8000/api/family/student/${selectedFamilyId}/post/`,
         {
@@ -313,12 +268,9 @@ const Dashboard: React.FC = () => {
           setPostRefreshTrigger(prev => prev + 1);
         }, 500);
       } else {
-        const errorData = await response.json().catch(() => ({}));
-        console.error("Error creating post:", errorData);
         showNotification("❌ حدث خطأ أثناء نشر المحتوى");
       }
     } catch (error) {
-      console.error("Network error:", error);
       showNotification("⚠️ فشل الاتصال بالسيرفر");
     } finally {
       setIsSubmitting(false);
@@ -378,10 +330,6 @@ const Dashboard: React.FC = () => {
         dept_id: parseInt(activityData.dept_id),
       };
 
-      console.log('=== CREATING ACTIVITY ===');
-      console.log('Endpoint:', endpoint);
-      console.log('Payload:', payload);
-
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
@@ -391,9 +339,7 @@ const Dashboard: React.FC = () => {
         body: JSON.stringify(payload),
       });
 
-      console.log('Response status:', response.status);
       const responseData = await response.json();
-      console.log('Response data:', responseData);
 
       if (response.ok) {
         showNotification("✅ تم إنشاء الفعالية بنجاح");
@@ -419,8 +365,6 @@ const Dashboard: React.FC = () => {
           setActivityRefreshTrigger(prev => prev + 1);
         }, 500);
       } else {
-        console.error("Error creating activity:", responseData);
-        
         // Extract error message
         let errorMsg = "حدث خطأ أثناء إنشاء الفعالية";
         
@@ -440,7 +384,6 @@ const Dashboard: React.FC = () => {
         showNotification("❌ " + errorMsg);
       }
     } catch (error) {
-      console.error("Network error:", error);
       showNotification("⚠️ فشل الاتصال بالسيرفر");
     } finally {
       setIsSubmitting(false);

@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState } from "react";
 import styles from "../Styles/Header.module.css";
 import Image from "next/image";
@@ -10,16 +9,22 @@ export default function Header() {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const handleLogout = () => {
-    localStorage.clear();
-    document.cookie = "access=; path=/; max-age=0; SameSite=Lax";
-    document.cookie = "refresh=; path=/; max-age=0; SameSite=Lax";
-    document.cookie = "user_type=; path=/; max-age=0; SameSite=Lax";
-    document.cookie = "roleKey=; path=/; max-age=0; SameSite=Lax";
-    document.cookie = "role=; path=/; max-age=0; SameSite=Lax";
+ const handleLogout = () => {
+ 
+  localStorage.clear();
 
-    router.push("/");
-  };
+  const isProd = process.env.NODE_ENV === "production";
+  const cookieEnd = `path=/; max-age=0; SameSite=Lax${isProd ? "; Secure" : ""}`;
+ 
+  document.cookie = `access=; ${cookieEnd}`;
+  document.cookie = `refresh=; ${cookieEnd}`;
+  document.cookie = `user_type=; ${cookieEnd}`;
+  document.cookie = `roleKey=; ${cookieEnd}`;
+  document.cookie = `role=; ${cookieEnd}`;
+
+  window.location.replace("/");
+};
+
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -35,7 +40,12 @@ export default function Header() {
       <div className={styles.headerContent}>
         <div className={styles.headerLeft}>
           <div className={styles.headerIcon}>
-            <Image className={styles.headerLogo} src={logo} alt="logo" />
+            <Image 
+              className={styles.headerLogo} 
+              src={logo} 
+              alt="شعار جامعة حلوان" 
+              priority
+            />
           </div>
           <div className={styles.headerTitle}>
             <h1 className={styles.headerTitleH1}>إدارة رعاية الشباب</h1>
@@ -48,6 +58,7 @@ export default function Header() {
           className={styles.hamburger}
           onClick={toggleMenu}
           aria-label="Toggle menu"
+          aria-expanded={isMenuOpen}
         >
           <span className={`${styles.hamburgerLine} ${isMenuOpen ? styles.open : ''}`}></span>
           <span className={`${styles.hamburgerLine} ${isMenuOpen ? styles.open : ''}`}></span>
@@ -55,32 +66,32 @@ export default function Header() {
         </button>
 
         {/* Navigation Buttons */}
-        <div className={`${styles.headerRight} ${isMenuOpen ? styles.mobileMenuOpen : ''}`}>
+        <nav 
+          className={`${styles.headerRight} ${isMenuOpen ? styles.mobileMenuOpen : ''}`}
+          aria-label="Main navigation"
+        >
           <button
             className={styles.navBtn}
             onClick={() => handleNavClick("/FacLevel")}
           >
             التكافل الاجتماعي
           </button>
-
           <button
             className={styles.navBtn}
             onClick={() => handleNavClick("/Family-Faclevel/events")}
           >
             الاسر الطلابية
           </button>
-
           <button
             className={styles.navBtn}
             onClick={() => handleNavClick("/activities")}
           >
             الانشطة
           </button>
-
           <button className={styles.logoutBtn} onClick={handleLogout}>
             تسجيل خروج
           </button>
-        </div>
+        </nav>
       </div>
     </header>
   );

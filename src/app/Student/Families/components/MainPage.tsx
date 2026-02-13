@@ -146,6 +146,7 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
           },
         }
       );
@@ -174,7 +175,7 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
         setAvailableFamilies(prev => prev.filter(f => f.id !== familyId));
       }
 
-      showToast('تم ارسال طلب الانضمام للأسرة بنجاح! 🎉', 'success');
+      showToast('تم إرسال طلب الانضمام للأسرة بنجاح! 🎉', 'success');
 
       // Refresh data from server to ensure consistency
       setTimeout(async () => {
@@ -255,7 +256,10 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
           <div className="gold-line"></div>
 
           {loading ? (
-            <p style={{ textAlign: 'center', padding: '40px', color: '#777' }}>جاري التحميل...</p>
+            <div className="loading-state">
+              <div className="spinner-large"></div>
+              <p>جاري التحميل...</p>
+            </div>
           ) : joinedFamilies.length === 0 ? (
             <div className="empty-state">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -321,34 +325,95 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
 
         {error && (
           <div className="error-box">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
             <p>{error}</p>
           </div>
         )}
 
         <main className="programs-grid">
           {loading ? (
-            <p>جاري التحميل...</p>
+            <div className="loading-state" style={{ gridColumn: '1 / -1' }}>
+              <div className="spinner-large"></div>
+              <p>جاري التحميل...</p>
+            </div>
           ) : availableFamilies.length === 0 ? (
-            <p style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: '#777' }}>لا توجد أسر متاحة حالياً</p>
+            <div className="empty-state" style={{ gridColumn: '1 / -1' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <p style={{ fontSize: '16px', margin: '0' }}>لا توجد أسر متاحة حالياً</p>
+              <p style={{ fontSize: '14px', marginTop: '8px', opacity: 0.7 }}>تحقق مرة أخرى لاحقاً</p>
+            </div>
           ) : (
             availableFamilies.map(program => (
               <div key={program.id} className="program-card">
-                <div className="program-image">
-                  <img src={program.image} alt={program.title} />
-                </div>
-
                 <div className="program-content">
-                  <h3>{program.title}</h3>
-                  <p className="goals-title">وصف الأسرة : {program.subtitle}</p>
-                  <p className="goals-title">العدد الحالي : {program.views}</p>
-                  <p className="goals-title">المكان : {program.place}</p>
+                  <div className="card-header-section">
+                    <h3>{program.title}</h3>
+                    <span className="family-badge">متاحة</span>
+                  </div>
+
+                  <div className="card-info-section">
+                    <div className="info-row">
+                      <div className="info-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        <span>الوصف</span>
+                      </div>
+                      <p className="info-value">{program.subtitle}</p>
+                    </div>
+
+                    <div className="info-row">
+                      <div className="info-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                          <circle cx="9" cy="7" r="4"/>
+                          <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                        <span>الأعضاء</span>
+                      </div>
+                      <p className="info-value">{program.views}</p>
+                    </div>
+
+                    <div className="info-row">
+                      <div className="info-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                          <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        <span>المكان</span>
+                      </div>
+                      <p className="info-value">{program.place}</p>
+                    </div>
+                  </div>
 
                   <button
                     className="join-btn"
                     onClick={() => joinFamily(program.id)}
                     disabled={joiningId === program.id}
                   >
-                    {joiningId === program.id ? 'جاري الانضمام...' : 'انضم للأسرة'}
+                    {joiningId === program.id ? (
+                      <>
+                        <span className="spinner"></span>
+                        جاري الانضمام...
+                      </>
+                    ) : (
+                      <>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                          <circle cx="9" cy="7" r="4"/>
+                          <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                        انضم للأسرة
+                      </>
+                    )}
                   </button>
                 </div>
               </div>

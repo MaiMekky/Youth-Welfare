@@ -1,45 +1,73 @@
-/* Base container & layout (original provided CSS) */
+/* Base container & layout */
 .container {
-  background: white;
-  padding: clamp(1rem, 4vw, 1.875rem);
-  border-radius: 16px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
-  direction: rtl;
-  max-width: min(900px, 95vw);
+  padding: clamp(1rem, 4vw, 2.5rem) clamp(1rem, 4vw, 1.25rem);
+  max-width: min(950px, 95vw);
   width: 100%;
-  margin: clamp(1rem, 4vw, 2.5rem) auto;
-  border: 3px solid #f1c40f;
+  margin: 0 auto;
+  direction: rtl;
+  color: #1e1e1e;
   box-sizing: border-box;
+}
+.contentCard {
+  border: 2px solid #d4a017;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  padding: 35px 40px 30px;
+  position: relative;
+  background: white;
 }
 
 .pageTitle {
-  font-size: 24px;
-  color: #2c3a5f;
-  margin-bottom: 25px;
   text-align: center;
-  border-bottom: 2px solid #f1c40f;
-  padding-bottom: 10px;
+  font-size: 26px;
+  font-weight: 800;
+  color: #2c2a6a;
+  margin-bottom: 30px;
+  border-bottom: 0; /* كان موجود عندك */
+  padding-bottom: 0; /* كان موجود عندك */
 }
 
+/* الأقسام */
 .section {
   margin-bottom: 25px;
+  border-bottom: 1px solid #e0c97d;
+  padding-bottom: 12px;
 }
 
 .section h3 {
-  color: #1f2937;
+  font-size: 18px;
+  color: #2c2a6a;
   margin-bottom: 10px;
-  border-right: 5px solid #facc15;
+  font-weight: 700;
+  border-right: 4px solid #d4a017;
   padding-right: 8px;
 }
 
+/* ✅ نفس شبكة البيانات (بدون الخلفية الرمادي اللي كانت عندك) */
 .infoGrid {
-  background: #f9fafb;
-  border-radius: 10px;
-  padding: 15px 20px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px 20px;
+  gap: 12px 25px;
+
+  /* (كان عندك background/padding كبير) */
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
 }
+
+.infoGrid p {
+  font-size: 15px;
+  margin: 0;
+  line-height: 1.7;
+}
+
+.infoGrid strong {
+  color: #2c2a6a;
+}
+
+/* =========================
+   (CSS زيادة - سيبناها زي ما هي)
+   ========================= */
 
 .longText {
   background: #fff8dc;
@@ -48,18 +76,6 @@
   line-height: 1.8;
   margin-top: 10px;
   font-size: 15px;
-}
-
-.docsTable {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-
-.docsTable th, .docsTable td {
-  padding: 10px;
-  border-bottom: 1px solid #e5e7eb;
-  text-align: right;
 }
 
 .verified {
@@ -86,31 +102,6 @@
   line-height: 1.6;
 }
 
-.actions {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 25px;
-}
-
-.btnApprove {
-  background-color: #10b981;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 20px;
-  cursor: pointer;
-}
-
-.btnReject {
-  background-color: #fee2e2;
-  color: #991b1b;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 20px;
-  cursor: pointer;
-}
-
 .btnReceived {
   background-color: #fef9c3;
   color: #b45309;
@@ -122,174 +113,11 @@
   border: 1px solid #facc15;
 }
 
-.btnBack {
-  background-color: #d4af37;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 18px;
-  display: block;
-  margin: 20px auto 0;
-  cursor: pointer;
-}
-.discountsBox {
-  background: #fffbea;
-  border: 1px solid #facc15;
-  border-radius: 10px;
-  padding: 15px 20px;
-  margin: 25px 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px 40px;
-  font-size: 15px;
-}
-
-.discountsBox label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-}
-/* ✅ الإشعار فوق يمين الشاشة (خارج الكونتينر) */
-.notification {
-  position: fixed;
-  top: 25px;
-  right: 25px;
-  width: 300px;
-  background: #ffffff;
-  padding: 14px 16px;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  font-weight: 600;
-  color: #333;
-  z-index: 10000;
-  animation: fadeIn 0.3s ease forwards;
-  overflow: hidden;
-  border-right: 6px solid transparent;
-}
-
-/* ✅ ألوان الإشعار */
-.success {
-  border-right-color: #22c55e;
-}
-.warning {
-  border-right-color: #f59e0b;
-}
-.error {
-  border-right-color: #dc2626;
-}
-
-/* ✅ الشريطة الصفراء المتحركة */
-.notification::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 4px;
-  background-color: #facc15;
-  animation: progress 3s linear forwards;
-}
-
-/* ✅ حركة الظهور */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateX(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* ✅ حركة الشريطة */
-@keyframes progress {
-  from {
-    width: 0%;
-  }
-  to {
-    width: 100%;
-  }
-}
-/* زر الرجوع */
 .backContainer {
   text-align: center;
   margin-top: 25px;
 }
 
-.btnBack {
-  background-color: #d4af37;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 22px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.btnBack:hover {
-  background-color: #b8962d;
-  transform: scale(1.05);
-}
-
-/* ✅ الإشعار فوق اليمين (duplicate cleaned earlier) */
-.notification {
-  position: fixed;
-  top: 25px;
-  right: 25px;
-  width: 300px;
-  background: #fff;
-  padding: 14px 16px;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  font-weight: 600;
-  color: #333;
-  z-index: 9999;
-  border-right: 6px solid transparent;
-  overflow: hidden;
-  animation: fadeIn 0.3s ease forwards;
-}
-
-.success {
-  border-right-color: #22c55e;
-}
-.warning {
-  border-right-color: #f59e0b;
-}
-.error {
-  border-right-color: #dc2626;
-}
-
-.notification::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 4px;
-  background-color: #facc15;
-  animation: progress 3s linear forwards;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateX(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes progress {
-  from {
-    width: 0%;
-  }
-  to {
-    width: 100%;
-  }
-}
 /* حاوية الخصومات */
 .discountsBox {
   background: #fffbea;
@@ -307,7 +135,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  min-width: 180px; /* لتوحيد حجم الحقول */
+  min-width: 180px;
   flex: 1 1 180px;
 }
 
@@ -337,10 +165,79 @@
 }
 
 /* ============================
-   Documents section enhancements
+   Documents section - Card Grid Layout
    ============================ */
 
-/* Table improvements: sticky header, subtle row hover */
+.docsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin-top: 15px;
+}
+
+.docCard {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  text-align: center;
+  transition: all 0.25s ease;
+  border: 1px solid #e5e7eb;
+}
+
+.docCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.docCard p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.docCard p strong {
+  color: #2c3a6a;
+}
+
+.docCard a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #2c3a5f;
+  color: #fff;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  margin: 8px 0;
+}
+
+.docCard a:hover {
+  background: #1f2a44;
+  transform: translateY(-1px);
+}
+
+.uploadDate {
+  font-size: 0.85rem;
+  color: #777;
+  margin-top: 8px;
+}
+
+.noLink {
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+.docsNote {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 8px;
+}
+
 .docsTable {
   width: 100%;
   border-collapse: collapse;
@@ -377,7 +274,6 @@
   vertical-align: middle;
 }
 
-/* Small secondary text for size/date */
 .docMeta {
   display: block;
   font-size: 12px;
@@ -385,34 +281,6 @@
   margin-top: 6px;
 }
 
-/* Actions column: group view & download buttons */
-.docActions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-start; /* visually left side for actions inside RTL container */
-}
-
-/* Link button for preview/download */
-.docLinkButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  background: #ffffff;
-  border: 1px solid #e6e9ee;
-  color: #2c3a5f;
-  border-radius: 8px;
-  text-decoration: none;
-  font-size: 13px;
-  transition: background-color 0.15s, transform 0.08s;
-}
-
-.docLinkButton:hover {
-  background: #f8fafc;
-  transform: translateY(-1px);
-}
-
-/* Badge for mime/type or file status */
 .docBadge {
   display: inline-block;
   padding: 4px 8px;
@@ -423,7 +291,6 @@
   margin-left: 8px;
 }
 
-/* Inline thumbnail for image previews (constrained) */
 .docImagePreview {
   max-width: 180px;
   max-height: 120px;
@@ -434,11 +301,145 @@
   margin-top: 8px;
 }
 
-/* When file url is not available */
-.noLink {
-  color: #9ca3af;
-  font-size: 13px;
+/* =========================
+   Actions Layout
+   ========================= */
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 30px;
+  flex-wrap: wrap;
 }
+
+/* =========================
+   Unified Buttons
+   ========================= */
+
+.btnApprove,
+.btnReject,
+.btnBack {
+  min-width: 140px;
+  height: 44px;
+  padding: 0 22px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: none;
+}
+
+/* Approve */
+.btnApprove {
+  background-color: #10b981;
+  color: #fff;
+}
+
+.btnApprove:hover {
+  background-color: #0e9f6e;
+  transform: translateY(-2px);
+}
+
+/* Reject */
+.btnReject {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.btnReject:hover {
+  background-color: #fecaca;
+  transform: translateY(-2px);
+}
+
+/* Back */
+.btnBack {
+  background-color: #d4af37;
+  color: #fff;
+}
+
+.btnBack:hover {
+  background-color: #b8962d;
+  transform: translateY(-2px);
+}
+
+/* =========================
+   Document Link Button
+   ========================= */
+
+.docLinkButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #2c3a5f;
+  color: #fff;
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+
+.docLinkButton:hover {
+  background: #1f2a44;
+  transform: translateY(-1px);
+}
+
+/* =========================
+   Notification
+   ========================= */
+
+.notification {
+  position: fixed;
+  top: 25px;
+  right: 25px;
+  width: 300px;
+  background: #fff;
+  padding: 14px 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  font-weight: 600;
+  color: #333;
+  z-index: 9999;
+  border-right: 6px solid transparent;
+  overflow: hidden;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.success { border-right-color: #22c55e; }
+.warning { border-right-color: #f59e0b; }
+.error   { border-right-color: #dc2626; }
+
+.notification::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background-color: #facc15;
+  animation: progress 3s linear forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes progress {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+/* =========================
+   Responsive
+   ========================= */
 
 @media (max-width: 820px) {
   .container {
@@ -461,6 +462,20 @@
   }
 }
 
+@media (max-width: 640px) {
+  .actions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .btnApprove,
+  .btnReject,
+  .btnBack {
+    width: 100%;
+    max-width: 280px;
+  }
+}
+
 /* Accessibility: focus outlines for keyboard users */
 .docLinkButton:focus,
 .btnApprove:focus,
@@ -469,48 +484,19 @@
   outline: 3px solid rgba(250,204,21,0.25);
   outline-offset: 2px;
 }
-
-/* subtle helper text below docs table */
-.docsNote {
-  font-size: 13px;
-  color: #6b7280;
-  margin-top: 8px;
-}
-.docsContainer {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 16px;
-  margin-top: 15px;
-}
-
-.docCard {
-  background: #fff;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  text-align: center;
+.backBtn {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  background: none;
+  border: none;
+  color: #2c2a6a;
+  font-size: 15px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s;
 }
 
-.docLinkButton {
-  display: inline-block;
-  margin: 10px 0;
-  padding: 8px 12px;
-  background: #0070f3;
-  color: white;
-  border-radius: 6px;
-  text-decoration: none;
-}
-
-.docLinkButton:hover {
-  background: #0059c8;
-}
-
-.uploadDate {
-  font-size: 0.85rem;
-  color: #777;
-}
-
-.noLink {
-  color: #999;
-  font-size: 0.9rem;
+.backBtn:hover {
+  text-decoration: underline;
 }

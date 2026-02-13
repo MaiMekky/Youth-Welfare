@@ -22,26 +22,22 @@ export default function Header() {
     }
   }, []);
 
-  const handleLogout = () => {
-    // Clear localStorage
-    localStorage.clear();
+   const handleLogout = () => {
+ 
+  localStorage.clear();
 
-    // Clear all cookies
-    const cookies = [
-      "access",
-      "refresh",
-      "user_type",
-      "roleKey",
-      "role"
-    ];
+  const isProd = process.env.NODE_ENV === "production";
+  const cookieEnd = `path=/; max-age=0; SameSite=Lax${isProd ? "; Secure" : ""}`;
+ 
+  document.cookie = `access=; ${cookieEnd}`;
+  document.cookie = `refresh=; ${cookieEnd}`;
+  document.cookie = `user_type=; ${cookieEnd}`;
+  document.cookie = `roleKey=; ${cookieEnd}`;
+  document.cookie = `role=; ${cookieEnd}`;
 
-    cookies.forEach(cookie => {
-      document.cookie = `${cookie}=; path=/; max-age=0; SameSite=Lax`;
-    });
+  window.location.replace("/");
+};
 
-    // Redirect to home
-    router.replace("/");
-  };
 
   return (
     <header className={styles.header}>
@@ -49,8 +45,8 @@ export default function Header() {
         {/* Brand Section */}
         <div className={styles.brand}>
           <div className={styles.brandText}>
-            <h1 className={styles.title}>التكافل الاجتماعي</h1>
-            <p className={styles.subtitle}>طلبات الدعم المالي المعتمدة للطلاب</p>
+            <h1 className={styles.title}>نظام ادارة رعاية الشباب</h1>
+            <p className={styles.subtitle}>طلبات الدعم المالي و الانشطة المعتمدة للطلاب</p>
           </div>
         </div>
 

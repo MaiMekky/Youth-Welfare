@@ -19,6 +19,136 @@
   align-items: center;
   gap: 12px;
   flex-wrap: wrap; 
+  position: relative;
+}
+/* ===== Header Buttons Area (copied from Header styles) ===== */
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.navBtn {
+  background: rgba(255, 255, 255, 0.95);
+  color: #2C3A5F;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 8px 14px;
+  border-radius: 6px;
+  margin-left: clamp(6px, 1.5vw, 10px);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: 0.3s;
+}
+
+.navBtn:hover {
+  background: #fff;
+  transform: translateY(-2px);
+  border-color: #D4AF37;
+}
+
+.logoutBtn {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: 0.3s;
+}
+
+.logoutBtn:hover {
+  background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+  transform: translateY(-2px);
+}
+
+/* ===== Hamburger ===== */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 30px;
+  height: 25px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.hamburgerLine {
+  width: 100%;
+  height: 3px;
+  background-color: white;
+  border-radius: 2px;
+  transition: 0.3s;
+}
+
+.hamburgerLine.open:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.hamburgerLine.open:nth-child(2) {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.hamburgerLine.open:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -6px);
+}
+
+/* ===== Mobile Menu (same behavior) ===== */
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+    flex-shrink: 0;
+  }
+
+  .headerRight {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+
+    background: linear-gradient(180deg, #3D4D75 0%, #2C3A5F 100%);
+    flex-direction: column;
+    align-items: stretch;
+
+    gap: 0;
+    padding: 0;
+
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, padding 0.35s ease;
+    z-index: 50;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .mobileMenuOpen {
+    max-height: 500px;
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .navBtn,
+  .logoutBtn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    transform: none !important;
+  }
 }
 
 .facultyHeader h1 {

@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import styles from "../Styles/Filters.module.css";
 
 interface FiltersProps {
-  selectedFaculty: number;
-  setSelectedFaculty: (v: number) => void;
+  selectedFaculty: string; // Changed to string for faculty name
+  setSelectedFaculty: (v: string) => void;
   selectedFamilyType: string;
   setSelectedFamilyType: (v: string) => void;
 }
@@ -23,11 +23,16 @@ export default function Filters({
     const fetchFaculties = async () => {
       setFacultiesLoading(true);
       try {
-        const response = await fetch("http://localhost:8000/api/solidarity/super_dept/faculties/");
+        const token = localStorage.getItem("access");
+        const response = await fetch("http://localhost:8000/api/solidarity/super_dept/faculties/", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (response.ok) {
           const data = await response.json();
-          // Add "الكل" option at the beginning
-          setFaculties([{ faculty_id: 0, name: "الكل" }, ...data]);
+          console.log("Fetched faculties:", data); // Debug log
+          setFaculties(data);
         } else {
           console.error("Failed to fetch faculties");
         }
@@ -37,7 +42,6 @@ export default function Filters({
         setFacultiesLoading(false);
       }
     };
-
     fetchFaculties();
   }, []);
 
@@ -54,23 +58,25 @@ export default function Filters({
         <label className={styles.filterLabel}>الكلية:</label>
         <select
           className={styles.filterSelect}
-          value={String(selectedFaculty)}
+          value={selectedFaculty}
           onChange={(e) => {
-            const val = Number(e.target.value);
-            if (!isNaN(val)) {
-              setSelectedFaculty(val);
-            }
+            const value = e.target.value;
+            console.log("Selected faculty:", value); // Debug log
+            setSelectedFaculty(value);
           }}
           disabled={facultiesLoading}
         >
           {facultiesLoading ? (
-            <option value="" disabled>جاري تحميل الكليات...</option>
+            <option value="الكل" disabled>جاري تحميل الكليات...</option>
           ) : (
-            faculties.map((f, index) => (
-              <option key={`faculty-${f.faculty_id}-${index}`} value={f.faculty_id}>
-                {f.name}
-              </option>
-            ))
+            <>
+              <option value="الكل">الكل</option>
+              {faculties.map((f, index) => (
+                <option key={`faculty-${f.faculty_id}-${index}`} value={f.name}>
+                  {f.name}
+                </option>
+              ))}
+            </>
           )}
         </select>
       </div>
@@ -80,7 +86,10 @@ export default function Filters({
         <select
           className={styles.filterSelect}
           value={selectedFamilyType}
-          onChange={(e) => setSelectedFamilyType(e.target.value)}
+          onChange={(e) => {
+            console.log("Selected family type:", e.target.value); // Debug log
+            setSelectedFamilyType(e.target.value);
+          }}
         >
           {familyTypes.map((t) => (
             <option key={t.value} value={t.value}>

@@ -12,11 +12,17 @@ const API_URL = "http://localhost:8000/api";
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState<string>("central");
-  const [selectedFaculty, setSelectedFaculty] = useState<number>(0); // Changed to number, 0 = "الكل"
+  const [selectedFaculty, setSelectedFaculty] = useState<string>("الكل"); // Changed to string for faculty name
   const [selectedFamilyType, setSelectedFamilyType] = useState<string>("all"); // Added family type filter
 
   const [families, setFamilies] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+
+  /* ================= Reset filters when switching tabs ================= */
+  useEffect(() => {
+    setSelectedFaculty("الكل");
+    setSelectedFamilyType("all");
+  }, [activeTab]);
 
   /* ================= API ================= */
 
@@ -35,6 +41,7 @@ export default function Page() {
       if (!response.ok) throw new Error("Unauthorized");
 
       const data = await response.json();
+      console.log("Fetched families:", data); // Debug log
       setFamilies(data);
     } catch (error) {
       console.error("Error fetching families:", error);
@@ -70,9 +77,9 @@ export default function Page() {
   const filteredQualityFamilies = useMemo(() => {
     let filtered = qualityFamilies;
 
-    // Filter by faculty
-    if (selectedFaculty !== 0) {
-      filtered = filtered.filter((f) => f.faculty_id === selectedFaculty);
+    // Filter by faculty name
+    if (selectedFaculty !== "الكل") {
+      filtered = filtered.filter((f) => f.faculty_name === selectedFaculty);
     }
 
     // Filter by family type (if not "all")
@@ -86,9 +93,9 @@ export default function Page() {
   const filteredEcoFamilies = useMemo(() => {
     let filtered = ecoFamilies;
 
-    // Filter by faculty
-    if (selectedFaculty !== 0) {
-      filtered = filtered.filter((f) => f.faculty_id === selectedFaculty);
+    // Filter by faculty name
+    if (selectedFaculty !== "الكل") {
+      filtered = filtered.filter((f) => f.faculty_name === selectedFaculty);
     }
 
     // Filter by family type (if not "all")
@@ -104,13 +111,17 @@ export default function Page() {
   const filteredNonCentralFamilies = useMemo(() => {
     let filtered = families.filter((f) => f.type !== "مركزية");
 
-    // Filter by faculty
-    if (selectedFaculty !== 0) {
-      filtered = filtered.filter((f) => f.faculty_id === selectedFaculty);
+    // Filter by faculty name
+    if (selectedFaculty !== "الكل") {
+      console.log("Filtering by faculty:", selectedFaculty); // Debug log
+      console.log("Before filter:", filtered.map(f => ({ name: f.name, faculty: f.faculty_name }))); // Debug log
+      filtered = filtered.filter((f) => f.faculty_name === selectedFaculty);
+      console.log("After filter:", filtered.map(f => ({ name: f.name, faculty: f.faculty_name }))); // Debug log
     }
 
     // Filter by family type
     if (selectedFamilyType !== "all") {
+      console.log("Filtering by type:", selectedFamilyType); // Debug log
       filtered = filtered.filter((f) => f.type === selectedFamilyType);
     }
 

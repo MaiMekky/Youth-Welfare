@@ -101,7 +101,6 @@ export default function FamilyCard({
             </button>
           </div>
         )}
-
         <button
           className={`${styles.btn} ${styles.btnDetails}`}
           onClick={handleViewDetails}

@@ -31,7 +31,6 @@ export default function Filters({
         });
         if (response.ok) {
           const data = await response.json();
-          console.log("Fetched faculties:", data); // Debug log
           setFaculties(data);
         } else {
           console.error("Failed to fetch faculties");
@@ -61,7 +60,6 @@ export default function Filters({
           value={selectedFaculty}
           onChange={(e) => {
             const value = e.target.value;
-            console.log("Selected faculty:", value); // Debug log
             setSelectedFaculty(value);
           }}
           disabled={facultiesLoading}
@@ -87,7 +85,6 @@ export default function Filters({
           className={styles.filterSelect}
           value={selectedFamilyType}
           onChange={(e) => {
-            console.log("Selected family type:", e.target.value); // Debug log
             setSelectedFamilyType(e.target.value);
           }}
         >

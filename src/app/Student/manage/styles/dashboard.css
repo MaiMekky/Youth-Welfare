@@ -197,57 +197,83 @@ body {
   font-weight: 500;
 }
 
-/* ========= TABS ========= */
+/* ========= TABS - SINGLE CARD WITH DIVIDED SECTIONS ========= */
 .dashboard-tabs {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 25px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 0;
+  margin-bottom: 32px;
   margin-top: 80px;
-  overflow-x: auto;
-  padding-bottom: 5px;
-}
-
-.dashboard-tabs::-webkit-scrollbar {
-  height: 6px;
-}
-
-.dashboard-tabs::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-
-.dashboard-tabs::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 3px;
-}
-
-.dashboard-tabs::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  overflow: hidden;
 }
 
 .tab {
-  padding: 12px 24px;
-  background-color: white;
-  border-radius: 10px;
+  padding: 20px 24px;
+  background: transparent;
+  border: none;
+  border-left: 1px solid #e5e7eb;
   cursor: pointer;
-  border: 2px solid transparent;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 600;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
   white-space: nowrap;
-  flex-shrink: 0;
+  text-align: center;
+  position: relative;
+  color: var(--dark-navy);
+}
+
+.tab:first-child {
+  border-left: none;
+}
+
+.tab::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(135deg, var(--gold) 0%, #D4A927 100%);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
 }
 
 .tab:hover {
-  background-color: #f8f9ff;
-  border-color: var(--gold);
+  background: rgba(179, 142, 25, 0.05);
 }
 
 .tab.active {
   background: linear-gradient(135deg, var(--gold) 0%, #D4A927 100%);
   color: white;
-  border-color: var(--gold);
-  box-shadow: 0 4px 10px rgba(179, 142, 25, 0.3);
+}
+
+.tab.active::before {
+  transform: scaleX(1);
+}
+
+/* Desktop: 4 columns */
+@media (min-width: 769px) {
+  .dashboard-tabs {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .tab {
+    border-left: 1px solid #e5e7eb;
+  }
+  
+  .tab:first-child {
+    border-left: none;
+    border-top-right-radius: 16px;
+    border-bottom-right-radius: 16px;
+  }
+  
+  .tab:last-child {
+    border-top-left-radius: 16px;
+    border-bottom-left-radius: 16px;
+  }
 }
 
 /* ========= MODAL STYLES ========= */
@@ -484,14 +510,46 @@ body {
     max-width: 400px;
   }
 
+  /* Tablet: 2 columns in single card */
   .dashboard-tabs {
-    gap: 8px;
+    grid-template-columns: repeat(2, 1fr);
     margin-top: 60px;
   }
 
   .tab {
-    padding: 10px 18px;
-    font-size: 16px;
+    padding: 18px 20px;
+    font-size: 17px;
+    border-left: none;
+    border-top: 1px solid #e5e7eb;
+  }
+  
+  .tab:nth-child(1),
+  .tab:nth-child(2) {
+    border-top: none;
+  }
+  
+  .tab:nth-child(odd) {
+    border-left: none;
+  }
+  
+  .tab:nth-child(even) {
+    border-right: 1px solid #e5e7eb;
+  }
+  
+  .tab:first-child {
+    border-top-right-radius: 16px;
+  }
+  
+  .tab:nth-child(2) {
+    border-top-left-radius: 16px;
+  }
+  
+  .tab:nth-last-child(2) {
+    border-bottom-right-radius: 16px;
+  }
+  
+  .tab:last-child {
+    border-bottom-left-radius: 16px;
   }
 
   .modal-box {
@@ -541,14 +599,32 @@ body {
     min-width: unset;
   }
 
+  /* Mobile: 1 column in single card */
   .dashboard-tabs {
-    gap: 6px;
+    grid-template-columns: 1fr;
     margin-top: 50px;
   }
 
   .tab {
-    padding: 10px 16px;
-    font-size: 15px;
+    padding: 16px 20px;
+    font-size: 16px;
+    border-left: none;
+    border-top: 1px solid #e5e7eb;
+  }
+  
+  .tab:first-child {
+    border-top: none;
+    border-top-right-radius: 16px;
+    border-top-left-radius: 16px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+  
+  .tab:last-child {
+    border-bottom-right-radius: 16px;
+    border-bottom-left-radius: 16px;
+    border-top-right-radius: 0;
+    border-top-left-radius: 0;
   }
 
   .notification-container {
@@ -606,7 +682,7 @@ body {
   }
 
   .tab {
-    padding: 8px 12px;
-    font-size: 14px;
+    padding: 14px 16px;
+    font-size: 15px;
   }
 }

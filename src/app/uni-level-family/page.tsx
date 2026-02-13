@@ -41,7 +41,6 @@ export default function Page() {
       if (!response.ok) throw new Error("Unauthorized");
 
       const data = await response.json();
-      console.log("Fetched families:", data); // Debug log
       setFamilies(data);
     } catch (error) {
       console.error("Error fetching families:", error);
@@ -113,15 +112,11 @@ export default function Page() {
 
     // Filter by faculty name
     if (selectedFaculty !== "الكل") {
-      console.log("Filtering by faculty:", selectedFaculty); // Debug log
-      console.log("Before filter:", filtered.map(f => ({ name: f.name, faculty: f.faculty_name }))); // Debug log
       filtered = filtered.filter((f) => f.faculty_name === selectedFaculty);
-      console.log("After filter:", filtered.map(f => ({ name: f.name, faculty: f.faculty_name }))); // Debug log
     }
 
     // Filter by family type
     if (selectedFamilyType !== "all") {
-      console.log("Filtering by type:", selectedFamilyType); // Debug log
       filtered = filtered.filter((f) => f.type === selectedFamilyType);
     }
 

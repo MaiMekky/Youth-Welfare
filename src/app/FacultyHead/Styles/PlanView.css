@@ -1,0 +1,492 @@
+.plan-view-container {
+  padding: 30px;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  direction: rtl;
+  font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.plan-view-header {
+  margin-bottom: 25px;
+}
+
+.plan-view-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a2456;
+  margin: 0;
+}
+
+/* Tabs */
+.plan-tabs {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+  background: white;
+  padding: 8px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.plan-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #5a6c8f;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.plan-tab:hover {
+  background: #f8f9fc;
+  color: #1a2456;
+}
+
+.plan-tab.active {
+  background: #e8f0fe;
+  color: #1976d2;
+}
+
+.plan-tab svg {
+  flex-shrink: 0;
+}
+
+/* Upload Section */
+.upload-section {
+  background: white;
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.upload-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.upload-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a2456;
+  margin: 0;
+}
+
+.send-to-admin-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(90deg, #c49b3a 0%, #a67f2c 100%);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(196, 155, 58, 0.3);
+}
+
+.send-to-admin-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(196, 155, 58, 0.4);
+}
+
+/* Upload Area */
+.upload-area {
+  border: 3px dashed #c49b3a;
+  border-radius: 16px;
+  padding: 60px 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #fffbf5;
+  margin-bottom: 35px;
+}
+
+.upload-area:hover,
+.upload-area.drag-active {
+  border-color: #a67f2c;
+  background: #fff9e6;
+  transform: scale(1.01);
+}
+
+.upload-input {
+  display: none;
+}
+
+.upload-icon {
+  margin: 0 auto 20px;
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #c49b3a 0%, #a67f2c 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.upload-area h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a2456;
+  margin: 0 0 10px 0;
+}
+
+.upload-area p {
+  font-size: 14px;
+  color: #5a6c8f;
+  margin: 0;
+}
+
+/* Submitted Plans Section */
+.submitted-plans-section {
+  margin-top: 35px;
+}
+
+.submitted-plans-section h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a2456;
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+/* Table */
+.plans-table-wrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid #e5e9f2;
+  margin-bottom: 25px;
+}
+
+.plans-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+}
+
+.plans-table thead {
+  background-color: #f8f9fc;
+}
+
+.plans-table thead tr {
+  border-bottom: 2px solid #e5e9f2;
+}
+
+.plans-table th {
+  padding: 16px 12px;
+  text-align: right;
+  font-weight: 600;
+  font-size: 14px;
+  color: #5a6c8f;
+  white-space: nowrap;
+}
+
+.plans-table tbody tr {
+  border-bottom: 1px solid #e5e9f2;
+  transition: background-color 0.2s ease;
+}
+
+.plans-table tbody tr:hover {
+  background-color: #f8f9fc;
+}
+
+.plans-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.plans-table td {
+  padding: 16px 12px;
+  font-size: 14px;
+  color: #2c3e50;
+}
+
+.file-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #1a2456;
+}
+
+.file-name-cell svg {
+  flex-shrink: 0;
+  color: #c49b3a;
+}
+
+.date-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #5a6c8f;
+}
+
+.date-cell svg {
+  flex-shrink: 0;
+  color: #a0a0a0;
+}
+
+.download-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #e3f2fd;
+  border: none;
+  border-radius: 8px;
+  color: #1976d2;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.download-btn:hover {
+  background: #1976d2;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(25, 118, 210, 0.3);
+}
+
+/* Total Plans */
+.total-plans {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #fff9e6;
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid #c49b3a;
+}
+
+.total-plans svg {
+  color: #c49b3a;
+}
+
+.total-plans span {
+  font-size: 16px;
+  color: #5a6c8f;
+  font-weight: 500;
+}
+
+.total-plans strong {
+  font-size: 28px;
+  font-weight: 700;
+  color: #c49b3a;
+}
+
+/* Reports Section */
+.reports-section {
+  background: white;
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .plan-view-container {
+    padding: 25px;
+  }
+
+  .upload-area {
+    padding: 50px 30px;
+  }
+
+  .plans-table {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 768px) {
+  .plan-view-container {
+    padding: 20px;
+  }
+
+  .plan-view-header h1 {
+    font-size: 24px;
+  }
+
+  .plan-tabs {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .plan-tab {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .upload-section {
+    padding: 20px;
+  }
+
+  .upload-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .upload-header h2 {
+    font-size: 18px;
+    text-align: center;
+  }
+
+  .send-to-admin-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .upload-area {
+    padding: 40px 20px;
+  }
+
+  .upload-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .upload-area h3 {
+    font-size: 18px;
+  }
+
+  .upload-area p {
+    font-size: 13px;
+  }
+
+  .submitted-plans-section h2 {
+    font-size: 18px;
+  }
+
+  .plans-table-wrapper {
+    border-radius: 8px;
+  }
+
+  .plans-table th,
+  .plans-table td {
+    padding: 12px 8px;
+    font-size: 12px;
+  }
+
+  .download-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .total-plans {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .total-plans strong {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 576px) {
+  .plan-view-container {
+    padding: 15px;
+  }
+
+  .plan-view-header h1 {
+    font-size: 20px;
+  }
+
+  .upload-section {
+    padding: 15px;
+  }
+
+  .upload-area {
+    padding: 30px 15px;
+  }
+
+  .upload-icon {
+    width: 50px;
+    height: 50px;
+  }
+
+  .upload-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .upload-area h3 {
+    font-size: 16px;
+  }
+
+  .upload-area p {
+    font-size: 12px;
+  }
+
+  .plans-table th,
+  .plans-table td {
+    padding: 10px 6px;
+    font-size: 11px;
+  }
+
+  .file-name-cell,
+  .date-cell {
+    gap: 4px;
+  }
+
+  .file-name-cell svg,
+  .date-cell svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .total-plans {
+    padding: 15px;
+  }
+
+  .total-plans svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .total-plans span {
+    font-size: 14px;
+  }
+
+  .total-plans strong {
+    font-size: 20px;
+  }
+
+  .reports-section {
+    padding: 20px;
+  }
+}
+
+/* Scrollbar styling */
+.plans-table-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.plans-table-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.plans-table-wrapper::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+
+.plans-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

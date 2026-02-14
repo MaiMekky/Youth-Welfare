@@ -87,12 +87,20 @@ export default function Sidebar({ onNavigate, currentView }: SidebarProps) {
 
       <aside id="sidebar" className={`sidebar ${isOpen ? "open" : ""}`}>
         <div className="sidebar-header">
-          <div className="headerIcon">
-            <div className="logoCircle">
-              <Image src={logo} alt="logo" className="headerLogo" />
+          <div className="logo-container">
+            <div className="logo-wrapper">
+              <div className="logo-circle">
+                <Image 
+                  src={logo} 
+                  alt="College Logo" 
+                  className="sidebar-logo"
+                  width={120}
+                  height={120}
+                />
+              </div>
             </div>
           </div>
-          <h2>المشرف العام للكلية</h2>
+          <h2 className="sidebar-title">المشرف العام للكلية</h2>
           {/* Close button - only show on mobile */}
           {isMobile && (
             <button className="sidebar-close-btn" onClick={() => setIsOpen(false)}>

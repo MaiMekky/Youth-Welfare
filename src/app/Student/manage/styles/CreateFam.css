@@ -11,6 +11,7 @@
   --border-gray: #E0E0E0;
   --gray-bg: #cccccc;
   --gray-hover: #b3b3b3;
+  --warning: #f57c00;
 }
 
 /* Container */
@@ -50,6 +51,7 @@
   color: var(--dark-navy);
   font-size: 16px;
   margin: 0;
+  opacity: 0.8;
 }
 
 /* Sections */
@@ -60,6 +62,43 @@
   margin-bottom: 25px;
   border: 2px solid var(--gold);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Family Type Section - Special Styling */
+.family-type-section {
+  background: var(--light-bg);
+  border: 3px solid var(--gold);
+  padding: 30px;
+  margin-bottom: 30px;
+}
+
+.family-type-section .form-group label {
+  color: var(--dark-navy);
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.family-type-section .form-select {
+  background-color: var(--white);
+  border: 3px solid var(--gold);
+  font-size: 16px;
+  font-weight: 600;
+  padding: 14px 18px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.family-type-section .form-select:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 4px rgba(179, 142, 25, 0.3);
+}
+
+.family-type-section .error-message {
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin-top: 12px;
 }
 
 .section-title {
@@ -89,6 +128,7 @@
   font-weight: 400;
   color: #666;
   font-size: 12px;
+  font-style: italic;
 }
 
 /* Inputs */
@@ -104,7 +144,6 @@
   background-color: var(--white);
   box-sizing: border-box;
   text-align: right;
-  transition: all 0.3s ease;
   font-family: inherit;
 }
 
@@ -113,10 +152,18 @@
 .form-select:focus {
   border-color: var(--gold);
   box-shadow: 0 0 0 3px rgba(179, 142, 25, 0.1);
+  background-color: #fffef8;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: #999;
+  opacity: 0.7;
 }
 
 .form-input.error,
-.form-textarea.error {
+.form-textarea.error,
+.form-select.error {
   border-color: var(--error);
   background-color: var(--error-light);
 }
@@ -124,16 +171,39 @@
 .form-textarea {
   resize: vertical;
   min-height: 100px;
+  line-height: 1.6;
 }
 
-/* Error Message */
+.form-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23171842' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 15px center;
+  padding-left: 40px;
+}
+
+.form-select:hover {
+  border-color: var(--gold);
+}
+
+/* Error Messages */
 .error-message {
   color: var(--error);
   font-size: 13px;
-  margin-top: 6px;
+  margin-top: 8px;
   display: flex;
   align-items: center;
   gap: 6px;
+  background-color: var(--error-light);
+  padding: 8px 12px;
+  border-radius: 6px;
+  border-right: 4px solid var(--error);
+}
+
+.error-message span:first-child {
+  font-size: 16px;
+  font-weight: bold;
 }
 
 /* Board Member Card */
@@ -153,13 +223,25 @@
   color: var(--dark-navy);
   font-weight: 600;
   padding-bottom: 8px;
-  border-bottom: 1px solid var(--gold);
+  border-bottom: 2px solid var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.board-member-title::before {
+  content: '👤';
+  font-size: 18px;
 }
 
 .member-fields {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 15px;
+}
+
+.field-wrapper {
+  position: relative;
 }
 
 .field-wrapper label {
@@ -177,7 +259,6 @@
   border-radius: 6px;
   font-size: 13px;
   outline: none;
-  transition: all 0.3s ease;
 }
 
 .field-wrapper input:focus {
@@ -194,11 +275,20 @@
   color: var(--error);
   font-size: 11px;
   margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+}
+
+.field-error::before {
+  content: '⚠';
+  font-size: 12px;
 }
 
 /* Committee Specific */
 .committee-name-header {
-  background-color: var(--gold);
+  background: linear-gradient(135deg, var(--gold) 0%, #d4a522 100%);
   padding: 12px 15px;
   border-radius: 8px;
   font-size: 18px;
@@ -206,10 +296,15 @@
   color: var(--white);
   text-align: center;
   font-weight: 700;
+  box-shadow: 0 3px 6px rgba(179, 142, 25, 0.3);
 }
 
 .committee-role-section {
   margin-bottom: 20px;
+  padding: 15px;
+  background-color: #fafafa;
+  border-radius: 8px;
+  border-right: 4px solid var(--gold);
 }
 
 .committee-role-title {
@@ -219,12 +314,24 @@
   margin-bottom: 10px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.committee-role-title::before {
+  content: '•';
+  color: var(--gold);
+  font-size: 20px;
 }
 
 .committee-optional-fields {
   margin-top: 20px;
   padding-top: 20px;
   border-top: 2px dashed var(--gold);
+  background-color: #fafafa;
+  padding: 20px;
+  border-radius: 8px;
 }
 
 .committee-optional-fields .form-group {
@@ -237,20 +344,20 @@
   justify-content: space-between;
   margin-top: 30px;
   padding-top: 20px;
-  border-top: 2px solid var(--gold);
+  border-top: 3px solid var(--gold);
   gap: 15px;
 }
 
 .btn-back,
 .btn-submit {
-  padding: 12px 30px;
+  padding: 14px 35px;
   border: none;
   border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  min-width: 120px;
-  transition: all 0.3s;
+  min-width: 140px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-back {
@@ -258,17 +365,32 @@
   color: var(--dark-navy);
 }
 
-.btn-back:hover {
+.btn-back:hover:not(:disabled) {
   background-color: var(--gray-hover);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .btn-submit {
-  background-color: var(--dark-navy);
+  background: linear-gradient(135deg, var(--dark-navy) 0%, #1d1d4a 100%);
   color: var(--white);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-submit::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
 }
 
 .btn-submit:hover:not(:disabled) {
-  background-color: #1d1d4a;
+  box-shadow: 0 6px 12px rgba(23, 24, 66, 0.3);
 }
 
 .btn-back:disabled,
@@ -277,7 +399,7 @@
   cursor: not-allowed;
 }
 
-/* Enhanced Notification */
+/* Notification */
 .notification {
   position: fixed;
   top: 20px;
@@ -288,19 +410,18 @@
   padding: 0;
   border-radius: 12px;
   z-index: 1000;
-  animation: slideDown 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   overflow: hidden;
 }
 
 .notification.success {
-  background-color: var(--success);
-  border: 2px solid #2e7d32;
+  background: linear-gradient(135deg, var(--success) 0%, #2e7d32 100%);
+  border: 2px solid #1b5e20;
 }
 
 .notification.error {
-  background-color: var(--error);
-  border: 2px solid #c62828;
+  background: linear-gradient(135deg, var(--error) 0%, #c62828 100%);
+  border: 2px solid #b71c1c;
 }
 
 .notification-content {
@@ -314,14 +435,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background-color: rgba(255, 255, 255, 0.25);
   color: white;
   font-size: 20px;
   font-weight: bold;
   flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .notification-message {
@@ -332,15 +454,10 @@
   flex: 1;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Loading State */
+.btn-submit:disabled {
+  background: linear-gradient(135deg, #555 0%, #666 100%);
+  position: relative;
 }
 
 /* Responsive Design */
@@ -356,8 +473,8 @@
   }
 
   .notification-icon {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     font-size: 18px;
   }
 
@@ -407,6 +524,14 @@
   .committee-card {
     padding: 15px;
   }
+
+  .family-type-section {
+    padding: 20px;
+  }
+
+  .family-type-section .form-group label {
+    font-size: 16px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -435,12 +560,40 @@
   }
 
   .notification-icon {
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
     font-size: 16px;
   }
 
   .notification-message {
     font-size: 13px;
   }
+
+  .committee-name-header {
+    font-size: 16px;
+    padding: 10px 12px;
+  }
+
+  .board-member-title {
+    font-size: 14px;
+  }
+
+  .family-type-section .form-group label {
+    font-size: 15px;
+  }
+
+  .family-type-section .form-select {
+    font-size: 14px;
+    padding: 12px 15px;
+  }
+}
+
+/* Focus Visible for Keyboard Navigation */
+.form-input:focus-visible,
+.form-textarea:focus-visible,
+.form-select:focus-visible,
+.btn-back:focus-visible,
+.btn-submit:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
 }

@@ -60,6 +60,12 @@
   margin-bottom: 15px;
 }
 
+/* Scroll Wrapper for Mobile */
+.joined-families-scroll-wrapper {
+  width: 100%;
+  overflow: visible;
+}
+
 .joined-families-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -74,7 +80,6 @@
   box-shadow: 0 4px 20px rgba(39, 40, 93, 0.08);
   border: 1px solid rgba(179, 142, 25, 0.1);
   border-top: 4px solid var(--gold);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
@@ -88,12 +93,6 @@
   height: 100%;
   background: linear-gradient(135deg, rgba(179, 142, 25, 0.03) 0%, transparent 100%);
   pointer-events: none;
-}
-
-.joined-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 32px rgba(39, 40, 93, 0.15);
-  border-color: var(--gold);
 }
 
 .joined-card-header {
@@ -154,7 +153,6 @@
   font-weight: 600;
   font-size: 15px;
   cursor: pointer;
-  transition: all 0.3s;
   position: relative;
   overflow: hidden;
 }
@@ -169,21 +167,6 @@
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
   transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
-}
-
-.view-details-btn:hover::before {
-  width: 300px;
-  height: 300px;
-}
-
-.view-details-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(39, 40, 93, 0.3);
-}
-
-.view-details-btn:active {
-  transform: translateY(0);
 }
 
 /* Empty State */
@@ -214,6 +197,10 @@
 }
 
 /* ====== Available Families Section ====== */
+.programs-grid-wrapper {
+  width: 100%;
+  overflow: visible;
+}
 
 .programs-grid {
   max-width: 1200px;
@@ -231,15 +218,8 @@
   box-shadow: 0 4px 20px rgba(39, 40, 93, 0.08);
   overflow: hidden;
   border: 1px solid rgba(39, 40, 93, 0.08);
-  transition: all 0.35s ease;
   display: flex;
   flex-direction: column;
-}
-
-.program-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 14px 36px rgba(39, 40, 93, 0.16);
-  border-color: rgba(179, 142, 25, 0.3);
 }
 
 /* Content */
@@ -328,7 +308,6 @@
   cursor: pointer;
   color: var(--white);
   background: linear-gradient(135deg, var(--gold) 0%, #d4a927 100%);
-  transition: all 0.3s ease;
   box-shadow: 0 4px 14px rgba(179, 142, 25, 0.35);
   display: flex;
   align-items: center;
@@ -338,16 +317,6 @@
 
 .join-btn svg {
   flex-shrink: 0;
-}
-
-.join-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(179, 142, 25, 0.45);
-  background: linear-gradient(135deg, #d4a927 0%, var(--gold) 100%);
-}
-
-.join-btn:active:not(:disabled) {
-  transform: translateY(0);
 }
 
 .join-btn:disabled {
@@ -391,7 +360,6 @@
 }
 
 /* ====== RESPONSIVE DESIGN ====== */
-
 /* Large screens */
 @media (min-width: 1400px) {
   .programs-grid {
@@ -416,7 +384,7 @@
   }
 }
 
-/* Tablets portrait */
+/* Tablets portrait - START HORIZONTAL SCROLL */
 @media (max-width: 768px) {
   .toast-container {
     width: 95%;
@@ -431,13 +399,46 @@
     font-size: 20px;
   }
 
+  /* Make joined families scrollable horizontally */
+  .joined-families-scroll-wrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--gold) transparent;
+    padding-bottom: 10px;
+    margin: 0 -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .joined-families-scroll-wrapper::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .joined-families-scroll-wrapper::-webkit-scrollbar-track {
+    background: rgba(179, 142, 25, 0.1);
+    border-radius: 4px;
+  }
+
+  .joined-families-scroll-wrapper::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border-radius: 4px;
+  }
+
   .joined-families-grid {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: row;
     gap: 16px;
+    margin-top: 20px;
+    width: max-content;
   }
 
   .joined-card {
     padding: 20px;
+    min-width: 280px;
+    max-width: 280px;
+    flex-shrink: 0;
   }
 
   .joined-card h3 {
@@ -457,15 +458,44 @@
     font-size: 14px;
   }
 
+  /* Make available families scrollable horizontally */
+  .programs-grid-wrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--gold) transparent;
+    padding-bottom: 10px;
+  }
+
+  .programs-grid-wrapper::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .programs-grid-wrapper::-webkit-scrollbar-track {
+    background: rgba(179, 142, 25, 0.1);
+    border-radius: 4px;
+  }
+
+  .programs-grid-wrapper::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border-radius: 4px;
+  }
+
   .programs-grid {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: row;
     gap: 16px;
     padding: 0 16px;
-    margin: 0 auto 40px;
+    margin: 0 0 40px;
+    width: max-content;
   }
 
   .program-card {
     border-radius: 14px;
+    min-width: 300px;
+    max-width: 300px;
+    flex-shrink: 0;
   }
 
   .program-content {
@@ -521,6 +551,7 @@
 
   .empty-state {
     padding: 40px 20px;
+    min-width: calc(100vw - 32px);
   }
 
   .empty-state svg {
@@ -536,6 +567,7 @@
 
   .loading-state {
     padding: 40px 20px;
+    min-width: calc(100vw - 32px);
   }
 
   .spinner-large {
@@ -551,9 +583,17 @@
     margin: 16px auto;
   }
 
+  .joined-families-scroll-wrapper {
+    margin: 0 -12px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
   .joined-card {
     padding: 18px;
     border-radius: 12px;
+    min-width: 260px;
+    max-width: 260px;
   }
 
   .joined-card h3 {
@@ -586,6 +626,8 @@
 
   .program-card {
     border-radius: 12px;
+    min-width: 280px;
+    max-width: 280px;
   }
 
   .program-content {
@@ -659,22 +701,6 @@
 
 /* Touch device optimizations */
 @media (hover: none) and (pointer: coarse) {
-  .joined-card:hover {
-    transform: translateY(-4px);
-  }
-
-  .program-card:hover {
-    transform: translateY(-4px);
-  }
-
-  .view-details-btn:hover {
-    transform: none;
-  }
-
-  .join-btn:hover:not(:disabled) {
-    transform: none;
-  }
-
   /* Increase touch targets */
   .join-btn,
   .view-details-btn {
@@ -689,6 +715,5 @@
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
   }
 }

@@ -14,7 +14,6 @@ const decodeToken = (token: string) => {
     );
     return JSON.parse(jsonPayload);
   } catch (error) {
-    console.error('Error decoding token:', error);
     return null;
   }
 };
@@ -52,6 +51,7 @@ interface FormErrors {
 const defaultPerson: Person = { fullName: '', nationalId: '', mobile: '', studentId: '' };
 
 const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }) => {
+  const [familyType, setFamilyType] = useState('');
   const [familyName, setFamilyName] = useState('');
   const [familyGoals, setFamilyGoals] = useState('');
   const [familyDescription, setFamilyDescription] = useState('');
@@ -88,25 +88,18 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
 
   const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
 
-  // Fetch departments
   useEffect(() => {
     if (!token) return;
 
     const fetchDepartments = async () => {
       try {
-        console.log('🔵 Fetching departments...');
-        
         const res = await fetch('http://127.0.0.1:8000/api/family/departments/', {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (!res.ok) {
-          console.error('❌ Departments API Error:', res.status);
-          return;
-        }
+        if (!res.ok) return;
 
         const response = await res.json();
-        console.log('✅ Departments API Response:', response);
 
         let depts: Department[] = [];
         
@@ -118,25 +111,21 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
           depts = response.results;
         }
 
-        console.log('📋 Departments loaded:', depts);
         setDepartments(depts);
       } catch (error) {
-        console.error('❌ Error fetching departments:', error);
+        // Silent error handling
       }
     };
 
     fetchDepartments();
   }, [token]);
 
-  // Fetch profile data
   useEffect(() => {
     if (!token) return;
 
     const fetchProfileData = async () => {
       try {
         const decodedToken = decodeToken(token);
-        console.log('=== Decoded Token ===');
-        console.log('Token payload:', decodedToken);
 
         const response = await fetch("http://127.0.0.1:8000/api/auth/profile/", {
           headers: { Authorization: `Bearer ${token}` },
@@ -144,28 +133,22 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
 
         if (response.ok) {
           const data = await response.json();
-          console.log('=== Profile Data ===');
-          console.log('Full response:', data);
           
           setStudentId(data.student_id);
           
           let faculId = null;
           if (data.faculty && data.faculty !== 0) {
             faculId = data.faculty;
-            console.log('✓ Using faculty from profile:', faculId);
           } else if (decodedToken?.faculty_id) {
             faculId = decodedToken.faculty_id;
-            console.log('✓ Using faculty_id from token:', faculId);
           }
           
           if (faculId) {
             setFacultyId(faculId);
-          } else {
-            console.warn('⚠️ No valid faculty ID found');
           }
         }
       } catch (error) {
-        console.error("Error fetching profile:", error);
+        // Silent error handling
       }
     };
 
@@ -201,12 +184,51 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
 
   const requiresFullInfo = ['leader', 'viceLeader', 'responsible', 'treasurer'];
 
+  const validateForm = () => {
+    const newErrors: FormErrors = {};
+
+    if (!familyType) {
+      newErrors.familyType = 'يرجى اختيار نوع الأسرة';
+    }
+
+    if (!familyName.trim()) {
+      newErrors.familyName = 'يرجى إدخال اسم الأسرة';
+    }
+
+    if (!familyDescription.trim()) {
+      newErrors.familyDescription = 'يرجى إدخال وصف الأسرة';
+    }
+
+    requiresFullInfo.forEach(key => {
+      const member = boardMembers[key as keyof typeof boardMembers];
+      if (!member.fullName.trim()) {
+        newErrors[`board_${key}_fullName`] = 'الاسم مطلوب';
+      }
+      if (!member.nationalId || member.nationalId.length !== 14) {
+        newErrors[`board_${key}_nationalId`] = 'الرقم القومي يجب أن يكون 14 رقم';
+      }
+      if (!member.mobile || member.mobile.length !== 11) {
+        newErrors[`board_${key}_mobile`] = 'رقم الموبايل يجب أن يكون 11 رقم';
+      }
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleFieldBlur = (fieldName: string) => {
     setTouchedFields(prev => new Set([...prev, fieldName]));
   };
 
   const handleBoardChange = (key: keyof typeof boardMembers, field: string, value: string) => {
     setBoardMembers(prev => ({ ...prev, [key]: { ...prev[key], [field]: value } }));
+    if (errors[`board_${key}_${field}`]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[`board_${key}_${field}`];
+        return newErrors;
+      });
+    }
   };
 
   const handleCommitteeChange = (
@@ -299,7 +321,6 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         });
       }
 
-      // Use selected department ID or fallback to faculty ID
       const deptId = committee.selectedDeptId ? parseInt(committee.selectedDeptId) : (facultyId || 0);
 
       const committeeData = {
@@ -315,12 +336,11 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         activities,
       };
       
-      console.log(`📋 Committee "${key}" payload:`, committeeData);
       committeesData.push(committeeData);
     });
 
     return {
-      family_type: 'نوعية',
+      family_type: familyType,
       name: familyName,
       description: familyDescription,
       min_limit: 15,
@@ -343,8 +363,8 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!familyName || !familyDescription) {
-      showNotification('error', 'الرجاء ملء جميع البيانات المطلوبة');
+    if (!validateForm()) {
+      showNotification('error', 'الرجاء ملء جميع البيانات المطلوبة بشكل صحيح');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -359,8 +379,6 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
       }
 
       const apiPayload = transformFormDataToAPI();
-      console.log('=== API Request ===');
-      console.log('Full payload:', JSON.stringify(apiPayload, null, 2));
 
       const response = await fetch(
         `http://127.0.0.1:8000/api/family/student/create/`,
@@ -374,11 +392,8 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         }
       );
 
-      console.log('Response status:', response.status);
-
       if (response.ok) {
         const data = await response.json();
-        console.log('Success response:', data);
         showNotification('success', 'تم ارسال طلبك بنجاح ويرجى مراجعته إلى أن يتم قبوله');
         
         setErrors({});
@@ -391,14 +406,11 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         }, 2000);
       } else {
         const errorData = await response.json().catch(() => ({}));
-        console.error("=== API Error Response ===");
-        console.error("Full error:", errorData);
         
         let errorMessage = 'فشل ارسال الطلب. يرجى المحاولة مرة أخرى';
         
         if (errorData?.errors) {
           const errors = errorData.errors;
-          console.error("Detailed errors:", errors);
           
           if (errors.faculty_id) {
             errorMessage = `خطأ في بيانات الكلية: ${errors.faculty_id[0]}`;
@@ -424,7 +436,6 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } catch (error) {
-      console.error("Network error:", error);
       showNotification('error', 'فشل الاتصال بالخادم. يرجى التحقق من الاتصال بالإنترنت والمحاولة مرة أخرى');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
@@ -451,6 +462,38 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
           <p>يرجى تعبئة جميع البيانات المطلوبة بدقة</p>
         </div>
 
+        {/* Family Type Selection */}
+        <section className="form-section family-type-section">
+          <div className="form-group">
+            <label>نوع الأسرة *</label>
+            <select
+              className={`form-select ${errors.familyType && touchedFields.has('familyType') ? 'error' : ''}`}
+              value={familyType}
+              onChange={e => {
+                setFamilyType(e.target.value);
+                if (errors.familyType) {
+                  setErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors.familyType;
+                    return newErrors;
+                  });
+                }
+              }}
+              onBlur={() => handleFieldBlur('familyType')}
+            >
+              <option value="">اختر نوع الأسرة</option>
+              <option value="نوعية">نوعية</option>
+              <option value="مركزية">مركزية</option>
+            </select>
+            {errors.familyType && touchedFields.has('familyType') && (
+              <div className="error-message">
+                <span>⚠</span>
+                <span>{errors.familyType}</span>
+              </div>
+            )}
+          </div>
+        </section>
+
         {/* Family Main Info */}
         <section className="form-section">
           <h2 className="section-title">بيانات الأسرة الرئيسية</h2>
@@ -458,16 +501,31 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
           <div className="form-group">
             <label>اسم الأسرة *</label>
             <input
-              className="form-input"
+              className={`form-input ${errors.familyName && touchedFields.has('familyName') ? 'error' : ''}`}
               value={familyName}
-              onChange={e => setFamilyName(e.target.value)}
+              onChange={e => {
+                setFamilyName(e.target.value);
+                if (errors.familyName) {
+                  setErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors.familyName;
+                    return newErrors;
+                  });
+                }
+              }}
               onBlur={() => handleFieldBlur('familyName')}
               placeholder="أدخل اسم الأسرة"
             />
+            {errors.familyName && touchedFields.has('familyName') && (
+              <div className="error-message">
+                <span>⚠</span>
+                <span>{errors.familyName}</span>
+              </div>
+            )}
           </div>
 
           <div className="form-group">
-            <label>أهداف الأسرة *</label>
+            <label>أهداف الأسرة </label>
             <textarea
               className="form-textarea"
               value={familyGoals}
@@ -481,13 +539,28 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
           <div className="form-group">
             <label>وصف الأسرة *</label>
             <textarea
-              className="form-textarea"
+              className={`form-textarea ${errors.familyDescription && touchedFields.has('familyDescription') ? 'error' : ''}`}
               value={familyDescription}
-              onChange={e => setFamilyDescription(e.target.value)}
+              onChange={e => {
+                setFamilyDescription(e.target.value);
+                if (errors.familyDescription) {
+                  setErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors.familyDescription;
+                    return newErrors;
+                  });
+                }
+              }}
               onBlur={() => handleFieldBlur('familyDescription')}
               rows={5}
               placeholder="قدم وصفاً تفصيلياً للأسرة ونشاطاتها"
             />
+            {errors.familyDescription && touchedFields.has('familyDescription') && (
+              <div className="error-message">
+                <span>⚠</span>
+                <span>{errors.familyDescription}</span>
+              </div>
+            )}
           </div>
         </section>
 
@@ -506,10 +579,14 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
                       <label>الاسم *</label>
                       <input
                         placeholder="الاسم الكامل"
+                        className={errors[`board_${key}_fullName`] && touchedFields.has(`board_${key}_fullName`) ? 'error' : ''}
                         value={person.fullName}
                         onChange={e => handleBoardChange(key as keyof typeof boardMembers, 'fullName', e.target.value)}
-                        onBlur={() => handleFieldBlur(`board_${key}_name`)}
+                        onBlur={() => handleFieldBlur(`board_${key}_fullName`)}
                       />
+                      {errors[`board_${key}_fullName`] && touchedFields.has(`board_${key}_fullName`) && (
+                        <div className="field-error">{errors[`board_${key}_fullName`]}</div>
+                      )}
                     </div>
                   )}
 
@@ -520,20 +597,28 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
                         <input
                           placeholder="14 رقم"
                           maxLength={14}
+                          className={errors[`board_${key}_nationalId`] && touchedFields.has(`board_${key}_nationalId`) ? 'error' : ''}
                           value={person.nationalId || ''}
                           onChange={e => handleBoardChange(key as keyof typeof boardMembers, 'nationalId', e.target.value.replace(/\D/g, ''))}
                           onBlur={() => handleFieldBlur(`board_${key}_nationalId`)}
                         />
+                        {errors[`board_${key}_nationalId`] && touchedFields.has(`board_${key}_nationalId`) && (
+                          <div className="field-error">{errors[`board_${key}_nationalId`]}</div>
+                        )}
                       </div>
                       <div className="field-wrapper">
                         <label>رقم الموبايل *</label>
                         <input
                           placeholder="01XXXXXXXXX"
                           maxLength={11}
+                          className={errors[`board_${key}_mobile`] && touchedFields.has(`board_${key}_mobile`) ? 'error' : ''}
                           value={person.mobile || ''}
                           onChange={e => handleBoardChange(key as keyof typeof boardMembers, 'mobile', e.target.value.replace(/\D/g, ''))}
                           onBlur={() => handleFieldBlur(`board_${key}_mobile`)}
                         />
+                        {errors[`board_${key}_mobile`] && touchedFields.has(`board_${key}_mobile`) && (
+                          <div className="field-error">{errors[`board_${key}_mobile`]}</div>
+                        )}
                       </div>
                     </>
                   ) : (

@@ -23,6 +23,7 @@ interface ProgramFamily {
   createdAt?: string;
   description: string;
   image: string;
+  type: string; // Added type field
 }
 
 interface MainPageProps {
@@ -78,6 +79,7 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
     place: family.faculty_name,
     views: `${family.member_count} عضو`,
     description: family.description,
+    type: family.type, // Map type from API
     createdAt: family.joined_at
       ? new Date(family.joined_at).toLocaleDateString('ar-EG')
       : '',
@@ -169,7 +171,6 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
           ...joinedFamily,
           createdAt: new Date().toLocaleDateString('ar-EG')
         };
-
         // Update UI immediately
         setJoinedFamilies(prev => [...prev, updatedFamily]);
         setAvailableFamilies(prev => prev.filter(f => f.id !== familyId));
@@ -190,7 +191,6 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
           console.error('Error refreshing data:', err);
         }
       }, 500);
-
     } catch (err: any) {
       showToast(err.message || 'حدث خطأ أثناء الانضمام للأسرة', 'error');
     } finally {
@@ -215,7 +215,6 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
           fetchJoinedFamilies(),
           fetchAvailableFamilies(),
         ]);
-
         setJoinedFamilies(joined);
         setAvailableFamilies(available);
       } catch (err: any) {
@@ -232,7 +231,7 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
   /* ======================
      RENDER
   ====================== */
-   return (
+  return (
     <>
       {/* Toast Container */}
       <div className="toast-container">
@@ -247,7 +246,6 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
       </div>
 
       <div dir="rtl" className="container">
-
         {/* ===== أسرك الحالية ===== */}
         <section className="joined-section">
           <header className="header">
@@ -269,50 +267,52 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
               <p style={{ fontSize: '14px', marginTop: '8px', opacity: 0.7 }}>تصفح الأسر المتاحة وانضم لإحداها</p>
             </div>
           ) : (
-            <div className="joined-families-grid">
-              {joinedFamilies.map(fam => (
-                <div key={fam.id} className="joined-card">
-                  <div className="joined-card-header">
-                    <h3>{fam.title}</h3>
-                  </div>
-                  <p>{fam.subtitle}</p>
-                  <div className="joined-meta">
-                    <div className="joined-meta-item">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                        <circle cx="9" cy="7" r="4"/>
-                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                      </svg>
-                      <span>{fam.views}</span>
+            <div className="joined-families-scroll-wrapper">
+              <div className="joined-families-grid">
+                {joinedFamilies.map(fam => (
+                  <div key={fam.id} className="joined-card">
+                    <div className="joined-card-header">
+                      <h3>{fam.title}</h3>
                     </div>
-                    <div className="joined-meta-item">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                        <circle cx="12" cy="10" r="3"/>
-                      </svg>
-                      <span>{fam.place}</span>
-                    </div>
-                    {fam.createdAt && (
+                    <p>{fam.subtitle}</p>
+                    <div className="joined-meta">
                       <div className="joined-meta-item">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                          <line x1="16" y1="2" x2="16" y2="6"/>
-                          <line x1="8" y1="2" x2="8" y2="6"/>
-                          <line x1="3" y1="10" x2="21" y2="10"/>
+                          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                          <circle cx="9" cy="7" r="4"/>
+                          <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                         </svg>
-                        <span>{fam.createdAt}</span>
+                        <span>{fam.views}</span>
                       </div>
-                    )}
+                      <div className="joined-meta-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                          <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        <span>{fam.place}</span>
+                      </div>
+                      {fam.createdAt && (
+                        <div className="joined-meta-item">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                          </svg>
+                          <span>{fam.createdAt}</span>
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      className="view-details-btn"
+                      onClick={() => onViewFamilyDetails?.(fam)}
+                    >
+                      عرض التفاصيل
+                    </button>
                   </div>
-                  <button
-                    className="view-details-btn"
-                    onClick={() => onViewFamilyDetails?.(fam)}
-                  >
-                    عرض التفاصيل
-                  </button>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
         </section>
@@ -334,93 +334,107 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
           </div>
         )}
 
-        <main className="programs-grid">
-          {loading ? (
-            <div className="loading-state" style={{ gridColumn: '1 / -1' }}>
-              <div className="spinner-large"></div>
-              <p>جاري التحميل...</p>
-            </div>
-          ) : availableFamilies.length === 0 ? (
-            <div className="empty-state" style={{ gridColumn: '1 / -1' }}>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <p style={{ fontSize: '16px', margin: '0' }}>لا توجد أسر متاحة حالياً</p>
-              <p style={{ fontSize: '14px', marginTop: '8px', opacity: 0.7 }}>تحقق مرة أخرى لاحقاً</p>
-            </div>
-          ) : (
-            availableFamilies.map(program => (
-              <div key={program.id} className="program-card">
-                <div className="program-content">
-                  <div className="card-header-section">
-                    <h3>{program.title}</h3>
-                    <span className="family-badge">متاحة</span>
-                  </div>
-
-                  <div className="card-info-section">
-                    <div className="info-row">
-                      <div className="info-label">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                        </svg>
-                        <span>الوصف</span>
-                      </div>
-                      <p className="info-value">{program.subtitle}</p>
-                    </div>
-
-                    <div className="info-row">
-                      <div className="info-label">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                          <circle cx="9" cy="7" r="4"/>
-                          <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                        </svg>
-                        <span>الأعضاء</span>
-                      </div>
-                      <p className="info-value">{program.views}</p>
-                    </div>
-
-                    <div className="info-row">
-                      <div className="info-label">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
-                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                          <circle cx="12" cy="10" r="3"/>
-                        </svg>
-                        <span>المكان</span>
-                      </div>
-                      <p className="info-value">{program.place}</p>
-                    </div>
-                  </div>
-
-                  <button
-                    className="join-btn"
-                    onClick={() => joinFamily(program.id)}
-                    disabled={joiningId === program.id}
-                  >
-                    {joiningId === program.id ? (
-                      <>
-                        <span className="spinner"></span>
-                        جاري الانضمام...
-                      </>
-                    ) : (
-                      <>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                          <circle cx="9" cy="7" r="4"/>
-                          <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                        </svg>
-                        انضم للأسرة
-                      </>
-                    )}
-                  </button>
-                </div>
+        <main className="programs-grid-wrapper">
+          <div className="programs-grid">
+            {loading ? (
+              <div className="loading-state" style={{ gridColumn: '1 / -1' }}>
+                <div className="spinner-large"></div>
+                <p>جاري التحميل...</p>
               </div>
-            ))
-          )}
+            ) : availableFamilies.length === 0 ? (
+              <div className="empty-state" style={{ gridColumn: '1 / -1' }}>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p style={{ fontSize: '16px', margin: '0' }}>لا توجد أسر متاحة حالياً</p>
+                <p style={{ fontSize: '14px', marginTop: '8px', opacity: 0.7 }}>تحقق مرة أخرى لاحقاً</p>
+              </div>
+            ) : (
+              availableFamilies.map(program => (
+                <div key={program.id} className="program-card">
+                  <div className="program-content">
+                    <div className="card-header-section">
+                      <h3>{program.title}</h3>
+                      <span className="family-badge">متاحة</span>
+                    </div>
+
+                    <div className="card-info-section">
+                      {/* Family Type Row */}
+                      <div className="info-row">
+                        <div className="info-label">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+                            <line x1="4" y1="22" x2="4" y2="15"/>
+                          </svg>
+                          <span>نوع الأسرة</span>
+                        </div>
+                        <p className="info-value">{program.type}</p>
+                      </div>
+
+                      <div className="info-row">
+                        <div className="info-label">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                          </svg>
+                          <span>الوصف</span>
+                        </div>
+                        <p className="info-value">{program.subtitle}</p>
+                      </div>
+
+                      <div className="info-row">
+                        <div className="info-label">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                          </svg>
+                          <span>الأعضاء</span>
+                        </div>
+                        <p className="info-value">{program.views}</p>
+                      </div>
+
+                      <div className="info-row">
+                        <div className="info-label">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                          </svg>
+                          <span>المكان</span>
+                        </div>
+                        <p className="info-value">{program.place}</p>
+                      </div>
+                    </div>
+
+                    <button
+                      className="join-btn"
+                      onClick={() => joinFamily(program.id)}
+                      disabled={joiningId === program.id}
+                    >
+                      {joiningId === program.id ? (
+                        <>
+                          <span className="spinner"></span>
+                          جاري الانضمام...
+                        </>
+                      ) : (
+                        <>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                          </svg>
+                          انضم للأسرة
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </main>
       </div>
     </>
   );
-};
+}

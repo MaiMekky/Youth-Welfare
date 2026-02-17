@@ -96,17 +96,14 @@ export default function ActivitiesManagement() {
 
   const handleView = (id: number) => {
     console.log("View activity:", id);
-    // Navigate to activity details
   };
 
   const handleApprove = (id: number) => {
     console.log("Approve activity:", id);
-    // Handle approval logic
   };
 
   const handleReject = (id: number) => {
     console.log("Reject activity:", id);
-    // Handle rejection logic
   };
 
   return (
@@ -162,23 +159,33 @@ export default function ActivitiesManagement() {
 
       <div className="table-section">
         <h2>طلبات الفعاليات المقدمة من إدارات الكليات</h2>
-        
+
         <div className="table-wrapper">
           <table className="activities-table">
             <thead>
               <tr>
-                <th>الإجراءات</th>
-                <th>مقدم الطلب</th>
-                <th>عدد المشاركين</th>
-                <th>الحالة</th>
-                <th>تاريخ الطلب</th>
-                <th>القسم</th>
                 <th>عنوان الفعالية</th>
+                <th>القسم</th>
+                <th>تاريخ الطلب</th>
+                <th>الحالة</th>
+                <th>عدد المشاركين</th>
+                <th>مقدم الطلب</th>
+                <th>الإجراءات</th>
               </tr>
             </thead>
             <tbody>
               {activities.map((activity) => (
                 <tr key={activity.id}>
+                  <td className="activity-title">{activity.title}</td>
+                  <td>{activity.department}</td>
+                  <td>{activity.date}</td>
+                  <td>
+                    <span className={`status-badge ${getStatusClass(activity.status)}`}>
+                      {activity.status}
+                    </span>
+                  </td>
+                  <td>{activity.participants} شخص</td>
+                  <td>{activity.submitter}</td>
                   <td>
                     <div className="action-buttons">
                       <button
@@ -208,16 +215,6 @@ export default function ActivitiesManagement() {
                       )}
                     </div>
                   </td>
-                  <td>{activity.submitter}</td>
-                  <td>{activity.participants} شخص</td>
-                  <td>
-                    <span className={`status-badge ${getStatusClass(activity.status)}`}>
-                      {activity.status}
-                    </span>
-                  </td>
-                  <td>{activity.date}</td>
-                  <td>{activity.department}</td>
-                  <td className="activity-title">{activity.title}</td>
                 </tr>
               ))}
             </tbody>

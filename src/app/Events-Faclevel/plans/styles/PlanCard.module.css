@@ -1,0 +1,182 @@
+.card{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:18px;
+  padding:16px;
+  box-shadow:0 10px 24px rgba(15,23,42,.06);
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  will-change: transform;
+  transform: translateZ(0);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.card:hover{
+  transform: translateY(-4px);
+  box-shadow:0 16px 34px rgba(15,23,42,.12);
+  border-color: rgba(44,58,95,.14);
+}
+
+.top{ text-align:right; }
+
+.title{
+  margin:0;
+  font-size:23px;
+  font-weight:900;
+  color:#2C3A5F;
+}
+
+.desc{
+  margin:8px 0 0;
+  color:#64748b;
+  font-size:14px;
+  font-weight:700;
+  line-height:1.7;
+}
+
+.badges{
+  margin-top:10px;
+  display:flex;
+  gap:8px;
+  justify-content:flex-start;
+  flex-wrap:wrap;
+}
+
+.year{
+  display:inline-flex;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid #e5e7eb;
+  background:#fff;
+  color:#0f172a;
+  font-weight:900;
+  font-size:12px;
+}
+
+.active{
+  display:inline-flex;
+  padding:6px 10px;
+  border-radius:999px;
+  background:#10b981;
+  color:#fff;
+  font-weight:900;
+  font-size:12px;
+}
+
+.draft{
+  display:inline-flex;
+  padding:6px 10px;
+  border-radius:999px;
+  background:#64748b;
+  color:#fff;
+  font-weight:900;
+  font-size:12px;
+}
+
+.statsRow{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+
+.statBox{
+  border-radius:14px;
+  padding:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border:1px solid #e5e7eb;
+}
+
+.green{
+  background: rgba(16,185,129,.08);
+  border-color: rgba(16,185,129,.25);
+}
+
+.blue{
+  background: rgba(37,99,235,.08);
+  border-color: rgba(37,99,235,.25);
+}
+
+.statHead{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:#2C3A5F;
+  font-weight:900;
+  font-size:13px;
+}
+
+.statValue{
+  font-weight:900;
+  font-size:22px;
+  color:#2C3A5F;
+}
+
+.progressWrap{
+  border-top:1px solid #eef2ff;
+  padding-top:12px;
+}
+
+.progressHead{
+  display:flex;
+  justify-content:space-between;
+  font-weight:900;
+  color:#2C3A5F;
+  margin-bottom:8px;
+}
+
+.progressBar{
+  height:8px;
+  background:#eef2ff;
+  border-radius:999px;
+  overflow:hidden;
+}
+
+.progressFill{
+  height:100%;
+  background:#0f172a;
+  border-radius:999px;
+}
+
+.progressMeta{
+  margin-top:8px;
+  color:#64748b;
+  font-weight:800;
+  font-size:12px;
+  text-align:right;
+}
+
+.actions{
+  display:flex;
+  justify-content:flex-end;
+}
+
+.viewBtn{
+  border-radius:12px;
+  padding:10px 12px;
+  font-weight:900;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  border:1px solid #e5e7eb;
+  background:#fff;
+  color:#2C3A5F;
+  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.viewBtn:hover{
+  background:#2C3A5F;
+  color:#fff;
+  border-color:#2C3A5F;
+  transform: translateY(-2px);
+  box-shadow:0 10px 20px rgba(44,58,95,.22);
+}
+
+.viewBtn:active{ transform: translateY(0); }
+
+@media (max-width:520px){
+  .statsRow{ grid-template-columns:1fr; }
+}

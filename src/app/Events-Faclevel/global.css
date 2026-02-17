@@ -1,0 +1,101 @@
+/* =========================
+   Global Reset
+========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+.app-body {
+  direction: rtl;   
+}
+body {
+  font-family: "Tajawal", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #f3f4f6;
+  color: #1f2937;
+  overflow-x: hidden;
+}
+
+/* =========================
+   App Layout (Sidebar + Main)
+========================= */
+.app-container {
+  display: flex;
+  align-items: stretch;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Sidebar ثابت */
+.app-container > *:first-child {
+  flex-shrink: 0;
+}
+
+/* المنطقة الرئيسية جنب الـSidebar */
+.main-content {
+  flex: 1;
+  min-width: 0; /* مهم يمنع overflow */
+  display: flex;
+  flex-direction: column;
+  background: #f9fafb;
+}
+
+/* Wrapper داخلي للصفحات */
+.page-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #E6E8EB;
+   min-height: 100%;
+}
+
+/* =========================
+   Page Content Container
+   (ده اللي هيتطبق على <main className="page-content">)
+========================= */
+.page-content {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px;
+  min-width: 0;
+}
+
+/* =========================
+   Generic Table Responsiveness
+========================= */
+.table-section,
+.tableSection {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* =========================
+   Breakpoints
+========================= */
+@media (max-width: 1024px) {
+  .page-content {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-content {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-content {
+    padding: 10px;
+  }
+}

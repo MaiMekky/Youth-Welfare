@@ -84,7 +84,7 @@ export default function Header() {
           </button>
           <button
             className={styles.navBtn}
-            onClick={() => handleNavClick("/activities")}
+            onClick={() => handleNavClick("/Events-Faclevel")}
           >
             الانشطة
           </button>

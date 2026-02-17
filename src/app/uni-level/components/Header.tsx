@@ -50,7 +50,7 @@ export default function Header() {
         <div className={`rightButtons ${open ? "open" : ""}`}>
           <button onClick={() => router.push("/uni-level")}>التكافل الاجتماعي</button>
           <button onClick={() => router.push("/uni-level-family")}>الأسر الطلابية</button>
-          <button onClick={() => router.push("/activities")}>الأنشطة</button>
+          <button onClick={() => router.push("/uni-level-activities")}>الأنشطة</button>
           <button className="logoutBtn" onClick={handleLogout}>
             تسجيل خروج
           </button>

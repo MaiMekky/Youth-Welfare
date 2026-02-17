@@ -1,0 +1,256 @@
+.page{
+  min-height:100vh;
+  background:#fafbff;
+  color:#2C3A5F;
+  border-radius:12px;
+}
+
+.container{
+  width:min(980px,92vw);
+  margin:0 auto;
+  padding:24px 0 46px;
+}
+
+.header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.headerText{
+  text-align:right;
+}
+
+.title{
+  margin:0;
+  font-size:clamp(22px,2.2vw,34px);
+  font-weight:900;
+  color:#2C3A5F;
+}
+
+.subtitle{
+  margin:6px 0 0;
+  color:#64748b;
+  font-size:14px;
+}
+
+.backBtn{
+  border:1px solid #e5e7eb;
+  background:#fff;
+  color:#2C3A5F;
+  border-radius:12px;
+  padding:10px 12px;
+  font-weight:800;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  transition:transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+.backBtn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 12px 22px rgba(15,23,42,.08);
+  background:#f8fafc;
+}
+
+.card{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 12px 30px rgba(15,23,42,.06);
+}
+
+.grid2{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  text-align:right;
+}
+
+.label{
+  font-weight:800;
+  color:#2C3A5F;
+  font-size:18px;
+}
+
+.input, .textarea{
+  width:100%;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  padding:12px 12px;
+  font-size:14px;
+  outline:none;
+  background:#f8fafc;
+  transition:border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.input:focus, .textarea:focus{
+  border-color: rgba(44,58,95,.35);
+  box-shadow: 0 0 0 4px rgba(44,58,95,.12);
+  background:#fff;
+}
+
+.textarea{
+  resize: none;
+  min-height: 140px;
+  max-height: 140px;
+}
+.numberInput::-webkit-outer-spin-button,
+.numberInput::-webkit-inner-spin-button{
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.inputError{
+  border-color: rgba(239,68,68,.55) !important;
+  box-shadow: 0 0 0 4px rgba(239,68,68,.14) !important;
+  background:#fff;
+}
+
+.errorText{
+  margin-top: 6px;
+  font-size: 12px;
+  color: #ef4444;
+  font-weight: 800;
+  text-align: right;
+}
+
+.hintRow{
+  margin-top: 8px;
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:flex-start;
+}
+
+.hint{
+  font-size: 12px;
+  color:#64748b;
+  font-weight: 800;
+}
+
+.errorTextInline{
+  font-size: 12px;
+  color:#ef4444;
+  font-weight: 800;
+  text-align:right;
+}
+
+.boxError{
+  border-color: rgba(239,68,68,.35);
+}
+/* Faculties */
+.facultyBox{
+  margin-top:16px;
+  border:1px solid #eef2ff;
+  background:#fbfcff;
+  border-radius:16px;
+  padding:14px;
+}
+
+.facultyHeader{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:10px;
+  font-size: 18px;
+}
+
+.facultyTitle{
+  font-weight:900;
+  color:#2C3A5F;
+}
+
+.facultyHint{
+  color:#64748b;
+  font-size:12px;
+  margin-top:4px;
+}
+
+.selectAll{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:800;
+  color:#2C3A5F;
+  user-select:none;
+}
+
+.facultyGrid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+
+.facultyItem{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  background:#fff;
+  cursor:pointer;
+  user-select:none;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.facultyItem:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 12px 22px rgba(15,23,42,.08);
+  border-color: rgba(44,58,95,.18);
+}
+
+.footer{
+  display:flex;
+  justify-content:flex-start;
+  gap:10px;
+  margin-top:16px;
+  flex-wrap:wrap;
+}
+
+.cancelBtn{
+  border:1px solid #e5e7eb;
+  background:#fff;
+  color:#2C3A5F;
+  border-radius:12px;
+  padding:10px 14px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.saveBtn{
+  background:#b38e19;
+  color:#fff;
+  border:1px solid rgba(179,142,25,.25);
+  border-radius:12px;
+  padding:10px 14px;
+  font-weight:900;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  box-shadow: 0 12px 26px rgba(179,142,25,.22);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.saveBtn:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 16px 30px rgba(179,142,25,.26);
+}
+
+/* Responsive */
+@media (max-width: 860px){
+  .grid2{ grid-template-columns:1fr; }
+  .facultyGrid{ grid-template-columns:1fr; }
+}

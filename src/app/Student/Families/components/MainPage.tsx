@@ -10,6 +10,7 @@ interface ApiFamily {
   faculty_name: string;
   type: string;
   status: string;
+  member_status: string;
   member_count: number;
   joined_at?: string;
 }
@@ -23,7 +24,8 @@ interface ProgramFamily {
   createdAt?: string;
   description: string;
   image: string;
-  type: string; // Added type field
+  type: string;
+  memberStatus: string; // Added member status
 }
 
 interface MainPageProps {
@@ -79,7 +81,8 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
     place: family.faculty_name,
     views: `${family.member_count} عضو`,
     description: family.description,
-    type: family.type, // Map type from API
+    type: family.type,
+    memberStatus: family.member_status || '', // Map member status from API
     createdAt: family.joined_at
       ? new Date(family.joined_at).toLocaleDateString('ar-EG')
       : '',
@@ -169,7 +172,8 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
         // Add joined date to the family
         const updatedFamily = {
           ...joinedFamily,
-          createdAt: new Date().toLocaleDateString('ar-EG')
+          createdAt: new Date().toLocaleDateString('ar-EG'),
+          memberStatus: 'منتظر' // Set default status as pending
         };
         // Update UI immediately
         setJoinedFamilies(prev => [...prev, updatedFamily]);
@@ -229,6 +233,32 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
   }, []);
 
   /* ======================
+     GET STATUS BADGE CLASS
+  ====================== */
+  const getStatusBadgeClass = (status: string) => {
+    const normalizedStatus = status.toLowerCase().trim();
+    
+    if (normalizedStatus === 'منتظر' || normalizedStatus === 'pending') {
+      return 'status-badge-pending';
+    } else if (normalizedStatus === 'مقبول' || normalizedStatus === 'accepted' || normalizedStatus === 'active') {
+      return 'status-badge-accepted';
+    } else if (normalizedStatus === 'مرفوض' || normalizedStatus === 'rejected') {
+      return 'status-badge-rejected';
+    }
+    return 'status-badge-default';
+  };
+
+  const getStatusText = (status: string) => {
+    const normalizedStatus = status.toLowerCase().trim();
+    
+    if (normalizedStatus === 'pending') return 'منتظر';
+    if (normalizedStatus === 'accepted' || normalizedStatus === 'active') return 'مقبول';
+    if (normalizedStatus === 'rejected') return 'مرفوض';
+    
+    return status;
+  };
+
+  /* ======================
      RENDER
   ====================== */
   return (
@@ -273,6 +303,11 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
                   <div key={fam.id} className="joined-card">
                     <div className="joined-card-header">
                       <h3>{fam.title}</h3>
+                      {fam.memberStatus && (
+                        <span className={`status-badge ${getStatusBadgeClass(fam.memberStatus)}`}>
+                          {getStatusText(fam.memberStatus)}
+                        </span>
+                      )}
                     </div>
                     <p>{fam.subtitle}</p>
                     <div className="joined-meta">

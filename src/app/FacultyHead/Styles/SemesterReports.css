@@ -1,0 +1,394 @@
+.semester-reports-container {
+  direction: rtl;
+  font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Upload Header */
+.semester-upload-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.semester-upload-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a2456;
+  margin: 0;
+}
+
+.semester-send-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(90deg, #c49b3a 0%, #a67f2c 100%);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(196, 155, 58, 0.3);
+}
+
+.semester-send-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(196, 155, 58, 0.4);
+}
+
+/* Upload Area */
+.semester-upload-area {
+  border: 3px dashed #c49b3a;
+  border-radius: 16px;
+  padding: 60px 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #fffbf5;
+  margin-bottom: 35px;
+}
+
+.semester-upload-area:hover,
+.semester-upload-area.drag-active {
+  border-color: #a67f2c;
+  background: #fff9e6;
+  transform: scale(1.01);
+}
+
+.semester-upload-input {
+  display: none;
+}
+
+.semester-upload-icon {
+  margin: 0 auto 20px;
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #c49b3a 0%, #a67f2c 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.semester-upload-area h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a2456;
+  margin: 0 0 10px 0;
+}
+
+.semester-upload-area p {
+  font-size: 14px;
+  color: #5a6c8f;
+  margin: 0;
+}
+
+/* Submitted Section */
+.semester-submitted-section {
+  margin-top: 35px;
+}
+
+.semester-submitted-section h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a2456;
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+/* Table */
+.semester-table-wrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid #e5e9f2;
+  margin-bottom: 25px;
+}
+
+.semester-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.semester-table thead {
+  background-color: #f8f9fc;
+}
+
+.semester-table thead tr {
+  border-bottom: 2px solid #e5e9f2;
+}
+
+.semester-table th {
+  padding: 16px 12px;
+  text-align: right;
+  font-weight: 600;
+  font-size: 14px;
+  color: #5a6c8f;
+  white-space: nowrap;
+}
+
+.semester-table tbody tr {
+  border-bottom: 1px solid #e5e9f2;
+  transition: background-color 0.2s ease;
+}
+
+.semester-table tbody tr:hover {
+  background-color: #f8f9fc;
+}
+
+.semester-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.semester-table td {
+  padding: 16px 12px;
+  font-size: 14px;
+  color: #2c3e50;
+}
+
+.semester-file-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #1a2456;
+}
+
+.semester-file-name svg {
+  flex-shrink: 0;
+  color: #c49b3a;
+}
+
+.semester-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #1a2456;
+}
+
+.semester-name-cell svg {
+  flex-shrink: 0;
+  color: #5a6c8f;
+}
+
+.semester-date-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #5a6c8f;
+}
+
+.semester-date-cell svg {
+  flex-shrink: 0;
+  color: #a0a0a0;
+}
+
+.semester-download-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #e3f2fd;
+  border: none;
+  border-radius: 8px;
+  color: #1976d2;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.semester-download-btn:hover {
+  background: #1976d2;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(25, 118, 210, 0.3);
+}
+
+/* Total Count */
+.semester-total-count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #fff9e6;
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid #c49b3a;
+}
+
+.semester-total-count svg {
+  color: #c49b3a;
+}
+
+.semester-total-count span {
+  font-size: 16px;
+  color: #5a6c8f;
+  font-weight: 500;
+}
+
+.semester-total-count strong {
+  font-size: 28px;
+  font-weight: 700;
+  color: #c49b3a;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .semester-upload-area {
+    padding: 50px 30px;
+  }
+
+  .semester-table {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 768px) {
+  .semester-upload-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .semester-upload-header h2 {
+    font-size: 18px;
+    text-align: center;
+  }
+
+  .semester-send-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .semester-upload-area {
+    padding: 40px 20px;
+  }
+
+  .semester-upload-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .semester-upload-area h3 {
+    font-size: 18px;
+  }
+
+  .semester-upload-area p {
+    font-size: 13px;
+  }
+
+  .semester-submitted-section h2 {
+    font-size: 18px;
+  }
+
+  .semester-table-wrapper {
+    border-radius: 8px;
+  }
+
+  .semester-table th,
+  .semester-table td {
+    padding: 12px 8px;
+    font-size: 12px;
+  }
+
+  .semester-download-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .semester-total-count {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .semester-total-count strong {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 576px) {
+  .semester-upload-area {
+    padding: 30px 15px;
+  }
+
+  .semester-upload-icon {
+    width: 50px;
+    height: 50px;
+  }
+
+  .semester-upload-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .semester-upload-area h3 {
+    font-size: 16px;
+  }
+
+  .semester-upload-area p {
+    font-size: 12px;
+  }
+
+  .semester-table th,
+  .semester-table td {
+    padding: 10px 6px;
+    font-size: 11px;
+  }
+
+  .semester-file-name,
+  .semester-name-cell,
+  .semester-date-cell {
+    gap: 4px;
+  }
+
+  .semester-file-name svg,
+  .semester-name-cell svg,
+  .semester-date-cell svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .semester-total-count {
+    padding: 15px;
+  }
+
+  .semester-total-count svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .semester-total-count span {
+    font-size: 14px;
+  }
+
+  .semester-total-count strong {
+    font-size: 20px;
+  }
+}
+
+/* Scrollbar styling */
+.semester-table-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.semester-table-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.semester-table-wrapper::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+
+.semester-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

@@ -1,0 +1,66 @@
+/* Footer.css */
+.footer {
+  background-color: #1e2a5a;
+  color: #e5e7eb;
+  width: 100%;
+  padding: clamp(1rem, 3vw, 1.25rem) 0;
+  font-size: clamp(0.8125rem, 1.5vw, 0.95rem);
+  margin-top: clamp(1.5rem, 4vw, 2.5rem);
+  box-sizing: border-box;
+}
+
+.footerContainer {
+  max-width: min(1300px, 100%);
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 3vw, 1.5rem);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+  direction: rtl;
+}
+
+.footerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  text-align: right;
+}
+
+.footerLogo {
+  font-weight: bold;
+  font-size: clamp(1rem, 2vw, 1.2rem);
+}
+
+.footerText {
+  display: flex;
+  flex-direction: column;
+  font-size: clamp(0.8125rem, 1.5vw, 0.9rem);
+  opacity: 0.9;
+}
+
+.footerRight {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.25rem, 0.75vw, 0.4rem);
+}
+
+.footerRight p {
+  margin: 0;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+@media (max-width: 640px) {
+  .footerContainer {
+    flex-direction: column;
+    text-align: center;
+  }
+  .footerLeft,
+  .footerRight {
+    text-align: center;
+    width: 100%;
+  }
+}

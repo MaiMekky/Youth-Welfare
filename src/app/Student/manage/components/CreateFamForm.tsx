@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import '../styles/CreateFam.css';
+import Toast from './Toast';
 
 const decodeToken = (token: string) => {
   try {
@@ -14,7 +15,6 @@ const decodeToken = (token: string) => {
     );
     return JSON.parse(jsonPayload);
   } catch (error) {
-    console.error('Error decoding token:', error);
     return null;
   }
 };
@@ -49,9 +49,16 @@ interface FormErrors {
   [key: string]: string;
 }
 
+interface ToastNotification {
+  id: number;
+  message: string;
+  type: 'success' | 'error' | 'info' | 'warning';
+}
+
 const defaultPerson: Person = { fullName: '', nationalId: '', mobile: '', studentId: '' };
 
 const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }) => {
+  const [familyType, setFamilyType] = useState('');
   const [familyName, setFamilyName] = useState('');
   const [familyGoals, setFamilyGoals] = useState('');
   const [familyDescription, setFamilyDescription] = useState('');
@@ -62,7 +69,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
   const [facultyId, setFacultyId] = useState<number | null>(null);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [toasts, setToasts] = useState<ToastNotification[]>([]);
 
   const [boardMembers, setBoardMembers] = useState({
     leader: { ...defaultPerson },
@@ -88,25 +95,30 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
 
   const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
 
-  // Fetch departments
+  /* ======================
+     TOAST FUNCTIONS
+  ====================== */
+  const showToast = (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, message, type }]);
+  };
+
+  const removeToast = (id: number) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
+
   useEffect(() => {
     if (!token) return;
 
     const fetchDepartments = async () => {
       try {
-        console.log('🔵 Fetching departments...');
-        
         const res = await fetch('http://127.0.0.1:8000/api/family/departments/', {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (!res.ok) {
-          console.error('❌ Departments API Error:', res.status);
-          return;
-        }
+        if (!res.ok) return;
 
         const response = await res.json();
-        console.log('✅ Departments API Response:', response);
 
         let depts: Department[] = [];
         
@@ -118,25 +130,21 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
           depts = response.results;
         }
 
-        console.log('📋 Departments loaded:', depts);
         setDepartments(depts);
       } catch (error) {
-        console.error('❌ Error fetching departments:', error);
+        // Silent error handling
       }
     };
 
     fetchDepartments();
   }, [token]);
 
-  // Fetch profile data
   useEffect(() => {
     if (!token) return;
 
     const fetchProfileData = async () => {
       try {
         const decodedToken = decodeToken(token);
-        console.log('=== Decoded Token ===');
-        console.log('Token payload:', decodedToken);
 
         const response = await fetch("http://127.0.0.1:8000/api/auth/profile/", {
           headers: { Authorization: `Bearer ${token}` },
@@ -144,38 +152,27 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
 
         if (response.ok) {
           const data = await response.json();
-          console.log('=== Profile Data ===');
-          console.log('Full response:', data);
           
           setStudentId(data.student_id);
           
           let faculId = null;
           if (data.faculty && data.faculty !== 0) {
             faculId = data.faculty;
-            console.log('✓ Using faculty from profile:', faculId);
           } else if (decodedToken?.faculty_id) {
             faculId = decodedToken.faculty_id;
-            console.log('✓ Using faculty_id from token:', faculId);
           }
           
           if (faculId) {
             setFacultyId(faculId);
-          } else {
-            console.warn('⚠️ No valid faculty ID found');
           }
         }
       } catch (error) {
-        console.error("Error fetching profile:", error);
+        // Silent error handling
       }
     };
 
     fetchProfileData();
   }, [token]);
-
-  const showNotification = (type: 'success' | 'error', message: string) => {
-    setNotification({ type, message });
-    setTimeout(() => setNotification(null), 5000);
-  };
 
   const boardLabels = {
     leader: 'رائد الأسرة',
@@ -201,12 +198,115 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
 
   const requiresFullInfo = ['leader', 'viceLeader', 'responsible', 'treasurer'];
 
+  const validateForm = () => {
+    const newErrors: FormErrors = {};
+
+    // Family Type
+    if (!familyType) {
+      newErrors.familyType = 'يرجى اختيار نوع الأسرة';
+    }
+
+    // Family Name
+    if (!familyName.trim()) {
+      newErrors.familyName = 'يرجى إدخال اسم الأسرة';
+    } else if (familyName.trim().length < 3) {
+      newErrors.familyName = 'اسم الأسرة يجب أن يكون 3 أحرف على الأقل';
+    }
+
+    // Family Description
+    if (!familyDescription.trim()) {
+      newErrors.familyDescription = 'يرجى إدخال وصف الأسرة';
+    } else if (familyDescription.trim().length < 10) {
+      newErrors.familyDescription = 'وصف الأسرة يجب أن يكون 10 أحرف على الأقل';
+    }
+
+    // Board Members with Full Info
+    requiresFullInfo.forEach(key => {
+      const member = boardMembers[key as keyof typeof boardMembers];
+      
+      // Full Name
+      if (!member.fullName.trim()) {
+        newErrors[`board_${key}_fullName`] = 'الاسم مطلوب';
+      } else if (member.fullName.trim().length < 3) {
+        newErrors[`board_${key}_fullName`] = 'الاسم يجب أن يكون 3 أحرف على الأقل';
+      }
+      
+      // National ID
+      if (!member.nationalId) {
+        newErrors[`board_${key}_nationalId`] = 'الرقم القومي مطلوب';
+      } else if (member.nationalId.length !== 14) {
+        newErrors[`board_${key}_nationalId`] = 'الرقم القومي يجب أن يكون 14 رقم';
+      } else if (!/^\d+$/.test(member.nationalId)) {
+        newErrors[`board_${key}_nationalId`] = 'الرقم القومي يجب أن يحتوي على أرقام فقط';
+      }
+      
+      // Mobile
+      if (!member.mobile) {
+        newErrors[`board_${key}_mobile`] = 'رقم الموبايل مطلوب';
+      } else if (member.mobile.length !== 11) {
+        newErrors[`board_${key}_mobile`] = 'رقم الموبايل يجب أن يكون 11 رقم';
+      } else if (!/^01[0-2,5]{1}[0-9]{8}$/.test(member.mobile)) {
+        newErrors[`board_${key}_mobile`] = 'رقم الموبايل غير صحيح';
+      }
+    });
+
+    // Board Members with Student ID only
+    const studentIdMembers = ['elderBrother', 'elderSister', 'secretary', 'elected1', 'elected2'];
+    studentIdMembers.forEach(key => {
+      const member = boardMembers[key as keyof typeof boardMembers];
+      if (member.studentId && member.studentId.trim()) {
+        if (!/^\d+$/.test(member.studentId)) {
+          newErrors[`board_${key}_studentId`] = 'كود الطالب يجب أن يحتوي على أرقام فقط';
+        }
+      }
+    });
+
+    // Committee Validations
+    Object.entries(committees).forEach(([key, committee]) => {
+      // Secretary Student ID
+      if (committee.secretary.studentId && committee.secretary.studentId.trim()) {
+        if (!/^\d+$/.test(committee.secretary.studentId)) {
+          newErrors[`committee_${key}_secretary_studentId`] = 'كود الطالب يجب أن يحتوي على أرقام فقط';
+        }
+      }
+      
+      // Assistant Student ID
+      if (committee.assistant.studentId && committee.assistant.studentId.trim()) {
+        if (!/^\d+$/.test(committee.assistant.studentId)) {
+          newErrors[`committee_${key}_assistant_studentId`] = 'كود الطالب يجب أن يحتوي على أرقام فقط';
+        }
+      }
+
+      // Execution Date validation
+      if (committee.executionDate) {
+        const selectedDate = new Date(committee.executionDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (selectedDate < today) {
+          newErrors[`committee_${key}_executionDate`] = 'تاريخ التنفيذ يجب أن يكون في المستقبل';
+        }
+      }
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleFieldBlur = (fieldName: string) => {
     setTouchedFields(prev => new Set([...prev, fieldName]));
   };
 
   const handleBoardChange = (key: keyof typeof boardMembers, field: string, value: string) => {
     setBoardMembers(prev => ({ ...prev, [key]: { ...prev[key], [field]: value } }));
+    const errorKey = `board_${key}_${field}`;
+    if (errors[errorKey]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[errorKey];
+        return newErrors;
+      });
+    }
   };
 
   const handleCommitteeChange = (
@@ -222,6 +322,15 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         [role]: { ...prev[committeeKey][role], [field]: value },
       },
     }));
+    
+    const errorKey = `committee_${committeeKey}_${role}_${field}`;
+    if (errors[errorKey]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[errorKey];
+        return newErrors;
+      });
+    }
   };
 
   const handleCommitteeFieldChange = (committeeKey: string, field: string, value: string) => {
@@ -232,6 +341,15 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         [field]: value,
       },
     }));
+    
+    const errorKey = `committee_${committeeKey}_${field}`;
+    if (errors[errorKey]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[errorKey];
+        return newErrors;
+      });
+    }
   };
 
   const handleCommitteeDeptChange = (committeeKey: string, deptId: string) => {
@@ -299,7 +417,6 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         });
       }
 
-      // Use selected department ID or fallback to faculty ID
       const deptId = committee.selectedDeptId ? parseInt(committee.selectedDeptId) : (facultyId || 0);
 
       const committeeData = {
@@ -315,12 +432,11 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         activities,
       };
       
-      console.log(`📋 Committee "${key}" payload:`, committeeData);
       committeesData.push(committeeData);
     });
 
     return {
-      family_type: 'نوعية',
+      family_type: familyType,
       name: familyName,
       description: familyDescription,
       min_limit: 15,
@@ -343,9 +459,20 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!familyName || !familyDescription) {
-      showNotification('error', 'الرجاء ملء جميع البيانات المطلوبة');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Validate form
+    if (!validateForm()) {
+      showToast('الرجاء ملء جميع البيانات المطلوبة بشكل صحيح', 'error');
+      
+      // Scroll to first error
+      const firstErrorKey = Object.keys(errors)[0];
+      if (firstErrorKey) {
+        const errorElement = document.querySelector(`[name="${firstErrorKey}"]`);
+        if (errorElement) {
+          errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }
       return;
     }
 
@@ -353,14 +480,12 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
 
     try {
       if (!token) {
-        showNotification('error', 'يرجى تسجيل الدخول أولاً');
+        showToast('يرجى تسجيل الدخول أولاً', 'error');
         setIsSubmitting(false);
         return;
       }
 
       const apiPayload = transformFormDataToAPI();
-      console.log('=== API Request ===');
-      console.log('Full payload:', JSON.stringify(apiPayload, null, 2));
 
       const response = await fetch(
         `http://127.0.0.1:8000/api/family/student/create/`,
@@ -374,13 +499,11 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         }
       );
 
-      console.log('Response status:', response.status);
-
       if (response.ok) {
         const data = await response.json();
-        console.log('Success response:', data);
-        showNotification('success', 'تم ارسال طلبك بنجاح ويرجى مراجعته إلى أن يتم قبوله');
+        showToast('تم إرسال طلبك بنجاح! 🎉 يرجى انتظار مراجعته', 'success');
         
+        // Clear form
         setErrors({});
         setTouchedFields(new Set());
 
@@ -391,14 +514,11 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         }, 2000);
       } else {
         const errorData = await response.json().catch(() => ({}));
-        console.error("=== API Error Response ===");
-        console.error("Full error:", errorData);
         
-        let errorMessage = 'فشل ارسال الطلب. يرجى المحاولة مرة أخرى';
+        let errorMessage = 'فشل إرسال الطلب. يرجى المحاولة مرة أخرى';
         
         if (errorData?.errors) {
           const errors = errorData.errors;
-          console.error("Detailed errors:", errors);
           
           if (errors.faculty_id) {
             errorMessage = `خطأ في بيانات الكلية: ${errors.faculty_id[0]}`;
@@ -420,12 +540,11 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
           errorMessage = errorData.error;
         }
         
-        showNotification('error', errorMessage);
+        showToast(errorMessage, 'error');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } catch (error) {
-      console.error("Network error:", error);
-      showNotification('error', 'فشل الاتصال بالخادم. يرجى التحقق من الاتصال بالإنترنت والمحاولة مرة أخرى');
+      showToast('فشل الاتصال بالخادم. يرجى التحقق من الاتصال بالإنترنت والمحاولة مرة أخرى', 'error');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setIsSubmitting(false);
@@ -434,22 +553,56 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
 
   return (
     <div className="create-fam-container">
-      {notification && (
-        <div className={`notification ${notification.type}`}>
-          <div className="notification-content">
-            <span className="notification-icon">
-              {notification.type === 'success' ? '✓' : '✕'}
-            </span>
-            <span className="notification-message">{notification.message}</span>
-          </div>
-        </div>
-      )}
+      {/* TOAST CONTAINER */}
+      <div className="toast-container">
+        {toasts.map(toast => (
+          <Toast
+            key={toast.id}
+            message={toast.message}
+            type={toast.type}
+            onClose={() => removeToast(toast.id)}
+          />
+        ))}
+      </div>
       
       <form className="create-fam-form" onSubmit={handleSubmit}>
         <div className="form-header">
           <h1>نموذج طلب إنشاء أسرة طلابية</h1>
           <p>يرجى تعبئة جميع البيانات المطلوبة بدقة</p>
         </div>
+
+        {/* Family Type Selection */}
+        <section className="form-section family-type-section">
+          <div className="form-group">
+            <label>نوع الأسرة *</label>
+            <select
+              name="familyType"
+              className={`form-select ${errors.familyType && touchedFields.has('familyType') ? 'error' : ''}`}
+              value={familyType}
+              onChange={e => {
+                setFamilyType(e.target.value);
+                if (errors.familyType) {
+                  setErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors.familyType;
+                    return newErrors;
+                  });
+                }
+              }}
+              onBlur={() => handleFieldBlur('familyType')}
+            >
+              <option value="">اختر نوع الأسرة</option>
+              <option value="نوعية">نوعية</option>
+              <option value="مركزية">مركزية</option>
+            </select>
+            {errors.familyType && touchedFields.has('familyType') && (
+              <div className="error-message">
+                <span>⚠</span>
+                <span>{errors.familyType}</span>
+              </div>
+            )}
+          </div>
+        </section>
 
         {/* Family Main Info */}
         <section className="form-section">
@@ -458,17 +611,34 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
           <div className="form-group">
             <label>اسم الأسرة *</label>
             <input
-              className="form-input"
+              name="familyName"
+              className={`form-input ${errors.familyName && touchedFields.has('familyName') ? 'error' : ''}`}
               value={familyName}
-              onChange={e => setFamilyName(e.target.value)}
+              onChange={e => {
+                setFamilyName(e.target.value);
+                if (errors.familyName) {
+                  setErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors.familyName;
+                    return newErrors;
+                  });
+                }
+              }}
               onBlur={() => handleFieldBlur('familyName')}
               placeholder="أدخل اسم الأسرة"
             />
+            {errors.familyName && touchedFields.has('familyName') && (
+              <div className="error-message">
+                <span>⚠</span>
+                <span>{errors.familyName}</span>
+              </div>
+            )}
           </div>
 
           <div className="form-group">
-            <label>أهداف الأسرة *</label>
+            <label>أهداف الأسرة </label>
             <textarea
+              name="familyGoals"
               className="form-textarea"
               value={familyGoals}
               onChange={e => setFamilyGoals(e.target.value)}
@@ -481,13 +651,29 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
           <div className="form-group">
             <label>وصف الأسرة *</label>
             <textarea
-              className="form-textarea"
+              name="familyDescription"
+              className={`form-textarea ${errors.familyDescription && touchedFields.has('familyDescription') ? 'error' : ''}`}
               value={familyDescription}
-              onChange={e => setFamilyDescription(e.target.value)}
+              onChange={e => {
+                setFamilyDescription(e.target.value);
+                if (errors.familyDescription) {
+                  setErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors.familyDescription;
+                    return newErrors;
+                  });
+                }
+              }}
               onBlur={() => handleFieldBlur('familyDescription')}
               rows={5}
               placeholder="قدم وصفاً تفصيلياً للأسرة ونشاطاتها"
             />
+            {errors.familyDescription && touchedFields.has('familyDescription') && (
+              <div className="error-message">
+                <span>⚠</span>
+                <span>{errors.familyDescription}</span>
+              </div>
+            )}
           </div>
         </section>
 
@@ -505,11 +691,16 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
                     <div className="field-wrapper">
                       <label>الاسم *</label>
                       <input
+                        name={`board_${key}_fullName`}
                         placeholder="الاسم الكامل"
+                        className={errors[`board_${key}_fullName`] && touchedFields.has(`board_${key}_fullName`) ? 'error' : ''}
                         value={person.fullName}
                         onChange={e => handleBoardChange(key as keyof typeof boardMembers, 'fullName', e.target.value)}
-                        onBlur={() => handleFieldBlur(`board_${key}_name`)}
+                        onBlur={() => handleFieldBlur(`board_${key}_fullName`)}
                       />
+                      {errors[`board_${key}_fullName`] && touchedFields.has(`board_${key}_fullName`) && (
+                        <div className="field-error">{errors[`board_${key}_fullName`]}</div>
+                      )}
                     </div>
                   )}
 
@@ -518,33 +709,47 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
                       <div className="field-wrapper">
                         <label>الرقم القومي *</label>
                         <input
+                          name={`board_${key}_nationalId`}
                           placeholder="14 رقم"
                           maxLength={14}
+                          className={errors[`board_${key}_nationalId`] && touchedFields.has(`board_${key}_nationalId`) ? 'error' : ''}
                           value={person.nationalId || ''}
                           onChange={e => handleBoardChange(key as keyof typeof boardMembers, 'nationalId', e.target.value.replace(/\D/g, ''))}
                           onBlur={() => handleFieldBlur(`board_${key}_nationalId`)}
                         />
+                        {errors[`board_${key}_nationalId`] && touchedFields.has(`board_${key}_nationalId`) && (
+                          <div className="field-error">{errors[`board_${key}_nationalId`]}</div>
+                        )}
                       </div>
                       <div className="field-wrapper">
                         <label>رقم الموبايل *</label>
                         <input
+                          name={`board_${key}_mobile`}
                           placeholder="01XXXXXXXXX"
                           maxLength={11}
+                          className={errors[`board_${key}_mobile`] && touchedFields.has(`board_${key}_mobile`) ? 'error' : ''}
                           value={person.mobile || ''}
                           onChange={e => handleBoardChange(key as keyof typeof boardMembers, 'mobile', e.target.value.replace(/\D/g, ''))}
                           onBlur={() => handleFieldBlur(`board_${key}_mobile`)}
                         />
+                        {errors[`board_${key}_mobile`] && touchedFields.has(`board_${key}_mobile`) && (
+                          <div className="field-error">{errors[`board_${key}_mobile`]}</div>
+                        )}
                       </div>
                     </>
                   ) : (
                     <div className="field-wrapper">
                       <label>كود الطالب *</label>
                       <input
+                        name={`board_${key}_studentId`}
                         placeholder="أدخل كود الطالب"
                         value={person.studentId || ''}
                         onChange={e => handleBoardChange(key as keyof typeof boardMembers, 'studentId', e.target.value)}
                         onBlur={() => handleFieldBlur(`board_${key}_studentId`)}
                       />
+                      {errors[`board_${key}_studentId`] && touchedFields.has(`board_${key}_studentId`) && (
+                        <div className="field-error">{errors[`board_${key}_studentId`]}</div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -564,6 +769,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
               <div className="form-group">
                 <label>القسم المسؤول *</label>
                 <select
+                  name={`committee_${key}_dept`}
                   className="form-select"
                   value={committee.selectedDeptId || ''}
                   onChange={e => handleCommitteeDeptChange(key, e.target.value)}
@@ -583,11 +789,15 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
                   <div className="field-wrapper">
                     <label>كود الطالب *</label>
                     <input
+                      name={`committee_${key}_secretary_studentId`}
                       placeholder="أدخل كود الطالب"
                       value={committee.secretary.studentId || ''}
                       onChange={e => handleCommitteeChange(key, 'secretary', 'studentId', e.target.value)}
                       onBlur={() => handleFieldBlur(`committee_${key}_secretary_studentId`)}
                     />
+                    {errors[`committee_${key}_secretary_studentId`] && touchedFields.has(`committee_${key}_secretary_studentId`) && (
+                      <div className="field-error">{errors[`committee_${key}_secretary_studentId`]}</div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -598,11 +808,15 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
                   <div className="field-wrapper">
                     <label>كود الطالب *</label>
                     <input
+                      name={`committee_${key}_assistant_studentId`}
                       placeholder="أدخل كود الطالب"
                       value={committee.assistant.studentId || ''}
                       onChange={e => handleCommitteeChange(key, 'assistant', 'studentId', e.target.value)}
                       onBlur={() => handleFieldBlur(`committee_${key}_assistant_studentId`)}
                     />
+                    {errors[`committee_${key}_assistant_studentId`] && touchedFields.has(`committee_${key}_assistant_studentId`) && (
+                      <div className="field-error">{errors[`committee_${key}_assistant_studentId`]}</div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -611,6 +825,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
                 <div className="form-group">
                   <label>الخطة <span className="optional-label">(اختياري)</span></label>
                   <textarea
+                    name={`committee_${key}_plan`}
                     className="form-textarea"
                     placeholder="أدخل خطة اللجنة"
                     rows={3}
@@ -621,16 +836,24 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
                 <div className="form-group">
                   <label>موعد التنفيذ <span className="optional-label">(اختياري)</span></label>
                   <input
-                    className="form-input"
+                    name={`committee_${key}_executionDate`}
+                    className={`form-input ${errors[`committee_${key}_executionDate`] ? 'error' : ''}`}
                     type="date"
                     placeholder="أدخل موعد التنفيذ"
                     value={committee.executionDate || ''}
                     onChange={e => handleCommitteeFieldChange(key, 'executionDate', e.target.value)}
                   />
+                  {errors[`committee_${key}_executionDate`] && (
+                    <div className="error-message">
+                      <span>⚠</span>
+                      <span>{errors[`committee_${key}_executionDate`]}</span>
+                    </div>
+                  )}
                 </div>
                 <div className="form-group">
                   <label>مصادر التمويل <span className="optional-label">(اختياري)</span></label>
                   <input
+                    name={`committee_${key}_fundingSources`}
                     className="form-input"
                     type="text"
                     placeholder="أدخل مصادر التمويل"

@@ -19,88 +19,6 @@ body {
   position: relative;
 }
 
-/* ========= NOTIFICATION STYLES ========= */
-.notification-container {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2000;
-  width: 100%;
-  max-width: 600px;
-  padding: 0 20px;
-  animation: slideDown 0.3s ease-out;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-}
-
-.notification {
-  background: #fff;
-  border-radius: 12px;
-  padding: 16px 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border-right: 4px solid #ef4444;
-  direction: rtl;
-  animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.notification-icon {
-  color: #ef4444;
-  flex-shrink: 0;
-}
-
-.notification-message {
-  flex: 1;
-  font-size: 17px;
-  font-weight: 500;
-  color: #27285D;
-  line-height: 1.5;
-}
-
-.notification-close {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #6b7280;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  transition: all 0.2s;
-  flex-shrink: 0;
-}
-
-.notification-close:hover {
-  background: #f3f4f6;
-  color: #27285D;
-}
-
 /* ========= HEADER ========= */
 .dashboard-header {
   text-align: center;
@@ -153,11 +71,18 @@ body {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
 .create-activity {
   background: linear-gradient(135deg, var(--dark-navy) 0%, #3A3B7A 100%);
 }
 
-.create-activity:hover {
+.create-activity:hover:not(:disabled) {
   background: linear-gradient(135deg, #1e1f4a 0%, var(--dark-navy) 100%);
 }
 
@@ -165,7 +90,7 @@ body {
   background: linear-gradient(135deg, var(--gold) 0%, #D4A927 100%);
 }
 
-.publish-content:hover {
+.publish-content:hover:not(:disabled) {
   background: linear-gradient(135deg, #9a7615 0%, var(--gold) 100%);
 }
 
@@ -386,6 +311,40 @@ body {
   box-shadow: 0 0 0 3px rgba(179, 142, 25, 0.1);
 }
 
+/* Form validation error states */
+.form-input-error,
+.form-textarea-error {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2;
+}
+
+.form-input-error:focus,
+.form-textarea-error:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+.error-message {
+  display: block;
+  color: #ef4444;
+  font-size: 13px;
+  margin-top: 6px;
+  font-weight: 500;
+  text-align: right;
+  animation: slideInError 0.2s ease-out;
+}
+
+@keyframes slideInError {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .form-textarea {
   resize: vertical;
   min-height: 100px;
@@ -440,10 +399,16 @@ body {
   gap: 8px;
 }
 
-.btn-submit:hover {
+.btn-submit:hover:not(:disabled) {
   background: linear-gradient(135deg, #9a7615 0%, #B38E19 100%);
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(179, 142, 25, 0.3);
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .btn-submit-activity {
@@ -458,10 +423,16 @@ body {
   transition: all 0.2s;
 }
 
-.btn-submit-activity:hover {
+.btn-submit-activity:hover:not(:disabled) {
   background: linear-gradient(135deg, #1e1f4a 0%, #27285D 100%);
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(39, 40, 93, 0.3);
+}
+
+.btn-submit-activity:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* ========= RESPONSIVE DESIGN ========= */
@@ -627,19 +598,6 @@ body {
     border-top-left-radius: 0;
   }
 
-  .notification-container {
-    padding: 0 12px;
-    top: 15px;
-  }
-
-  .notification {
-    padding: 12px 16px;
-  }
-
-  .notification-message {
-    font-size: 15px;
-  }
-
   .modal-header {
     padding: 16px 20px;
   }
@@ -661,6 +619,10 @@ body {
   .form-select {
     padding: 10px 14px;
     font-size: 15px;
+  }
+
+  .error-message {
+    font-size: 12px;
   }
 
   .btn-cancel,

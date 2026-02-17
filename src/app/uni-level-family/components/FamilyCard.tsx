@@ -41,6 +41,9 @@ export default function FamilyCard({
     router.push(`/uni-level-family/details/${family.family_id}`);
   };
 
+  // Check if approve/reject buttons should be shown
+  const shouldShowApproveReject = showActions && family.status !== "مقبول";
+
   return (
     <div className={styles.familyCard}>
       {/* Header */}
@@ -85,7 +88,7 @@ export default function FamilyCard({
 
       {/* Actions */}
       <div className={styles.cardActions}>
-        {showActions && (
+        {shouldShowApproveReject && (
           <div className={styles.actionRow}>
             <button
               className={`${styles.btn} ${styles.btnApprove}`}

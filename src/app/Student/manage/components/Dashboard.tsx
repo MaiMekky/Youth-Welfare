@@ -6,7 +6,8 @@ import Activities from "./Activities";
 import Members from "./Members";
 import Posts from "./Posts";
 import Overview from "./Overview";
-import { X, Upload, AlertCircle } from "lucide-react";
+import Toast from "./Toast";
+import { X, Upload } from "lucide-react";
 
 interface Member {
   id: number;
@@ -60,6 +61,12 @@ interface Department {
   name: string;
 }
 
+interface ToastNotification {
+  id: number;
+  message: string;
+  type: 'success' | 'error' | 'info' | 'warning';
+}
+
 const Dashboard: React.FC = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -83,11 +90,8 @@ const Dashboard: React.FC = () => {
   const [postRefreshTrigger, setPostRefreshTrigger] = useState(0);
   const [activityRefreshTrigger, setActivityRefreshTrigger] = useState(0);
 
-  // Notification state
-  const [notification, setNotification] = useState<{
-    show: boolean;
-    message: string;
-  }>({ show: false, message: "" });
+  // Toast notifications state
+  const [toasts, setToasts] = useState<ToastNotification[]>([]);
 
   // Create Content Form
   const [contentTitle, setContentTitle] = useState("");
@@ -109,7 +113,22 @@ const Dashboard: React.FC = () => {
     dept_id: "",
   });
 
+  // Form validation errors
+  const [activityErrors, setActivityErrors] = useState<Record<string, string>>({});
+
   const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
+
+  /* ======================
+     TOAST FUNCTIONS
+  ====================== */
+  const showToast = (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, message, type }]);
+  };
+
+  const removeToast = (id: number) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
 
   // Fetch family ID and name from families API
   useEffect(() => {
@@ -149,7 +168,7 @@ const Dashboard: React.FC = () => {
         }
 
         if (families.length === 0) {
-          showNotification("لا توجد أسر متاحة");
+          showToast("لا توجد أسر متاحة", "warning");
           setProfileLoading(false);
           return;
         }
@@ -161,11 +180,11 @@ const Dashboard: React.FC = () => {
           setSelectedFamilyId(elderBrotherFamily.family_id);
           setFamilyName(elderBrotherFamily.name);
         } else {
-          showNotification("لا توجد أسرة بدور 'أخ أكبر'");
+          showToast("لا توجد أسرة بدور 'أخ أكبر'", "warning");
           setProfileLoading(false);
         }
       } catch (err: any) {
-        showNotification(err.message || "حصل خطأ أثناء تحميل قائمة الأسر");
+        showToast(err.message || "حصل خطأ أثناء تحميل قائمة الأسر", "error");
       } finally {
         setProfileLoading(false);
       }
@@ -214,29 +233,83 @@ const Dashboard: React.FC = () => {
     fetchDepartments();
   }, [token]);
 
-  // Show notification
-  const showNotification = (message: string) => {
-    setNotification({ show: true, message });
-    setTimeout(() => {
-      setNotification({ show: false, message: "" });
-    }, 4000);
+  // Validate activity form
+  const validateActivityForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    // Required fields
+    if (!activityData.title.trim()) {
+      errors.title = "عنوان الفعالية مطلوب";
+    }
+
+    if (!activityData.type) {
+      errors.type = "نوع الفعالية مطلوب";
+    }
+
+    if (!activityData.description.trim()) {
+      errors.description = "وصف الفعالية مطلوب";
+    }
+
+    if (!activityData.date) {
+      errors.date = "تاريخ البداية مطلوب";
+    }
+
+    if (!activityData.endDate) {
+      errors.endDate = "تاريخ النهاية مطلوب";
+    }
+
+    if (!activityData.location.trim()) {
+      errors.location = "المكان مطلوب";
+    }
+
+    if (!activityData.dept_id) {
+      errors.dept_id = "اللجنة مطلوبة";
+    }
+
+    // Date validation
+    if (activityData.date && activityData.endDate) {
+      const startDate = new Date(activityData.date);
+      const endDate = new Date(activityData.endDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (startDate < today) {
+        errors.date = "تاريخ البداية يجب أن يكون في المستقبل";
+      }
+
+      if (endDate < startDate) {
+        errors.endDate = "تاريخ النهاية يجب أن يكون بعد تاريخ البداية";
+      }
+    }
+
+    // Numeric validations
+    if (activityData.maxParticipants && parseInt(activityData.maxParticipants) < 1) {
+      errors.maxParticipants = "الحد الأقصى للمشاركين يجب أن يكون أكبر من صفر";
+    }
+
+    if (activityData.cost && parseFloat(activityData.cost) < 0) {
+      errors.cost = "التكلفة لا يمكن أن تكون سالبة";
+    }
+
+    setActivityErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   // Submit Content
   const handleCreateContent = async () => {
     if (!contentBody.trim()) {
-      showNotification("محتوى المنشور مطلوب");
+      showToast("محتوى المنشور مطلوب", "error");
       return;
     }
 
     if (!selectedFamilyId) {
-      showNotification("لم يتم العثور على معرف الأسرة");
+      showToast("لم يتم العثور على معرف الأسرة", "error");
       return;
     }
 
     const token = localStorage.getItem("access");
     if (!token) {
-      showNotification("يرجى تسجيل الدخول أولاً");
+      showToast("يرجى تسجيل الدخول أولاً", "error");
       return;
     }
 
@@ -259,7 +332,7 @@ const Dashboard: React.FC = () => {
       );
 
       if (response.ok) {
-        showNotification("✅ تم نشر المحتوى بنجاح");
+        showToast("تم نشر المحتوى بنجاح 🎉", "success");
         setContentBody("");
         setContentTitle("");
         setShowCreateContentForm(false);
@@ -268,10 +341,12 @@ const Dashboard: React.FC = () => {
           setPostRefreshTrigger(prev => prev + 1);
         }, 500);
       } else {
-        showNotification("❌ حدث خطأ أثناء نشر المحتوى");
+        const errorData = await response.json();
+        const errorMsg = errorData?.detail || errorData?.error || "حدث خطأ أثناء نشر المحتوى";
+        showToast(errorMsg, "error");
       }
     } catch (error) {
-      showNotification("⚠️ فشل الاتصال بالسيرفر");
+      showToast("فشل الاتصال بالسيرفر", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -279,36 +354,20 @@ const Dashboard: React.FC = () => {
 
   // Submit Activity
   const handleCreateActivity = async () => {
-    if (
-      !activityData.title ||
-      !activityData.type ||
-      !activityData.description ||
-      !activityData.date ||
-      !activityData.endDate ||
-      !activityData.location ||
-      !activityData.dept_id
-    ) {
-      showNotification("الرجاء ملء جميع الحقول المطلوبة");
-      return;
-    }
-
-    // Validate dates
-    const startDate = new Date(activityData.date);
-    const endDate = new Date(activityData.endDate);
-    
-    if (endDate < startDate) {
-      showNotification("❌ تاريخ النهاية يجب أن يكون بعد تاريخ البداية");
+    // Validate form
+    if (!validateActivityForm()) {
+      showToast("الرجاء ملء جميع الحقول المطلوبة بشكل صحيح", "error");
       return;
     }
 
     if (!selectedFamilyId) {
-      showNotification("لم يتم العثور على معرف الأسرة");
+      showToast("لم يتم العثور على معرف الأسرة", "error");
       return;
     }
 
     const token = localStorage.getItem("access");
     if (!token) {
-      showNotification("يرجى تسجيل الدخول أولاً");
+      showToast("يرجى تسجيل الدخول أولاً", "error");
       return;
     }
 
@@ -342,7 +401,7 @@ const Dashboard: React.FC = () => {
       const responseData = await response.json();
 
       if (response.ok) {
-        showNotification("✅ تم إنشاء الفعالية بنجاح");
+        showToast("تم إنشاء الفعالية بنجاح 🎉", "success");
         
         setShowCreateActivityForm(false);
         setActivityData({
@@ -359,6 +418,7 @@ const Dashboard: React.FC = () => {
           reward: "",
           dept_id: "",
         });
+        setActivityErrors({});
 
         setActiveTab("activities");
         setTimeout(() => {
@@ -381,10 +441,10 @@ const Dashboard: React.FC = () => {
           errorMsg = responseData.error;
         }
         
-        showNotification("❌ " + errorMsg);
+        showToast(errorMsg, "error");
       }
     } catch (error) {
-      showNotification("⚠️ فشل الاتصال بالسيرفر");
+      showToast("فشل الاتصال بالسيرفر", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -393,26 +453,32 @@ const Dashboard: React.FC = () => {
   const handleActivityChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    setActivityData({ ...activityData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setActivityData({ ...activityData, [name]: value });
+    
+    // Clear error for this field when user starts typing
+    if (activityErrors[name]) {
+      setActivityErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   return (
     <div className="dashboard-container">
-      {/* NOTIFICATION */}
-      {notification.show && (
-        <div className="notification-container">
-          <div className="notification">
-            <AlertCircle size={20} className="notification-icon" />
-            <span className="notification-message">{notification.message}</span>
-            <button
-              className="notification-close"
-              onClick={() => setNotification({ show: false, message: "" })}
-            >
-              <X size={18} />
-            </button>
-          </div>
-        </div>
-      )}
+      {/* TOAST CONTAINER */}
+      <div className="toast-container">
+        {toasts.map(toast => (
+          <Toast
+            key={toast.id}
+            message={toast.message}
+            type={toast.type}
+            onClose={() => removeToast(toast.id)}
+          />
+        ))}
+      </div>
 
       {/* HEADER */}
       <header className="dashboard-header">
@@ -574,35 +640,40 @@ const Dashboard: React.FC = () => {
                     value={activityData.title}
                     onChange={handleActivityChange}
                     placeholder="مثلاً: اجتماع شهري"
-                    className="form-input"
+                    className={`form-input ${activityErrors.title ? 'form-input-error' : ''}`}
                   />
+                  {activityErrors.title && (
+                    <span className="error-message">{activityErrors.title}</span>
+                  )}
                 </div>
 
-              <div className="form-group">
-  <label>نوع الفعالية *</label>
-  <select
-    name="type"
-    value={activityData.type}
-    onChange={handleActivityChange}
-    className="form-input"
-    required
-  >
-    <option value="">-- اختار نوع الفعالية --</option>
-    <option value="داخلي">داخلي</option>
-    <option value="خارجي">خارجي</option>
-    <option value="نشاط رياضي">نشاط رياضي</option>
-    <option value="نشاط ثقافي">نشاط ثقافي</option>
-    <option value="نشاط بيئي">نشاط بيئي</option>
-    <option value="نشاط اجتماعي">نشاط اجتماعي</option>
-    <option value="نشاط علمي">نشاط علمي</option>
-    <option value="نشاط خدمة عامة">نشاط خدمة عامة</option>
-    <option value="نشاط فني">نشاط فني</option>
-    <option value="نشاط معسكرات">نشاط معسكرات</option>
-    <option value="اسر">اسر</option>
-    <option value="اخر">اخر</option>
-  </select>
-</div>
-
+                <div className="form-group">
+                  <label>نوع الفعالية *</label>
+                  <select
+                    name="type"
+                    value={activityData.type}
+                    onChange={handleActivityChange}
+                    className={`form-input ${activityErrors.type ? 'form-input-error' : ''}`}
+                    required
+                  >
+                    <option value="">-- اختار نوع الفعالية --</option>
+                    <option value="داخلي">داخلي</option>
+                    <option value="خارجي">خارجي</option>
+                    <option value="نشاط رياضي">نشاط رياضي</option>
+                    <option value="نشاط ثقافي">نشاط ثقافي</option>
+                    <option value="نشاط بيئي">نشاط بيئي</option>
+                    <option value="نشاط اجتماعي">نشاط اجتماعي</option>
+                    <option value="نشاط علمي">نشاط علمي</option>
+                    <option value="نشاط خدمة عامة">نشاط خدمة عامة</option>
+                    <option value="نشاط فني">نشاط فني</option>
+                    <option value="نشاط معسكرات">نشاط معسكرات</option>
+                    <option value="اسر">اسر</option>
+                    <option value="اخر">اخر</option>
+                  </select>
+                  {activityErrors.type && (
+                    <span className="error-message">{activityErrors.type}</span>
+                  )}
+                </div>
               </div>
 
               {/* DEPARTMENT */}
@@ -612,7 +683,7 @@ const Dashboard: React.FC = () => {
                   name="dept_id"
                   value={activityData.dept_id}
                   onChange={handleActivityChange}
-                  className="form-select"
+                  className={`form-select ${activityErrors.dept_id ? 'form-input-error' : ''}`}
                 >
                   <option value="">اختر اللجنة</option>
                   {departments.map(dept => (
@@ -621,6 +692,9 @@ const Dashboard: React.FC = () => {
                     </option>
                   ))}
                 </select>
+                {activityErrors.dept_id && (
+                  <span className="error-message">{activityErrors.dept_id}</span>
+                )}
               </div>
 
               {/* DESCRIPTION */}
@@ -631,8 +705,11 @@ const Dashboard: React.FC = () => {
                   value={activityData.description}
                   onChange={handleActivityChange}
                   placeholder="اكتب وصفاً للفعالية..."
-                  className="form-textarea"
+                  className={`form-textarea ${activityErrors.description ? 'form-input-error' : ''}`}
                 />
+                {activityErrors.description && (
+                  <span className="error-message">{activityErrors.description}</span>
+                )}
               </div>
 
               {/* DATE + TIME + MAX */}
@@ -644,8 +721,11 @@ const Dashboard: React.FC = () => {
                     name="date"
                     value={activityData.date}
                     onChange={handleActivityChange}
-                    className="form-input"
+                    className={`form-input ${activityErrors.date ? 'form-input-error' : ''}`}
                   />
+                  {activityErrors.date && (
+                    <span className="error-message">{activityErrors.date}</span>
+                  )}
                 </div>
 
                 <div className="form-group">
@@ -655,8 +735,11 @@ const Dashboard: React.FC = () => {
                     name="endDate"
                     value={activityData.endDate}
                     onChange={handleActivityChange}
-                    className="form-input"
+                    className={`form-input ${activityErrors.endDate ? 'form-input-error' : ''}`}
                   />
+                  {activityErrors.endDate && (
+                    <span className="error-message">{activityErrors.endDate}</span>
+                  )}
                 </div>
 
                 <div className="form-group">
@@ -667,8 +750,11 @@ const Dashboard: React.FC = () => {
                     value={activityData.maxParticipants}
                     onChange={handleActivityChange}
                     placeholder="اختياري"
-                    className="form-input"
+                    className={`form-input ${activityErrors.maxParticipants ? 'form-input-error' : ''}`}
                   />
+                  {activityErrors.maxParticipants && (
+                    <span className="error-message">{activityErrors.maxParticipants}</span>
+                  )}
                 </div>
               </div>
 
@@ -681,8 +767,11 @@ const Dashboard: React.FC = () => {
                   value={activityData.location}
                   onChange={handleActivityChange}
                   placeholder="مثلاً: قاعة الاجتماعات - كلية الهندسة"
-                  className="form-input"
+                  className={`form-input ${activityErrors.location ? 'form-input-error' : ''}`}
                 />
+                {activityErrors.location && (
+                  <span className="error-message">{activityErrors.location}</span>
+                )}
               </div>
 
               {/* OPTIONAL FIELDS */}
@@ -696,8 +785,11 @@ const Dashboard: React.FC = () => {
                     value={activityData.cost}
                     onChange={handleActivityChange}
                     placeholder="اختياري"
-                    className="form-input"
+                    className={`form-input ${activityErrors.cost ? 'form-input-error' : ''}`}
                   />
+                  {activityErrors.cost && (
+                    <span className="error-message">{activityErrors.cost}</span>
+                  )}
                 </div>
 
                 <div className="form-group">
@@ -728,7 +820,10 @@ const Dashboard: React.FC = () => {
               <div className="form-actions">
                 <button
                   className="btn-cancel"
-                  onClick={() => setShowCreateActivityForm(false)}
+                  onClick={() => {
+                    setShowCreateActivityForm(false);
+                    setActivityErrors({});
+                  }}
                 >
                   إلغاء
                 </button>

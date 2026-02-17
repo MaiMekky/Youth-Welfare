@@ -1,0 +1,213 @@
+/* Sidebar specific styles - works with Layout.css */
+.sidebar {
+  /* Base styles from Layout.css are preserved */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ===== Header ===== */
+.sidebar-header {
+  text-align: center;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.sidebar-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 15px 0 0 0;
+  color: white;
+}
+
+/* ===== Logo Circle ===== */
+.headerIcon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.logoCircle {
+  width: 95px;
+  height: 95px;
+ 
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  transition: transform 0.3s ease;
+}
+
+.logoCircle:hover {
+  transform: scale(1.05);
+}
+
+.headerLogo {
+  object-fit: contain;
+  width: 75%;
+  height: 75%;
+}
+
+/* ===== Profile Card ===== */
+.profile-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.profile-icon {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.admin-info h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  color: white;
+}
+
+/* ===== Navigation ===== */
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nav button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: right;
+  width: 100%;
+  font-weight: 500;
+}
+
+.nav button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(-3px);
+}
+
+.nav button.active {
+  background: linear-gradient(90deg, #c49b3a 0%, #a67f2c 100%);
+  box-shadow: 0 4px 12px rgba(196, 155, 58, 0.3);
+}
+
+.nav button svg {
+  flex-shrink: 0;
+}
+
+.nav button span {
+  flex: 1;
+  text-align: right;
+}
+
+/* ===== Mobile ===== */
+.mobile-menu-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 999;
+  background: linear-gradient(135deg, #2d3e7d 0%, #1a2456 100%);
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  display: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar-close-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  display: none;
+  transition: background 0.3s ease;
+}
+
+.sidebar-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+/* Mobile specific styles */
+@media (max-width: 768px) {
+  .mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sidebar-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+
+  .logoCircle {
+    width: 80px;
+    height: 80px;
+  }
+
+  .sidebar-header h2 {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logoCircle {
+    width: 70px;
+    height: 70px;
+  }
+
+  .sidebar-header h2 {
+    font-size: 14px;
+  }
+
+  .nav button {
+    font-size: 14px;
+    padding: 12px 14px;
+  }
+}

@@ -13,9 +13,6 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => 
     gold: "#B38E19",
     lightBg: "#F3F5FD",
     white: "#FFFFFF",
-    sectionBlue: "#B3E5FC",
-    sectionYellow: "#FFF9C4",
-    sectionGreen: "#C8E6C9",
   };
 
   const handleBackClick = () => {
@@ -55,9 +52,45 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => 
     },
     {
       id: 2,
+      title: "مقدمة عن الأسرة المركزية",
+      icon: "🏛️",
+      color: COLORS.white,
+      content: (
+        <>
+          <p className="section-intro">
+            الأسرة المركزية هي وحدة تنظيمية طلابية شاملة تهدف إلى تنمية مهارات الطلاب في جميع المجالات وتعزيز روح العمل الجماعي والمشاركة الفعالة في الأنشطة الطلابية المتنوعة على مستوى الجامعة. تساهم الأسرة المركزية في بناء شخصية الطالب وتطوير مهاراته القيادية والاجتماعية بشكل متكامل.
+          </p>
+          <ul className="checklist">
+            <li>تنظيم الأنشطة والفعاليات الطلابية المتنوعة على مستوى الجامعة</li>
+            <li>تنمية المهارات القيادية والإدارية للطلاب في جميع المجالات</li>
+            <li>تعزيز الانتماء والمشاركة المجتمعية الشاملة</li>
+          </ul>
+        </>
+      ),
+    },
+    {
+      id: 3,
+      title: "مقدمة عن الأسرة النوعية",
+      icon: "🎯",
+      color: COLORS.white,
+      content: (
+        <>
+          <p className="section-intro">
+            الأسرة النوعية هي وحدة تنظيمية طلابية متخصصة تركز على مجال محدد (ثقافي، رياضي، فني، علمي، اجتماعي). تهدف إلى تنمية مهارات الطلاب في هذا المجال المحدد وتعزيز التميز والإبداع فيه. تساهم الأسرة النوعية في اكتشاف المواهب وتطويرها في مجالها التخصصي.
+          </p>
+          <ul className="checklist">
+            <li>تنظيم أنشطة وفعاليات متخصصة في المجال المحدد</li>
+            <li>اكتشاف وتنمية المواهب في المجال التخصصي</li>
+            <li>تحقيق التميز والإبداع في مجال الأسرة</li>
+          </ul>
+        </>
+      ),
+    },
+    {
+      id: 4,
       title: "شروط ومتطلبات إنشاء الأسرة",
       icon: "✅",
-      color: COLORS.sectionYellow,
+      color: COLORS.white,
       content: (
         <div className="requirements-list">
           <p className="section-subtitle">المتطلبات الأساسية:</p>
@@ -71,10 +104,10 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => 
       ),
     },
     {
-      id: 3,
+      id: 5,
       title: "هيكل مجلس إدارة الأسرة",
       icon: "👥",
-      color: COLORS.sectionBlue,
+      color: COLORS.white,
       content: (
         <div className="structure-layout">
           <div className="role-column">
@@ -106,10 +139,10 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => 
       ),
     },
     {
-      id: 4,
+      id: 6,
       title: "خطوات التقديم والمراجعة",
       icon: "✔️",
-      color: COLORS.sectionGreen,
+      color: COLORS.white,
       content: (
         <ol className="step-list">
           <li className="step-item">
@@ -145,7 +178,7 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => 
         <h1 className="main-header-title">طلب إنشاء أسرة طلابية</h1>
         <div className="separator-line-gold"></div>
         <p className="main-header-subtitle">
-          تعرف على خطوات ومطلبات إنشاء أسرة طلابية جديدة
+          تعرف على خطوات ومتطلبات إنشاء أسرة طلابية جديدة
         </p>
       </div>
 
@@ -167,9 +200,8 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => 
       </div>
 
       {/* Footer */}
-
       <div className="action-footer">
-         <button
+        <button
           className="footer-button button-submit"
           onClick={handleSubmitClick}
         >
@@ -179,7 +211,6 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => 
         <button className="footer-button button-back" onClick={handleBackClick}>
           العودة
         </button>
-       
       </div>
     </div>
   );

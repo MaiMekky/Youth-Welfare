@@ -27,13 +27,13 @@ const IconActivities = () => (
   </svg>
 );
 
-const IconUnion = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-    <path d="M17 21v-2a3 3 0 00-3-3H8a3 3 0 00-3 3v2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    <circle cx="11" cy="8" r="3" stroke="currentColor" strokeWidth="1.8"/>
-    <path d="M20 8v4M22 10h-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-  </svg>
-);
+// const IconUnion = () => (
+//   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+//     <path d="M17 21v-2a3 3 0 00-3-3H8a3 3 0 00-3 3v2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+//     <circle cx="11" cy="8" r="3" stroke="currentColor" strokeWidth="1.8"/>
+//     <path d="M20 8v4M22 10h-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+//   </svg>
+// );
 
 const IconFamily = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -102,13 +102,13 @@ const StudentNavbar: React.FC = () => {
   const pathname = usePathname();
 
   const navItems: NavItem[] = [
-    { key: "home",         label: "الرئيسية",        icon: <IconHome />,         href: "/Student/MainPage" },
-    { key: "activities",   label: "الأنشطة",          icon: <IconActivities />,   href: "/Student/Activities", badge: 3 },
-    { key: "union",        label: "اتحاد الطلبة",     icon: <IconUnion />,        href: "/Student/StudentUnion" },
-    { key: "families",     label: "الأسر الطلابية",   icon: <IconFamily />,       href: "/Student/Families" },
-    { key: "familyManage", label: "إدارة الأسر",      icon: <IconFamilyManage />, href: "/Student/manage" },
-    { key: "takafol",      label: "التكافل الاجتماعي",icon: <IconTakafol />,      href: "/Student/takafol" },
-    { key: "profile",      label: "ملفي الشخصي",      icon: <IconProfile />,      href: "/Student/profile" },
+    { key: "home",         label: "الرئيسية",         icon: <IconHome />,         href: "/Student/MainPage"    },
+    { key: "activities",   label: "الأنشطة",           icon: <IconActivities />,   href: "/Student/Activities", badge: 3 },
+    // { key: "union",     label: "اتحاد الطلبة",      icon: <IconUnion />,        href: "/Student/StudentUnion" },
+    { key: "families",     label: "الأسر الطلابية",    icon: <IconFamily />,       href: "/Student/Families"    },
+    { key: "familyManage", label: "إدارة الأسر",       icon: <IconFamilyManage />, href: "/Student/manage"      },
+    { key: "takafol",      label: "التكافل الاجتماعي", icon: <IconTakafol />,      href: "/Student/takafol"     },
+    { key: "profile",      label: "ملفي الشخصي",       icon: <IconProfile />,      href: "/Student/profile"     },
   ];
 
   const handleLogout = () => {

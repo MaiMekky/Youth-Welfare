@@ -1,187 +1,310 @@
 "use client";
-import React, { useState, useRef } from "react";
-import "../Styles/SemesterReports.css";
-import { Upload, Download, Calendar, FileIcon, BarChart3 } from "lucide-react";
+import React, { useEffect, useState, useCallback } from "react";
+import {
+  Download, Calendar, FileText, Building2, BarChart3,
+  RefreshCw, AlertCircle, ChevronLeft, ChevronRight,
+  Layers, BookOpen, Hash,
+} from "lucide-react";
+import styles from "../Styles/SemesterReports.module.css";
 
-interface SemesterReport {
-  id: number;
-  fileName: string;
-  semester: string;
-  size: string;
-  uploadDate: string;
-  submissionDate: string;
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+interface Plan {
+  plan_id: number;
+  name: string;
+  term: number;
+  faculty: number;
+  faculty_name: string;
+  events_count: number;
+  created_at: string;
+  updated_at: string;
 }
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+const getToken = () =>
+  typeof window !== "undefined" ? localStorage.getItem("access") : null;
+
+const BASE = "http://127.0.0.1:8000";
+
+function fmt(d?: string) {
+  if (!d) return "—";
+  return new Date(d).toLocaleDateString("ar-EG", {
+    year: "numeric", month: "short", day: "numeric",
+  });
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+
 export default function SemesterReports() {
-  const [dragActive, setDragActive] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [plans, setPlans]               = useState<Plan[]>([]);
+  const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState("");
+  const [search, setSearch]             = useState("");
+  const [currentPage, setCurrentPage]   = useState(1);
+  const [downloadingId, setDownloadingId] = useState<number | null>(null);
+  const [toastMsg, setToastMsg]         = useState("");
+  const rowsPerPage = 8;
 
-  const [semesterReports] = useState<SemesterReport[]>([
-    {
-      id: 1,
-      fileName: "تقرير الفصل الأول 2024.pdf",
-      semester: "الفصل الأول 2024",
-      size: "1.9 ميجابايت",
-      uploadDate: "2024-02-15",
-      submissionDate: "2024-02-16",
-    },
-    {
-      id: 2,
-      fileName: "تقرير الفصل الثاني 2023.pdf",
-      semester: "الفصل الثاني 2023",
-      size: "2.1 ميجابايت",
-      uploadDate: "2023-07-20",
-      submissionDate: "2023-07-22",
-    },
-  ]);
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(""), 3500);
+  };
 
-  const totalReports = semesterReports.length;
+  // ── Fetch plans ──
+  const fetchPlans = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${BASE}/api/events/plans/list/`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setPlans(Array.isArray(data) ? data : data.results ?? []);
+      setError("");
+    } catch {
+      setError("فشل في جلب البيانات. تحقق من الاتصال.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
+  useEffect(() => { fetchPlans(); }, [fetchPlans]);
+
+  // ── Download PDF ──
+  const handleDownload = async (plan: Plan) => {
+    if (downloadingId !== null) return;
+    setDownloadingId(plan.plan_id);
+    try {
+      const res = await fetch(`${BASE}/api/event/export-plan-pdf/${plan.plan_id}/`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (!res.ok) throw new Error();
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      a.href     = url;
+      a.download = `${plan.name}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("✅ تم تحميل الخطة بنجاح");
+    } catch {
+      showToast("⚠️ فشل تحميل الملف، حاول مجدداً");
+    } finally {
+      setDownloadingId(null);
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFiles(e.dataTransfer.files);
-    }
-  };
+  // ── Stats ──
+  const totalFaculties = new Set(plans.map(p => p.faculty)).size;
+  const totalEvents    = plans.reduce((sum, p) => sum + (p.events_count ?? 0), 0);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    if (e.target.files && e.target.files[0]) {
-      handleFiles(e.target.files);
-    }
-  };
+  // ── Filter ──
+  const filtered = plans.filter(p => {
+    const term = search.toLowerCase();
+    return !search ||
+      p.name?.toLowerCase().includes(term) ||
+      p.faculty_name?.toLowerCase().includes(term) ||
+      p.term?.toString().includes(term);
+  });
 
-  const handleFiles = (files: FileList) => {
-    console.log("Files uploaded:", files);
-    // Handle file upload logic here
-  };
-
-  const onButtonClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleDownload = (id: number) => {
-    console.log("Download report:", id);
-    // Handle download logic
-  };
-
-  const handleSendToAdmin = () => {
-    console.log("Send report to admin");
-    // Handle send to admin logic
-  };
+  const totalPages = Math.max(1, Math.ceil(filtered.length / rowsPerPage));
+  const paginated  = filtered.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   return (
-    <div className="semester-reports-container">
-      {/* Upload Header */}
-      <div className="semester-upload-header">
-        <h2>رفع تقرير الفصل</h2>
-        <button className="semester-send-btn" onClick={handleSendToAdmin}>
-          <Upload size={18} />
-          إرسال للإدارة العامة
+    <div className={styles.root}>
+
+      {/* ── Header ── */}
+      <div className={styles.header}>
+        <div className={styles.headerText}>
+          <h1>خطط الفعاليات الفصلية</h1>
+          <p>عرض وتحميل خطط الفعاليات المقدمة من الكليات</p>
+        </div>
+        <button className={styles.refreshBtn} onClick={fetchPlans}>
+          <RefreshCw size={14} /> تحديث
         </button>
       </div>
 
-      {/* Upload Area */}
-      <div
-        className={`semester-upload-area ${dragActive ? "drag-active" : ""}`}
-        onDragEnter={handleDrag}
-        onDragLeave={handleDrag}
-        onDragOver={handleDrag}
-        onDrop={handleDrop}
-        onClick={onButtonClick}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          className="semester-upload-input"
-          onChange={handleChange}
-          accept=".pdf,.doc,.docx,.xlsx,.xls,.ppt,.pptx"
-        />
-        <div className="semester-upload-icon">
-          <Upload size={48} />
+      {/* ── Stat Cards ── */}
+      <div className={styles.statsRow}>
+        <div className={`${styles.statCard} ${styles.blue}`}>
+          <div className={styles.statIcon}><Layers size={20} /></div>
+          <div className={styles.statBody}>
+            <div className={styles.statNum}>{plans.length}</div>
+            <div className={styles.statLabel}>إجمالي الخطط</div>
+          </div>
         </div>
-        <h3>اختر ملف تقرير الفصل</h3>
-        <p>يمكنك رفع ملفات PDF, DOC, DOCX, XLSX, PPT, PPTX</p>
+
+        <div className={`${styles.statCard} ${styles.gold}`}>
+          <div className={styles.statIcon}><Building2 size={20} /></div>
+          <div className={styles.statBody}>
+            
+          </div>
+        </div>
+
+        <div className={`${styles.statCard} ${styles.teal}`}>
+          <div className={styles.statIcon}><BarChart3 size={20} /></div>
+          <div className={styles.statBody}>
+            <div className={styles.statNum}>{totalEvents}</div>
+            <div className={styles.statLabel}>إجمالي الفعاليات</div>
+          </div>
+        </div>
       </div>
 
-      {/* Submitted Reports Table */}
-      <div className="semester-submitted-section">
-        <h2>التقارير المرفوعة سابقًا</h2>
+      {/* ── Table Card ── */}
+      <div className={styles.tableCard}>
 
-        <div className="semester-table-wrapper">
-          <table className="semester-table">
-            <thead>
-              <tr>
-                <th>الإجراءات</th>
-                <th>تاريخ الإرسال</th>
-                <th>تاريخ الرفع</th>
-                <th>الحجم</th>
-                <th>الفصل الدراسي</th>
-                <th>اسم الملف</th>
-              </tr>
-            </thead>
-            <tbody>
-              {semesterReports.map((report) => (
-                <tr key={report.id}>
-                  <td>
-                    <button
-                      className="semester-download-btn"
-                      onClick={() => handleDownload(report.id)}
-                      title="تحميل"
-                    >
-                      <Download size={18} />
-                      تحميل
-                    </button>
-                  </td>
-                  <td>
-                    <div className="semester-date-cell">
-                      <Calendar size={16} />
-                      {report.submissionDate}
-                    </div>
-                  </td>
-                  <td>
-                    <div className="semester-date-cell">
-                      <Calendar size={16} />
-                      {report.uploadDate}
-                    </div>
-                  </td>
-                  <td>{report.size}</td>
-                  <td>
-                    <div className="semester-name-cell">
-                      <FileIcon size={16} />
-                      {report.semester}
-                    </div>
-                  </td>
-                  <td className="semester-file-name">
-                    <FileIcon size={16} />
-                    {report.fileName}
-                  </td>
+        {/* Toolbar */}
+        <div className={styles.toolbar}>
+          <h2 className={styles.toolbarTitle}>قائمة خطط الفعاليات</h2>
+          <input
+            className={styles.searchInput}
+            placeholder="🔍 ابحث بالاسم، الكلية، الفصل…"
+            value={search}
+            onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
+          />
+        </div>
+
+        {/* Error */}
+        {error && (
+          <div className={styles.errorBanner}>
+            <AlertCircle size={16} /> {error}
+          </div>
+        )}
+
+        {/* Table */}
+        <div className={styles.tableWrap}>
+          {loading ? (
+            <div className={styles.stateBox}>
+              <RefreshCw size={36} className={styles.spinner} />
+              <p>جاري تحميل البيانات…</p>
+            </div>
+          ) : paginated.length === 0 ? (
+            <div className={styles.stateBox}>
+              <BookOpen size={44} />
+              <p>لا توجد خطط مطابقة</p>
+            </div>
+          ) : (
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>اسم الخطة</th>
+                  <th>الكلية</th>
+                  <th>الفصل الدراسي</th>
+                  <th>عدد الفعاليات</th>
+                  <th>تاريخ الإنشاء</th>
+                  <th>آخر تحديث</th>
+                  <th>الإجراءات</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {paginated.map(plan => (
+                  <tr key={plan.plan_id}>
+
+                    <td className={styles.idCell}>#{plan.plan_id}</td>
+
+                    <td>
+                      <div className={styles.nameCell}>
+                        <FileText size={14} />
+                        {plan.name || "—"}
+                      </div>
+                    </td>
+
+                    <td>
+                      <div className={styles.facultyCell}>
+                        <Building2 size={13} />
+                        {plan.faculty_name || "—"}
+                      </div>
+                    </td>
+
+                    <td>
+                      <span className={styles.termBadge}>
+                        الفصل {plan.term ?? "—"}
+                      </span>
+                    </td>
+
+                    <td>
+                      <div className={styles.countCell}>
+                        <Hash size={13} />
+                        {plan.events_count ?? 0} فعالية
+                      </div>
+                    </td>
+
+                    <td>
+                      <div className={styles.dateCell}>
+                        <Calendar size={12} />
+                        {fmt(plan.created_at)}
+                      </div>
+                    </td>
+
+                    <td>
+                      <div className={styles.dateCell}>
+                        <Calendar size={12} />
+                        {fmt(plan.updated_at)}
+                      </div>
+                    </td>
+
+                    <td>
+                      <button
+                        className={styles.downloadBtn}
+                        onClick={() => handleDownload(plan)}
+                        disabled={downloadingId === plan.plan_id}
+                        title={`تحميل خطة ${plan.name}`}
+                      >
+                        {downloadingId === plan.plan_id ? (
+                          <>
+                            <RefreshCw size={13} style={{ animation: "spin 1s linear infinite" }} />
+                            جاري…
+                          </>
+                        ) : (
+                          <>
+                            <Download size={13} />
+                            تحميل PDF
+                          </>
+                        )}
+                      </button>
+                    </td>
+
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
 
-        {/* Total Count */}
-        <div className="semester-total-count">
-          <BarChart3 size={24} />
-          <span>إجمالي التقارير المرفوعة</span>
-          <strong>{totalReports}</strong>
-        </div>
+        {/* Pagination */}
+        {!loading && filtered.length > 0 && (
+          <div className={styles.pagination}>
+            <span className={styles.pgInfo}>
+              عرض{" "}
+              <strong>{(currentPage - 1) * rowsPerPage + 1}</strong>–
+              <strong>{Math.min(currentPage * rowsPerPage, filtered.length)}</strong>{" "}
+              من <strong>{filtered.length}</strong> خطة
+            </span>
+            <div className={styles.pgControls}>
+              <button
+                className={styles.pgBtn}
+                onClick={() => setCurrentPage(p => p - 1)}
+                disabled={currentPage === 1}
+              >
+                <ChevronRight size={15} />
+              </button>
+              <span className={styles.pgLabel}>{currentPage} / {totalPages}</span>
+              <button
+                className={styles.pgBtn}
+                onClick={() => setCurrentPage(p => p + 1)}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronLeft size={15} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* ── Toast ── */}
+      {toastMsg && <div className={styles.toast}>{toastMsg}</div>}
     </div>
   );
 }

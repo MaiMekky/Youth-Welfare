@@ -57,7 +57,7 @@ export default function Header() {
 
         {/* RIGHT: Title */}
         <div className="headerTitle">
-          <h1 className="headerTitleH1">نظام إدارة الشباب</h1>
+          <h1 className="headerTitleH1">نظام إدارة رعاية الطلاب</h1>
           <p className="headerTitleP">لوحة تحكم المدير العام</p>
         </div>
 

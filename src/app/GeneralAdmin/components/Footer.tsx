@@ -18,8 +18,8 @@ export default function Footer() {
               </svg>
             </div>
             <div>
-              <div className="brandName">جامعة حلوان</div>
-              <div className="brandSub">Helwan University</div>
+              <div className="brandName">جامعة العاصمة</div>
+              <div className="brandSub">Capital University</div>
             </div>
           </div>
           <p className="brandDesc">
@@ -33,8 +33,8 @@ export default function Footer() {
 
         {/* Col 2: نظام إدارة شؤون الشباب */}
         <div className="footerCol">
-          <div className="colTitle">نظام إدارة شؤون الشباب</div>
-          <p className="colDesc">المنصة الرقمية الموحدة لإدارة الأنشطة الطلابية والشبابية بجامعة حلوان</p>
+          <div className="colTitle">نظام إدارة شؤون الطلاب</div>
+          <p className="colDesc">المنصة الرقمية الموحدة لإدارة الأنشطة الطلابية والشبابية بجامعة العاصمة</p>
           {/* <ul className="colListIcon">
             <li><Users size={13} /><span>النظرة العامة</span></li>
             <li><Users size={13} /><span>إدارة الفعاليات</span></li>
@@ -62,7 +62,7 @@ export default function Footer() {
         <div className="footerCol">
           <div className="colTitle">معلومات التواصل</div>
           <ul className="contactList">
-            <li><MapPin size={14} /><span>إدارة رعاية الشباب<br/>جامعة حلوان - عين حلوان</span></li>
+            <li><MapPin size={14} /><span>إدارة رعاية الطلاب<br/>جامعة العاصمة - عين حلوان</span></li>
             <li><Phone size={14} /><span>(202+) 2556-0000</span></li>
             <li><Mail size={14} /><span>youth@helwan.edu.eg</span></li>
             <li><Globe size={14} /><span>www.helwan.edu.eg</span></li>

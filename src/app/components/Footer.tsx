@@ -27,14 +27,14 @@ const Footer: React.FC = () => {
               <div className={styles.footerLogoWrapper}>
                 <Image
                   src={youthLogo}
-                  alt="الإدارة العامة لرعاية الشباب"
+                  alt="الإدارة العامة لرعاية الطلاب"
                   style={{ objectFit: "contain" }}
                   fill
                 />
               </div>
               <div>
-                <h3 style={{ fontSize: "1.25rem", fontWeight: "bold", margin: 0 }}>جامعة حلوان</h3>
-                <p style={{ ...textLightStyle, margin: 0 }}>بوابة رعاية الشباب</p>
+                <h3 style={{ fontSize: "1rem", fontWeight: "bold", margin: 0 }}>جامعة العاصمة</h3>
+                <p style={{ ...textLightStyle, margin: 0 }}>بوابة رعاية الطلاب</p>
               </div>
             </div>
             <p style={{ ...textLightStyle, lineHeight: "1.8", marginBottom: "1.5rem" }}>
@@ -104,7 +104,7 @@ const Footer: React.FC = () => {
 
         <div className={styles.footerBottom}>
           <p style={grayTextStyle}>
-            © 2025 جامعة حلوان - بوابة رعاية الشباب. جميع الحقوق محفوظة.
+            © 2026 جامعة العاصمة - بوابة رعاية الطلاب. جميع الحقوق محفوظة.
           </p>
         </div>
       </div>

@@ -100,8 +100,8 @@ export default function Sidebar({ onNavigate, currentView }: SidebarProps) {
             />
           </div>
           <div className="sidebar-brand">
-            <span className="sidebar-brand-title">إدارة الشباب</span>
-            <span className="sidebar-brand-sub">جامعة حلوان</span>
+            <span className="sidebar-brand-title">إدارة رعاية الطلاب</span>
+            <span className="sidebar-brand-sub">جامعة العاصمة</span>
           </div>
         </div>
 
@@ -149,12 +149,7 @@ export default function Sidebar({ onNavigate, currentView }: SidebarProps) {
           </button>
         </nav>
 
-        {/* Footer label */}
-        <div className="sidebar-footer-label">
-          <span className="sidebar-footer-top">لوحة المدير العام</span>
-          <span className="sidebar-footer-bot">إدارة الشباب</span>
-        </div>
-
+      
       </aside>
 
       {isMobile && isOpen && (

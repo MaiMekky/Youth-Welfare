@@ -1,191 +1,272 @@
-/* ============================================
-   Sidebar.css - matched to first sidebar design
-   ============================================ */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
 
-:root {
-  --logo-size: 110px;
-}
-
-/* ===== Base Sidebar ===== */
+/* ══════════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════════ */
 .sidebar {
   width: min(260px, 85vw);
   min-height: 100vh;
-  background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+  background: linear-gradient(180deg, #1a2744 0%, #243358 55%, #1d2e52 100%);
   color: white;
   display: flex;
   flex-direction: column;
-  padding: clamp(1rem, 2vw, 1.25rem) clamp(0.75rem, 2vw, 0.9375rem);
   position: relative;
   z-index: 10;
   box-sizing: border-box;
+  font-family: 'Cairo', sans-serif;
+  direction: rtl;
+  border-left: 1px solid rgba(201,151,42,0.15);
 }
 
-/* ===== Header ===== */
+/* ══════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════ */
 .sidebar-header {
   text-align: center;
-  margin-bottom: clamp(1.5rem, 3vw, 1.875rem);
+  padding: 28px 16px 16px;
   position: relative;
 }
-.sidebar-header h2 {
-  font-size: clamp(1rem, 2vw, 1.125rem);
-  margin: 0;
-  word-wrap: break-word;
-  color: white;
-  font-weight: 600;
-}
-.sidebar-header p {
-  font-size: clamp(0.75rem, 1.5vw, 0.8125rem);
-  color: #d1d5db;
-  margin-top: clamp(0.25rem, 0.5vw, 0.25rem);
+/* Gold top accent */
+.sidebar-header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #c9972a, #e0aa35, #c9972a);
 }
 
-/* ===== Logo circle ===== */
-.logo-container { display: flex; justify-content: center; }
-.logo-wrapper    { display: flex; justify-content: center; }
+.logo-container,
+.logo-wrapper { display: flex; justify-content: center; }
 
 .logo-circle {
-  width: clamp(80px, 10vw, 110px);
-  height: clamp(80px, 10vw, 110px);
-  margin: clamp(0.5rem, 1.5vw, 0.625rem) auto 0;
+  width: clamp(80px, 10vw, 100px);
+  height: clamp(80px, 10vw, 100px);
   border-radius: 50%;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  background: linear-gradient(145deg, #c9972a, #a87820);
+  box-shadow: 0 4px 18px rgba(201,151,42,0.4), 0 0 0 3px rgba(201,151,42,0.15);
+  margin-bottom: 12px;
   flex-shrink: 0;
 }
 .sidebar-logo {
-  width: 100%;
-  height: 100%;
+  width: 100%; height: 100%;
   object-fit: cover;
-  display: block;
   border-radius: 50%;
+  display: block;
 }
 
-/* ===== Close button (hidden until mobile) ===== */
+.sidebar-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 3px;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+.sidebar-subtitle {
+  font-size: 0.72rem;
+  color: rgba(201,151,42,0.75);
+  margin: 0;
+  font-weight: 600;
+}
+
+/* Close button */
 .sidebar-close-btn {
   display: none;
   position: absolute;
-  top: 0;
-  left: 0;
-  background: transparent;
-  border: none;
-  color: #fff;
+  top: 10px;
+  left: 10px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.7);
+  width: 30px; height: 30px;
+  border-radius: 8px;
   cursor: pointer;
-  padding: 8px;
-  z-index: 1001;
-  min-width: 44px;
-  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 10;
+}
+.sidebar-close-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+/* ══════════════════════════════════════════
+   DIVIDER
+══════════════════════════════════════════ */
+.sidebar-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201,151,42,0.35), transparent);
+  margin: 0 16px 14px;
 }
 
-/* ===== Profile Card ===== */
+/* ══════════════════════════════════════════
+   PROFILE CARD
+══════════════════════════════════════════ */
 .profile-card {
-  background-color: rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  padding: clamp(0.75rem, 1.5vw, 0.875rem) clamp(0.75rem, 2vw, 0.875rem);
   display: flex;
   align-items: center;
-  gap: clamp(0.5rem, 1.5vw, 0.625rem);
-  margin-bottom: clamp(1.25rem, 2vw, 1.5625rem);
+  gap: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 10px;
+  padding: 10px 13px;
+  margin: 0 12px 16px;
   flex-wrap: wrap;
 }
-.profile-card h3 {
-  margin: 0;
-  font-size: clamp(0.8125rem, 1.5vw, 0.9375rem);
-  font-weight: 600;
-  word-wrap: break-word;
-  color: white;
-}
-.profile-card p {
-  margin: 0;
-  font-size: clamp(0.75rem, 1.5vw, 0.8125rem);
-  color: #cbd5e1;
-}
 .profile-icon {
-  background-color: rgba(255, 255, 255, 0.12);
-  border-radius: 6px;
-  padding: clamp(0.375rem, 1vw, 0.375rem);
+  width: 36px; height: 36px;
+  background: rgba(201,151,42,0.18);
+  border: 1.5px solid rgba(201,151,42,0.3);
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e0aa35;
   flex-shrink: 0;
 }
+.admin-info h3 {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 2px;
+  line-height: 1.2;
+  word-break: break-word;
+}
+.admin-info p {
+  font-size: 0.69rem;
+  color: rgba(255,255,255,0.42);
+  margin: 0;
+  font-weight: 500;
+}
 
-/* ===== Navigation ===== */
+/* ══════════════════════════════════════════
+   NAV
+══════════════════════════════════════════ */
 .nav {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 4px;
+  padding: 0 12px;
+  flex: 1;
 }
+
 .nav button {
   width: 100%;
-  padding: 12px 14px;
+  padding: 11px 12px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  background-color: transparent;
-  color: #fff;
-  border: none;
+  gap: 10px;
+  background: transparent;
+  color: rgba(255,255,255,0.62);
+  border: 1px solid transparent;
   border-radius: 10px;
-  font-size: 15px;
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: 0.3s;
+  transition: all 0.2s;
+  text-align: right;
+  direction: rtl;
   position: relative;
 }
-/* RTL: text right, icon left */
-.nav button span { order: 1; font-weight: 600; }
-.nav button svg  { order: 2; opacity: 0.95; }
+.nav button span:not(.nav-icon-wrap) { flex: 1; }
+
+.nav-icon-wrap {
+  width: 32px; height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.06);
+  border-radius: 8px;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
 
 .nav button:hover {
-  background-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(255,255,255,0.08);
   color: #fff;
-  font-weight: 700;
 }
-.nav button.active {
-  background-color: rgba(255, 255, 255, 0.12);
-  font-weight: 700;
-}
-.nav button.active::after {
-  content: "";
-  position: absolute;
-  top: 10px;
-  bottom: 10px;
-  right: 6px;
-  width: 4px;
-  border-radius: 999px;
-  background: #fff;
+.nav button:hover .nav-icon-wrap {
+  background: rgba(255,255,255,0.1);
 }
 
-/* ===== Mobile menu button ===== */
+.nav button.active {
+  background: rgba(201,151,42,0.13);
+  border-color: rgba(201,151,42,0.26);
+  color: #e0aa35;
+  font-weight: 800;
+}
+.nav button.active .nav-icon-wrap {
+  background: rgba(201,151,42,0.18);
+  color: #e0aa35;
+}
+.nav button.active::before {
+  content: '';
+  position: absolute;
+  top: 8px; bottom: 8px;
+  right: 0;
+  width: 3px;
+  background: #c9972a;
+  border-radius: 3px 0 0 3px;
+}
+
+/* ══════════════════════════════════════════
+   BOTTOM
+══════════════════════════════════════════ */
+.sidebar-footer {
+  padding: 12px 16px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  margin-top: 8px;
+  text-align: center;
+}
+.sidebar-footer span {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.22);
+  font-weight: 600;
+}
+
+/* ══════════════════════════════════════════
+   MOBILE TRIGGER
+══════════════════════════════════════════ */
 .mobile-menu-btn {
   display: none;
   position: fixed;
-  top: 15px;
-  right: 15px;
-  background: #2C3A5F;
-  border: none;
-  border-radius: 6px;
+  top: 14px;
+  right: 14px;
+  background: #1a2744;
+  border: 1px solid rgba(201,151,42,0.3);
+  border-radius: 9px;
   color: #fff;
+  width: 40px; height: 40px;
   z-index: 100;
   cursor: pointer;
-  padding: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  min-width: 44px;
-  min-height: 44px;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.25);
+  transition: background 0.2s;
 }
+.mobile-menu-btn:hover { background: #243358; }
 
-/* ===== Overlay ===== */
+/* ══════════════════════════════════════════
+   OVERLAY
+══════════════════════════════════════════ */
 .sidebar-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(10,15,35,0.58);
   z-index: 999;
-  display: none;
+  backdrop-filter: blur(2px);
+  display: block;
 }
 
-/* ===== Responsive ===== */
+/* ══════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════ */
 @media (max-width: 1024px) {
-  .sidebar { width: min(220px, 80vw); }
+  .sidebar { width: min(230px, 80vw); }
 }
 
 @media (max-width: 768px) {
@@ -195,24 +276,17 @@
     top: 0;
     height: 100vh;
     width: min(260px, 85vw);
-    max-width: 85vw;
-    transition: right 0.3s ease;
+    transition: right 0.3s cubic-bezier(0.4,0,0.2,1);
     z-index: 1000;
+    box-shadow: -8px 0 32px rgba(0,0,0,0.28);
   }
-  .sidebar.open        { right: 0; }
-  .sidebar-close-btn   { display: block; }
-  .mobile-menu-btn     { display: flex; }
-  .sidebar-overlay     { display: block; }
-  .logo-circle         { width: 80px; height: 80px; }
-  .sidebar-header h2   { font-size: clamp(0.875rem, 2vw, 1rem); }
+  .sidebar.open       { right: 0; }
+  .sidebar-close-btn  { display: flex; }
+  .mobile-menu-btn    { display: flex; }
+  .logo-circle        { width: 80px; height: 80px; }
 }
 
 @media (max-width: 480px) {
-  .sidebar { width: min(260px, 90vw); }
-  .nav button {
-    font-size: 0.8125rem;
-    padding: clamp(0.5rem, 1.5vw, 0.625rem) clamp(0.625rem, 1.5vw, 0.75rem);
-  }
-  .logo-circle       { width: 70px; height: 70px; }
-  .sidebar-header h2 { font-size: 0.875rem; }
+  .sidebar   { width: min(260px, 90vw); }
+  .nav button { font-size: 0.845rem; }
 }

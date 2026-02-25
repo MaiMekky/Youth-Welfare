@@ -11,142 +11,119 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ onNavigate, currentView }: SidebarProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen,   setIsOpen]   = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  
-  const [adminInfo, setAdminInfo] = useState({
-    name: "",
-  });
+  const [adminInfo, setAdminInfo] = useState({ name: "" });
 
-  // Check if mobile on mount and resize
   useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    
-    checkIfMobile();
-    window.addEventListener('resize', checkIfMobile);
-    
-    return () => {
-      window.removeEventListener('resize', checkIfMobile);
-    };
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
   }, []);
 
   useEffect(() => {
-    const userDataString = localStorage.getItem("user");
-    if (userDataString) {
-      try {
-        const userData = JSON.parse(userDataString);
-        setAdminInfo({
-          name: userData.name || "مدير النظام",
-        });
-      } catch (error) {
-        console.error("فشل في قراءة بيانات المدير من localStorage", error);
-      }
-    }
+    try {
+      const u = localStorage.getItem("user");
+      if (u) setAdminInfo({ name: JSON.parse(u).name || "مدير النظام" });
+    } catch {}
   }, []);
 
   const handleNavigate = (view: string) => {
-    if (onNavigate) {
-      onNavigate(view);
-    }
+    onNavigate?.(view);
     if (isMobile) setIsOpen(false);
   };
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      const sidebar = document.getElementById("sidebar");
+    const handler = (e: MouseEvent) => {
+      const sidebar  = document.getElementById("sidebar");
       const mobileBtn = document.querySelector(".mobile-menu-btn");
-      
-      if (isOpen && sidebar && !sidebar.contains(e.target as Node) && !mobileBtn?.contains(e.target as Node)) {
+      if (isOpen && sidebar && !sidebar.contains(e.target as Node) && !mobileBtn?.contains(e.target as Node))
         setIsOpen(false);
-      }
     };
-    
     if (isOpen && isMobile) {
-      document.addEventListener("mousedown", handleClickOutside);
-      document.body.style.overflow = 'hidden';
+      document.addEventListener("mousedown", handler);
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     }
-    
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.body.style.overflow = 'unset';
+      document.removeEventListener("mousedown", handler);
+      document.body.style.overflow = "unset";
     };
   }, [isOpen, isMobile]);
 
+  const NAV = [
+    { id: "activities", label: "إدارة الفعاليات",    Icon: Briefcase },
+    { id: "reports",    label: "التقارير والإنجازات", Icon: BarChart3  },
+    { id: "plan",       label: "خطة الكلية",          Icon: Calendar   },
+  ];
+
   return (
     <>
-      {/* Mobile menu button - only show on mobile */}
       {isMobile && (
-        <button className="mobile-menu-btn" onClick={() => setIsOpen(true)}>
-          <Menu size={24} />
+        <button className="mobile-menu-btn" onClick={() => setIsOpen(true)} aria-label="فتح القائمة">
+          <Menu size={22} />
         </button>
       )}
 
-      <aside id="sidebar" className={`sidebar ${isOpen ? "open" : ""}`}>
+      <aside id="sidebar" className={`sidebar${isOpen ? " open" : ""}`} dir="rtl">
+
+        {/* ── Header ── */}
         <div className="sidebar-header">
           <div className="logo-container">
             <div className="logo-wrapper">
               <div className="logo-circle">
-                <Image 
-                  src={logo} 
-                  alt="College Logo" 
-                  className="sidebar-logo"
-                  width={120}
-                  height={120}
-                />
+                <Image src={logo} alt="شعار الجامعة" className="sidebar-logo" width={110} height={110} />
               </div>
             </div>
           </div>
-          <h2 className="sidebar-title">المشرف العام للكلية</h2>
-          {/* Close button - only show on mobile */}
+          <h2 className="sidebar-title">جامعة حلوان</h2>
+          <p className="sidebar-subtitle">المشرف العام للكلية</p>
           {isMobile && (
-            <button className="sidebar-close-btn" onClick={() => setIsOpen(false)}>
-              <X size={20} />
+            <button className="sidebar-close-btn" onClick={() => setIsOpen(false)} aria-label="إغلاق">
+              <X size={18} />
             </button>
           )}
         </div>
 
+        {/* ── Gold divider ── */}
+        <div className="sidebar-divider" />
+
+        {/* ── Profile card ── */}
         <div className="profile-card">
           <div className="profile-icon">
-            <User size={22} />
+            <User size={18} />
           </div>
           <div className="admin-info">
-            <h3>{adminInfo.name}</h3>
+            <h3>{adminInfo.name || "مدير النظام"}</h3>
+            <p>مشرف النظام</p>
           </div>
         </div>
-        
+
+        {/* ── Navigation ── */}
         <nav className="nav">
-          <button
-            className={currentView === "activities" ? "active" : ""}
-            onClick={() => handleNavigate("activities")}
-          >
-            <Briefcase size={18} />
-            <span>إدارة الفعاليات</span>
-          </button>
-
-          <button
-            className={currentView === "reports" ? "active" : ""}
-            onClick={() => handleNavigate("reports")}
-          >
-            <BarChart3 size={18} />
-            <span>التقارير والإنجازات</span>
-          </button>
-
-          <button
-            className={currentView === "plan" ? "active" : ""}
-            onClick={() => handleNavigate("plan")}
-          >
-            <Calendar size={18} />
-            <span>خطة الكلية</span>
-          </button>
+          {NAV.map(({ id, label, Icon }) => (
+            <button
+              key={id}
+              className={currentView === id ? "active" : ""}
+              onClick={() => handleNavigate(id)}
+            >
+              <span className="nav-icon-wrap"><Icon size={16} /></span>
+              <span>{label}</span>
+            </button>
+          ))}
         </nav>
+
+        {/* ── Version ── */}
+        <div className="sidebar-footer">
+          <span>v1.0.9</span>
+        </div>
       </aside>
 
-      {/* Overlay - only show on mobile when sidebar is open */}
-      {isMobile && isOpen && <div className="sidebar-overlay" onClick={() => setIsOpen(false)} />}
+      {isMobile && isOpen && (
+        <div className="sidebar-overlay" onClick={() => setIsOpen(false)} />
+      )}
     </>
   );
 }

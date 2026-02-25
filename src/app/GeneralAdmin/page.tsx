@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import Layout from "./Layout";
 import Activities from "./components/Activities";
+import PlanView from "./components/PlanView";
 
 export default function Page() {
   const [currentView, setCurrentView] = useState("activities");
@@ -11,11 +12,9 @@ export default function Page() {
       case "activities":
         return <Activities />;
       case "reports":
-        // Replace <></> with your Reports component when ready
         return <></>;
       case "plan":
-        // Replace <></> with your CollegeReports component when ready
-        return <></>;
+        return <PlanView />;
       default:
         return <Activities />;
     }

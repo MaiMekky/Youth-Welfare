@@ -102,11 +102,9 @@ export default function ActivityLogsTable() {
 
   return (
     <div className={styles.activityLogsContainer}>
-      <h2 className={styles.logsHeader}>سجلات النشاط والتقارير</h2>
-
-      {/* Filters */}
+      
       <div className={styles.filters}>
-        <button>تصدير ⬇</button>
+        {/* <button>تصدير ⬇</button> */}
         <input type="date" />
 
         <select onChange={(e) => setActionFilter(e.target.value)}>

@@ -15,7 +15,7 @@ export default function Sidebar() {
   const menuItems = [
     { label: "صلاحيات الوصول", href: "/CreateAdmins" },
     { label: "سجلات النشاط", href: "/ActivityLogs" },
-    { label: "إدارة الفعاليات", href: "#" },
+    { label: "إدارة الفعاليات", href: "/SuperAdmin/Events" },
     { label: "إحصائيات الزوار", href: "#" },
     { label: "التكافل الاجتماعي", href: "/SuperAdmin" },
     { label: "الاسر الطلابية", href: "/SuperAdmin-family" },

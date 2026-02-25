@@ -244,13 +244,17 @@ export default function Page() {
       )}
 
       <main className={styles.tabContent}>
-        {activeTab === "central" && (
-          <>
-            <AddButton />
-            <FamiliesGrid families={centralFamilies} showActions={false} />
-          </>
-        )}
-
+     {activeTab === "central" && (
+  <>
+    <AddButton />
+    <FamiliesGrid 
+      families={centralFamilies} 
+      showActions={true} 
+      onApprove={handleApproveFamily}
+      onReject={handleRejectFamily}
+    />
+  </>
+)}
         {activeTab === "quality" && (
           <>
             <Filters

@@ -38,6 +38,7 @@ interface Activity {
   cost: string;
   restrictions: string;
   reward: string;
+  is_registered?: boolean;
 }
 
 const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
@@ -48,8 +49,41 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
   const [loadingActivities, setLoadingActivities] = useState(false);
   const [registeringEventId, setRegisteringEventId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [notification, setNotification] = useState<{
+    show: boolean;
+    message: string;
+    type: 'success' | 'error';
+  }>({ show: false, message: '', type: 'success' });
 
   const token = typeof window !== 'undefined' ? localStorage.getItem('access') : null;
+
+  // Show notification helper
+  const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
+    setNotification({ show: true, message, type });
+    setTimeout(() => {
+      setNotification({ show: false, message: '', type: 'success' });
+    }, 4000);
+  };
+
+  // Helper functions for localStorage persistence
+  const getRegisteredEvents = (): number[] => {
+    if (typeof window === 'undefined') return [];
+    const stored = localStorage.getItem(`registered_events_family_${family.id}`);
+    return stored ? JSON.parse(stored) : [];
+  };
+
+  const saveRegisteredEvent = (eventId: number) => {
+    if (typeof window === 'undefined') return;
+    const registered = getRegisteredEvents();
+    if (!registered.includes(eventId)) {
+      registered.push(eventId);
+      localStorage.setItem(`registered_events_family_${family.id}`, JSON.stringify(registered));
+    }
+  };
+
+  const isEventRegistered = (eventId: number): boolean => {
+    return getRegisteredEvents().includes(eventId);
+  };
 
   // Fetch Posts
   const fetchPosts = async () => {
@@ -102,7 +136,14 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
 
       const data = await res.json();
       const activitiesArray = Array.isArray(data) ? data : data.results || data.events || [];
-      setActivities(activitiesArray);
+      
+      // Mark activities as registered based on localStorage
+      const activitiesWithRegistrationStatus = activitiesArray.map((activity: Activity) => ({
+        ...activity,
+        is_registered: activity.is_registered || isEventRegistered(activity.event_id)
+      }));
+      
+      setActivities(activitiesWithRegistrationStatus);
     } catch (err: any) {
       setError(err.message);
       console.error('Error fetching activities:', err);
@@ -114,7 +155,7 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
   // Register for Event
   const registerForEvent = async (eventId: number) => {
     if (!token) {
-      alert('غير مصرح');
+      showNotification('غير مصرح', 'error');
       return;
     }
 
@@ -141,12 +182,23 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
         throw new Error(msg);
       }
 
-      alert('تم التسجيل في الفعالية بنجاح ✅');
+      // Save to localStorage for persistence
+      saveRegisteredEvent(eventId);
+
+      // Update the activity's registration status immediately
+      setActivities(prevActivities =>
+        prevActivities.map(activity =>
+          activity.event_id === eventId
+            ? { ...activity, is_registered: true }
+            : activity
+        )
+      );
+
+      // Show success notification
+      showNotification('تم التسجيل في الفعالية بنجاح ✅', 'success');
       
-      // Refresh activities list
-      await fetchActivities();
     } catch (err: any) {
-      alert(err.message || 'حصل خطأ أثناء التسجيل');
+      showNotification(err.message || 'حصل خطأ أثناء التسجيل', 'error');
     } finally {
       setRegisteringEventId(null);
     }
@@ -186,6 +238,24 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
 
   return (
     <div className="family-details-page" dir="rtl">
+      {/* Custom Notification */}
+      {notification.show && (
+        <div className={`custom-notification ${notification.type}`}>
+          <div className="notification-content">
+            <span className="notification-icon">
+              {notification.type === 'success' ? '✓' : '✕'}
+            </span>
+            <span className="notification-message">{notification.message}</span>
+          </div>
+          <button 
+            className="notification-close"
+            onClick={() => setNotification({ ...notification, show: false })}
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       {/* Header with Back Button */}
       <div className="details-header-wrapper">
         <button onClick={onBack} className="back-button">
@@ -330,11 +400,15 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
                       )}
                     </div>
                     <button
-                      className="register-event-btn"
+                      className={`register-event-btn ${activity.is_registered ? 'registered' : ''}`}
                       onClick={() => registerForEvent(activity.event_id)}
-                      disabled={registeringEventId === activity.event_id}
+                      disabled={registeringEventId === activity.event_id || activity.is_registered}
                     >
-                      {registeringEventId === activity.event_id ? 'جاري التسجيل...' : 'تسجيل في الفعالية'}
+                      {activity.is_registered 
+                        ? 'تم التسجيل ✓' 
+                        : registeringEventId === activity.event_id 
+                        ? 'جاري التسجيل...' 
+                        : 'تسجيل في الفعالية'}
                     </button>
                   </div>
                 ))}

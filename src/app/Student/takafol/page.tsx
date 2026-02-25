@@ -11,12 +11,9 @@ export default function TakafolPage() {
   const [activeTab, setActiveTab] = useState<string>("info");
   const [showAlert, setShowAlert] = useState(false);
 
-  // ⬅️ دي هنجمع فيها حالة الطلبات اللي جاية من MyRequests
+
   const [requestsStatus, setRequestsStatus] = useState<string[]>([]);
 
-  // ======================================================
-  // 🔥 لو فيه طلب واحد على الأقل مش مقبول → alert يظهر
-  // ======================================================
   useEffect(() => {
     if (requestsStatus.length === 0) return;
 

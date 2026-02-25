@@ -1,6 +1,28 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Events.css';
+
+/* ══════════════════════════════════════════
+   TYPES
+══════════════════════════════════════════ */
+interface ApiEvent {
+  event_id: number;
+  title: string;
+  description: string;
+  st_date: string;
+  end_date: string;
+  location: string;
+  type: string;
+  cost: string;
+  s_limit: number;
+  faculty_name: string;
+  dept_name: string;
+  days_remaining: number;
+  is_full: boolean;
+  current_participants: number;
+  imgs: string | null;
+  reward: string;
+}
 
 interface Event {
   id: number;
@@ -9,64 +31,80 @@ interface Event {
   date: string;
   location: string;
   seats: number;
-  duration: string;
-  category: string;
-  type: 'university' | 'college';
-  image: string;
-  status: 'available' | 'registered' | 'full';
+  takenSeats: number;
+  type: string;
+  faculty: string;
+  dept: string;
+  cost: string;
+  reward: string;
+  isFull: boolean;
+  image: string | null;
+  daysLeft: number;
 }
 
-const EVENTS: Event[] = [
-  { id:1, title:'دوري كرة القدم الجامعي',     description:'منافسات رياضية بين كليات الجامعة في بطولة كرة القدم السنوية', date:'25 ديسمبر 2024', location:'الملاعب الرياضية',  seats:25, duration:'2 ساعة', category:'social',     type:'university', image:'/api/placeholder/400/250', status:'available'  },
-  { id:2, title:'أمسية ثقافية فنية',           description:'أمسية ثقافية تضم عروض فنية ومسرحية ومعارض للطلاب المبدعين', date:'20 ديسمبر 2024', location:'المركز الثقافي',  seats:25, duration:'2 ساعة', category:'cultural',   type:'university', image:'/api/placeholder/400/250', status:'available'  },
-  { id:3, title:'ورشة التطوير المهني',          description:'ورشة تدريبية شاملة لتطوير المهارات المهنية والشخصية للطلاب', date:'15 ديسمبر 2024', location:'المدرج الرئيسي', seats:25, duration:'2 ساعة', category:'scientific', type:'college',    image:'/api/placeholder/400/250', status:'registered' },
-  { id:4, title:'معرض الفنون والإبداع',         description:'معرض سنوي يعرض أعمال الطلاب الفنية في مجالات متعددة',     date:'10 ديسمبر 2024', location:'قاعة المعارض',  seats:50, duration:'3 ساعات', category:'artistic', type:'university', image:'/api/placeholder/400/250', status:'available'  },
-  { id:5, title:'رحلة الإسكندرية التطوعية',    description:'رحلة خدمة مجتمعية وتطوعية للطلاب المشاركين في الجوالة',    date:'5 ديسمبر 2024',  location:'الإسكندرية',    seats:30, duration:'يوم كامل', category:'volunteer', type:'college', image:'/api/placeholder/400/250', status:'available'  },
-  { id:6, title:'ندوة الاتحادات الطلابية',      description:'ندوة لمناقشة دور الاتحادات الطلابية وتطوير العمل التطوعي',  date:'1 ديسمبر 2024',  location:'قاعة الاجتماعات', seats:60, duration:'ساعتان', category:'unions', type:'university', image:'/api/placeholder/400/250', status:'available'  },
-];
+/* ══════════════════════════════════════════
+   MAPPER
+══════════════════════════════════════════ */
+const mapEvent = (e: ApiEvent): Event => ({
+  id:         e.event_id,
+  title:      e.title,
+  description:e.description,
+  date:       new Date(e.st_date).toLocaleDateString('ar-EG', { day:'numeric', month:'long', year:'numeric' }),
+  location:   e.location,
+  seats:      e.s_limit,
+  takenSeats: e.current_participants,
+  type:       e.type,
+  faculty:    e.faculty_name,
+  dept:       e.dept_name,
+  cost:       e.cost,
+  reward:     e.reward,
+  isFull:     e.is_full,
+  image:      e.imgs,
+  daysLeft:   e.days_remaining,
+});
 
-const CATEGORIES = [
-  { id:'all',       name:'جميع الفعاليات',       count:12 },
-  { id:'social',    name:'النشاط الاجتماعي',     count:2  },
-  { id:'scientific',name:'النشاط العلمي',         count:4  },
-  { id:'volunteer', name:'الجوالة والخدمة',       count:2  },
-  { id:'unions',    name:'الاتحادات الطلابية',    count:1  },
-  { id:'artistic',  name:'النشاط الفني',          count:1  },
-  { id:'cultural',  name:'النشاط الثقافي',        count:1  },
-];
-
-const CATEGORY_LABELS: Record<string, string> = {
-  social:'النشاط الاجتماعي', scientific:'النشاط العلمي',
-  cultural:'النشاط الثقافي', artistic:'النشاط الفني',
-  volunteer:'الجوالة', unions:'الاتحادات',
-};
-
-const BADGE_CLASS: Record<string, string> = {
-  social:'badge-social', scientific:'badge-scientific', volunteer:'badge-volunteer',
-  cultural:'badge-cultural', artistic:'badge-artistic', unions:'badge-unions',
-};
-
-// SVG icons
+/* ══════════════════════════════════════════
+   ICONS
+══════════════════════════════════════════ */
 const CalendarIcon = () => (
   <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-    <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
-    <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+    <rect x="3" y="4" width="18" height="18" rx="2"/>
+    <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+    <line x1="3" y1="10" x2="21" y2="10"/>
   </svg>
 );
 const PinIcon = () => (
   <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+    <circle cx="12" cy="10" r="3"/>
   </svg>
 );
 const UsersIcon = () => (
   <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-    <circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    <circle cx="9" cy="7" r="4"/>
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
   </svg>
 );
-const ClockIcon = () => (
+const BuildingIcon = () => (
   <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+    <rect x="2" y="3" width="20" height="18" rx="2"/>
+    <path d="M8 21V9M16 21V9M2 9h20"/>
+  </svg>
+);
+const CoinIcon = () => (
+  <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <circle cx="12" cy="12" r="9"/>
+    <path d="M12 7v2M12 15v2M9.5 9.5C9.5 8.7 10.6 8 12 8s2.5.7 2.5 1.5S13.4 11 12 11s-2.5.7-2.5 1.5S10.6 14 12 14s2.5-.7 2.5-1.5"/>
+  </svg>
+);
+const GiftIcon = () => (
+  <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <polyline points="20 12 20 22 4 22 4 12"/>
+    <rect x="2" y="7" width="20" height="5"/>
+    <line x1="12" y1="22" x2="12" y2="7"/>
+    <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+    <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
   </svg>
 );
 const CheckIcon = () => (
@@ -74,80 +112,125 @@ const CheckIcon = () => (
     <polyline points="20 6 9 17 4 12"/>
   </svg>
 );
-const UploadIcon = () => (
-  <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-    <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-  </svg>
-);
 
+/* ══════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════ */
+const TYPE_BADGE: Record<string, string> = {
+  'نشاط رياضي': 'badge-social',
+  'نشاط علمي':  'badge-scientific',
+  'نشاط ثقافي': 'badge-cultural',
+  'نشاط فني':   'badge-artistic',
+  'تطوعي':      'badge-volunteer',
+  'اتحاد':      'badge-unions',
+};
+const getBadgeClass = (type: string) => TYPE_BADGE[type] ?? 'badge-default';
+const seatsPercent  = (taken: number, total: number) =>
+  total > 0 ? Math.min(100, Math.round((taken / total) * 100)) : 0;
+
+/* ══════════════════════════════════════════
+   COMPONENT
+══════════════════════════════════════════ */
 export default function Events() {
-  const [activeCat,  setActiveCat]  = useState('all');
-  const [activeType, setActiveType] = useState('all');
-  const [drawerEvent, setDrawerEvent] = useState<Event | null>(null);
-  const [formData, setFormData] = useState({
-    studentNumber:'', fullName:'', email:'', phone:'',
-    faculty:'', academicYear:'', notes:'',
-    universityId: null as File | null,
-  });
+  const [events,      setEvents]      = useState<Event[]>([]);
+  const [loading,     setLoading]     = useState(true);
+  const [error,       setError]       = useState<string | null>(null);
+  const [joiningId,   setJoiningId]   = useState<number | null>(null);
+  const [registered,  setRegistered]  = useState<Set<number>>(new Set());
+  const [toast,       setToast]       = useState<{ msg: string; ok: boolean } | null>(null);
+  const [activeType,  setActiveType]  = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const filtered = EVENTS.filter(e => {
-    const catMatch  = activeCat  === 'all' || e.category === activeCat;
-    const typeMatch = activeType === 'all' || e.type     === activeType;
-    return catMatch && typeMatch;
-  });
+  const token = typeof window !== 'undefined' ? localStorage.getItem('access') : null;
 
-  const openDrawer  = (e: Event)  => setDrawerEvent(e);
-  const closeDrawer = ()          => setDrawerEvent(null);
-
-  const handleSubmit = () => {
-    console.log('Submitted:', formData);
-    closeDrawer();
-    setFormData({ studentNumber:'', fullName:'', email:'', phone:'', faculty:'', academicYear:'', notes:'', universityId: null });
+  const showToast = (msg: string, ok: boolean) => {
+    setToast({ msg, ok });
+    setTimeout(() => setToast(null), 3500);
   };
 
+  /* ── Fetch ── */
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch('http://127.0.0.1:8000/api/event/student-events/available/', {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (!res.ok) throw new Error('فشل تحميل الفعاليات');
+        const raw = await res.json();
+        const arr: ApiEvent[] = Array.isArray(raw) ? raw : (raw.results ?? raw.data ?? []);
+        setEvents(arr.map(mapEvent));
+      } catch (e: any) {
+        setError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  /* ── Join ── */
+  const joinEvent = async (id: number) => {
+    if (!token) { showToast('يرجى تسجيل الدخول أولاً', false); return; }
+    try {
+      setJoiningId(id);
+      const res = await fetch(`http://127.0.0.1:8000/api/event/student-events/${id}/join/`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || err.detail || 'فشل التسجيل');
+      }
+      setRegistered(prev => new Set([...prev, id]));
+      setEvents(prev => prev.map(e => e.id === id ? { ...e, takenSeats: e.takenSeats + 1 } : e));
+      showToast('تم التسجيل في الفعالية بنجاح! 🎉', true);
+    } catch (e: any) {
+      showToast(e.message, false);
+    } finally {
+      setJoiningId(null);
+    }
+  };
+
+  /* ── Filters ── */
+  const types    = ['all', ...Array.from(new Set(events.map(e => e.type)))];
+  const filtered = events.filter(e =>
+    (activeType === 'all' || e.type === activeType) &&
+    (!searchQuery || e.title.includes(searchQuery) || e.description.includes(searchQuery))
+  );
+
+  /* ══════════════════════════════════════════
+     RENDER
+  ══════════════════════════════════════════ */
   return (
     <div className="events-page" dir="rtl">
 
-      {/* ══ HERO HEADER ══ */}
+      {/* ── Toast ── */}
+      {toast && (
+        <div className={`ev-toast ${toast.ok ? 'ev-toast-success' : 'ev-toast-error'}`}>
+          {toast.ok ? '✅' : '❌'} {toast.msg}
+        </div>
+      )}
+
+      {/* ══ HERO ══ */}
       <div className="events-hero">
         <div className="hero-inner">
           <div className="hero-text">
             <h1 className="hero-title">جميع الأنشطة والفعاليات</h1>
-            <p className="hero-sub">استكشف الفعاليات والأنشطة المتاحة وسجّل في ما يناسبك</p>
+            <p className="hero-sub">استكشف الفعاليات المتاحة وسجّل في ما يناسبك مباشرةً</p>
           </div>
           <span className="hero-count">{filtered.length} فعالية</span>
         </div>
 
-        {/* Category filters as tabs inside hero */}
+        {/* Dynamic type tabs from API data */}
         <div className="hero-filters">
-          {CATEGORIES.map(cat => (
+          {types.map(t => (
             <button
-              key={cat.id}
-              className={`filter-pill${activeCat === cat.id ? ' active' : ''}`}
-              onClick={() => setActiveCat(cat.id)}
+              key={t}
+              className={`filter-pill${activeType === t ? ' active' : ''}`}
+              onClick={() => setActiveType(t)}
             >
-              {cat.name}
-              <span className="pill-count">{cat.count}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ══ TYPE BAR ══ */}
-      <div className="type-bar">
-        <div className="type-toggle">
-          {[
-            { id:'all',        label:'الكل' },
-            { id:'university', label:'فعاليات الجامعة' },
-            { id:'college',    label:'فعاليات الكلية'  },
-          ].map(t => (
-            <button
-              key={t.id}
-              className={`type-btn${activeType === t.id ? ' active' : ''}`}
-              onClick={() => setActiveType(t.id)}
-            >
-              {t.label}
+              {t === 'all' ? 'جميع الفعاليات' : t}
             </button>
           ))}
         </div>
@@ -155,168 +238,132 @@ export default function Events() {
 
       {/* ══ BODY ══ */}
       <div className="events-body">
-        <div className="results-bar">
+
+        {/* Search + count */}
+        <div className="search-bar-row">
+          <div className="search-wrap">
+            <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input
+              className="search-input"
+              type="text"
+              placeholder="ابحث عن فعالية..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
+          </div>
           <span className="results-label">عرض <strong>{filtered.length}</strong> فعالية</span>
         </div>
 
-        <div className="events-grid">
-          {filtered.length === 0 && (
-            <div className="empty-state">
-              <p>لا توجد فعاليات تطابق الفلتر المحدد</p>
-            </div>
-          )}
-
-          {filtered.map(event => (
-            <div key={event.id} className="event-card">
-              {/* Image */}
-              <div className="event-image">
-                <img src={event.image} alt={event.title} />
-                <span className={`event-badge ${BADGE_CLASS[event.category] || ''}`}>
-                  {CATEGORY_LABELS[event.category] || event.category}
-                </span>
-                {event.status === 'registered' && (
-                  <span className="status-badge">تم التسجيل</span>
-                )}
-                <span className={`type-badge ${event.type}`}>
-                  {event.type === 'university' ? 'متاح للتسجيل' : 'فعالية الكلية'}
-                </span>
-              </div>
-
-              {/* Content */}
-              <div className="event-content">
-                <h3 className="event-title">{event.title}</h3>
-                <p className="event-description">{event.description}</p>
-
-                <div className="event-meta">
-                  <div className="meta-item"><CalendarIcon />{event.date}</div>
-                  <div className="meta-item"><PinIcon />{event.location}</div>
-                  <div className="meta-item"><UsersIcon />{event.seats} مقعد</div>
-                  <div className="meta-item"><ClockIcon />{event.duration}</div>
-                </div>
-
-                {event.status === 'registered' ? (
-                  <button className="register-btn registered-btn">
-                    <CheckIcon /> تم التسجيل مسبقاً
-                  </button>
-                ) : (
-                  <button className="register-btn" onClick={() => openDrawer(event)}>
-                    التسجيل في النشاط
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ══ REGISTRATION DRAWER ══ */}
-      {drawerEvent && (
-        <>
-          <div className="drawer-overlay" onClick={closeDrawer} />
-          <div className="drawer">
-            {/* Drawer header */}
-            <div className="drawer-header">
-              <button className="drawer-close" onClick={closeDrawer}>×</button>
-              <p className="drawer-event-title">{drawerEvent.title}</p>
-              <p className="drawer-event-meta">{drawerEvent.date} · {drawerEvent.location}</p>
-            </div>
-
-            {/* Drawer body */}
-            <div className="drawer-body">
-              <div className="reg-form">
-
-                <p className="drawer-section">البيانات الشخصية</p>
-
-                <div className="reg-row">
-                  <div className="reg-group">
-                    <label>رقم الطالب *</label>
-                    <input type="text" placeholder="أدخل رقم الطالب"
-                      value={formData.studentNumber}
-                      onChange={e => setFormData({...formData, studentNumber: e.target.value})} />
-                  </div>
-                  <div className="reg-group">
-                    <label>الاسم الكامل *</label>
-                    <input type="text" placeholder="أدخل اسمك بالكامل"
-                      value={formData.fullName}
-                      onChange={e => setFormData({...formData, fullName: e.target.value})} />
-                  </div>
-                </div>
-
-                <div className="reg-row">
-                  <div className="reg-group">
-                    <label>البريد الإلكتروني *</label>
-                    <input type="email" placeholder="i@student.university.edu.eg"
-                      value={formData.email}
-                      onChange={e => setFormData({...formData, email: e.target.value})} />
-                  </div>
-                  <div className="reg-group">
-                    <label>رقم الهاتف *</label>
-                    <input type="tel" placeholder="01XXXXXXXXX"
-                      value={formData.phone}
-                      onChange={e => setFormData({...formData, phone: e.target.value})} />
-                  </div>
-                </div>
-
-                <div className="reg-row">
-                  <div className="reg-group">
-                    <label>الكلية *</label>
-                    <select value={formData.faculty}
-                      onChange={e => setFormData({...formData, faculty: e.target.value})}>
-                      <option value="">اختر الكلية</option>
-                      <option value="engineering">كلية الهندسة</option>
-                      <option value="science">كلية العلوم</option>
-                      <option value="arts">كلية الآداب</option>
-                      <option value="commerce">كلية التجارة</option>
-                    </select>
-                  </div>
-                  <div className="reg-group">
-                    <label>السنة الدراسية *</label>
-                    <select value={formData.academicYear}
-                      onChange={e => setFormData({...formData, academicYear: e.target.value})}>
-                      <option value="">اختر السنة</option>
-                      <option value="1">الأولى</option>
-                      <option value="2">الثانية</option>
-                      <option value="3">الثالثة</option>
-                      <option value="4">الرابعة</option>
-                    </select>
-                  </div>
-                </div>
-
-                <p className="drawer-section">المستندات</p>
-
-                <div className="reg-group">
-                  <label>صورة الهوية الجامعية *</label>
-                  <div className="file-drop">
-                    <label className="file-drop-label" htmlFor="uniId">
-                      <UploadIcon />
-                      <span>{formData.universityId ? formData.universityId.name : 'اضغط لرفع الهوية الجامعية'}</span>
-                    </label>
-                    <input id="uniId" type="file" accept="image/*,.pdf"
-                      onChange={e => setFormData({...formData, universityId: e.target.files?.[0] || null})}
-                      style={{ display:'none' }} />
-                  </div>
-                </div>
-
-                <p className="drawer-section">ملاحظات</p>
-
-                <div className="reg-group">
-                  <label>طلبات خاصة أو ملاحظات</label>
-                  <textarea placeholder="أي طلبات خاصة تريد إضافتها..." rows={3}
-                    value={formData.notes}
-                    onChange={e => setFormData({...formData, notes: e.target.value})} />
-                </div>
-
-              </div>
-            </div>
-
-            {/* Drawer footer */}
-            <div className="drawer-footer">
-              <button className="btn-cancel" onClick={closeDrawer}>إلغاء</button>
-              <button className="btn-submit" onClick={handleSubmit}>تأكيد التسجيل</button>
-            </div>
+        {/* Loading */}
+        {loading && (
+          <div className="ev-center-state">
+            <div className="ev-spinner" />
+            <p>جاري تحميل الفعاليات...</p>
           </div>
-        </>
-      )}
+        )}
+
+        {/* Error */}
+        {!loading && error && (
+          <div className="ev-center-state ev-error">
+            <p>⚠️ {error}</p>
+          </div>
+        )}
+
+        {/* Grid */}
+        {!loading && !error && (
+          <div className="events-grid">
+            {filtered.length === 0 && (
+              <div className="empty-state"><p>لا توجد فعاليات تطابق البحث</p></div>
+            )}
+
+            {filtered.map(event => {
+              const isReg     = registered.has(event.id);
+              const isJoining = joiningId === event.id;
+              const pct       = seatsPercent(event.takenSeats, event.seats);
+
+              return (
+                <div key={event.id} className="event-card">
+
+                  {/* Image */}
+                  <div className="event-image">
+                    {event.image
+                      ? <img src={event.image} alt={event.title} />
+                      : <div className="event-img-placeholder">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                          </svg>
+                          <span>{event.type}</span>
+                        </div>
+                    }
+                    <span className={`event-badge ${getBadgeClass(event.type)}`}>{event.type}</span>
+                    {isReg         && <span className="status-badge">✓ مسجّل</span>}
+                    {event.isFull && !isReg && <span className="full-badge">مكتمل</span>}
+                    {event.daysLeft > 0 && <span className="days-chip">{event.daysLeft} يوم</span>}
+                  </div>
+
+                  {/* Content */}
+                  <div className="event-content">
+                    <h3 className="event-title">{event.title}</h3>
+                    <p className="event-description">{event.description}</p>
+
+                    <div className="event-meta">
+                      <div className="meta-item"><CalendarIcon />{event.date}</div>
+                      <div className="meta-item"><PinIcon />{event.location}</div>
+                      <div className="meta-item"><BuildingIcon />{event.faculty}</div>
+                      <div className="meta-item">
+                        <UsersIcon />{event.takenSeats} / {event.seats} مقعد
+                      </div>
+                      {Number(event.cost) > 0 && (
+                        <div className="meta-item"><CoinIcon />{event.cost} ج.م</div>
+                      )}
+                      {event.reward && (
+                        <div className="meta-item meta-wide"><GiftIcon />{event.reward}</div>
+                      )}
+                    </div>
+
+                    {/* Seats bar */}
+                    <div className="seats-row">
+                      <div className="seats-bar">
+                        <div
+                          className={`seats-fill ${pct >= 90 ? 'seats-fill-danger' : pct >= 60 ? 'seats-fill-warn' : ''}`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      <span className="seats-pct">{pct}%</span>
+                    </div>
+
+                    {/* CTA button — no form, direct API call */}
+                    {isReg ? (
+                      <button className="register-btn registered-btn" disabled>
+                        <CheckIcon /> تم التسجيل
+                      </button>
+                    ) : event.isFull ? (
+                      <button className="register-btn full-btn" disabled>
+                        المقاعد مكتملة
+                      </button>
+                    ) : (
+                      <button
+                        className="register-btn"
+                        onClick={() => joinEvent(event.id)}
+                        disabled={isJoining}
+                      >
+                        {isJoining
+                          ? <><span className="btn-spinner" /> جاري التسجيل...</>
+                          : 'التسجيل في الفعالية'
+                        }
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

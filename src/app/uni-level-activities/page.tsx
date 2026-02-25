@@ -7,7 +7,7 @@ import StatsGrid, { StatItem } from "./component/StatsGrid";
 import { EventItem } from "./component/EventCard";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
-
+import { useParams } from "next/navigation";
 export default function Page() {
   const router = useRouter();
   const goCreate = () => router.push("/uni-level-activities/create");
@@ -64,10 +64,12 @@ export default function Page() {
       { title: "الفعاليات النشطة", value: "12", meta: "+3 هذا الأسبوع", icon: "calendar", accent: "gold" },
     ],
     []
-  );
-
+    );
+  const params = useParams();
+  const eventId = params?.id as string | undefined;
+  const isEditMode = !!eventId;
   const onView = (id: number) => router.push(`/uni-level-activities/${id}`);
-  const onEdit = (id: number) => alert(`تعديل فعالية #${id}`);
+  const onEdit = (id: number) => router.push(`/uni-level-activities/create/${id}`);
   const onDelete = (id: number) => {
     if (confirm("هل تريد حذف الفعالية؟")) {
       setEvents((prev) => prev.filter((e) => e.id !== id));

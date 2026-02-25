@@ -17,7 +17,8 @@ export default function FamilyCard({
   onReject,
 }: FamilyCardProps) {
   const router = useRouter();
-  
+
+const isEcoFamily = family.type === "اصدقاء البيئة";
   if (!family) return null;
 
   const getStatusColor = (status: string) => {
@@ -83,9 +84,9 @@ export default function FamilyCard({
         </div>
       </div>
 
-      {/* Actions */}
+          {/* Actions */}
       <div className={styles.cardActions}>
-        {showActions && (
+        {showActions && !isEcoFamily && (
           <div className={styles.actionRow}>
             <button
               className={`${styles.btn} ${styles.btnApprove}`}
@@ -101,6 +102,7 @@ export default function FamilyCard({
             </button>
           </div>
         )}
+
         <button
           className={`${styles.btn} ${styles.btnDetails}`}
           onClick={handleViewDetails}

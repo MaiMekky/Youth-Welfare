@@ -3,21 +3,18 @@
 import React, { useMemo } from "react";
 import styles from "../styles/PlanCard.module.css";
 import type { PlanItem } from "../page";
-import { Eye, CheckCircle2, FileText } from "lucide-react";
+import { Eye, CalendarDays, Building2, ClipboardList , Pencil} from "lucide-react";
 
-export default function PlanCard({
-  item,
-  onView,
-}: {
+function fmt(iso: string) {
+  if (!iso) return "—";
+  return iso.slice(0, 10);
+}
+export default function PlanCard({ item, onView, onEdit }: {
   item: PlanItem;
-  onView: (id: number) => void;
+  onView: (id:number)=>void;
+  onEdit: (p: PlanItem)=>void;
 }) {
-  const total = Math.max(item.activeEvents + item.proposedEvents, 0);
-  const completed = Math.max(item.completedEvents, 0);
-  const progress = useMemo(() => {
-    if (!total) return 0;
-    return Math.min(100, Math.round((completed / total) * 100));
-  }, [total, completed]);
+  const created = useMemo(() => fmt(item.createdAt), [item.createdAt]);
 
   return (
     <article className={styles.card}>
@@ -26,41 +23,44 @@ export default function PlanCard({
         <p className={styles.desc}>{item.description}</p>
 
         <div className={styles.badges}>
-          <span className={styles.year}>{item.yearLabel}</span>
-          <span className={item.statusLabel === "نشطة" ? styles.active : styles.draft}>
+          <span
+            className={`${styles.badge} ${
+              item.statusLabel === "نشطة" ? styles.badgeActive : styles.badgeDraft
+            }`}
+          >
             {item.statusLabel}
+          </span>
+
+          <span className={`${styles.badge} ${styles.badgeTerm}`}>
+            <ClipboardList size={14} />
+            الفصل {item.term}
+          </span>
+
+          {item.facultyName && (
+            <span className={`${styles.badge} ${styles.badgeFaculty}`}>
+              <Building2 size={14} />
+              {item.facultyName}
+            </span>
+          )}
+
+          <span className={`${styles.badge} ${styles.badgeDate}`} dir="ltr">
+            <CalendarDays size={14} />
+            {created}
           </span>
         </div>
       </div>
 
       <div className={styles.statsRow}>
-        <div className={`${styles.statBox} ${styles.green}`}>
-          <div className={styles.statHead}>
-            <CheckCircle2 size={16} />
-            <span>الفعاليات الفعلية</span>
-          </div>
-          <div className={styles.statValue}>{item.activeEvents}</div>
+        <div className={styles.statBox}>
+          <div className={styles.statLabel}>عدد الفعاليات الفعلية</div>
+          <div className={styles.statValue}>{item.eventsCount}</div>
         </div>
 
-        <div className={`${styles.statBox} ${styles.blue}`}>
-          <div className={styles.statHead}>
-            <FileText size={16} />
-            <span>الفعاليات المقترحة</span>
+        <div className={styles.statBox}>
+          <div className={styles.statLabel}>آخر تحديث</div>
+          <div className={styles.statValueSm} dir="ltr">
+            {fmt(item.updatedAt)}
           </div>
-          <div className={styles.statValue}>{item.proposedEvents}</div>
-        </div>
-      </div>
-
-      <div className={styles.progressWrap}>
-        <div className={styles.progressHead}>
-          <span>نسبة الإنجاز</span>
-          <span>{progress}%</span>
-        </div>
-        <div className={styles.progressBar}>
-          <div className={styles.progressFill} style={{ width: `${progress}%` }} />
-        </div>
-        <div className={styles.progressMeta}>
-          {completed} من {total} فعاليات مكتملة
         </div>
       </div>
 
@@ -69,6 +69,10 @@ export default function PlanCard({
           <Eye size={18} />
           عرض التفاصيل
         </button>
+        <button className={styles.editBtn} onClick={() => onEdit(item)} type="button">
+      <Pencil size={18} />
+      تعديل
+    </button>
       </div>
     </article>
   );

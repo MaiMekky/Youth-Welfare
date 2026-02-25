@@ -33,25 +33,53 @@ export type EventItem = {
 function Chip({ label, variant }: { label: string; variant: ChipVariant }) {
   return <span className={`${styles.chip} ${styles[variant]}`}>{label}</span>;
 }
-
 export default function EventCard({
   item,
   onView,
   onEdit,
   onDelete,
+  decision,         
+  onDecisionChange,  
 }: {
   item?: EventItem;
   onView: (id: number) => void;
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
+  decision?: "approved" | "rejected";
+  onDecisionChange?: (id: number, v: "approved" | "rejected") => void;
 }) {
   if (!item) return null;
 
+  const isApproved = decision === "approved";
   return (
     <article className={styles.card}>
-      <div className={styles.top}>
-        <h3 className={styles.title}>{item.title}</h3>
-        <p className={styles.plan}>{item.planName}</p>
+            <div className={styles.top}>
+        <div className={styles.topRow}>
+        
+          <div className={styles.titleBox}>
+            <h3 className={styles.title}>{item.title}</h3>
+            <p className={styles.plan}>{item.planName}</p>
+          </div>
+           <div className={styles.approvalWrap}>
+            <span className={styles.approvalLabel}>
+              {isApproved ? "مقبول" : "مرفوض"}
+            </span>
+
+            <label className={styles.switch} aria-label="حالة الاعتماد">
+              <input
+                type="checkbox"
+                checked={isApproved}
+                onChange={(e) =>
+                  onDecisionChange?.(
+                    item.id,
+                    e.target.checked ? "approved" : "rejected"
+                  )
+                }
+              />
+              <span className={styles.slider} />
+            </label>
+          </div>
+        </div>
 
         <div className={styles.chips}>
           <Chip label={item.statusLabel} variant={item.statusVariant} />
@@ -87,13 +115,16 @@ export default function EventCard({
       <div className={styles.actions}>
         <button className={styles.danger} onClick={() => onDelete(item.id)}>
           <Trash2 size={18} />
-          حذف
+         الغاء
         </button>
 
-        {/* <button className={styles.secondary} onClick={() => onEdit(item.id)}>
+        <button
+          className={styles.secondary}
+          onClick={() => onEdit(item.id)}
+        >
           <Pencil size={18} />
           تعديل
-        </button> */}
+        </button>
 
         <button className={styles.secondary} onClick={() => onView(item.id)}>
           <Eye size={18} />

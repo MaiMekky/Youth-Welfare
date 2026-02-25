@@ -1,158 +1,308 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styles from "./FacEvents.module.css";
-import {
-  CalendarDays,
-  Building2,
-  Users,
-  ClipboardList,
-  Filter,
-  Eye,
-} from "lucide-react";
+import { CalendarDays, Building2, ClipboardList, Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-type EventRow = {
-  id: number;
+type ApiEvent = {
+  event_id: number;
   title: string;
-  college: string;
-  owner: string;
-  type: "تقني" | "ثقافي" | "رياضي" | "فني";
-  status: "نشط" | "قريباً" | "مكتمل";
-  date: string; // yyyy-mm-dd
-  place: string;
-  cost: string;
-  participants: string; // 45/60
+  description: string;
+  st_date: string; // "2026-02-25"
+  end_date: string;
+  location: string;
+  status: string;
+  type: string;
+  cost: string; // "615"
+  s_limit: number;
+  faculty_id: number;
+  dept_id: number;
 };
 
-const TYPE_BADGE: Record<EventRow["type"], string> = {
-  تقني: "badgeBlue",
-  ثقافي: "badgePurple",
-  رياضي: "badgeRed",
-  فني: "badgeIndigo",
-};
-
-const STATUS_BADGE: Record<EventRow["status"], string> = {
-  نشط: "statusOk",
-  قريباً: "statusAmber",
-  مكتمل: "statusBlue",
+type Faculty = {
+  faculty_id: number;
+  name: string;
 };
 
 export default function Page() {
   const router = useRouter();
 
   const [filters, setFilters] = useState({
-    year: "2024",
-    plan: "الكل",
+    year: "الكل",
     status: "الكل",
     type: "الكل",
-    college: "الكل",
+    college: "الكل", // هنخزن فيها faculty_id كـ string
   });
 
-  const [rows] = useState<EventRow[]>([
-    {
-      id: 1,
-      title: "ورشة البرمجة المتقدمة",
-      college: "كلية الهندسة",
-      owner: "د. محمد أحمد",
-      type: "تقني",
-      status: "نشط",
-      date: "2024-02-15",
-      place: "معمل الحاسبات - مبنى الهندسة",
-      cost: "مجاني",
-      participants: "45/60",
-    },
-    {
-      id: 2,
-      title: "معرض التخرج السنوي",
-      college: "كلية الفنون الجميلة",
-      owner: "د. سارة حسن",
-      type: "ثقافي",
-      status: "قريباً",
-      date: "2024-03-20",
-      place: "قاعة المعارض - كلية الفنون",
-      cost: "مجاني",
-      participants: "120/200",
-    },
-    {
-      id: 3,
-      title: "بطولة كرة السلة",
-      college: "كلية التربية الرياضية",
-      owner: "أ/ كريم محمود",
-      type: "رياضي",
-      status: "مكتمل",
-      date: "2024-01-28",
-      place: "الصالة المغطاة",
-      cost: "مجاني",
-      participants: "180/180",
-    },
-    {
-      id: 4,
-      title: "ورشة رسم وتشكيليات",
-      college: "كلية الفنون الجميلة",
-      owner: "أ/ منة الله",
-      type: "فني",
-      status: "نشط",
-      date: "2024-02-10",
-      place: "مرسم 2 - كلية الفنون",
-      cost: "50 جنيه",
-      participants: "30/50",
-    },
-    {
-      id: 5,
-      title: "ندوة الذكاء الاصطناعي",
-      college: "كلية الحاسبات والمعلومات",
-      owner: "د. أحمد علي",
-      type: "تقني",
-      status: "قريباً",
-      date: "2024-04-05",
-      place: "قاعة المؤتمرات",
-      cost: "100 جنيه",
-      participants: "220/300",
-    },
-  ]);
+  const [rows, setRows] = useState<ApiEvent[]>([]);
+  const [faculties, setFaculties] = useState<Faculty[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  /* ================= API: Faculties ================= */
+  async function fetchFaculties() {
+    try {
+      const token = localStorage.getItem("access");
+      if (!token) return;
+
+      const res = await fetch(
+        "http://localhost:8000/api/solidarity/super_dept/faculties/",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        }
+      );
+
+      if (!res.ok) {
+        console.error("Faculties fetch failed:", res.status);
+        setFaculties([]);
+        return;
+      }
+
+      const data: Faculty[] = await res.json();
+      setFaculties(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error(e);
+      setFaculties([]);
+    }
+  }
+
+  const facultyNameById = useMemo(() => {
+    const map: Record<number, string> = {};
+    faculties.forEach((f) => (map[f.faculty_id] = f.name));
+    return map;
+  }, [faculties]);
+
+  /* ================= API: Events ================= */
+  async function fetchFacultyEvents() {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const token = localStorage.getItem("access");
+      if (!token) {
+        setRows([]);
+        setError("مفيش access token. اعملي تسجيل دخول تاني.");
+        return;
+      }
+
+      const res = await fetch(
+        "http://localhost:8000/api/event/get-events/faculty/",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        }
+      );
+
+      const text = await res.text();
+      console.log("GET events status:", res.status);
+      console.log("GET events raw body:", text);
+
+      if (!res.ok) {
+        setRows([]);
+        setError(`فشل تحميل الفعاليات (Status ${res.status})`);
+        return;
+      }
+
+      const parsed = text ? JSON.parse(text) : [];
+      const data: ApiEvent[] = Array.isArray(parsed) ? parsed : parsed?.results ?? [];
+
+      if (!Array.isArray(data)) {
+        setRows([]);
+        setError("الـ API رجّع شكل بيانات غير متوقع.");
+        return;
+      }
+
+      setRows(data);
+    } catch (err) {
+      console.error(err);
+      setRows([]);
+      setError("حصل خطأ أثناء تحميل الفعاليات");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchFaculties();
+    fetchFacultyEvents();
+  }, []);
+
+  /* ================= Dynamic filter options ================= */
+  const uniqueStatuses = useMemo(() => {
+    const s = Array.from(new Set(rows.map((r) => (r.status || "").trim()).filter(Boolean)));
+    return ["الكل", ...s];
+  }, [rows]);
+
+  const uniqueTypes = useMemo(() => {
+    const s = Array.from(new Set(rows.map((r) => (r.type || "").trim()).filter(Boolean)));
+    return ["الكل", ...s];
+  }, [rows]);
+
+  const uniqueYears = useMemo(() => {
+    const years = Array.from(
+      new Set(
+        rows
+          .map((r) => (r.st_date || "").slice(0, 4))
+          .filter((y) => y && /^\d{4}$/.test(y))
+      )
+    ).sort();
+    return ["الكل", ...years];
+  }, [rows]);
+
+  /* ================= Filtering ================= */
   const filteredRows = useMemo(() => {
     return rows.filter((r) => {
-      const yearOk = filters.year === "الكل" ? true : r.date.startsWith(filters.year);
-      const statusOk = filters.status === "الكل" ? true : r.status === filters.status;
-      const typeOk = filters.type === "الكل" ? true : r.type === filters.type;
-      const collegeOk = filters.college === "الكل" ? true : r.college === filters.college;
-      // plan لسه dummy
-      const planOk = true;
-      return yearOk && statusOk && typeOk && collegeOk && planOk;
+      const yearOk =
+        filters.year === "الكل" ? true : (r.st_date || "").startsWith(filters.year);
+
+      const statusOk =
+        filters.status === "الكل" ? true : (r.status || "") === filters.status;
+
+      const typeOk =
+        filters.type === "الكل" ? true : (r.type || "") === filters.type;
+
+      const collegeOk =
+        filters.college === "الكل"
+          ? true
+          : String(r.faculty_id) === filters.college;
+
+      return yearOk && statusOk && typeOk && collegeOk;
     });
   }, [rows, filters]);
 
+  /* ================= Elegant Status Badge ================= */
+  const statusStyle = (status: string): React.CSSProperties => {
+    const s = (status || "").trim().toLowerCase();
+
+    // Active / Accepted
+    if (s === "نشط" || s === "active" || s === "مقبول" || s === "approved") {
+      return {
+        background: "rgba(16,185,129,.14)",
+        color: "#0f766e",
+        border: "1px solid rgba(16,185,129,.28)",
+      };
+    }
+
+    // Upcoming / Pending-ish
+    if (s === "قريباً" || s === "upcoming" || s === "في الانتظار" || s === "pending") {
+      return {
+        background: "rgba(245,158,11,.16)",
+        color: "#92400e",
+        border: "1px solid rgba(245,158,11,.30)",
+      };
+    }
+
+    // Completed
+    if (s === "مكتمل" || s === "completed" || s === "done") {
+      return {
+        background: "rgba(59,130,246,.14)",
+        color: "#1d4ed8",
+        border: "1px solid rgba(59,130,246,.28)",
+      };
+    }
+
+    // Rejected / Cancelled / Other
+    if (s === "مرفوض" || s === "rejected" || s === "cancelled" || s === "canceled") {
+      return {
+        background: "rgba(239,68,68,.14)",
+        color: "#b91c1c",
+        border: "1px solid rgba(239,68,68,.28)",
+      };
+    }
+
+    // Default
+    return {
+      background: "rgba(100,116,139,.12)",
+      color: "#334155",
+      border: "1px solid rgba(100,116,139,.22)",
+    };
+  };
+
+  const badgeBase: React.CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    padding: "6px 10px",
+    borderRadius: 999,
+    fontWeight: 900,
+    fontSize: 12,
+    lineHeight: 1,
+    whiteSpace: "nowrap",
+  };
+  /* ================= Elegant Type Badge ================= */
+const typeStyle = (type: string): React.CSSProperties => {
+  const t = (type || "").trim().toLowerCase();
+
+  // تقني
+  if (t === "تقني" || t === "technical") {
+    return {
+      background: "rgba(59,130,246,.14)",
+      color: "#1d4ed8",
+      border: "1px solid rgba(59,130,246,.28)",
+    };
+  }
+
+  // ثقافي
+  if (t === "ثقافي" || t === "cultural") {
+    return {
+      background: "rgba(168,85,247,.14)",
+      color: "#6d28d9",
+      border: "1px solid rgba(168,85,247,.28)",
+    };
+  }
+
+  // رياضي
+  if (t === "رياضي" || t === "sports") {
+    return {
+      background: "rgba(239,68,68,.14)",
+      color: "#b91c1c",
+      border: "1px solid rgba(239,68,68,.28)",
+    };
+  }
+
+  // فني
+  if (t === "فني" || t === "art") {
+    return {
+      background: "rgba(14,165,233,.14)",
+      color: "#0369a1",
+      border: "1px solid rgba(14,165,233,.28)",
+    };
+  }
+
+  return {
+    background: "rgba(100,116,139,.12)",
+    color: "#334155",
+    border: "1px solid rgba(100,116,139,.22)",
+  };
+};
+  /* ================= Stats ================= */
   const stats = useMemo(() => {
-    const totalColleges = new Set(rows.map((r) => r.college)).size;
+    const totalColleges = new Set(rows.map((r) => r.faculty_id)).size;
     const totalEvents = rows.length;
 
-    const activeEvents = rows.filter((r) => r.status === "نشط").length;
+    const isActive = (status: string) => {
+      const s = (status || "").trim().toLowerCase();
+      return s === "نشط" || s === "active" || s === "مقبول" || s === "approved";
+    };
 
-    const participantsSum = rows.reduce((acc, r) => {
-      // "45/60" => 45
-      const left = (r.participants.split("/")[0] || "0").trim();
-      const n = Number(left.replaceAll(",", ""));
-      return acc + (Number.isNaN(n) ? 0 : n);
-    }, 0);
+    const activeEvents = rows.filter((r) => isActive(r.status)).length;
 
     return {
       totalColleges,
-      participantsSum,
       activeEvents,
       totalEvents,
     };
   }, [rows]);
 
-  const uniqueColleges = useMemo(() => {
-    const set = Array.from(new Set(rows.map((r) => r.college)));
-    return ["الكل", ...set];
-  }, [rows]);
-
-  const onView = (id: number) => {
-    // لو عندك صفحة تفاصيل للجامعة نفسها
-    router.push(`/uni-level-activities/${id}`);
+  const onView = (eventId: number) => {
+    router.push(`/uni-level-activities/${eventId}`);
   };
 
   return (
@@ -166,26 +316,22 @@ export default function Page() {
           </div>
         </div>
 
-        {/* Stats */}
+        {/* Stats (شيلنا كارت المشاركين) */}
         <div className={styles.statsGrid}>
           <div className={`${styles.statCard} ${styles.statGold}`}>
-            <div className={styles.statIcon}><Building2 size={22} /></div>
+            <div className={styles.statIcon}>
+              <Building2 size={22} />
+            </div>
             <div className={styles.statText}>
               <div className={styles.statLabel}>عدد الكليات</div>
               <div className={styles.statValue}>{stats.totalColleges}</div>
             </div>
           </div>
 
-          <div className={`${styles.statCard} ${styles.statPurple}`}>
-            <div className={styles.statIcon}><Users size={22} /></div>
-            <div className={styles.statText}>
-              <div className={styles.statLabel}>إجمالي المشاركين</div>
-              <div className={styles.statValue}>{stats.participantsSum}</div>
-            </div>
-          </div>
-
           <div className={`${styles.statCard} ${styles.statGreen}`}>
-            <div className={styles.statIcon}><ClipboardList size={22} /></div>
+            <div className={styles.statIcon}>
+              <ClipboardList size={22} />
+            </div>
             <div className={styles.statText}>
               <div className={styles.statLabel}>الفعاليات النشطة</div>
               <div className={styles.statValue}>{stats.activeEvents}</div>
@@ -193,7 +339,9 @@ export default function Page() {
           </div>
 
           <div className={`${styles.statCard} ${styles.statBlue}`}>
-            <div className={styles.statIcon}><CalendarDays size={22} /></div>
+            <div className={styles.statIcon}>
+              <CalendarDays size={22} />
+            </div>
             <div className={styles.statText}>
               <div className={styles.statLabel}>إجمالي الفعاليات</div>
               <div className={styles.statValue}>{stats.totalEvents}</div>
@@ -201,15 +349,8 @@ export default function Page() {
           </div>
         </div>
 
-        {/* Filters */}
+        {/* Filters (شيلنا فلتر الخطة) */}
         <section className={styles.filtersCard}>
-          <div className={styles.filtersHead}>
-            <div className={styles.filtersTitle}>
-              <Filter size={18} />
-              تصفية الفعاليات
-            </div>
-          </div>
-
           <div className={styles.filtersGrid}>
             <div className={styles.field}>
               <label className={styles.label}>الكلية</label>
@@ -218,9 +359,10 @@ export default function Page() {
                 value={filters.college}
                 onChange={(e) => setFilters((p) => ({ ...p, college: e.target.value }))}
               >
-                {uniqueColleges.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
+                <option value="الكل">الكل</option>
+                {faculties.map((f) => (
+                  <option key={f.faculty_id} value={String(f.faculty_id)}>
+                    {f.name}
                   </option>
                 ))}
               </select>
@@ -233,11 +375,11 @@ export default function Page() {
                 value={filters.type}
                 onChange={(e) => setFilters((p) => ({ ...p, type: e.target.value }))}
               >
-                <option value="الكل">الكل</option>
-                <option value="تقني">تقني</option>
-                <option value="ثقافي">ثقافي</option>
-                <option value="رياضي">رياضي</option>
-                <option value="فني">فني</option>
+                {uniqueTypes.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -248,23 +390,11 @@ export default function Page() {
                 value={filters.status}
                 onChange={(e) => setFilters((p) => ({ ...p, status: e.target.value }))}
               >
-                <option value="الكل">الكل</option>
-                <option value="نشط">نشط</option>
-                <option value="قريباً">قريباً</option>
-                <option value="مكتمل">مكتمل</option>
-              </select>
-            </div>
-
-            <div className={styles.field}>
-              <label className={styles.label}>الخطة</label>
-              <select
-                className={styles.select}
-                value={filters.plan}
-                onChange={(e) => setFilters((p) => ({ ...p, plan: e.target.value }))}
-              >
-                <option value="الكل">الكل</option>
-                <option value="خطة 2024">خطة 2024</option>
-                <option value="خطة 2025">خطة 2025</option>
+                {uniqueStatuses.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -275,13 +405,25 @@ export default function Page() {
                 value={filters.year}
                 onChange={(e) => setFilters((p) => ({ ...p, year: e.target.value }))}
               >
-                <option value="2024">2024</option>
-                <option value="2025">2025</option>
-                <option value="الكل">الكل</option>
+                {uniqueYears.map((y) => (
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
         </section>
+
+        {loading && (
+          <div style={{ textAlign: "center", padding: 16 }}>جاري تحميل الفعاليات...</div>
+        )}
+
+        {error && (
+          <div style={{ textAlign: "center", padding: 16, color: "crimson" }}>
+            {error}
+          </div>
+        )}
 
         {/* Table */}
         <section className={styles.tableBlock}>
@@ -293,110 +435,81 @@ export default function Page() {
 
           <div className={styles.tableWrap}>
             <div className={styles.tableScroll}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                    <th>اسم الفعالية</th>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>رقم الفعالية</th>
+                    <th>العنوان</th>
                     <th>الكلية</th>
-                    <th>مسؤول الكلية</th>
-                    <th>النوع</th>
-                    <th>الحالة</th>
-                    <th>التاريخ</th>
+                    <th>الوصف</th>
+                    <th>تاريخ البداية</th>
+                    <th>تاريخ النهاية</th>
                     <th>المكان</th>
+                    <th>الحالة</th>
+                    <th>النوع</th>
                     <th>التكلفة</th>
-                    <th>المشاركون</th>
+                    <th>الحد الأقصى</th>
                     <th>الإجراءات</th>
-                </tr>
+                  </tr>
                 </thead>
 
+                <tbody>
+                  {filteredRows.map((r) => (
+                    <tr key={r.event_id}>
+                      <td>{r.event_id}</td>
+                      <td className={styles.cellTitle}>{r.title}</td>
 
-              <tbody>
-                    {filteredRows.map((r) => (
-                        <tr key={r.id}>
-                        {/* اسم الفعالية */}
-                        <td className={styles.cellTitle}>{r.title}</td>
+                      <td>{facultyNameById[r.faculty_id] ?? "—"}</td>
 
-                        {/* الكلية */}
-                        <td>{r.college}</td>
+                      <td>{r.description}</td>
+                      <td dir="ltr">{r.st_date}</td>
+                      <td dir="ltr">{r.end_date}</td>
+                      <td>{r.location}</td>
 
-                        {/* مسؤول */}
-                        <td>{r.owner}</td>
+                      <td>
+                        <span style={{ ...badgeBase, ...statusStyle(r.status) }}>
+                          {r.status}
+                        </span>
+                      </td>
 
-                        {/* النوع */}
-                        <td>
-                            <span className={styles[TYPE_BADGE[r.type] as keyof typeof styles]}>
-                            {r.type}
-                            </span>
-                        </td>
+                      <td>
+                      <span style={{ ...badgeBase, ...typeStyle(r.type) }}>
+                        {r.type}
+                      </span>
+                    </td>
 
-                        {/* الحالة */}
-                        <td>
-                            <span className={styles[STATUS_BADGE[r.status] as keyof typeof styles]}>
-                            {r.status}
-                            </span>
-                        </td>
+                      <td className={styles.cellValue}>
+                        {r.cost ? `${r.cost} جنيه` : "مجاني"}
+                      </td>
 
-                        {/* التاريخ */}
-                        <td dir="ltr">{r.date}</td>
+                      <td className={styles.cellValue}>{r.s_limit}</td>
 
-                        {/* المكان */}
-                        <td>{r.place}</td>
+                      <td>
+                        <div className={styles.rowActions}>
+                          <button
+                            className={styles.actionBtn}
+                            type="button"
+                            onClick={() => onView(r.event_id)}
+                          >
+                            <Eye size={16} />
+                            عرض التفاصيل
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
 
-                        {/* التكلفة */}
-                        <td className={styles.cellValue}>{r.cost}</td>
-
-                        {/* المشاركون */}
-                        <td className={styles.cellValue}>{r.participants}</td>
-
-                        {/* الإجراءات */}
-                        <td>
-                            <div className={styles.rowActions}>
-                            <button
-                                className={styles.actionBtn}
-                                type="button"
-                                onClick={() => onView(r.id)}
-                            >
-                                <Eye size={16} />
-                                عرض
-                            </button>
-                            </div>
-
-                            {/* Mobile card */}
-                            <div className={styles.mobileCard}>
-                            <div className={styles.mobileTitle}>{r.title}</div>
-
-                            <div className={styles.mobileBadges}>
-                                <span className={styles[TYPE_BADGE[r.type] as keyof typeof styles]}>
-                                {r.type}
-                                </span>
-                                <span className={styles[STATUS_BADGE[r.status] as keyof typeof styles]}>
-                                {r.status}
-                                </span>
-                            </div>
-
-                            <div className={styles.mobileGrid}>
-                                <div><span className={styles.k}>الكلية:</span> {r.college}</div>
-                                <div><span className={styles.k}>مسؤول:</span> {r.owner}</div>
-                                <div><span className={styles.k}>التاريخ:</span> <span dir="ltr">{r.date}</span></div>
-                                <div><span className={styles.k}>المكان:</span> {r.place}</div>
-                                <div><span className={styles.k}>التكلفة:</span> {r.cost}</div>
-                                <div><span className={styles.k}>المشاركون:</span> {r.participants}</div>
-                            </div>
-
-                            <div className={styles.mobileActions}>
-                                <button className={styles.actionBtn} type="button" onClick={() => onView(r.id)}>
-                                <Eye size={16} />
-                                عرض
-                                </button>
-                            </div>
-                            </div>
-                        </td>
-                        </tr>
-                    ))}
-                    </tbody>
-            </table>
+                  {!loading && !error && filteredRows.length === 0 && (
+                    <tr>
+                      <td colSpan={12} style={{ textAlign: "center", padding: 18, color: "#64748b" }}>
+                        لا توجد فعاليات مطابقة للفلاتر
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
         </section>
       </div>
     </div>

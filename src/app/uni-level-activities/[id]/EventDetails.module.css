@@ -412,6 +412,31 @@
   min-width:0;
 }
 
+/* ================= قبول ================= */
+.acceptBtn{
+  background: #e7f8ee;
+  color: #067647;
+  border: 1px solid #a6e3c3;
+}
+
+.acceptBtn:hover{
+  background: #d3f3e2;
+  border-color: #7fd6ac;
+}
+
+
+/* ================= رفض ================= */
+.rejectBtn{
+  background: #fdebed;
+  color: #b42318;
+  border: 1px solid #f5b5ba;
+}
+
+.rejectBtn:hover{
+  background: #fbd5d9;
+  border-color: #ee8f96;
+}
+
 @media (max-width: 980px){
   .infoGrid{ grid-template-columns:repeat(2,minmax(0,1fr)); }
   .infoWide{ grid-column: span 2; }

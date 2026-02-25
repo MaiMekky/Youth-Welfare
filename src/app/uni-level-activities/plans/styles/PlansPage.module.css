@@ -234,6 +234,7 @@
   box-shadow:0 16px 30px rgba(179,142,25,.26);
 }
 
+
 @media (max-width:720px){
   .modalGrid2{ grid-template-columns:1fr; }
 }

@@ -125,6 +125,25 @@ export default function EventDetailsPage() {
     setEditingRankId(null);
     setDraftRank("");
   };
+  /* ===================== قبول/رفض ===================== */
+  const acceptRow = (rowId: number) => {
+    setRows((prev) =>
+      prev.map((r) => (r.id === rowId ? { ...r, status: "مؤكد" } : r))
+    );
+  };
+
+  const rejectRow = (rowId: number) => {
+    setRows((prev) =>
+      prev.map((r) => (r.id === rowId ? { ...r, status: "مرفوض" } : r))
+    );
+  }
+  const acceptAll = () => {
+    setRows((prev) =>
+      prev.map((r) => (r.status === "قيد المراجعة" ? { ...r, status: "مؤكد" } : r))
+    );
+  };
+
+  const pendingCount = rows.filter((r) => r.status === "قيد المراجعة").length;
 
   return (
     <div className={styles.page}>
@@ -242,6 +261,18 @@ export default function EventDetailsPage() {
             <div className={styles.tableChips}>
               <span className={styles.miniChip}><Medal size={14} /> {ranksCount}</span>
               <span className={styles.miniChip}><Award size={14} /> {rewardsCount}</span>
+               {/* زر قبول الجميع */}
+              <button
+                className={`${styles.actionBtn} ${styles.acceptBtn}`}
+                type="button"
+                onClick={acceptAll}
+                disabled={pendingCount === 0}
+                style={{ opacity: pendingCount === 0 ? 0.6 : 1 }}
+                title={pendingCount === 0 ? "لا يوجد طلبات قيد المراجعة" : "قبول جميع الطلبات"}
+              >
+                <Check size={16} />
+                قبول الجميع ({pendingCount})
+              </button>
             </div>
           </div>
 
@@ -292,6 +323,28 @@ export default function EventDetailsPage() {
                     </td>
                     <td>
                       <div className={styles.rowActions}>
+                        {/* قبول/رفض (يظهروا بس لو قيد المراجعة) */}
+                        {r.status === "قيد المراجعة" && (
+                          <>
+                            <button
+                              className={`${styles.actionBtn} ${styles.acceptBtn}`}
+                              type="button"
+                              onClick={() => acceptRow(r.id)}
+                            >
+                              <Check size={16} />
+                              قبول
+                            </button>
+
+                            <button
+                              className={`${styles.actionBtn} ${styles.rejectBtn}`}
+                              type="button"
+                              onClick={() => rejectRow(r.id)}
+                            >
+                              <X size={16} />
+                              رفض
+                            </button>
+                          </>
+                        )}
                         {editingRewardId === r.id ? (
                           <div className={styles.inlineEdit}>
                             <input

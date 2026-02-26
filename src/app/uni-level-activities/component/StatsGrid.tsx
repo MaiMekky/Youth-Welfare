@@ -2,7 +2,7 @@
 
 import React from "react";
 import styles from "../styles/StatsGrid.module.css";
-import { CalendarDays, CheckCircle2, Clock3, Users } from "lucide-react";
+import { CalendarDays, CheckCircle2, Clock3, Users} from "lucide-react";
 
 export type StatItem = {
   title: string;
@@ -23,7 +23,7 @@ export default function StatsGrid({ items }: { items: StatItem[] }) {
   return (
   <div className={styles.statsGrid}>
     {items.map((s, idx) => {
-      const Icon = IconMap[s.icon];
+      const Icon = IconMap[s.icon] ?? Clock3;
       return (
         <div key={idx} className={`${styles.statsCard} ${styles[s.accent]}`}>
           <div className={styles.statsIconWrap}>

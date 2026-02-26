@@ -1,76 +1,148 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styles from "./styles/PlansPage.module.css";
 import PlansGrid from "./components/PlansGrid";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import CreatePlanModal from "./components/CreatePlanModal";
-import Header from "@/app/FacLevel/components/Header";
 import Footer from "@/app/FacLevel/components/Footer";
+import Header from "@/app/FacLevel/components/Header";
+
+type ApiPlan = {
+  plan_id: number;
+  name: string;
+  term: number;
+  faculty: number | null;
+  faculty_name: string | null;
+  events_count: number;
+  created_at: string;
+  updated_at: string;
+};
 
 export type PlanItem = {
   id: number;
   title: string;
   description: string;
-  yearLabel: string;
   statusLabel: "نشطة" | "مسودة";
-  activeEvents: number;
-  proposedEvents: number;
-  completedEvents: number;
+  facultyName: string | null;
+  term: number;
+  eventsCount: number;
+  createdAt: string;
+  updatedAt: string;
 };
+
+const API_URL = "http://localhost:8000/api";
 
 export default function Page() {
   const router = useRouter();
   const goDetails = (id: number) => router.push(`/Events-Faclevel/plans/${id}`);
 
-  const [openCreate, setOpenCreate] = useState(false);
 
-  const [plans, setPlans] = useState<PlanItem[]>([
-    {
-      id: 1,
-      title: "خطة الأنشطة الرياضية",
-      description: "برنامج رياضي متكامل يشمل جميع الألعاب والبطولات على مستوى الجامعة",
-      yearLabel: "العام: 2024",
-      statusLabel: "نشطة",
-      activeEvents: 10,
-      proposedEvents: 20,
-      completedEvents: 4,
-    },
-    {
-      id: 2,
-      title: "خطة الأنشطة الثقافية والفنية",
-      description: "خطة شاملة للأنشطة الثقافية والفنية على مستوى الجامعة للعام الدراسي",
-      yearLabel: "العام: 2024",
-      statusLabel: "نشطة",
-      activeEvents: 8,
-      proposedEvents: 15,
-      completedEvents: 5,
-    },
-    {
-      id: 3,
-      title: "خطة الأنشطة الاجتماعية والتطوعية",
-      description: "مبادرات اجتماعية وتطوعية لخدمة المجتمع وتنمية روح المسؤولية لدى الطلاب",
-      yearLabel: "العام: 2024",
-      statusLabel: "مسودة",
-      activeEvents: 0,
-      proposedEvents: 12,
-      completedEvents: 0,
-    },
-  ]);
+  const [plans, setPlans] = useState<PlanItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+    // داخل Page()
+  const [openModal, setOpenModal] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<null | { id: number; name: string; term: number }>(null);
+
+  // Create
+  const openCreate = () => {
+    setEditingPlan(null);
+    setOpenModal(true);
+  };
+
+  // Edit
+  const openEdit = (p: PlanItem) => {
+    setEditingPlan({ id: p.id, name: p.title, term: p.term });
+    setOpenModal(true);
+  };
+  const toPlanItem = (p: ApiPlan): PlanItem => {
+    const hasEvents = (p.events_count ?? 0) > 0;
+
+    return {
+      id: p.plan_id,
+      title: p.name,
+      description: p.faculty_name ? `خطة خاصة بـ ${p.faculty_name}` : "خطة عامة على مستوى الجامعة",
+      statusLabel: hasEvents ? "نشطة" : "مسودة",
+      facultyName: p.faculty_name,
+      term: p.term,
+      eventsCount: p.events_count ?? 0,
+      createdAt: p.created_at,
+      updatedAt: p.updated_at,
+    };
+  };
+
+  async function fetchPlans() {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const token = localStorage.getItem("access");
+      if (!token) {
+        setPlans([]);
+        setError("مفيش access token. اعملي تسجيل دخول تاني.");
+        return;
+      }
+
+      const res = await fetch(`${API_URL}/events/plans/list/`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
+
+      const text = await res.text();
+      console.log("GET plans status:", res.status);
+      console.log("GET plans raw body:", text);
+
+      if (!res.ok) {
+        setPlans([]);
+        setError(`فشل تحميل الخطط (Status ${res.status})`);
+        return;
+      }
+
+      const parsed = text ? JSON.parse(text) : [];
+      const data: ApiPlan[] = Array.isArray(parsed) ? parsed : parsed?.results ?? [];
+
+      if (!Array.isArray(data)) {
+        setPlans([]);
+        setError("الـ API رجّع شكل بيانات غير متوقع.");
+        return;
+      }
+
+      const mapped = data.map(toPlanItem);
+      setPlans(mapped);
+    } catch (e) {
+      console.error(e);
+      setPlans([]);
+      setError("حصل خطأ أثناء تحميل الخطط");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchPlans();
+  }, []);
+
+  // (اختياري) إنشاء خطة محلياً فقط (لحد ما تربطي POST)
   const onSubmitPlan = (payload: { title: string; year: string }) => {
     const newPlan: PlanItem = {
       id: Date.now(),
       title: payload.title,
-      description: "—",
-      yearLabel: `العام: ${payload.year}`,
+      description: "خطة جديدة (مسودة)",
       statusLabel: "مسودة",
-      activeEvents: 0,
-      proposedEvents: 0,
-      completedEvents: 0,
+      facultyName: null,
+      term: 1,
+      eventsCount: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
     setPlans((prev) => [newPlan, ...prev]);
+    setOpenModal(false);
   };
 
   return (
@@ -80,21 +152,30 @@ export default function Page() {
         <div className={styles.header}>
           <div className={styles.headerText}>
             <h1 className={styles.pageTitle}>إدارة الخطط</h1>
-            <p className={styles.pageSubtitle}>إنشاء وإدارة خطط الأنشطة السنوية</p>
+            <p className={styles.pageSubtitle}>إنشاء وإدارة خطط الأنشطة</p>
           </div>
 
-          <button className={styles.createBtnTop} onClick={() => setOpenCreate(true)}>
-            <Plus size={18} />
-            إنشاء خطة جديدة
-          </button>
+         <button className={styles.createBtnTop} onClick={openCreate}>
+          <Plus size={18} />
+          إنشاء خطة جديدة
+        </button>
         </div>
 
-        <PlansGrid items={plans} onView={goDetails} />
+        {loading && (
+          <div style={{ textAlign: "center", padding: 16 }}>جاري تحميل الخطط...</div>
+        )}
+
+        {error && (
+          <div style={{ textAlign: "center", padding: 16, color: "crimson" }}>{error}</div>
+        )}
+
+        <PlansGrid items={plans} onView={goDetails} onEdit={openEdit} />
 
         <CreatePlanModal
-          open={openCreate}
-          onClose={() => setOpenCreate(false)}
-          onSubmitPlan={onSubmitPlan}
+          open={openModal}
+          onClose={() => setOpenModal(false)}
+          initialPlan={editingPlan}
+          onSaved={fetchPlans}
         />
       </div>
       <Footer />

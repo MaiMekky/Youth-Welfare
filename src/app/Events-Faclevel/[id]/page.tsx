@@ -1,10 +1,8 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styles from "./EventDetails.module.css";
 import { useParams, useRouter } from "next/navigation";
-import Header from "@/app/FacLevel/components/Header";
-import Footer from "@/app/FacLevel/components/Footer";
 import {
   ArrowRight,
   CalendarDays,
@@ -21,6 +19,100 @@ import {
   Check,
   Eye,
 } from "lucide-react";
+import Header from "@/app/FacLevel/components/Header";
+import Footer from "@/app/FacLevel/components/Footer";
+
+const API_URL = "http://localhost:8000";
+
+/* ===================== API helpers ===================== */
+function getAccessToken(): string | null {
+  return (
+    localStorage.getItem("access") ||
+    localStorage.getItem("access_token") ||
+    localStorage.getItem("token") ||
+    null
+  );
+}
+
+async function apiFetch<T>(
+  path: string,
+  opts: RequestInit = {}
+): Promise<
+  { ok: true; data: T } | { ok: false; message: string; status?: number; raw?: any }
+> {
+  const token = getAccessToken();
+  const headers: Record<string, string> = {
+    ...(opts.headers as any),
+  };
+
+  // add content-type only if body exists
+  if (!headers["Content-Type"] && opts.body) headers["Content-Type"] = "application/json";
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(`${API_URL}${path}`, { ...opts, headers });
+    const text = await res.text();
+    const maybeJson = text
+      ? (() => {
+          try {
+            return JSON.parse(text);
+          } catch {
+            return text;
+          }
+        })()
+      : null;
+
+    if (!res.ok) {
+      const msg =
+        (typeof maybeJson === "object" &&
+          maybeJson &&
+          (maybeJson.detail || maybeJson.message || maybeJson.error)) ||
+        (typeof maybeJson === "string" ? maybeJson : "") ||
+        `طلب غير ناجح (${res.status})`;
+
+      return { ok: false, message: String(msg), status: res.status, raw: maybeJson };
+    }
+
+    return { ok: true, data: maybeJson as T };
+  } catch (e: any) {
+    return { ok: false, message: e?.message || "مشكلة في الاتصال" };
+  }
+}
+
+/* ===================== Types ===================== */
+type ApiEventDetails = {
+  event_id: number;
+  created_by_name: string;
+  faculty_name: string | null;
+  dept_name: string | null;
+  family_name: string | null;
+
+  title: string;
+  description: string;
+
+  cost: string;
+  location: string;
+
+  restrictions: string;
+  reward: string;
+  status: string;
+  imgs: string;
+
+  st_date: string;
+  end_date: string;
+  s_limit: number;
+
+  type: string;
+  resource: string;
+
+  selected_facs: number[];
+  active: boolean;
+
+  dept: number;
+  faculty: number | null;
+  created_by: number;
+  family: number | null;
+};
 
 type StudentRow = {
   id: number;
@@ -39,27 +131,30 @@ export default function EventDetailsPage() {
   const params = useParams();
   const id = String(params?.id ?? "");
 
-  const event = useMemo(
-    () => ({
-      id,
-      title: "مؤتمر الذكاء الاصطناعي",
-      subtitle: "معلومات شاملة عن تفاصيل الفعالية والمشاركين",
-      status: "نشط",
-      type: "تقني",
-      scope: "عام - على مستوى الجامعة",
-      cost: "50 جنيه",
-      date: "2024-01-15",
-      time: "10:00 ص",
-      location: "قاعة الاحتفالات الكبرى",
-      reward: "شهادة مشاركة + كتاب",
-      constraints: "طلاب الهندسة والحاسبات",
-      description: "مؤتمر تقني متخصص في تطبيقات الذكاء الاصطناعي",
-      max: 200,
-      registered: 120,
-    }),
-    [id]
-  );
+  /* ===================== Event from API ===================== */
+  const [event, setEvent] = useState<ApiEventDetails | null>(null);
+  const [loadingEvent, setLoadingEvent] = useState(false);
 
+  useEffect(() => {
+    if (!id) return;
+
+    (async () => {
+      setLoadingEvent(true);
+      const res = await apiFetch<ApiEventDetails>(`/api/event/get-events/${id}/`, {
+        method: "GET",
+      });
+      setLoadingEvent(false);
+
+      if (!res.ok) {
+        window.alert(res.message);
+        return;
+      }
+
+      setEvent(res.data);
+    })();
+  }, [id]);
+
+  /* ===================== Students (still local for now) ===================== */
   const [rows, setRows] = useState<StudentRow[]>([
     {
       id: 1,
@@ -68,7 +163,7 @@ export default function EventDetailsPage() {
       level: "الفرقة الثالثة",
       phone: "01234567890",
       nationalId: "30012345678901",
-      status: "قيد المراجعة",
+      status: "مؤكد",
       reward: "",
       rank: "",
     },
@@ -85,11 +180,61 @@ export default function EventDetailsPage() {
     },
   ]);
 
-  const remaining = Math.max(event.max - event.registered, 0);
+  /* ===================== Derived UI values ===================== */
+  const ui = useMemo(() => {
+    if (!event) {
+      return {
+        title: "",
+        subtitle: "معلومات شاملة عن تفاصيل الفعالية والمشاركين",
+        status: "",
+        type: "",
+        scope: "",
+        cost: "",
+        startDate: "",
+        endDate: "",
+        location: "",
+        reward: "",
+        constraints: "",
+        description: "",
+        max: 0,
+      };
+    }
+
+    const scope =
+      event.dept_name
+        ? `على مستوى ${event.dept_name}`
+        : event.dept
+        ? `القسم رقم ${event.dept}`
+        : "—";
+
+    const costNum = Number(String(event.cost ?? "").trim());
+    const costText = !Number.isFinite(costNum) || costNum === 0 ? "مجاني" : `${costNum} جنيه`;
+
+    return {
+      title: event.title ?? "",
+      subtitle: "معلومات شاملة عن تفاصيل الفعالية والمشاركين",
+      status: event.status ?? "",
+      type: event.type ?? "",
+      scope,
+      cost: costText,
+      startDate: event.st_date ?? "",
+      endDate: event.end_date ?? "",
+      location: event.location ?? "",
+      reward: (event.reward ?? "").trim() || "—",
+      constraints: (event.restrictions ?? "").trim() || "—",
+      description: (event.description ?? "").trim() || "—",
+      max: Number(event.s_limit ?? 0),
+    };
+  }, [event]);
+
+  // registered: لحد ما يبقى عندك API للطلاب، هنحسبه من rows
+  const registered = rows.length;
+  const remaining = Math.max(ui.max - registered, 0);
 
   const rewardsCount = rows.filter((r) => (r.reward ?? "").trim().length > 0).length;
   const ranksCount = rows.filter((r) => (r.rank ?? "").trim().length > 0).length;
 
+  /* ===================== Inline edit (reward/rank) ===================== */
   const [editingRewardId, setEditingRewardId] = useState<number | null>(null);
   const [editingRankId, setEditingRankId] = useState<number | null>(null);
   const [draftReward, setDraftReward] = useState("");
@@ -129,24 +274,26 @@ export default function EventDetailsPage() {
 
   /* ===================== قبول/رفض ===================== */
   const acceptRow = (rowId: number) => {
-    setRows((prev) =>
-      prev.map((r) => (r.id === rowId ? { ...r, status: "مؤكد" } : r))
-    );
+    setRows((prev) => prev.map((r) => (r.id === rowId ? { ...r, status: "مؤكد" } : r)));
   };
 
   const rejectRow = (rowId: number) => {
-    setRows((prev) =>
-      prev.map((r) => (r.id === rowId ? { ...r, status: "مرفوض" } : r))
-    );
+    setRows((prev) => prev.map((r) => (r.id === rowId ? { ...r, status: "مرفوض" } : r)));
   };
 
   const acceptAll = () => {
-    setRows((prev) =>
-      prev.map((r) => (r.status === "قيد المراجعة" ? { ...r, status: "مؤكد" } : r))
-    );
+    setRows((prev) => prev.map((r) => (r.status === "قيد المراجعة" ? { ...r, status: "مؤكد" } : r)));
   };
 
   const pendingCount = rows.filter((r) => r.status === "قيد المراجعة").length;
+
+  const statusBadgeClass = useMemo(() => {
+    const s = (ui.status || "").trim();
+    if (s === "نشط") return styles.badgeSuccess;
+    if (s === "منتظر") return styles.badgeBlue; // لو عندك badge ثانية
+    if (s === "غير نشط" || s === "ملغي" || s === "مرفوض") return styles.badgeDanger || styles.badgeBlue;
+    return styles.badgeBlue;
+  }, [ui.status, styles]);
 
   return (
     <div className={styles.page}>
@@ -155,17 +302,23 @@ export default function EventDetailsPage() {
         <div className={styles.topBar}>
           <div className={styles.headText}>
             <h1 className={styles.pageTitle}>تفاصيل الفعالية</h1>
-            <p className={styles.pageSubtitle}>{event.subtitle}</p>
+            <p className={styles.pageSubtitle}>{ui.subtitle}</p>
           </div>
 
-          <button className={styles.backBtn} onClick={() => router.back()}>
+          <button className={styles.backBtn} onClick={() => router.back()} type="button">
             <ArrowRight size={18} />
             العودة للفعاليات
           </button>
         </div>
 
+        {loadingEvent && (
+          <div style={{ fontWeight: 800, opacity: 0.8, margin: "10px 0" }}>
+            جاري تحميل بيانات الفعالية...
+          </div>
+        )}
+
         <div className={styles.hero}>
-          <div className={styles.heroTitle}>{event.title}</div>
+          <div className={styles.heroTitle}>{ui.title || "—"}</div>
         </div>
 
         <div className={styles.statsRow}>
@@ -185,7 +338,7 @@ export default function EventDetailsPage() {
             </div>
             <div className={styles.statText}>
               <div className={styles.statLabel}>الحد الأقصى</div>
-              <div className={styles.statValue}>{event.max}</div>
+              <div className={styles.statValue}>{ui.max}</div>
             </div>
           </div>
 
@@ -195,7 +348,7 @@ export default function EventDetailsPage() {
             </div>
             <div className={styles.statText}>
               <div className={styles.statLabel}>العدد الحالي</div>
-              <div className={styles.statValue}>{event.registered}</div>
+              <div className={styles.statValue}>{registered}</div>
             </div>
           </div>
         </div>
@@ -205,50 +358,53 @@ export default function EventDetailsPage() {
             <div className={styles.infoLabel}>
               <DollarSign size={16} /> التكلفة
             </div>
-            <div className={styles.infoValue}>{event.cost}</div>
+            <div className={styles.infoValue}>{ui.cost}</div>
           </div>
 
           <div className={styles.infoCard}>
             <div className={styles.infoLabel}>
               <ShieldAlert size={16} /> حالة الفعالية
             </div>
-            <div className={styles.badgeSuccess}>{event.status}</div>
+            <div className={statusBadgeClass}>{ui.status || "—"}</div>
           </div>
 
           <div className={styles.infoCard}>
             <div className={styles.infoLabel}>
               <Users size={16} /> نطاق الفعالية
             </div>
-            <div className={styles.infoValue}>{event.scope}</div>
+            <div className={styles.infoValue}>{ui.scope || "—"}</div>
           </div>
 
           <div className={styles.infoCard}>
             <div className={styles.infoLabel}>
               <Timer size={16} /> نوع الفعالية
             </div>
-            <div className={styles.badgeBlue}>{event.type}</div>
+            <div className={styles.badgeBlue}>{ui.type || "—"}</div>
           </div>
 
           <div className={`${styles.infoCard} ${styles.infoWide}`}>
             <div className={styles.infoLabel}>
               <MapPin size={16} /> المكان
             </div>
-            <div className={styles.infoValue}>{event.location}</div>
+            <div className={styles.infoValue}>{ui.location || "—"}</div>
           </div>
 
+          {/* بدل "وقت" نخليها تاريخ البداية والنهاية (علشان API عندك st/end) */}
           <div className={styles.infoCard}>
             <div className={styles.infoLabel}>
-              <Clock size={16} /> وقت الفعالية
-            </div>
-            <div className={styles.infoValue}>{event.time}</div>
-          </div>
-
-          <div className={styles.infoCard}>
-            <div className={styles.infoLabel}>
-              <CalendarDays size={16} /> تاريخ الفعالية
+              <CalendarDays size={16} /> تاريخ البداية
             </div>
             <div className={styles.infoValue} dir="ltr">
-              {event.date}
+              {ui.startDate || "—"}
+            </div>
+          </div>
+
+          <div className={styles.infoCard}>
+            <div className={styles.infoLabel}>
+              <CalendarDays size={16} /> تاريخ النهاية
+            </div>
+            <div className={styles.infoValue} dir="ltr">
+              {ui.endDate || "—"}
             </div>
           </div>
         </section>
@@ -256,18 +412,18 @@ export default function EventDetailsPage() {
         <section className={styles.twoCols}>
           <div className={styles.block}>
             <div className={styles.blockTitle}>المكافأة</div>
-            <div className={styles.blockBody}>{event.reward}</div>
+            <div className={styles.blockBody}>{ui.reward}</div>
           </div>
 
           <div className={styles.block}>
             <div className={styles.blockTitle}>القيود والشروط</div>
-            <div className={styles.blockBody}>{event.constraints}</div>
+            <div className={styles.blockBody}>{ui.constraints}</div>
           </div>
         </section>
 
         <section className={styles.block}>
           <div className={styles.blockTitle}>وصف الفعالية</div>
-          <div className={styles.blockBody}>{event.description}</div>
+          <div className={styles.blockBody}>{ui.description}</div>
         </section>
 
         <section className={styles.tableBlock}>
@@ -284,7 +440,6 @@ export default function EventDetailsPage() {
                 <Award size={14} /> {rewardsCount}
               </span>
 
-              {/* زر قبول الجميع */}
               <button
                 className={`${styles.actionBtn} ${styles.acceptBtn}`}
                 type="button"
@@ -325,30 +480,19 @@ export default function EventDetailsPage() {
                     <td dir="ltr">{r.nationalId}</td>
 
                     <td>
-                      {r.status === "مؤكد" ? (
-                        <span className={styles.statusOk}>{r.status}</span>
-                      ) : r.status === "قيد المراجعة" ? (
-                        <span className={styles.statusPending}>{r.status}</span>
-                      ) : (
-                        <span className={styles.statusReject}>{r.status}</span>
-                      )}
+                      <span className={styles.statusOk}>{r.status}</span>
                     </td>
 
                     <td>
-                      <span className={styles.cellValue}>
-                        {(r.rank ?? "").trim() ? r.rank : "-"}
-                      </span>
+                      <span className={styles.cellValue}>{(r.rank ?? "").trim() ? r.rank : "-"}</span>
                     </td>
 
                     <td>
-                      <span className={styles.cellValue}>
-                        {(r.reward ?? "").trim() ? r.reward : "-"}
-                      </span>
+                      <span className={styles.cellValue}>{(r.reward ?? "").trim() ? r.reward : "-"}</span>
                     </td>
 
                     <td>
                       <div className={styles.rowActions}>
-                        {/* قبول/رفض (يظهروا بس لو قيد المراجعة) */}
                         {r.status === "قيد المراجعة" && (
                           <>
                             <button
@@ -371,7 +515,6 @@ export default function EventDetailsPage() {
                           </>
                         )}
 
-                        {/* مكافأة */}
                         {editingRewardId === r.id ? (
                           <div className={styles.inlineEdit}>
                             <input
@@ -380,11 +523,7 @@ export default function EventDetailsPage() {
                               onChange={(e) => setDraftReward(e.target.value)}
                               placeholder="المكافأة"
                             />
-                            <button
-                              className={styles.iconBtn}
-                              type="button"
-                              onClick={() => saveReward(r.id)}
-                            >
+                            <button className={styles.iconBtn} type="button" onClick={() => saveReward(r.id)}>
                               <Check size={18} />
                             </button>
                             <button className={styles.iconBtn} type="button" onClick={cancelReward}>
@@ -398,7 +537,6 @@ export default function EventDetailsPage() {
                           </button>
                         )}
 
-                        {/* ترتيب */}
                         {editingRankId === r.id ? (
                           <div className={styles.inlineEdit}>
                             <input
@@ -421,11 +559,10 @@ export default function EventDetailsPage() {
                           </button>
                         )}
 
-                        {/* عرض */}
                         <button
                           className={styles.actionBtn}
                           type="button"
-                          onClick={() => router.push(`/uni-level-activities/${event.id}`)}
+                          onClick={() => router.push(`/uni-level-activities/${id}`)}
                         >
                           <Eye size={16} />
                           عرض

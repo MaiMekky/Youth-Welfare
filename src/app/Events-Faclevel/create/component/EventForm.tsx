@@ -4,6 +4,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import styles from "../CreateEvent.module.css";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowRight, Save } from "lucide-react";
+import Footer from "@/app/FacLevel/components/Footer";
+import Header from "@/app/FacLevel/components/Header";
 
 /** ================== API ================== */
 const API_URL = "http://localhost:8000";
@@ -370,6 +372,7 @@ export default function EventForm({
 
   return (
     <div className={styles.page}>
+      <Header />
       <div className={styles.container}>
         <header className={styles.header}>
           <div className={styles.headerText}>
@@ -517,44 +520,7 @@ export default function EventForm({
             />
             {errors.description && <div className={styles.errorText}>{errors.description}</div>}
           </div>
-
-          {/* Faculties */}
-          <div className={`${styles.facultyBox} ${errors.selected_facs ? styles.boxError : ""}`}>
-            <div className={styles.facultyHeader}>
-              <div>
-                <div className={styles.facultyTitle}>الكليات المستهدفة</div>
-                <div className={styles.facultyHint}>اختاري كلية أو أكثر</div>
-              </div>
-
-              <label className={styles.selectAll}>
-                <input
-                  type="checkbox"
-                  checked={allSelected}
-                  ref={(el) => {
-                    if (el) el.indeterminate = someSelected;
-                  }}
-                  onChange={toggleAll}
-                />
-                <span>اختيار كل الكليات</span>
-              </label>
-            </div>
-
-            {errors.selected_facs && <div className={styles.errorText}>{errors.selected_facs}</div>}
-
-            <div className={styles.facultyGrid}>
-              {faculties.map((f) => (
-                <label key={f.id} className={styles.facultyItem}>
-                  <input
-                    type="checkbox"
-                    checked={selectedFacultyIds.includes(f.id)}
-                    onChange={() => toggleOne(f.id)}
-                  />
-                  <span>{f.name}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
+          
           <div className={styles.footer}>
             <button type="button" className={styles.cancelBtn} onClick={() => router.back()} disabled={submitting}>
               إلغاء
@@ -567,6 +533,7 @@ export default function EventForm({
           </div>
         </form>
       </div>
+      <Footer />
     </div>
   );
 }

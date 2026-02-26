@@ -10,7 +10,25 @@
   padding:18px 0 40px;
   overflow:visible;
 }
-
+.actionBtnDanger{
+  border:1px solid rgba(220,38,38,.25);
+  background:rgba(220,38,38,.06);
+  color:#b91c1c;
+  border-radius:12px;
+  padding:10px 12px;
+  font-weight:900;
+  cursor:pointer;
+  transition:all .18s ease;
+}
+.actionBtnDanger:hover{
+  background:#dc2626;
+  color:#fff;
+  border-color:#dc2626;
+}
+.actionBtnDanger:disabled{
+  cursor:not-allowed;
+  opacity:.6;
+}
 .backBtn{
   border:1px solid #e5e7eb;
   background:#fff;

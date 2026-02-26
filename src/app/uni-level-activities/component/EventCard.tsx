@@ -28,53 +28,53 @@ export type EventItem = {
   location: string;
   participantsText: string;
   priceText: string;
+
+  // ✅ جديد
+  isActive: boolean;
 };
 
 function Chip({ label, variant }: { label: string; variant: ChipVariant }) {
   return <span className={`${styles.chip} ${styles[variant]}`}>{label}</span>;
 }
+
 export default function EventCard({
   item,
   onView,
   onEdit,
   onDelete,
-  decision,         
-  onDecisionChange,  
+  onActiveChange,
+  busy,
 }: {
   item?: EventItem;
   onView: (id: number) => void;
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
-  decision?: "approved" | "rejected";
-  onDecisionChange?: (id: number, v: "approved" | "rejected") => void;
+  onActiveChange?: (id: number, nextActive: boolean) => void;
+  busy?: boolean;
 }) {
   if (!item) return null;
 
-  const isApproved = decision === "approved";
   return (
     <article className={styles.card}>
-            <div className={styles.top}>
+      <div className={styles.top}>
         <div className={styles.topRow}>
-        
           <div className={styles.titleBox}>
             <h3 className={styles.title}>{item.title}</h3>
             <p className={styles.plan}>{item.planName}</p>
           </div>
-           <div className={styles.approvalWrap}>
+
+          {/* ✅ السويتش: نشط / غير نشط */}
+          <div className={styles.approvalWrap}>
             <span className={styles.approvalLabel}>
-              {isApproved ? "مقبول" : "مرفوض"}
+              {item.isActive ? "نشط" : "غير نشط"}
             </span>
 
-            <label className={styles.switch} aria-label="حالة الاعتماد">
+            <label className={styles.switch} aria-label="حالة النشاط">
               <input
                 type="checkbox"
-                checked={isApproved}
-                onChange={(e) =>
-                  onDecisionChange?.(
-                    item.id,
-                    e.target.checked ? "approved" : "rejected"
-                  )
-                }
+                checked={item.isActive}
+                disabled={busy}
+                onChange={(e) => onActiveChange?.(item.id, e.target.checked)}
               />
               <span className={styles.slider} />
             </label>
@@ -88,13 +88,13 @@ export default function EventCard({
       </div>
 
       <div className={styles.meta}>
-        <div className={styles.metaRow}>
-          <CalendarDays size={18} />
-          <span dir="ltr">{item.date}</span>
-          <span className={styles.dot}>•</span>
-          <Clock size={18} />
-          <span>{item.time}</span>
-        </div>
+       <div className={styles.metaRow}>
+        <CalendarDays size={18} />
+        <span dir="ltr">{item.date}</span>
+        <span className={styles.dot}>•</span>
+        <CalendarDays size={18} />
+        <span dir="ltr">{item.time}</span>
+      </div>
 
         <div className={styles.metaRow}>
           <MapPin size={18} />
@@ -115,13 +115,10 @@ export default function EventCard({
       <div className={styles.actions}>
         <button className={styles.danger} onClick={() => onDelete(item.id)}>
           <Trash2 size={18} />
-         الغاء
+          الغاء
         </button>
 
-        <button
-          className={styles.secondary}
-          onClick={() => onEdit(item.id)}
-        >
+        <button className={styles.secondary} onClick={() => onEdit(item.id)}>
           <Pencil size={18} />
           تعديل
         </button>

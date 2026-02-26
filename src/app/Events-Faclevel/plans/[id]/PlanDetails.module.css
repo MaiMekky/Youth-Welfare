@@ -10,7 +10,25 @@
   padding:18px 0 40px;
   overflow:visible;
 }
-
+.actionBtnDanger{
+  border:1px solid rgba(220,38,38,.25);
+  background:rgba(220,38,38,.06);
+  color:#b91c1c;
+  border-radius:12px;
+  padding:10px 12px;
+  font-weight:900;
+  cursor:pointer;
+  transition:all .18s ease;
+}
+.actionBtnDanger:hover{
+  background:#dc2626;
+  color:#fff;
+  border-color:#dc2626;
+}
+.actionBtnDanger:disabled{
+  cursor:not-allowed;
+  opacity:.6;
+}
 .backBtn{
   border:1px solid #e5e7eb;
   background:#fff;
@@ -104,7 +122,125 @@
   box-shadow:0 16px 34px rgba(15,23,42,.10);
   border-color:rgba(44,58,95,.14);
 }
+/* ===== Hero badges ===== */
+.heroBadges{
+  margin-top:10px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:flex-start;
+}
 
+.badgeSoft{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid rgba(44,58,95,.12);
+  background:rgba(244,246,255,.9);
+  color:#2C3A5F;
+  font-weight:900;
+  font-size:13px;
+}
+
+/* ===== Status pills (Elegant) ===== */
+.statusOk{
+  background:rgba(16,185,129,.14);
+  border:1px solid rgba(16,185,129,.28);
+  color:#0f766e;
+  padding:6px 10px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:12px;
+  display:inline-flex;
+  align-items:center;
+}
+
+.statusAmber{
+  background:rgba(245,158,11,.14);
+  border:1px solid rgba(245,158,11,.28);
+  color:#92400e;
+  padding:6px 10px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:12px;
+  display:inline-flex;
+  align-items:center;
+}
+
+.statusBlue{
+  background:rgba(59,130,246,.14);
+  border:1px solid rgba(59,130,246,.28);
+  color:#1d4ed8;
+  padding:6px 10px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:12px;
+  display:inline-flex;
+  align-items:center;
+}
+
+.statusDanger{
+  background:rgba(239,68,68,.14);
+  border:1px solid rgba(239,68,68,.28);
+  color:#b91c1c;
+  padding:6px 10px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:12px;
+  display:inline-flex;
+  align-items:center;
+}
+
+.statusNeutral{
+  background:rgba(100,116,139,.12);
+  border:1px solid rgba(100,116,139,.22);
+  color:#334155;
+  padding:6px 10px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:12px;
+  display:inline-flex;
+  align-items:center;
+}
+
+/* ===== Type pills ===== */
+.typePill{
+  padding:6px 10px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:12px;
+  display:inline-flex;
+  align-items:center;
+  border:1px solid transparent;
+}
+
+.typeBlue{
+  background:rgba(59,130,246,.12);
+  border-color:rgba(59,130,246,.22);
+  color:#1d4ed8;
+}
+.typePurple{
+  background:rgba(139,92,246,.12);
+  border-color:rgba(139,92,246,.22);
+  color:#6d28d9;
+}
+.typeRed{
+  background:rgba(239,68,68,.12);
+  border-color:rgba(239,68,68,.22);
+  color:#b91c1c;
+}
+.typeIndigo{
+  background:rgba(99,102,241,.12);
+  border-color:rgba(99,102,241,.22);
+  color:#4338ca;
+}
+.typeNeutral{
+  background:rgba(100,116,139,.12);
+  border-color:rgba(100,116,139,.22);
+  color:#334155;
+}
 .statIcon{
   width:46px;                         /* ↑ */
   height:46px;                        /* ↑ */

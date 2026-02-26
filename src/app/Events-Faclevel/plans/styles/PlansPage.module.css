@@ -7,7 +7,7 @@
 .container{
   width:min(1200px,92vw);
   margin:0 auto;
-  padding: 18px 0 40px;
+  padding: 5px 0 40px;
 }
 
 .header{
@@ -233,6 +233,7 @@
   transform:translateY(-2px);
   box-shadow:0 16px 30px rgba(179,142,25,.26);
 }
+
 
 @media (max-width:720px){
   .modalGrid2{ grid-template-columns:1fr; }

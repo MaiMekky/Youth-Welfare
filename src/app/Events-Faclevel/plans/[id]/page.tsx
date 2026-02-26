@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styles from "./PlanDetails.module.css";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -9,154 +9,310 @@ import {
   CheckCircle2,
   FileText,
   Lightbulb,
-  Users,
-  MapPin,
-  DollarSign,
-  Clock,
   Eye,
   Plus,
+  Building2,
+  Layers,
 } from "lucide-react";
-import Footer from "@/app/FacLevel/components/Footer";
-import Header from "@/app/FacLevel/components/Header";
 
-type ProposedRow = {
-  id: number;
+const API_URL = "http://localhost:8000/api";
+
+/* ================= Types ================= */
+
+type ApiPlanEvent = {
+  event_id: number;
   title: string;
-  category: string;
-  place: string;
-  date: string;
-  expected: string;
-  cost: string;
+  description: string;
+  dept: number | null;
+  dept_name: string | null;
+  faculty: number | null;
+  faculty_name: string | null;
+  created_by: number | null;
+  created_by_name: string | null;
+  family: number | null;
+  family_name: string | null;
+  cost: string | null;
+  location: string | null;
+  restrictions: string | null;
+  reward: string | null;
+  status: string;
+  type: string;
+  imgs: any;
+  st_date: string;
+  end_date: string;
+  s_limit: number | null;
+  resource: any;
+  selected_facs: any;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
 };
 
-type LinkedEventRow = {
-  id: number;
-  title: string;
-  date: string;
-  status: "مكتمل" | "نشط" | "قريباً";
-  participants: string;
+type ApiPlanDetails = {
+  plan_id: number;
+  name: string;
+  term: number;
+  faculty: number | null;
+  faculty_name: string | null;
+  events: ApiPlanEvent[];
+  created_at: string;
+  updated_at: string;
 };
+
+/* ================= Helpers (UI mapping) ================= */
+
+function statusLabel(ar: string) {
+  const s = (ar || "").trim();
+  if (["مقبول", "موافق", "تمت الموافقة", "معتمد"].includes(s)) return "مقبول";
+  if (["منتظر", "في الانتظار", "قيد المراجعة"].includes(s)) return "منتظر";
+  if (["مرفوض", "مرفوضة", "تم الرفض"].includes(s)) return "مرفوض";
+  if (["مكتمل", "منتهي"].includes(s)) return "مكتمل";
+  if (["نشط", "فعال"].includes(s)) return "نشط";
+  if (["قريباً", "قريبا", "قادمة"].includes(s)) return "قريباً";
+  return s || "—";
+}
+
+function statusClass(stylesObj: any, s: string) {
+  const x = statusLabel(s);
+  if (x === "مقبول") return stylesObj.statusOk;
+  if (x === "منتظر") return stylesObj.statusAmber;
+  if (x === "مرفوض") return stylesObj.statusDanger;
+  if (x === "مكتمل") return stylesObj.statusBlue;
+  if (x === "نشط") return stylesObj.statusBlue;
+  if (x === "قريباً") return stylesObj.statusAmber;
+  return stylesObj.statusNeutral;
+}
+
+function typeClass(stylesObj: any, t: string) {
+  const x = (t || "").trim();
+  if (x.includes("ثقافي")) return stylesObj.typePurple;
+  if (x.includes("رياضي")) return stylesObj.typeRed;
+  if (x.includes("تقني") || x.includes("تكنولوج")) return stylesObj.typeBlue;
+  if (x.includes("فني")) return stylesObj.typeIndigo;
+  return stylesObj.typeNeutral;
+}
+
+function safeMoney(v: string | null) {
+  const s = (v ?? "").trim();
+  if (!s) return "—";
+  if (s === "0" || s === "0.00") return "مجاني";
+  return `${s} جنيه`;
+}
+
+/* ================= Component ================= */
 
 export default function PlanDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const id = String(params?.id ?? "");
 
-  const plan = useMemo(
-    () => ({
-      id,
-      title: "خطة الأنشطة الرياضية",
-      subtitle: "معلومات شاملة عن الخطة والفعاليات المقترحة والفعلية",
-      status: "نشطة",
-      year: "2024",
-      description:
-        "برنامج رياضي متكامل يشمل جميع الألعاب والبطولات على مستوى الجامعة",
-      activeEvents: 10,
-      proposedEvents: 20,
-      completedEvents: 4,
-    }),
-    [id]
-  );
+  const [plan, setPlan] = useState<ApiPlanDetails | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [removingId, setRemovingId] = useState<number | null>(null);
+  function getAccessToken(): string | null {
+    return (
+      localStorage.getItem("access") ||
+      localStorage.getItem("access_token") ||
+      localStorage.getItem("token") ||
+      null
+    );
+  }
 
-  const [proposed, setProposed] = useState<ProposedRow[]>([
-    {
-      id: 11,
-      title: "دوري كرة القدم",
-      category: "رياضي",
-      place: "ملاعب الجامعة الرئيسية",
-      date: "2024-03-01",
-      expected: "500 طالب",
-      cost: "20,000 جنيه",
-    },
-    {
-      id: 12,
-      title: "بطولة كرة السلة",
-      category: "رياضي",
-      place: "صالة الألعاب المغطاة",
-      date: "2024-04-15",
-      expected: "300 طالب",
-      cost: "15,000 جنيه",
-    },
-  ]);
+  async function apiCall(
+    path: string,
+    opts: RequestInit = {}
+  ): Promise<{ ok: true; data: any } | { ok: false; message: string }> {
+    const token = getAccessToken();
+    const headers: Record<string, string> = {
+      Accept: "application/json",
+      ...(opts.headers as any),
+    };
+    if (token) headers.Authorization = `Bearer ${token}`;
 
-  const [linkedEvents] = useState<LinkedEventRow[]>([
-    {
-      id: 201,
-      title: "ماراثون الجامعة",
-      date: "2024-02-20",
-      status: "مكتمل",
-      participants: "450 مشارك",
-    },
-  ]);
+    try {
+      const res = await fetch(`http://localhost:8000${path}`, { ...opts, headers });
+      const text = await res.text();
+      const json = text ? (() => { try { return JSON.parse(text); } catch { return text; } })() : null;
 
-  const total = Math.max(plan.activeEvents + plan.proposedEvents, 0);
-  const completed = Math.max(plan.completedEvents, 0);
+      if (!res.ok) {
+        const msg =
+          (typeof json === "object" && json && (json.detail || json.message)) ||
+          (typeof json === "string" ? json : "") ||
+          `طلب غير ناجح (${res.status})`;
+        return { ok: false, message: String(msg) };
+      }
 
-  const progress = useMemo(() => {
-    if (!total) return 0;
-    return Math.min(100, Math.round((completed / total) * 100));
-  }, [total, completed]);
+      return { ok: true, data: json };
+    } catch (e: any) {
+      return { ok: false, message: e?.message || "مشكلة في الاتصال" };
+    }
+  }
+    const onRemoveEvent = async (eventId: number) => {
+    if (!confirm("هل تريد إلغاء هذه الفعالية من الخطة؟")) return;
 
-const onAddProposed = () => {
-  router.push(`/Events-Faclevel/plans/${id}/propsed/create`);
-};
+    setRemovingId(eventId);
 
-const onConvertToEvent = (rowId: number) => {
-  const row = proposed.find((x) => x.id === rowId);
-  if (!row) return;
+    const res = await apiCall(`/api/events/plans/${id}/remove-event/${eventId}/`, {
+      method: "DELETE", 
+    });
 
-  sessionStorage.setItem(
-    "convert_proposed_payload",
-    JSON.stringify({
-      planId: id,
-      row,
-    })
-  );
+    setRemovingId(null);
 
- router.push(`/Events-Faclevel/plans/${id}/propsed/create?mode=convert`);
+    if (!res.ok) {
+      window.alert(res.message);
+      return;
+    }
 
-};
+    setPlan((prev) => {
+      if (!prev) return prev;
+      return { ...prev, events: prev.events.filter((e) => e.event_id !== eventId) };
+    });
+  };
+  async function fetchPlanDetails() {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const token = localStorage.getItem("access");
+      if (!token) {
+        setPlan(null);
+        setError("مفيش access token. اعملي تسجيل دخول تاني.");
+        return;
+      }
+
+      const res = await fetch(`${API_URL}/events/plans/${id}/details/`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
+
+      const text = await res.text();
+      console.log("GET plan details status:", res.status);
+      console.log("GET plan details raw body:", text);
+
+      if (!res.ok) {
+        setPlan(null);
+        setError(`فشل تحميل تفاصيل الخطة (Status ${res.status})`);
+        return;
+      }
+
+      const parsed = text ? JSON.parse(text) : null;
+      if (!parsed || typeof parsed !== "object") {
+        setPlan(null);
+        setError("الـ API رجّع بيانات غير متوقعة.");
+        return;
+      }
+
+      setPlan(parsed as ApiPlanDetails);
+    } catch (e) {
+      console.error(e);
+      setPlan(null);
+      setError("حصل خطأ أثناء تحميل تفاصيل الخطة");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!id) return;
+    fetchPlanDetails();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  // Derived stats (Optional)
+  const derived = useMemo(() => {
+    const events = plan?.events ?? [];
+    const totalEvents = events.length;
+    const completedEvents = events.filter((e) => statusLabel(e.status) === "مكتمل").length;
+    const pendingEvents = events.filter((e) => statusLabel(e.status) === "منتظر").length;
+
+    return { totalEvents, completedEvents, pendingEvents };
+  }, [plan]);
+
+  const onAddProposed = () => {
+    router.push(`/Events-Faclevel/plans/${id}/propsed/create`);
+  };
 
 
-  const onViewProposed = (rowId: number) => {
-    alert(`عرض تفاصيل المقترح #${rowId} (مؤقتاً)`);
+  const onConvertToEvent = (eventId: number) => {
+    const ev = plan?.events?.find((x) => x.event_id === eventId);
+    if (!ev) return;
+
+    sessionStorage.setItem(
+      "convert_proposed_payload",
+      JSON.stringify({
+        planId: id,
+        event: ev,
+      })
+    );
+
+    router.push(`/Events-Faclevel/plans/${id}/propsed/create?mode=convert`);
   };
 
   const onViewLinkedEvent = (eventId: number) => {
-    router.push(`/Events-Faclevel/activities/${eventId}`);
+    router.push(`/Events-Faclevel/${eventId}`);
   };
+
+  // UI safe fallbacks
+  const planTitle = plan?.name ?? "—";
+  const planSubtitle = "معلومات شاملة عن الخطة والفعاليات المرتبطة بها";
+  const facultyName = plan?.faculty_name ?? "خطة عامة على مستوى الجامعة";
+  const termLabel = plan?.term ? `الترم: ${plan.term}` : "—";
 
   return (
     <div className={styles.page}>
-      <Header />
       <div className={styles.container}>
         {/* Top bar */}
         <div className={styles.topBar}>
           <div className={styles.headText}>
             <h1 className={styles.pageTitle}>تفاصيل الخطة</h1>
-            <p className={styles.pageSubtitle}>{plan.subtitle}</p>
+            <p className={styles.pageSubtitle}>{planSubtitle}</p>
           </div>
 
-          <button className={styles.backBtn} onClick={() => router.back()}>
+          <button className={styles.backBtn} onClick={() => router.push("/Events-Faclevel/plans")}>
             <ArrowRight size={18} />
             العودة للخطط
           </button>
         </div>
 
+        {loading && (
+          <div style={{ textAlign: "center", padding: 14, fontWeight: 900 }}>
+            جاري تحميل تفاصيل الخطة...
+          </div>
+        )}
+
+        {error && (
+          <div style={{ textAlign: "center", padding: 14, color: "crimson", fontWeight: 900 }}>
+            {error}
+          </div>
+        )}
+
         {/* Hero */}
         <div className={styles.hero}>
-          <div className={styles.heroTitle}>{plan.title}</div>
+          <div className={styles.heroTitle}>{planTitle}</div>
+
+          <div className={styles.heroBadges}>
+            <span className={styles.badgeSoft}>
+              <Building2 size={14} /> {facultyName}
+            </span>
+            <span className={styles.badgeSoft}>
+              <Layers size={14} /> {termLabel}
+            </span>
+          </div>
         </div>
 
-        {/* Stats */}
+        {/* Stats (اختياري) */}
         <div className={styles.statsRow}>
           <div className={`${styles.statCard} ${styles.statAmber}`}>
             <div className={styles.statIcon}>
               <Lightbulb size={20} />
             </div>
             <div className={styles.statText}>
-              <div className={styles.statLabel}>الفعاليات المقترحة</div>
-              <div className={styles.statValue}>{plan.proposedEvents}</div>
+              <div className={styles.statLabel}>منتظر</div>
+              <div className={styles.statValue}>{derived.pendingEvents}</div>
             </div>
           </div>
 
@@ -165,8 +321,8 @@ const onConvertToEvent = (rowId: number) => {
               <CheckCircle2 size={20} />
             </div>
             <div className={styles.statText}>
-              <div className={styles.statLabel}>الفعاليات المكتملة</div>
-              <div className={styles.statValue}>{plan.completedEvents}</div>
+              <div className={styles.statLabel}>مكتمل</div>
+              <div className={styles.statValue}>{derived.completedEvents}</div>
             </div>
           </div>
 
@@ -175,8 +331,8 @@ const onConvertToEvent = (rowId: number) => {
               <FileText size={20} />
             </div>
             <div className={styles.statText}>
-              <div className={styles.statLabel}>الفعاليات الفعلية</div>
-              <div className={styles.statValue}>{plan.activeEvents}</div>
+              <div className={styles.statLabel}>إجمالي</div>
+              <div className={styles.statValue}>{derived.totalEvents}</div>
             </div>
           </div>
         </div>
@@ -187,46 +343,40 @@ const onConvertToEvent = (rowId: number) => {
             <div className={styles.infoLabel}>
               <FileText size={16} /> عنوان الخطة
             </div>
-            <div className={styles.infoValue}>{plan.title}</div>
+            <div className={styles.infoValue}>{planTitle}</div>
           </div>
 
           <div className={styles.infoCard}>
             <div className={styles.infoLabel}>
-              <CalendarDays size={16} /> العام
+              <CalendarDays size={16} /> الترم
             </div>
             <div className={styles.infoValue} dir="ltr">
-              {plan.year}
+              {plan?.term ?? "—"}
             </div>
           </div>
 
           <div className={styles.infoCard}>
             <div className={styles.infoLabel}>
-              <CheckCircle2 size={16} /> الحالة
+              <Building2 size={16} /> الكلية
             </div>
-            <div className={styles.badgeSuccess}>{plan.status}</div>
+            <div className={styles.infoValue}>{facultyName}</div>
           </div>
 
-          <div className={styles.infoCard}>
+          <div className={`${styles.infoCard}`}>
             <div className={styles.infoLabel}>
-              <Users size={16} /> نسبة الإنجاز
+              <FileText size={16} /> ملاحظات
             </div>
-            <div className={styles.infoValue}>{progress}%</div>
-          </div>
-
-          <div className={`${styles.infoCard} ${styles.infoWide}`}>
-            <div className={styles.infoLabel}>
-              <FileText size={16} /> وصف الخطة
+            <div className={styles.infoValue}>
+              {plan?.faculty_name ? "هذه خطة خاصة بكلية محددة." : "هذه خطة عامة على مستوى الجامعة."}
             </div>
-            <div className={styles.infoValue}>{plan.description}</div>
           </div>
         </section>
 
-        {/* Proposed events table */}
+        {/* ✅ One table for all events */}
         <section className={styles.tableBlock}>
           <div className={styles.tableHead}>
             <div className={styles.tableTitle}>
-              تفاصيل الفعاليات المقترحة{" "}
-              <span className={styles.count}>({proposed.length})</span>
+              فعاليات الخطة <span className={styles.count}>({plan?.events?.length ?? 0})</span>
             </div>
 
             <button className={styles.miniChipBtn} type="button" onClick={onAddProposed}>
@@ -235,134 +385,110 @@ const onConvertToEvent = (rowId: number) => {
             </button>
           </div>
 
-            {/* Hint: Proposed */}
-            <div className={styles.hintInfo}>
+          <div className={styles.hintInfo}>
             <div className={styles.hintIcon}>
-                <Lightbulb size={18} />
+              <Lightbulb size={18} />
             </div>
             <p className={styles.hintText}>
-                الفعاليات المقترحة هي تفاصيل مبدئية للتخطيط ولا تظهر للطلاب، يمكن تحويلها لفعالية لاحقاً.
+              
+ الفعاليات المقترحة هي تفاصيل مبدئية للتخطيط ولا تظهر للطلاب، يمكن تحويلها لفعالية لاحقاً.
+           <br />
+ الفعاليات الفعلية هي الفعاليات المنفذة والمنشورة للطلاب للتسجيل فيها.
             </p>
-            </div>
+          </div>
 
           <div className={styles.tableWrap}>
             <table className={styles.table}>
               <thead>
                 <tr>
-                    <th>العنوان</th>
-                    <th>التصنيف</th>
-                    <th>المكان المقترح</th>
-                    <th>التاريخ المقترح</th>
-                    <th>العدد المتوقع</th>
-                    <th>التكلفة التقديرية</th>
-                    <th>الإجراءات</th>
+                  <th>اسم الفعالية</th>
+                  <th>القسم</th>
+                  <th>النوع</th>
+                  <th>الحالة</th>
+                  <th>تاريخ البداية</th>
+                  <th>تاريخ النهاية</th>
+                  <th>المكان</th>
+                  <th>الحد</th>
+                  <th>التكلفة</th>
+                  <th>الإجراءات</th>
                 </tr>
-                </thead>
+              </thead>
 
-                <tbody>
-                {proposed.map((r) => (
-                    <tr key={r.id}>
-                    <td>{r.title}</td>
-                    <td>{r.category}</td>
-                    <td>{r.place}</td>
-                    <td dir="ltr">{r.date}</td>
-                    <td className={styles.cellValue}>{r.expected}</td>
-                    <td className={styles.cellValue}>{r.cost}</td>
+              <tbody>
+                {(plan?.events ?? []).map((e) => {
+                 const converted =
+                  typeof window !== "undefined" &&
+                  sessionStorage.getItem(`converted_${id}_${e.event_id}`) === "1";  
+                  return (
+                    <tr key={e.event_id}>
+                      <td className={styles.cellTitle}>{e.title}</td>
+                      <td>{e.dept_name ?? "—"}</td>
 
-                    <td>
-                        <div className={styles.rowActions}>
-                        <button
-                            className={styles.actionBtn}
-                            type="button"
-                            onClick={() => onConvertToEvent(r.id)}
-                        >
-                            <Plus size={16} />
-                            إضافة للفعالية
-                        </button>
-                        </div>
-                    </td>
-                    </tr>
-                ))}
-                </tbody>
-
-            </table>
-          </div>
-        </section>
-
-        {/* Linked events table */}
-        <section className={styles.tableBlock}>
-          <div className={styles.tableHead}>
-            <div className={styles.tableTitle}>
-              الفعاليات الفعلية المرتبطة بالخطة{" "}
-              <span className={styles.count}>({linkedEvents.length})</span>
-            </div>
-          </div>
-
-        {/* Hint: Linked */}
-        <div className={styles.hintSuccess}>
-        <div className={styles.hintIcon}>
-            <CheckCircle2 size={18} />
-        </div>
-        <p className={styles.hintText}>
-            الفعاليات الفعلية هي الفعاليات المنفذة والمنشورة للطلاب للتسجيل فيها.
-        </p>
-        </div>
-
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-             <thead>
-                <tr>
-                    <th>اسم الفعالية</th>
-                    <th>التاريخ</th>
-                    <th>الحالة</th>
-                    <th>المشاركون</th>
-                    <th>الإجراءات</th>
-                </tr>
-                </thead>
-
-                <tbody>
-                {linkedEvents.map((e) => (
-                    <tr key={e.id}>
-                    <td>{e.title}</td>
-                    <td dir="ltr">{e.date}</td>
-
-                    <td>
-                        <span
-                        className={
-                            e.status === "مكتمل"
-                            ? styles.statusOk
-                            : e.status === "نشط"
-                            ? styles.statusBlue
-                            : styles.statusAmber
-                        }
-                        >
-                        {e.status}
+                      <td>
+                        <span className={`${styles.typePill} ${typeClass(styles, e.type)}`}>
+                          {e.type || "—"}
                         </span>
-                    </td>
+                      </td>
 
-                    <td className={styles.cellValue}>{e.participants}</td>
+                      <td>
+                        <span className={statusClass(styles, e.status)}>{statusLabel(e.status)}</span>
+                      </td>
 
-                    <td>
+                      <td dir="ltr">{e.st_date}</td>
+                      <td dir="ltr">{e.end_date}</td>
+                      <td>{e.location ?? "—"}</td>
+                      <td className={styles.cellValue}>{e.s_limit != null ? e.s_limit : "—"}</td>
+                      <td className={styles.cellValue}>{safeMoney(e.cost)}</td>
+
+                      <td>
                         <div className={styles.rowActions}>
-                        <button
-                            className={styles.actionBtn}
-                            type="button"
-                            // onClick={() => onViewLinkedEvent(e.id)}
-                        >
-                            <Eye size={16} />
-                            عرض
-                        </button>
+                            <button
+                              className={styles.actionBtn}
+                              type="button"
+                              onClick={() => onViewLinkedEvent(e.event_id)}
+                            >
+                              <Eye size={16} />
+                              عرض التفاصيل
+                            </button>
+                
+                          {!converted && (
+                              <button
+                                className={styles.actionBtn}
+                                type="button"
+                                onClick={() => onConvertToEvent(e.event_id)}
+                              >
+                                <Plus size={16} />
+                                إنشاء للفعالية
+                              </button>
+                            )}
+                             <button
+                              className={styles.actionBtnDanger}
+                              type="button"
+                              disabled={removingId === e.event_id}
+                              onClick={() => onRemoveEvent(e.event_id)}
+                              title="إلغاء الفعالية من الخطة"
+                              style={{ opacity: removingId === e.event_id ? 0.7 : 1 }}
+                            >
+                              الغاء
+                            </button>
                         </div>
-                    </td>
+                      </td>
                     </tr>
-                ))}
-                </tbody>
+                  );
+                })}
 
+                {!loading && !error && (plan?.events?.length ?? 0) === 0 && (
+                  <tr>
+                    <td colSpan={9} style={{ textAlign: "center", padding: 16, color: "#64748b", fontWeight: 800 }}>
+                      لا توجد فعاليات مرتبطة بهذه الخطة
+                    </td>
+                  </tr>
+                )}
+              </tbody>
             </table>
           </div>
         </section>
       </div>
-      <Footer />
     </div>
   );
 }

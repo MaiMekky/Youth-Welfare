@@ -4,28 +4,11 @@ import React from "react";
 
 export default function StudentUnionPage() {
   return (
-    <div style={{ 
-      padding: "40px 20px", 
-      textAlign: "center",
-      minHeight: "60vh",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "center",
-      alignItems: "center"
-    }}>
-      <h1 style={{ 
-        fontSize: "2.5rem", 
-        color: "#2C3A5F",
-        marginBottom: "20px"
-      }}>
+    <div className="student-page-wrap" style={{ textAlign: "center", paddingTop: "48px", paddingBottom: "48px" }}>
+      <h1 style={{ fontSize: "clamp(1.5rem, 4vw, 2rem)", color: "#1a2744", marginBottom: "12px", fontWeight: 800 }}>
         اتحاد الطلبة
       </h1>
-      <p style={{ 
-        fontSize: "1.2rem", 
-        color: "#64748b",
-        maxWidth: "600px",
-        lineHeight: "1.8"
-      }}>
+      <p style={{ fontSize: "1rem", color: "#6b7a99", maxWidth: "560px", margin: "0 auto", lineHeight: 1.7 }}>
         صفحة اتحاد الطلبة - قريباً
       </p>
     </div>

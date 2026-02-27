@@ -211,20 +211,20 @@ export default function PlanView() {
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th>#</th>
+                    {/* <th>#</th> */}
                     <th>اسم الخطة</th>
-                    <th>الكلية</th>
+                    {/* <th>الكلية</th> */}
                     <th>الفصل الدراسي</th>
                     <th>عدد الفعاليات</th>
                     <th>تاريخ الإنشاء</th>
-                    <th>آخر تحديث</th>
+                    {/* <th>آخر تحديث</th> */}
                     <th>الإجراءات</th>
                   </tr>
                 </thead>
                 <tbody>
                   {paginated.map(plan => (
                     <tr key={plan.plan_id}>
-                      <td className={styles.idCell}>#{plan.plan_id}</td>
+                      {/* <td className={styles.idCell}>#{plan.plan_id}</td> */}
 
                       <td>
                         <div className={styles.fileNameCell}>
@@ -233,12 +233,12 @@ export default function PlanView() {
                         </div>
                       </td>
 
-                      <td>
+                      {/* <td>
                         <div className={styles.facultyCell}>
                           <Building2 size={13} />
                           {plan.faculty_name || "—"}
                         </div>
-                      </td>
+                      </td> */}
 
                       <td>
                         <span className={styles.termBadge}>الفصل {plan.term ?? "—"}</span>
@@ -258,12 +258,12 @@ export default function PlanView() {
                         </div>
                       </td>
 
-                      <td>
+                      {/* <td>
                         <div className={styles.dateCell}>
                           <Calendar size={12} />
                           {fmt(plan.updated_at)}
                         </div>
-                      </td>
+                      </td> */}
 
                       <td>
                         <button

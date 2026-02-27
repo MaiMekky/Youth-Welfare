@@ -1,0 +1,52 @@
+/* Master layout template — Student section (and reused by other roles) */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
+
+:root {
+  --student-max: 1280px;
+  --student-gutter: 24px;
+  --student-gutter-sm: 16px;
+  --student-gutter-xs: 12px;
+  --student-bg: #f4f6fa;
+  --student-section-gap: 24px;
+}
+
+.student-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  background: var(--student-bg);
+}
+
+/* Optional inner wrapper for pages that need constrained width + padding */
+.student-page-wrap {
+  width: 100%;
+  max-width: var(--student-max);
+  margin: 0 auto;
+  padding: var(--student-gutter);
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .student-page-wrap {
+    padding: var(--student-gutter-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .student-page-wrap {
+    padding: var(--student-gutter-xs);
+  }
+}
+
+.student-families-page {
+  width: 100%;
+  min-height: 100%;
+}
+
+.student-manage-page {
+  width: 100%;
+  min-height: 100%;
+  direction: rtl;
+  font-family: 'Cairo', sans-serif;
+}

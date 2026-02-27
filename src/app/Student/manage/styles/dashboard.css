@@ -29,11 +29,16 @@ body {
 }
 
 .dashboard-container {
-   width: 100%;
-  margin: 0 auto;
-  padding: 28px 24px 40px;
+  width: 100%;
+  padding: 20px 0 32px;
   direction: rtl;
   position: relative;
+  box-sizing: border-box;
+}
+
+/* When inside student-page-wrap, horizontal padding comes from the wrap */
+.student-page-wrap .dashboard-container {
+  padding: 20px 0 32px;
 }
 
 /* ═══════════════════════════════════════════
@@ -42,8 +47,8 @@ body {
 .dashboard-header {
   background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, #1d2e52 100%);
   border-radius: var(--radius);
-  padding: 36px 40px 32px;
-  margin-bottom: 28px;
+  padding: 28px 32px 24px;
+  margin-bottom: 20px;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -485,7 +490,8 @@ body {
    RESPONSIVE
 ═══════════════════════════════════════════ */
 @media (max-width: 768px) {
-  .dashboard-container { padding: 16px; }
+  .dashboard-container { padding: 16px 0 24px; }
+  .student-page-wrap .dashboard-container { padding: 16px 0 24px; }
 
   .dashboard-header {
     padding: 28px 24px 24px;

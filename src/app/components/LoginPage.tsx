@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import logo from "../assets/logo1.png";
 import styles from "../Styles/components/LoginPage.module.css";
+import ForgotPasswordModal from "./ForgotPasswordModal";
 
 interface LoginPageProps {
   onClose: () => void;
@@ -18,6 +19,7 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const showNotification = (message: string, type: "success" | "warning" | "error") => {
     setNotification(`${type}:${message}`);
@@ -167,6 +169,16 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
         />
         {errors.password && <p className={styles.errorMsg}>{errors.password}</p>}
 
+        <p className={styles.forgotWrap}>
+          <button
+            type="button"
+            className={styles.forgotLink}
+            onClick={() => setShowForgotPassword(true)}
+          >
+            نسيت كلمة المرور؟
+          </button>
+        </p>
+
         {errors.general && <p className={styles.errorMsg}>{errors.general}</p>}
 
         <button type="submit" disabled={loading} className={styles.loginButton}>
@@ -181,6 +193,13 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
           إنشاء حساب جديد
         </span>
       </p>
+
+      {showForgotPassword && (
+        <ForgotPasswordModal
+          onClose={() => setShowForgotPassword(false)}
+          onSuccess={() => showNotification("تم تغيير كلمة المرور. سجّلي الدخول بالكلمة الجديدة.", "success")}
+        />
+      )}
     </div>
   );
 }

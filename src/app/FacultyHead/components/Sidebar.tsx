@@ -78,7 +78,7 @@ export default function Sidebar({ onNavigate, currentView }: SidebarProps) {
               </div>
             </div>
           </div>
-          <h2 className="sidebar-title">جامعة حلوان</h2>
+          <h2 className="sidebar-title">جامعة العاصمة</h2>
           <p className="sidebar-subtitle">المشرف العام للكلية</p>
           {isMobile && (
             <button className="sidebar-close-btn" onClick={() => setIsOpen(false)} aria-label="إغلاق">

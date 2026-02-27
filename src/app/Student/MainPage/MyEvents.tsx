@@ -356,9 +356,9 @@ export default function MyEvents() {
                             <button className="btn-result" onClick={() => fetchResult(event)}>
                               <ResultIcon /> نتيجتي
                             </button>
-                            <button className="btn-download">
+                            {/* <button className="btn-download">
                               <DownloadIcon /> الشهادة
-                            </button>
+                            </button> */}
                           </>
                         ) : (
                           <div className={`status-info-bar ${st.cls}`}>

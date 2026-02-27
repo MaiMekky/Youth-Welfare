@@ -79,10 +79,10 @@ export default function TakafolPage() {
   };
 
   return (
-    <>
+    <div className="student-takafol-page">
       <HeaderCard activeTab={activeTab} onTabChange={setActiveTab} />
-      {renderContent()}
-    </>
+      <div className="student-page-wrap">{renderContent()}</div>
+    </div>
   );
 }
 

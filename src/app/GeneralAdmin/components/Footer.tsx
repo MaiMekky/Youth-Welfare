@@ -79,13 +79,13 @@ export default function Footer() {
 
       </div>
 
-      {/* Stats bar */}
+      {/* Stats bar
       <div className="footerStats">
         <div className="statItem"><span className="statNum">+24</span><span className="statLbl">كلية </span></div>
         <div className="statItem"><span className="statNum">+180K</span><span className="statLbl">طالب وطالبة</span></div>
         <div className="statItem"><span className="statNum">100</span><span className="statLbl">عام من التميز</span></div>
         <div className="statItem"><span className="statNum">3</span><span className="statLbl">فروع جامعية</span></div>
-      </div>
+      </div> */}
 
     </footer>
   );

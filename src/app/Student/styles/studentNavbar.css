@@ -434,13 +434,6 @@
   font-family: 'Cairo', sans-serif;
 }
 
-.student-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-x: hidden;
-}
-
 /* ─── Accessibility & Motion ───────────────────────────────── */
 *:focus-visible {
   outline: 2px solid var(--gold-bright);

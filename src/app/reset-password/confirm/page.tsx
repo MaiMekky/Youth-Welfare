@@ -2,11 +2,399 @@
 
 import React, { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Lock, Eye, EyeOff, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import Image from "next/image";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import logo from "@/utils/logo.png";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-// ── Main form (needs Suspense because of useSearchParams) ────
+/* ── Inline styles ───────────────────────────────────────────── */
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:        #1a2744;
+    --navy-mid:    #243358;
+    --navy-light:  #2e4070;
+    --gold:        #c9972a;
+    --gold-bright: #e0aa35;
+    --gold-pale:   rgba(201,151,42,0.12);
+    --gold-border: rgba(201,151,42,0.25);
+    --white:       #ffffff;
+    --off-white:   #f4f6fc;
+    --text-light:  rgba(255,255,255,0.65);
+    --text-muted:  rgba(255,255,255,0.4);
+    --danger:      #e05252;
+    --danger-bg:   rgba(224,82,82,0.12);
+    --danger-bdr:  rgba(224,82,82,0.3);
+    --success:     #22c55e;
+    --success-bg:  rgba(34,197,94,0.12);
+    --success-bdr: rgba(34,197,94,0.3);
+    --radius:      14px;
+    --radius-sm:   9px;
+    --trans:       0.22s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .rp-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(145deg, #101828 0%, #1a2744 45%, #243358 75%, #1d2e52 100%);
+    font-family: 'Cairo', sans-serif;
+    direction: rtl;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── Decorative background shapes ─────────── */
+  .rp-page::before {
+    content: '';
+    position: fixed;
+    top: -15%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,151,42,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .rp-page::after {
+    content: '';
+    position: fixed;
+    bottom: -15%;
+    left: -8%;
+    width: 450px;
+    height: 450px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(46,64,112,0.6) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .rp-blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .rp-blob-1 {
+    top: 10%;
+    left: 15%;
+    width: 300px;
+    height: 300px;
+    background: rgba(201,151,42,0.07);
+  }
+  .rp-blob-2 {
+    bottom: 12%;
+    right: 12%;
+    width: 280px;
+    height: 280px;
+    background: rgba(36,51,88,0.7);
+  }
+
+  /* ── Card ──────────────────────────────────── */
+  .rp-card {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 480px;
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 24px;
+    padding: 2.75rem 2.5rem 2.5rem;
+    box-shadow:
+      0 32px 64px rgba(0,0,0,0.45),
+      0 0 0 1px rgba(201,151,42,0.1),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+
+  /* top gold accent line */
+  .rp-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 10%; right: 10%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), var(--gold-bright), var(--gold), transparent);
+    border-radius: 0 0 99px 99px;
+  }
+
+  /* ── Logo ──────────────────────────────────── */
+  .rp-logo-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  .rp-logo-ring {
+    width: 100px;
+    height: 100px;
+    border-radius: 22px;
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    box-shadow:
+      0 8px 28px rgba(0,0,0,0.35),
+      0 0 0 1px var(--gold-border),
+      inset 0 1px 0 rgba(255,255,255,0.9);
+    margin-bottom: 1.2rem;
+  }
+  .rp-logo-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain;
+  }
+  .rp-heading {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: 0.01em;
+    text-align: center;
+    line-height: 1.25;
+    margin-bottom: 0.35rem;
+  }
+  .rp-sub {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--gold-bright);
+    text-align: center;
+    letter-spacing: 0.04em;
+    opacity: 0.85;
+  }
+
+  /* ── Divider ───────────────────────────────── */
+  .rp-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    margin: 1.5rem 0;
+  }
+
+  /* ── Alert boxes ───────────────────────────── */
+  .rp-alert {
+    border-radius: var(--radius-sm);
+    padding: 1.25rem 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .rp-alert-error  { background: var(--danger-bg);  border: 1px solid var(--danger-bdr); }
+  .rp-alert-success{ background: var(--success-bg); border: 1px solid var(--success-bdr);}
+  .rp-alert-icon { display: block; margin: 0 auto 0.75rem; }
+  .rp-alert-title {
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 0.4rem;
+  }
+  .rp-alert-title-error   { color: #fca5a5; }
+  .rp-alert-title-success { color: #86efac; }
+  .rp-alert-body {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  /* inline error banner */
+  .rp-inline-error {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    background: var(--danger-bg);
+    border: 1px solid var(--danger-bdr);
+    border-radius: var(--radius-sm);
+    padding: 0.9rem 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .rp-inline-error svg { flex-shrink: 0; margin-top: 1px; }
+  .rp-inline-error span { font-size: 0.85rem; color: #fca5a5; line-height: 1.5; }
+
+  /* ── Form ──────────────────────────────────── */
+  .rp-field { margin-bottom: 1.1rem; }
+  .rp-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-light);
+    margin-bottom: 7px;
+    letter-spacing: 0.02em;
+  }
+  .rp-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 52px;
+    border-radius: var(--radius-sm);
+    padding: 0 14px;
+    background: rgba(255,255,255,0.055);
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: border-color var(--trans), background var(--trans), box-shadow var(--trans);
+  }
+  .rp-input-wrap:focus-within {
+    border-color: var(--gold-border);
+    background: rgba(255,255,255,0.07);
+    box-shadow: 0 0 0 3px rgba(201,151,42,0.12);
+  }
+  .rp-input-wrap.has-error {
+    border-color: var(--danger-bdr);
+  }
+  .rp-input-wrap.has-error:focus-within {
+    box-shadow: 0 0 0 3px rgba(224,82,82,0.12);
+  }
+  .rp-input-icon { flex-shrink: 0; color: var(--text-muted); }
+  .rp-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--white);
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.95rem;
+    direction: rtl;
+  }
+  .rp-input::placeholder { color: var(--text-muted); }
+  .rp-eye-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 3px;
+    display: flex;
+    align-items: center;
+    color: var(--text-muted);
+    transition: color var(--trans);
+  }
+  .rp-eye-btn:hover { color: var(--text-light); }
+
+  .rp-field-error {
+    font-size: 0.76rem;
+    color: var(--danger);
+    margin-top: 5px;
+  }
+
+  /* ── Strength bar ──────────────────────────── */
+  .rp-strength-bars {
+    display: flex;
+    gap: 4px;
+    margin: 6px 0 2px;
+  }
+  .rp-strength-bar {
+    flex: 1;
+    height: 4px;
+    border-radius: 99px;
+    transition: background 0.3s;
+  }
+  .rp-strength-label {
+    font-size: 0.74rem;
+    font-weight: 600;
+  }
+
+  /* ── Submit button ─────────────────────────── */
+  .rp-submit {
+    width: 100%;
+    height: 52px;
+    margin-top: 0.5rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 50%, #b8881e 100%);
+    color: var(--navy);
+    font-family: 'Cairo', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all var(--trans);
+    box-shadow: 0 6px 20px rgba(201,151,42,0.35);
+  }
+  .rp-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(201,151,42,0.5);
+    background: linear-gradient(135deg, var(--gold-bright) 0%, #f0c040 50%, var(--gold) 100%);
+  }
+  .rp-submit:active:not(:disabled) { transform: translateY(0); }
+  .rp-submit:disabled { opacity: 0.65; cursor: not-allowed; }
+
+  .rp-back-btn {
+    width: 100%;
+    height: 46px;
+    margin-top: 0.75rem;
+    border: 1px solid var(--gold-border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--gold-bright);
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--trans);
+  }
+  .rp-back-btn:hover {
+    background: var(--gold-pale);
+    border-color: var(--gold);
+  }
+
+  /* ── Spin ──────────────────────────────────── */
+  @keyframes rp-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .rp-spin { animation: rp-spin 1s linear infinite; }
+
+  /* ── Icons (inline SVG) ────────────────────── */
+  .rp-icon-lock, .rp-icon-check, .rp-icon-x {
+    display: inline-block;
+    vertical-align: middle;
+  }
+`;
+
+/* ── SVG icons ───────────────────────────────────────────────── */
+const LockIcon = ({ size = 18, cls = "" }) => (
+  <svg className={`rp-icon-lock ${cls}`} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2"/>
+    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+  </svg>
+);
+const CheckCircleIcon = ({ size = 48 }) => (
+  <svg className="rp-icon-check" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "#22c55e" }}>
+    <circle cx="12" cy="12" r="10"/>
+    <polyline points="9 12 11 14 15 10"/>
+  </svg>
+);
+const XCircleIcon = ({ size = 40 }) => (
+  <svg className="rp-icon-x" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "#e05252" }}>
+    <circle cx="12" cy="12" r="10"/>
+    <line x1="15" y1="9" x2="9" y2="15"/>
+    <line x1="9" y1="9" x2="15" y2="15"/>
+  </svg>
+);
+const XSmallIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e05252" strokeWidth="2" strokeLinecap="round">
+    <circle cx="12" cy="12" r="10"/>
+    <line x1="15" y1="9" x2="9" y2="15"/>
+    <line x1="9" y1="9" x2="15" y2="15"/>
+  </svg>
+);
+
+/* ── Strength helpers ────────────────────────────────────────── */
+const calcStrength = (pw: string) => {
+  if (!pw) return 0;
+  let s = 0;
+  if (pw.length >= 6)          s++;
+  if (pw.length >= 10)         s++;
+  if (/[A-Z]/.test(pw))        s++;
+  if (/[0-9]/.test(pw))        s++;
+  if (/[^A-Za-z0-9]/.test(pw)) s++;
+  return s;
+};
+const STRENGTH_LABELS = ["", "ضعيفة جداً", "ضعيفة", "متوسطة", "قوية", "قوية جداً"];
+const STRENGTH_COLORS = ["", "#ef4444", "#f97316", "#eab308", "#22c55e", "#16a34a"];
+
+/* ── Main form ───────────────────────────────────────────────── */
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -24,6 +412,9 @@ function ResetPasswordForm() {
   const [statusMsg,       setStatusMsg]       = useState("");
 
   const invalidLink = !uid || !token;
+  const strength      = calcStrength(newPassword);
+  const strengthLabel = STRENGTH_LABELS[strength];
+  const strengthColor = STRENGTH_COLORS[strength];
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -43,24 +434,16 @@ function ResetPasswordForm() {
       const res = await fetch(`${API_BASE}/api/auth/password-reset/confirm/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          uid,
-          token,
-          new_password: newPassword,
-          confirm_password: confirmPassword,
-        }),
+        body: JSON.stringify({ uid, token, new_password: newPassword, confirm_password: confirmPassword }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setStatus("error");
-        setStatusMsg(
-          data.detail || data.error || data.message ||
-          "فشل تغيير كلمة المرور. قد يكون الرابط منتهي الصلاحية، يرجى طلب رابط جديد."
-        );
+        setStatusMsg(data.detail || data.error || data.message || "فشل تغيير كلمة المرور. قد يكون الرابط منتهي الصلاحية، يرجى طلب رابط جديد.");
       } else {
         setStatus("success");
-        setStatusMsg("تم تغيير كلمة المرور بنجاح! جاري تحويلك...");
-        setTimeout(() => router.push("/"), 2500);
+        setStatusMsg("تم تغيير كلمة المرور بنجاح! جاري تحويلك إلى صفحة الدخول...");
+        setTimeout(() => router.push("/"), 2800);
       }
     } catch {
       setStatus("error");
@@ -70,189 +453,157 @@ function ResetPasswordForm() {
     }
   };
 
-  // Password strength
-  const strength = (() => {
-    if (!newPassword) return 0;
-    let s = 0;
-    if (newPassword.length >= 6)          s++;
-    if (newPassword.length >= 10)         s++;
-    if (/[A-Z]/.test(newPassword))        s++;
-    if (/[0-9]/.test(newPassword))        s++;
-    if (/[^A-Za-z0-9]/.test(newPassword)) s++;
-    return s;
-  })();
-  const strengthLabel = ["", "ضعيفة جداً", "ضعيفة", "متوسطة", "قوية", "قوية جداً"][strength];
-  const strengthColor = ["", "#ef4444",    "#f97316", "#eab308", "#22c55e", "#16a34a"][strength];
-
   return (
-    <div style={pageStyle} dir="rtl">
-      {/* Blobs */}
-      <div style={{ position:"fixed", top:"-10%", right:"-5%", width:"400px", height:"400px", borderRadius:"50%", background:"rgba(167,139,250,0.15)", filter:"blur(80px)", pointerEvents:"none" }} />
-      <div style={{ position:"fixed", bottom:"-10%", left:"-5%", width:"350px", height:"350px", borderRadius:"50%", background:"rgba(99,102,241,0.2)", filter:"blur(80px)", pointerEvents:"none" }} />
+    <div className="rp-page">
+      <style>{styles}</style>
 
-      <div style={cardStyle}>
-        {/* Header */}
-        <div style={{ textAlign:"center", marginBottom:"2rem" }}>
-          <div style={{ width:"64px", height:"64px", borderRadius:"16px", background:"linear-gradient(135deg,#818cf8,#a78bfa)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 1rem", boxShadow:"0 8px 24px rgba(129,140,248,0.4)" }}>
-            <Lock size={28} color="#fff" />
+      {/* Decorative blobs */}
+      <div className="rp-blob rp-blob-1" />
+      <div className="rp-blob rp-blob-2" />
+
+      <div className="rp-card">
+
+        {/* ── Logo + Heading ── */}
+        <div className="rp-logo-wrap">
+          <div className="rp-logo-ring">
+            <Image
+              src={logo}
+              alt="شعار جامعة العاصمة"
+              className="rp-logo-img"
+              width={88}
+              height={88}
+              priority
+            />
           </div>
-          <h1 style={{ color:"#fff", fontSize:"1.5rem", fontWeight:700, margin:0 }}>إعادة تعيين كلمة المرور</h1>
-          <p style={{ color:"rgba(255,255,255,0.5)", marginTop:"0.4rem", fontSize:"0.875rem" }}>الإدارة العامة لرعاية الشباب</p>
+          <h1 className="rp-heading">إعادة تعيين كلمة المرور</h1>
+          <p className="rp-sub">الإدارة العامة لرعاية الشباب — جامعة العاصمة</p>
         </div>
 
-        {/* Invalid link */}
+        <div className="rp-divider" />
+
+        {/* ── Invalid link ── */}
         {invalidLink && (
-          <div style={alertBox("#ef4444")}>
-            <XCircle size={40} color="#ef4444" style={{ margin:"0 auto 0.75rem", display:"block" }} />
-            <p style={{ color:"#fca5a5", fontWeight:600, margin:"0 0 0.5rem", textAlign:"center" }}>رابط غير صالح</p>
-            <p style={{ color:"rgba(255,255,255,0.5)", fontSize:"0.85rem", margin:"0 0 1.25rem", textAlign:"center" }}>
-              يرجى طلب رابط إعادة تعيين جديد من صفحة تسجيل الدخول.
-            </p>
-            <button onClick={() => router.push("/")} style={btnStyle}>العودة للرئيسية</button>
+          <div className="rp-alert rp-alert-error">
+            <XCircleIcon size={44} />
+            <p className="rp-alert-title rp-alert-title-error" style={{ marginTop: "0.75rem" }}>رابط غير صالح</p>
+            <p className="rp-alert-body">يرجى طلب رابط إعادة تعيين جديد من صفحة تسجيل الدخول.</p>
+            <button className="rp-back-btn" style={{ marginTop: "1.25rem" }} onClick={() => router.push("/")}>
+              العودة للرئيسية
+            </button>
           </div>
         )}
 
-        {/* Success */}
+        {/* ── Success ── */}
         {!invalidLink && status === "success" && (
-          <div style={alertBox("#22c55e")}>
-            <CheckCircle size={48} color="#22c55e" style={{ margin:"0 auto 0.75rem", display:"block" }} />
-            <p style={{ color:"#86efac", fontWeight:700, fontSize:"1.1rem", margin:"0 0 0.5rem", textAlign:"center" }}>تم بنجاح! 🎉</p>
-            <p style={{ color:"rgba(255,255,255,0.6)", fontSize:"0.9rem", margin:0, textAlign:"center" }}>{statusMsg}</p>
+          <div className="rp-alert rp-alert-success">
+            <CheckCircleIcon size={52} />
+            <p className="rp-alert-title rp-alert-title-success" style={{ marginTop: "0.75rem", fontSize: "1.1rem" }}>
+              تم بنجاح 🎉
+            </p>
+            <p className="rp-alert-body">{statusMsg}</p>
           </div>
         )}
 
-        {/* Error banner */}
+        {/* ── Error banner ── */}
         {!invalidLink && status === "error" && (
-          <div style={{ background:"rgba(239,68,68,0.15)", border:"1px solid rgba(239,68,68,0.3)", borderRadius:"12px", padding:"1rem", marginBottom:"1.25rem", display:"flex", gap:"0.5rem", alignItems:"flex-start" }}>
-            <XCircle size={18} color="#ef4444" style={{ flexShrink:0, marginTop:"2px" }} />
-            <p style={{ color:"#fca5a5", margin:0, fontSize:"0.875rem" }}>{statusMsg}</p>
+          <div className="rp-inline-error">
+            <XSmallIcon />
+            <span>{statusMsg}</span>
           </div>
         )}
 
-        {/* Form */}
+        {/* ── Form ── */}
         {!invalidLink && status !== "success" && (
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} noValidate>
+
             {/* New password */}
-            <div style={{ marginBottom:"1rem" }}>
-              <label style={labelStyle}>كلمة المرور الجديدة</label>
-              <div style={inputWrap(!!errors.newPassword)}>
-                <Lock size={17} color="rgba(255,255,255,0.4)" style={{ flexShrink:0 }} />
+            <div className="rp-field">
+              <label className="rp-label">كلمة المرور الجديدة</label>
+              <div className={`rp-input-wrap${errors.newPassword ? " has-error" : ""}`}>
+                <LockIcon size={17} cls="rp-input-icon" />
                 <input
+                  className="rp-input"
                   type={showNew ? "text" : "password"}
                   placeholder="أدخل كلمة مرور قوية"
                   value={newPassword}
                   onChange={e => setNewPassword(e.target.value)}
-                  style={inputStyle}
                   autoFocus
                   autoComplete="new-password"
                 />
-                <button type="button" onClick={() => setShowNew(!showNew)} style={eyeBtn}>
-                  {showNew ? <EyeOff size={16} color="rgba(255,255,255,0.4)" /> : <Eye size={16} color="rgba(255,255,255,0.4)" />}
+                <button type="button" className="rp-eye-btn" onClick={() => setShowNew(s => !s)}>
+                  {showNew
+                    ? <EyeOff size={16} />
+                    : <Eye size={16} />
+                  }
                 </button>
               </div>
+
+              {/* Strength indicator */}
               {newPassword && (
-                <div style={{ marginTop:"6px" }}>
-                  <div style={{ display:"flex", gap:"4px", marginBottom:"3px" }}>
+                <div>
+                  <div className="rp-strength-bars">
                     {[1,2,3,4,5].map(i => (
-                      <div key={i} style={{ flex:1, height:"4px", borderRadius:"99px", background: i <= strength ? strengthColor : "rgba(255,255,255,0.1)", transition:"background 0.3s" }} />
+                      <div
+                        key={i}
+                        className="rp-strength-bar"
+                        style={{ background: i <= strength ? strengthColor : "rgba(255,255,255,0.1)" }}
+                      />
                     ))}
                   </div>
-                  <span style={{ fontSize:"0.75rem", color:strengthColor }}>{strengthLabel}</span>
+                  <span className="rp-strength-label" style={{ color: strengthColor }}>{strengthLabel}</span>
                 </div>
               )}
-              {errors.newPassword && <p style={errStyle}>{errors.newPassword}</p>}
+              {errors.newPassword && <p className="rp-field-error">{errors.newPassword}</p>}
             </div>
 
             {/* Confirm password */}
-            <div style={{ marginBottom:"1.5rem" }}>
-              <label style={labelStyle}>تأكيد كلمة المرور</label>
-              <div style={inputWrap(!!errors.confirmPassword)}>
-                <Lock size={17} color="rgba(255,255,255,0.4)" style={{ flexShrink:0 }} />
+            <div className="rp-field" style={{ marginBottom: "1.5rem" }}>
+              <label className="rp-label">تأكيد كلمة المرور</label>
+              <div className={`rp-input-wrap${errors.confirmPassword ? " has-error" : ""}`}>
+                <LockIcon size={17} cls="rp-input-icon" />
                 <input
+                  className="rp-input"
                   type={showConfirm ? "text" : "password"}
                   placeholder="أعد إدخال كلمة المرور"
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
-                  style={inputStyle}
                   autoComplete="new-password"
                 />
-                <button type="button" onClick={() => setShowConfirm(!showConfirm)} style={eyeBtn}>
-                  {showConfirm ? <EyeOff size={16} color="rgba(255,255,255,0.4)" /> : <Eye size={16} color="rgba(255,255,255,0.4)" />}
+                <button type="button" className="rp-eye-btn" onClick={() => setShowConfirm(s => !s)}>
+                  {showConfirm
+                    ? <EyeOff size={16} />
+                    : <Eye size={16} />
+                  }
                 </button>
               </div>
-              {errors.confirmPassword && <p style={errStyle}>{errors.confirmPassword}</p>}
+              {errors.confirmPassword && <p className="rp-field-error">{errors.confirmPassword}</p>}
             </div>
 
-            <button type="submit" disabled={loading} style={{ ...btnStyle, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1 }}>
+            {/* Submit */}
+            <button type="submit" disabled={loading} className="rp-submit">
               {loading
-                ? <span style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"8px" }}>
-                    <Loader2 size={18} style={{ animation:"spin 1s linear infinite" }} />
-                    جاري الحفظ...
-                  </span>
+                ? <><Loader2 size={18} className="rp-spin" /> جاري الحفظ...</>
                 : "تغيير كلمة المرور"
               }
+            </button>
+
+            {/* Back */}
+            <button type="button" className="rp-back-btn" onClick={() => router.push("/")}>
+              العودة لصفحة الدخول
             </button>
           </form>
         )}
       </div>
-
-      <style>{`
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        input::placeholder { color: rgba(255,255,255,0.3) !important; }
-        input { color: white !important; }
-      `}</style>
     </div>
   );
 }
 
-// ── Styles ───────────────────────────────────────────────────
-const pageStyle: React.CSSProperties = {
-  minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center",
-  background:"linear-gradient(135deg,#1e1b4b 0%,#312e81 40%,#4c1d95 100%)",
-  fontFamily:"'Tajawal','Cairo',sans-serif", padding:"1rem",
-};
-const cardStyle: React.CSSProperties = {
-  background:"rgba(255,255,255,0.05)", backdropFilter:"blur(20px)",
-  border:"1px solid rgba(255,255,255,0.12)", borderRadius:"24px",
-  padding:"2.5rem", width:"100%", maxWidth:"460px",
-  boxShadow:"0 25px 50px rgba(0,0,0,0.4)",
-};
-const alertBox = (color: string): React.CSSProperties => ({
-  background:`${color}26`, border:`1px solid ${color}4d`, borderRadius:"12px", padding:"1.5rem",
-});
-const labelStyle: React.CSSProperties = {
-  display:"block", color:"rgba(255,255,255,0.7)", fontSize:"0.85rem", fontWeight:500, marginBottom:"6px",
-};
-const inputWrap = (hasError: boolean): React.CSSProperties => ({
-  display:"flex", alignItems:"center", gap:"10px",
-  background:"rgba(255,255,255,0.07)",
-  border:`1px solid ${hasError ? "#ef4444" : "rgba(255,255,255,0.12)"}`,
-  borderRadius:"12px", padding:"0 14px", height:"50px",
-});
-const inputStyle: React.CSSProperties = {
-  flex:1, background:"transparent", border:"none", outline:"none",
-  color:"#fff", fontSize:"0.95rem", direction:"rtl",
-};
-const eyeBtn: React.CSSProperties = {
-  background:"none", border:"none", cursor:"pointer", padding:"2px", display:"flex",
-};
-const errStyle: React.CSSProperties = {
-  color:"#f87171", fontSize:"0.78rem", margin:"4px 0 0",
-};
-const btnStyle: React.CSSProperties = {
-  width:"100%", padding:"14px", marginTop:"0.5rem",
-  background:"linear-gradient(135deg,#818cf8,#a78bfa)",
-  border:"none", borderRadius:"12px", color:"#fff",
-  fontSize:"1rem", fontWeight:700,
-  boxShadow:"0 8px 20px rgba(129,140,248,0.35)",
-};
-
-// ── Page export — Suspense مطلوب لـ useSearchParams في App Router ──
+/* ── Page export ─────────────────────────────────────────────── */
 export default function Page() {
   return (
     <Suspense fallback={
-      <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"#1e1b4b" }}>
-        <Loader2 size={32} color="#818cf8" style={{ animation:"spin 1s linear infinite" }} />
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#1a2744" }}>
+        <Loader2 size={34} color="#c9972a" style={{ animation: "spin 1s linear infinite" }} />
         <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
       </div>
     }>

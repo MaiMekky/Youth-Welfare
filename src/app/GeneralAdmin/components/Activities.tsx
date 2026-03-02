@@ -565,7 +565,7 @@ export default function Activities() {
                       <Users size={13} className="meta-icon" />
                       <span className="meta-label">المشاركون:</span>
                       <span className="meta-value participants">
-                        {activity.s_limit >= 2147483647 ? "غير محدود" : activity.s_limit.toLocaleString("ar-EG")}
+                        {!activity.s_limit || activity.s_limit >= 2147483647 ? "غير محدود" : activity.s_limit.toLocaleString("ar-EG")}
                       </span>
                     </div>
                     <div className="meta-item">

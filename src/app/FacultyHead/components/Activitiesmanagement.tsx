@@ -407,7 +407,7 @@ export default function ActivitiesManagement() {
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>#</th>
+                  {/* <th>#</th> */}
                   <th>عنوان الفعالية</th>
                   <th>النوع</th>
                   <th>الموقع</th>
@@ -425,7 +425,7 @@ export default function ActivitiesManagement() {
                   const pending = isPending(ev.status);
                   return (
                     <tr key={ev.event_id}>
-                      <td className={styles.idCell}>#{ev.event_id}</td>
+                      {/* <td className={styles.idCell}>#{ev.event_id}</td> */}
 
                       <td>
                         <div className={styles.titleCell}>

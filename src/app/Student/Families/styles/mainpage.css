@@ -129,11 +129,20 @@
   color: white;
 }
 
+/* ====== Container ====== */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 /* ====== Joined Families Section ====== */
 .joined-section {
-  max-width: 1200px;
-  margin: 30px auto;
-  padding: 0 20px;
+  max-width: 1280px;
+  margin: 20px auto 0;
+  padding: 0 24px;
 }
 
 .joined-section h2 {
@@ -304,9 +313,9 @@
 }
 
 .programs-grid {
-  max-width: 1200px;
-  margin: 0 auto 60px;
-  padding: 0 20px;
+  max-width: 1280px;
+  margin: 0 auto 40px;
+  padding: 0 24px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 24px;
@@ -470,7 +479,7 @@
   color: var(--navy);
   font-size: 28px;
   font-weight: 800;
-  margin: 40px 0 0;
+  margin: 24px 0 0;
 }
 
 /* ====== RESPONSIVE DESIGN ====== */
@@ -510,9 +519,10 @@
   }
 
   .joined-section {
-    margin: 20px auto;
+    margin: 16px auto 0;
     padding: 0 16px;
   }
+  .container { padding: 0 16px; }
 
   .joined-section h2 {
     font-size: 20px;
@@ -611,7 +621,7 @@
     flex-direction: row;
     gap: 16px;
     padding: 0 16px;
-    margin: 0 0 40px;
+    margin: 0 0 32px;
     width: max-content;
   }
 

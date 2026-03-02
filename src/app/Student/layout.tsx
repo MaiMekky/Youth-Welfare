@@ -2,6 +2,7 @@
 import React from "react";
 import "./styles/studentNavbar.css";
 import "./styles/headerCard.css";
+import "./styles/layout.css";
 import StudentNavbar from "./components/StudentNavbar";
 import StudentFooter from "./components/StudentFooter";
 
@@ -18,7 +19,7 @@ export default function StudentLayout({
   return (
     <div className="student-app">
       <StudentNavbar />
-      <div className="student-content">{children}</div>
+      <main className="student-content">{children}</main>
       <StudentFooter />
     </div>
   );

@@ -40,9 +40,10 @@
 .my-events-hero {
   width: 100%;
   background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, #1d2e52 100%);
-  padding: 36px 48px 0;
+  padding: 28px 24px 0;
   position: relative;
   overflow: hidden;
+  box-sizing: border-box;
 }
 .my-events-hero::before {
   content: '';
@@ -179,7 +180,11 @@
    BODY
 ══════════════════════════════════════════ */
 .my-events-body {
-  padding: 24px 48px 48px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 24px 40px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .results-bar {
@@ -722,8 +727,8 @@
 }
 
 @media (max-width: 768px) {
-  .my-events-hero { padding: 28px 20px 0; }
-  .my-events-body { padding: 18px 16px 36px; }
+  .my-events-hero { padding: 24px 16px 0; }
+  .my-events-body { padding: 20px 16px 32px; }
   .hero-inner     { flex-direction: column; align-items: flex-start; gap: 16px; }
   .hero-title     { font-size: 1.4rem; }
   .hero-stats     { width: 100%; }
@@ -733,9 +738,9 @@
 }
 
 @media (max-width: 480px) {
-  .my-events-hero { padding: 20px 14px 0; }
+  .my-events-hero { padding: 20px 12px 0; }
   .hero-title     { font-size: 1.2rem; }
-  .my-events-body { padding: 14px 12px 28px; }
+  .my-events-body { padding: 16px 12px 28px; }
   .filter-tab     { padding: 10px 14px; font-size: 0.82rem; }
   .result-modal   { width: calc(100vw - 24px); }
 }

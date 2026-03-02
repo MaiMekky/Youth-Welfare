@@ -40,18 +40,13 @@ export default function Header() {
           </div>
           <div className="hdr-brand-text">
             <h1 className="hdr-title">النظام الإداري</h1>
-            <p className="hdr-sub">لوحة تحكم المشرف العام للكلية</p>
+            <h2 className="hdr-sub">النظام الاداري لرعاية الطلاب</h2>
           </div>
         </div>
 
         {/* ── Actions ── */}
         <div className="hdr-actions">
 
-          {/* Notification */}
-          <button className="hdr-icon-btn" aria-label="الإشعارات">
-            <Bell size={17} />
-            <span className="hdr-notif-dot" />
-          </button>
 
           {/* User menu */}
           <div className="hdr-user-wrap" ref={menuRef}>
@@ -69,8 +64,7 @@ export default function Header() {
                 <div className="hdr-dropdown-header">
                   <span className="hdr-avatar hdr-avatar-lg">م</span>
                   <div>
-                    <p className="hdr-dd-name">المشرف العام</p>
-                    <p className="hdr-dd-role">مشرف الكلية</p>
+                    <h2>النظام الاداري لرعاية الطلاب</h2>
                   </div>
                 </div>
                 <div className="hdr-dropdown-divider" />

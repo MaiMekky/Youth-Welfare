@@ -37,13 +37,13 @@ const STEPS = [
 ];
 
 const defaultCommittees = {
-  cultural: { name: 'اللجنة الثقافية',              secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
-  wall:     { name: 'لجنة صحف الحائط',              secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
-  social:   { name: 'اللجنة الاجتماعية والرحلات',  secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
-  technical:{ name: 'اللجنة الفنية',                secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
-  scientific:{ name:'اللجنة العلمية',               secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
-  service:  { name: 'لجنة الخدمة العامة والمعسكرات',secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
-  sports:   { name: 'اللجنة الرياضية',              secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
+  cultural:  { name: 'اللجنة الثقافية',               secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
+  wall:      { name: 'لجنة صحف الحائط',               secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
+  social:    { name: 'اللجنة الاجتماعية والرحلات',    secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
+  technical: { name: 'اللجنة الفنية',                 secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
+  scientific:{ name: 'اللجنة العلمية',                secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
+  service:   { name: 'لجنة الخدمة العامة والمعسكرات', secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
+  sports:    { name: 'اللجنة الرياضية',               secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
 };
 
 const defaultBoard = {
@@ -65,7 +65,7 @@ const committeeKeys: Record<string, string> = {
 const requiresFullInfo = ['leader', 'viceLeader', 'responsible', 'treasurer'];
 
 const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }) => {
-  const [step, setStep]           = useState(0);
+  const [step, setStep]                         = useState(0);
   const [familyType, setFamilyType]             = useState('');
   const [familyName, setFamilyName]             = useState('');
   const [familyGoals, setFamilyGoals]           = useState('');
@@ -205,25 +205,27 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
             location: '', cost: c.fundingSources || '0',
           });
         }
-        return { committee_key: committeeKeys[key] || key,
+        return {
+          committee_key: committeeKeys[key] || key,
           head:      { uid: parseInt(c.secretary.studentId||'0'), dept_id: deptId },
           assistant: { uid: parseInt(c.assistant.studentId||'0'), dept_id: deptId },
-          activities };
+          activities,
+        };
       });
 
       const payload = {
         family_type: familyType, name: familyName, description: familyDescription,
         min_limit: 15, faculty_id: facultyId || 0,
         default_roles: {
-          رائد:       { name: boardMembers.leader.fullName,      nid: parseInt(boardMembers.leader.nationalId||'0'),      ph_no: parseInt(boardMembers.leader.mobile||'0') },
-          نائب_رائد:  { name: boardMembers.viceLeader.fullName,  nid: parseInt(boardMembers.viceLeader.nationalId||'0'),  ph_no: parseInt(boardMembers.viceLeader.mobile||'0') },
-          مسؤول:      { name: boardMembers.responsible.fullName, nid: parseInt(boardMembers.responsible.nationalId||'0'), ph_no: parseInt(boardMembers.responsible.mobile||'0') },
-          أمين_صندوق: { name: boardMembers.treasurer.fullName,   nid: parseInt(boardMembers.treasurer.nationalId||'0'),   ph_no: parseInt(boardMembers.treasurer.mobile||'0') },
-          أخ_أكبر:    { uid: parseInt(boardMembers.elderBrother.studentId||'0') },
-          أخت_كبرى:   { uid: parseInt(boardMembers.elderSister.studentId||'0') },
-          أمين_سر:    { uid: parseInt(boardMembers.secretary.studentId||'0') },
-          عضو_منتخب_1:{ uid: parseInt(boardMembers.elected1.studentId||'0') },
-          عضو_منتخب_2:{ uid: parseInt(boardMembers.elected2.studentId||'0') },
+          رائد:        { name: boardMembers.leader.fullName,      nid: parseInt(boardMembers.leader.nationalId||'0'),      ph_no: parseInt(boardMembers.leader.mobile||'0') },
+          نائب_رائد:   { name: boardMembers.viceLeader.fullName,  nid: parseInt(boardMembers.viceLeader.nationalId||'0'),  ph_no: parseInt(boardMembers.viceLeader.mobile||'0') },
+          مسؤول:       { name: boardMembers.responsible.fullName, nid: parseInt(boardMembers.responsible.nationalId||'0'), ph_no: parseInt(boardMembers.responsible.mobile||'0') },
+          أمين_صندوق:  { name: boardMembers.treasurer.fullName,   nid: parseInt(boardMembers.treasurer.nationalId||'0'),   ph_no: parseInt(boardMembers.treasurer.mobile||'0') },
+          أخ_أكبر:     { uid: parseInt(boardMembers.elderBrother.studentId||'0') },
+          أخت_كبرى:    { uid: parseInt(boardMembers.elderSister.studentId||'0') },
+          أمين_سر:     { uid: parseInt(boardMembers.secretary.studentId||'0') },
+          عضو_منتخب_1: { uid: parseInt(boardMembers.elected1.studentId||'0') },
+          عضو_منتخب_2: { uid: parseInt(boardMembers.elected2.studentId||'0') },
         },
         committees: committeesData,
       };
@@ -247,54 +249,72 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
     finally { setIsSubmitting(false); }
   };
 
-  // ── Render helpers ────────────────────────────────────────
-  const field = (
-    label: string, value: string, onChange: (v: string) => void,
-    opts: { placeholder?: string; type?: string; maxLength?: number; required?: boolean; error?: string; tag?: 'textarea' | 'select'; rows?: number; children?: React.ReactNode }
-  ) => (
-    <div className="cf-field">
-      <label className="cf-label">{label}{opts.required && <span className="cf-req">*</span>}</label>
-      {opts.tag === 'textarea' ? (
-        <textarea className={`cf-input cf-textarea${opts.error ? ' cf-error' : ''}`}
-          value={value} onChange={e => onChange(e.target.value)}
-          placeholder={opts.placeholder} rows={opts.rows || 3} />
-      ) : opts.tag === 'select' ? (
-        <select className={`cf-input cf-select${opts.error ? ' cf-error' : ''}`}
-          value={value} onChange={e => onChange(e.target.value)}>
-          {opts.children}
-        </select>
-      ) : (
-        <input className={`cf-input${opts.error ? ' cf-error' : ''}`}
-          type={opts.type || 'text'} value={value} onChange={e => onChange(e.target.value)}
-          placeholder={opts.placeholder} maxLength={opts.maxLength} />
-      )}
-      {opts.error && <p className="cf-err-msg">⚠ {opts.error}</p>}
-    </div>
-  );
+  // ══════════════════════════════════════════════════════════
+  // STEP CONTENT — inlined as JSX (NOT as sub-components) to
+  // prevent React remounting on every render, which caused
+  // inputs to lose focus after typing a single character.
+  // ══════════════════════════════════════════════════════════
 
-  // ══════════════════════════════════════════════════════════
-  // STEP CONTENT
-  // ══════════════════════════════════════════════════════════
-  const Step0 = () => (
+  const renderStep0 = () => (
     <div className="cf-step-content">
       <h2 className="cf-step-title">بيانات الأسرة الأساسية</h2>
       <div className="cf-grid-2">
-        {field('نوع الأسرة', familyType, setFamilyType, {
-          required: true, error: errors.familyType, tag: 'select',
-          children: <>
+        {/* Family Type */}
+        <div className="cf-field">
+          <label className="cf-label">نوع الأسرة <span className="cf-req">*</span></label>
+          <select
+            className={`cf-input cf-select${errors.familyType ? ' cf-error' : ''}`}
+            value={familyType}
+            onChange={e => setFamilyType(e.target.value)}
+          >
             <option value="">اختر نوع الأسرة</option>
             <option value="نوعية">نوعية</option>
             <option value="مركزية">مركزية</option>
-          </>
-        })}
-        {field('اسم الأسرة', familyName, setFamilyName, { required: true, placeholder: 'أدخل اسم الأسرة', error: errors.familyName })}
+          </select>
+          {errors.familyType && <p className="cf-err-msg">⚠ {errors.familyType}</p>}
+        </div>
+
+        {/* Family Name */}
+        <div className="cf-field">
+          <label className="cf-label">اسم الأسرة <span className="cf-req">*</span></label>
+          <input
+            className={`cf-input${errors.familyName ? ' cf-error' : ''}`}
+            placeholder="أدخل اسم الأسرة"
+            value={familyName}
+            onChange={e => setFamilyName(e.target.value)}
+          />
+          {errors.familyName && <p className="cf-err-msg">⚠ {errors.familyName}</p>}
+        </div>
       </div>
-      {field('أهداف الأسرة', familyGoals, setFamilyGoals, { placeholder: 'اذكر أهداف الأسرة', tag: 'textarea', rows: 3 })}
-      {field('وصف الأسرة', familyDescription, setFamilyDescription, { required: true, placeholder: 'قدم وصفاً تفصيلياً للأسرة ونشاطاتها', tag: 'textarea', rows: 4, error: errors.familyDescription })}
+
+      {/* Goals */}
+      <div className="cf-field">
+        <label className="cf-label">أهداف الأسرة</label>
+        <textarea
+          className="cf-input cf-textarea"
+          placeholder="اذكر أهداف الأسرة"
+          rows={3}
+          value={familyGoals}
+          onChange={e => setFamilyGoals(e.target.value)}
+        />
+      </div>
+
+      {/* Description */}
+      <div className="cf-field">
+        <label className="cf-label">وصف الأسرة <span className="cf-req">*</span></label>
+        <textarea
+          className={`cf-input cf-textarea${errors.familyDescription ? ' cf-error' : ''}`}
+          placeholder="قدم وصفاً تفصيلياً للأسرة ونشاطاتها"
+          rows={4}
+          value={familyDescription}
+          onChange={e => setFamilyDescription(e.target.value)}
+        />
+        {errors.familyDescription && <p className="cf-err-msg">⚠ {errors.familyDescription}</p>}
+      </div>
     </div>
   );
 
-  const Step1 = () => (
+  const renderStep1 = () => (
     <div className="cf-step-content">
       <h2 className="cf-step-title">مجلس إدارة الأسرة</h2>
       <div className="cf-members-grid">
@@ -310,32 +330,46 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
                 <div className="cf-member-fields">
                   <div className="cf-field">
                     <label className="cf-label">الاسم الكامل <span className="cf-req">*</span></label>
-                    <input className={`cf-input${errors[`board_${key}_fullName`] ? ' cf-error' : ''}`}
-                      placeholder="الاسم الكامل" value={person.fullName}
-                      onChange={e => handleBoardChange(key as any, 'fullName', e.target.value)} />
+                    <input
+                      className={`cf-input${errors[`board_${key}_fullName`] ? ' cf-error' : ''}`}
+                      placeholder="الاسم الكامل"
+                      value={person.fullName}
+                      onChange={e => handleBoardChange(key as keyof typeof boardMembers, 'fullName', e.target.value)}
+                    />
                     {errors[`board_${key}_fullName`] && <p className="cf-err-msg">⚠ {errors[`board_${key}_fullName`]}</p>}
                   </div>
                   <div className="cf-field">
                     <label className="cf-label">الرقم القومي <span className="cf-req">*</span></label>
-                    <input className={`cf-input${errors[`board_${key}_nationalId`] ? ' cf-error' : ''}`}
-                      placeholder="14 رقماً" maxLength={14} value={person.nationalId||''}
-                      onChange={e => handleBoardChange(key as any, 'nationalId', e.target.value.replace(/\D/g,''))} />
+                    <input
+                      className={`cf-input${errors[`board_${key}_nationalId`] ? ' cf-error' : ''}`}
+                      placeholder="14 رقماً"
+                      maxLength={14}
+                      value={person.nationalId || ''}
+                      onChange={e => handleBoardChange(key as keyof typeof boardMembers, 'nationalId', e.target.value.replace(/\D/g, ''))}
+                    />
                     {errors[`board_${key}_nationalId`] && <p className="cf-err-msg">⚠ {errors[`board_${key}_nationalId`]}</p>}
                   </div>
                   <div className="cf-field">
                     <label className="cf-label">رقم الموبايل <span className="cf-req">*</span></label>
-                    <input className={`cf-input${errors[`board_${key}_mobile`] ? ' cf-error' : ''}`}
-                      placeholder="01XXXXXXXXX" maxLength={11} value={person.mobile||''}
-                      onChange={e => handleBoardChange(key as any, 'mobile', e.target.value.replace(/\D/g,''))} />
+                    <input
+                      className={`cf-input${errors[`board_${key}_mobile`] ? ' cf-error' : ''}`}
+                      placeholder="01XXXXXXXXX"
+                      maxLength={11}
+                      value={person.mobile || ''}
+                      onChange={e => handleBoardChange(key as keyof typeof boardMembers, 'mobile', e.target.value.replace(/\D/g, ''))}
+                    />
                     {errors[`board_${key}_mobile`] && <p className="cf-err-msg">⚠ {errors[`board_${key}_mobile`]}</p>}
                   </div>
                 </div>
               ) : (
                 <div className="cf-field">
                   <label className="cf-label">كود الطالب</label>
-                  <input className="cf-input" placeholder="أدخل كود الطالب"
-                    value={person.studentId||''}
-                    onChange={e => handleBoardChange(key as any, 'studentId', e.target.value)} />
+                  <input
+                    className="cf-input"
+                    placeholder="أدخل كود الطالب"
+                    value={person.studentId || ''}
+                    onChange={e => handleBoardChange(key as keyof typeof boardMembers, 'studentId', e.target.value)}
+                  />
                 </div>
               )}
             </div>
@@ -345,7 +379,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
     </div>
   );
 
-  const Step2 = () => (
+  const renderStep2 = () => (
     <div className="cf-step-content">
       <h2 className="cf-step-title">اللجان</h2>
       <div className="cf-committees-list">
@@ -360,41 +394,63 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
               <div className="cf-grid-2">
                 <div className="cf-field">
                   <label className="cf-label">القسم المسؤول</label>
-                  <select className="cf-input cf-select"
-                    value={c.selectedDeptId||''} onChange={e => handleCommitteeFieldChange(key, 'selectedDeptId', e.target.value)}>
+                  <select
+                    className="cf-input cf-select"
+                    value={c.selectedDeptId || ''}
+                    onChange={e => handleCommitteeFieldChange(key, 'selectedDeptId', e.target.value)}
+                  >
                     <option value="">اختر القسم</option>
                     {departments.map(d => <option key={d.dept_id} value={d.dept_id}>{d.name}</option>)}
                   </select>
                 </div>
                 <div className="cf-field">
                   <label className="cf-label">موعد التنفيذ <span className="cf-optional">(اختياري)</span></label>
-                  <input type="date" className="cf-input" value={c.executionDate||''}
-                    onChange={e => handleCommitteeFieldChange(key, 'executionDate', e.target.value)} />
+                  <input
+                    type="date"
+                    className="cf-input"
+                    value={c.executionDate || ''}
+                    onChange={e => handleCommitteeFieldChange(key, 'executionDate', e.target.value)}
+                  />
                 </div>
               </div>
               <div className="cf-grid-2">
                 <div className="cf-field">
                   <label className="cf-label">كود أمين اللجنة</label>
-                  <input className="cf-input" placeholder="كود الطالب"
-                    value={c.secretary.studentId||''}
-                    onChange={e => handleCommitteeChange(key, 'secretary', 'studentId', e.target.value)} />
+                  <input
+                    className="cf-input"
+                    placeholder="كود الطالب"
+                    value={c.secretary.studentId || ''}
+                    onChange={e => handleCommitteeChange(key, 'secretary', 'studentId', e.target.value)}
+                  />
                 </div>
                 <div className="cf-field">
                   <label className="cf-label">كود أمين مساعد اللجنة</label>
-                  <input className="cf-input" placeholder="كود الطالب"
-                    value={c.assistant.studentId||''}
-                    onChange={e => handleCommitteeChange(key, 'assistant', 'studentId', e.target.value)} />
+                  <input
+                    className="cf-input"
+                    placeholder="كود الطالب"
+                    value={c.assistant.studentId || ''}
+                    onChange={e => handleCommitteeChange(key, 'assistant', 'studentId', e.target.value)}
+                  />
                 </div>
               </div>
               <div className="cf-field">
                 <label className="cf-label">الخطة <span className="cf-optional">(اختياري)</span></label>
-                <textarea className="cf-input cf-textarea" placeholder="أدخل خطة اللجنة" rows={2}
-                  value={c.plan||''} onChange={e => handleCommitteeFieldChange(key, 'plan', e.target.value)} />
+                <textarea
+                  className="cf-input cf-textarea"
+                  placeholder="أدخل خطة اللجنة"
+                  rows={2}
+                  value={c.plan || ''}
+                  onChange={e => handleCommitteeFieldChange(key, 'plan', e.target.value)}
+                />
               </div>
               <div className="cf-field">
                 <label className="cf-label">مصادر التمويل <span className="cf-optional">(اختياري)</span></label>
-                <input className="cf-input" placeholder="مصادر التمويل"
-                  value={c.fundingSources||''} onChange={e => handleCommitteeFieldChange(key, 'fundingSources', e.target.value)} />
+                <input
+                  className="cf-input"
+                  placeholder="مصادر التمويل"
+                  value={c.fundingSources || ''}
+                  onChange={e => handleCommitteeFieldChange(key, 'fundingSources', e.target.value)}
+                />
               </div>
             </div>
           </details>
@@ -403,7 +459,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
     </div>
   );
 
-  const Step3 = () => (
+  const renderStep3 = () => (
     <div className="cf-step-content">
       <h2 className="cf-step-title">مراجعة البيانات</h2>
       <div className="cf-review">
@@ -445,7 +501,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
     </div>
   );
 
-  const stepComponents = [<Step0 />, <Step1 />, <Step2 />, <Step3 />];
+  const stepRenderers = [renderStep0, renderStep1, renderStep2, renderStep3];
 
   return (
     <div className="cf-page">
@@ -453,7 +509,6 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         {toasts.map(t => <Toast key={t.id} message={t.message} type={t.type} onClose={() => removeToast(t.id)} />)}
       </div>
 
-      {/* ── Wizard Shell ── */}
       <div className="cf-wizard">
 
         {/* Progress Header */}
@@ -487,13 +542,13 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
 
           {/* Progress bar */}
           <div className="cf-progress-bar">
-            <div className="cf-progress-fill" style={{ width: `${((step) / (STEPS.length - 1)) * 100}%` }} />
+            <div className="cf-progress-fill" style={{ width: `${(step / (STEPS.length - 1)) * 100}%` }} />
           </div>
         </div>
 
         {/* Step Body */}
         <div className="cf-body">
-          {stepComponents[step]}
+          {stepRenderers[step]()}
         </div>
 
         {/* Navigation Footer */}

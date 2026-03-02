@@ -47,7 +47,7 @@ interface Event {
   image: string | null;
 }
 
-type FilterType = 'all' | 'مقبول' | 'منتظر' | 'مرفوض';
+type FilterType = 'all' | 'مقبول' | 'قيد الانتظار' | 'مرفوض';
 
 /* ══════════════════════════════════════════
    MAPPER
@@ -148,17 +148,17 @@ const EmptyTrophyIcon = () => (
    STATUS HELPERS
 ══════════════════════════════════════════ */
 const STATUS_META: Record<string, { cls: string; dot: string }> = {
-  'مقبول':  { cls: 'status-accepted', dot: '#16a34a' },
-  'منتظر':  { cls: 'status-pending',  dot: '#d97706' },
-  'مرفوض':  { cls: 'status-rejected', dot: '#dc2626' },
+  'مقبول':        { cls: 'status-accepted', dot: '#16a34a' },
+  'قيد الانتظار': { cls: 'status-pending',  dot: '#d97706' },
+  'مرفوض':        { cls: 'status-rejected', dot: '#dc2626' },
 };
 const getStatus = (s: string) => STATUS_META[s] ?? { cls: 'status-default', dot: '#6b7a99' };
 
 const FILTERS: { id: FilterType; label: string }[] = [
-  { id: 'all',    label: 'الكل'  },
-  { id: 'مقبول', label: 'مقبول' },
-  { id: 'منتظر', label: 'منتظر' },
-  { id: 'مرفوض', label: 'مرفوض'},
+  { id: 'all',           label: 'الكل'         },
+  { id: 'مقبول',        label: 'مقبول'        },
+  { id: 'قيد الانتظار', label: 'قيد الانتظار' },
+  { id: 'مرفوض',        label: 'مرفوض'        },
 ];
 
 /* ══════════════════════════════════════════
@@ -216,10 +216,10 @@ export default function MyEvents() {
 
   /* ── Counts ── */
   const counts = {
-    all:    events.length,
-    'مقبول': events.filter(e => e.participationStatus === 'مقبول').length,
-    'منتظر': events.filter(e => e.participationStatus === 'منتظر').length,
-    'مرفوض': events.filter(e => e.participationStatus === 'مرفوض').length,
+    all:              events.length,
+    'مقبول':         events.filter(e => e.participationStatus === 'مقبول').length,
+    'قيد الانتظار':  events.filter(e => e.participationStatus === 'قيد الانتظار').length,
+    'مرفوض':         events.filter(e => e.participationStatus === 'مرفوض').length,
   };
 
   const filtered = activeFilter === 'all'
@@ -241,10 +241,9 @@ export default function MyEvents() {
           </div>
           <div className="hero-stats">
             {[
-              { num: counts.all,      lbl: 'إجمالي' },
-              { num: counts['مقبول'], lbl: 'مقبول'  },
-              { num: counts['منتظر'], lbl: 'منتظر'  },
-              { num: counts['مرفوض'], lbl: 'مرفوض' },
+              { num: counts.all,             lbl: 'إجمالي'      },
+              { num: counts['مقبول'],        lbl: 'مقبول'       },
+              { num: counts['مرفوض'],        lbl: 'مرفوض'       },
             ].map(s => (
               <div key={s.lbl} className="stat-pill">
                 <span className="stat-num">{s.num}</span>
@@ -356,14 +355,14 @@ export default function MyEvents() {
                             <button className="btn-result" onClick={() => fetchResult(event)}>
                               <ResultIcon /> نتيجتي
                             </button>
-                            <button className="btn-download">
+                            {/* <button className="btn-download">
                               <DownloadIcon /> الشهادة
-                            </button>
+                            </button> */}
                           </>
                         ) : (
                           <div className={`status-info-bar ${st.cls}`}>
                             <span className="status-dot" style={{ background: st.dot }} />
-                            {event.participationStatus === 'منتظر' ? 'طلبك قيد المراجعة' : 'تم رفض طلبك'}
+                            {event.participationStatus === 'قيد الانتظار' ? 'طلبك قيد المراجعة' : 'تم رفض طلبك'}
                           </div>
                         )}
                       </div>

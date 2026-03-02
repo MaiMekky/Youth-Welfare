@@ -17,33 +17,21 @@ export default function FamilyManagePage() {
   };
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "#f0f2f8",
-        width: "100%",
-        direction: "rtl",
-        fontFamily: "'Cairo', sans-serif",
-      }}
-    >
+    <main className="student-manage-page">
       {/* ── HOME VIEW ── */}
       {currentView === "home" && (
-        <div
-          style={{
-            maxWidth: 1200,
-            margin: "0 auto",
-            padding: "28px 24px 48px",
-          }}
-        >
+        <>
           {/* Full-width hero card with both action buttons */}
           <TrackReqButton
             onCreateClick={() => setCurrentView("createForm")}
             onReviewClick={() => setCurrentView("trackRequest")}
           />
 
-          {/* Dashboard below — its own internal header is removed in favour of the hero above */}
-          <Dashboard />
-        </div>
+          {/* Dashboard content in the constrained layout wrapper */}
+          <div className="student-page-wrap">
+            <Dashboard />
+          </div>
+        </>
       )}
 
       {/* ── CREATE FORM VIEW ── */}

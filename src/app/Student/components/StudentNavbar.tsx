@@ -76,7 +76,7 @@ const StudentNavbar: React.FC = () => {
 
   const navItems: NavItem[] = [
     { key: "home",         label: "الرئيسية",         icon: <IconHome />,         href: "/Student/MainPage"     },
-    { key: "activities",   label: "الأنشطة",           icon: <IconActivities />,   href: "/Student/Activities",  badge: 3 },
+    { key: "activities",   label: "الأنشطة",           icon: <IconActivities />,   href: "/Student/Activities" },
     { key: "families",     label: "الأسر الطلابية",    icon: <IconFamily />,       href: "/Student/Families"     },
     { key: "familyManage", label: "إدارة الأسر",       icon: <IconFamilyManage />, href: "/Student/manage"       },
     { key: "takafol",      label: "التكافل الاجتماعي", icon: <IconTakafol />,      href: "/Student/takafol"      },

@@ -1,138 +1,187 @@
+/* ══════════════════════════════════════════
+   FiltersBar.module.css — professional redesign
+══════════════════════════════════════════ */
+
 .filtersContainer {
   background: #fff;
+  border: 1px solid #e8e8ee;
   border-radius: 16px;
-  padding: clamp(1rem, 3vw, 1.5rem);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  padding: 20px 24px;
+  box-shadow: 0 2px 8px rgba(44, 58, 95, 0.06);
   width: 100%;
   box-sizing: border-box;
 }
 
-.sectionTitle {
-  font-size: clamp(0.9375rem, 2vw, 1rem);
-  font-weight: 700;
+/* ── Top row: search full width ── */
+.searchWrapper {
+  position: relative;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.searchIcon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
   color: #2C3A5F;
-  margin-bottom: clamp(0.75rem, 2vw, 1rem);
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 .searchField {
-  border-radius: 10px;
-  border: 1px solid #E2E5EF;
-  padding: clamp(0.5rem, 1.5vw, 0.625rem) clamp(0.75rem, 2vw, 0.875rem);
   width: 100%;
-  margin-bottom: clamp(0.75rem, 2vw, 0.875rem);
-  background: #FAFBFD;
-  font-size: clamp(0.875rem, 1.5vw, 0.9375rem);
+  height: 42px;
+  padding: 0 42px 0 14px;
+  border: 1px solid #dde0ea;
+  border-radius: 10px;
+  background: #fafbfd;
+  font-size: 14px;
+  color: #2C3A5F;
   box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  font-family: inherit;
 }
 
+.searchField::placeholder { color: #9aa0b4; }
+
+.searchField:focus {
+  border-color: #bfa032;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(191, 160, 50, 0.14);
+}
+
+/* ── Divider ── */
+.divider {
+  height: 1px;
+  background: #f0f1f5;
+  margin-bottom: 16px;
+}
+
+/* ── Filters grid ── */
 .filterSelects {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(150px, 100%), 1fr));
-  gap: clamp(0.5rem, 1.5vw, 0.625rem);
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
 }
 
-.filterSelects select {
-  border: 1px solid #E2E5EF;
-  padding: 10px;
-  border-radius: 8px;
-  background: #F8F9FB;
-  color:  #2C3A5F;
-}
-
-.filter-selects select {
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  background: #f9f9f9;
-  color: #555;
+.select {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #dde0ea;
+  border-radius: 9px;
+  background: #fafbfd;
+  font-size: 13.5px;
+  color: #2C3A5F;
   cursor: pointer;
-  transition: all 0.2s ease;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%232C3A5F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 10px center;
 }
 
-
-.activeSelect {
-  background-color: #d4af37; 
-  color: #fff;
-  border-color: #b89125;
+.select:focus {
+  border-color: #bfa032;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(191, 160, 50, 0.14);
 }
 
+.select option[value=""][disabled] { color: #9aa0b4; }
 
-.filter-selects select option[disabled] {
-  color: #aaa;
-  display: none; 
+/* select that has a real value chosen — subtle highlight */
+.select:not([value=""]) {
+  border-color: #c8aa3a;
+  background-color: #fffdf3;
 }
-/* ===== Buttons Wrapper ===== */
 
-.buttonsWrapper {
+/* ── Footer: clear only (apply removed) ── */
+.footer {
   display: flex;
-  justify-content: flex-start;
   align-items: center;
-  gap: 14px;
-  margin-top: 20px;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+  border-top: 1px solid #f0f1f5;
 }
 
-/* زرار المسح */
+.activeFiltersHint {
+  flex: 1;
+  font-size: 12.5px;
+  color: #9aa0b4;
+  font-weight: 500;
+}
+
+.activeFiltersHint span {
+  color: #bfa032;
+  font-weight: 700;
+}
+
 .clearBtn {
-  background: #F3F4F9;
-  border: 1px solid #E2E5EF;
-  border-radius: 8px;
-  padding: 0.65rem 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 28px;
+  background: #f4f5f8;
+  border: 1px solid #e0e2ea;
+  border-radius: 10px;
+  font-size: 15px;
   font-weight: 600;
   color: #2C3A5F;
   cursor: pointer;
-  height: 44px;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+  font-family: inherit;
 }
 
-/* زرار التطبيق */
+.clearBtn:hover {
+  background: #ecedf2;
+  border-color: #c8cad6;
+}
+
 .applyBtn {
-  background: #2C3A5F;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 36px;
+  background: #bfa032;
   border: none;
-  border-radius: 8px;
-  padding: 0.65rem 1.7rem;
-  font-weight: 600;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
   color: #fff;
   cursor: pointer;
-  height: 44px;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transition: background 0.15s, transform 0.1s;
+  font-family: inherit;
 }
 
-.applyBtn:hover {
-  background: #d4af37;
-  color: #fff;
+.applyBtn:hover  { background: #a68c2a; }
+.applyBtn:active { transform: scale(0.97); }
+
+/* ══════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════ */
+@media (max-width: 1100px) {
+  .filterSelects { grid-template-columns: repeat(3, 1fr); }
 }
 
-@media (max-width: 640px) {
-  .filterSelects {
-    grid-template-columns: 1fr;
-  }
-
-  .buttonsWrapper {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .clearBtn,
-  .applyBtn {
-    width: 100%;
-  }
+@media (max-width: 800px) {
+  .filterSelects { grid-template-columns: repeat(2, 1fr); }
+  .filtersContainer { padding: 16px; }
 }
-@media (max-width: 640px) {
-  .filterSelects {
-    grid-template-columns: 1fr;
-  }
-  .clearBtn,
-  .applyBtn {
-    width: 100%;
-    margin-right: 0;
-  }
+
+@media (max-width: 500px) {
+  .filterSelects { grid-template-columns: 1fr; }
+  .footer { flex-direction: column; align-items: stretch; }
+  .clearBtn, .applyBtn { width: 100%; justify-content: center; }
 }

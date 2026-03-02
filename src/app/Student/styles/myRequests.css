@@ -5,25 +5,12 @@
 ============================================ */
 .my-requests-container {
   direction: rtl;
-  max-width: 1400px;
-  width: 95%;
+  max-width: 100%;
+  width: 100%;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 24px 0 32px;
   font-family: "Cairo", sans-serif;
-}
-
-@media (min-width: 1600px) {
-  .my-requests-container {
-    max-width: 1600px;
-    width: 90%;
-  }
-}
-
-@media (min-width: 1920px) {
-  .my-requests-container {
-    max-width: 1800px;
-    width: 85%;
-  }
+  box-sizing: border-box;
 }
 
 /* ============================================

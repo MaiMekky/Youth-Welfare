@@ -1,105 +1,159 @@
-/* app/student/styles/headerCard.css */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
+
+/* ── Container: full page width, no centering constraint ── */
 .header-card-container {
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px 20px;
-  align-items: center;
+  padding: 0;
   box-sizing: border-box;
+  font-family: 'Cairo', sans-serif;
+  direction: rtl;
 }
 
+/* ── Hero card ── */
 .header-card {
-  background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+  background: linear-gradient(135deg, #1a2744 0%, #243358 60%, #1d2e52 100%);
   color: #fff;
-  padding: 36px 20px;
-  border-radius: 10px;
+  padding: 32px 48px 0;
   text-align: center;
   width: 100%;
   box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Gold top accent line */
+.header-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #c9972a, #e0aa35, #c9972a);
+}
+
+/* Subtle radial glow */
+.header-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(201,151,42,0.1) 0%, transparent 65%);
+  pointer-events: none;
 }
 
 .header-title {
-  margin: 0 0 8px 0;
-  font-size: 28px;
+  margin: 0 0 6px;
+  font-size: 1.9rem;
+  font-weight: 800;
   color: #fff;
+  position: relative;
+  z-index: 1;
+  letter-spacing: -0.01em;
+}
+
+/* Gold underline separator */
+.header-title::after {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 3px;
+  background: #c9972a;
+  border-radius: 3px;
+  margin: 10px auto 0;
 }
 
 .header-subtitle {
   margin: 0;
-  font-size: 15px;
-  opacity: 0.9;
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.58);
+  position: relative;
+  z-index: 1;
+  margin-top: 12px;
+  margin-bottom: 24px;
 }
 
+/* ── Tabs — sit inside the hero card at the bottom ── */
 .header-tabs {
   display: flex;
-  gap: 8px;
   justify-content: center;
-  margin-top: 18px;
-  flex-wrap: wrap;
+  gap: 2px;
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  margin: 0 -48px;
+  padding: 0 48px;
 }
 
 .tab-btn {
-  background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
-  color: #fff;
+  background: transparent;
+  color: rgba(255,255,255,0.6);
   border: none;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
-  transition: all 0.3s ease;
+  padding: 14px 24px;
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.925rem;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  white-space: nowrap;
 }
 
-.tab-btn.active,
+/* Active indicator underline */
+.tab-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: #c9972a;
+  border-radius: 3px 3px 0 0;
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+}
+
 .tab-btn:hover {
-  background: #B38E19;
+  color: #fff;
+  background: rgba(255,255,255,0.06);
 }
 
-/* responsive */
+.tab-btn.active {
+  color: #fff;
+  font-weight: 700;
+}
+
+.tab-btn.active::after {
+  transform: scaleX(1);
+}
+
+/* ── Responsive ── */
 @media (max-width: 768px) {
-  .header-card-container {
-    padding: 16px 12px;
+  .header-card {
+    padding: 24px 20px 0;
   }
-  .header-card { 
-    padding: 24px 12px; 
-  }
-  .header-title { 
-    font-size: 22px; 
-  }
-  .header-subtitle {
-    font-size: 13px;
-  }
-  .tab-btn { 
-    padding: 6px 10px; 
-    font-size: 14px; 
-  }
+
   .header-tabs {
-    gap: 6px;
-    margin-top: 14px;
+    margin: 0 -20px;
+    padding: 0 20px;
   }
+
+  .header-title { font-size: 1.5rem; }
+  .header-subtitle { font-size: 0.82rem; }
+  .tab-btn { padding: 12px 16px; font-size: 0.875rem; }
 }
 
 @media (max-width: 480px) {
-  .header-card-container {
-    padding: 12px 8px;
-  }
-  .header-card { 
-    padding: 20px 10px; 
-  }
-  .header-title { 
-    font-size: 18px; 
-  }
-  .header-subtitle {
-    font-size: 12px;
-  }
-  .tab-btn { 
-    padding: 6px 8px; 
-    font-size: 12px; 
-    flex: 1;
-    min-width: 0;
-  }
+  .header-card { padding: 20px 14px 0; }
+
   .header-tabs {
-    gap: 4px;
-    margin-top: 12px;
+    margin: 0 -14px;
+    padding: 0;
+    width: calc(100% + 28px);
+  }
+
+  .header-title  { font-size: 1.25rem; }
+  .header-subtitle { font-size: 0.78rem; margin-bottom: 16px; }
+
+  .tab-btn {
+    flex: 1;
+    padding: 11px 8px;
+    font-size: 0.8rem;
+    text-align: center;
   }
 }

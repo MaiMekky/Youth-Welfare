@@ -10,46 +10,41 @@ type View = "home" | "createForm" | "trackRequest";
 export default function FamilyManagePage() {
   const [currentView, setCurrentView] = useState<View>("home");
 
-  const handleNavigateToCreateForm = () => {
-    setCurrentView("createForm");
-  };
-
-  const handleNavigateToTrackRequest = () => {
-    setCurrentView("trackRequest");
-  };
-
-  const handleNavigateBack = () => {
-    setCurrentView("home");
-  };
-
   const handleFormSubmitSuccess = () => {
-    // After successful form submission, save status to localStorage
     localStorage.setItem("familyRequestStatus", "pending");
     localStorage.setItem("familyRequestSubmitted", "true");
     setCurrentView("trackRequest");
   };
 
   return (
-    <main style={{ minHeight: "100vh", backgroundColor: "#F3F5FD", width: "100%", direction: "rtl" }}>
+    <main className="student-manage-page">
+      {/* ── HOME VIEW ── */}
       {currentView === "home" && (
         <>
-          <TrackReqButton 
-            onCreateClick={handleNavigateToCreateForm}
-            onReviewClick={handleNavigateToTrackRequest}
+          {/* Full-width hero card with both action buttons */}
+          <TrackReqButton
+            onCreateClick={() => setCurrentView("createForm")}
+            onReviewClick={() => setCurrentView("trackRequest")}
           />
-          <Dashboard />
+
+          {/* Dashboard content in the constrained layout wrapper */}
+          <div className="student-page-wrap">
+            <Dashboard />
+          </div>
         </>
       )}
 
+      {/* ── CREATE FORM VIEW ── */}
       {currentView === "createForm" && (
-        <CreateFamForm 
-          onBack={handleNavigateBack}
+        <CreateFamForm
+          onBack={() => setCurrentView("home")}
           onSubmitSuccess={handleFormSubmitSuccess}
         />
       )}
 
+      {/* ── TRACK REQUEST VIEW ── */}
       {currentView === "trackRequest" && (
-        <TrackRequest onBack={handleNavigateBack} />
+        <TrackRequest onBack={() => setCurrentView("home")} />
       )}
     </main>
   );

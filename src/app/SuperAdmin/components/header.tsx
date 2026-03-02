@@ -45,7 +45,7 @@ export default function Header() {
         {/* Brand Section */}
         <div className={styles.brand}>
           <div className={styles.brandText}>
-            <h1 className={styles.title}>نظام ادارة رعاية الشباب</h1>
+            <h1 className={styles.title}>نظام ادارة رعاية الطلاب</h1>
             <p className={styles.subtitle}>طلبات الدعم المالي و الانشطة المعتمدة للطلاب</p>
           </div>
         </div>

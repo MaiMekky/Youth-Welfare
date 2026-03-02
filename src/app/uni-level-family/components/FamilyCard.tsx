@@ -42,6 +42,9 @@ const isEcoFamily = family.type === "اصدقاء البيئة";
     router.push(`/uni-level-family/details/${family.family_id}`);
   };
 
+  // Check if approve/reject buttons should be shown
+  const shouldShowApproveReject = showActions && family.status !== "مقبول";
+
   return (
     <div className={styles.familyCard}>
       {/* Header */}

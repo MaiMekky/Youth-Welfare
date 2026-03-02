@@ -32,9 +32,9 @@ const HeroSection: React.FC = () => {
     >
       <div className={styles.overlay}>
         <div className={styles.heroContent}>
-          <h1 className={styles.universityName}>جامعة حلوان</h1>
+          <h1 className={styles.universityName}>جامعة العاصمة</h1>
           <div className={styles.separator}></div>
-          <h1 className={styles.mainTitle}>مرحباً بكم في بوابة رعاية الشباب</h1>
+          <h1 className={styles.mainTitle}>مرحباً بكم في بوابة رعاية الطلاب</h1>
           <p className={styles.description}>
             بوابتكم إلى عالم من الفرص والإبداع في بيئة جامعية متميزة.
           </p>

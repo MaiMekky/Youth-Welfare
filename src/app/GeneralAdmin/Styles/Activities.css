@@ -1,0 +1,286 @@
+/* Activities.css */
+
+.activities-page {
+  direction: rtl;
+  font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+  padding: clamp(1rem, 3vw, 1.75rem);
+  background-color: #f3f5fd;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+/* ===== Section Header ===== */
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.section-header-right {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.section-title {
+  font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+  font-weight: 700;
+  color: #1e2a5a;
+  margin: 0;
+}
+
+.section-subtitle {
+  font-size: clamp(0.78rem, 1.5vw, 0.875rem);
+  color: #6b7fc4;
+  margin: 0;
+}
+
+/* Pending badge */
+.pending-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff8e6;
+  border: 1px solid #f0d080;
+  color: #a07b10;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.pending-badge svg {
+  flex-shrink: 0;
+}
+
+/* ===== Cards List ===== */
+.activities-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ===== Single Card ===== */
+.activity-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: clamp(1rem, 2.5vw, 1.25rem) clamp(1rem, 3vw, 1.5rem);
+  box-shadow: 0 2px 10px rgba(30, 42, 90, 0.06);
+  border: 1px solid #eaedf6;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.activity-card:hover {
+  box-shadow: 0 6px 20px rgba(30, 42, 90, 0.1);
+  transform: translateY(-2px);
+}
+
+/* ===== Card Top Row ===== */
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.card-title {
+  font-size: clamp(1rem, 2vw, 1.15rem);
+  font-weight: 700;
+  color: #1e2a5a;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== Department Badge ===== */
+.dept-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.dept-social  { background: #edf3ff; color: #3b5fc0; }
+.dept-science { background: #edfaf3; color: #1a7a4a; }
+.dept-sports  { background: #fff3e8; color: #b85c00; }
+.dept-culture { background: #f5eeff; color: #6b2fa0; }
+.dept-arts    { background: #fff0f6; color: #b5005b; }
+.dept-general { background: #f0f4ff; color: #2c4ea8; }
+
+/* ===== Action Buttons ===== */
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+/* Shared button base */
+.card-actions button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+}
+
+/* Reject */
+.btn-reject {
+  background: #ffffff;
+  color: #c0392b;
+  border-color: #e8c8c5 !important;
+}
+
+.btn-reject:hover {
+  background: #fff0f0;
+  border-color: #c0392b !important;
+}
+
+/* Approve */
+.btn-approve {
+  background: linear-gradient(135deg, #c49b3a 0%, #a67f2c 100%);
+  color: #ffffff;
+  box-shadow: 0 3px 10px rgba(196, 155, 58, 0.3);
+}
+
+.btn-approve:hover {
+  background: linear-gradient(135deg, #a67f2c 0%, #8a6820 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(196, 155, 58, 0.4);
+}
+
+/* View Details */
+.btn-view {
+  background: #ffffff;
+  color: #3b5fc0;
+  border-color: #c8d4f0 !important;
+}
+
+.btn-view:hover {
+  background: #edf3ff;
+  border-color: #3b5fc0 !important;
+}
+
+/* ===== Card Meta Grid ===== */
+.card-meta {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px 16px;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f0f2f8;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.meta-icon {
+  color: #8fa3cc;
+  flex-shrink: 0;
+}
+
+.meta-label {
+  font-size: 0.78rem;
+  color: #8fa3cc;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.meta-value {
+  font-size: 0.82rem;
+  color: #2c3a5f;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta-value.participants {
+  color: #6b7fc4;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1024px) {
+  .card-meta {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .card-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .card-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .card-meta {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .card-title {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 480px) {
+  .activities-page {
+    padding: 0.75rem;
+  }
+
+  .card-meta {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .card-actions {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .card-actions button {
+    flex: 1;
+    justify-content: center;
+    min-width: 90px;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

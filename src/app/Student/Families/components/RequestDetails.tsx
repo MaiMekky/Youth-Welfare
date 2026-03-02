@@ -8,38 +8,11 @@ interface RequestDetailsProps {
 }
 
 const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => {
-  const COLORS = {
-    darkNavy: "#27285D",
-    gold: "#B38E19",
-    lightBg: "#F3F5FD",
-    white: "#FFFFFF",
-    sectionBlue: "#B3E5FC",
-    sectionYellow: "#FFF9C4",
-    sectionGreen: "#C8E6C9",
-  };
-
-  const handleBackClick = () => {
-    if (onBack) {
-      onBack();
-    } else {
-      alert("Navigating Back (Router action not implemented).");
-    }
-  };
-
-  const handleSubmitClick = () => {
-    if (onSubmit) {
-      onSubmit();
-    } else {
-      alert("Submitting Request (Form submission not implemented).");
-    }
-  };
-
   const sections = [
     {
       id: 1,
       title: "مقدمة عن الأسر الطلابية",
       icon: "📄",
-      color: COLORS.white,
       content: (
         <>
           <p className="section-intro">
@@ -55,74 +28,106 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => 
     },
     {
       id: 2,
-      title: "شروط ومتطلبات إنشاء الأسرة",
+      title: "الأسرة المركزية",
+      icon: "🏛️",
+      content: (
+        <>
+          <p className="section-intro">
+            الأسرة المركزية وحدة تنظيمية شاملة تهدف إلى تنمية مهارات الطلاب في جميع المجالات على مستوى الجامعة، وتساهم في بناء شخصية الطالب بشكل متكامل.
+          </p>
+          <ul className="checklist">
+            <li>تنظيم الأنشطة على مستوى الجامعة</li>
+            <li>تنمية المهارات القيادية في جميع المجالات</li>
+            <li>تعزيز الانتماء والمشاركة المجتمعية الشاملة</li>
+          </ul>
+        </>
+      ),
+    },
+    {
+      id: 3,
+      title: "الأسرة النوعية",
+      icon: "🎯",
+      content: (
+        <>
+          <p className="section-intro">
+            الأسرة النوعية وحدة متخصصة تركز على مجال محدد (ثقافي، رياضي، فني، علمي، اجتماعي)، وتهدف إلى اكتشاف المواهب وتطويرها في المجال التخصصي.
+          </p>
+          <ul className="checklist">
+            <li>تنظيم أنشطة متخصصة في المجال المحدد</li>
+            <li>اكتشاف وتنمية المواهب التخصصية</li>
+            <li>تحقيق التميز والإبداع في مجال الأسرة</li>
+          </ul>
+        </>
+      ),
+    },
+    {
+      id: 4,
+      title: "شروط ومتطلبات الإنشاء",
       icon: "✅",
-      color: COLORS.sectionYellow,
       content: (
         <div className="requirements-list">
           <p className="section-subtitle">المتطلبات الأساسية:</p>
           <ul className="bullet-list">
-            <li>تحديد اسم الأسرة وأهدافها بشكل واضح ومحدد</li>
-            <li>تشكيل مجلس إدارة كامل للأسرة (9 أعضاء)</li>
+            <li>تحديد اسم الأسرة وأهدافها بشكل واضح</li>
+            <li>تشكيل مجلس إدارة كامل (9 أعضاء)</li>
             <li>تحديد اللجان النوعية وأعضائها (7 لجان)</li>
-            <li>وجود رائد أكاديمي للأسرة من أعضاء هيئة التدريس</li>
+            <li>وجود رائد أكاديمي من هيئة التدريس</li>
           </ul>
         </div>
       ),
     },
     {
-      id: 3,
-      title: "هيكل مجلس إدارة الأسرة",
+      id: 5,
+      title: "هيكل مجلس الإدارة",
       icon: "👥",
-      color: COLORS.sectionBlue,
       content: (
         <div className="structure-layout">
           <div className="role-column">
-            <p className="column-title">
-              يتكون مجلس إدارة الأسرة من 9 أعضاء، لكل منهم دور ومسؤولية محددة:
-            </p>
+            <p className="column-title">أعضاء مجلس الإدارة (9 أعضاء)</p>
             <ul className="bullet-list">
               <li>قائد الأسرة</li>
+              <li>نائب القائد</li>
               <li>مسؤول الأسرة</li>
               <li>أمين الصندوق</li>
               <li>الأمين العام</li>
               <li>سكرتير / أمين السر</li>
+              <li>الأخ الأكبر</li>
               <li>عضو منتخب (1)</li>
+              <li>عضو منتخب (2)</li>
             </ul>
           </div>
           <div className="committee-column">
-            <p className="column-title">اللجان النوعية (7 لجان):</p>
+            <p className="column-title">اللجان النوعية (7 لجان)</p>
             <ul className="bullet-list">
               <li>اللجنة الثقافية</li>
               <li>اللجنة الرياضية</li>
               <li>اللجنة الاجتماعية والرحلات</li>
               <li>اللجنة الفنية</li>
-              <li>لجنة حفظ القرآن</li>
-              <li>لجنة إعداد القادة</li>
-              <li>لجنة التدريب والتأهيل</li>
+              <li>اللجنة العلمية</li>
+              <li>لجنة الخدمة العامة</li>
+              <li>لجنة صحف الحائط</li>
             </ul>
           </div>
         </div>
       ),
     },
     {
-      id: 4,
+      id: 6,
       title: "خطوات التقديم والمراجعة",
       icon: "✔️",
-      color: COLORS.sectionGreen,
       content: (
         <ol className="step-list">
           <li className="step-item">
             <span className="step-number">1</span>
             <div className="step-content">
-              <span className="step-title">تعبئة طلب إنشاء الأسرة</span>
+              <span className="step-title">تعبئة طلب الإنشاء</span>
               <p>تعبئة جميع البيانات والمستندات المطلوبة بدقة</p>
             </div>
           </li>
           <li className="step-item">
             <span className="step-number">2</span>
             <div className="step-content">
-              <span className="step-title">مراجعة إدارة رعاية الشباب</span>
+              <span className="step-title">مراجعة إدارة رعاية الطلاب</span>
               <p>سيتم مراجعة الطلب والتحقق من استيفاء الشروط</p>
             </div>
           </li>
@@ -140,23 +145,20 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => 
 
   return (
     <div className="request-details-container">
-      {/* Main Header */}
+
+      {/* ── Full-width Hero Header ── */}
       <div className="main-header-card">
         <h1 className="main-header-title">طلب إنشاء أسرة طلابية</h1>
-        <div className="separator-line-gold"></div>
+        <div className="separator-line-gold" />
         <p className="main-header-subtitle">
-          تعرف على خطوات ومطلبات إنشاء أسرة طلابية جديدة
+          تعرف على خطوات ومتطلبات إنشاء أسرة طلابية جديدة
         </p>
       </div>
 
-      {/* Sections */}
+      {/* ── 2-column cards grid ── */}
       <div className="content-area">
         {sections.map((section) => (
-          <div
-            key={section.id}
-            className="section-card"
-            style={{ backgroundColor: section.color }}
-          >
+          <div key={section.id} className="section-card">
             <div className="section-title-bar">
               <span className="section-icon">{section.icon}</span>
               <h2 className="section-heading">{section.title}</h2>
@@ -166,21 +168,16 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => 
         ))}
       </div>
 
-      {/* Footer */}
-
+      {/* ── Sticky footer — two buttons only ── */}
       <div className="action-footer">
-         <button
-          className="footer-button button-submit"
-          onClick={handleSubmitClick}
-        >
-          تقديم طلب الإنشاء
-        </button>
-        
-        <button className="footer-button button-back" onClick={handleBackClick}>
+        <button className="footer-button button-back" onClick={onBack ?? (() => window.history.back())}>
           العودة
         </button>
-       
+        <button className="footer-button button-submit" onClick={onSubmit}>
+          تقديم طلب الإنشاء
+        </button>
       </div>
+
     </div>
   );
 };

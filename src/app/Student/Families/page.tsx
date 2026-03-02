@@ -42,7 +42,7 @@ export default function FamiliesPage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#F3F5FD", width: "100%" }}>
+    <div className="student-families-page">
       {currentView === "home" && (
         <>
           <HeadPage

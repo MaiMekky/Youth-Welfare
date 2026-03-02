@@ -33,12 +33,12 @@ const Navbar: React.FC = () => {
                 <div className={styles.departmentInfo}>
           <h2>
             {lang === "ar"
-              ? "الإدارة العامة لرعاية الشباب"
+              ? "الإدارة العامة لرعاية الطلاب"
               : "General Administration of Youth Care"}
           </h2>
           <p>
             {lang === "ar"
-              ? "Helwan University - Youth Care"
+              ? "Capital University - Youth Welfare"
               : "Helwan University - Youth Care"}
           </p>
         </div>

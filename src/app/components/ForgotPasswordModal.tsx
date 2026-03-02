@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
-import { X, Mail, KeyRound, Lock, ArrowRight } from "lucide-react";
+import { X, Mail, Lock, ArrowRight } from "lucide-react";
 import styles from "../Styles/components/ForgotPasswordModal.module.css";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-type Step = "email" | "code" | "success";
+type Step = "email" | "confirm" | "success";
 
 interface ForgotPasswordModalProps {
   onClose: () => void;
@@ -16,7 +16,8 @@ interface ForgotPasswordModalProps {
 export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswordModalProps) {
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
+  const [uid, setUid] = useState("");
+  const [token, setToken] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -25,7 +26,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
 
   const showMessage = useCallback((text: string, type: "success" | "error" | "info") => {
     setMessage({ text, type });
-    setTimeout(() => setMessage(null), 4000);
+    setTimeout(() => setMessage(null), 5000);
   }, []);
 
   // Close on Escape
@@ -37,83 +38,111 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
     return () => window.removeEventListener("keydown", handleEscape);
   }, [onClose]);
 
+  // If uid & token are present in the URL (from email link), pre-fill and jump to confirm step
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const urlUid = params.get("uid");
+    const urlToken = params.get("token");
+    if (urlUid && urlToken) {
+      setUid(urlUid);
+      setToken(urlToken);
+      setStep("confirm");
+    }
+  }, []);
+
   const validateEmail = () => {
     const e: Record<string, string> = {};
     if (!email.trim()) e.email = "البريد الإلكتروني مطلوب";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
-      e.email = "أدخل بريدًا إلكترونيًا صالحًا";
+      e.email = "أدخلي بريدًا إلكترونيًا صالحًا";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  const validateCodeStep = () => {
+  const validateConfirmStep = () => {
     const e: Record<string, string> = {};
-    if (!code.trim()) e.code = "أدخل الكود المرسل إلى بريدك";
     if (!newPassword.trim()) e.newPassword = "كلمة المرور الجديدة مطلوبة";
     else if (newPassword.length < 6) e.newPassword = "كلمة المرور 6 أحرف على الأقل";
-    if (newPassword !== confirmPassword) e.confirmPassword = "كلمة المرور غير متطابقة";
+    if (newPassword !== confirmPassword) e.confirmPassword = "كلمتا المرور غير متطابقتين";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  // Backend: POST body { email } → send OTP/code to email
-  const handleRequestCode = async (e: React.FormEvent) => {
+  // Backend: POST { email } → sends password-reset email (with uid + token in link)
+  const handleRequestEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateEmail()) return;
     setLoading(true);
     setErrors({});
     try {
-      const res = await fetch(`${API_BASE}/api/auth/request-password-reset/`, {
+      const res = await fetch(`${API_BASE}/api/auth/password-reset/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim() }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        showMessage(data.detail || data.message || "فشل إرسال الكود. تحقق من البريد أو حاول لاحقًا.", "error");
+        showMessage(
+          data.detail || data.message || "فشل إرسال رابط إعادة التعيين. تأكدي من صحة البريد أو حاولي لاحقًا.",
+          "error"
+        );
         setLoading(false);
         return;
       }
-      setStep("code");
-      showMessage("تم إرسال كود إعادة التعيين إلى بريدك الإلكتروني. تحقق من صندوق الوارد أو الرسائل غير المرغوبة.", "success");
+      showMessage(
+        "تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك. افتحي الرابط من بريدك الإلكتروني لإكمال العملية.",
+        "success"
+      );
     } catch (err) {
       console.error(err);
-      showMessage("حدث خطأ في الاتصال. تأكد من الاتصال بالإنترنت وحاول مرة أخرى.", "error");
+      showMessage("حدث خطأ في الاتصال. تأكدي من الاتصال بالإنترنت ثم حاولي مرة أخرى.", "error");
     } finally {
       setLoading(false);
     }
   };
 
+  // Backend: POST { uid, token, new_password, confirm_password } → confirms reset
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateCodeStep()) return;
+    if (!validateConfirmStep()) return;
+
+    // Safety check — uid/token must exist (they come from the URL)
+    if (!uid || !token) {
+      showMessage("رابط إعادة التعيين غير صالح. يرجى النقر على الرابط الموجود في بريدك مرة أخرى.", "error");
+      return;
+    }
+
     setLoading(true);
     setErrors({});
     try {
-      const res = await fetch(`${API_BASE}/api/auth/reset-password/`, {
+      const res = await fetch(`${API_BASE}/api/auth/password-reset/confirm/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: email.trim(),
-          code: code.trim(),
+          uid: uid.trim(),
+          token: token.trim(),
           new_password: newPassword,
+          confirm_password: confirmPassword,
         }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        showMessage(data.detail || data.message || "فشل تغيير كلمة المرور. تحقق من الكود وحاول مرة أخرى.", "error");
+        showMessage(
+          data.detail || data.message || "فشل تغيير كلمة المرور. قد يكون الرابط منتهي الصلاحية، حاولي طلب رابط جديد.",
+          "error"
+        );
         setLoading(false);
         return;
       }
       setStep("success");
-      showMessage("تم تغيير كلمة المرور بنجاح. يمكنك تسجيل الدخول الآن.", "success");
       setTimeout(() => {
         onSuccess?.();
         onClose();
-      }, 2000);
+      }, 2500);
     } catch (err) {
       console.error(err);
-      showMessage("حدث خطأ في الاتصال. حاول مرة أخرى.", "error");
+      showMessage("حدث خطأ في الاتصال. حاولي مرة أخرى.", "error");
     } finally {
       setLoading(false);
     }
@@ -121,10 +150,19 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
 
   const handleBackToEmail = () => {
     setStep("email");
-    setCode("");
+    setUid("");
+    setToken("");
     setNewPassword("");
     setConfirmPassword("");
     setErrors({});
+    setMessage(null);
+    // Clear uid/token from URL without page reload
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("uid");
+      url.searchParams.delete("token");
+      window.history.replaceState({}, "", url.toString());
+    }
   };
 
   return (
@@ -141,7 +179,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
 
         <h2 id="forgot-password-title" className={styles.title}>
           {step === "email" && "نسيت كلمة المرور"}
-          {step === "code" && "إدخال الكود وكلمة المرور الجديدة"}
+          {step === "confirm" && "تعيين كلمة مرور جديدة"}
           {step === "success" && "تم بنجاح"}
         </h2>
 
@@ -151,12 +189,13 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
           </div>
         )}
 
+        {/* ── Step 1: Enter email ── */}
         {step === "email" && (
           <>
             <p className={styles.subtitle}>
-              أدخل بريدك الجامعي وسنرسل لك كودًا لإعادة تعيين كلمة المرور.
+              أدخلي بريدك الجامعي وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.
             </p>
-            <form onSubmit={handleRequestCode} className={styles.form}>
+            <form onSubmit={handleRequestEmail} className={styles.form}>
               <div className={styles.inputWrap}>
                 <Mail className={styles.inputIcon} size={18} />
                 <input
@@ -171,32 +210,19 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
               </div>
               {errors.email && <p className={styles.errorMsg}>{errors.email}</p>}
               <button type="submit" disabled={loading} className={styles.primaryBtn}>
-                {loading ? "جاري الإرسال..." : "إرسال الكود"}
+                {loading ? "جاري الإرسال..." : "إرسال رابط إعادة التعيين"}
               </button>
             </form>
           </>
         )}
 
-        {step === "code" && (
+        {/* ── Step 2: Set new password (uid & token come from URL, hidden from user) ── */}
+        {step === "confirm" && (
           <>
             <p className={styles.subtitle}>
-              أدخل الكود الذي وصلك على <strong>{email}</strong> وكلمة المرور الجديدة.
+              أدخلي كلمة المرور الجديدة لحسابك.
             </p>
             <form onSubmit={handleResetPassword} className={styles.form}>
-              <div className={styles.inputWrap}>
-                <KeyRound className={styles.inputIcon} size={18} />
-                <input
-                  type="text"
-                  placeholder="الكود المرسل إلى البريد"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  className={errors.code ? styles.invalid : ""}
-                  autoComplete="one-time-code"
-                  autoFocus
-                />
-              </div>
-              {errors.code && <p className={styles.errorMsg}>{errors.code}</p>}
-
               <div className={styles.inputWrap}>
                 <Lock className={styles.inputIcon} size={18} />
                 <input
@@ -206,6 +232,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
                   onChange={(e) => setNewPassword(e.target.value)}
                   className={errors.newPassword ? styles.invalid : ""}
                   autoComplete="new-password"
+                  autoFocus
                 />
               </div>
               {errors.newPassword && <p className={styles.errorMsg}>{errors.newPassword}</p>}
@@ -226,6 +253,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
               <button type="submit" disabled={loading} className={styles.primaryBtn}>
                 {loading ? "جاري الحفظ..." : "تغيير كلمة المرور"}
               </button>
+
               <button
                 type="button"
                 className={styles.backBtn}
@@ -233,12 +261,13 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
                 disabled={loading}
               >
                 <ArrowRight size={16} />
-                تغيير البريد الإلكتروني
+                إرسال رابط جديد
               </button>
             </form>
           </>
         )}
 
+        {/* ── Step 3: Success ── */}
         {step === "success" && (
           <div className={styles.successBlock}>
             <div className={styles.successIcon}>✓</div>

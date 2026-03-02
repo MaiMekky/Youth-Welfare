@@ -244,17 +244,13 @@ export default function Page() {
       )}
 
       <main className={styles.tabContent}>
-     {activeTab === "central" && (
-  <>
-    <AddButton />
-    <FamiliesGrid 
-      families={centralFamilies} 
-      showActions={true} 
-      onApprove={handleApproveFamily}
-      onReject={handleRejectFamily}
-    />
-  </>
-)}
+        {activeTab === "central" && (
+          <>
+            {/* <AddButton /> */}
+            <FamiliesGrid families={centralFamilies} showActions={false} />
+          </>
+        )}
+
         {activeTab === "quality" && (
           <>
             <Filters
@@ -274,18 +270,20 @@ export default function Page() {
 
         {activeTab === "eco" && (
           <>
-            <Filters
-              selectedFaculty={selectedFaculty}
-              setSelectedFaculty={setSelectedFaculty}
-              selectedFamilyType={selectedFamilyType}
-              setSelectedFamilyType={setSelectedFamilyType}
-            />
-            <FamiliesGrid
-              families={filteredNonCentralFamilies}
-              showActions={true}
-              onApprove={handleApproveFamily}
-              onReject={handleRejectFamily}
-            />
+           {activeTab === "eco" && (
+            <>
+              <Filters
+                selectedFaculty={selectedFaculty}
+                setSelectedFaculty={setSelectedFaculty}
+                selectedFamilyType={selectedFamilyType}
+                setSelectedFamilyType={setSelectedFamilyType}
+              />
+              <FamiliesGrid
+                families={filteredNonCentralFamilies}
+                showActions={false} 
+              />
+            </>
+          )}
           </>
         )}
       </main>

@@ -194,7 +194,7 @@ export default function FacultyReport() {
           الاسر الطلابية
         </button>
 
-        <button className={styles.navBtn} onClick={() => handleNavClick("/activities")} type="button">
+        <button className={styles.navBtn} onClick={() => handleNavClick("/Events-Faclevel")} type="button">
           الانشطة
         </button>
 

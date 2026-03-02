@@ -13,7 +13,11 @@ export default function AddUser() {
 
   const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
- const [notification, setNotification] = useState<string | null>(null);
+  const [notification, setNotification] = useState<string | null>(null);
+
+  // ✅ departments now fetched from API instead of hard-coded map
+  const [departments, setDepartments] = useState<{ dept_id: number; name: string }[]>([]);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -24,17 +28,10 @@ export default function AddUser() {
     faculty: '', // This will store faculty ID as string
     departments: [] as string[],
   });
- const showNotification = (message: string, type: "success" | "warning" | "error") => {
+
+  const showNotification = (message: string, type: "success" | "warning" | "error") => {
     setNotification(`${type}:${message}`);
     setTimeout(() => setNotification(null), 3500);
-  };
-  const departmentsMap: { [key: string]: number } = {
-    'فني و ثقافي': 1,
-    'رياضي': 2,
-    'اجتماعي': 3,
-    'أسر': 4,
-    'علمي': 5,
-    'تكافل': 6,
   };
 
   const roleMap: { [key: string]: string } = {
@@ -45,36 +42,54 @@ export default function AddUser() {
     "super_admin": "مشرف النظام",
   };
 
-  const departmentsList = Object.keys(departmentsMap);
+  // ✅ departmentsList from API (same usage as before)
+  const departmentsList = departments.map(d => d.name);
 
-  // Fetch faculties on component mount
+  // Fetch faculties + departments on component mount
   useEffect(() => {
-    const fetchFaculties = async () => {
+    const fetchInitialData = async () => {
       try {
         const token = localStorage.getItem('access');
-        const response = await fetch('http://localhost:8000/api/solidarity/super_dept/faculties/', {
-          headers: { 
+
+        // faculties
+        const facultiesRes = await fetch('http://localhost:8000/api/solidarity/super_dept/faculties/', {
+          headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         });
 
-        if (!response.ok) {
+        if (!facultiesRes.ok) {
           throw new Error('Failed to fetch faculties');
         }
 
-        const facultiesData = await response.json();
-        console.log("data: ", facultiesData)
+        const facultiesData = await facultiesRes.json();
         setFaculties(facultiesData);
+
+        // ✅ departments
+        const departmentsRes = await fetch('http://localhost:8000/api/family/departments/', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!departmentsRes.ok) {
+          throw new Error('Failed to fetch departments');
+        }
+
+        const departmentsData = await departmentsRes.json();
+        setDepartments(departmentsData);
+
       } catch (error) {
-        console.error('Error fetching faculties:', error);
-       showNotification("حدث خطاء في تحميل الكليات" , "error");
+        console.error('Error fetching initial data:', error);
+        showNotification("حدث خطاء في تحميل البيانات", "error");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchFaculties();
+    fetchInitialData();
   }, []);
 
   useEffect(() => {
@@ -86,20 +101,19 @@ export default function AddUser() {
       })
         .then(res => res.json())
         .then(data => {
+          let deptNames: string[] = [];
 
- let deptNames: string[] = [];
+          
+          if (Array.isArray(data.dept_name)) {
+            deptNames = data.dept_name;
+          }
 
-// لو الداتا Array بالفعل
-if (Array.isArray(data.dept_name)) {
-  deptNames = data.dept_name;
-}
-// لو الداتا string مش منسق كويس، فيه {} أو commas
-else if (typeof data.dept_name === "string") {
-  deptNames = data.dept_name
-    .replace(/[{}]/g, '')   // شيل الأقواس {}
-    .split(',')             // افصل على حسب الفواصل
-    .map(s => s.trim());    // شيل الفراغات
-}
+          else if (typeof data.dept_name === "string") {
+            deptNames = data.dept_name
+              .replace(/[{}]/g, '')  
+              .split(',')            
+              .map(s => s.trim());   
+          }
 
           // Store faculty ID directly (convert to string for consistency with form state)
           const facultyId = data.faculty ? data.faculty.toString() : '';
@@ -122,7 +136,7 @@ else if (typeof data.dept_name === "string") {
         })
         .catch(err => console.error('Error fetching admin data:', err));
     }
-  }, [admin_id, faculties]); // Added faculties to dependencies
+  }, [admin_id, faculties]); // keep same dependencies as your file
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, checked, type } = e.target;
@@ -192,13 +206,13 @@ else if (typeof data.dept_name === "string") {
 
         dept:
           formData.role === "department_manager"
-            ? Number(formData.departments[0]) 
-            : null,                            
+            ? Number(formData.departments[0])
+            : null,
 
         dept_fac_ls:
           formData.role === "faculty_admin"
-            ? formData.departments          
-            : [],                              
+            ? formData.departments
+            : [],
 
         acc_status: formData.status ? "active" : "inactive",
 
@@ -219,15 +233,16 @@ else if (typeof data.dept_name === "string") {
 
       if (!res.ok) {
         const errorText = await res.text();
-     showNotification("حدث خطأ" + errorText, "error" );
+        showNotification("حدث خطأ" + errorText, "error");
         return;
       }
-     showNotification( isEdit ? "تم التحديث بنجاح 🎉" : "تم الإنشاء بنجاح 🎉" , "success");
+
+      showNotification(isEdit ? "تم التحديث بنجاح 🎉" : "تم الإنشاء بنجاح 🎉", "success");
       router.push('/CreateAdmins');
 
     } catch (err) {
       console.error(err);
-     showNotification("حدث خطأ ما.", "error" );
+      showNotification("حدث خطأ ما.", "error");
     }
   };
 
@@ -250,19 +265,20 @@ else if (typeof data.dept_name === "string") {
           <h2 className={styles.formTitle}>
             {isEdit ? "تعديل المستخدم" : "إنشاء مستخدم جديد"}
           </h2>
-    {notification && (
-        <div
-          className={`${styles.notification} ${
-            notification.startsWith("success")
-              ? styles.success
-              : notification.startsWith("warning")
-              ? styles.warning
-              : styles.error
-          }`}
-        >
-          {notification.split(":")[1]}
-        </div>
-      )}
+
+          {notification && (
+            <div
+              className={`${styles.notification} ${notification.startsWith("success")
+                ? styles.success
+                : notification.startsWith("warning")
+                  ? styles.warning
+                  : styles.error
+                }`}
+            >
+              {notification.split(":")[1]}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className={styles.formContent}>
             <h3 className={styles.sectionTitle}>معلومات المستخدم</h3>
 
@@ -361,9 +377,11 @@ else if (typeof data.dept_name === "string") {
                   }
                 >
                   <option value="" hidden>اختر القسم</option>
-                  {departmentsList.map(dep => (
-                    <option key={dep} value={departmentsMap[dep]}>
-                      {dep}
+
+                  {/* ✅ now built from API, but keeps EXACT same behavior (value is dept_id number) */}
+                  {departments.map(dep => (
+                    <option key={dep.dept_id} value={dep.dept_id}>
+                      {dep.name}
                     </option>
                   ))}
                 </select>
@@ -381,8 +399,8 @@ else if (typeof data.dept_name === "string") {
                   onChange={handleChange}
                 />
                 {p === "C" ? "إنشاء" :
-                 p === "R" ? "قراءة" :
-                 p === "U" ? "تعديل" : "حذف"}
+                  p === "R" ? "قراءة" :
+                    p === "U" ? "تعديل" : "حذف"}
               </label>
             ))}
 

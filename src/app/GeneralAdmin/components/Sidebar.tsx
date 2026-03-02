@@ -131,14 +131,14 @@ export default function Sidebar({ onNavigate, currentView }: SidebarProps) {
             <Briefcase size={18} />
             <span> الفعاليات العامة</span>
           </button>
-
+{/* 
           <button
             className={currentView === "reports" ? "active" : ""}
             onClick={() => handleNavigate("reports")}
           >
             <BarChart3 size={18} />
             <span>التقارير والإنجازات</span>
-          </button>
+          </button> */}
 
           <button
             className={currentView === "plan" ? "active" : ""}

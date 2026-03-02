@@ -55,8 +55,7 @@ export default function Sidebar({ onNavigate, currentView }: SidebarProps) {
 
   const NAV = [
     { id: "activities", label: "إدارة الفعاليات",    Icon: Briefcase },
-    { id: "reports",    label: "التقارير والإنجازات", Icon: BarChart3  },
-    { id: "plan",       label: "خطة الكلية",          Icon: Calendar   },
+       { id: "plan",       label: "خطة الكلية",          Icon: Calendar   },
   ];
 
   return (

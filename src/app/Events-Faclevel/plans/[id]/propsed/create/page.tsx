@@ -3,13 +3,34 @@
 import React, { useEffect, useMemo, useState } from "react";
 import styles from "./CreateProposed.module.css";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { ArrowRight, Save, X, MapPin, CalendarDays, DollarSign, Users, Lightbulb , Briefcase } from "lucide-react";
+import {
+  ArrowRight,
+  Save,
+  X,
+  MapPin,
+  CalendarDays,
+  DollarSign,
+  Users,
+  Lightbulb,
+  Briefcase,
+} from "lucide-react";
 import Footer from "@/app/FacLevel/components/Footer";
 import Header from "@/app/FacLevel/components/Header";
 
 const API_URL = "http://localhost:8000";
 
 type Mode = "create" | "convert";
+
+const ACTIVITY_TYPES = [
+  "نشاط رياضي",
+  "نشاط ثقافي",
+  "نشاط بيئي",
+  "نشاط اجتماعي",
+  "نشاط علمي",
+  "نشاط خدمة عامة",
+  "نشاط فني",
+  "نشاط معسكرات",
+] as const;
 
 type FormState = {
   title: string;
@@ -26,6 +47,9 @@ type FormState = {
 };
 
 type FormErrors = Partial<Record<keyof FormState, string>>;
+
+/* ===================== Toast (same style) ===================== */
+type ToastType = "success" | "error" | "warning";
 
 function getAccessToken(): string | null {
   return (
@@ -90,11 +114,19 @@ async function apiFetch<T>(
   try {
     const res = await fetch(`${API_URL}${path}`, { ...opts, headers });
     const text = await res.text();
-    const maybeJson = text ? (() => { try { return JSON.parse(text); } catch { return text; } })() : null;
+    const maybeJson = text
+      ? (() => {
+          try {
+            return JSON.parse(text);
+          } catch {
+            return text;
+          }
+        })()
+      : null;
 
     if (!res.ok) {
       const msg =
-        (typeof maybeJson === "object" && maybeJson && (maybeJson.detail || maybeJson.message)) ||
+        (typeof maybeJson === "object" && maybeJson && ((maybeJson as any).detail || (maybeJson as any).message || (maybeJson as any).error)) ||
         (typeof maybeJson === "string" ? maybeJson : "") ||
         `طلب غير ناجح (${res.status})`;
       return { ok: false, message: String(msg), status: res.status, raw: maybeJson };
@@ -136,6 +168,20 @@ export default function CreateProposedEventPage() {
   const [touched, setTouched] = useState<Partial<Record<keyof FormState, boolean>>>({});
   const [submitting, setSubmitting] = useState(false);
   const [loadingEvent, setLoadingEvent] = useState(false);
+
+  /* ===================== Toast State ===================== */
+  const [toast, setToast] = useState<{ show: boolean; message: string; type: ToastType }>({
+    show: false,
+    message: "",
+    type: "success",
+  });
+
+  const showToast = (message: string, type: ToastType) => {
+    setToast({ show: true, message, type });
+    window.setTimeout(() => {
+      setToast({ show: false, message: "", type: "success" });
+    }, 2500);
+  };
 
   const setField = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((p) => ({ ...p, [key]: value }));
@@ -203,7 +249,10 @@ export default function CreateProposedEventPage() {
     const nextErrors = validate(form);
     setErrors(nextErrors);
     touchAll();
-    if (Object.keys(nextErrors).length) return;
+    if (Object.keys(nextErrors).length) {
+      showToast("⚠️ راجعي الحقول المطلوبة", "warning");
+      return;
+    }
 
     setSubmitting(true);
 
@@ -211,7 +260,7 @@ export default function CreateProposedEventPage() {
       const dept = getDeptFromToken();
       if (!dept) {
         setSubmitting(false);
-        window.alert("مش قادر أحدد القسم من التوكن");
+        showToast("❌ مش قادر أحدد القسم من التوكن", "error");
         return;
       }
 
@@ -241,17 +290,18 @@ export default function CreateProposedEventPage() {
 
       if (!res.ok) {
         console.error("خطأ إنشاء فعالية مقترحة:", res);
-        window.alert(res.message);
+        showToast(`❌ ${res.message}`, "error");
         return;
       }
 
-      router.push(`/uni-level-activities/plans/${planId}`);
+      showToast("✅ تم إنشاء فعالية مقترحة بنجاح", "success");
+      router.push(`/Events-Faclevel/plans/${planId}`);
       return;
     }
 
     if (!eventId) {
       setSubmitting(false);
-      window.alert("لا يوجد رقم فعالية للتحويل");
+      showToast("❌ لا يوجد رقم فعالية للتحويل", "error");
       return;
     }
 
@@ -278,15 +328,15 @@ export default function CreateProposedEventPage() {
 
     if (!res2.ok) {
       console.error("خطأ إضافة فعالية للخطة:", res2);
-      window.alert(res2.message);
+      showToast(`❌ ${res2.message}`, "error");
       return;
     }
 
-  sessionStorage.setItem(`converted_${planId}_${eventId}`, "1");
+    sessionStorage.setItem(`converted_${planId}_${eventId}`, "1");
+    sessionStorage.removeItem("convert_proposed_payload");
 
-  sessionStorage.removeItem("convert_proposed_payload");
-
-    router.push(`/uni-level-activities/plans/${planId}`);
+    showToast("✅ تم تحويل الفعالية وإضافتها للخطة", "success");
+    router.push(`/Events-Faclevel/plans/${planId}`);
   };
 
   useEffect(() => {
@@ -302,7 +352,7 @@ export default function CreateProposedEventPage() {
       return;
     }
 
-    const id =
+    const idFromPayload =
       parsed?.event?.event_id ??
       parsed?.event?.id ??
       parsed?.row?.event_id ??
@@ -330,16 +380,16 @@ export default function CreateProposedEventPage() {
     setSeed(prefilledFromPayload);
     setForm((p) => ({ ...p, ...prefilledFromPayload }));
 
-    if (!id) return;
+    if (!idFromPayload) return;
 
     setLoadingEvent(true);
 
     (async () => {
-      const res = await apiFetch<any>(`/api/event/get-events/${id}/`, { method: "GET" });
+      const res = await apiFetch<any>(`/api/event/get-events/${idFromPayload}/`, { method: "GET" });
       setLoadingEvent(false);
 
       if (!res.ok) {
-        window.alert(res.message);
+        showToast(`❌ ${res.message}`, "error");
         return;
       }
 
@@ -359,7 +409,7 @@ export default function CreateProposedEventPage() {
         resource: e?.resource ?? "",
       };
 
-      setEventId(Number(e?.event_id ?? id));
+      setEventId(Number(e?.event_id ?? idFromPayload));
       setSeed(prefilled);
       setForm((p) => ({ ...p, ...prefilled }));
     })();
@@ -375,229 +425,237 @@ export default function CreateProposedEventPage() {
   }, [planId]);
 
   return (
-    <div className={styles.page}>
-      <Header />
-      <div className={styles.container}>
-        <div className={styles.topBar}>
-          <div className={styles.headText}>
-            <h1 className={styles.pageTitle}>{isConvert ? "إنشاء فعالية فعلية" : "إضافة فعالية مقترحة"}</h1>
-            <p className={styles.pageSubtitle}>
-              {isConvert ? "يتم تحميل البيانات من الفعالية المقترحة ويمكن تعديلها" : "املئي البيانات الأساسية للفعالية"}
-            </p>
+    <>
+      {/* ✅ Toast */}
+         {toast.show && (
+  <div className={`${styles.toast} ${styles[`toast_${toast.type}`]}`}>
+    {toast.message}
+  </div>
+)}
+
+      <div className={styles.page}>
+        <Header />
+        <div className={styles.container}>
+          <div className={styles.topBar}>
+            <div className={styles.headText}>
+              <h1 className={styles.pageTitle}>{isConvert ? "إنشاء فعالية فعلية" : "إضافة فعالية مقترحة"}</h1>
+              <p className={styles.pageSubtitle}>
+                {isConvert ? "يتم تحميل البيانات من الفعالية المقترحة ويمكن تعديلها" : "املئي البيانات الأساسية للفعالية"}
+              </p>
+            </div>
+
+            <button className={styles.backBtn} onClick={() => router.back()} type="button">
+              <ArrowRight size={18} />
+              العودة للخطة
+            </button>
           </div>
 
-          <button className={styles.backBtn} onClick={() => router.back()} type="button">
-            <ArrowRight size={18} />
-            العودة للخطة
-          </button>
-        </div>
+          <div className={styles.hero}>
+            <div className={styles.heroTitle}>خطة رقم: {planId}</div>
+          </div>
 
-        <div className={styles.hero}>
-          <div className={styles.heroTitle}>خطة رقم: {planId}</div>
-        </div>
-
-        <section className={styles.formCard}>
-          {isConvert && seed && (
-            <div className={styles.summaryBox}>
-              <div className={styles.summaryHead}>
-                <div className={styles.summaryIcon}>
-                  <Lightbulb size={18} />
+          <section className={styles.formCard}>
+            {isConvert && seed && (
+              <div className={styles.summaryBox}>
+                <div className={styles.summaryHead}>
+                  <div className={styles.summaryIcon}>
+                    <Lightbulb size={18} />
+                  </div>
+                  <div className={styles.summaryTitle}>بيانات الفعالية المقترحة:</div>
                 </div>
-                <div className={styles.summaryTitle}>بيانات الفعالية المقترحة:</div>
+
+                <ul className={styles.summaryList}>
+                  <li>العنوان: {seed.title || "—"}</li>
+                  <li>المكان: {seed.location || "—"}</li>
+                  <li>تاريخ البداية: {seed.st_date || "—"}</li>
+                  <li>تاريخ النهاية: {seed.end_date || "—"}</li>
+                  <li>الحد الأقصى: {seed.s_limit || "—"}</li>
+                  <li>التكلفة: {seed.cost || "—"}</li>
+                  <li>النوع: {seed.type || "—"}</li>
+                </ul>
+
+                {eventId && <div style={{ marginTop: 8, fontWeight: 800, opacity: 0.9 }}>رقم الفعالية: {eventId}</div>}
               </div>
+            )}
 
-              <ul className={styles.summaryList}>
-                <li>العنوان: {seed.title || "—"}</li>
-                <li>المكان: {seed.location || "—"}</li>
-                <li>تاريخ البداية: {seed.st_date || "—"}</li>
-                <li>تاريخ النهاية: {seed.end_date || "—"}</li>
-                <li>الحد الأقصى: {seed.s_limit || "—"}</li>
-                <li>التكلفة: {seed.cost || "—"}</li>
-                <li>النوع: {seed.type || "—"}</li>
-              </ul>
-
-              {eventId && <div style={{ marginTop: 8, fontWeight: 800, opacity: 0.9 }}>رقم الفعالية: {eventId}</div>}
-            </div>
-          )}
-
-          <div className={styles.formHead}>
-            <div className={styles.formTitle}>{isConvert ? "بيانات الفعالية النهائية" : "بيانات الفعالية المقترحة"}</div>
-            <div className={styles.formMeta}>
-              {isConvert ? "عدّلي القيم ثم اضغطي حفظ." : "هذه البيانات للتخطيط ويمكن تعديلها لاحقاً."}
-            </div>
-          </div>
-
-          {isConvert && loadingEvent && (
-            <div style={{ marginBottom: 12, fontWeight: 800, opacity: 0.8 }}>جاري تحميل البيانات...</div>
-          )}
-
-          <form className={styles.form} onSubmit={onSubmit} noValidate>
-            <div className={styles.grid2}>
-              <div className={styles.field}>
-                <label className={styles.label}>
-                  <Briefcase size={16} /> العنوان
-                </label>
-                <input
-                  className={`${styles.input} ${touched.title && errors.title ? styles.inputError : ""}`}
-                  placeholder="مثال: معرض"
-                  value={form.title}
-                  onChange={(e) => setField("title", e.target.value)}
-                  onBlur={() => onBlur("title")}
-                />
-                {touched.title && errors.title && <div className={styles.errorText}>{errors.title}</div>}
-              </div>
-
-              <div className={styles.field}>
-                <label className={styles.label}>
-                  <MapPin size={16} /> المكان
-                </label>
-                <input
-                  className={`${styles.input} ${touched.location && errors.location ? styles.inputError : ""}`}
-                  placeholder="مثال: قاعة الاحتفالات"
-                  value={form.location}
-                  onChange={(e) => setField("location", e.target.value)}
-                  onBlur={() => onBlur("location")}
-                />
-                {touched.location && errors.location && <div className={styles.errorText}>{errors.location}</div>}
-              </div>
-
-              <div className={styles.field}>
-                <label className={styles.label}>
-                  <CalendarDays size={16} /> تاريخ البداية
-                </label>
-                <input
-                  className={`${styles.input} ${touched.st_date && errors.st_date ? styles.inputError : ""}`}
-                  placeholder="YYYY-MM-DD"
-                  value={form.st_date}
-                  onChange={(e) => setField("st_date", e.target.value)}
-                  onBlur={() => onBlur("st_date")}
-                  dir="ltr"
-                />
-                {touched.st_date && errors.st_date && <div className={styles.errorText}>{errors.st_date}</div>}
-              </div>
-
-              <div className={styles.field}>
-                <label className={styles.label}>
-                  <CalendarDays size={16} /> تاريخ النهاية
-                </label>
-                <input
-                  className={`${styles.input} ${touched.end_date && errors.end_date ? styles.inputError : ""}`}
-                  placeholder="YYYY-MM-DD"
-                  value={form.end_date}
-                  onChange={(e) => setField("end_date", e.target.value)}
-                  onBlur={() => onBlur("end_date")}
-                  dir="ltr"
-                />
-                {touched.end_date && errors.end_date && <div className={styles.errorText}>{errors.end_date}</div>}
-              </div>
-
-              <div className={styles.field}>
-                <label className={styles.label}>
-                  <DollarSign size={16} /> التكلفة
-                </label>
-                <input
-                  className={`${styles.input} ${touched.cost && errors.cost ? styles.inputError : ""}`}
-                  placeholder="مثال: 200"
-                  value={form.cost}
-                  onChange={(e) => setField("cost", e.target.value)}
-                  onBlur={() => onBlur("cost")}
-                  inputMode="numeric"
-                  dir="ltr"
-                />
-                {touched.cost && errors.cost && <div className={styles.errorText}>{errors.cost}</div>}
-              </div>
-
-              <div className={styles.field}>
-                <label className={styles.label}>
-                  <Users size={16} /> الحد الأقصى للمشاركين
-                </label>
-                <input
-                  className={`${styles.input} ${touched.s_limit && errors.s_limit ? styles.inputError : ""}`}
-                  placeholder="مثال: 0"
-                  value={form.s_limit}
-                  onChange={(e) => setField("s_limit", e.target.value)}
-                  onBlur={() => onBlur("s_limit")}
-                  inputMode="numeric"
-                  dir="ltr"
-                />
-                {touched.s_limit && errors.s_limit && <div className={styles.errorText}>{errors.s_limit}</div>}
-              </div>
-
-              <div className={styles.field}>
-                <label className={styles.label}>
-                  <Lightbulb size={16} /> النوع
-                </label>
-                <input
-                  className={`${styles.input} ${touched.type && errors.type ? styles.inputError : ""}`}
-                  placeholder="مثال: نشاط فني"
-                  value={form.type}
-                  onChange={(e) => setField("type", e.target.value)}
-                  onBlur={() => onBlur("type")}
-                />
-                {touched.type && errors.type && <div className={styles.errorText}>{errors.type}</div>}
-              </div>
-
-              <div className={styles.field}>
-                <label className={styles.label}>القيود</label>
-                <input
-                  className={styles.input}
-                  placeholder="اختياري"
-                  value={form.restrictions}
-                  onChange={(e) => setField("restrictions", e.target.value)}
-                  onBlur={() => onBlur("restrictions")}
-                />
-              </div>
-
-              <div className={styles.field}>
-                <label className={styles.label}>المكافأة</label>
-                <input
-                  className={styles.input}
-                  placeholder="اختياري"
-                  value={form.reward}
-                  onChange={(e) => setField("reward", e.target.value)}
-                  onBlur={() => onBlur("reward")}
-                />
-              </div>
-
-              <div className={styles.field}>
-                <label className={styles.label}>الموارد</label>
-                <input
-                  className={styles.input}
-                  placeholder="اختياري"
-                  value={form.resource}
-                  onChange={(e) => setField("resource", e.target.value)}
-                  onBlur={() => onBlur("resource")}
-                />
-              </div>
-
-               <div className={styles.field} style={{ gridColumn: "1 / -1" }}>
-                <label className={styles.label}>الوصف</label>
-                <textarea
-                  className={styles.input}
-                  placeholder="اكتبي وصف مختصر"
-                  value={form.description}
-                  onChange={(e) => setField("description", e.target.value)}
-                  onBlur={() => onBlur("description")}
-                  rows={3}
-                />
+            <div className={styles.formHead}>
+              <div className={styles.formTitle}>{isConvert ? "بيانات الفعالية النهائية" : "بيانات الفعالية المقترحة"}</div>
+              <div className={styles.formMeta}>
+                {isConvert ? "عدّلي القيم ثم اضغطي حفظ." : "هذه البيانات للتخطيط ويمكن تعديلها لاحقاً."}
               </div>
             </div>
 
-            <div className={styles.footer}>
-              <button type="button" className={styles.cancelBtn} onClick={onCancel} disabled={submitting}>
-                <X size={18} />
-                إلغاء
-              </button>
+            {isConvert && loadingEvent && (
+              <div style={{ marginBottom: 12, fontWeight: 800, opacity: 0.8 }}>جاري تحميل البيانات...</div>
+            )}
 
-              <button type="submit" className={styles.saveBtn} disabled={submitting}>
-                <Save size={18} />
-                {isConvert ? "حفظ كفعالية فعلية" : "حفظ كفعالية مقترحة"}
-              </button>
-            </div>
-          </form>
-        </section>
+            <form className={styles.form} onSubmit={onSubmit} noValidate>
+              <div className={styles.grid2}>
+                <div className={styles.field}>
+                  <label className={styles.label}>
+                    <Briefcase size={16} /> العنوان
+                  </label>
+                  <input
+                    className={`${styles.input} ${touched.title && errors.title ? styles.inputError : ""}`}
+                    placeholder="مثال: معرض"
+                    value={form.title}
+                    onChange={(e) => setField("title", e.target.value)}
+                    onBlur={() => onBlur("title")}
+                  />
+                  {touched.title && errors.title && <div className={styles.errorText}>{errors.title}</div>}
+                </div>
+
+                <div className={styles.field}>
+                  <label className={styles.label}>
+                    <MapPin size={16} /> المكان
+                  </label>
+                  <input
+                    className={`${styles.input} ${touched.location && errors.location ? styles.inputError : ""}`}
+                    placeholder="مثال: قاعة الاحتفالات"
+                    value={form.location}
+                    onChange={(e) => setField("location", e.target.value)}
+                    onBlur={() => onBlur("location")}
+                  />
+                  {touched.location && errors.location && <div className={styles.errorText}>{errors.location}</div>}
+                </div>
+
+                <div className={styles.field}>
+                  <label className={styles.label}>تاريخ البداية</label>
+              <input
+                className={`${styles.input} ${errors.st_date ? styles.inputError : ""}`}
+                type="date"
+                value={form.st_date}
+                onChange={(ev) => setField("st_date", ev.target.value)}
+              />
+                  {touched.st_date && errors.st_date && <div className={styles.errorText}>{errors.st_date}</div>}
+                </div>
+
+                <div className={styles.field}>
+                  <label className={styles.label}>تاريخ النهاية</label>
+              <input
+                className={`${styles.input} ${errors.end_date ? styles.inputError : ""}`}
+                type="date"
+                value={form.end_date}
+                onChange={(ev) => setField("end_date", ev.target.value)}
+              />
+                  {touched.end_date && errors.end_date && <div className={styles.errorText}>{errors.end_date}</div>}
+                </div>
+
+                <div className={styles.field}>
+                  <label className={styles.label}>
+                    <DollarSign size={16} /> التكلفة
+                  </label>
+                  <input
+                    className={`${styles.input} ${touched.cost && errors.cost ? styles.inputError : ""}`}
+                    placeholder="مثال: 200"
+                    value={form.cost}
+                    onChange={(e) => setField("cost", e.target.value)}
+                    onBlur={() => onBlur("cost")}
+                    inputMode="numeric"
+                    dir="ltr"
+                  />
+                  {touched.cost && errors.cost && <div className={styles.errorText}>{errors.cost}</div>}
+                </div>
+
+                <div className={styles.field}>
+                  <label className={styles.label}>
+                    <Users size={16} /> الحد الأقصى للمشاركين
+                  </label>
+                  <input
+                    className={`${styles.input} ${touched.s_limit && errors.s_limit ? styles.inputError : ""}`}
+                    placeholder="مثال: 0"
+                    value={form.s_limit}
+                    onChange={(e) => setField("s_limit", e.target.value)}
+                    onBlur={() => onBlur("s_limit")}
+                    inputMode="numeric"
+                    dir="ltr"
+                  />
+                  {touched.s_limit && errors.s_limit && <div className={styles.errorText}>{errors.s_limit}</div>}
+                </div>
+
+                <div className={styles.field}>
+                 <label className={styles.label}>نوع النشاط</label>
+
+              <select
+                className={`${styles.input} ${errors.type ? styles.inputError : ""}`}
+                value={form.type}
+                onChange={(ev) => setField("type", ev.target.value)}
+              >
+                <option value="" disabled>
+                  اختار نوع النشاط
+                </option>
+
+                {ACTIVITY_TYPES.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+                  {touched.type && errors.type && <div className={styles.errorText}>{errors.type}</div>}
+                </div>
+
+                <div className={styles.field}>
+                  <label className={styles.label}>القيود</label>
+                  <input
+                    className={styles.input}
+                    placeholder="اختياري"
+                    value={form.restrictions}
+                    onChange={(e) => setField("restrictions", e.target.value)}
+                    onBlur={() => onBlur("restrictions")}
+                  />
+                </div>
+
+                <div className={styles.field}>
+                  <label className={styles.label}>المكافأة</label>
+                  <input
+                    className={styles.input}
+                    placeholder="اختياري"
+                    value={form.reward}
+                    onChange={(e) => setField("reward", e.target.value)}
+                    onBlur={() => onBlur("reward")}
+                  />
+                </div>
+
+                <div className={styles.field}>
+                  <label className={styles.label}>الموارد</label>
+                  <input
+                    className={styles.input}
+                    placeholder="اختياري"
+                    value={form.resource}
+                    onChange={(e) => setField("resource", e.target.value)}
+                    onBlur={() => onBlur("resource")}
+                  />
+                </div>
+
+                <div className={styles.field} style={{ gridColumn: "1 / -1" }}>
+                  <label className={styles.label}>الوصف</label>
+                  <textarea
+                    className={styles.input}
+                    placeholder="اكتبي وصف مختصر"
+                    value={form.description}
+                    onChange={(e) => setField("description", e.target.value)}
+                    onBlur={() => onBlur("description")}
+                    rows={3}
+                  />
+                </div>
+              </div>
+
+              <div className={styles.footer}>
+                <button type="button" className={styles.cancelBtn} onClick={onCancel} disabled={submitting}>
+                  <X size={18} />
+                  إلغاء
+                </button>
+
+                <button type="submit" className={styles.saveBtn} disabled={submitting}>
+                  <Save size={18} />
+                  {submitting ? "جارٍ الحفظ..." : isConvert ? "حفظ كفعالية فعلية" : "حفظ كفعالية مقترحة"}
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+        <Footer />
       </div>
-      <Footer />
-    </div>
+    </>
   );
 }

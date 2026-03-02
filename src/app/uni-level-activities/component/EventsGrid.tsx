@@ -18,7 +18,7 @@ function getAccessToken(): string | null {
 async function apiFetch<T>(
   path: string,
   opts: RequestInit = {}
-): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number; raw?: any }> {
+): Promise<{ ok: true; data: T } | { ok: false; message: string }> {
   const token = getAccessToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -41,10 +41,12 @@ async function apiFetch<T>(
 
     if (!res.ok) {
       const msg =
-        (typeof maybeJson === "object" && maybeJson && (maybeJson.detail || maybeJson.message)) ||
+        (typeof maybeJson === "object" &&
+          maybeJson &&
+          ((maybeJson as any).detail || (maybeJson as any).message)) ||
         (typeof maybeJson === "string" ? maybeJson : "") ||
         `طلب غير ناجح (${res.status})`;
-      return { ok: false, message: String(msg), status: res.status, raw: maybeJson };
+      return { ok: false, message: String(msg) };
     }
 
     return { ok: true, data: maybeJson as T };
@@ -69,43 +71,66 @@ export default function EventsGrid({
   const safeItems = useMemo(() => items.filter(Boolean), [items]);
   const [busyId, setBusyId] = useState<number | null>(null);
 
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: "success" | "error" | "warning";
+  } | null>(null);
+
+  const showNotification = (message: string, type: "success" | "error" | "warning") => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 2500);
+  };
+
   const onActiveChange = async (id: number, nextActive: boolean) => {
+    const current = safeItems.find((x) => x.id === id);
+    if (!current) return;
+
+    // ✅ لو التوجل مخفي (يعني عنده faculty id) منعملش حاجة
+    if (current.hideToggle) return;
+
     setBusyId(id);
-
-
     const prev = safeItems;
-    onItemsChange(
-      prev.map((e) => (e.id === id ? { ...e, isActive: nextActive } : e))
-    );
 
-    const res = await apiFetch<any>(`/api/event/activate-events/${id}/activate/`, {
-      method: "PATCH",
+    onItemsChange(prev.map((e) => (e.id === id ? { ...e, isActive: nextActive } : e)));
+
+    const res = await apiFetch<{ active: boolean }>(`/api/event/activate-events/${id}/activate/`, {
+      method: "POST",
     });
 
     setBusyId(null);
 
     if (!res.ok) {
-
       onItemsChange(prev);
-      window.alert(res.message);
+      showNotification(res.message, "error");
       return;
     }
 
+    onItemsChange(prev.map((e) => (e.id === id ? { ...e, isActive: res.data.active } : e)));
+    showNotification("تم تحديث حالة الفعالية بنجاح", "success");
   };
 
   return (
-    <div className={styles.grid}>
-      {safeItems.map((e) => (
-        <EventCard
-          key={e.id}
-          item={e}
-          busy={busyId === e.id}
-          onActiveChange={onActiveChange}
-          onView={onView}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
-      ))}
-    </div>
+    <>
+      {notification && (
+        <div className={`${styles.notification} ${notification.type === "success" ? styles.success : styles.error}`}>
+          {notification.message}
+        </div>
+      )}
+
+      <div className={styles.grid}>
+        {safeItems.map((e) => (
+          <EventCard
+            key={e.id}
+            item={e}
+            busy={busyId === e.id}
+            hideToggle={e.hideToggle}
+            onActiveChange={e.hideToggle ? undefined : onActiveChange}
+            onView={onView}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        ))}
+      </div>
+    </>
   );
 }

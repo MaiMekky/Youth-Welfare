@@ -5,11 +5,12 @@ import styles from "./styles/EventsPage.module.css";
 import EventsGrid from "./components/EventsGrid";
 import StatsGrid from "./components/StatsGrid";
 import type { StatItem } from "./components/StatsGrid";
+import Tabs from "./components/Tabs";
+import { EventItem, ChipVariant } from "./components/EventCard";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import Header from "@/app/FacLevel/components/Header";
 import Footer from "@/app/FacLevel/components/Footer";
-import Tabs from "./components/Tabs";
 
 const API_URL = "http://localhost:8000";
 
@@ -20,33 +21,14 @@ type ApiEvent = {
   st_date: string;
   end_date: string;
   location: string;
-  status: string;
+  status: any;
   type: string;
   cost: string;
   s_limit: number;
   faculty_id: number | null;
   dept_id: number;
-  active?: boolean;
+  active?: any;
 };
-
-export type EventRow = {
-  id: number;
-  title: string;
-  plan: string;
-  type: string;
-  status: string;
-  date: string;
-  time: string;
-  place: string;
-  participants: string;
-  cost: string;
-
-  // ✅ new
-  scope: "global" | "faculty";
-  isActive: boolean;
-};
-
-type TabKey = "global" | "faculty";
 
 function getAccessToken(): string | null {
   return (
@@ -83,9 +65,12 @@ async function apiFetch<T>(
 
     if (!res.ok) {
       const msg =
-        (typeof maybeJson === "object" && maybeJson && (maybeJson.detail || maybeJson.message)) ||
+        (typeof maybeJson === "object" &&
+          maybeJson &&
+          ((maybeJson as any).detail || (maybeJson as any).message || (maybeJson as any).error)) ||
         (typeof maybeJson === "string" ? maybeJson : "") ||
         `طلب غير ناجح (${res.status})`;
+
       return { ok: false, message: String(msg), status: res.status, raw: maybeJson };
     }
 
@@ -95,42 +80,89 @@ async function apiFetch<T>(
   }
 }
 
+function toBool(v: any): boolean | null {
+  if (typeof v === "boolean") return v;
+  if (typeof v === "number") return v === 1 ? true : v === 0 ? false : null;
+  if (typeof v === "string") {
+    const s = v.trim().toLowerCase();
+    if (s === "true" || s === "1" || s === "yes") return true;
+    if (s === "false" || s === "0" || s === "no") return false;
+  }
+  return null;
+}
+
+function statusVariant(status: string): ChipVariant {
+  const s = (status || "").trim();
+  if (s === "نشط") return "success";
+  if (s === "منتظر") return "primary";
+  if (s === "مكتمل") return "info";
+  if (s === "غير نشط" || s === "ملغي" || s === "مرفوض") return "danger";
+  return "purple";
+}
+
+function categoryVariant(_type: string): ChipVariant {
+  return "info";
+}
+
 function toPriceText(cost: string) {
-  const n = Number(String(cost || "").replaceAll(",", "").trim());
+  const n = Number(String(cost || "").trim());
   if (!Number.isFinite(n) || n === 0) return "مجاني";
   return `${n} جنيه`;
 }
 
-function toEventRow(e: ApiEvent): EventRow {
-  const apiActive = typeof e.active === "boolean" ? e.active : null;
-  const isActive = apiActive ?? (String(e.status || "").trim() === "نشط");
+function toEventItem(e: ApiEvent): EventItem {
+  const apiActive = toBool(e.active);
+  const statusBool = toBool(e.status);
+  const statusText = typeof e.status === "string" ? e.status : "";
 
-  const scope: EventRow["scope"] = e.faculty_id ? "faculty" : "global";
+  const isActive = apiActive ?? statusBool ?? statusText === "نشط";
+
+  // ✅ dept event = faculty_id === null => hide toggle
+  const isDeptEvent = e.faculty_id === null;
 
   return {
     id: e.event_id,
     title: e.title ?? "",
-    plan: e.description ?? "",
-    type: e.type ?? "—",
-    status: e.status ?? "—",
-    date: e.st_date ?? "",
-    time: e.end_date ?? "", // لو عندك وقت فعلي من API بدّليه هنا
-    place: e.location ?? "—",
-    participants: `الحد الأقصى: ${e.s_limit ?? 0}`,
-    cost: toPriceText(e.cost),
-    scope,
-    isActive,
+    planName: e.description ?? "",
+    statusLabel: statusText ?? "",
+    statusVariant: statusVariant(statusText),
+    categoryLabel: e.type ?? "",
+    categoryVariant: categoryVariant(e.type),
+    date: e.st_date || "",
+    time: e.end_date || "",
+    location: e.location ?? "",
+    participantsText: `الحد الأقصى: ${e.s_limit ?? 0}`,
+    priceText: toPriceText(e.cost),
+    isActive: Boolean(isActive),
+
+    // ✅ keep ids for tabs filtering
+    faculty_id: e.faculty_id ?? null,
+    dept_id: e.dept_id,
+
+    // ✅ remove toggle for dept events only
+    hideToggle: isDeptEvent,
   };
 }
 
-export default function EventsFaclevelPage() {
-  const router = useRouter();
+type NotifType = "success" | "error" | "warning";
+type EventsTab = "faculty" | "dept";
 
-  const [tab, setTab] = useState<TabKey>("faculty");
-  const [rowsAll, setRowsAll] = useState<EventRow[]>([]);
+export default function Page() {
+  const router = useRouter();
+  const goCreate = () => router.push("/Events-Faclevel/create");
+
+  const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const [busyId, setBusyId] = useState<number | null>(null);
+  // ✅ Tabs
+  const [activeTab, setActiveTab] = useState<EventsTab>("faculty");
+
+  // ✅ Notification (Toast)
+  const [notification, setNotification] = useState<{ message: string; type: NotifType } | null>(null);
+  const showNotification = (message: string, type: NotifType) => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 2500);
+  };
 
   const fetchEvents = async () => {
     setLoading(true);
@@ -138,12 +170,12 @@ export default function EventsFaclevelPage() {
     setLoading(false);
 
     if (!res.ok) {
-      window.alert(res.message);
+      showNotification(res.message || "فشل تحميل الفعاليات", "error");
       return;
     }
 
     const list = Array.isArray(res.data) ? res.data : [];
-    setRowsAll(list.map(toEventRow));
+    setEvents(list.map(toEventItem));
   };
 
   useEffect(() => {
@@ -151,96 +183,107 @@ export default function EventsFaclevelPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const rows = useMemo(() => rowsAll.filter((e) => e.scope === tab), [rowsAll, tab]);
-const stats: StatItem[] = useMemo(() => {
-  const total = rows.length;
-  const active = rows.filter((e) => e.isActive).length;
-  const inactive = rows.filter((e) => !e.isActive).length;
+  // ✅ Counts for badges
+  const facultyCount = useMemo(() => events.filter((e) => e.faculty_id !== null).length, [events]);
+  const deptCount = useMemo(() => events.filter((e) => e.faculty_id === null).length, [events]);
 
-  return [
-    { title: "إجمالي الفعاليات", value: String(total), meta: "", icon: "calendar", accent: "gold" },
-    { title: "الفعاليات النشطة", value: String(active), meta: "", icon: "check", accent: "green" },
-    { title: "فعاليات غير نشطة", value: String(inactive), meta: "", icon: "clock", accent: "indigo" },
-  ];
-}, [rows]);
-    const registeredStudents = 0;
+  const tabItems = useMemo(
+    () => [
+      { key: "faculty" as const, label: "فعاليات الكلية", badge: facultyCount },
+      { key: "dept" as const, label: "فعاليات القسم", badge: deptCount },
+    ],
+    [facultyCount, deptCount]
+  );
 
-    
+  // ✅ Filter by tab
+  const visibleEvents = useMemo(() => {
+    if (activeTab === "faculty") return events.filter((e) => e.faculty_id !== null);
+    return events.filter((e) => e.faculty_id === null);
+  }, [events, activeTab]);
 
-  const onCreate = () => router.push("/Events-Faclevel/create");
+  // ✅ Stats based on current tab list
+  const stats: StatItem[] = useMemo(() => {
+    const active = visibleEvents.filter((e) => e.isActive).length;
+    const inactive = visibleEvents.filter((e) => !e.isActive).length;
+    const total = visibleEvents.length;
+
+    return [
+      { title: "إجمالي الفعاليات", value: String(total), meta: "", icon: "calendar", accent: "gold" },
+      { title: "الفعاليات النشطة", value: String(active), meta: "", icon: "check", accent: "green" },
+      { title: "فعاليات غير نشطة", value: String(inactive), meta: "", icon: "clock", accent: "indigo" },
+    ];
+  }, [visibleEvents]);
+
   const onView = (id: number) => router.push(`/Events-Faclevel/${id}`);
-  const onEdit = (id: number) => router.push(`/Events-Faclevel/create/${id}`);  
-  const onDelete = (id: number) => {
-    if (!confirm("هل تريد حذف الفعالية؟")) return;
-    setRowsAll((prev) => prev.filter((e) => e.id !== id));
-  };
+  const onEdit = (id: number) => router.push(`/Events-Faclevel/create/${id}`);
 
-  // ✅ activate فقط لفعاليات الكلية
-  const onActiveChange = async (id: number, next: boolean) => {
-    const target = rowsAll.find((x) => x.id === id);
-    if (!target || target.scope !== "faculty") return;
+  const onDelete = async (id: number) => {
+    const prev = events;
 
-    setBusyId(id);
-
-    const prev = rowsAll;
-    setRowsAll((p) => p.map((e) => (e.id === id ? { ...e, isActive: next } : e)));
-
-    const res = await apiFetch<any>(`/api/event/activate-events/${id}/activate/`, {
-      method: "PATCH",
+    const res = await apiFetch<any>(`/api/event/get-events/${id}/`, {
+      method: "DELETE",
     });
 
-    setBusyId(null);
-
     if (!res.ok) {
-      setRowsAll(prev); // rollback
-      window.alert(res.message);
+      setEvents(prev);
+      showNotification(res.message || "فشل الغاء الفعالية", "error");
       return;
     }
+
+    showNotification("✅ تم الغاء الفعالية بنجاح", "success");
+    await fetchEvents();
   };
 
   return (
-    <div className="page-wrapper">
+    <div className={styles.page}>
       <Header />
 
-      <div className={styles.page}>
-        <div className={styles.container}>
-          <div className={styles.header}>
-            <div className={styles.headerText}>
-              <h1 className={styles.pageTitle}>إدارة الفعاليات</h1>
-              <p className={styles.pageSubtitle}>إدارة فعاليات الجامعة والكلية</p>
-            </div>
+      {/* ✅ Notification */}
+      {notification && (
+        <div
+          className={`${styles.notification} ${
+            notification.type === "success"
+              ? styles.success
+              : notification.type === "warning"
+              ? styles.warning
+              : styles.error
+          }`}
+        >
+          {notification.message}
+        </div>
+      )}
 
-            <button className={styles.createBtn} type="button" onClick={onCreate}>
-              <Plus size={18} />
-              إنشاء فعالية جديدة
-            </button>
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <div>
+            <h1 className={styles.pageTitle}>إدارة الفعاليات</h1>
+            <p className={styles.pageSubtitle}>إنشاء وتعديل وإدارة فعاليات الجامعة</p>
           </div>
 
-          <Tabs
-            value={tab}
-            onChange={setTab}
-            items={[
-              { key: "faculty", label: "فعاليات الكلية" },
-              { key: "global", label: "فعاليات الجامعة" },
-            ]}
-          />
+          <button className={styles.createBtnTop} onClick={goCreate}>
+            <Plus size={18} />
+            إنشاء فعالية جديدة
+          </button>
+        </div>
 
-          <StatsGrid items={stats} />
+        {/* ✅ Tabs */}
+        <Tabs<EventsTab> value={activeTab} onChange={setActiveTab} items={tabItems} />
 
+        <StatsGrid items={stats} />
+
+        <div className={styles.eventsSection}>
           {loading && (
-            <div style={{ fontWeight: 800, opacity: 0.8, margin: "10px 0" }}>
+            <div style={{ fontWeight: 800, opacity: 0.8, marginBottom: 12 }}>
               جاري تحميل الفعاليات...
             </div>
           )}
 
           <EventsGrid
-            rows={rows}
+            items={visibleEvents}
+            onItemsChange={setEvents}
             onView={onView}
             onEdit={onEdit}
             onDelete={onDelete}
-            canDelete={tab === "faculty"}
-            onActiveChange={onActiveChange}
-            busyId={busyId}
           />
         </div>
       </div>

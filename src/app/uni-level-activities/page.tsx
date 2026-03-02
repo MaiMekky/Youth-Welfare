@@ -18,14 +18,15 @@ type ApiEvent = {
   st_date: string;
   end_date: string;
   location: string;
-  status: string;
+  status: any;
   type: string;
   cost: string;
   s_limit: number;
   faculty_id: number | null;
   dept_id: number;
-  active?: boolean;
+  active?: any;
 };
+
 function getAccessToken(): string | null {
   return (
     localStorage.getItem("access") ||
@@ -61,9 +62,12 @@ async function apiFetch<T>(
 
     if (!res.ok) {
       const msg =
-        (typeof maybeJson === "object" && maybeJson && (maybeJson.detail || maybeJson.message)) ||
+        (typeof maybeJson === "object" &&
+          maybeJson &&
+          ((maybeJson as any).detail || (maybeJson as any).message || (maybeJson as any).error)) ||
         (typeof maybeJson === "string" ? maybeJson : "") ||
         `طلب غير ناجح (${res.status})`;
+
       return { ok: false, message: String(msg), status: res.status, raw: maybeJson };
     }
 
@@ -71,6 +75,17 @@ async function apiFetch<T>(
   } catch (e: any) {
     return { ok: false, message: e?.message || "مشكلة في الاتصال" };
   }
+}
+
+function toBool(v: any): boolean | null {
+  if (typeof v === "boolean") return v;
+  if (typeof v === "number") return v === 1 ? true : v === 0 ? false : null;
+  if (typeof v === "string") {
+    const s = v.trim().toLowerCase();
+    if (s === "true" || s === "1" || s === "yes") return true;
+    if (s === "false" || s === "0" || s === "no") return false;
+  }
+  return null;
 }
 
 function statusVariant(status: string): ChipVariant {
@@ -93,19 +108,18 @@ function toPriceText(cost: string) {
 }
 
 function toEventItem(e: ApiEvent): EventItem {
-  const apiActive =
-    typeof e.active === "boolean"
-      ? e.active
-      : null;
+  const apiActive = toBool(e.active);
+  const statusBool = toBool(e.status);
+  const statusText = typeof e.status === "string" ? e.status : "";
 
-  const isActive = apiActive ?? (e.status === "نشط"); 
+  const isActive = apiActive ?? statusBool ?? statusText === "نشط";
 
   return {
     id: e.event_id,
     title: e.title ?? "",
     planName: e.description ?? "",
-    statusLabel: e.status ?? "",
-    statusVariant: statusVariant(e.status),
+    statusLabel: statusText ?? "",
+    statusVariant: statusVariant(statusText),
     categoryLabel: e.type ?? "",
     categoryVariant: categoryVariant(e.type),
     date: e.st_date || "",
@@ -113,9 +127,12 @@ function toEventItem(e: ApiEvent): EventItem {
     location: e.location ?? "",
     participantsText: `الحد الأقصى: ${e.s_limit ?? 0}`,
     priceText: toPriceText(e.cost),
-    isActive,
+    isActive: Boolean(isActive),
+    hideToggle: e.faculty_id !== null,
   };
 }
+
+type NotifType = "success" | "error" | "warning";
 
 export default function Page() {
   const router = useRouter();
@@ -124,13 +141,20 @@ export default function Page() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // ✅ Notification (Toast)
+  const [notification, setNotification] = useState<{ message: string; type: NotifType } | null>(null);
+  const showNotification = (message: string, type: NotifType) => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 2500);
+  };
+
   const fetchEvents = async () => {
     setLoading(true);
     const res = await apiFetch<ApiEvent[]>("/api/event/get-events/", { method: "GET" });
     setLoading(false);
 
     if (!res.ok) {
-      window.alert(res.message);
+      showNotification(res.message || "فشل تحميل الفعاليات", "error");
       return;
     }
 
@@ -144,36 +168,54 @@ export default function Page() {
   }, []);
 
   const stats: StatItem[] = useMemo(() => {
-    const waiting = events.filter((e) => e.statusLabel === "منتظر").length;
     const active = events.filter((e) => e.isActive).length;
     const inactive = events.filter((e) => !e.isActive).length;
+    const total = events.length;
 
-    // تقديري: إجمالي السعة
-    const totalLimit = events.reduce((acc, e) => {
-      const m = String(e.participantsText).match(/(\d+)/);
-      const n = m ? Number(m[1]) : 0;
-      return acc + (Number.isFinite(n) ? n : 0);
-    }, 0);
-
- const total = events.length;
-
-return [
-  { title: "إجمالي الفعاليات", value: String(total), meta: "", icon: "calendar", accent: "gold" },
-  { title: "الفعاليات النشطة", value: String(active), meta: "", icon: "check", accent: "green" },
-  { title: "فعاليات غير نشطة", value: String(inactive), meta: "", icon: "clock", accent: "indigo" },
-];
+    return [
+      { title: "إجمالي الفعاليات", value: String(total), meta: "", icon: "calendar", accent: "gold" },
+      { title: "الفعاليات النشطة", value: String(active), meta: "", icon: "check", accent: "green" },
+      { title: "فعاليات غير نشطة", value: String(inactive), meta: "", icon: "clock", accent: "indigo" },
+    ];
   }, [events]);
 
   const onView = (id: number) => router.push(`/uni-level-activities/${id}`);
   const onEdit = (id: number) => router.push(`/uni-level-activities/create/${id}`);
-  const onDelete = (id: number) => {
-    if (confirm("هل تريد حذف الفعالية؟")) {
-      setEvents((prev) => prev.filter((e) => e.id !== id));
+
+  const onDelete = async (id: number) => {
+    const prev = events;
+
+    const res = await apiFetch<any>(`/api/event/get-events/${id}/`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) {
+      setEvents(prev);
+      showNotification(res.message || "فشل الغاء الفعالية", "error");
+      return;
     }
+
+    showNotification("✅ تم الغاء الفعالية بنجاح", "success");
+    await fetchEvents();
   };
 
   return (
     <div className={styles.page}>
+      {/* ✅ Notification */}
+      {notification && (
+        <div
+          className={`${styles.notification} ${
+            notification.type === "success"
+              ? styles.success
+              : notification.type === "warning"
+              ? styles.warning
+              : styles.error
+          }`}
+        >
+          {notification.message}
+        </div>
+      )}
+
       <div className={styles.container}>
         <div className={styles.header}>
           <div>
@@ -190,7 +232,11 @@ return [
         <StatsGrid items={stats} />
 
         <div className={styles.eventsSection}>
-          {loading && <div style={{ fontWeight: 800, opacity: 0.8, marginBottom: 12 }}>جاري تحميل الفعاليات...</div>}
+          {loading && (
+            <div style={{ fontWeight: 800, opacity: 0.8, marginBottom: 12 }}>
+              جاري تحميل الفعاليات...
+            </div>
+          )}
 
           <EventsGrid
             items={events}

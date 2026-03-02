@@ -2,102 +2,126 @@
 
 import React from "react";
 import styles from "../styles/EventsPage.module.css";
-import { CalendarDays, Clock, Eye, MapPin, Trash2, Users, DollarSign , Pencil } from "lucide-react";
-import { EventRow } from "../page";
+import { CalendarDays, MapPin, Users, DollarSign, Eye, Pencil, Trash2 } from "lucide-react";
 
-const statusBadgeClass = (status: string) => {
-  const s = (status || "").trim();
-  if (s.includes("نشط")) return "badgeGreen";
-  if (s.includes("قريب")) return "badgeBlue";
-  if (s.includes("مكتمل")) return "badgeIndigo";
-  if (s.includes("انتظار") || s.includes("منتظر")) return "badgeAmber";
-  return "badgeBlue";
+export type ChipVariant = "success" | "primary" | "info" | "purple" | "danger";
+
+export type EventItem = {
+  id: number;
+  title: string;
+  planName: string;
+  statusLabel: string;
+  statusVariant: ChipVariant;
+  categoryLabel: string;
+  categoryVariant: ChipVariant;
+  date: string;
+  time: string;
+  location: string;
+  participantsText: string;
+  priceText: string;
+  isActive: boolean;
+  faculty_id: number | null;
+  dept_id: number;
+  hideToggle?: boolean;
 };
 
-const typePillClass = (type: string) => {
-  const t = (type || "").trim();
-  if (t.includes("تقني") || t.includes("تكنولوج")) return "pillTech";
-  if (t.includes("ثقاف")) return "pillCulture";
-  if (t.includes("رياض")) return "pillSport";
-  if (t.includes("فني")) return "pillArt";
-  return "pillTech";
-};
+function Chip({ label, variant }: { label: string; variant: ChipVariant }) {
+  return <span className={`${styles.chip} ${styles[variant]}`}>{label}</span>;
+}
 
 export default function EventCard({
-  row,
+  item,
   onView,
   onEdit,
   onDelete,
-  canDelete,
-
-  showToggle,
-  busy,
   onActiveChange,
+  busy,
+  hideToggle,
 }: {
-  row: EventRow;
+  item?: EventItem;
   onView: (id: number) => void;
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
-  canDelete: boolean;
-
-  showToggle?: boolean;
+  onActiveChange?: (id: number, nextActive: boolean) => void;
   busy?: boolean;
-  onActiveChange?: (id: number, next: boolean) => void;
+  hideToggle?: boolean; 
 }) {
+  if (!item) return null;
+
   return (
     <article className={styles.card}>
-      <div className={styles.cardTopRow}>
-        <h3 className={styles.cardTitle}>{row.title}</h3>
+      <div className={styles.top}>
+        <div className={styles.topRow}>
+          <div className={styles.titleBox}>
+            <h3 className={styles.title}>{item.title}</h3>
+            <p className={styles.plan}>{item.planName}</p>
+          </div>
 
-        {showToggle && (
-          <div className={styles.toggleWrap}>
-            <span className={styles.toggleLabel}>{row.isActive ? "نشط" : "غير نشط"}</span>
+            {!hideToggle && ( 
+          <div className={styles.approvalWrap}>
+            <span className={styles.approvalLabel}>
+              {item.isActive ? "نشط" : "غير نشط"}
+            </span>
 
             <label className={styles.switch} aria-label="حالة النشاط">
               <input
                 type="checkbox"
-                checked={!!row.isActive}
-                disabled={!!busy}
-                onChange={(e) => onActiveChange?.(row.id, e.target.checked)}
+                checked={item.isActive}
+                disabled={busy}
+                onChange={(e) => onActiveChange?.(item.id, e.target.checked)}
               />
               <span className={styles.slider} />
             </label>
           </div>
         )}
+        </div>
+
+        <div className={styles.chips}>
+          <Chip label={item.statusLabel} variant={item.statusVariant} />
+          <Chip label={item.categoryLabel} variant={item.categoryVariant} />
+        </div>
       </div>
 
-      <p className={styles.cardSub}>
-        <span className={styles.muted}>الخطة:</span> {row.plan}
-      </p>
+      <div className={styles.meta}>
+        <div className={styles.metaRow}>
+          <CalendarDays size={18} />
+          <span dir="ltr">{item.date}</span>
+          <span className={styles.dot}>•</span>
+          <CalendarDays size={18} />
+          <span dir="ltr">{item.time}</span>
+        </div>
 
-      <div className={styles.badgesRow}>
-        <span className={styles[typePillClass(row.type) as keyof typeof styles]}>{row.type}</span>
-        <span className={styles[statusBadgeClass(row.status) as keyof typeof styles]}>{row.status}</span>
+        <div className={styles.metaRow}>
+          <MapPin size={18} />
+          <span>{item.location}</span>
+        </div>
+
+        <div className={styles.metaRow}>
+          <Users size={18} />
+          <span>{item.participantsText}</span>
+        </div>
+
+        <div className={styles.metaRow}>
+          <DollarSign size={18} />
+          <span>{item.priceText}</span>
+        </div>
       </div>
 
-      <div className={styles.metaList}>
-        <div className={styles.metaItem}><CalendarDays size={16} /><span dir="ltr">{row.date}</span></div>
-        <div className={styles.metaItem}><Clock size={16} /><span dir="ltr">{row.time}</span></div>
-        <div className={styles.metaItem}><MapPin size={16} /><span>{row.place}</span></div>
-        <div className={styles.metaItem}><Users size={16} /><span>{row.participants}</span></div>
-        <div className={styles.metaItem}><DollarSign size={16} /><span>{row.cost}</span></div>
-      </div>
-
-      <div className={styles.cardActions}>
-        <button className={styles.btnGhost} type="button" onClick={() => onView(row.id)}>
-          <Eye size={16} />
-          عرض التفاصيل
+      <div className={styles.actions}>
+        <button className={styles.danger} onClick={() => onDelete(item.id)}>
+          <Trash2 size={18} />
+          الغاء
         </button>
-        <button className={styles.secondary} onClick={() => onEdit(row.id)}>
+
+        <button className={styles.secondary} onClick={() => onEdit(item.id)}>
           <Pencil size={18} />
           تعديل
         </button>
-        {canDelete && (
-          <button className={styles.btnDanger} type="button" onClick={() => onDelete(row.id)}>
-            <Trash2 size={16} />
-            الغاء
-          </button>
-        )}
+
+        <button className={styles.secondary} onClick={() => onView(item.id)}>
+          <Eye size={18} />
+          عرض التفاصيل
+        </button>
       </div>
     </article>
   );

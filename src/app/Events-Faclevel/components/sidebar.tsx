@@ -127,13 +127,13 @@ export default function Sidebar() {
             </button>
 
             {/* الإنجازات والتقارير */}
-            <button
+            {/* <button
               onClick={() => handleNavigation("/Events-Faclevel/reports")}
               className={pathname === "/Events-Faclevel/reports" ? styles.active : ""}
             >
               <TrendingUp size={18} />
               <span>الإنجازات والتقارير</span>
-            </button>
+            </button> */}
 
           </nav>
 

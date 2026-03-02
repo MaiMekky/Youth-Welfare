@@ -14,6 +14,8 @@ import {
   Building2,
   Layers,
 } from "lucide-react";
+import Footer from "@/app/FacLevel/components/Footer";
+import Header from "@/app/FacLevel/components/Header";
 
 const API_URL = "http://localhost:8000/api";
 
@@ -101,6 +103,8 @@ function safeMoney(v: string | null) {
 
 /* ================= Component ================= */
 
+type ToastType = "success" | "error" | "warning";
+
 export default function PlanDetailsPage() {
   const router = useRouter();
   const params = useParams();
@@ -108,8 +112,24 @@ export default function PlanDetailsPage() {
 
   const [plan, setPlan] = useState<ApiPlanDetails | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+
+  // هنخلي بدل error box = toast
   const [removingId, setRemovingId] = useState<number | null>(null);
+
+  /* ===================== Toast (same style) ===================== */
+  const [toast, setToast] = useState<{ show: boolean; message: string; type: ToastType }>({
+    show: false,
+    message: "",
+    type: "success",
+  });
+
+  const showToast = (message: string, type: ToastType) => {
+    setToast({ show: true, message, type });
+    window.setTimeout(() => {
+      setToast({ show: false, message: "", type: "success" });
+    }, 2500);
+  };
+
   function getAccessToken(): string | null {
     return (
       localStorage.getItem("access") ||
@@ -128,16 +148,25 @@ export default function PlanDetailsPage() {
       Accept: "application/json",
       ...(opts.headers as any),
     };
+    if (!headers["Content-Type"] && opts.body) headers["Content-Type"] = "application/json";
     if (token) headers.Authorization = `Bearer ${token}`;
 
     try {
       const res = await fetch(`http://localhost:8000${path}`, { ...opts, headers });
       const text = await res.text();
-      const json = text ? (() => { try { return JSON.parse(text); } catch { return text; } })() : null;
+      const json = text
+        ? (() => {
+            try {
+              return JSON.parse(text);
+            } catch {
+              return text;
+            }
+          })()
+        : null;
 
       if (!res.ok) {
         const msg =
-          (typeof json === "object" && json && (json.detail || json.message)) ||
+          (typeof json === "object" && json && ((json as any).detail || (json as any).message || (json as any).error)) ||
           (typeof json === "string" ? json : "") ||
           `طلب غير ناجح (${res.status})`;
         return { ok: false, message: String(msg) };
@@ -148,19 +177,19 @@ export default function PlanDetailsPage() {
       return { ok: false, message: e?.message || "مشكلة في الاتصال" };
     }
   }
-    const onRemoveEvent = async (eventId: number) => {
-    if (!confirm("هل تريد إلغاء هذه الفعالية من الخطة؟")) return;
 
+  const onRemoveEvent = async (eventId: number) => {
+  
     setRemovingId(eventId);
 
     const res = await apiCall(`/api/events/plans/${id}/remove-event/${eventId}/`, {
-      method: "DELETE", 
+      method: "DELETE",
     });
 
     setRemovingId(null);
 
     if (!res.ok) {
-      window.alert(res.message);
+      showToast(`❌ ${res.message}`, "error");
       return;
     }
 
@@ -168,16 +197,18 @@ export default function PlanDetailsPage() {
       if (!prev) return prev;
       return { ...prev, events: prev.events.filter((e) => e.event_id !== eventId) };
     });
+
+    showToast("✅ تم حذف الفعالية من الخطة", "success");
   };
+
   async function fetchPlanDetails() {
     try {
       setLoading(true);
-      setError(null);
 
       const token = localStorage.getItem("access");
       if (!token) {
         setPlan(null);
-        setError("مفيش access token. اعملي تسجيل دخول تاني.");
+        showToast("❌ مفيش access token. اعملي تسجيل دخول تاني.", "error");
         return;
       }
 
@@ -190,19 +221,23 @@ export default function PlanDetailsPage() {
       });
 
       const text = await res.text();
-      console.log("GET plan details status:", res.status);
-      console.log("GET plan details raw body:", text);
 
       if (!res.ok) {
         setPlan(null);
-        setError(`فشل تحميل تفاصيل الخطة (Status ${res.status})`);
+        showToast(`❌ فشل تحميل تفاصيل الخطة (Status ${res.status})`, "error");
         return;
       }
 
-      const parsed = text ? JSON.parse(text) : null;
+      let parsed: any = null;
+      try {
+        parsed = text ? JSON.parse(text) : null;
+      } catch {
+        parsed = null;
+      }
+
       if (!parsed || typeof parsed !== "object") {
         setPlan(null);
-        setError("الـ API رجّع بيانات غير متوقعة.");
+        showToast("❌ الـ API رجّع بيانات غير متوقعة.", "error");
         return;
       }
 
@@ -210,7 +245,7 @@ export default function PlanDetailsPage() {
     } catch (e) {
       console.error(e);
       setPlan(null);
-      setError("حصل خطأ أثناء تحميل تفاصيل الخطة");
+      showToast("❌ حصل خطأ أثناء تحميل تفاصيل الخطة", "error");
     } finally {
       setLoading(false);
     }
@@ -236,7 +271,6 @@ export default function PlanDetailsPage() {
     router.push(`/Events-Faclevel/plans/${id}/propsed/create`);
   };
 
-
   const onConvertToEvent = (eventId: number) => {
     const ev = plan?.events?.find((x) => x.event_id === eventId);
     if (!ev) return;
@@ -249,6 +283,7 @@ export default function PlanDetailsPage() {
       })
     );
 
+    showToast("✅ تم تجهيز بيانات التحويل", "success");
     router.push(`/Events-Faclevel/plans/${id}/propsed/create?mode=convert`);
   };
 
@@ -263,185 +298,187 @@ export default function PlanDetailsPage() {
   const termLabel = plan?.term ? `الترم: ${plan.term}` : "—";
 
   return (
-    <div className={styles.page}>
-      <div className={styles.container}>
-        {/* Top bar */}
-        <div className={styles.topBar}>
-          <div className={styles.headText}>
-            <h1 className={styles.pageTitle}>تفاصيل الخطة</h1>
-            <p className={styles.pageSubtitle}>{planSubtitle}</p>
-          </div>
+    <>
+      {/* ✅ Toast */}
+    {toast.show && (
+  <div className={`${styles.toast} ${styles[`toast_${toast.type}`]}`}>
+    {toast.message}
+  </div>
+)}
 
-          <button className={styles.backBtn} onClick={() => router.push("/Events-Faclevel/plans")}>
-            <ArrowRight size={18} />
-            العودة للخطط
-          </button>
-        </div>
-
-        {loading && (
-          <div style={{ textAlign: "center", padding: 14, fontWeight: 900 }}>
-            جاري تحميل تفاصيل الخطة...
-          </div>
-        )}
-
-        {error && (
-          <div style={{ textAlign: "center", padding: 14, color: "crimson", fontWeight: 900 }}>
-            {error}
-          </div>
-        )}
-
-        {/* Hero */}
-        <div className={styles.hero}>
-          <div className={styles.heroTitle}>{planTitle}</div>
-
-          <div className={styles.heroBadges}>
-            <span className={styles.badgeSoft}>
-              <Building2 size={14} /> {facultyName}
-            </span>
-            <span className={styles.badgeSoft}>
-              <Layers size={14} /> {termLabel}
-            </span>
-          </div>
-        </div>
-
-        {/* Stats (اختياري) */}
-        <div className={styles.statsRow}>
-          <div className={`${styles.statCard} ${styles.statAmber}`}>
-            <div className={styles.statIcon}>
-              <Lightbulb size={20} />
-            </div>
-            <div className={styles.statText}>
-              <div className={styles.statLabel}>منتظر</div>
-              <div className={styles.statValue}>{derived.pendingEvents}</div>
-            </div>
-          </div>
-
-          <div className={`${styles.statCard} ${styles.statGreen}`}>
-            <div className={styles.statIcon}>
-              <CheckCircle2 size={20} />
-            </div>
-            <div className={styles.statText}>
-              <div className={styles.statLabel}>مكتمل</div>
-              <div className={styles.statValue}>{derived.completedEvents}</div>
-            </div>
-          </div>
-
-          <div className={`${styles.statCard} ${styles.statIndigo}`}>
-            <div className={styles.statIcon}>
-              <FileText size={20} />
-            </div>
-            <div className={styles.statText}>
-              <div className={styles.statLabel}>إجمالي</div>
-              <div className={styles.statValue}>{derived.totalEvents}</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Info grid */}
-        <section className={styles.infoGrid}>
-          <div className={styles.infoCard}>
-            <div className={styles.infoLabel}>
-              <FileText size={16} /> عنوان الخطة
-            </div>
-            <div className={styles.infoValue}>{planTitle}</div>
-          </div>
-
-          <div className={styles.infoCard}>
-            <div className={styles.infoLabel}>
-              <CalendarDays size={16} /> الترم
-            </div>
-            <div className={styles.infoValue} dir="ltr">
-              {plan?.term ?? "—"}
-            </div>
-          </div>
-
-          <div className={styles.infoCard}>
-            <div className={styles.infoLabel}>
-              <Building2 size={16} /> الكلية
-            </div>
-            <div className={styles.infoValue}>{facultyName}</div>
-          </div>
-
-          <div className={`${styles.infoCard}`}>
-            <div className={styles.infoLabel}>
-              <FileText size={16} /> ملاحظات
-            </div>
-            <div className={styles.infoValue}>
-              {plan?.faculty_name ? "هذه خطة خاصة بكلية محددة." : "هذه خطة عامة على مستوى الجامعة."}
-            </div>
-          </div>
-        </section>
-
-        {/* ✅ One table for all events */}
-        <section className={styles.tableBlock}>
-          <div className={styles.tableHead}>
-            <div className={styles.tableTitle}>
-              فعاليات الخطة <span className={styles.count}>({plan?.events?.length ?? 0})</span>
+      <div className={styles.page}>
+        <Header />
+        <div className={styles.container}>
+          {/* Top bar */}
+          <div className={styles.topBar}>
+            <div className={styles.headText}>
+              <h1 className={styles.pageTitle}>تفاصيل الخطة</h1>
+              <p className={styles.pageSubtitle}>{planSubtitle}</p>
             </div>
 
-            <button className={styles.miniChipBtn} type="button" onClick={onAddProposed}>
-              <Plus size={14} />
-              إضافة فعالية مقترحة
+            <button className={styles.backBtn} onClick={() => router.push("/Events-Faclevel/plans")}>
+              <ArrowRight size={18} />
+              العودة للخطط
             </button>
           </div>
 
-          <div className={styles.hintInfo}>
-            <div className={styles.hintIcon}>
-              <Lightbulb size={18} />
+          {loading && (
+            <div style={{ textAlign: "center", padding: 14, fontWeight: 900 }}>
+              جاري تحميل تفاصيل الخطة...
             </div>
-            <p className={styles.hintText}>
-              
- الفعاليات المقترحة هي تفاصيل مبدئية للتخطيط ولا تظهر للطلاب، يمكن تحويلها لفعالية لاحقاً.
-           <br />
- الفعاليات الفعلية هي الفعاليات المنفذة والمنشورة للطلاب للتسجيل فيها.
-            </p>
+          )}
+
+          {/* Hero */}
+          <div className={styles.hero}>
+            <div className={styles.heroTitle}>{planTitle}</div>
+
+            <div className={styles.heroBadges}>
+              <span className={styles.badgeSoft}>
+                <Building2 size={14} /> {facultyName}
+              </span>
+              <span className={styles.badgeSoft}>
+                <Layers size={14} /> {termLabel}
+              </span>
+            </div>
           </div>
 
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>اسم الفعالية</th>
-                  <th>القسم</th>
-                  <th>النوع</th>
-                  <th>الحالة</th>
-                  <th>تاريخ البداية</th>
-                  <th>تاريخ النهاية</th>
-                  <th>المكان</th>
-                  <th>الحد</th>
-                  <th>التكلفة</th>
-                  <th>الإجراءات</th>
-                </tr>
-              </thead>
+          {/* Stats (اختياري) */}
+          <div className={styles.statsRow}>
+            <div className={`${styles.statCard} ${styles.statAmber}`}>
+              <div className={styles.statIcon}>
+                <Lightbulb size={20} />
+              </div>
+              <div className={styles.statText}>
+                <div className={styles.statLabel}>منتظر</div>
+                <div className={styles.statValue}>{derived.pendingEvents}</div>
+              </div>
+            </div>
 
-              <tbody>
-                {(plan?.events ?? []).map((e) => {
-                 const converted =
-                  typeof window !== "undefined" &&
-                  sessionStorage.getItem(`converted_${id}_${e.event_id}`) === "1";  
-                  return (
-                    <tr key={e.event_id}>
-                      <td className={styles.cellTitle}>{e.title}</td>
-                      <td>{e.dept_name ?? "—"}</td>
+            <div className={`${styles.statCard} ${styles.statGreen}`}>
+              <div className={styles.statIcon}>
+                <CheckCircle2 size={20} />
+              </div>
+              <div className={styles.statText}>
+                <div className={styles.statLabel}>مكتمل</div>
+                <div className={styles.statValue}>{derived.completedEvents}</div>
+              </div>
+            </div>
 
-                      <td>
-                        <span className={`${styles.typePill} ${typeClass(styles, e.type)}`}>
-                          {e.type || "—"}
-                        </span>
-                      </td>
+            <div className={`${styles.statCard} ${styles.statIndigo}`}>
+              <div className={styles.statIcon}>
+                <FileText size={20} />
+              </div>
+              <div className={styles.statText}>
+                <div className={styles.statLabel}>إجمالي</div>
+                <div className={styles.statValue}>{derived.totalEvents}</div>
+              </div>
+            </div>
+          </div>
 
-                      <td>
-                        <span className={statusClass(styles, e.status)}>{statusLabel(e.status)}</span>
-                      </td>
+          {/* Info grid */}
+          <section className={styles.infoGrid}>
+            <div className={styles.infoCard}>
+              <div className={styles.infoLabel}>
+                <FileText size={16} /> عنوان الخطة
+              </div>
+              <div className={styles.infoValue}>{planTitle}</div>
+            </div>
 
-                      <td dir="ltr">{e.st_date}</td>
-                      <td dir="ltr">{e.end_date}</td>
-                      <td>{e.location ?? "—"}</td>
-                      <td className={styles.cellValue}>{e.s_limit != null ? e.s_limit : "—"}</td>
-                      <td className={styles.cellValue}>{safeMoney(e.cost)}</td>
+            <div className={styles.infoCard}>
+              <div className={styles.infoLabel}>
+                <CalendarDays size={16} /> الترم
+              </div>
+              <div className={styles.infoValue} dir="ltr">
+                {plan?.term ?? "—"}
+              </div>
+            </div>
 
-                      <td>
-                        <div className={styles.rowActions}>
+            <div className={styles.infoCard}>
+              <div className={styles.infoLabel}>
+                <Building2 size={16} /> الكلية
+              </div>
+              <div className={styles.infoValue}>{facultyName}</div>
+            </div>
+
+            <div className={`${styles.infoCard}`}>
+              <div className={styles.infoLabel}>
+                <FileText size={16} /> ملاحظات
+              </div>
+              <div className={styles.infoValue}>
+                {plan?.faculty_name ? "هذه خطة خاصة بكلية محددة." : "هذه خطة عامة على مستوى الجامعة."}
+              </div>
+            </div>
+          </section>
+
+          {/* ✅ One table for all events */}
+          <section className={styles.tableBlock}>
+            <div className={styles.tableHead}>
+              <div className={styles.tableTitle}>
+                فعاليات الخطة <span className={styles.count}>({plan?.events?.length ?? 0})</span>
+              </div>
+
+              <button className={styles.miniChipBtn} type="button" onClick={onAddProposed}>
+                <Plus size={14} />
+                إضافة فعالية مقترحة
+              </button>
+            </div>
+
+            <div className={styles.hintInfo}>
+              <div className={styles.hintIcon}>
+                <Lightbulb size={18} />
+              </div>
+              <p className={styles.hintText}>
+                الفعاليات المقترحة هي تفاصيل مبدئية للتخطيط ولا تظهر للطلاب، يمكن تحويلها لفعالية لاحقاً.
+                <br />
+                الفعاليات الفعلية هي الفعاليات المنفذة والمنشورة للطلاب للتسجيل فيها.
+              </p>
+            </div>
+
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>اسم الفعالية</th>
+                    <th>القسم</th>
+                    <th>النوع</th>
+                    <th>الحالة</th>
+                    <th>تاريخ البداية</th>
+                    <th>تاريخ النهاية</th>
+                    <th>المكان</th>
+                    <th>الحد</th>
+                    <th>التكلفة</th>
+                    <th>الإجراءات</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {(plan?.events ?? []).map((e) => {
+                    const converted =
+                      typeof window !== "undefined" &&
+                      sessionStorage.getItem(`converted_${id}_${e.event_id}`) === "1";
+                    return (
+                      <tr key={e.event_id}>
+                        <td className={styles.cellTitle}>{e.title}</td>
+                        <td>{e.dept_name ?? "—"}</td>
+
+                        <td>
+                          <span className={`${styles.typePill} ${typeClass(styles, e.type)}`}>
+                            {e.type || "—"}
+                          </span>
+                        </td>
+
+                        <td>
+                          <span className={statusClass(styles, e.status)}>{statusLabel(e.status)}</span>
+                        </td>
+
+                        <td dir="ltr">{e.st_date}</td>
+                        <td dir="ltr">{e.end_date}</td>
+                        <td>{e.location ?? "—"}</td>
+                        <td className={styles.cellValue}>{e.s_limit != null ? e.s_limit : "—"}</td>
+                        <td className={styles.cellValue}>{safeMoney(e.cost)}</td>
+
+                        <td>
+                          <div className={styles.rowActions}>
                             <button
                               className={styles.actionBtn}
                               type="button"
@@ -450,8 +487,8 @@ export default function PlanDetailsPage() {
                               <Eye size={16} />
                               عرض التفاصيل
                             </button>
-                
-                          {!converted && (
+
+                            {!converted && (
                               <button
                                 className={styles.actionBtn}
                                 type="button"
@@ -461,7 +498,8 @@ export default function PlanDetailsPage() {
                                 إنشاء للفعالية
                               </button>
                             )}
-                             <button
+
+                            <button
                               className={styles.actionBtnDanger}
                               type="button"
                               disabled={removingId === e.event_id}
@@ -469,26 +507,28 @@ export default function PlanDetailsPage() {
                               title="إلغاء الفعالية من الخطة"
                               style={{ opacity: removingId === e.event_id ? 0.7 : 1 }}
                             >
-                              الغاء
+                              {removingId === e.event_id ? "..." : "الغاء"}
                             </button>
-                        </div>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+
+                  {!loading && (plan?.events?.length ?? 0) === 0 && (
+                    <tr>
+                      <td colSpan={10} style={{ textAlign: "center", padding: 16, color: "#64748b", fontWeight: 800 }}>
+                        لا توجد فعاليات مرتبطة بهذه الخطة
                       </td>
                     </tr>
-                  );
-                })}
-
-                {!loading && !error && (plan?.events?.length ?? 0) === 0 && (
-                  <tr>
-                    <td colSpan={9} style={{ textAlign: "center", padding: 16, color: "#64748b", fontWeight: 800 }}>
-                      لا توجد فعاليات مرتبطة بهذه الخطة
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+        <Footer />
       </div>
-    </div>
+    </>
   );
 }

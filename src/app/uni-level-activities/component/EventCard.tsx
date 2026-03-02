@@ -2,16 +2,7 @@
 
 import React from "react";
 import styles from "../styles/EventsPage.module.css";
-import {
-  CalendarDays,
-  Clock,
-  MapPin,
-  Users,
-  DollarSign,
-  Eye,
-  Pencil,
-  Trash2,
-} from "lucide-react";
+import { CalendarDays, MapPin, Users, DollarSign, Eye, Pencil, Trash2 } from "lucide-react";
 
 export type ChipVariant = "success" | "primary" | "info" | "purple" | "danger";
 
@@ -28,9 +19,8 @@ export type EventItem = {
   location: string;
   participantsText: string;
   priceText: string;
-
-  // ✅ جديد
   isActive: boolean;
+  hideToggle?: boolean;
 };
 
 function Chip({ label, variant }: { label: string; variant: ChipVariant }) {
@@ -44,6 +34,7 @@ export default function EventCard({
   onDelete,
   onActiveChange,
   busy,
+  hideToggle,
 }: {
   item?: EventItem;
   onView: (id: number) => void;
@@ -51,6 +42,7 @@ export default function EventCard({
   onDelete: (id: number) => void;
   onActiveChange?: (id: number, nextActive: boolean) => void;
   busy?: boolean;
+  hideToggle?: boolean; 
 }) {
   if (!item) return null;
 
@@ -63,7 +55,7 @@ export default function EventCard({
             <p className={styles.plan}>{item.planName}</p>
           </div>
 
-          {/* ✅ السويتش: نشط / غير نشط */}
+            {!hideToggle && ( 
           <div className={styles.approvalWrap}>
             <span className={styles.approvalLabel}>
               {item.isActive ? "نشط" : "غير نشط"}
@@ -79,6 +71,7 @@ export default function EventCard({
               <span className={styles.slider} />
             </label>
           </div>
+        )}
         </div>
 
         <div className={styles.chips}>
@@ -88,13 +81,13 @@ export default function EventCard({
       </div>
 
       <div className={styles.meta}>
-       <div className={styles.metaRow}>
-        <CalendarDays size={18} />
-        <span dir="ltr">{item.date}</span>
-        <span className={styles.dot}>•</span>
-        <CalendarDays size={18} />
-        <span dir="ltr">{item.time}</span>
-      </div>
+        <div className={styles.metaRow}>
+          <CalendarDays size={18} />
+          <span dir="ltr">{item.date}</span>
+          <span className={styles.dot}>•</span>
+          <CalendarDays size={18} />
+          <span dir="ltr">{item.time}</span>
+        </div>
 
         <div className={styles.metaRow}>
           <MapPin size={18} />

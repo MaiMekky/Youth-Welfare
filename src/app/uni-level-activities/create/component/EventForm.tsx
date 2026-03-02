@@ -46,6 +46,17 @@ type ManageEventPayload = {
   selected_facs: number[];
 };
 
+const ACTIVITY_TYPES = [
+  "نشاط رياضي",
+  "نشاط ثقافي",
+  "نشاط بيئي",
+  "نشاط اجتماعي",
+  "نشاط علمي",
+  "نشاط خدمة عامة",
+  "نشاط فني",
+  "نشاط معسكرات",
+] as const;
+
 function getAccessToken(): string | null {
   return (
     localStorage.getItem("access") ||
@@ -61,10 +72,7 @@ function decodeJwtPayload(token: string): any | null {
     if (parts.length < 2) return null;
     const base64Url = parts[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-    const padded = base64.padEnd(
-      base64.length + ((4 - (base64.length % 4)) % 4),
-      "="
-    );
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
     const json = atob(padded);
     return JSON.parse(json);
   } catch {
@@ -136,9 +144,10 @@ async function apiFetch<T>(
       const msg =
         (typeof maybeJson === "object" &&
           maybeJson &&
-          (maybeJson.detail || maybeJson.message || maybeJson.error)) ||
+          ((maybeJson as any).detail || (maybeJson as any).message || (maybeJson as any).error)) ||
         (typeof maybeJson === "string" ? maybeJson : "") ||
         `طلب غير ناجح (${res.status})`;
+
       return { ok: false, message: String(msg), status: res.status, raw: maybeJson };
     }
 
@@ -170,6 +179,7 @@ type FormState = {
 };
 
 type FormErrors = Partial<Record<keyof FormState | "selected_facs", string>>;
+type NotifType = "success" | "error" | "warning";
 
 export default function EventForm({
   mode,
@@ -183,6 +193,13 @@ export default function EventForm({
   const routeId = params?.id as string | undefined;
   const eventId = id ?? routeId; // يدعم الاتنين
   const isEditMode = mode === "edit" && !!eventId;
+
+  /** ✅ Notification */
+  const [notification, setNotification] = useState<{ message: string; type: NotifType } | null>(null);
+  const showNotification = (message: string, type: NotifType) => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 2500);
+  };
 
   /** ===== Faculties from API ===== */
   const [faculties, setFaculties] = useState<Faculty[]>([]);
@@ -236,19 +253,23 @@ export default function EventForm({
     if (!form.title.trim()) next.title = "عنوان الفعالية مطلوب";
     if (!form.st_date) next.st_date = "تاريخ البداية مطلوب";
     if (!form.end_date) next.end_date = "تاريخ النهاية مطلوب";
-    if (form.st_date && form.end_date && form.st_date > form.end_date) next.end_date = "تاريخ النهاية لازم يكون بعد/يساوي تاريخ البداية";
+    if (form.st_date && form.end_date && form.st_date > form.end_date)
+      next.end_date = "تاريخ النهاية لازم يكون بعد/يساوي تاريخ البداية";
 
     if (!form.location.trim()) next.location = "المكان مطلوب";
 
-    if (!Number.isFinite(form.s_limit) || form.s_limit < 1) next.s_limit = "الحد الأقصى للمشاركين لازم يكون رقم أكبر من 0";
+    if (!Number.isFinite(form.s_limit) || form.s_limit < 1)
+      next.s_limit = "الحد الأقصى للمشاركين لازم يكون رقم أكبر من 0";
 
-    const costNum = Number(String(form.cost).replaceAll(",", "").trim());
-    if (String(form.cost).trim() && (Number.isNaN(costNum) || costNum < 0)) next.cost = "التكلفة لازم تكون رقم أكبر أو يساوي 0";
+    const costStr = String(form.cost ?? "").trim();
+    const costNum = Number(costStr.replaceAll(",", ""));
+    // ✅ خلي التكلفة Required + رقم >= 0
+    if (!costStr) next.cost = "التكلفة مطلوبة";
+    else if (Number.isNaN(costNum) || costNum < 0) next.cost = "التكلفة لازم تكون رقم أكبر أو يساوي 0";
 
     if (!form.description.trim()) next.description = "الوصف مطلوب";
 
     if (!form.type.trim()) next.type = "نوع النشاط مطلوب";
-
     if (selectedFacultyIds.length === 0) next.selected_facs = "اختاري كلية واحدة على الأقل";
 
     return next;
@@ -262,7 +283,7 @@ export default function EventForm({
       setLoadingFacs(false);
 
       if (!res.ok) {
-        window.alert(res.message);
+        showNotification(res.message || "فشل تحميل الكليات", "error");
         return;
       }
 
@@ -270,6 +291,7 @@ export default function EventForm({
       const mapped: Faculty[] = list.map((f) => ({ id: f.faculty_id, name: f.name }));
       setFaculties(mapped);
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /** ===== Load event details for edit ===== */
@@ -282,7 +304,7 @@ export default function EventForm({
       setLoadingEvent(false);
 
       if (!res.ok) {
-        window.alert(res.message);
+        showNotification(res.message || "فشل تحميل بيانات الفعالية", "error");
         return;
       }
 
@@ -306,6 +328,7 @@ export default function EventForm({
 
       setSelectedFacultyIds(Array.isArray(e?.selected_facs) ? e.selected_facs : []);
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditMode, eventId]);
 
   /** ===== Submit ===== */
@@ -314,11 +337,15 @@ export default function EventForm({
 
     const nextErrors = validate();
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length) return;
+
+    if (Object.keys(nextErrors).length) {
+      showNotification("⚠️ من فضلك كمّلي البيانات المطلوبة", "warning");
+      return;
+    }
 
     const dept = getDeptFromToken();
     if (!dept) {
-      window.alert("مش قادر أحدد القسم من التوكن (dept).");
+      showNotification("❌ مش قادر أحدد القسم من التوكن (dept).", "error");
       return;
     }
 
@@ -343,15 +370,17 @@ export default function EventForm({
 
     if (isEditMode) {
       const res = await apiFetch<any>(`/api/event/manage-events/${eventId}/`, {
-        method: "PATCH", 
+        method: "PATCH",
         body: JSON.stringify(payload),
       });
       setSubmitting(false);
 
       if (!res.ok) {
-        window.alert(res.message);
+        showNotification(res.message || "❌ حصل خطأ أثناء تعديل الفعالية", "error");
         return;
       }
+
+      showNotification("✅ تم تعديل الفعالية بنجاح", "success");
     } else {
       const res = await apiFetch<any>("/api/event/manage-events/", {
         method: "POST",
@@ -360,35 +389,49 @@ export default function EventForm({
       setSubmitting(false);
 
       if (!res.ok) {
-        window.alert(res.message);
+        showNotification(res.message || "❌ حصل خطأ أثناء إنشاء الفعالية", "error");
         return;
       }
+
+      showNotification("✅ تم إنشاء الفعالية بنجاح", "success");
     }
 
+    // سيبيها زي ما هي (بعد 2500ms التوست هيختفي)
     router.push("/uni-level-activities");
   };
 
   return (
     <div className={styles.page}>
+      {/* ✅ Notification */}
+      {notification && (
+        <div
+          className={`${styles.notification} ${
+            notification.type === "success"
+              ? styles.success
+              : notification.type === "warning"
+              ? styles.warning
+              : styles.error
+          }`}
+        >
+          {notification.message}
+        </div>
+      )}
+
       <div className={styles.container}>
         <header className={styles.header}>
           <div className={styles.headerText}>
             <h1 className={styles.title}>{isEditMode ? "تعديل الفعالية" : "إنشاء فعالية جديدة"}</h1>
-            <p className={styles.subtitle}>
-              {isEditMode ? "قومي بتعديل البيانات ثم حفظ" : "قومي بملء البيانات لإنشاء فعالية جديدة"}
-            </p>
+            <p className={styles.subtitle}>{isEditMode ? "قومي بتعديل البيانات ثم حفظ" : "قومي بملء البيانات لإنشاء فعالية جديدة"}</p>
           </div>
 
-          <button className={styles.backBtn} onClick={() => router.back()} type="button">
+          <button className={styles.backBtn} onClick={() => router.back()} type="button" disabled={submitting}>
             <ArrowRight size={18} />
             رجوع
           </button>
         </header>
 
         {(loadingEvent || loadingFacs) && (
-          <div style={{ fontWeight: 800, opacity: 0.8, marginBottom: 10 }}>
-            جاري تحميل البيانات...
-          </div>
+          <div style={{ fontWeight: 800, opacity: 0.8, marginBottom: 10 }}>جاري تحميل البيانات...</div>
         )}
 
         <form className={styles.card} onSubmit={onSubmit} noValidate>
@@ -406,12 +449,23 @@ export default function EventForm({
 
             <div className={styles.field}>
               <label className={styles.label}>نوع النشاط</label>
-              <input
+
+              <select
                 className={`${styles.input} ${errors.type ? styles.inputError : ""}`}
-                placeholder="مثال: نشاط ثقافي"
                 value={form.type}
                 onChange={(ev) => setField("type", ev.target.value)}
-              />
+              >
+                <option value="" disabled>
+                  اختار نوع النشاط
+                </option>
+
+                {ACTIVITY_TYPES.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+
               {errors.type && <div className={styles.errorText}>{errors.type}</div>}
             </div>
 
@@ -473,10 +527,10 @@ export default function EventForm({
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>الموارد</label>
+              <label className={styles.label}>الموارد (اختياري)</label>
               <input
                 className={`${styles.input} ${errors.resource ? styles.inputError : ""}`}
-                placeholder="اختياري"
+                placeholder="الموارد"
                 value={form.resource}
                 onChange={(ev) => setField("resource", ev.target.value)}
               />
@@ -484,10 +538,10 @@ export default function EventForm({
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>القيود</label>
+              <label className={styles.label}>القيود (اختياري)</label>
               <input
                 className={`${styles.input} ${errors.restrictions ? styles.inputError : ""}`}
-                placeholder="اختياري"
+                placeholder="القيود"
                 value={form.restrictions}
                 onChange={(ev) => setField("restrictions", ev.target.value)}
               />
@@ -495,10 +549,10 @@ export default function EventForm({
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>المكافأة</label>
+              <label className={styles.label}>المكافأة (اختياري)</label>
               <input
                 className={`${styles.input} ${errors.reward ? styles.inputError : ""}`}
-                placeholder="اختياري"
+                placeholder="المكافأة"
                 value={form.reward}
                 onChange={(ev) => setField("reward", ev.target.value)}
               />
@@ -544,11 +598,7 @@ export default function EventForm({
             <div className={styles.facultyGrid}>
               {faculties.map((f) => (
                 <label key={f.id} className={styles.facultyItem}>
-                  <input
-                    type="checkbox"
-                    checked={selectedFacultyIds.includes(f.id)}
-                    onChange={() => toggleOne(f.id)}
-                  />
+                  <input type="checkbox" checked={selectedFacultyIds.includes(f.id)} onChange={() => toggleOne(f.id)} />
                   <span>{f.name}</span>
                 </label>
               ))}
@@ -562,7 +612,7 @@ export default function EventForm({
 
             <button type="submit" className={styles.saveBtn} disabled={submitting}>
               <Save size={18} />
-              حفظ
+              {submitting ? "جاري الحفظ..." : "حفظ"}
             </button>
           </div>
         </form>

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import styles from "../styles/PlansPage.module.css";
 import { X, Save } from "lucide-react";
 
@@ -11,11 +12,13 @@ type InitialPlan = { id: number; name: string; term: number } | null;
 type FormState = { name: string; term: number };
 type FormErrors = Partial<Record<keyof FormState, string>>;
 
+type ToastType = "success" | "error" | "warning";
+
 export default function CreatePlanModal({
   open,
   onClose,
-  initialPlan,     // 👈 لو موجود يبقى Edit
-  onSaved,         // 👈 بعد save نعمل refresh
+  initialPlan, // 👈 لو موجود يبقى Edit
+  onSaved, // 👈 بعد save نعمل refresh
 }: {
   open: boolean;
   onClose: () => void;
@@ -27,12 +30,22 @@ export default function CreatePlanModal({
   const [form, setForm] = useState<FormState>({ name: "", term: 1 });
   const [errors, setErrors] = useState<FormErrors>({});
   const [saving, setSaving] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
+
+  /* ===================== Toast (same style) ===================== */
+  const [toast, setToast] = useState<{ show: boolean; message: string; type: ToastType }>({
+    show: false,
+    message: "",
+    type: "success",
+  });
+
+  const showToast = (message: string, type: ToastType) => {
+    setToast({ show: true, message, type });
+    window.setTimeout(() => setToast({ show: false, message: "", type: "success" }), 2500);
+  };
 
   const reset = () => {
     setForm({ name: "", term: 1 });
     setErrors({});
-    setServerError(null);
     setSaving(false);
   };
 
@@ -51,7 +64,6 @@ export default function CreatePlanModal({
       setForm({ name: "", term: 1 });
     }
     setErrors({});
-    setServerError(null);
   }, [open, initialPlan]);
 
   // ESC
@@ -68,16 +80,15 @@ export default function CreatePlanModal({
   // lock scroll
   useEffect(() => {
     if (!open) return;
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow = "visible";
     return () => {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = "auto";
     };
   }, [open]);
 
   const setField = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((p) => ({ ...p, [key]: value }));
     setErrors((p) => ({ ...p, [key]: undefined }));
-    setServerError(null);
   };
 
   const validate = (): FormErrors => {
@@ -92,15 +103,17 @@ export default function CreatePlanModal({
 
     const nextErrors = validate();
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length > 0) return;
+    if (Object.keys(nextErrors).length > 0) {
+      showToast("❌ راجعي الحقول المطلوبة", "error");
+      return;
+    }
 
     try {
       setSaving(true);
-      setServerError(null);
 
       const token = localStorage.getItem("access");
       if (!token) {
-        setServerError("مفيش access token. اعملي تسجيل دخول تاني.");
+        showToast("❌ مفيش access token. اعملي تسجيل دخول تاني.", "error");
         return;
       }
 
@@ -126,26 +139,28 @@ export default function CreatePlanModal({
       });
 
       const text = await res.text();
-      console.log(method, "plan status:", res.status);
-      console.log(method, "plan raw body:", text);
 
       if (!res.ok) {
-        // لو السيرفر بيرجع errors بشكل معين
         let msg = `فشل الحفظ (Status ${res.status})`;
         try {
           const j = text ? JSON.parse(text) : null;
-          msg = j?.detail || j?.error || msg;
+          msg = j?.detail || j?.error || j?.message || msg;
+
+          // لو بيرجع أخطاء حقول
+          if (j?.name?.[0]) setErrors((p) => ({ ...p, name: String(j.name[0]) }));
+          if (j?.term?.[0]) setErrors((p) => ({ ...p, term: String(j.term[0]) }));
         } catch {}
-        setServerError(msg);
+        showToast(`❌ ${String(msg)}`, "error");
         return;
       }
 
-      // Success
-      onSaved();      // refresh list
+      showToast("✅ تم حفظ الخطة بنجاح", "success");
+
+      onSaved(); // refresh list
       closeAndReset();
     } catch (err) {
       console.error(err);
-      setServerError("حصل خطأ أثناء الحفظ");
+      showToast("❌ حصل خطأ أثناء الحفظ", "error");
     } finally {
       setSaving(false);
     }
@@ -154,68 +169,130 @@ export default function CreatePlanModal({
   if (!open) return null;
 
   return (
-    <div className={styles.modalOverlay} onMouseDown={closeAndReset}>
-      <div className={styles.modal} onMouseDown={(e) => e.stopPropagation()}>
-        <div className={styles.modalHeader}>
-          <div className={styles.modalHeadText}>
-            <h2 className={styles.modalTitle}>
-              {isEdit ? "تعديل الخطة" : "إنشاء خطة جديدة"}
-            </h2>
-            <p className={styles.modalSubtitle}>
-              {isEdit ? "عدّلي الاسم أو الترم ثم احفظي" : "قم بملء البيانات الأساسية للخطة"}
-            </p>
-          </div>
-
-          <button className={styles.modalClose} type="button" onClick={closeAndReset}>
-            <X size={18} />
-          </button>
+    <>
+      {/* Toast */}
+      {toast.show && (
+        <div className={`toast ${toast.type === "success" ? "success" : toast.type === "error" ? "error" : "warning"}`}>
+          <div className="msg">{toast.message}</div>
+          <div className="bar" />
         </div>
+      )}
 
-        <form className={styles.modalBody} onSubmit={submit} noValidate>
-          <div className={styles.modalGrid2}>
-            <div className={styles.field}>
-              <label className={styles.label}>اسم الخطة</label>
-              <input
-                className={`${styles.input} ${errors.name ? styles.inputError : ""}`}
-                placeholder="مثال: خطة الأنشطة الثقافية"
-                value={form.name}
-                onChange={(e) => setField("name", e.target.value)}
-              />
-              {errors.name && <div className={styles.errorText}>{errors.name}</div>}
+      <div className={styles.modalOverlay} onMouseDown={closeAndReset}>
+        <div className={styles.modal} onMouseDown={(e) => e.stopPropagation()}>
+          <div className={styles.modalHeader}>
+            <div className={styles.modalHeadText}>
+              <h2 className={styles.modalTitle}>{isEdit ? "تعديل الخطة" : "إنشاء خطة جديدة"}</h2>
+              <p className={styles.modalSubtitle}>
+                {isEdit ? "عدّلي الاسم أو الترم ثم احفظي" : "قم بملء البيانات الأساسية للخطة"}
+              </p>
             </div>
 
-            <div className={styles.field}>
-              <label className={styles.label}>الترم</label>
-              <select
-                className={`${styles.select} ${errors.term ? styles.inputError : ""}`}
-                value={String(form.term)}
-                onChange={(e) => setField("term", Number(e.target.value))}
-              >
-                <option value="1">1</option>
-                <option value="2">2</option>
-              </select>
-              {errors.term && <div className={styles.errorText}>{errors.term}</div>}
-            </div>
-          </div>
-
-          {serverError && (
-            <div style={{ marginTop: 10, color: "crimson", fontWeight: 900, textAlign: "right" }}>
-              {serverError}
-            </div>
-          )}
-
-          <div className={styles.modalFooter}>
-            <button type="button" className={styles.cancelBtn} onClick={closeAndReset} disabled={saving}>
-              إلغاء
-            </button>
-
-            <button type="submit" className={styles.saveBtn} disabled={saving}>
-              <Save size={18} />
-              {saving ? "جارٍ الحفظ..." : "حفظ"}
+            <button className={styles.modalClose} type="button" onClick={closeAndReset} disabled={saving}>
+              <X size={18} />
             </button>
           </div>
-        </form>
+
+          <form className={styles.modalBody} onSubmit={submit} noValidate>
+            <div className={styles.modalGrid2}>
+              <div className={styles.field}>
+                <label className={styles.label}>اسم الخطة</label>
+                <input
+                  className={`${styles.input} ${errors.name ? styles.inputError : ""}`}
+                  placeholder="مثال: خطة الأنشطة الثقافية"
+                  value={form.name}
+                  onChange={(e) => setField("name", e.target.value)}
+                />
+                {errors.name && <div className={styles.errorText}>{errors.name}</div>}
+              </div>
+
+              <div className={styles.field}>
+                <label className={styles.label}>الترم</label>
+                <select
+                  className={`${styles.select} ${errors.term ? styles.inputError : ""}`}
+                  value={String(form.term)}
+                  onChange={(e) => setField("term", Number(e.target.value))}
+                >
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                </select>
+                {errors.term && <div className={styles.errorText}>{errors.term}</div>}
+              </div>
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button type="button" className={styles.cancelBtn} onClick={closeAndReset} disabled={saving}>
+                إلغاء
+              </button>
+
+              <button type="submit" className={styles.saveBtn} disabled={saving}>
+                <Save size={18} />
+                {saving ? "جارٍ الحفظ..." : "حفظ"}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+
+      {/* نفس ستايل النوتفكيشن اللي اتفقنا عليه */}
+      <style jsx>{`
+        .toast {
+          position: fixed;
+          top: 20px;
+          right: 25px;
+          width: 280px;
+          background: #fff;
+          padding: 14px 16px;
+          border-radius: 10px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+          font-weight: 700;
+          color: #333;
+          z-index: 100000;
+          animation: fadeIn 0.4s ease forwards;
+          overflow: hidden;
+        }
+        .toast.success {
+          border-right: 6px solid #4caf50;
+        }
+        .toast.error {
+          border-right: 6px solid #f44336;
+        }
+        .toast.warning {
+          border-right: 6px solid #f59e0b;
+        }
+        .msg {
+          text-align: right;
+          line-height: 1.35;
+        }
+        .bar {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          height: 4px;
+          width: 0%;
+          background-color: #d4a017;
+          animation: progress 2.5s linear forwards;
+          transform-origin: left;
+        }
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateX(40px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        @keyframes progress {
+          from {
+            width: 0%;
+          }
+          to {
+            width: 100%;
+          }
+        }
+      `}</style>
+    </>
   );
 }

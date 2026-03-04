@@ -1,7 +1,7 @@
 "use client";
 import React, { ChangeEvent, FormEvent, useState, useEffect } from "react";
 import Image from "next/image";
-import logo from "@/app/assets/logo1.png";
+import logo from "@/app/assets/logo.png";
 import profilePlaceholder from "@/app/assets/profile.png";
 import styles from "../Styles/components/LoginPage.module.css"; // reuse popup styles
 

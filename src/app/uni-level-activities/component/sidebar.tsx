@@ -4,7 +4,7 @@ import { useRouter, usePathname } from "next/navigation";
 import "@/app/uni-level/styles/Sidebar.css";
 import { Menu, X, User, Users, CalendarDays, Bell } from "lucide-react";
 import Image from "next/image";
-import logo from "../../assets/logo1.png";
+import logo from "../../assets/logo.png";
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import "../Styles/Sidebar.css";
 import { Menu, X, User, Briefcase, BarChart3, Calendar } from "lucide-react";
 import Image from "next/image";
-import logo from "../../assets/logo1.png";
+import logo from "../../assets/logo.png";
 
 interface SidebarProps {
   onNavigate?: (view: string) => void;
@@ -95,8 +95,8 @@ export default function Sidebar({ onNavigate, currentView }: SidebarProps) {
             <User size={18} />
           </div>
           <div className="admin-info">
-            <h3>{adminInfo.name || "مدير النظام"}</h3>
-            <p>مشرف النظام</p>
+            <h3>دكتور/ {adminInfo.name || "المشرف العام"}</h3>
+            
           </div>
         </div>
 

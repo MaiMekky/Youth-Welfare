@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import styles from "../Styles/Header.module.css";
 import Image from "next/image";
-import logo from "@/app/assets/logo1.png";
+import logo from "@/app/assets/logo.png";
 import { useRouter } from "next/navigation";
 
 export default function Header() {

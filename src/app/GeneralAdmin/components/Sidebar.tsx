@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import "../Styles/Sidebar.css";
 import { Menu, X, User, Briefcase, BarChart3, Calendar } from "lucide-react";
 import Image from "next/image";
-import logo from "../../assets/logo1.png";
+import logo from "@/utils/logo.png";
 
 interface SidebarProps {
   onNavigate?: (view: string) => void;

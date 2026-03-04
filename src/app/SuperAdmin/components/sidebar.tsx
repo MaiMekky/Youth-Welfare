@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "../Styles/sidebar.module.css";
 import Image from "next/image";
-import Logo from "../../assets/logo1.png";
+import Logo from "../../assets/logo.png";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";

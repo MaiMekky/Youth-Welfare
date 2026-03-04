@@ -239,7 +239,8 @@
 }
 
 /* ===== MOBILE MENU BUTTON ===== */
-.mobile-menu-btn {
+.mobile-menu-btn,
+.mobileMenuBtn {
   display: none;
   position: fixed;
   top: 1rem;
@@ -311,7 +312,8 @@
     right: 0;
   }
   
-  .sidebar-close-btn {
+.sidebar-close-btn,
+.closeBtn {
     display: flex;
   }
 }

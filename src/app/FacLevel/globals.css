@@ -1,6 +1,27 @@
-/* =========================
-   Global Reset
-========================= */
+/* FacLevel — uses global design tokens (Student theme)
+   Import root globals.css for :root vars, or use fallbacks below.
+*/
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --navy: #1a2744;
+  --navy-mid: #243358;
+  --navy-light: #2e4070;
+  --navy-deep: #111b33;
+  --gold: #c9972a;
+  --gold-bright: #e0aa35;
+  --gold-pale: rgba(201, 151, 42, 0.13);
+  --gold-border: rgba(201, 151, 42, 0.28);
+  --bg-color: #f4f6fa;
+  --content-max: 1280px;
+  --gutter: 24px;
+  --gutter-sm: 16px;
+  --gutter-xs: 12px;
+  --radius: 11px;
+  --radius-sm: 8px;
+  --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -10,21 +31,20 @@
 html, body {
   height: 100%;
 }
+
 .app-body {
-  direction: rtl;   
+  direction: rtl;
 }
+
 body {
-  font-family: "Tajawal", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #f3f4f6;
-  color: #1f2937;
+  background: var(--bg-color);
+  color: #1a2744;
   overflow-x: hidden;
 }
 
-/* =========================
-   App Layout (Sidebar + Main)
-========================= */
 .app-container {
   display: flex;
   align-items: stretch;
@@ -33,45 +53,55 @@ body {
   overflow-x: hidden;
 }
 
-/* Sidebar ثابت */
 .app-container > *:first-child {
   flex-shrink: 0;
 }
 
-/* المنطقة الرئيسية جنب الـSidebar */
 .main-content {
   flex: 1;
-  min-width: 0; /* مهم يمنع overflow */
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  background: #f9fafb;
+  background: var(--bg-color);
 }
 
-/* Wrapper داخلي للصفحات */
 .page-wrapper {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  background: #E6E8EB;
-   min-height: 100%;
+  min-height: 100%;
+  background: var(--bg-color);
 }
 
-/* =========================
-   Page Content Container
-   (ده اللي هيتطبق على <main className="page-content">)
-========================= */
 .page-content {
   width: 100%;
-  max-width: 1280px;
+  max-width: var(--content-max);
   margin: 0 auto;
-  padding: 24px;
+  padding: var(--gutter);
   min-width: 0;
 }
 
-/* =========================
-   Generic Table Responsiveness
-========================= */
+.page-wrapper main.main-content {
+  flex: 1;
+  padding: var(--gutter);
+  max-width: var(--content-max);
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .page-wrapper main.main-content {
+    padding: var(--gutter-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .page-wrapper main.main-content {
+    padding: var(--gutter-xs);
+  }
+}
+
 .table-section,
 .tableSection {
   width: 100%;
@@ -79,23 +109,20 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-/* =========================
-   Breakpoints
-========================= */
 @media (max-width: 1024px) {
   .page-content {
-    padding: 16px;
+    padding: var(--gutter-sm);
   }
 }
 
 @media (max-width: 768px) {
   .page-content {
-    padding: 12px;
+    padding: var(--gutter-xs);
   }
 }
 
 @media (max-width: 480px) {
   .page-content {
-    padding: 10px;
+    padding: var(--gutter-xs);
   }
 }

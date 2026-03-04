@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import Image from "next/image";
 import styles from "../Styles/Sidbar.module.css";
-
-import { Home, FileText, BarChart3, User, Menu, X } from "lucide-react";
+import { FileText, BarChart3, User, Menu, X } from "lucide-react";
+import logo from "@/app/assets/logo.png";
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -82,18 +83,32 @@ export default function Sidebar() {
       >
         <div className={styles.sidebarContent}>
           <div className={styles.header}>
-            <div className={styles.headerText}>
-              <h2>إدارة التكافل الاجتماعي</h2>
-              <p>جامعة حلوان - قسم خدمات الطلاب</p>
+            <div className={styles.headerBrand}>
+              <div className={styles.logoWrap} title="جامعة العاصمة">
+                <Image
+                  src={logo}
+                  alt="شعار جامعة العاصمة"
+                  className={styles.logoImg}
+                  width={52}
+                  height={52}
+                  sizes="52px"
+                  priority
+                />
+              </div>
+              <div className={styles.headerText}>
+                <h2>إدارة التكافل الاجتماعي</h2>
+                <p>جامعة العاصمة - قسم خدمات الطلاب</p>
+              </div>
             </div>
-            <button 
-              className={styles.closeBtn} 
+            <button
+              className={styles.closeBtn}
               onClick={() => setIsOpen(false)}
               aria-label="إغلاق القائمة"
             >
               <X size={20} />
             </button>
           </div>
+          <div className={styles.headerDivider} />
 
           {/* Profile Section */}
           {userData && (
@@ -108,7 +123,7 @@ export default function Sidebar() {
             </div>
           )}
 
-          {/* Navigation */}
+          <div className={styles.navLabel}>القائمة الرئيسية</div>
           <nav className={styles.nav}>
             <button
               onClick={() => handleNavigation("/FacultyReport")}

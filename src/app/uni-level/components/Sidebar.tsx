@@ -91,14 +91,28 @@ export default function Sidebar() {
 
       <aside id="sidebar" className={`sidebar ${isOpen ? "open" : ""}`}>
         <div className="sidebar-header">
-          <h2>إدارة التكافل الاجتماعي</h2>
-          <p>جامعة حلوان - قسم خدمات الطلاب</p>  
-          <div className="headerIcon">
-            <Image src={logo} alt="logo" className="headerLogo" width={50} height={50} />
+          <div className="logo-container" aria-hidden="true">
+            <div className="logo-wrapper">
+              <div className="logo-circle">
+                <Image
+                  src={logo}
+                  alt="شعار جامعة العاصمة"
+                  className="sidebar-logo"
+                  width={96}
+                  height={96}
+                  priority
+                />
+              </div>
+            </div>
           </div>
-          {/* Close button - only show on mobile */}
+          <h2 className="sidebar-title">إدارة التكافل الاجتماعي</h2>
+          <p>جامعة العاصمة - قسم خدمات الطلاب</p>
           {isMobile && (
-            <button className="closeBtn" onClick={() => setIsOpen(false)}>
+            <button
+              className="sidebar-close-btn"
+              onClick={() => setIsOpen(false)}
+              aria-label="إغلاق القائمة"
+            >
               <X size={20} />
             </button>
           )}

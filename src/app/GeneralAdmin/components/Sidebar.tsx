@@ -90,13 +90,15 @@ export default function Sidebar({ onNavigate, currentView }: SidebarProps) {
               <X size={18} />
             </button>
           )}
-          <div className="sidebar-logo-wrap">
+          <div className="sidebar-logo-wrap" title="جامعة العاصمة">
             <Image
               src={logo}
-              alt="شعار الجامعة"
+              alt="شعار جامعة العاصمة"
               className="sidebar-logo-img"
               width={52}
               height={52}
+              sizes="52px"
+              priority
             />
           </div>
           <div className="sidebar-brand">

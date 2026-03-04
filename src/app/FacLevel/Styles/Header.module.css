@@ -11,7 +11,7 @@
 .headerLogo {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: fit;
   object-position: center;
   display: block;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
@@ -58,7 +58,7 @@
 
 /* ==================== ICON CONTAINER (Logo Card) ==================== */
 .headerIcon {
-  background: linear-gradient(135deg, #D4AF37 0%, #F4D03F 100%);
+  background: white;
   padding: clamp(4px, 0.8vw, 6px);
   border-radius: clamp(8px, 1.5vw, 10px);
   display: flex;

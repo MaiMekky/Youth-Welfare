@@ -48,8 +48,8 @@ export default function Header() {
             />
           </div>
           <div className={styles.headerTitle}>
-            <h1 className={styles.headerTitleH1}>إدارة رعاية الشباب</h1>
-            <p className={styles.headerTitleP}>جامعة حلوان - قسم خدمات الطلاب</p>
+            <h1 className={styles.headerTitleH1}>إدارة رعاية الطلاب</h1>
+            <p className={styles.headerTitleP}>جامعة العاصمة - قسم خدمات الطلاب</p>
           </div>
         </div>
 

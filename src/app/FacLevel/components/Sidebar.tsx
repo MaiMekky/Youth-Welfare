@@ -7,7 +7,6 @@ import Image from "next/image";
 import logo from "@/app/assets/logo.png";
 
 export default function Sidebar() {
-  const [isMobile, setIsMobile] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -61,15 +60,14 @@ export default function Sidebar() {
 
   return (
     <>
-      {isMobile && (
-        <button
-          className="mobileMenuBtn"
-          onClick={() => setIsOpen(true)}
-          aria-label="فتح القائمة"
-        >
-          <Menu size={24} />
-        </button>
-      )}
+      {/* Button is always in the DOM, CSS controls visibility */}
+      <button
+        className="mobileMenuBtn"
+        onClick={() => setIsOpen(true)}
+        aria-label="فتح القائمة"
+      >
+        <Menu size={24} />
+      </button>
 
       <aside id="sidebar" className={`sidebar ${isOpen ? "open" : ""}`}>
         <div className="sidebar-header">
@@ -104,7 +102,7 @@ export default function Sidebar() {
           </div>
           <div className="admin-info">
             <h3>{userData?.name || "المستخدم"}</h3>
-            <p>{userData?.faculty_name || ""}</p>
+            {userData?.faculty_name && <p>{userData.faculty_name}</p>}
           </div>
         </div>
 

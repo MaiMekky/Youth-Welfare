@@ -17,12 +17,20 @@
   display: flex;
   flex-direction: column;
   padding: clamp(1.5rem, 2vw, 2rem) clamp(1rem, 2vw, 1.25rem);
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 10;
+  right: -100%;
+  height: 100vh;
+  z-index: 1000;
   box-sizing: border-box;
   border-left: 1px solid var(--gold-border, rgba(201, 151, 42, 0.28));
-  box-shadow: 2px 0 24px rgba(0, 0, 0, 0.18);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.3);
+  transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+}
+
+.sidebar.open {
+  right: 0;
 }
 
 /* ===== HEADER ===== */
@@ -115,13 +123,14 @@
   margin: 2px 0 0 0;
 }
 
-.sidebar-close-btn {
+.sidebar-close-btn,
+.closeBtn {
   position: absolute;
-  top: -0.5rem;
-  left: 0;
+  top: 0.5rem;
+  left: 0.5rem;
   background: rgba(255, 255, 255, 0.1);
-  border: none;
-  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
   color: #fff;
   cursor: pointer;
   padding: 0.5rem;
@@ -133,8 +142,10 @@
   backdrop-filter: blur(10px);
 }
 
-.sidebar-close-btn:hover {
+.sidebar-close-btn:hover,
+.closeBtn:hover {
   background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.25);
   transform: scale(1.05);
 }
 
@@ -339,32 +350,40 @@
   color: rgba(255, 255, 255, 0.45);
 }
 
-/* ===== MOBILE MENU BUTTON ===== */
+/* ===== SIDEBAR TOGGLE BUTTON (always visible) ===== */
 .mobile-menu-btn,
 .mobileMenuBtn {
-  display: none;
+  display: flex;
   position: fixed;
   top: 1rem;
   right: 1rem;
-  background: linear-gradient(135deg, #2C3A5F, #3D4D75);
-  border: none;
-  border-radius: 8px;
+  background: linear-gradient(135deg, #1a2744 0%, #2c3a5f 50%, #3d4d75 100%);
+  border: 1px solid rgba(201, 151, 42, 0.35);
+  border-radius: 10px;
   color: #fff;
   z-index: 100;
   cursor: pointer;
-  padding: 0.625rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  padding: 0.75rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05);
   transition: all 0.3s ease;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: 48px;
+  min-height: 48px;
   align-items: center;
   justify-content: center;
+  backdrop-filter: blur(8px);
 }
 
 .mobile-menu-btn:hover,
 .mobileMenuBtn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(135deg, #243358 0%, #3d4d75 100%);
+  border-color: rgba(201, 151, 42, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35), 0 0 20px rgba(201, 151, 42, 0.1);
+}
+
+.mobile-menu-btn:active,
+.mobileMenuBtn:active {
+  transform: translateY(0);
 }
 
 /* ===== OVERLAY ===== */
@@ -386,36 +405,22 @@
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
   .sidebar {
-    width: min(240px, 80vw);
+    width: min(260px, 80vw);
   }
 }
 
 @media (max-width: 768px) {
+  .sidebar {
+    width: min(280px, 85vw);
+  }
+
   .mobile-menu-btn,
   .mobileMenuBtn {
-    display: flex;
-  }
-
-  .sidebar {
-    position: fixed;
-    right: -100%;
-    top: 0;
-    height: 100vh;
-    width: min(280px, 85vw);
-    max-width: 85vw;
-    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 1000;
-    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.3);
-    overflow-y: auto;
-  }
-
-  .sidebar.open {
-    right: 0;
-  }
-
-  .sidebar-close-btn,
-  .closeBtn {
-    display: flex;
+    top: 0.75rem;
+    right: 0.75rem;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0.625rem;
   }
 }
 

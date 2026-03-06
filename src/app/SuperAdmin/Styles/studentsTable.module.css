@@ -1,3 +1,11 @@
+.tableSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  min-width: 0;
+}
+
 .studentsTable {
   background: #fff;
   padding: clamp(1rem, 2vw, 1.25rem);
@@ -6,6 +14,7 @@
   direction: rtl;
   width: 100%;
   max-width: 100%;
+  overflow: hidden;
 }
 .tableWrapper {
   width: 100%;
@@ -456,18 +465,18 @@
 /* ===== Footer Pagination (Gmail Style) ===== */
 .tableFooter {
   margin-top: 16px;
-  padding: 10px 18px;
+  padding: 12px 18px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
   background: #fafafa;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid #e5e7eb;
   border-radius: 0 0 12px 12px;
   font-size: 14px;
   color: #2c3a5f;
   direction: rtl;
-   justify-content: center;
-  gap: 16px;
 }
 
 .footerRight {
@@ -522,13 +531,24 @@
   .tableFooter {
     flex-direction: column;
     align-items: stretch;
-    gap: 10px;
+    gap: 12px;
+    padding: 12px;
+  }
+  .footerLeft {
+    text-align: center;
   }
   .footerRight {
-    justify-content: space-between;
+    justify-content: center;
     flex-wrap: wrap;
   }
   .rowsSelect {
-    width: 120px;
+    min-width: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tableFooter {
+    padding: 10px 12px;
+    font-size: 13px;
   }
 }

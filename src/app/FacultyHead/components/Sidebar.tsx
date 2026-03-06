@@ -11,16 +11,8 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ onNavigate, currentView }: SidebarProps) {
-  const [isOpen,   setIsOpen]   = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [adminInfo, setAdminInfo] = useState({ name: "" });
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth <= 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
 
   useEffect(() => {
     try {
@@ -31,17 +23,24 @@ export default function Sidebar({ onNavigate, currentView }: SidebarProps) {
 
   const handleNavigate = (view: string) => {
     onNavigate?.(view);
-    if (isMobile) setIsOpen(false);
+    setIsOpen(false);
   };
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      const sidebar  = document.getElementById("sidebar");
-      const mobileBtn = document.querySelector(".mobile-menu-btn");
-      if (isOpen && sidebar && !sidebar.contains(e.target as Node) && !mobileBtn?.contains(e.target as Node))
+      const sidebar = document.getElementById("sidebar");
+      const menuBtn = document.querySelector(".mobile-menu-btn");
+      if (
+        isOpen &&
+        sidebar &&
+        !sidebar.contains(e.target as Node) &&
+        menuBtn &&
+        !(menuBtn as HTMLElement).contains(e.target as Node)
+      ) {
         setIsOpen(false);
+      }
     };
-    if (isOpen && isMobile) {
+    if (isOpen) {
       document.addEventListener("mousedown", handler);
       document.body.style.overflow = "hidden";
     } else {
@@ -51,7 +50,7 @@ export default function Sidebar({ onNavigate, currentView }: SidebarProps) {
       document.removeEventListener("mousedown", handler);
       document.body.style.overflow = "unset";
     };
-  }, [isOpen, isMobile]);
+  }, [isOpen]);
 
   const NAV = [
     { id: "activities", label: "إدارة الفعاليات",    Icon: Briefcase },
@@ -60,15 +59,15 @@ export default function Sidebar({ onNavigate, currentView }: SidebarProps) {
 
   return (
     <>
-      {isMobile && (
-        <button className="mobile-menu-btn" onClick={() => setIsOpen(true)} aria-label="فتح القائمة">
-          <Menu size={22} />
-        </button>
-      )}
+      <button
+        className="mobile-menu-btn"
+        onClick={() => setIsOpen(true)}
+        aria-label="فتح القائمة"
+      >
+        <Menu size={22} />
+      </button>
 
       <aside id="sidebar" className={`sidebar ${isOpen ? "open" : ""}`} dir="rtl">
-
-        {/* ── Header ── */}
         <div className="sidebar-header">
           <div className="logo-container">
             <div className="logo-wrapper">
@@ -79,11 +78,13 @@ export default function Sidebar({ onNavigate, currentView }: SidebarProps) {
           </div>
           <h2 className="sidebar-title">جامعة العاصمة</h2>
           <p className="sidebar-subtitle">المشرف العام للكلية</p>
-          {isMobile && (
-            <button className="sidebar-close-btn" onClick={() => setIsOpen(false)} aria-label="إغلاق">
-              <X size={18} />
-            </button>
-          )}
+          <button
+            className="sidebar-close-btn"
+            onClick={() => setIsOpen(false)}
+            aria-label="إغلاق"
+          >
+            <X size={18} />
+          </button>
         </div>
 
         {/* ── Gold divider ── */}
@@ -120,8 +121,12 @@ export default function Sidebar({ onNavigate, currentView }: SidebarProps) {
         </div>
       </aside>
 
-      {isMobile && isOpen && (
-        <div className="sidebar-overlay" onClick={() => setIsOpen(false)} />
+      {isOpen && (
+        <div
+          className="sidebar-overlay"
+          onClick={() => setIsOpen(false)}
+          aria-hidden="true"
+        />
       )}
     </>
   );

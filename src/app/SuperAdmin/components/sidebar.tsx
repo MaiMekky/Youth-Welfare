@@ -22,28 +22,21 @@ export default function Sidebar() {
   ];
 
   useEffect(() => {
-    const checkIfMobile = () => setIsMobile(window.innerWidth <= 768);
-    checkIfMobile();
-    window.addEventListener("resize", checkIfMobile);
-    return () => window.removeEventListener("resize", checkIfMobile);
-  }, []);
-
-  useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const sidebarEl = document.getElementById("superadmin-sidebar");
-      const mobileBtn = document.querySelector(".mobileMenuBtn");
+      const menuBtn = document.querySelector(".mobileMenuBtn");
       if (
         isOpen &&
         sidebarEl &&
         !sidebarEl.contains(e.target as Node) &&
-        mobileBtn &&
-        !(mobileBtn as HTMLElement).contains(e.target as Node)
+        menuBtn &&
+        !(menuBtn as HTMLElement).contains(e.target as Node)
       ) {
         setIsOpen(false);
       }
     };
 
-    if (isOpen && isMobile) {
+    if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
       document.body.style.overflow = "hidden";
     } else {
@@ -54,23 +47,19 @@ export default function Sidebar() {
       document.removeEventListener("mousedown", handleClickOutside);
       document.body.style.overflow = "unset";
     };
-  }, [isOpen, isMobile]);
+  }, [isOpen]);
 
-  const handleLinkClick = () => {
-    if (isMobile) setIsOpen(false);
-  };
+  const handleLinkClick = () => setIsOpen(false);
 
   return (
     <>
-      {isMobile && (
-        <button
-          className="mobileMenuBtn"
-          onClick={() => setIsOpen(true)}
-          aria-label="فتح القائمة"
-        >
-          <Menu size={24} />
-        </button>
-      )}
+      <button
+        className="mobileMenuBtn"
+        onClick={() => setIsOpen(true)}
+        aria-label="فتح القائمة"
+      >
+        <Menu size={24} />
+      </button>
 
       <aside
         id="superadmin-sidebar"
@@ -93,15 +82,13 @@ export default function Sidebar() {
           </div>
           <h2 className="sidebar-title">إدارة رعاية الطلاب</h2>
           <p className="sidebar-subtitle">نظام إدارة الفعاليات</p>
-          {isMobile && (
-            <button
-              className="sidebar-close-btn"
-              onClick={() => setIsOpen(false)}
-              aria-label="إغلاق القائمة"
-            >
-              <X size={20} />
-            </button>
-          )}
+          <button
+            className="sidebar-close-btn"
+            onClick={() => setIsOpen(false)}
+            aria-label="إغلاق القائمة"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         <div className="profile-card">
@@ -128,7 +115,7 @@ export default function Sidebar() {
         </nav>
       </aside>
 
-      {isMobile && isOpen && (
+      {isOpen && (
         <div
           className="sidebar-overlay"
           onClick={() => setIsOpen(false)}

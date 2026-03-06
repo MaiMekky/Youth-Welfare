@@ -137,14 +137,13 @@ export default function StudentsTable() {
   };
 
   return (
-    <div>
+    <div className={styles.tableSection}>
       <FiltersBar
         onSearchChange={setSearchTerm}
         filters={filters}
         setFilters={setFilters}
         onApply={() => fetchApplications(filters)}
       />
-    <br />
       <div className={styles.studentsTable}>
         <div className={styles.tableWrapper}>
         <table className={styles.table}>

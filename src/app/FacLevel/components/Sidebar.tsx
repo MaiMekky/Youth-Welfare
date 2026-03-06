@@ -7,8 +7,8 @@ import Image from "next/image";
 import logo from "@/app/assets/logo.png";
 
 export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const [userData, setUserData] = useState<{ name?: string; faculty_name?: string } | null>(null);
@@ -20,13 +20,6 @@ export default function Sidebar() {
         setUserData(JSON.parse(storedUser));
       } catch {}
     }
-  }, []);
-
-  useEffect(() => {
-    const checkIfMobile = () => setIsMobile(window.innerWidth <= 768);
-    checkIfMobile();
-    window.addEventListener("resize", checkIfMobile);
-    return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
 
   useEffect(() => {
@@ -44,7 +37,7 @@ export default function Sidebar() {
       }
     };
 
-    if (isOpen && isMobile) {
+    if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
       document.body.style.overflow = "hidden";
     } else {
@@ -55,15 +48,15 @@ export default function Sidebar() {
       document.removeEventListener("mousedown", handleClickOutside);
       document.body.style.overflow = "unset";
     };
-  }, [isOpen, isMobile]);
+  }, [isOpen]);
 
   useEffect(() => {
-    if (isMobile) setIsOpen(false);
+    setIsOpen(false);
   }, [pathname]);
 
   const handleNavigation = (path: string) => {
     router.push(path);
-    if (isMobile) setIsOpen(false);
+    setIsOpen(false);
   };
 
   return (
@@ -96,15 +89,13 @@ export default function Sidebar() {
           </div>
           <h2 className="sidebar-title">إدارة التكافل الاجتماعي</h2>
           <p className="sidebar-subtitle">جامعة العاصمة - قسم خدمات الطلاب</p>
-          {isMobile && (
-            <button
-              className="sidebar-close-btn"
-              onClick={() => setIsOpen(false)}
-              aria-label="إغلاق القائمة"
-            >
-              <X size={20} />
-            </button>
-          )}
+          <button
+            className="sidebar-close-btn"
+            onClick={() => setIsOpen(false)}
+            aria-label="إغلاق القائمة"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         <div className="profile-card">
@@ -139,7 +130,7 @@ export default function Sidebar() {
         </div>
       </aside>
 
-      {isMobile && isOpen && (
+      {isOpen && (
         <div
           className="sidebar-overlay"
           onClick={() => setIsOpen(false)}

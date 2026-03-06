@@ -19,6 +19,7 @@
   max-width: 1400px;
   margin: auto;
   flex-wrap: wrap;
+  padding-right: clamp(4rem, 8vw, 5rem); /* Reserve space for sidebar toggle button */
 }
 
 /* Mobile toggle button */

@@ -8,7 +8,6 @@ import logo from "@/app/assets/logo.png";
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const [userData, setUserData] = useState<{ name?: string; faculty_name?: string } | null>(null);
@@ -20,13 +19,6 @@ export default function Sidebar() {
         setUserData(JSON.parse(storedUser));
       } catch {}
     }
-  }, []);
-
-  useEffect(() => {
-    const checkIfMobile = () => setIsMobile(window.innerWidth <= 768);
-    checkIfMobile();
-    window.addEventListener("resize", checkIfMobile);
-    return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
 
   useEffect(() => {
@@ -44,7 +36,7 @@ export default function Sidebar() {
       }
     };
 
-    if (isOpen && isMobile) {
+    if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
       document.body.style.overflow = "hidden";
     } else {
@@ -55,28 +47,26 @@ export default function Sidebar() {
       document.removeEventListener("mousedown", handleClickOutside);
       document.body.style.overflow = "unset";
     };
-  }, [isOpen, isMobile]);
+  }, [isOpen]);
 
   useEffect(() => {
-    if (isMobile) setIsOpen(false);
+    setIsOpen(false);
   }, [pathname]);
 
   const handleNavigation = (path: string) => {
     router.push(path);
-    if (isMobile) setIsOpen(false);
+    setIsOpen(false);
   };
 
   return (
     <>
-      {isMobile && (
-        <button
-          className="mobileMenuBtn"
-          onClick={() => setIsOpen(true)}
-          aria-label="فتح القائمة"
-        >
-          <Menu size={24} />
-        </button>
-      )}
+      <button
+        className="mobileMenuBtn"
+        onClick={() => setIsOpen(true)}
+        aria-label="فتح القائمة"
+      >
+        <Menu size={24} />
+      </button>
 
       <aside id="sidebar" className={`sidebar ${isOpen ? "open" : ""}`}>
         <div className="sidebar-header">
@@ -139,7 +129,7 @@ export default function Sidebar() {
         </div>
       </aside>
 
-      {isMobile && isOpen && (
+      {isOpen && (
         <div
           className="sidebar-overlay"
           onClick={() => setIsOpen(false)}

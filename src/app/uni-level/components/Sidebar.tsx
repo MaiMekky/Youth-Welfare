@@ -8,7 +8,6 @@ import logo from "../../assets/logo.png";
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   
@@ -17,20 +16,6 @@ export default function Sidebar() {
     email: "",
     role: "",
   });
-
-  // Check if mobile on mount and resize
-  useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    
-    checkIfMobile();
-    window.addEventListener('resize', checkIfMobile);
-    
-    return () => {
-      window.removeEventListener('resize', checkIfMobile);
-    };
-  }, []);
 
   useEffect(() => {
     const tokenData = localStorage.getItem("access");
@@ -51,43 +36,51 @@ export default function Sidebar() {
 
   const handleReportsClick = () => {
     router.push("/uni-level/reports");
-    if (isMobile) setIsOpen(false);
+    setIsOpen(false);
   };
 
   const handleAllApplicationsClick = () => {
     router.push("/uni-level");
-    if (isMobile) setIsOpen(false);
+    setIsOpen(false);
   };
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const sidebar = document.getElementById("sidebar");
-      if (isOpen && sidebar && !sidebar.contains(e.target as Node)) {
+      const menuBtn = document.querySelector(".mobileMenuBtn");
+      if (
+        isOpen &&
+        sidebar &&
+        !sidebar.contains(e.target as Node) &&
+        menuBtn &&
+        !(menuBtn as HTMLElement).contains(e.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
-    
+
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
-      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     }
-    
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     };
   }, [isOpen]);
 
   return (
     <>
-      {/* Mobile menu button - only show on mobile */}
-      {isMobile && (
-        <button className="mobileMenuBtn" onClick={() => setIsOpen(true)}>
-          <Menu size={24} />
-        </button>
-      )}
+      <button
+        className="mobileMenuBtn"
+        onClick={() => setIsOpen(true)}
+        aria-label="فتح القائمة"
+      >
+        <Menu size={24} />
+      </button>
 
       <aside id="sidebar" className={`sidebar ${isOpen ? "open" : ""}`}>
         <div className="sidebar-header">
@@ -106,15 +99,13 @@ export default function Sidebar() {
             </div>
           </div>
           
-          {isMobile && (
-            <button
-              className="sidebar-close-btn"
-              onClick={() => setIsOpen(false)}
-              aria-label="إغلاق القائمة"
-            >
-              <X size={20} />
-            </button>
-          )}
+          <button
+            className="sidebar-close-btn"
+            onClick={() => setIsOpen(false)}
+            aria-label="إغلاق القائمة"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         <div className="profile-card">
@@ -146,8 +137,13 @@ export default function Sidebar() {
         </nav>
       </aside>
 
-      {/* Overlay - only show on mobile when sidebar is open */}
-      {isMobile && isOpen && <div className="sidebar-overlay" onClick={() => setIsOpen(false)} aria-hidden="true" />}
+      {isOpen && (
+        <div
+          className="sidebar-overlay"
+          onClick={() => setIsOpen(false)}
+          aria-hidden="true"
+        />
+      )}
     </>
   );
 }

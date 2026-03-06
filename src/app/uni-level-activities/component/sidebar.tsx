@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import "@/app/uni-level/styles/Sidebar.css";
+import "@/app/Styles/Sidebar.css";
 import { Menu, X, User, Users, CalendarDays, Bell } from "lucide-react";
 import Image from "next/image";
 import logo from "../../assets/logo.png";
@@ -18,21 +18,13 @@ export default function Sidebar() {
     role: "",
   });
 
-  // Detect mobile screen
   useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
+    const checkIfMobile = () => setIsMobile(window.innerWidth <= 768);
     checkIfMobile();
     window.addEventListener("resize", checkIfMobile);
-
-    return () => {
-      window.removeEventListener("resize", checkIfMobile);
-    };
+    return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
 
-  // Load admin info
   useEffect(() => {
     const userDataString = localStorage.getItem("user");
     if (userDataString) {
@@ -49,16 +41,22 @@ export default function Sidebar() {
     }
   }, []);
 
-  // Close sidebar when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const sidebar = document.getElementById("sidebar");
-      if (isOpen && sidebar && !sidebar.contains(e.target as Node)) {
+      const mobileBtn = document.querySelector(".mobileMenuBtn");
+      if (
+        isOpen &&
+        sidebar &&
+        !sidebar.contains(e.target as Node) &&
+        mobileBtn &&
+        !(mobileBtn as HTMLElement).contains(e.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
 
-    if (isOpen) {
+    if (isOpen && isMobile) {
       document.addEventListener("mousedown", handleClickOutside);
       document.body.style.overflow = "hidden";
     } else {
@@ -69,7 +67,7 @@ export default function Sidebar() {
       document.removeEventListener("mousedown", handleClickOutside);
       document.body.style.overflow = "unset";
     };
-  }, [isOpen]);
+  }, [isOpen, isMobile]);
 
   const handleNav = (path: string) => {
     router.push(path);
@@ -78,30 +76,40 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile menu button */}
       {isMobile && (
-        <button className="mobileMenuBtn" onClick={() => setIsOpen(true)}>
+        <button
+          className="mobileMenuBtn"
+          onClick={() => setIsOpen(true)}
+          aria-label="فتح القائمة"
+        >
           <Menu size={24} />
         </button>
       )}
 
       <aside id="sidebar" className={`sidebar ${isOpen ? "open" : ""}`}>
         <div className="sidebar-header">
-          <h2>إدارة الفعاليات</h2>
-          <p>جامعة حلوان - قسم خدمات الطلاب</p>
-
-          <div className="headerIcon">
-            <Image
-              src={logo}
-              alt="logo"
-              className="headerLogo"
-              width={50}
-              height={50}
-            />
+          <div className="logo-container" aria-hidden="true">
+            <div className="logo-wrapper">
+              <div className="logo-circle">
+                <Image
+                  src={logo}
+                  alt="شعار الجامعة"
+                  className="sidebar-logo"
+                  width={96}
+                  height={96}
+                  priority
+                />
+              </div>
+            </div>
           </div>
-
+          <h2 className="sidebar-title">إدارة الفعاليات</h2>
+          <p className="sidebar-subtitle">جامعة حلوان - قسم خدمات الطلاب</p>
           {isMobile && (
-            <button className="closeBtn" onClick={() => setIsOpen(false)}>
+            <button
+              className="sidebar-close-btn"
+              onClick={() => setIsOpen(false)}
+              aria-label="إغلاق القائمة"
+            >
               <X size={20} />
             </button>
           )}
@@ -125,15 +133,13 @@ export default function Sidebar() {
             <CalendarDays size={18} />
             <span>الفعاليات</span>
           </button>
-
           <button
             className={pathname === "/uni-level-activities/plans" ? "active" : ""}
             onClick={() => handleNav("/uni-level-activities/plans")}
           >
-             <Users size={18} />
+            <Users size={18} />
             <span>الخطط</span>
           </button>
-
           <button
             className={pathname === "/uni-level-activities/uni-level-faculty-events" ? "active" : ""}
             onClick={() => handleNav("/uni-level-activities/uni-level-faculty-events")}
@@ -145,7 +151,11 @@ export default function Sidebar() {
       </aside>
 
       {isMobile && isOpen && (
-        <div className="overlay" onClick={() => setIsOpen(false)} />
+        <div
+          className="sidebar-overlay"
+          onClick={() => setIsOpen(false)}
+          aria-hidden="true"
+        />
       )}
     </>
   );

@@ -1,141 +1,179 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import styles from "../styles/Sidbar.module.css";
-
+import "@/app/Styles/Sidebar.css";
 import {
-  Home,
-  FileText,
-  BarChart3,
   User,
   Menu,
   X,
+  BarChart3,
   ClipboardList,
-  Users,
   PlusCircle,
-  CalendarRange
+  CalendarRange,
 } from "lucide-react";
+import Image from "next/image";
+import logo from "@/app/assets/logo.png";
 
 export default function FacLevelSidebar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-
-  const [userData, setUserData] = useState<any>(null);
+  const [userData, setUserData] = useState<{ name?: string; faculty_name?: string } | null>(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      setUserData(JSON.parse(storedUser));
+      try {
+        setUserData(JSON.parse(storedUser));
+      } catch {}
     }
+  }, []);
+
+  useEffect(() => {
+    const checkIfMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkIfMobile();
+    window.addEventListener("resize", checkIfMobile);
+    return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const sidebar = document.getElementById("sidebar");
-      if (isOpen && sidebar && !sidebar.contains(e.target as Node)) {
+      const menuBtn = document.querySelector(".mobileMenuBtn");
+      if (
+        isOpen &&
+        sidebar &&
+        !sidebar.contains(e.target as Node) &&
+        menuBtn &&
+        !(menuBtn as HTMLElement).contains(e.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen]);
+
+    if (isOpen && isMobile) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen, isMobile]);
+
+  useEffect(() => {
+    if (isMobile) setIsOpen(false);
+  }, [pathname]);
 
   const handleNavigation = (path: string) => {
     router.push(path);
-    setIsOpen(false);
+    if (isMobile) setIsOpen(false);
   };
 
   return (
     <>
-      <button className={styles.mobileMenuBtn} onClick={() => setIsOpen(true)}>
-        <Menu size={24} />
-      </button>
+      {isMobile && (
+        <button
+          className="mobileMenuBtn"
+          onClick={() => setIsOpen(true)}
+          aria-label="فتح القائمة"
+        >
+          <Menu size={24} />
+        </button>
+      )}
 
-     <aside
-      id="sidebar"
-      className={`${styles.sidebar} ${isOpen ? styles.open : ""}`}
-    >
-      <div className={styles.sidebarContent}>
-        {/* ===== Header ===== */}
-        <div className={styles.header}>
-          <div className={styles.headerText}>
-            <h2>إدارة الاسر الطلابية</h2>
-            <p>جامعة حلوان - قسم خدمات الاسر الطلابية</p>
+      <aside id="sidebar" className={`sidebar ${isOpen ? "open" : ""}`}>
+        <div className="sidebar-header">
+          <div className="logo-container" aria-hidden="true">
+            <div className="logo-wrapper">
+              <div className="logo-circle">
+                <Image
+                  src={logo}
+                  alt="شعار جامعة العاصمة"
+                  className="sidebar-logo"
+                  width={96}
+                  height={96}
+                  priority
+                />
+              </div>
+            </div>
           </div>
-
-          <button className={styles.closeBtn} onClick={() => setIsOpen(false)}>
-            <X size={20} />
-          </button>
+          <h2 className="sidebar-title">إدارة الأسر الطلابية</h2>
+          <p className="sidebar-subtitle">جامعة حلوان - قسم خدمات الأسر الطلابية</p>
+          {isMobile && (
+            <button
+              className="sidebar-close-btn"
+              onClick={() => setIsOpen(false)}
+              aria-label="إغلاق القائمة"
+            >
+              <X size={20} />
+            </button>
+          )}
         </div>
 
-        {/* ===== Profile ===== */}
-       {userData && (
-      <div className={styles.profile}>
-        <div className={styles.profileIcon}>
-          <User size={28} />
+        <div className="profile-card">
+          <div className="profile-icon">
+            <User size={22} />
+          </div>
+          <div className="admin-info">
+            <h3>{userData?.name || "المستخدم"}</h3>
+            <p>{userData?.faculty_name || ""}</p>
+          </div>
         </div>
 
-        <div className={styles.profileInfo}>
-          <h3>{userData.name}</h3>
-          <p>{userData.faculty_name}</p>
-        </div>
-      </div>
-    )}
-
-        {/* ===== Nav ===== */}
-        <nav className={styles.nav}>
+        <nav className="nav">
           <button
             onClick={() => handleNavigation("/Family-Faclevel/events")}
-            className={pathname === "/Family-Faclevel/events" ? styles.active : ""}
+            className={pathname === "/Family-Faclevel/events" ? "active" : ""}
           >
             <CalendarRange size={18} />
-            <span>إدارة الفعليات</span>
+            <span>إدارة الفعاليات</span>
           </button>
-
           <button
             onClick={() => handleNavigation("/Family-Faclevel/families-reports")}
-            className={pathname === "/Family-Faclevel/families-reports" ? styles.active : ""}
+            className={pathname === "/Family-Faclevel/families-reports" ? "active" : ""}
           >
             <BarChart3 size={18} />
-            <span>تقارير الاسر</span>
+            <span>تقارير الأسر</span>
           </button>
-
           <button
             onClick={() => handleNavigation("/Family-Faclevel/families-requests")}
-            className={pathname === "/Family-Faclevel/families-requests" ? styles.active : ""}
+            className={pathname === "/Family-Faclevel/families-requests" ? "active" : ""}
           >
             <ClipboardList size={18} />
-            <span>طلبات الاسر</span>
+            <span>طلبات الأسر</span>
           </button>
-
           <button
             onClick={() => handleNavigation("/Family-Faclevel/environment-friends")}
-            className={pathname === "/Family-Faclevel/environment-friends" ? styles.active : ""}
+            className={pathname === "/Family-Faclevel/environment-friends" ? "active" : ""}
           >
             <PlusCircle size={18} />
             <span>إنشاء أسرة أصدقاء البيئة</span>
           </button>
-
           <button
             onClick={() => handleNavigation("/Family-Faclevel/leaders")}
-            className={pathname === "/Family-Faclevel/leaders" ? styles.active : ""}
+            className={pathname === "/Family-Faclevel/leaders" ? "active" : ""}
           >
             <User size={18} />
-            <span>قادة الاسر</span>
+            <span>قادة الأسر</span>
           </button>
         </nav>
-      </div>
-      
-        {/* ===== Footer ===== */}
-        <div className={styles.footer}>
-          <p>الإصدار 1.0.0 | النظام نشط</p>
-        </div>
-    </aside>
 
-      {isOpen && (
-        <div className={styles.overlay} onClick={() => setIsOpen(false)}></div>
+        <div className="sidebar-footer">
+          <span>الإصدار 1.0.0 | النظام نشط</span>
+        </div>
+      </aside>
+
+      {isMobile && isOpen && (
+        <div
+          className="sidebar-overlay"
+          onClick={() => setIsOpen(false)}
+          aria-hidden="true"
+        />
       )}
     </>
   );

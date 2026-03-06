@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import "../styles/Sidebar.css";
+import "@/app/Styles/Sidebar.css";
 import { Menu, X, FileText, BarChart3, User } from "lucide-react";
 import Image from "next/image";
 import logo from "../../assets/logo.png";
@@ -105,8 +105,7 @@ export default function Sidebar() {
               </div>
             </div>
           </div>
-          <h2 className="sidebar-title">إدارة التكافل الاجتماعي</h2>
-          <p>جامعة العاصمة - قسم خدمات الطلاب</p>
+          
           {isMobile && (
             <button
               className="sidebar-close-btn"
@@ -148,7 +147,7 @@ export default function Sidebar() {
       </aside>
 
       {/* Overlay - only show on mobile when sidebar is open */}
-      {isMobile && isOpen && <div className="overlay" onClick={() => setIsOpen(false)} />}
+      {isMobile && isOpen && <div className="sidebar-overlay" onClick={() => setIsOpen(false)} aria-hidden="true" />}
     </>
   );
 }

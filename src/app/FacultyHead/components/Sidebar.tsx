@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import "../Styles/Sidebar.css";
+import "@/app/Styles/Sidebar.css";
 import { Menu, X, User, Briefcase, BarChart3, Calendar } from "lucide-react";
 import Image from "next/image";
 import logo from "../../assets/logo.png";
@@ -66,7 +66,7 @@ export default function Sidebar({ onNavigate, currentView }: SidebarProps) {
         </button>
       )}
 
-      <aside id="sidebar" className={`sidebar${isOpen ? " open" : ""}`} dir="rtl">
+      <aside id="sidebar" className={`sidebar ${isOpen ? "open" : ""}`} dir="rtl">
 
         {/* ── Header ── */}
         <div className="sidebar-header">

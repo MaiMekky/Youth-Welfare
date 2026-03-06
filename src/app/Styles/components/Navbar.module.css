@@ -4,11 +4,16 @@
   left: 0;
   width: 100%;
   z-index: 1000;
-  padding: 8px 40px; /* reduced from 12px */
-  background: rgba(40, 40, 50, 0.4);
-  backdrop-filter: blur(12px);
   color: white;
-  transition: background 0.3s ease, backdrop-filter 0.3s ease;
+  padding: 8px 40px;
+  background: rgba(40,40,50,0.35);
+  backdrop-filter: blur(10px);
+  transition: all 0.35s ease;
+}
+.headerScrolled {
+  background: #2e3266;
+  color: white;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
 }
 /* Flex container */
 .navContent {
@@ -80,17 +85,33 @@
   text-align: right;
 }
 .departmentInfo h2 {
-  font-size: 15px;
+  font-size: 22px;
   font-weight: 600;
   color: #ffda66;
   margin: 0;
   line-height: 1.2; /* added for compactness */
 }
 .departmentInfo p {
-  font-size: 12px;
+  font-size: 20px;
   color: rgba(255, 255, 255, 0.8);
   margin: 2px 0 0;
   line-height: 1.2; /* added for compactness */
+}
+/* Floating logo */
+.logoWrapper {
+  position: absolute;
+  right: 40px;
+  top: 8px;
+  transition: all 0.5s ease;
+}
+.logoWrapper img {
+  width: 120px;
+  height: auto;
+}
+.logoScrolled {
+  background: #2e3266;
+  padding: 6px 10px;
+  border-radius: 18px;
 }
 @media (max-width: 768px) {
   .header {
@@ -98,7 +119,7 @@
   }
   .navContent {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: flex-end;
     gap: 10px; /* reduced from 12px */
   }
   .rightSide {
@@ -125,5 +146,22 @@
   }
   .departmentInfo p {
     font-size: 0.75rem;
+  }
+}
+@media (max-width: 768px) {
+
+  .logoWrapper img {
+    width: 65px;
+  }
+
+  .logoWrapper {
+    right: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .logoWrapper img {
+    width: 55px;
   }
 }

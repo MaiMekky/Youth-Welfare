@@ -5,7 +5,7 @@ import AuthBackGuard from "./components/AuthBackGuard";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Helwan University Portal",
+  title: "بوابة رعاية الطلاب - جامعة العاصمة",
   description: "بوابة رعاية الشباب بجامعة حلوان",
 };
 

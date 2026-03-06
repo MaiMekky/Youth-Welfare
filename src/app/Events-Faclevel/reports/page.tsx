@@ -2,7 +2,6 @@
 
 import React, { useMemo, useState } from "react";
 import styles from "./Reports.module.css";
-import Header from "@/app/FacLevel/components/Header";
 import Footer from "@/app/FacLevel/components/Footer";
 import Tabs from "@/app/Events-Faclevel/components/Tabs";
 import {
@@ -80,7 +79,7 @@ export default function ReportsPage() {
 
   return (
     <div className={styles.page}>
-      <Header />
+
 
       <div className={styles.container}>
         {/* Header Row: النص يمين + الزرار شمال */}

@@ -1,70 +1,54 @@
+
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import "@/app/Styles/Sidebar.css";
 import Image from "next/image";
 import Logo from "../../assets/logo.png";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, User } from "lucide-react";
+import { X, User } from "lucide-react";
 
-export default function Sidebar() {
+interface SidebarProps {
+  isOpen?: boolean;
+  setIsOpen?: (v: boolean) => void;
+}
+
+export default function Sidebar({ isOpen = false, setIsOpen = () => {} }: SidebarProps) {
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
 
   const menuItems = [
-    { label: "صلاحيات الوصول", href: "/CreateAdmins" },
-    { label: "سجلات النشاط", href: "/ActivityLogs" },
+    { label: "صلاحيات الوصول",  href: "/CreateAdmins" },
+    { label: "سجلات النشاط",    href: "/ActivityLogs" },
     { label: "إدارة الفعاليات", href: "/SuperAdmin/Events" },
-    { label: "إحصائيات الزوار", href: "#" },
+    // { label: "إحصائيات الزوار", href: "#" },
     { label: "التكافل الاجتماعي", href: "/SuperAdmin" },
-    { label: "الاسر الطلابية", href: "/SuperAdmin-family" },
+    { label: "الأسر الطلابية",  href: "/SuperAdmin-family" },
   ];
 
+  // Close on outside click
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      const sidebarEl = document.getElementById("superadmin-sidebar");
-      const menuBtn = document.querySelector(".mobileMenuBtn");
-      if (
-        isOpen &&
-        sidebarEl &&
-        !sidebarEl.contains(e.target as Node) &&
-        menuBtn &&
-        !(menuBtn as HTMLElement).contains(e.target as Node)
-      ) {
-        setIsOpen(false);
-      }
+    const handleOutside = (e: MouseEvent) => {
+      const el = document.getElementById("superadmin-sidebar");
+      if (isOpen && el && !el.contains(e.target as Node)) setIsOpen(false);
     };
-
     if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("mousedown", handleOutside);
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
     }
-
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("mousedown", handleOutside);
       document.body.style.overflow = "unset";
     };
   }, [isOpen]);
 
-  const handleLinkClick = () => setIsOpen(false);
+  // Close on route change
+  useEffect(() => { setIsOpen(false); }, [pathname]);
 
   return (
     <>
-      <button
-        className="mobileMenuBtn"
-        onClick={() => setIsOpen(true)}
-        aria-label="فتح القائمة"
-      >
-        <Menu size={24} />
-      </button>
-
-      <aside
-        id="superadmin-sidebar"
-        className={`sidebar ${isOpen ? "open" : ""}`}
-      >
+      <aside id="superadmin-sidebar" className={`sidebar ${isOpen ? "open" : ""}`}>
         <div className="sidebar-header">
           <div className="logo-container" aria-hidden="true">
             <div className="logo-wrapper">
@@ -92,9 +76,7 @@ export default function Sidebar() {
         </div>
 
         <div className="profile-card">
-          <div className="profile-icon">
-            <User size={22} />
-          </div>
+          <div className="profile-icon"><User size={22} /></div>
           <div className="admin-info">
             <h3>مشرف النظام</h3>
             <p>نظام إدارة الفعاليات</p>
@@ -106,13 +88,17 @@ export default function Sidebar() {
             <Link
               key={index}
               href={item.href}
-              onClick={handleLinkClick}
+              onClick={() => setIsOpen(false)}
               className={pathname === item.href ? "active" : ""}
             >
               <span>{item.label}</span>
             </Link>
           ))}
         </nav>
+
+        <div className="sidebar-footer">
+          <span>الإصدار 1.0.0 | النظام نشط</span>
+        </div>
       </aside>
 
       {isOpen && (

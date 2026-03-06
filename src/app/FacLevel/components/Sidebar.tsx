@@ -6,8 +6,15 @@ import { FileText, BarChart3, User, Menu, X } from "lucide-react";
 import Image from "next/image";
 import logo from "@/app/assets/logo.png";
 
-export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(false);
+
+// ✅ Add this interface
+interface SidebarProps {
+  isOpen?: boolean;
+  setIsOpen?: (v: boolean) => void;
+}
+
+export default function Sidebar({ isOpen = false, setIsOpen = () => {} }: SidebarProps) {
+
   const pathname = usePathname();
   const router = useRouter();
   const [userData, setUserData] = useState<{ name?: string; faculty_name?: string } | null>(null);
@@ -60,15 +67,6 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Button is always in the DOM, CSS controls visibility */}
-      <button
-        className="mobileMenuBtn"
-        onClick={() => setIsOpen(true)}
-        aria-label="فتح القائمة"
-      >
-        <Menu size={24} />
-      </button>
-
       <aside id="sidebar" className={`sidebar ${isOpen ? "open" : ""}`}>
         <div className="sidebar-header">
           <div className="logo-container" aria-hidden="true">

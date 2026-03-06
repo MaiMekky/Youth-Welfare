@@ -1,19 +1,18 @@
+
 import React from "react";
+import SidebarLayout from "../SuperAdmin/components/SidebarLayout";
 import Sidebar from "../SuperAdmin/components/sidebar";
-import Header from "../SuperAdmin/components/header";
 import Footer from "../SuperAdmin/components/Footer2";
-import styles from "./layout.module.css";
+import styles from "../SuperAdmin/layout.module.css";
 
 export const metadata = { title: "Dashboard" };
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className={styles.dashboardContainer}>
-      <Header />
-      <div className={styles.dashboardContent}>
-        <Sidebar />
-        <main className={styles.mainContent}>{children}</main>
-      </div>
+      <SidebarLayout sidebar={<Sidebar />}>
+        {children}
+      </SidebarLayout>
       <Footer />
     </div>
   );

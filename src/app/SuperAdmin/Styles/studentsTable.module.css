@@ -5,7 +5,64 @@
   width: 100%;
   min-width: 0;
 }
+/* Stats Grid */
 
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.statCard {
+  background: white;
+  border-radius: 14px;
+  padding: 22px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  border: 1px solid rgba(0,0,0,0.05);
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.statCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+}
+
+.statNumber {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.statLabel {
+  font-size: 14px;
+  color: #64748b;
+}
+
+/* Status colors */
+
+.pending {
+  border-right: 4px solid #f59e0b;
+}
+
+.accepted {
+  border-right: 4px solid #10b981;
+}
+
+.rejected {
+  border-right: 4px solid #ef4444;
+}
+
+/* responsive */
+
+@media (max-width:768px){
+  .statNumber{
+    font-size:24px;
+  }
+}
 .studentsTable {
   background: #fff;
   padding: clamp(1rem, 2vw, 1.25rem);

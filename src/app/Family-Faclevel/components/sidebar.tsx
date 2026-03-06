@@ -14,8 +14,13 @@ import {
 import Image from "next/image";
 import logo from "@/app/assets/logo.png";
 
-export default function FacLevelSidebar() {
-  const [isOpen, setIsOpen] = useState(false);
+// ✅ Add this interface
+interface SidebarProps {
+  isOpen?: boolean;
+  setIsOpen?: (v: boolean) => void;
+}
+
+export default function FacLevelSidebar({ isOpen = false, setIsOpen = () => {} }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [userData, setUserData] = useState<{ name?: string; faculty_name?: string } | null>(null);
@@ -57,25 +62,19 @@ export default function FacLevelSidebar() {
     };
   }, [isOpen]);
 
-  useEffect(() => {
-    setIsOpen(false);
-  }, [pathname]);
-
   const handleNavigation = (path: string) => {
     router.push(path);
     setIsOpen(false);
   };
+    // Close on route change
+    useEffect(() => { setIsOpen(false); }, [pathname]);
+  
+    const go = (path: string) => { router.push(path); setIsOpen(false); };
+  
+    // ✅ NO <button className="mobileMenuBtn"> here — it's now in Header
 
   return (
     <>
-      <button
-        className="mobileMenuBtn"
-        onClick={() => setIsOpen(true)}
-        aria-label="فتح القائمة"
-      >
-        <Menu size={24} />
-      </button>
-
       <aside id="sidebar" className={`sidebar ${isOpen ? "open" : ""}`}>
         <div className="sidebar-header">
           <div className="logo-container" aria-hidden="true">
@@ -94,7 +93,7 @@ export default function FacLevelSidebar() {
           </div>
           <h2 className="sidebar-title">إدارة الأسر الطلابية</h2>
           <p className="sidebar-subtitle">جامعة حلوان - قسم خدمات الأسر الطلابية</p>
-          {isMobile && (
+          {isOpen && (
             <button
               className="sidebar-close-btn"
               onClick={() => setIsOpen(false)}

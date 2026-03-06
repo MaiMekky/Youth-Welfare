@@ -22,7 +22,6 @@ import {
   Trash2,
   FileText,
 } from "lucide-react";
-import Header from "@/app/FacLevel/components/Header";
 import Footer from "@/app/FacLevel/components/Footer";
 
 const API_URL = "http://localhost:8000";
@@ -769,7 +768,6 @@ export default function EventDetailsPage() {
 
   return (
     <div className={styles.page}>
-      <Header />
       {/* ✅ Toast notification (same style you gave me) */}
       {notification.show && (
         <div

@@ -15,7 +15,7 @@ import {
   Layers,
 } from "lucide-react";
 import Footer from "@/app/FacLevel/components/Footer";
-import Header from "@/app/FacLevel/components/Header";
+
 
 const API_URL = "http://localhost:8000/api";
 
@@ -307,7 +307,7 @@ export default function PlanDetailsPage() {
 )}
 
       <div className={styles.page}>
-        <Header />
+
         <div className={styles.container}>
           {/* Top bar */}
           <div className={styles.topBar}>

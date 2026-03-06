@@ -1,7 +1,8 @@
+
 import React from "react";
-import Sidebar from "../SuperAdmin/components/sidebar";
-import Header from "../SuperAdmin/components/header";
-import Footer from "../SuperAdmin/components/Footer2";
+import SidebarLayout from "./components/SidebarLayout";
+import Sidebar from "./components/sidebar";
+import Footer from "./components/Footer2";
 import styles from "./layout.module.css";
 
 export const metadata = { title: "Dashboard" };
@@ -9,11 +10,9 @@ export const metadata = { title: "Dashboard" };
 export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className={styles.dashboardContainer}>
-      <Header />
-      <div className={styles.dashboardContent}>
-        <Sidebar />
-        <main className={styles.mainContent}>{children}</main>
-      </div>
+      <SidebarLayout sidebar={<Sidebar />}>
+        {children}
+      </SidebarLayout>
       <Footer />
     </div>
   );

@@ -1,66 +1,79 @@
-/* ============================================================
-   Header.module.css — premium navy + gold, fully responsive
-   ============================================================ */
-
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
 
-/* ── Base header ── */
 .header {
-  background: linear-gradient(
-    135deg,
-    #111b33 0%,
-    #1a2744 40%,
-    #243358 80%,
-    #1d2e52 100%
-  );
+  background: linear-gradient(135deg, #111b33 0%, #1a2744 40%, #243358 80%, #1d2e52 100%);
   color: white;
   box-shadow: 0 8px 40px rgba(8, 14, 32, 0.15);
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 100;
   border-bottom: 1px solid rgba(201, 151, 42, 0.28);
   font-family: 'Cairo', sans-serif;
 }
 
-/* Gold top accent line */
 .header::before {
-  content: '';
+  content: ''; 
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 3px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    #c9972a 20%,
-    #e0aa35 50%,
-    #c9972a 80%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg, transparent 0%, #c9972a 20%, #e0aa35 50%, #c9972a 80%, transparent 100%);
   z-index: 1;
 }
 
-/* ── Content row ── */
+/* RTL: logo on right, nav buttons on left */
 .headerContent {
-  max-width: 100%;
-  margin: 0 auto;
   padding: clamp(12px, 2vw, 16px) clamp(16px, 4vw, 24px);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: clamp(12px, 2vw, 20px);
   position: relative;
+  direction: rtl;
 }
 
-/* ── Left: logo + title ── */
+/* RIGHT side — sidebar toggle + logo + title */
 .headerLeft {
   display: flex;
   align-items: center;
-  gap: clamp(10px, 2vw, 16px);
+  gap: clamp(10px, 2vw, 14px);
   flex-shrink: 0;
+  direction: rtl;
 }
 
+/* LEFT side — nav buttons */
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 1.5vw, 12px);
+  flex-wrap: nowrap;
+}
+
+/* Gold sidebar toggle button */
+.sidebarToggleBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  background: rgba(201, 151, 42, 0.15);
+  border: 1px solid rgba(201, 151, 42, 0.35);
+  border-radius: 8px;
+  color: #e0aa35;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.sidebarToggleBtn:hover {
+  background: rgba(201, 151, 42, 0.28);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(201, 151, 42, 0.2);
+}
+
+/* Logo icon box */
 .headerIcon {
-  width: clamp(46px, 10vw, 54px);
-  height: clamp(46px, 10vw, 54px);
+  width: clamp(42px, 9vw, 50px);
+  height: clamp(42px, 9vw, 50px);
   background: white;
   padding: 4px;
   border-radius: 11px;
@@ -68,10 +81,9 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(201, 151, 42, 0.28);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15), 0 0 0 1px rgba(201,151,42,0.28);
   transition: box-shadow 0.22s ease, transform 0.22s ease;
+  overflow: hidden;
 }
 
 .headerIcon:hover {
@@ -90,6 +102,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  text-align: right;
 }
 
 .headerTitleH1 {
@@ -108,20 +121,12 @@
   opacity: 0.95;
 }
 
-/* ── Right: nav buttons group ── */
-.headerRight {
-  display: flex;
-  align-items: center;
-  gap: clamp(8px, 1.5vw, 14px);
-  flex-wrap: nowrap;
-}
-
-/* ── Nav buttons ── */
+/* Desktop nav buttons */
 .navBtn {
   background: rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  padding: clamp(7px, 1.5vw, 10px) clamp(12px, 2vw, 18px);
+  padding: clamp(7px, 1.5vw, 10px) clamp(10px, 2vw, 16px);
   border-radius: 8px;
   cursor: pointer;
   font-size: clamp(0.78rem, 1.8vw, 0.88rem);
@@ -142,7 +147,7 @@
   background: rgba(192, 57, 43, 0.18);
   color: #f5b2ae;
   border: 1px solid rgba(192, 57, 43, 0.32);
-  padding: clamp(7px, 1.5vw, 10px) clamp(12px, 2vw, 18px);
+  padding: clamp(7px, 1.5vw, 10px) clamp(10px, 2vw, 16px);
   border-radius: 8px;
   cursor: pointer;
   font-size: clamp(0.78rem, 1.8vw, 0.88rem);
@@ -160,9 +165,9 @@
   box-shadow: 0 4px 12px rgba(192, 57, 43, 0.25);
 }
 
-/* ── Nav hamburger (toggles nav dropdown on mobile) ── */
+/* Mobile hamburger — hidden on desktop */
 .navHamburger {
-  display: none;          /* hidden on desktop */
+  display: none;
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
@@ -177,63 +182,22 @@
   transition: background 0.2s;
 }
 
-.navHamburger:hover {
-  background: rgba(255, 255, 255, 0.16);
-}
+.navHamburger:hover { background: rgba(255, 255, 255, 0.16); }
 
 .hamburgerLine {
   width: 100%;
-  height: 3px;
+  height: 2px;
   background: white;
   border-radius: 2px;
   transition: all 0.3s ease;
   display: block;
 }
 
-/* Animated X state */
 .hamburgerLine.open:nth-child(1) { transform: rotate(45deg) translate(4px, 4px); }
 .hamburgerLine.open:nth-child(2) { opacity: 0; transform: scaleX(0); }
 .hamburgerLine.open:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
 
-/* ── Sidebar toggle button ──
-   Sits inline inside .headerLeft, right before the logo.
-   Visible on all screen sizes whenever a sidebar exists.
-── */
-.sidebarToggleBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 50px;
-  height: 50px;
-  background: rgba(201, 151, 42, 0.15);
-  border: 1px solid rgba(201, 151, 42, 0.35);
-  border-radius: 8px;
-  color: #e0aa35;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
-  /* No position:absolute — it flows naturally in the flex row */
-}
-
-.sidebarToggleBtn:hover {
-  background: rgba(201, 151, 42, 0.28);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(201, 151, 42, 0.2);
-}
-
-.sidebarToggleBtn:focus-visible {
-  outline: 2px solid #e0aa35;
-  outline-offset: 2px;
-}
-
-@media (max-width: 640px) {
-  .sidebarToggleBtn {
-    width: 36px;
-    height: 36px;
-  }
-}
-
-/* ── Mobile nav dropdown ── */
+/* Mobile dropdown */
 .mobileNavDropdown {
   display: flex;
   flex-direction: column;
@@ -242,6 +206,7 @@
   background: linear-gradient(180deg, #243358 0%, #1a2744 100%);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   animation: slideDown 0.28s ease;
+  direction: rtl;
 }
 
 @keyframes slideDown {
@@ -249,10 +214,7 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/*
-  These classes are ONLY used inside .mobileNavDropdown.
-  They are never hidden by media queries — that's the fix.
-*/
+/* Dropdown buttons — own classes, never hidden by media queries */
 .dropdownBtn {
   display: flex !important;
   width: 100%;
@@ -261,7 +223,6 @@
   font-size: 0.95rem;
   font-weight: 600;
   font-family: 'Cairo', sans-serif;
-  text-align: center;
   justify-content: center;
   cursor: pointer;
   background: rgba(255, 255, 255, 0.08);
@@ -270,10 +231,7 @@
   transition: background 0.2s ease;
 }
 
-.dropdownBtn:hover {
-  background: rgba(255, 255, 255, 0.16);
-  color: #ffffff;
-}
+.dropdownBtn:hover { background: rgba(255, 255, 255, 0.16); color: #fff; }
 
 .dropdownLogoutBtn {
   display: flex !important;
@@ -283,7 +241,6 @@
   font-size: 0.95rem;
   font-weight: 600;
   font-family: 'Cairo', sans-serif;
-  text-align: center;
   justify-content: center;
   cursor: pointer;
   background: rgba(192, 57, 43, 0.25);
@@ -292,59 +249,29 @@
   transition: background 0.2s ease;
 }
 
-.dropdownLogoutBtn:hover {
-  background: rgba(192, 57, 43, 0.38);
-  color: #ffffff;
-}
+.dropdownLogoutBtn:hover { background: rgba(192, 57, 43, 0.38); color: #fff; }
 
-/* ── Focus styles ── */
+/* Focus */
 .navBtn:focus-visible,
 .logoutBtn:focus-visible,
-.navHamburger:focus-visible {
-  outline: 2px solid #e0aa35;
-  outline-offset: 2px;
-}
+.navHamburger:focus-visible,
+.sidebarToggleBtn:focus-visible { outline: 2px solid #e0aa35; outline-offset: 2px; }
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
-
-/* Tablet: hide text labels, keep sidebar button */
+/* ── Responsive ── */
 @media (max-width: 900px) {
-  .navBtn,
-  .logoutBtn {
-    display: none;       /* hidden — shown in dropdown instead */
-  }
-  .navHamburger {
-    display: flex;       /* show the nav hamburger */
-  }
+  .navBtn, .logoutBtn { display: none; }
+  .navHamburger { display: flex; }
 }
 
-/* Mobile */
 @media (max-width: 640px) {
-  .headerContent {
-    padding: 10px 14px;
-    gap: 10px;
-  }
-  .headerTitleP {
-    display: none;       /* hide subtitle on very small screens */
-  }
-  .sidebarToggleBtn {
-    width: 36px;
-    height: 36px;
-  }
+  .headerContent { padding: 10px 14px; gap: 10px; }
+  .headerTitleP { display: none; }
+  .sidebarToggleBtn { width: 36px; height: 36px; }
 }
 
-/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .header,
-  .headerIcon,
-  .navBtn,
-  .logoutBtn,
-  .navHamburger,
-  .hamburgerLine,
-  .sidebarToggleBtn,
-  .mobileNavDropdown {
+  .header, .headerIcon, .navBtn, .logoutBtn,
+  .navHamburger, .hamburgerLine, .sidebarToggleBtn, .mobileNavDropdown {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }

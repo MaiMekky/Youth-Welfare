@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import Header from "./components/Header";
 import PageTitleSection from "./components/PageTitleSection";
 import StatsGrid from "./components/StatsGrid";
 import FiltersSection from "./components/FiltersSection";
 import RequestsTable from "./components/RequestsTable";
 import Footer from "./components/Footer";
 import DiscountsSection from "./components/DiscountsSection";
+
 
 export default function FinancialSupportPage() {
   const [requests, setRequests] = useState<any[]>([]);
@@ -28,8 +28,8 @@ export default function FinancialSupportPage() {
 
   return (
     <div className="page-wrapper">
-      <Header />
-      <main className="main-content">
+      
+      <main className="main-content" style={{ width: "100%", maxWidth: "100%" }}>
         <PageTitleSection />
 
         {/* StatsGrid تاخد كل البيانات الأصلية */}

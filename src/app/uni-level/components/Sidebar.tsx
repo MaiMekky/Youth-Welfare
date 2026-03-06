@@ -1,149 +1,88 @@
+
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import "@/app/Styles/Sidebar.css";
-import { Menu, X, FileText, BarChart3, User } from "lucide-react";
+import { X, FileText, BarChart3, User } from "lucide-react";
 import Image from "next/image";
 import logo from "../../assets/logo.png";
 
-export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(false);
+interface SidebarProps {
+  isOpen?: boolean;
+  setIsOpen?: (v: boolean) => void;
+}
+
+export default function Sidebar({ isOpen = false, setIsOpen = () => {} }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
-  
-  const [adminInfo, setAdminInfo] = useState({
-    name: "",
-    email: "",
-    role: "",
-  });
+  const [adminInfo, setAdminInfo] = useState({ name: "", role: "" });
 
   useEffect(() => {
-    const tokenData = localStorage.getItem("access");
-    const userDataString = localStorage.getItem("user");
-    if (userDataString) {
+    const raw = localStorage.getItem("user");
+    if (raw) {
       try {
-        const userData = JSON.parse(userDataString);
-        setAdminInfo({
-          name: userData.name || "مدير النظام",
-          email: userData.email || "admin@helwan.edu.eg",
-          role: userData.role || "",
-        });
-      } catch (error) {
-        console.error("فشل في قراءة بيانات المدير من localStorage", error);
-      }
+        const u = JSON.parse(raw);
+        setAdminInfo({ name: u.name || "مدير النظام", role: u.role || "" });
+      } catch {}
     }
   }, []);
 
-  const handleReportsClick = () => {
-    router.push("/uni-level/reports");
-    setIsOpen(false);
-  };
-
-  const handleAllApplicationsClick = () => {
-    router.push("/uni-level");
-    setIsOpen(false);
-  };
-
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleOutside = (e: MouseEvent) => {
       const sidebar = document.getElementById("sidebar");
-      const menuBtn = document.querySelector(".mobileMenuBtn");
-      if (
-        isOpen &&
-        sidebar &&
-        !sidebar.contains(e.target as Node) &&
-        menuBtn &&
-        !(menuBtn as HTMLElement).contains(e.target as Node)
-      ) {
-        setIsOpen(false);
-      }
+      if (isOpen && sidebar && !sidebar.contains(e.target as Node)) setIsOpen(false);
     };
-
     if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("mousedown", handleOutside);
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
     }
-
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("mousedown", handleOutside);
       document.body.style.overflow = "unset";
     };
   }, [isOpen]);
 
+  useEffect(() => { setIsOpen(false); }, [pathname]);
+
+  const go = (path: string) => { router.push(path); setIsOpen(false); };
+
   return (
     <>
-      <button
-        className="mobileMenuBtn"
-        onClick={() => setIsOpen(true)}
-        aria-label="فتح القائمة"
-      >
-        <Menu size={24} />
-      </button>
-
       <aside id="sidebar" className={`sidebar ${isOpen ? "open" : ""}`}>
         <div className="sidebar-header">
-          <div className="logo-container" aria-hidden="true">
+          <div className="logo-container">
             <div className="logo-wrapper">
               <div className="logo-circle">
-                <Image
-                  src={logo}
-                  alt="شعار جامعة العاصمة"
-                  className="sidebar-logo"
-                  width={96}
-                  height={96}
-                  priority
-                />
+                <Image src={logo} alt="شعار جامعة العاصمة" className="sidebar-logo" width={96} height={96} priority />
               </div>
             </div>
           </div>
-          
-          <button
-            className="sidebar-close-btn"
-            onClick={() => setIsOpen(false)}
-            aria-label="إغلاق القائمة"
-          >
-            <X size={20} />
-          </button>
+             <h2 className="sidebar-title">إدارة التكافل الاجتماعي</h2> <p className="sidebar-subtitle">جامعة العاصمة - قسم خدمات الطلاب</p> <button className="sidebar-close-btn" onClick={() => setIsOpen(false)} aria-label="إغلاق القائمة"> <X size={20} /> </button>
         </div>
 
         <div className="profile-card">
-          <div className="profile-icon">
-            <User size={22} />
-          </div>
+          <div className="profile-icon"><User size={22} /></div>
           <div className="admin-info">
             <h3>{adminInfo.name}</h3>
             {adminInfo.role && <p>{adminInfo.role}</p>}
           </div>
         </div>
-        
-        <nav className="nav">
-          <button
-            className={pathname === "/uni-level/reports" ? "active" : ""}
-            onClick={handleReportsClick}
-          >
-            <BarChart3 size={18} />
-            <span>تقارير الكليات</span>
-          </button>
 
-          <button
-            className={pathname === "/uni-level" ? "active" : ""}
-            onClick={handleAllApplicationsClick}
-          >
-            <FileText size={18} />
-            <span>إدارة الطلبات</span>
+        <nav className="nav">
+          <button className={pathname === "/uni-level/reports" ? "active" : ""} onClick={() => go("/uni-level/reports")}>
+            <BarChart3 size={18} /><span>تقارير الكليات</span>
+          </button>
+          <button className={pathname === "/uni-level" ? "active" : ""} onClick={() => go("/uni-level")}>
+            <FileText size={18} /><span>إدارة الطلبات</span>
           </button>
         </nav>
+
+        <div className="sidebar-footer"><span>الإصدار 1.0.0 | النظام نشط</span></div>
       </aside>
 
-      {isOpen && (
-        <div
-          className="sidebar-overlay"
-          onClick={() => setIsOpen(false)}
-          aria-hidden="true"
-        />
-      )}
+      {isOpen && <div className="sidebar-overlay" onClick={() => setIsOpen(false)} aria-hidden="true" />}
     </>
   );
 }

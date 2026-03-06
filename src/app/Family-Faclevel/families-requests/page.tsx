@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Header from "@/app/FacLevel/components/Header";
 import Footer from "@/app/FacLevel/components/Footer";
 import FamRequests from "../families-requests/components/famRequests";
 import styles from "../families-requests/styles/famRequests.module.css";
@@ -40,7 +39,7 @@ export default function FamilyRequestsPage() {
 
   return (
     <div className={styles.pageWrapper}>
-      <Header />
+
 
       <header className={styles.pageHeaderFamily}>
         <div className={styles.headerContentFamily}>

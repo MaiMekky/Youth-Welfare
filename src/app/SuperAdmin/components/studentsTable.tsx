@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import styles from "../Styles/studentsTable.module.css";
 import FiltersBar from "./FiltersBar";
+import SolidarityHeader from "./SolidarityHeader";
 
 interface Application {
   solidarity_id: number;
@@ -135,9 +136,43 @@ export default function StudentsTable() {
       default: return styles.defaultStatus;
     }
   };
-
+const stats = {
+  total: filteredApps.length,
+  pending: filteredApps.filter(a => a.req_status === "منتظر").length,
+  accepted: filteredApps.filter(a => a.req_status === "مقبول").length,
+  rejected: filteredApps.filter(a => a.req_status === "مرفوض").length,
+};
   return (
+    
+
+    
     <div className={styles.tableSection}>
+
+      <SolidarityHeader />
+
+        {/* Stats Grid */}
+    <div className={styles.statsGrid}>
+      <div className={styles.statCard}>
+        <div className={styles.statNumber}>{stats.total}</div>
+        <div className={styles.statLabel}>إجمالي الطلبات</div>
+      </div>
+
+      <div className={`${styles.statCard} ${styles.pending}`}>
+        <div className={styles.statNumber}>{stats.pending}</div>
+        <div className={styles.statLabel}>منتظر</div>
+      </div>
+
+      <div className={`${styles.statCard} ${styles.accepted}`}>
+        <div className={styles.statNumber}>{stats.accepted}</div>
+        <div className={styles.statLabel}>مقبول</div>
+      </div>
+
+      <div className={`${styles.statCard} ${styles.rejected}`}>
+        <div className={styles.statNumber}>{stats.rejected}</div>
+        <div className={styles.statLabel}>مرفوض</div>
+      </div>
+    </div>
+
       <FiltersBar
         onSearchChange={setSearchTerm}
         filters={filters}

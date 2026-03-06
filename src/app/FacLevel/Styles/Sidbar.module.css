@@ -1,32 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
 
-/* ===== MOBILE MENU BUTTON ===== */
-/* Hidden on desktop, shown on mobile */
-.mobileMenuBtn {
-  display: none;
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  background: linear-gradient(135deg, #1a2744, #243358);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  color: #fff;
-  z-index: 1100;
-  cursor: pointer;
-  padding: 10px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  transition: all 0.22s ease;
-  min-width: 44px;
-  min-height: 44px;
-  align-items: center;
-  justify-content: center;
-}
-
-.mobileMenuBtn:hover {
-  background: #243358;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-}
+/*
+  NOTE: .mobileMenuBtn has been REMOVED from here.
+  The sidebar toggle button now lives in Header.tsx (.sidebarToggleBtn).
+  All three sidebars receive isOpen/setIsOpen as props from their parent page.
+*/
 
 /* ===== SIDEBAR ===== */
 .sidebar {
@@ -49,6 +27,7 @@
   border-left: 1px solid rgba(201, 151, 42, 0.28);
   box-shadow: 2px 0 24px rgba(0, 0, 0, 0.18);
   flex-shrink: 0;
+  font-family: 'Cairo', sans-serif;
 }
 
 /* ===== HEADER ===== */
@@ -110,7 +89,7 @@
   margin: 0;
 }
 
-/* Close button — hidden on desktop, shown on mobile */
+/* Close button — always shown (user can close sidebar from within) */
 .sidebar-close-btn {
   position: absolute;
   top: 0;
@@ -121,7 +100,7 @@
   color: #fff;
   cursor: pointer;
   padding: 0.5rem;
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
   transition: background 0.2s;
@@ -227,21 +206,11 @@
 
 @keyframes fadeIn {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
 }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-  /* Show the hamburger button on mobile */
-  .mobileMenuBtn {
-    display: flex;  /* ✅ THIS is what makes it appear */
-  }
-
-  /* Show the close button inside sidebar on mobile */
-  .sidebar-close-btn {
-    display: flex;
-  }
-
   /* Sidebar slides in from the right on mobile */
   .sidebar {
     position: fixed;
@@ -255,6 +224,6 @@
   }
 
   .sidebar.open {
-    right: 0; /* ✅ slides into view */
+    right: 0;
   }
 }

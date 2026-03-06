@@ -34,7 +34,7 @@ html, body {
 }
 
 body {
-  font-family: "Inter", "Noto Kufi Arabic", "Cairo", "Segoe UI", Arial, sans-serif;
+  font-family: "Cairo",sans-serif;
   background: var(--muted);
   color: var(--text);
   -webkit-font-smoothing: antialiased;

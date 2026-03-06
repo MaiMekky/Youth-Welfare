@@ -9,7 +9,6 @@ import Tabs from "./components/Tabs";
 import { EventItem, ChipVariant } from "./components/EventCard";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
-import Header from "@/app/FacLevel/components/Header";
 import Footer from "@/app/FacLevel/components/Footer";
 
 const API_URL = "http://localhost:8000";
@@ -236,7 +235,7 @@ export default function Page() {
 
   return (
     <div className={styles.page}>
-      <Header />
+
 
       {/* ✅ Notification */}
       {notification && (

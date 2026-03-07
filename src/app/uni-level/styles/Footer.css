@@ -51,11 +51,11 @@
   text-align: right;
 }
 
-.footerLogo {
-  font-weight: bold;
-  font-size: clamp(1rem, 2vw, 1.2rem);
+.logoImage {
+  height: 50px;       
+  width: auto;        
+  display: block;    
 }
-
 .footerText {
   display: flex;
   flex-direction: column;

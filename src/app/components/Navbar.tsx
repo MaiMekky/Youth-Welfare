@@ -4,48 +4,67 @@ import styles from "../Styles/components/Navbar.module.css";
 import { Search, User, Globe } from "lucide-react";
 import LoginPage from "./LoginPage";
 import SignupPage from "./SignUp";
+import Image from "next/image";
+import logo from "../assets/capital-uni-logo.png";
+import { useEffect } from "react";
 
 const Navbar: React.FC = () => {
   const [lang, setLang] = useState("ar");
+  const [scrolled, setScrolled] = useState(false);
 
-  // ✅ Local modal state
   const [showModal, setShowModal] = useState(false);
   const [activeScreen, setActiveScreen] = useState<"login" | "signup">("login");
 
   const toggleLang = () => {
     setLang(lang === "ar" ? "en" : "ar");
   };
+    useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 120); // trigger after hero
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <>
-      <header className={styles.header} dir={lang === "ar" ? "rtl" : "ltr"} lang={lang}>
+      <header  className={`${styles.header} ${scrolled ? styles.headerScrolled : ""}`} dir={lang === "ar" ? "rtl" : "ltr"} lang={lang}>
+        
+        {/* Floating Logo */}
+        <div   className={`${styles.logoWrapper} ${
+          scrolled ? styles.logoScrolled : ""
+        }`}>
+          <Image
+            src={logo}
+            alt="Capital University"
+            width={90}
+            height={110}
+            className={styles.logoImage}
+            draggable={false}
+            priority
+          />
+        </div>
+
         <div className={styles.navContent}>
-          {/* Right side: search + buttons */}
-          <div className={styles.rightSide}>
-            <div className={styles.searchBox}>
-              <input
-                type="text"
-                placeholder={lang === "ar" ? "البحث في الموقع..." : "Search the site..."}
-              />
-              <Search className={styles.searchIcon} size={16} />
-            </div>
+          <div className={styles.rightSide}></div>
+
+          <div className={styles.departmentInfo}>
+            <h2>
+              {lang === "ar"
+                ? "الإدارة العامة لرعاية الطلاب"
+                : "General Administration of Youth Care"}
+            </h2>
+            <p>
+              {lang === "ar"
+                ? "Capital University - Youth Welfare"
+                : "Capital University - Youth Care"}
+            </p>
+          </div>
         </div>
-                <div className={styles.departmentInfo}>
-          <h2>
-            {lang === "ar"
-              ? "الإدارة العامة لرعاية الطلاب"
-              : "General Administration of Youth Care"}
-          </h2>
-          <p>
-            {lang === "ar"
-              ? "Capital University - Youth Welfare"
-              : "Helwan University - Youth Care"}
-          </p>
-        </div>
-      </div>
       </header>
 
-      {/* ✅ Modal Popup */}
+      {/* Modal */}
       {showModal && (
         <div
           style={{
@@ -63,7 +82,6 @@ const Navbar: React.FC = () => {
         >
           <div
             style={{
-              // backgroundColor: "#fff",
               borderRadius: "15px",
               padding: "30px",
               maxWidth: "500px",

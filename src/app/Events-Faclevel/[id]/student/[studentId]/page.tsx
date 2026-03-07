@@ -5,7 +5,7 @@ import styles from "./StudentDetails.module.css";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowRight, Mail, Phone, MapPin, User, GraduationCap, IdCard } from "lucide-react";
 import Footer from "@/app/FacLevel/components/Footer";
-import Header from "@/app/FacLevel/components/Header";
+
 
 const API_URL = "http://localhost:8000";
 
@@ -145,7 +145,7 @@ export default function StudentDetailsPage() {
 
   return (
     <div className={styles.page} dir="rtl">
-      <Header />
+
       <div className={styles.container}>
         <div className={styles.topBar}>
           <div className={styles.headText}>

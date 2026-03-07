@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Header from "@/app/FacLevel/components/Header";
 import Footer from "@/app/FacLevel/components/Footer";
 import ActivityCard from "./components/ActivityCard";
 import styles from "./styles/Activities.module.css";
@@ -53,7 +52,7 @@ export default function ActivitiesPage() {
 
   return (
     <div className={styles.pageWrapper}>
-      <Header />
+
 
       <main className={styles.container}>
         <div className={styles.pageHeader}>

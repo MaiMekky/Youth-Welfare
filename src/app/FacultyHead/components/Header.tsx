@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import "../Styles/Header.css";
-import logo from "../../assets/logo1.png";
+import logo from "../../assets/logo.png";
 import { useState, useRef, useEffect } from "react";
 import { LogOut, ChevronDown, Bell, Settings } from "lucide-react";
 
@@ -54,7 +54,7 @@ export default function Header() {
               className={`hdr-user-btn${menuOpen ? " hdr-user-open" : ""}`}
               onClick={() => setMenuOpen(o => !o)}
             >
-              <span className="hdr-avatar">م</span>
+             
               <span className="hdr-user-name">المشرف العام</span>
               <ChevronDown size={13} className="hdr-chevron" />
             </button>
@@ -64,13 +64,11 @@ export default function Header() {
                 <div className="hdr-dropdown-header">
                   <span className="hdr-avatar hdr-avatar-lg">م</span>
                   <div>
-                    <h2>النظام الاداري لرعاية الطلاب</h2>
+                    <p>النظام الاداري لرعاية الطلاب</p>
                   </div>
                 </div>
                 <div className="hdr-dropdown-divider" />
-                <button className="hdr-dd-item">
-                  <Settings size={14} /> الإعدادات
-                </button>
+               
                 <button className="hdr-dd-item hdr-dd-logout" onClick={handleLogout}>
                   <LogOut size={14} /> تسجيل الخروج
                 </button>

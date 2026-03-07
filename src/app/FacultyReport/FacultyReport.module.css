@@ -1,6 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
 
+/* ── Page shell ── */
 .facultyReportPage {
-  background: #f6f7fb;
+  background: #f0f2f8;
   min-height: 100vh;
   font-family: "Cairo", sans-serif;
   direction: rtl;
@@ -9,216 +11,135 @@
   flex-direction: column;
 }
 
-/* ===== Header ===== */
-.facultyHeader {
-  background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
+/* ── Page title bar (sits below the shared Header) ── */
+.pageTitle {
+  background: linear-gradient(135deg, #111b33 0%, #1a2744 50%, #243358 100%);
   color: white;
-  padding: clamp(1rem, 3vw, 1.25rem) clamp(1rem, 4vw, 1.875rem);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap; 
+  padding: clamp(14px, 2.5vw, 20px) clamp(16px, 4vw, 32px);
+  border-bottom: 1px solid rgba(201, 151, 42, 0.3);
   position: relative;
 }
-/* ===== Header Buttons Area (copied from Header styles) ===== */
-.headerLeft {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-  min-width: 0;
+
+/* Gold accent line under page title */
+.pageTitle::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #c9972a 30%, #e0aa35 50%, #c9972a 70%, transparent);
 }
 
-.headerRight {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.navBtn {
-  background: rgba(255, 255, 255, 0.95);
-  color: #2C3A5F;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 8px 14px;
-  border-radius: 6px;
-  margin-left: clamp(6px, 1.5vw, 10px);
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  white-space: nowrap;
-  transition: 0.3s;
-}
-
-.navBtn:hover {
-  background: #fff;
-  transform: translateY(-2px);
-  border-color: #D4AF37;
-}
-
-.logoutBtn {
-  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-  color: #fff;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: 0.3s;
-}
-
-.logoutBtn:hover {
-  background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
-  transform: translateY(-2px);
-}
-
-/* ===== Hamburger ===== */
-.hamburger {
-  display: none;
-  flex-direction: column;
-  justify-content: space-around;
-  width: 30px;
-  height: 25px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-}
-
-.hamburgerLine {
-  width: 100%;
-  height: 3px;
-  background-color: white;
-  border-radius: 2px;
-  transition: 0.3s;
-}
-
-.hamburgerLine.open:nth-child(1) {
-  transform: rotate(45deg) translate(6px, 6px);
-}
-
-.hamburgerLine.open:nth-child(2) {
-  opacity: 0;
-  transform: translateX(20px);
-}
-
-.hamburgerLine.open:nth-child(3) {
-  transform: rotate(-45deg) translate(7px, -6px);
-}
-
-/* ===== Mobile Menu (same behavior) ===== */
-@media (max-width: 768px) {
-  .hamburger {
-    display: flex;
-    flex-shrink: 0;
-  }
-
-  .headerRight {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-
-    background: linear-gradient(180deg, #3D4D75 0%, #2C3A5F 100%);
-    flex-direction: column;
-    align-items: stretch;
-
-    gap: 0;
-    padding: 0;
-
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.35s ease, padding 0.35s ease;
-    z-index: 50;
-    border-top: 1px solid rgba(255,255,255,0.1);
-  }
-
-  .mobileMenuOpen {
-    max-height: 500px;
-    padding: 12px;
-    gap: 10px;
-  }
-
-  .navBtn,
-  .logoutBtn {
-    width: 100%;
-    text-align: center;
-    justify-content: center;
-    transform: none !important;
-  }
-}
-
-.facultyHeader h1 {
-  font-size: clamp(16px, 2.2vw, 22px); /* ✅ responsive */
+.pageTitle h1 {
   margin: 0;
+  font-size: clamp(1rem, 3vw, 1.3rem);
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.2;
 }
 
-.facultyHeader p {
-  font-size: 13px;
-  opacity: 0.8;
-  margin: 3px 0 0;
+.pageTitle p {
+  margin: 4px 0 0;
+  font-size: clamp(0.7rem, 1.8vw, 0.82rem);
+  color: #e0aa35;
+  opacity: 0.9;
 }
-/* ===== Main ===== */
+
+/* ── Main content area ── */
 .facultyMain {
   flex: 1;
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 1200px;  
   margin: 0 auto;
-  padding: 0 16px 24px; 
+  padding: 0 clamp(12px, 3vw, 24px) 32px;
+  gap: 0;
 }
-/* ===== Stats Section ===== */
+
+/* ── Stats cards ── */
 .statsSection {
-  display: grid;                 /* ✅ بدل flex */
+  display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
-  margin: 20px 0;
+  margin: 24px 0 20px;
 }
 
 .statBox {
   background: #fff;
   border-radius: 14px;
   border: 1px solid #ddd;
-  padding: 14px 16px;
+  padding: clamp(14px, 2vw, 20px) clamp(16px, 2.5vw, 24px);
   display: flex;
   justify-content: space-between;
   align-items: center;
   min-width: 0;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.statBox:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.statBox p {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.statBox h2 {
+  margin: 0;
+  font-size: clamp(1.3rem, 3vw, 1.7rem);
+  font-weight: 800;
+  line-height: 1;
 }
 
 .yellow {
-  background: #fff8e1;
-  border-color: #f5d55b;
-  color: #b08900;
+  background: linear-gradient(135deg, #fffbea, #fff8d6);
+  border-color: #e0aa35;
+  color: #7a5c10;
 }
+
+.yellow .icon { color: #c9972a; }
 
 .blue {
-  background: #eef2ff;
-  border-color: #b9c4f5;
-  color: #1c1e58;
+  background: linear-gradient(135deg, #eef2ff, #e8edff);
+  border-color: #8fa4e8;
+  color: #1a2744;
 }
+
+.blue .icon { color: #2c3a5f; }
 
 .icon {
-  display: inline-flex;         
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
   flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.6);
 }
 
-/* ===== Search Bar ===== */
+/* ── Search bar ── */
 .searchBar {
   background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 14px;
-  margin: 0 0 16px;   /* ✅ بدل 25px */
-  padding: 10px 12px;
+  border: 1px solid #d0d5e8;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  padding: 10px 14px;
   display: flex;
   align-items: center;
   gap: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  color: #2c3a5f;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.searchBar:focus-within {
+  border-color: #c9972a;
+  box-shadow: 0 2px 12px rgba(201, 151, 42, 0.15);
 }
 
 .searchBar input {
@@ -227,56 +148,21 @@
   flex: 1;
   min-width: 0;
   font-size: 14px;
+  font-family: "Cairo", sans-serif;
   background: transparent;
+  color: #1a2744;
+  direction: rtl;
 }
 
-.searchBar button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 18px;
-}
+.searchBar input::placeholder { color: #8a95b0; }
 
-/* ===== Table Section ===== */
-.tableContainer {
-  background: #fff;
-  margin: 0 25px;
-  border-radius: 14px;
-  border: 1px solid #ddd;
-  overflow: hidden;
-}
-
-.tableHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 20px;
-  border-bottom: 1px solid #eee;
-}
-
-.tableHeader h2 {
-  margin: 0;
-  font-size: 18px;
-  color: #1c1e58;
-}
-
-.tableButtons button {
-  margin-left: 10px;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 14px;
-  cursor: pointer;
-  border: none;
-  color: white;
-}
-
-/* ===== Table Section ===== */
+/* ── Table container ── */
 .tableContainer {
   background: #fff;
   border-radius: 14px;
-  border: 1px solid #ddd;
+  border: 1px solid #d0d5e8;
   overflow: hidden;
-  color: #1c1e58;
+  box-shadow: 0 2px 16px rgba(26, 39, 68, 0.08);
 }
 
 .tableHeader {
@@ -284,207 +170,147 @@
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  padding: 14px 16px;
-  border-bottom: 1px solid #eee;
-  flex-wrap: wrap; /* ✅ */
+  padding: 16px 20px;
+  border-bottom: 1px solid #e8eaf2;
+  background: linear-gradient(135deg, #f8f9ff, #f0f3ff);
+  flex-wrap: wrap;
 }
 
 .tableHeader h2 {
   margin: 0;
-  font-size: 16px;
-  color: #1c1e58;
+  font-size: clamp(0.9rem, 2vw, 1rem);
+  font-weight: 700;
+  color: #1a2744;
 }
 
-.tableButtons button {
-  padding: 8px 12px;
-  border-radius: 10px;
-  font-size: 14px;
-  cursor: pointer;
-  border: none;
-  color: white;
-}
-
-.tableButtons {
-  display: flex;
-  align-items: center;
-}
-
+/* ── Export button (matches gold theme) ── */
 .exportBtn {
-  display: inline-flex;      
-  align-items: center;     
-  gap: 8px;                  
-  padding: 8px 12px;
-  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  border: none;
-  background: #d9c31d;
-  color: #222;
+  border: 1px solid rgba(201, 151, 42, 0.4);
+  background: linear-gradient(135deg, rgba(201,151,42,0.12), rgba(224,170,53,0.08));
+  color: #7a5c10;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: "Cairo", sans-serif;
   white-space: nowrap;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 
-.exportBtn svg {
-  flex-shrink: 0;           
+.exportBtn:hover {
+  background: linear-gradient(135deg, rgba(201,151,42,0.22), rgba(224,170,53,0.16));
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(201, 151, 42, 0.2);
 }
 
+/* ── Table scroll wrapper ── */
 .tableScroll {
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
+/* ── Table ── */
 .reportTable {
   width: 100%;
   border-collapse: collapse;
   text-align: center;
-  min-width: 640px;
+  min-width: 560px;
+}
+
+.reportTable thead {
+  background: linear-gradient(135deg, #1a2744, #243358);
 }
 
 .reportTable th {
-  background: #f9f9ff;
-  padding: 10px;
-  font-size: 14px;
-  border-bottom: 1px solid #ddd;
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #e0aa35;
   white-space: nowrap;
+  border-bottom: 2px solid rgba(201, 151, 42, 0.3);
 }
 
 .reportTable td {
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-  font-size: 14px;
+  padding: 11px 14px;
+  border-bottom: 1px solid #eef0f8;
+  font-size: 13.5px;
+  color: #2c3a5f;
   white-space: nowrap;
 }
 
-.reportTable tr:hover {
-  background: #f5f6ff;
+.reportTable tbody tr:hover {
+  background: #f4f6ff;
+}
+
+.reportTable tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .amount {
-  color: #b08900;
-  font-weight: bold;
+  color: #7a5c10;
+  font-weight: 700;
 }
 
-/* ===== Footer ===== */
-.footer {
- background: linear-gradient(180deg, #2C3A5F 0%, #3D4D75 100%);
-  color: white;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 18px 30px;
-  font-size: 13px;
-  direction: rtl;
-  border-top: 1px solid rgba(255,255,255,0.1);
-}
-
-.footer p {
-  margin: 2px 0;
-}
-
-.left, .center, .right {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.center {
+.noData {
+  padding: 40px !important;
+  color: #8a95b0;
+  font-size: 14px;
   text-align: center;
-  flex: 1;
 }
 
-.right {
-  text-align: left;
-  font-size: 12px;
-  color: #d1d5db;
-}
-
-@media (max-width: 768px) {
-  .statsSection {
-    flex-direction: column;
-    margin: 1rem;
-  }
-
-  .searchBar {
-    margin: 0 1rem 1rem;
-  }
-
-  .tableContainer {
-    margin: 0 1rem;
-  }
-
-  .tableHeader {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.75rem;
-  }
-
-  .footer {
-    flex-direction: column;
-    text-align: center;
-    gap: 1rem;
-    padding: 1rem;
-  }
-
-  .gmailFooter {
-    margin: 1rem;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.75rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .facultyHeader h1 {
-    font-size: 1.125rem;
-  }
-
-  .reportTable th,
-  .reportTable td {
-    padding: 0.5rem;
-    font-size: 0.8125rem;
-  }
-}/* ===== Gmail Footer ===== */
-/* ===== Gmail Footer matching Table Footer Theme ===== */
+/* ── Pagination footer ── */
 .gmailFooter {
-  background: #fafafa;
-  border-top: 1px solid #ddd;
-  padding: 10px 16px;
+  background: #f8f9ff;
+  border-top: 1px solid #e8eaf2;
+  padding: 12px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 14px;
+  font-size: 13px;
   color: #2c3a5f;
   gap: 12px;
   flex-wrap: wrap;
 }
 
-.paginationInfo strong {
-  color: #2c3a5f;
-}
+.paginationInfo { font-size: 13px; }
+.paginationInfo strong { color: #1a2744; font-weight: 700; }
 
 .paginationControls {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
+.paginationControls span { font-size: 13px; color: #5a6480; }
+
 .paginationControls select {
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 5px 8px;
+  border: 1px solid #c8cde0;
+  border-radius: 7px;
+  padding: 5px 10px;
   font-size: 13px;
+  font-family: "Cairo", sans-serif;
   outline: none;
   background: white;
-  color: #2c3a5f;
+  color: #1a2744;
+  cursor: pointer;
+  transition: border-color 0.2s;
 }
 
+.paginationControls select:focus { border-color: #c9972a; }
+
 .arrowBtn {
-  background: #f1f1f1;
-  border: none;
-  border-radius: 6px;
-  padding: 5px 8px;
+  background: #fff;
+  border: 1px solid #c8cde0;
+  border-radius: 7px;
+  padding: 5px 9px;
   cursor: pointer;
-  transition: 0.2s;
+  transition: all 0.2s;
   color: #2c3a5f;
   display: inline-flex;
   align-items: center;
@@ -492,16 +318,33 @@
 }
 
 .arrowBtn:hover:not(:disabled) {
-  background: #ddd;
+  background: #1a2744;
+  border-color: #1a2744;
+  color: white;
 }
 
 .arrowBtn:disabled {
-  opacity: 0.5;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
-/* ✅ Responsive for mobile */
+/* ── Responsive ── */
 @media (max-width: 768px) {
+  .statsSection {
+    grid-template-columns: 1fr;
+    margin: 16px 0;
+  }
+
+  .tableHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .exportBtn {
+    justify-content: center;
+    width: 100%;
+  }
+
   .gmailFooter {
     flex-direction: column;
     align-items: stretch;
@@ -511,8 +354,15 @@
   .paginationControls {
     justify-content: center;
   }
+}
 
-  .paginationControls select {
-    width: 100%;
+@media (max-width: 480px) {
+  .pageTitle h1 { font-size: 0.95rem; }
+  .statBox h2   { font-size: 1.2rem; }
+
+  .reportTable th,
+  .reportTable td {
+    padding: 9px 10px;
+    font-size: 12.5px;
   }
 }

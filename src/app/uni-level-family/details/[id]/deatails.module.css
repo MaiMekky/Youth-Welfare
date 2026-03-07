@@ -3,9 +3,9 @@
 
 /* Page Container */
 .pageContainer {
-  max-width: min(1400px, 100%);
+  max-width: 100%;
   margin: 0 auto;
-  padding: clamp(1rem, 3vw, 1.25rem);
+  /* padding: clamp(1rem, 3vw, 1.25rem); */
   direction: rtl;
   background-color: #f8f9fa;
   border-radius: 20px;

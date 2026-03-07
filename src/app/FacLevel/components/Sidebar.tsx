@@ -1,64 +1,65 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import styles from "../Styles/Sidbar.module.css";
+import "@/app/Styles/Sidebar.css";
+import { FileText, BarChart3, User, Menu, X } from "lucide-react";
+import Image from "next/image";
+import logo from "@/app/assets/logo.png";
 
-import { Home, FileText, BarChart3, User, Menu, X } from "lucide-react";
 
-export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(false);
+// ✅ Add this interface
+interface SidebarProps {
+  isOpen?: boolean;
+  setIsOpen?: (v: boolean) => void;
+}
+
+export default function Sidebar({ isOpen = false, setIsOpen = () => {} }: SidebarProps) {
+
   const pathname = usePathname();
   const router = useRouter();
+  const [userData, setUserData] = useState<{ name?: string; faculty_name?: string } | null>(null);
 
-  const [userData, setUserData] = useState<any>(null);
-
-  // Load user data from localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      setUserData(JSON.parse(storedUser));
+      try {
+        setUserData(JSON.parse(storedUser));
+      } catch {}
     }
   }, []);
 
-  // Close sidebar when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const sidebar = document.getElementById("sidebar");
-      const menuBtn = document.querySelector(`.${styles.mobileMenuBtn}`);
-      
+      const menuBtn = document.querySelector(".mobileMenuBtn");
       if (
-        isOpen && 
-        sidebar && 
+        isOpen &&
+        sidebar &&
         !sidebar.contains(e.target as Node) &&
         menuBtn &&
-        !menuBtn.contains(e.target as Node)
+        !(menuBtn as HTMLElement).contains(e.target as Node)
       ) {
         setIsOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.body.style.overflow = "unset";
+    };
   }, [isOpen]);
 
-  // Close sidebar on route change (mobile)
   useEffect(() => {
     setIsOpen(false);
   }, [pathname]);
 
-  // Prevent body scroll when sidebar is open on mobile
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
-
-  // Navigate to page and close sidebar on mobile
   const handleNavigation = (path: string) => {
     router.push(path);
     setIsOpen(false);
@@ -66,79 +67,71 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile Menu Button */}
-      <button 
-        className={styles.mobileMenuBtn} 
-        onClick={() => setIsOpen(true)}
-        aria-label="فتح القائمة"
-      >
-        <Menu size={24} />
-      </button>
-
-      {/* Sidebar */}
-      <aside
-        id="sidebar"
-        className={`${styles.sidebar} ${isOpen ? styles.open : ""}`}
-      >
-        <div className={styles.sidebarContent}>
-          <div className={styles.header}>
-            <div className={styles.headerText}>
-              <h2>إدارة التكافل الاجتماعي</h2>
-              <p>جامعة حلوان - قسم خدمات الطلاب</p>
-            </div>
-            <button 
-              className={styles.closeBtn} 
-              onClick={() => setIsOpen(false)}
-              aria-label="إغلاق القائمة"
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          {/* Profile Section */}
-          {userData && (
-            <div className={styles.profile}>
-              <div className={styles.profileIcon}>
-                <User size={28} />
-              </div>
-              <div className={styles.profileInfo}>
-                <h3>{userData.name}</h3>
-                <p>{userData.faculty_name}</p>
+      <aside id="sidebar" className={`sidebar ${isOpen ? "open" : ""}`}>
+        <div className="sidebar-header">
+          <div className="logo-container" aria-hidden="true">
+            <div className="logo-wrapper">
+              <div className="logo-circle">
+                <Image
+                  src={logo}
+                  alt="شعار جامعة العاصمة"
+                  className="sidebar-logo"
+                  width={96}
+                  height={96}
+                  priority
+                />
               </div>
             </div>
-          )}
-
-          {/* Navigation */}
-          <nav className={styles.nav}>
-            <button
-              onClick={() => handleNavigation("/FacultyReport")}
-              className={pathname === "/FacultyReport" ? styles.active : ""}
-            >
-              <BarChart3 size={18} />
-              <span>تقرير الكلية</span>
-            </button>
-
-            <button
-              onClick={() => handleNavigation("/FacLevel")}
-              className={pathname === "/FacLevel" ? styles.active : ""}
-            >
-              <FileText size={18} />
-              <span>إدارة الطلبات</span>
-            </button>
-          </nav>
-
-          <div className={styles.footer}>
-            <p>الإصدار 1.0.0 | النظام نشط</p>
           </div>
+          <h2 className="sidebar-title">إدارة التكافل الاجتماعي</h2>
+          <p className="sidebar-subtitle">جامعة العاصمة - قسم خدمات الطلاب</p>
+          <button
+            className="sidebar-close-btn"
+            onClick={() => setIsOpen(false)}
+            aria-label="إغلاق القائمة"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="profile-card">
+          <div className="profile-icon">
+            <User size={22} />
+          </div>
+          <div className="admin-info">
+            <h3>{userData?.name || "المستخدم"}</h3>
+            {userData?.faculty_name && <p>{userData.faculty_name}</p>}
+          </div>
+        </div>
+
+        <nav className="nav">
+          <button
+            onClick={() => handleNavigation("/FacultyReport")}
+            className={pathname === "/FacultyReport" ? "active" : ""}
+          >
+            <BarChart3 size={18} />
+            <span>تقرير الكلية</span>
+          </button>
+          <button
+            onClick={() => handleNavigation("/FacLevel")}
+            className={pathname === "/FacLevel" ? "active" : ""}
+          >
+            <FileText size={18} />
+            <span>إدارة الطلبات</span>
+          </button>
+        </nav>
+
+        <div className="sidebar-footer">
+          <span>الإصدار 1.0.0 | النظام نشط</span>
         </div>
       </aside>
 
-      {/* Overlay for mobile */}
       {isOpen && (
         <div
-          className={styles.overlay}
+          className="sidebar-overlay"
           onClick={() => setIsOpen(false)}
-        ></div>
+          aria-hidden="true"
+        />
       )}
     </>
   );

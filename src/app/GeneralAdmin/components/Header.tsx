@@ -64,21 +64,18 @@ export default function Header() {
         {/* LEFT: Action buttons */}
         <div className="headerActions">
 
-          {/* Sidebar toggle (layout icon) */}
+          {/* Sidebar toggle (layout icon)
           <button className="headerIconBtn" title="القائمة">
             <Menu size={20} />
-          </button>
+          </button> */}
 
-          {/* Language toggle */}
-          <button className="headerIconBtn langBtn" title="تغيير اللغة">
-            <span>A</span>
-          </button>
+          
 
-          {/* Notifications */}
+          {/* Notifications
           <button className="headerIconBtn notifBtn" title="الإشعارات">
             <Bell size={20} />
             {notifCount > 0 && <span className="notifBadge">{notifCount}</span>}
-          </button>
+          </button> */}
 
           {/* User dropdown */}
           <div className="userDropdownWrap" ref={dropdownRef}>
@@ -89,7 +86,7 @@ export default function Header() {
               <div className="userAvatar">{getInitials(adminInfo.name)}</div>
               <div className="userInfo">
                 <span className="userName">{adminInfo.name}</span>
-                <span className="userEmail">{adminInfo.email}</span>
+               
               </div>
               <ChevronDown size={16} className={`chevron ${dropdownOpen ? "open" : ""}`} />
             </button>
@@ -104,10 +101,7 @@ export default function Header() {
                   </div>
                 </div>
                 <div className="dropdownDivider" />
-                <button className="dropdownItem">
-                  <User size={15} />
-                  <span>الملف الشخصي</span>
-                </button>
+              
                 <div className="dropdownDivider" />
                 <button className="dropdownItem logout" onClick={handleLogout}>
                   <LogOut size={15} />

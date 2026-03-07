@@ -1,41 +1,31 @@
-/* Master layout template — Student section (and reused by other roles) */
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
-
-:root {
-  --student-max: 1280px;
-  --student-gutter: 24px;
-  --student-gutter-sm: 16px;
-  --student-gutter-xs: 12px;
-  --student-bg: #f4f6fa;
-  --student-section-gap: 24px;
-}
+/* Master layout template — Student section (uses global design tokens) */
+/* Tokens inherited from globals.css: --content-max, --gutter, --gutter-sm, --gutter-xs, --bg-color, --section-gap */
 
 .student-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
-  background: var(--student-bg);
+  background: var(--bg-color);
 }
 
-/* Optional inner wrapper for pages that need constrained width + padding */
 .student-page-wrap {
   width: 100%;
-  max-width: var(--student-max);
+  max-width: var(--content-max);
   margin: 0 auto;
-  padding: var(--student-gutter);
+  padding: var(--gutter);
   box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
   .student-page-wrap {
-    padding: var(--student-gutter-sm);
+    padding: var(--gutter-sm);
   }
 }
 
 @media (max-width: 480px) {
   .student-page-wrap {
-    padding: var(--student-gutter-xs);
+    padding: var(--gutter-xs);
   }
 }
 

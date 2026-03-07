@@ -1,11 +1,12 @@
 /* ===== BASE STYLES ===== */
 .tableSection {
-  background-color: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  background: white;
+  border-radius: var(--radius, 11px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   padding: clamp(1rem, 3vw, 1.5rem);
   overflow-x: auto;
   max-width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .tableHeader {
@@ -75,7 +76,7 @@
 }
 
 .requestsTable tr:hover {
-  background-color: #fff8e7;
+  background-color: rgba(201, 151, 42, 0.04);
 }
 
 /* ===== BUTTONS ===== */

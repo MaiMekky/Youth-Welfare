@@ -33,8 +33,8 @@ export default function Footer() {
           <div className="ftr-logo-area">
             <div className="ftr-logo-badge">HU</div>
             <div>
-              <p className="ftr-brand-name">جامعة حلوان</p>
-              <p className="ftr-brand-en">Helwan University</p>
+              <p className="ftr-brand-name">جامعة العاصمة</p>
+              <p className="ftr-brand-en">Capital University</p>
             </div>
           </div>
           <p className="ftr-brand-desc">
@@ -100,7 +100,7 @@ export default function Footer() {
 
       {/* ── Bottom bar ── */}
       <div className="ftr-bottom">
-        <p>© {new Date().getFullYear()} جامعة حلوان — نظام إدارة الأنشطة الطلابية. جميع الحقوق محفوظة.</p>
+        <p>© {new Date().getFullYear()} جامعة العاصمة — نظام إدارة الأنشطة الطلابية. جميع الحقوق محفوظة.</p>
       </div>
     </footer>
   );

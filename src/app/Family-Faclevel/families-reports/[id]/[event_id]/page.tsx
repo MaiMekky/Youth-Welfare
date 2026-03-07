@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "./detail.module.css";
 import { useParams, useRouter } from "next/navigation";
-import Header from "@/app/FacLevel/components/Header";
+
 import Footer from "@/app/FacLevel/components/Footer";
 
 /* ================= Interfaces ================= */
@@ -239,7 +239,7 @@ const handleApproveAll = async () => {
 
   return (
     <>
-      <Header />
+
 
       {notification && (
         <div

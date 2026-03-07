@@ -1,110 +1,69 @@
+
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import "@/app/uni-level/styles/Sidebar.css";
-import { Menu, X, User,Users } from "lucide-react";
+import "@/app/Styles/Sidebar.css";
+import { X, FileText, BarChart3, Users ,User } from "lucide-react";
 import Image from "next/image";
-import logo from "../../assets/logo1.png";
+import logo from "../../assets/logo.png";
 
-export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+interface SidebarProps {
+  isOpen?: boolean;
+  setIsOpen?: (v: boolean) => void;
+}
+
+export default function Sidebar({ isOpen = false, setIsOpen = () => {} }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const [adminInfo, setAdminInfo] = useState({ name: "", role: "" });
 
-  const [adminInfo, setAdminInfo] = useState({
-    name: "",
-    email: "",
-    role: "",
-  });
-
-  // Detect mobile screen
   useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
-    checkIfMobile();
-    window.addEventListener("resize", checkIfMobile);
-
-    return () => {
-      window.removeEventListener("resize", checkIfMobile);
-    };
-  }, []);
-
-  // Load admin info
-  useEffect(() => {
-    const userDataString = localStorage.getItem("user");
-    if (userDataString) {
+    const raw = localStorage.getItem("user");
+    if (raw) {
       try {
-        const userData = JSON.parse(userDataString);
-        setAdminInfo({
-          name: userData.name || "مدير النظام",
-          email: userData.email || "admin@helwan.edu.eg",
-          role: userData.role || "",
-        });
-      } catch (error) {
-        console.error("فشل في قراءة بيانات المدير", error);
-      }
+        const u = JSON.parse(raw);
+        setAdminInfo({ name: u.name || "مدير النظام", role: u.role || "" });
+      } catch {}
     }
   }, []);
 
-  // Close sidebar when clicking outside
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleOutside = (e: MouseEvent) => {
       const sidebar = document.getElementById("sidebar");
-      if (isOpen && sidebar && !sidebar.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
+      if (isOpen && sidebar && !sidebar.contains(e.target as Node)) setIsOpen(false);
     };
-
     if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("mousedown", handleOutside);
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
     }
-
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("mousedown", handleOutside);
       document.body.style.overflow = "unset";
     };
   }, [isOpen]);
 
-  const handleFamiliesClick = () => {
-    router.push("/uni-level-family");
-    if (isMobile) setIsOpen(false);
-  };
+  useEffect(() => { setIsOpen(false); }, [pathname]);
+
+  const go = (path: string) => { router.push(path); setIsOpen(false); };
 
   return (
     <>
-      {/* Mobile menu button */}
-      {isMobile && (
-        <button className="mobileMenuBtn" onClick={() => setIsOpen(true)}>
-          <Menu size={24} />
-        </button>
-      )}
-
       <aside id="sidebar" className={`sidebar ${isOpen ? "open" : ""}`}>
         <div className="sidebar-header">
-          <h2>إدارة الأسر الطلابية</h2>
-          <p>جامعة حلوان - قسم خدمات الطلاب</p>
-
-          <div className="headerIcon">
-            <Image src={logo} alt="logo" className="headerLogo" width={50} height={50} />
+          <div className="logo-container">
+            <div className="logo-wrapper">
+              <div className="logo-circle">
+                <Image src={logo} alt="شعار جامعة العاصمة" className="sidebar-logo" width={96} height={96} priority />
+              </div>
+            </div>
           </div>
-
-          {isMobile && (
-            <button className="closeBtn" onClick={() => setIsOpen(false)}>
-              <X size={20} />
-            </button>
-          )}
+          <h2 className="sidebar-title">إدارة الأسر الطلابية</h2> <p className="sidebar-subtitle">جامعة العاصمة - قسم خدمات الطلاب</p> <button className="sidebar-close-btn" onClick={() => setIsOpen(false)} aria-label="إغلاق القائمة"> <X size={20} /> </button>
         </div>
 
         <div className="profile-card">
-          <div className="profile-icon">
-            <User size={22} />
-          </div>
+          <div className="profile-icon"><User size={22} /></div>
           <div className="admin-info">
             <h3>{adminInfo.name}</h3>
             {adminInfo.role && <p>{adminInfo.role}</p>}
@@ -112,17 +71,15 @@ export default function Sidebar() {
         </div>
 
         <nav className="nav">
-          <button
-            className={pathname === "/uni-level-family" ? "active" : ""}
-            onClick={handleFamiliesClick}
-          >
-            <Users size={18} />
-            <span>إدارة الأسر</span>
+          <button className={pathname === "/uni-level-family" ? "active" : ""} onClick={() => go("/uni-level-family")}>
+            <Users size={18} /><span>ادارة الأسر</span>
           </button>
         </nav>
+
+        <div className="sidebar-footer"><span>الإصدار 1.0.0 | النظام نشط</span></div>
       </aside>
 
-      {isMobile && isOpen && <div className="overlay" onClick={() => setIsOpen(false)} />}
+      {isOpen && <div className="sidebar-overlay" onClick={() => setIsOpen(false)} aria-hidden="true" />}
     </>
   );
 }

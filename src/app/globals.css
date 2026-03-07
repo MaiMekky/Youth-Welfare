@@ -1,40 +1,124 @@
-/* globals.css */
+/* ==========================================================================
+   YOUTH WELFARE — Global Design System (Student-based theme)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
 
 :root {
+  /* Breakpoints (for reference in media queries) */
   --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;
   --breakpoint-xl: 1280px;
+
+  /* ─── Primary palette (navy + gold) ─── */
+  --primary-color: #1a2744;
+  --primary-mid: #243358;
+  --primary-light: #2e4070;
+  --primary-deep: #111b33;
+  --secondary-color: #c9972a;
+  --secondary-bright: #e0aa35;
+  --secondary-pale: rgba(201, 151, 42, 0.13);
+  --secondary-border: rgba(201, 151, 42, 0.28);
+
+  /* ─── Legacy aliases (navy/gold) ─── */
+  --navy: #1a2744;
+  --navy-mid: #243358;
+  --navy-light: #2e4070;
+  --navy-deep: #111b33;
+  --gold: #c9972a;
+  --gold-bright: #e0aa35;
+  --gold-pale: rgba(201, 151, 42, 0.13);
+  --gold-border: rgba(201, 151, 42, 0.28);
+
+  /* ─── Surfaces ─── */
+  --bg-color: #f4f6fa;
+  --bg-alt: #f0f3fa;
+  --card-bg: #ffffff;
+  --card-bg-subtle: rgba(255, 255, 255, 0.95);
+
+  /* ─── Text ─── */
+  --text-main: #1a2744;
+  --text-secondary: #475569;
+  --text-muted: rgba(255, 255, 255, 0.65);
+  --text-nav: rgba(255, 255, 255, 0.82);
+  --text-nav-muted: rgba(255, 255, 255, 0.48);
+
+  /* ─── Status ─── */
+  --danger: #c0392b;
+  --danger-light: rgba(192, 57, 43, 0.1);
+  --success: #22c55e;
+  --warning: #f59e0b;
+
+  /* ─── Layout ─── */
+  --content-max: 1280px;
+  --gutter: 24px;
+  --gutter-sm: 16px;
+  --gutter-xs: 12px;
+  --section-gap: 24px;
+
+  /* ─── Border radius ─── */
+  --radius: 11px;
+  --radius-sm: 8px;
+  --radius-lg: 14px;
+
+  /* ─── Shadows ─── */
+  --shadow-soft: 0 2px 10px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 40px rgba(8, 14, 32, 0.15);
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.06);
+
+  /* ─── Transitions ─── */
+  --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 0.15s ease;
+
+  /* ─── Navbar / Header ─── */
+  --navbar-h: 90px;
+  --navbar-h-sm: 78px;
+  --header-h: 64px;
+  --header-h-sm: 56px;
+
+  /* ─── Sidebar ─── */
+  --sidebar-w: 260px;
+  --sidebar-w-sm: 230px;
+
+  /* ─── Typography ─── */
   --font-size-base: 1rem;
-  --spacing-unit: 0.25rem;
+  --font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
 }
+
+/* ==========================================================================
+   Base styles
+   ========================================================================== */
+
 html {
-  direction: ltr;          
+  direction: ltr;
   scroll-behavior: smooth;
 }
 
 body {
-  direction: rtl;        
+  direction: rtl;
   padding: 0;
   margin: 0;
-  font-family: "Cairo", sans-serif;
-  background-color: #ffffff;
-  color: #000000;
+  font-family: var(--font-family);
+  background-color: var(--card-bg);
+  color: var(--text-main);
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
   overflow-x: hidden;
   width: 100%;
   min-height: 100%;
 }
-html { direction: ltr; }
 
-body { direction: ltr; }
-
-.app-body, .app-container, .page-wrapper {
-  direction: rtl;         
+.app-body,
+.app-container,
+.page-wrapper {
+  direction: rtl;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -43,7 +127,9 @@ button {
   cursor: pointer;
 }
 
-input, select, textarea {
+input,
+select,
+textarea {
   font-size: 1rem;
 }
 
@@ -52,6 +138,157 @@ img {
   height: auto;
 }
 
-html {
-  scroll-behavior: smooth;
+/* ==========================================================================
+   Shared utility classes (buttons, cards, inputs)
+   ========================================================================== */
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 100%);
+  color: var(--navy);
+  box-shadow: 0 2px 10px rgba(201, 151, 42, 0.25);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--gold-bright) 0%, #f0c040 100%);
+  box-shadow: 0 4px 16px rgba(201, 151, 42, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--text-nav);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.18);
+  transform: translateY(-1px);
+}
+
+.btn-danger {
+  background: var(--danger-light);
+  border-color: rgba(192, 57, 43, 0.25);
+  color: #ec9d98;
+}
+
+.btn-danger:hover {
+  background: rgba(192, 57, 43, 0.2);
+  border-color: rgba(192, 57, 43, 0.5);
+  color: #f5b2ae;
+  transform: translateY(-1px);
+}
+
+/* Cards */
+.card-base {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  padding: var(--gutter);
+  transition: box-shadow var(--transition);
+}
+
+.card-base:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Inputs */
+.input-base {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family);
+  font-size: 0.95rem;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.input-base:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-pale);
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-primary {
+  background: var(--gold-pale);
+  color: var(--gold);
+  border: 1px solid var(--gold-border);
+}
+
+.badge-danger {
+  background: rgba(192, 57, 43, 0.12);
+  color: var(--danger);
+}
+
+/* Logo standard */
+.logo-mark {
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  min-height: 52px;
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md), 0 0 0 1px var(--gold-border);
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+
+.logo-mark:hover {
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(201, 151, 42, 0.4);
+  transform: translateY(-1px);
+}
+
+.logo-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ==========================================================================
+   Accessibility & motion
+   ========================================================================== */
+
+*:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -1,98 +1,146 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "../Styles/Header.module.css";
 import Image from "next/image";
-import logo from "@/app/assets/logo1.png";
+import logo from "@/app/assets/logo.png";
 import { useRouter } from "next/navigation";
+import { Menu } from "lucide-react";
 
-export default function Header() {
+interface HeaderProps {
+  onSidebarOpen?: () => void;
+}
+
+// ── Department name groups ────────────────────────────────────
+const TKAFOL_NAMES  = new Set(["التكافل الإجتماعي", "التكافل الاجتماعي"]);
+const FAMILY_NAMES  = new Set(["الأسر الطلابية"]);
+const ACTIVITY_NAMES = new Set([
+  "الأنشطة الرياضية",
+  "الأنشطة الثقافية",
+  "الأنشطة البيئية",
+  "الأنشطة الاجتماعية",
+  "الأنشطة العلمية",
+]);
+
+interface Dept { dept_id: number; dept_name: string; }
+
+function readDepts(): Dept[] {
+  try {
+    const raw = localStorage.getItem("departments");
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+export default function Header({ onSidebarOpen }: HeaderProps) {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
- const handleLogout = () => {
- 
-  localStorage.clear();
+  // Dept-based visibility — computed once on mount
+  const [showTkafol,   setShowTkafol]   = useState(true);
+  const [showFamily,   setShowFamily]   = useState(true);
+  const [showActivity, setShowActivity] = useState(true);
+  const [deptRestricted, setDeptRestricted] = useState(false);
 
-  const isProd = process.env.NODE_ENV === "production";
-  const cookieEnd = `path=/; max-age=0; SameSite=Lax${isProd ? "; Secure" : ""}`;
- 
-  document.cookie = `access=; ${cookieEnd}`;
-  document.cookie = `refresh=; ${cookieEnd}`;
-  document.cookie = `user_type=; ${cookieEnd}`;
-  document.cookie = `roleKey=; ${cookieEnd}`;
-  document.cookie = `role=; ${cookieEnd}`;
+  useEffect(() => {
+    const depts = readDepts();
+    if (!depts.length) return; // no restriction — show all buttons (super_admin / fac_head etc.)
 
-  window.location.replace("/");
-};
+    setDeptRestricted(true);
+    const names = depts.map((d) => d.dept_name.trim());
 
+    setShowTkafol(names.some((n) => TKAFOL_NAMES.has(n)));
+    setShowFamily(names.some((n) => FAMILY_NAMES.has(n)));
+    setShowActivity(names.some((n) => ACTIVITY_NAMES.has(n)));
+  }, []);
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
+  const handleLogout = () => {
+    localStorage.clear();
+    const isProd = process.env.NODE_ENV === "production";
+    const cookieEnd = `path=/; max-age=0; SameSite=Lax${isProd ? "; Secure" : ""}`;
+    ["access","refresh","user_type","roleKey","role"].forEach(
+      (k) => (document.cookie = `${k}=; ${cookieEnd}`)
+    );
+    window.location.replace("/");
   };
 
-  const handleNavClick = (path: string) => {
-    router.push(path);
-    setIsMenuOpen(false); // Close menu after navigation
-  };
+  const nav = (path: string) => { router.push(path); setIsMenuOpen(false); };
 
   return (
     <header className={styles.header}>
       <div className={styles.headerContent}>
+
+        {/* RIGHT: sidebar toggle + logo + title */}
         <div className={styles.headerLeft}>
+          {onSidebarOpen && (
+            <button className={styles.sidebarToggleBtn} onClick={onSidebarOpen} aria-label="فتح القائمة الجانبية">
+              <Menu size={22} />
+            </button>
+          )}
           <div className={styles.headerIcon}>
-            <Image 
-              className={styles.headerLogo} 
-              src={logo} 
-              alt="شعار جامعة حلوان" 
-              priority
-            />
+            <Image className={styles.headerLogo} src={logo} alt="شعار جامعة العاصمة" priority />
           </div>
           <div className={styles.headerTitle}>
-            <h1 className={styles.headerTitleH1}>إدارة رعاية الشباب</h1>
-            <p className={styles.headerTitleP}>جامعة حلوان - قسم خدمات الطلاب</p>
+            <h1 className={styles.headerTitleH1}>إدارة رعاية الطلاب</h1>
+            <p className={styles.headerTitleP}>جامعة العاصمة - قسم خدمات الطلاب</p>
           </div>
         </div>
 
-        {/* Hamburger Menu Button (Mobile) */}
-        <button 
-          className={styles.hamburger}
-          onClick={toggleMenu}
-          aria-label="Toggle menu"
-          aria-expanded={isMenuOpen}
-        >
-          <span className={`${styles.hamburgerLine} ${isMenuOpen ? styles.open : ''}`}></span>
-          <span className={`${styles.hamburgerLine} ${isMenuOpen ? styles.open : ''}`}></span>
-          <span className={`${styles.hamburgerLine} ${isMenuOpen ? styles.open : ''}`}></span>
-        </button>
-
-        {/* Navigation Buttons */}
-        <nav 
-          className={`${styles.headerRight} ${isMenuOpen ? styles.mobileMenuOpen : ''}`}
-          aria-label="Main navigation"
-        >
-          <button
-            className={styles.navBtn}
-            onClick={() => handleNavClick("/FacLevel")}
-          >
-            التكافل الاجتماعي
-          </button>
-          <button
-            className={styles.navBtn}
-            onClick={() => handleNavClick("/Family-Faclevel/events")}
-          >
-            الاسر الطلابية
-          </button>
-          <button
-            className={styles.navBtn}
-            onClick={() => handleNavClick("/Events-Faclevel")}
-          >
-            الانشطة
-          </button>
+        {/* LEFT: conditional nav buttons */}
+        <div className={styles.headerRight}>
+          {showTkafol && (
+            <button className={styles.navBtn} onClick={() => nav("/FacLevel")}>
+              التكافل الاجتماعي
+            </button>
+          )}
+          {showFamily && (
+            <button className={styles.navBtn} onClick={() => nav("/Family-Faclevel/events")}>
+              الأسر الطلابية
+            </button>
+          )}
+          {showActivity && (
+            <button className={styles.navBtn} onClick={() => nav("/Events-Faclevel")}>
+              الأنشطة
+            </button>
+          )}
           <button className={styles.logoutBtn} onClick={handleLogout}>
             تسجيل خروج
           </button>
-        </nav>
+
+          <button
+            className={styles.navHamburger}
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="قائمة التنقل"
+            aria-expanded={isMenuOpen}
+          >
+            <span className={`${styles.hamburgerLine} ${isMenuOpen ? styles.open : ""}`} />
+            <span className={`${styles.hamburgerLine} ${isMenuOpen ? styles.open : ""}`} />
+            <span className={`${styles.hamburgerLine} ${isMenuOpen ? styles.open : ""}`} />
+          </button>
+        </div>
       </div>
+
+      {/* Mobile dropdown — same conditional logic */}
+      {isMenuOpen && (
+        <nav className={styles.mobileNavDropdown}>
+          {showTkafol && (
+            <button className={styles.dropdownBtn} onClick={() => nav("/FacLevel")}>
+              التكافل الاجتماعي
+            </button>
+          )}
+          {showFamily && (
+            <button className={styles.dropdownBtn} onClick={() => nav("/Family-Faclevel/events")}>
+              الأسر الطلابية
+            </button>
+          )}
+          {showActivity && (
+            <button className={styles.dropdownBtn} onClick={() => nav("/Events-Faclevel")}>
+              الأنشطة
+            </button>
+          )}
+          <button className={styles.dropdownLogoutBtn} onClick={handleLogout}>
+            تسجيل خروج
+          </button>
+        </nav>
+      )}
     </header>
   );
 }

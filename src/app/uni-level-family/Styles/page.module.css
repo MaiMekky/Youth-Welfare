@@ -1,7 +1,6 @@
 .container {
-  max-width: min(1400px, 100%);
+  max-width:100%;
   margin: 0 auto;
-  padding: clamp(1rem, 3vw, 1.25rem);
   direction: rtl;
   background-color: #F8F9FA;
   min-height: 100vh;

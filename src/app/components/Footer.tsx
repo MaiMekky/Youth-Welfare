@@ -3,7 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import { Facebook, Instagram, Youtube, MapPin, Phone, Mail } from "react-feather";
-import youthLogo from "../assets/logo1.png";
+import youthLogo from "../assets/logo.png";
 import styles from "../Styles/components/Footer.module.css";
 
 const Footer: React.FC = () => {

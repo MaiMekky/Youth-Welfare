@@ -13,10 +13,11 @@ body {
   line-height: 1.6;
 } */
 .formContainer {
-  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
   color: #2C3A5F;
+  width: 95%;
+  font-family: "Cairo", sans-serif;
 }
 
 /* Form Header */

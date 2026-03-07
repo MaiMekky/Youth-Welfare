@@ -105,33 +105,60 @@ type ApiEventImage = {
 type ReportFormState = {
   event_title: string;
   event_code: string;
+
   male_count: number | "";
   female_count: number | "";
   total_participants: number | "";
+
   start_date: string;
   duration_days: number | "";
+
   project_stages: string;
   preparation_stage: string;
   execution_stage: string;
   evaluation_stage: string;
   achieved_goals: string;
+
+  committee_preparation: string;
+  committee_organizing: string;
+  committee_execution: string;
+  committee_purchases: string;
+  committee_supervision: string;
+  committee_other: string;
+
+  evaluation: "excellent" | "very_good" | "good" | "acceptable";
+
+  suggestions: string;
 };
 
 const emptyReportForm: ReportFormState = {
   event_title: "",
   event_code: "",
+
   male_count: "",
   female_count: "",
   total_participants: "",
+
   start_date: "",
   duration_days: "",
+
   project_stages: "",
   preparation_stage: "",
   execution_stage: "",
   evaluation_stage: "",
   achieved_goals: "",
-};
 
+  committee_preparation: "",
+  committee_organizing: "",
+  committee_execution: "",
+  committee_purchases: "",
+  committee_supervision: "",
+  committee_other: "",
+
+  evaluation: "excellent",
+
+  suggestions: "",
+};
 type ApiEventDetails = {
   event_id: number;
   created_by_name: string;
@@ -314,13 +341,21 @@ export default function EventDetailsPage() {
   type ReportErrors = Partial<Record<keyof ReportFormState, string>>;
   const [reportErrors, setReportErrors] = useState<ReportErrors>({});
 
-  const MAX_290_FIELDS: (keyof ReportFormState)[] = [
+  const MAX_250_FIELDS: (keyof ReportFormState)[] = [
     "project_stages",
     "preparation_stage",
     "execution_stage",
     "evaluation_stage",
     "achieved_goals",
   ];
+      const committeeFields: (keyof ReportFormState)[] = [
+      "committee_preparation",
+      "committee_organizing",
+      "committee_execution",
+      "committee_purchases",
+      "committee_supervision",
+      "committee_other",
+    ];
 
   const validateReportForm = (form: ReportFormState): ReportErrors => {
     const next: ReportErrors = {};
@@ -355,13 +390,24 @@ export default function EventDetailsPage() {
     requireNonNegInt("total_participants", form.total_participants);
     requireNonNegInt("duration_days", form.duration_days);
 
-    // required + max 290
-    for (const k of MAX_290_FIELDS) {
+    // required + max 250
+    for (const k of MAX_250_FIELDS) {
       const v = String(form[k] ?? "").trim();
       if (!v) next[k] = "الحقل مطلوب";
-      else if (v.length > 290) next[k] = `الحد الأقصى 290 حرف (حاليًا ${v.length})`;
+      else if (v.length > 250) next[k] = `الحد الأقصى 250 حرف (حاليًا ${v.length})`;
+    }
+      for (const k of committeeFields) {
+      const v = String(form[k] ?? "").trim();
+      if (!v) next[k] = "الحقل مطلوب";
+      else if (v.length > 250) next[k] = `الحد الأقصى 250 حرف`;
     }
 
+    if (!form.evaluation) next.evaluation = "التقييم مطلوب";
+
+    if (!form.suggestions.trim()) next.suggestions = "الاقتراحات مطلوبة";
+
+
+  
     return next;
   };
 
@@ -412,7 +458,7 @@ export default function EventDetailsPage() {
 
     const token = getAccessToken();
     if (!token) {
-      showToast("مش لاقي التوكن (access).", "error");
+      showToast(" لا يوجد توكن (access).", "error");
       return;
     }
 
@@ -487,6 +533,14 @@ export default function EventDetailsPage() {
       execution_stage: "",
       evaluation_stage: "",
       achieved_goals: "",
+      committee_preparation: "",
+      committee_organizing: "",
+      committee_execution: "",
+      committee_purchases: "",
+      committee_supervision: "",
+      committee_other: "",
+      evaluation: "excellent",
+      suggestions: "",
     });
 
     setReportErrors({});
@@ -704,10 +758,9 @@ export default function EventDetailsPage() {
     const errs = validateReportForm(reportForm);
     setReportErrors(errs);
     if (Object.keys(errs).length) {
-      showToast("⚠️ من فضلك كمّلي البيانات المطلوبة", "warning");
+      showToast("⚠️ برجاء استكمال البيانات المطلوبة", "warning");
       return;
     }
-
     const body = {
       event_title: reportForm.event_title.trim(),
       event_code: reportForm.event_code.trim(),
@@ -724,6 +777,17 @@ export default function EventDetailsPage() {
       execution_stage: reportForm.execution_stage.trim(),
       evaluation_stage: reportForm.evaluation_stage.trim(),
       achieved_goals: reportForm.achieved_goals.trim(),
+
+      committee_preparation: reportForm.committee_preparation.trim(),
+      committee_organizing: reportForm.committee_organizing.trim(),
+      committee_execution: reportForm.committee_execution.trim(),
+      committee_purchases: reportForm.committee_purchases.trim(),
+      committee_supervision: reportForm.committee_supervision.trim(),
+      committee_other: reportForm.committee_other.trim(),
+
+      evaluation: reportForm.evaluation,
+
+      suggestions: [reportForm.suggestions.trim()],
     };
 
     try {
@@ -1118,6 +1182,30 @@ export default function EventDetailsPage() {
                     />
                     {reportErrors.duration_days && <div className={styles.modalError}>{reportErrors.duration_days}</div>}
                   </div>
+
+                    <div className={styles.modalField}>
+                  <label className={styles.modalLabel}>التقييم العام</label>
+
+                  <select
+                  className={styles.modalInput}
+                  value={reportForm.evaluation}
+                  onChange={(e)=>setReportField("evaluation",e.target.value as any)}
+                  >
+
+                  <option value="excellent">ممتاز</option>
+                  <option value="very_good">جيد جداً</option>
+                  <option value="good">جيد</option>
+                  <option value="acceptable">مقبول</option>
+
+                  </select>
+                  
+                  <div className={styles.modalHintRow}>
+                      {reportErrors.evaluation && (
+                        <span className={styles.modalErrorInline}>{reportErrors.evaluation}</span>
+                      )}
+                    </div>
+                  </div>
+
                 </div>
 
                 <div className={styles.modalField}>
@@ -1125,13 +1213,13 @@ export default function EventDetailsPage() {
                   <textarea
                     className={styles.modalTextarea}
                     rows={3}
-                    maxLength={290}
+                    maxLength={250}
                     value={reportForm.project_stages}
                     onChange={(e) => setReportField("project_stages", e.target.value)}
                     placeholder="اكتب مراحل المشروع..."
                   />
                   <div className={styles.modalHintRow}>
-                    <span className={styles.modalHint}>{(reportForm.project_stages ?? "").length}/290</span>
+                    <span className={styles.modalHint}>{(reportForm.project_stages ?? "").length}/250</span>
                     {reportErrors.project_stages && (
                       <span className={styles.modalErrorInline}>{reportErrors.project_stages}</span>
                     )}
@@ -1144,13 +1232,13 @@ export default function EventDetailsPage() {
                     <textarea
                       className={styles.modalTextarea}
                       rows={3}
-                      maxLength={290}
+                      maxLength={250}
                       value={reportForm.preparation_stage}
                       onChange={(e) => setReportField("preparation_stage", e.target.value)}
                       placeholder="اكتب تفاصيل الإعداد..."
                     />
                     <div className={styles.modalHintRow}>
-                      <span className={styles.modalHint}>{(reportForm.preparation_stage ?? "").length}/290</span>
+                      <span className={styles.modalHint}>{(reportForm.preparation_stage ?? "").length}/250</span>
                       {reportErrors.preparation_stage && (
                         <span className={styles.modalErrorInline}>{reportErrors.preparation_stage}</span>
                       )}
@@ -1162,13 +1250,13 @@ export default function EventDetailsPage() {
                     <textarea
                       className={styles.modalTextarea}
                       rows={3}
-                      maxLength={290}
+                      maxLength={250}
                       value={reportForm.execution_stage}
                       onChange={(e) => setReportField("execution_stage", e.target.value)}
                       placeholder="اكتب تفاصيل التنفيذ..."
                     />
                     <div className={styles.modalHintRow}>
-                      <span className={styles.modalHint}>{(reportForm.execution_stage ?? "").length}/290</span>
+                      <span className={styles.modalHint}>{(reportForm.execution_stage ?? "").length}/250</span>
                       {reportErrors.execution_stage && (
                         <span className={styles.modalErrorInline}>{reportErrors.execution_stage}</span>
                       )}
@@ -1180,13 +1268,13 @@ export default function EventDetailsPage() {
                     <textarea
                       className={styles.modalTextarea}
                       rows={3}
-                      maxLength={290}
+                      maxLength={250}
                       value={reportForm.evaluation_stage}
                       onChange={(e) => setReportField("evaluation_stage", e.target.value)}
                       placeholder="اكتب تفاصيل التقييم والمتابعة والنتائج..."
                     />
                     <div className={styles.modalHintRow}>
-                      <span className={styles.modalHint}>{(reportForm.evaluation_stage ?? "").length}/290</span>
+                      <span className={styles.modalHint}>{(reportForm.evaluation_stage ?? "").length}/250</span>
                       {reportErrors.evaluation_stage && (
                         <span className={styles.modalErrorInline}>{reportErrors.evaluation_stage}</span>
                       )}
@@ -1198,18 +1286,133 @@ export default function EventDetailsPage() {
                     <textarea
                       className={styles.modalTextarea}
                       rows={3}
-                      maxLength={290}
+                      maxLength={250}
                       value={reportForm.achieved_goals}
                       onChange={(e) => setReportField("achieved_goals", e.target.value)}
                       placeholder="اكتب ما تحقق من أهداف المشروع..."
                     />
                     <div className={styles.modalHintRow}>
-                      <span className={styles.modalHint}>{(reportForm.achieved_goals ?? "").length}/290</span>
+                      <span className={styles.modalHint}>{(reportForm.achieved_goals ?? "").length}/250</span>
                       {reportErrors.achieved_goals && (
                         <span className={styles.modalErrorInline}>{reportErrors.achieved_goals}</span>
                       )}
                     </div>
                   </div>
+
+                  <div className={styles.modalField}>
+                  <label className={styles.modalLabel}>لجنة الإعداد</label>
+                  <input
+                  className={styles.modalInput}
+                  value={reportForm.committee_preparation}
+                  onChange={(e)=>setReportField("committee_preparation",e.target.value)}
+                  placeholder="لجنة الاعداد..."
+                  />
+                        <div className={styles.modalHintRow}>
+                      {reportErrors.committee_preparation && (
+                        <span className={styles.modalErrorInline}>{reportErrors.committee_preparation}</span>
+                      )}
+                    </div>
+                  </div>
+
+            
+
+                  <div className={styles.modalField}>
+                  <label className={styles.modalLabel}>لجنة التنظيم</label>
+                  <input
+                  className={styles.modalInput}
+                  value={reportForm.committee_organizing}
+                  onChange={(e)=>setReportField("committee_organizing",e.target.value)}
+                  placeholder="لجنة التنظيم..."
+                  />
+                       <div className={styles.modalHintRow}>
+                      {reportErrors.committee_organizing && (
+                        <span className={styles.modalErrorInline}>{reportErrors.committee_organizing}</span>
+                      )}
+                    </div>
+                  </div>
+             
+                  <div className={styles.modalField}>
+                  <label className={styles.modalLabel}>لجنة التنفيذ</label>
+                  <input
+                  className={styles.modalInput}
+                  value={reportForm.committee_execution}
+                  onChange={(e)=>setReportField("committee_execution",e.target.value)}
+                  placeholder="لجنة التنفيذ..."
+                  />
+                      <div className={styles.modalHintRow}>
+                      {reportErrors.committee_execution && (
+                        <span className={styles.modalErrorInline}>{reportErrors.committee_execution}</span>
+                      )}
+                    </div>
+                  </div>
+              
+
+                  <div className={styles.modalField}>
+                  <label className={styles.modalLabel}>لجنة المشتريات</label>
+                  <input
+                  className={styles.modalInput}
+                  value={reportForm.committee_purchases}
+                  onChange={(e)=>setReportField("committee_purchases",e.target.value)}
+                  placeholder="لجنة المشتريات..."
+                  />
+                  
+                  <div className={styles.modalHintRow}>
+                      {reportErrors.committee_purchases && (
+                        <span className={styles.modalErrorInline}>{reportErrors.committee_purchases}</span>
+                      )}
+                    </div>
+                  </div>
+
+
+                  <div className={styles.modalField}>
+                  <label className={styles.modalLabel}>لجنة الإشراف</label>
+                  <input
+                  className={styles.modalInput}
+                  value={reportForm.committee_supervision}
+                  onChange={(e)=>setReportField("committee_supervision",e.target.value)}
+                  placeholder="لجنة الإشراف..."
+                  />
+                    <div className={styles.modalHintRow}>
+                      {reportErrors.committee_supervision && (
+                        <span className={styles.modalErrorInline}>{reportErrors.committee_supervision}</span>
+                      )}
+                    </div>
+                  </div>
+                
+
+                  <div className={styles.modalField}>
+                  <label className={styles.modalLabel}>لجان أخرى</label>
+                  <input
+                  className={styles.modalInput}
+                  value={reportForm.committee_other}
+                  onChange={(e)=>setReportField("committee_other",e.target.value)}
+                  placeholder="لجان أخرى..."
+                  />
+                      <div className={styles.modalHintRow}>
+                      {reportErrors.committee_other && (
+                        <span className={styles.modalErrorInline}>{reportErrors.committee_other}</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className={styles.modalField}>
+                  <label className={styles.modalLabel}>مقترحات للتحسين</label>
+                  <textarea
+                    className={styles.modalTextarea}
+                    rows={3}
+                    maxLength={250}
+                    value={reportForm.suggestions}
+                    onChange={(e) => setReportField("suggestions", e.target.value)}
+                    placeholder="اكتب مقترحات للتحسين..."
+                  />
+                  <div className={styles.modalHintRow}>
+                    <span className={styles.modalHint}>{(reportForm.suggestions ?? "").length}/250</span>
+                    {reportErrors.suggestions && (
+                      <span className={styles.modalErrorInline}>{reportErrors.suggestions}</span>
+                    )}
+                  </div>
+                </div>
+              
                 </div>
               </div>
 
@@ -1247,7 +1450,7 @@ export default function EventDetailsPage() {
               <span className={styles.miniChip}>
                 <Award size={14} /> {rewardsCount}
               </span>
-             {isFacultyEvent && (
+             {!isFacultyEvent && (
               <button
                 className={`${styles.actionBtn} ${styles.acceptBtn}`}
                 type="button"
@@ -1295,8 +1498,8 @@ export default function EventDetailsPage() {
 
                     <td>
                      <div className={styles.rowActions}>
-
-                  {!isFacultyEvent ? (
+  {/* ✅ لو Faculty Event: عرض التفاصيل فقط */}
+                  {isFacultyEvent ? (
                     <button
                       className={styles.actionBtn}
                       type="button"

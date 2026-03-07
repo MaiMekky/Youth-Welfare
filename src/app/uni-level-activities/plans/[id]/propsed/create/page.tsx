@@ -19,17 +19,6 @@ const API_URL = "http://localhost:8000";
 
 type Mode = "create" | "convert";
 
-const ACTIVITY_TYPES = [
-  "نشاط رياضي",
-  "نشاط ثقافي",
-  "نشاط بيئي",
-  "نشاط اجتماعي",
-  "نشاط علمي",
-  "نشاط خدمة عامة",
-  "نشاط فني",
-  "نشاط معسكرات",
-] as const;
-
 type FormState = {
   title: string;
   description: string;
@@ -58,43 +47,24 @@ function getAccessToken(): string | null {
   );
 }
 
-function decodeJwtPayload(token: string): any | null {
-  try {
-    const parts = token.split(".");
-    if (parts.length < 2) return null;
-    const base64Url = parts[1];
-    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
-    const json = atob(padded);
-    return JSON.parse(json);
-  } catch {
-    return null;
-  }
-}
-
 function getDeptFromToken(): number | null {
   const token = getAccessToken();
   if (!token) return null;
-
-  const payload = decodeJwtPayload(token);
-  if (!payload) return null;
-
-  const departments = payload?.departments;
-  const deptId1 = Array.isArray(departments) ? departments?.[0]?.dept_id : undefined;
-
-  const deptIds = payload?.dept_ids;
-  const deptId2 = Array.isArray(deptIds) ? deptIds?.[0] : undefined;
-
-  const candidate = deptId1 ?? deptId2;
-
-  if (typeof candidate === "number") return candidate;
-
-  if (typeof candidate === "string") {
-    const n = Number(candidate);
-    return Number.isFinite(n) ? n : null;
-  }
-
-  return null;
+  try {
+    const parts = token.split(".");
+    if (parts.length < 2) return null;
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
+    const payload = JSON.parse(atob(padded));
+    const departments = payload?.departments;
+    const deptId1 = Array.isArray(departments) ? departments?.[0]?.dept_id : undefined;
+    const deptIds = payload?.dept_ids;
+    const deptId2 = Array.isArray(deptIds) ? deptIds?.[0] : undefined;
+    const candidate = deptId1 ?? deptId2;
+    if (typeof candidate === "number") return candidate;
+    if (typeof candidate === "string") { const n = Number(candidate); return Number.isFinite(n) ? n : null; }
+    return null;
+  } catch { return null; }
 }
 
 async function apiFetch<T>(
@@ -106,30 +76,19 @@ async function apiFetch<T>(
     "Content-Type": "application/json",
     ...(opts.headers as any),
   };
-
   if (token) headers.Authorization = `Bearer ${token}`;
-
   try {
     const res = await fetch(`${API_URL}${path}`, { ...opts, headers });
     const text = await res.text();
-    const maybeJson = text
-      ? (() => {
-          try {
-            return JSON.parse(text);
-          } catch {
-            return text;
-          }
-        })()
-      : null;
-
+    const maybeJson = text ? (() => { try { return JSON.parse(text); } catch { return text; } })() : null;
     if (!res.ok) {
       const msg =
-        (typeof maybeJson === "object" && maybeJson && ((maybeJson as any).detail || (maybeJson as any).message || (maybeJson as any).error)) ||
+        (typeof maybeJson === "object" && maybeJson &&
+          ((maybeJson as any).detail || (maybeJson as any).message || (maybeJson as any).error)) ||
         (typeof maybeJson === "string" ? maybeJson : "") ||
         `طلب غير ناجح (${res.status})`;
       return { ok: false, message: String(msg), status: res.status, raw: maybeJson };
     }
-
     return { ok: true, data: maybeJson as T };
   } catch (e: any) {
     return { ok: false, message: e?.message || "مشكلة في الاتصال" };
@@ -144,6 +103,16 @@ export default function CreateProposedEventPage() {
   const planId = String(params?.id ?? "");
   const mode = (searchParams.get("mode") ?? "create") as Mode;
   const isConvert = mode === "convert";
+
+  // ── Departments from localStorage (exactly like CreatePlanModal) ──
+  const [departments, setDepartments] = useState<{ dept_id: number; dept_name: string }[]>([]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("departments");
+    if (stored) {
+      try { setDepartments(JSON.parse(stored)); } catch {}
+    }
+  }, []);
 
   const [form, setForm] = useState<FormState>({
     title: "",
@@ -189,26 +158,21 @@ export default function CreateProposedEventPage() {
   const validate = useMemo(
     () => (data: FormState): FormErrors => {
       const next: FormErrors = {};
-
       if (!data.title.trim()) next.title = "العنوان مطلوب";
       if (!data.location.trim()) next.location = "المكان مطلوب";
       if (!data.st_date.trim()) next.st_date = "تاريخ البداية مطلوب";
       if (!data.end_date.trim()) next.end_date = "تاريخ النهاية مطلوب";
       if (!data.cost.trim()) next.cost = "التكلفة مطلوبة";
       if (!data.type.trim()) next.type = "نوع النشاط مطلوب";
-
       const costNum = Number(String(data.cost).replaceAll(",", "").trim());
-      if (data.cost.trim() && (Number.isNaN(costNum) || costNum < 0)) next.cost = "ادخلي تكلفة صحيحة";
-
+      if (data.cost.trim() && (Number.isNaN(costNum) || costNum < 0)) next.cost = "برجاء ادخال تكلفة صحيحة";
       if (data.s_limit.trim()) {
         const limitNum = Number(String(data.s_limit).replaceAll(",", "").trim());
-        if (!Number.isInteger(limitNum) || limitNum < 0) next.s_limit = "ادخلي رقم صحيح 0 أو أكبر";
+        if (!Number.isInteger(limitNum) || limitNum < 0) next.s_limit = "برجاء ادخال رقم صحيح 0 أو أكبر";
       }
-
       if (data.st_date && data.end_date && data.st_date > data.end_date) {
         next.end_date = "تاريخ النهاية لازم يكون بعد/يساوي تاريخ البداية";
       }
-
       return next;
     },
     []
@@ -243,12 +207,11 @@ export default function CreateProposedEventPage() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     const nextErrors = validate(form);
     setErrors(nextErrors);
     touchAll();
     if (Object.keys(nextErrors).length) {
-      showToast("⚠️ راجعي الحقول المطلوبة", "warning");
+      showToast("⚠️ برجاء ملء الحقول المطلوبة", "warning");
       return;
     }
 
@@ -258,7 +221,7 @@ export default function CreateProposedEventPage() {
       const dept = getDeptFromToken();
       if (!dept) {
         setSubmitting(false);
-        showToast("❌ مش قادر أحدد القسم من التوكن", "error");
+        showToast("❌ لا يوجد رقم قسم في التوكن", "error");
         return;
       }
 
@@ -283,15 +246,8 @@ export default function CreateProposedEventPage() {
         method: "POST",
         body: JSON.stringify(payload),
       });
-
       setSubmitting(false);
-
-      if (!res.ok) {
-        console.error("خطأ إنشاء فعالية مقترحة:", res);
-        showToast(`❌ ${res.message}`, "error");
-        return;
-      }
-
+      if (!res.ok) { console.error("خطأ إنشاء فعالية مقترحة:", res); showToast(`❌ ${res.message}`, "error"); return; }
       showToast("✅ تم إنشاء فعالية مقترحة بنجاح", "success");
       router.push(`/uni-level-activities/plans/${planId}`);
       return;
@@ -321,45 +277,54 @@ export default function CreateProposedEventPage() {
       method: "POST",
       body: JSON.stringify(payload2),
     });
-
     setSubmitting(false);
-
-    if (!res2.ok) {
-      console.error("خطأ إضافة فعالية للخطة:", res2);
-      showToast(`❌ ${res2.message}`, "error");
-      return;
-    }
-
+    if (!res2.ok) { console.error("خطأ إضافة فعالية للخطة:", res2); showToast(`❌ ${res2.message}`, "error"); return; }
     sessionStorage.setItem(`converted_${planId}_${eventId}`, "1");
     sessionStorage.removeItem("convert_proposed_payload");
-
     showToast("✅ تم تحويل الفعالية وإضافتها للخطة", "success");
     router.push(`/uni-level-activities/plans/${planId}`);
   };
 
+  // ── Helper: resolve dept_name from dept id using localStorage departments ──
+  // Priority: 1) match by dept_id from departments array
+  //           2) fallback to e.type string if already a name
+  const resolveDeptName = (
+    deptId: number | undefined,
+    fallbackType: string | undefined,
+    depts: { dept_id: number; dept_name: string }[]
+  ): string => {
+    if (deptId) {
+      const match = depts.find((d) => d.dept_id === Number(deptId));
+      if (match) return match.dept_name;
+    }
+    // If no match by ID, try to see if fallbackType is already a valid dept_name
+    if (fallbackType) {
+      const nameMatch = depts.find((d) => d.dept_name === fallbackType);
+      if (nameMatch) return nameMatch.dept_name;
+    }
+    return fallbackType ?? "";
+  };
+
   useEffect(() => {
     if (!isConvert) return;
-
     const raw = sessionStorage.getItem("convert_proposed_payload");
     if (!raw) return;
-
     let parsed: any = null;
-    try {
-      parsed = JSON.parse(raw);
-    } catch {
-      return;
-    }
+    try { parsed = JSON.parse(raw); } catch { return; }
 
     const idFromPayload =
-      parsed?.event?.event_id ??
-      parsed?.event?.id ??
-      parsed?.row?.event_id ??
-      parsed?.row?.id ??
-      parsed?.event_id ??
-      parsed?.id ??
-      null;
+      parsed?.event?.event_id ?? parsed?.event?.id ??
+      parsed?.row?.event_id ?? parsed?.row?.id ??
+      parsed?.event_id ?? parsed?.id ?? null;
 
     const fallbackRow = parsed?.event ?? parsed?.row ?? parsed ?? {};
+
+    // Read departments fresh from localStorage for resolution
+    let localDepts: { dept_id: number; dept_name: string }[] = [];
+    try {
+      const stored = localStorage.getItem("departments");
+      if (stored) localDepts = JSON.parse(stored);
+    } catch {}
 
     const prefilledFromPayload: FormState = {
       title: fallbackRow?.title ?? "",
@@ -369,7 +334,8 @@ export default function CreateProposedEventPage() {
       end_date: fallbackRow?.end_date ?? "",
       cost: String(fallbackRow?.cost ?? ""),
       s_limit: String(fallbackRow?.s_limit ?? ""),
-      type: fallbackRow?.type ?? "",
+      // ── Resolve dept name from dept id in sessionStorage payload ──
+      type: resolveDeptName(fallbackRow?.dept, fallbackRow?.type, localDepts),
       restrictions: fallbackRow?.restrictions ?? "",
       reward: fallbackRow?.reward ?? "",
       resource: fallbackRow?.resource ?? "",
@@ -377,21 +343,21 @@ export default function CreateProposedEventPage() {
 
     setSeed(prefilledFromPayload);
     setForm((p) => ({ ...p, ...prefilledFromPayload }));
-
     if (!idFromPayload) return;
 
     setLoadingEvent(true);
-
     (async () => {
       const res = await apiFetch<any>(`/api/event/get-events/${idFromPayload}/`, { method: "GET" });
       setLoadingEvent(false);
-
-      if (!res.ok) {
-        showToast(`❌ ${res.message}`, "error");
-        return;
-      }
-
+      if (!res.ok) { showToast(`❌ ${res.message}`, "error"); return; }
       const e = (res.data as any)?.data ?? res.data;
+
+      // Read departments fresh again inside async (closure may be stale)
+      let asyncDepts: { dept_id: number; dept_name: string }[] = [];
+      try {
+        const stored = localStorage.getItem("departments");
+        if (stored) asyncDepts = JSON.parse(stored);
+      } catch {}
 
       const prefilled: FormState = {
         title: e?.title ?? "",
@@ -401,7 +367,8 @@ export default function CreateProposedEventPage() {
         end_date: e?.end_date ?? "",
         cost: e?.cost ?? "",
         s_limit: String(e?.s_limit ?? ""),
-        type: e?.type ?? "",
+        // ── KEY FIX: resolve dept_name from e.dept (the dept id from API) ──
+        type: resolveDeptName(e?.dept, e?.type, asyncDepts),
         restrictions: e?.restrictions ?? "",
         reward: e?.reward ?? "",
         resource: e?.resource ?? "",
@@ -414,9 +381,7 @@ export default function CreateProposedEventPage() {
   }, [isConvert, planId]);
 
   useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onCancel();
-    };
+    const onKeyDown = (e: KeyboardEvent) => { if (e.key === "Escape") onCancel(); };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -425,11 +390,11 @@ export default function CreateProposedEventPage() {
   return (
     <>
       {/* ✅ Toast */}
-         {toast.show && (
-  <div className={`${styles.toast} ${styles[`toast_${toast.type}`]}`}>
-    {toast.message}
-  </div>
-)}
+      {toast.show && (
+        <div className={`${styles.toast} ${styles[`toast_${toast.type}`]}`}>
+          {toast.message}
+        </div>
+      )}
 
       <div className={styles.page}>
         <div className={styles.container}>
@@ -440,10 +405,8 @@ export default function CreateProposedEventPage() {
                 {isConvert ? "يتم تحميل البيانات من الفعالية المقترحة ويمكن تعديلها" : "املئي البيانات الأساسية للفعالية"}
               </p>
             </div>
-
             <button className={styles.backBtn} onClick={() => router.back()} type="button">
-              <ArrowRight size={18} />
-              العودة للخطة
+              <ArrowRight size={18} /> العودة للخطة
             </button>
           </div>
 
@@ -455,12 +418,9 @@ export default function CreateProposedEventPage() {
             {isConvert && seed && (
               <div className={styles.summaryBox}>
                 <div className={styles.summaryHead}>
-                  <div className={styles.summaryIcon}>
-                    <Lightbulb size={18} />
-                  </div>
+                  <div className={styles.summaryIcon}><Lightbulb size={18} /></div>
                   <div className={styles.summaryTitle}>بيانات الفعالية المقترحة:</div>
                 </div>
-
                 <ul className={styles.summaryList}>
                   <li>العنوان: {seed.title || "—"}</li>
                   <li>المكان: {seed.location || "—"}</li>
@@ -470,7 +430,6 @@ export default function CreateProposedEventPage() {
                   <li>التكلفة: {seed.cost || "—"}</li>
                   <li>النوع: {seed.type || "—"}</li>
                 </ul>
-
                 {eventId && <div style={{ marginTop: 8, fontWeight: 800, opacity: 0.9 }}>رقم الفعالية: {eventId}</div>}
               </div>
             )}
@@ -489,9 +448,7 @@ export default function CreateProposedEventPage() {
             <form className={styles.form} onSubmit={onSubmit} noValidate>
               <div className={styles.grid2}>
                 <div className={styles.field}>
-                  <label className={styles.label}>
-                    <Briefcase size={16} /> العنوان
-                  </label>
+                  <label className={styles.label}><Briefcase size={16} /> العنوان</label>
                   <input
                     className={`${styles.input} ${touched.title && errors.title ? styles.inputError : ""}`}
                     placeholder="مثال: معرض"
@@ -503,9 +460,7 @@ export default function CreateProposedEventPage() {
                 </div>
 
                 <div className={styles.field}>
-                  <label className={styles.label}>
-                    <MapPin size={16} /> المكان
-                  </label>
+                  <label className={styles.label}><MapPin size={16} /> المكان</label>
                   <input
                     className={`${styles.input} ${touched.location && errors.location ? styles.inputError : ""}`}
                     placeholder="مثال: قاعة الاحتفالات"
@@ -518,30 +473,28 @@ export default function CreateProposedEventPage() {
 
                 <div className={styles.field}>
                   <label className={styles.label}>تاريخ البداية</label>
-              <input
-                className={`${styles.input} ${errors.st_date ? styles.inputError : ""}`}
-                type="date"
-                value={form.st_date}
-                onChange={(ev) => setField("st_date", ev.target.value)}
-              />
+                  <input
+                    className={`${styles.input} ${errors.st_date ? styles.inputError : ""}`}
+                    type="date"
+                    value={form.st_date}
+                    onChange={(ev) => setField("st_date", ev.target.value)}
+                  />
                   {touched.st_date && errors.st_date && <div className={styles.errorText}>{errors.st_date}</div>}
                 </div>
 
                 <div className={styles.field}>
                   <label className={styles.label}>تاريخ النهاية</label>
-              <input
-                className={`${styles.input} ${errors.end_date ? styles.inputError : ""}`}
-                type="date"
-                value={form.end_date}
-                onChange={(ev) => setField("end_date", ev.target.value)}
-              />
+                  <input
+                    className={`${styles.input} ${errors.end_date ? styles.inputError : ""}`}
+                    type="date"
+                    value={form.end_date}
+                    onChange={(ev) => setField("end_date", ev.target.value)}
+                  />
                   {touched.end_date && errors.end_date && <div className={styles.errorText}>{errors.end_date}</div>}
                 </div>
 
                 <div className={styles.field}>
-                  <label className={styles.label}>
-                    <DollarSign size={16} /> التكلفة
-                  </label>
+                  <label className={styles.label}><DollarSign size={16} /> التكلفة</label>
                   <input
                     className={`${styles.input} ${touched.cost && errors.cost ? styles.inputError : ""}`}
                     placeholder="مثال: 200"
@@ -555,9 +508,7 @@ export default function CreateProposedEventPage() {
                 </div>
 
                 <div className={styles.field}>
-                  <label className={styles.label}>
-                    <Users size={16} /> الحد الأقصى للمشاركين
-                  </label>
+                  <label className={styles.label}><Users size={16} /> الحد الأقصى للمشاركين</label>
                   <input
                     className={`${styles.input} ${touched.s_limit && errors.s_limit ? styles.inputError : ""}`}
                     placeholder="مثال: 0"
@@ -570,24 +521,22 @@ export default function CreateProposedEventPage() {
                   {touched.s_limit && errors.s_limit && <div className={styles.errorText}>{errors.s_limit}</div>}
                 </div>
 
+                {/* ── نوع النشاط — from localStorage departments ── */}
                 <div className={styles.field}>
-                 <label className={styles.label}>نوع النشاط</label>
-
-              <select
-                className={`${styles.input} ${errors.type ? styles.inputError : ""}`}
-                value={form.type}
-                onChange={(ev) => setField("type", ev.target.value)}
-              >
-                <option value="" disabled>
-                  اختار نوع النشاط
-                </option>
-
-                {ACTIVITY_TYPES.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
+                  <label className={styles.label}>نوع النشاط</label>
+                  <select
+                    className={`${styles.input} ${touched.type && errors.type ? styles.inputError : ""}`}
+                    value={form.type}
+                    onChange={(ev) => setField("type", ev.target.value)}
+                    onBlur={() => onBlur("type")}
+                  >
+                    <option value="" hidden>اختار نوع النشاط</option>
+                    {departments.map((d) => (
+                      <option key={d.dept_id} value={d.dept_name}>
+                        {d.dept_name}
+                      </option>
+                    ))}
+                  </select>
                   {touched.type && errors.type && <div className={styles.errorText}>{errors.type}</div>}
                 </div>
 
@@ -639,10 +588,8 @@ export default function CreateProposedEventPage() {
 
               <div className={styles.footer}>
                 <button type="button" className={styles.cancelBtn} onClick={onCancel} disabled={submitting}>
-                  <X size={18} />
-                  إلغاء
+                  <X size={18} /> إلغاء
                 </button>
-
                 <button type="submit" className={styles.saveBtn} disabled={submitting}>
                   <Save size={18} />
                   {submitting ? "جارٍ الحفظ..." : isConvert ? "حفظ كفعالية فعلية" : "حفظ كفعالية مقترحة"}

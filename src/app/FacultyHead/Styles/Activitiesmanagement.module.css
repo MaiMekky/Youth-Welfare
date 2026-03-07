@@ -3,10 +3,10 @@
 /* ── Root ── */
 .root {
   direction: rtl;
-  font-family: 'Tajawal', sans-serif;
+  font-family: "Cairo", sans-serif;
   background: #F1F5F9;
   min-height: 100vh;
-  padding: 24px;
+  /* padding: 24px; */
 }
 
 /* ── Header ── */
@@ -17,6 +17,8 @@
   margin-bottom: 22px;
   flex-wrap: wrap;
   gap: 12px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .headerText h1 {

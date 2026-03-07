@@ -208,7 +208,7 @@ export default function PlanDetailsPage() {
       const token = localStorage.getItem("access");
       if (!token) {
         setPlan(null);
-        showToast("❌ مفيش access token. اعملي تسجيل دخول تاني.", "error");
+        showToast("❌ مفيش access token. برجاء تسجيل دخول مرة اخري.", "error");
         return;
       }
 
@@ -488,7 +488,7 @@ export default function PlanDetailsPage() {
                               عرض التفاصيل
                             </button>
 
-                            {!converted && (
+                            {!converted && statusLabel(e.status) == "منتظر" && (
                               <button
                                 className={styles.actionBtn}
                                 type="button"

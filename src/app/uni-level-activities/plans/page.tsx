@@ -16,6 +16,7 @@ type ApiPlan = {
   events_count: number;
   created_at: string;
   updated_at: string;
+  dept: number;
 };
 
 export type PlanItem = {
@@ -28,6 +29,7 @@ export type PlanItem = {
   eventsCount: number;
   createdAt: string;
   updatedAt: string;
+  dept?: number
 };
 
 const API_URL = "http://localhost:8000/api";
@@ -43,7 +45,7 @@ export default function Page() {
 
     // داخل Page()
   const [openModal, setOpenModal] = useState(false);
-  const [editingPlan, setEditingPlan] = useState<null | { id: number; name: string; term: number }>(null);
+  const [editingPlan, setEditingPlan] = useState<null | { id: number; name: string; term: number , dept_id?: number }>(null);
 
   // Create
   const openCreate = () => {
@@ -53,7 +55,7 @@ export default function Page() {
 
   // Edit
   const openEdit = (p: PlanItem) => {
-    setEditingPlan({ id: p.id, name: p.title, term: p.term });
+    setEditingPlan({ id: p.id, name: p.title, term: p.term , dept_id: p.dept });
     setOpenModal(true);
   };
   const toPlanItem = (p: ApiPlan): PlanItem => {
@@ -69,6 +71,7 @@ export default function Page() {
       eventsCount: p.events_count ?? 0,
       createdAt: p.created_at,
       updatedAt: p.updated_at,
+      dept: p.dept, 
     };
   };
 
@@ -80,7 +83,7 @@ export default function Page() {
       const token = localStorage.getItem("access");
       if (!token) {
         setPlans([]);
-        setError("مفيش access token. اعملي تسجيل دخول تاني.");
+        setError("مفيش access token. برجاء تسجيل الدخول مرة اخري.");
         return;
       }
 

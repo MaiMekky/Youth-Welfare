@@ -47,17 +47,6 @@ type ManageEventPayload = {
   selected_facs: number[];
 };
 
-const ACTIVITY_TYPES = [
-  "نشاط رياضي",
-  "نشاط ثقافي",
-  "نشاط بيئي",
-  "نشاط اجتماعي",
-  "نشاط علمي",
-  "نشاط خدمة عامة",
-  "نشاط فني",
-  "نشاط معسكرات",
-] as const;
-
 function getAccessToken(): string | null {
   return (
     localStorage.getItem("access") ||
@@ -182,6 +171,23 @@ type FormState = {
 type FormErrors = Partial<Record<keyof FormState | "selected_facs", string>>;
 type NotifType = "success" | "error" | "warning";
 
+// ── Helper: resolve dept_name from dept id using localStorage departments ──
+function resolveDeptName(
+  deptId: number | undefined,
+  fallbackType: string | undefined,
+  depts: { dept_id: number; dept_name: string }[]
+): string {
+  if (deptId) {
+    const match = depts.find((d) => d.dept_id === Number(deptId));
+    if (match) return match.dept_name;
+  }
+  if (fallbackType) {
+    const nameMatch = depts.find((d) => d.dept_name === fallbackType);
+    if (nameMatch) return nameMatch.dept_name;
+  }
+  return fallbackType ?? "";
+}
+
 export default function EventForm({
   mode,
   id,
@@ -201,6 +207,16 @@ export default function EventForm({
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 2500);
   };
+
+  // ── Departments from localStorage (same as CreatePlanModal) ──
+  const [departments, setDepartments] = useState<{ dept_id: number; dept_name: string }[]>([]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("departments");
+    if (stored) {
+      try { setDepartments(JSON.parse(stored)); } catch {}
+    }
+  }, []);
 
   /** ===== Faculties from API ===== */
   const [faculties, setFaculties] = useState<Faculty[]>([]);
@@ -264,7 +280,6 @@ export default function EventForm({
 
     const costStr = String(form.cost ?? "").trim();
     const costNum = Number(costStr.replaceAll(",", ""));
-    // ✅ خلي التكلفة Required + رقم >= 0
     if (!costStr) next.cost = "التكلفة مطلوبة";
     else if (Number.isNaN(costNum) || costNum < 0) next.cost = "التكلفة لازم تكون رقم أكبر أو يساوي 0";
 
@@ -311,6 +326,13 @@ export default function EventForm({
 
       const e = res.data;
 
+      // Read departments fresh for resolution
+      let localDepts: { dept_id: number; dept_name: string }[] = [];
+      try {
+        const stored = localStorage.getItem("departments");
+        if (stored) localDepts = JSON.parse(stored);
+      } catch {}
+
       setForm((p) => ({
         ...p,
         title: e?.title ?? "",
@@ -320,7 +342,8 @@ export default function EventForm({
         s_limit: Number(e?.s_limit ?? 100),
         cost: String(e?.cost ?? ""),
         description: e?.description ?? "",
-        type: e?.type ?? "",
+        // ── KEY FIX: resolve dept id → dept_name for the select ──
+        type: resolveDeptName(e?.dept, e?.type, localDepts),
         restrictions: e?.restrictions ?? "",
         reward: e?.reward ?? "",
         resource: e?.resource ?? "",
@@ -397,7 +420,6 @@ export default function EventForm({
       showNotification("✅ تم إنشاء الفعالية بنجاح", "success");
     }
 
-    // سيبيها زي ما هي (بعد 2500ms التوست هيختفي)
     router.push("/Events-Faclevel");
   };
 
@@ -448,25 +470,21 @@ export default function EventForm({
               {errors.title && <div className={styles.errorText}>{errors.title}</div>}
             </div>
 
+            {/* ── نوع النشاط — from localStorage departments ── */}
             <div className={styles.field}>
               <label className={styles.label}>نوع النشاط</label>
-
               <select
                 className={`${styles.input} ${errors.type ? styles.inputError : ""}`}
                 value={form.type}
                 onChange={(ev) => setField("type", ev.target.value)}
               >
-                <option value="" disabled>
-                  اختار نوع النشاط
-                </option>
-
-                {ACTIVITY_TYPES.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
+                <option value="" hidden>اختار نوع النشاط</option>
+                {departments.map((d) => (
+                  <option key={d.dept_id} value={d.dept_name}>
+                    {d.dept_name}
                   </option>
                 ))}
               </select>
-
               {errors.type && <div className={styles.errorText}>{errors.type}</div>}
             </div>
 

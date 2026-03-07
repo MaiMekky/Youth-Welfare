@@ -215,7 +215,39 @@
 .hdr-dd-item:hover { background: #f5f7fc; }
 .hdr-dd-logout { color: #dc2626; }
 .hdr-dd-logout:hover { background: rgba(220,38,38,0.05); }
+/* ── Append this to your existing Header.css ──────────────── */
 
+/* Gold sidebar toggle — sits beside logo in .hdr-brand */
+.hdr-sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: rgba(201, 151, 42, 0.15);
+  border: 1px solid rgba(201, 151, 42, 0.35);
+  border-radius: 8px;
+  color: #e0aa35;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.hdr-sidebar-toggle:hover {
+  background: rgba(201, 151, 42, 0.28);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(201, 151, 42, 0.2);
+}
+
+.hdr-sidebar-toggle:focus-visible {
+  outline: 2px solid #e0aa35;
+  outline-offset: 2px;
+}
+
+/* Also update sidebar-close-btn to show on ALL screens (not just mobile) */
+.sidebar-close-btn {
+  display: flex !important;  /* always visible — sidebar is overlay on all screens */
+}
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .hdr-inner   { padding: 0 14px; height: 54px; }

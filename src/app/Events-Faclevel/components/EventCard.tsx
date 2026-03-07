@@ -57,7 +57,7 @@ export default function EventCard({
             <p className={styles.plan}>{item.planName}</p>
           </div>
 
-            {!hideToggle && ( 
+            {!hideToggle  && item.statusLabel === "مقبول" && (
           <div className={styles.approvalWrap}>
             <span className={styles.approvalLabel}>
               {item.isActive ? "نشط" : "غير نشط"}

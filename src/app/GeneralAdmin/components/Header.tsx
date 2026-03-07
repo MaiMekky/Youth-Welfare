@@ -2,52 +2,46 @@
 import "../Styles/Header.css";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { Bell, ChevronDown, LogOut, User, Menu } from "lucide-react";
+import { ChevronDown, LogOut, Menu } from "lucide-react";
 
-export default function Header() {
-  const router = useRouter();
+interface HeaderProps {
+  onSidebarOpen?: () => void;
+}
+
+export default function Header({ onSidebarOpen }: HeaderProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [notifCount] = useState(3);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
   const [adminInfo, setAdminInfo] = useState({ name: "المدير العام", email: "admin@university.edu" });
 
   useEffect(() => {
-    const userDataString = localStorage.getItem("user");
-    if (userDataString) {
-      try {
-        const userData = JSON.parse(userDataString);
-        setAdminInfo({
-          name: userData.name || "المدير العام",
-          email: userData.email || "admin@university.edu",
-        });
-      } catch {}
-    }
+    try {
+      const raw = localStorage.getItem("user");
+      if (raw) {
+        const u = JSON.parse(raw);
+        setAdminInfo({ name: u.name || "المدير العام", email: u.email || "admin@university.edu" });
+      }
+    } catch {}
   }, []);
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node))
         setDropdownOpen(false);
-      }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   const handleLogout = () => {
     localStorage.clear();
     const isProd = process.env.NODE_ENV === "production";
     const cookieEnd = `path=/; max-age=0; SameSite=Lax${isProd ? "; Secure" : ""}`;
-    document.cookie = `access=; ${cookieEnd}`;
-    document.cookie = `refresh=; ${cookieEnd}`;
-    document.cookie = `user_type=; ${cookieEnd}`;
-    document.cookie = `roleKey=; ${cookieEnd}`;
-    document.cookie = `role=; ${cookieEnd}`;
+    ["access", "refresh", "user_type", "roleKey", "role"].forEach(k => {
+      document.cookie = `${k}=; ${cookieEnd}`;
+    });
     window.location.replace("/");
   };
 
-  // Get initials from name
   const getInitials = (name: string) =>
     name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 
@@ -55,38 +49,31 @@ export default function Header() {
     <header className="header">
       <div className="headerContent">
 
-        {/* RIGHT: Title */}
-        <div className="headerTitle">
-          <h1 className="headerTitleH1">نظام إدارة رعاية الطلاب</h1>
-          <p className="headerTitleP">لوحة تحكم المدير العام</p>
+        {/* RIGHT side in RTL: toggle + title */}
+        <div className="headerLeft">
+          {/* Gold ☰ — opens sidebar on ALL screen sizes */}
+          {onSidebarOpen && (
+            <button
+              className="headerSidebarToggle"
+              onClick={onSidebarOpen}
+              aria-label="فتح القائمة الجانبية"
+            >
+              <Menu size={20} />
+            </button>
+          )}
+          <div className="headerTitle">
+            <h1 className="headerTitleH1">نظام إدارة رعاية الطلاب</h1>
+            <p className="headerTitleP">لوحة تحكم المدير العام</p>
+          </div>
         </div>
 
-        {/* LEFT: Action buttons */}
+        {/* LEFT side in RTL: user dropdown */}
         <div className="headerActions">
-
-          {/* Sidebar toggle (layout icon)
-          <button className="headerIconBtn" title="القائمة">
-            <Menu size={20} />
-          </button> */}
-
-          
-
-          {/* Notifications
-          <button className="headerIconBtn notifBtn" title="الإشعارات">
-            <Bell size={20} />
-            {notifCount > 0 && <span className="notifBadge">{notifCount}</span>}
-          </button> */}
-
-          {/* User dropdown */}
           <div className="userDropdownWrap" ref={dropdownRef}>
-            <button
-              className="userBtn"
-              onClick={() => setDropdownOpen((v) => !v)}
-            >
+            <button className="userBtn" onClick={() => setDropdownOpen((v) => !v)}>
               <div className="userAvatar">{getInitials(adminInfo.name)}</div>
               <div className="userInfo">
                 <span className="userName">{adminInfo.name}</span>
-               
               </div>
               <ChevronDown size={16} className={`chevron ${dropdownOpen ? "open" : ""}`} />
             </button>
@@ -101,8 +88,6 @@ export default function Header() {
                   </div>
                 </div>
                 <div className="dropdownDivider" />
-              
-                <div className="dropdownDivider" />
                 <button className="dropdownItem logout" onClick={handleLogout}>
                   <LogOut size={15} />
                   <span>تسجيل الخروج</span>
@@ -110,7 +95,6 @@ export default function Header() {
               </div>
             )}
           </div>
-
         </div>
       </div>
     </header>

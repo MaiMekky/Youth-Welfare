@@ -1,133 +1,121 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import "@/app/Styles/Sidebar.css";
-import { Menu, X, User, Briefcase, Calendar } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+// ✅ Own CSS — never conflicts with shared Sidebar.css
+import "../Styles/Sidebar.css";
+import { X, Briefcase, Calendar } from "lucide-react";
 import Image from "next/image";
 import logo from "@/utils/logo.png";
 
 interface SidebarProps {
+  isOpen?: boolean;
+  setIsOpen?: (v: boolean) => void;
   onNavigate?: (view: string) => void;
   currentView?: string;
 }
 
-export default function Sidebar({ onNavigate, currentView }: SidebarProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [adminInfo, setAdminInfo] = useState({ name: "" });
+const NAV = [
+  { id: "activities", label: "الفعاليات العامة", Icon: Briefcase },
+  { id: "plan",       label: "تقارير الكليات",   Icon: Calendar  },
+];
 
+function getInitials(name: string) {
+  return name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+}
+
+export default function Sidebar({
+  isOpen = false,
+  setIsOpen = () => {},
+  onNavigate,
+  currentView,
+}: SidebarProps) {
+  const sidebarRef = useRef<HTMLElement>(null);
+  const [adminInfo, setAdminInfo] = useState({ name: "المدير العام", role: "المدير العام للإدارة" });
+
+  // Load user info
   useEffect(() => {
-    const userDataString = localStorage.getItem("user");
-    if (userDataString) {
-      try {
-        const userData = JSON.parse(userDataString);
-        setAdminInfo({ name: userData.name || "مدير النظام" });
-      } catch {}
-    }
+    try {
+      const raw = localStorage.getItem("user");
+      if (raw) {
+        const u = JSON.parse(raw);
+        setAdminInfo({
+          name: u.name || "المدير العام",
+          role: u.role || "المدير العام للإدارة",
+        });
+      }
+    } catch {}
   }, []);
 
-  const handleNavigate = (view: string) => {
-    if (onNavigate) onNavigate(view);
-    setIsOpen(false);
-  };
-
+  // Outside-click — deferred to avoid race with toggle button
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      const sidebar = document.getElementById("sidebar");
-      const menuBtn = document.querySelector(".mobile-menu-btn");
-      if (
-        isOpen &&
-        sidebar &&
-        !sidebar.contains(e.target as Node) &&
-        menuBtn &&
-        !(menuBtn as HTMLElement).contains(e.target as Node)
-      ) {
-        setIsOpen(false);
-      }
+    if (!isOpen) return;
+
+    const handleOutside = (e: MouseEvent) => {
+      if (sidebarRef.current?.contains(e.target as Node)) return;
+      setTimeout(() => setIsOpen(false), 0);
     };
 
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-
+    document.addEventListener("mousedown", handleOutside);
+    document.body.style.overflow = "hidden";
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("mousedown", handleOutside);
       document.body.style.overflow = "unset";
     };
   }, [isOpen]);
 
+  const handleNavigate = (view: string) => {
+    onNavigate?.(view);
+    setIsOpen(false);
+  };
+
   return (
     <>
-      <button
-        className="mobile-menu-btn"
-        onClick={() => setIsOpen(true)}
-        aria-label="فتح القائمة"
+      <aside
+        ref={sidebarRef}
+        className={`ga-sidebar${isOpen ? " open" : ""}`}
+        dir="rtl"
       >
-        <Menu size={22} />
-      </button>
-
-      <aside id="sidebar" className={`sidebar ${isOpen ? "open" : ""}`}>
-        <div className="sidebar-header">
-          <div className="logo-container" aria-hidden="true">
-            <div className="logo-wrapper">
-              <div className="logo-circle">
-                <Image
-                  src={logo}
-                  alt="شعار جامعة العاصمة"
-                  className="sidebar-logo"
-                  width={96}
-                  height={96}
-                  priority
-                />
-              </div>
-            </div>
+        <div className="ga-sidebar-header">
+          <div className="ga-logo-wrap">
+            <Image src={logo} alt="شعار الجامعة" className="ga-logo-img" width={44} height={44} priority />
           </div>
-          <h2 className="sidebar-title">إدارة رعاية الطلاب</h2>
-          <p className="sidebar-subtitle">جامعة العاصمة</p>
-          <button
-            className="sidebar-close-btn"
-            onClick={() => setIsOpen(false)}
-            aria-label="إغلاق القائمة"
-          >
+          <div className="ga-brand">
+            <span className="ga-brand-title">جامعة العاصمة</span>
+            <span className="ga-brand-sub">إدارة رعاية الطلاب</span>
+          </div>
+
+          <button className="ga-close-btn" onClick={() => setIsOpen(false)} aria-label="إغلاق القائمة">
             <X size={18} />
           </button>
         </div>
 
-        <div className="profile-card">
-          <div className="profile-icon">
-            <User size={22} />
-          </div>
-          <div className="admin-info">
-            <h3>{adminInfo.name || "المدير العام"}</h3>
-            <p>المدير العام للإدارة</p>
+        <div className="ga-divider" />
+
+        <div className="ga-profile-card">
+          <div className="ga-profile-avatar">{getInitials(adminInfo.name)}</div>
+          <div className="ga-profile-info">
+            <span className="ga-profile-name">{adminInfo.name}</span>
+            <span className="ga-profile-role">{adminInfo.role}</span>
           </div>
         </div>
 
-        <nav className="nav">
-          <button
-            className={currentView === "activities" ? "active" : ""}
-            onClick={() => handleNavigate("activities")}
-          >
-            <Briefcase size={18} />
-            <span>الفعاليات العامة</span>
-          </button>
-          <button
-            className={currentView === "plan" ? "active" : ""}
-            onClick={() => handleNavigate("plan")}
-          >
-            <Calendar size={18} />
-            <span>تقارير الكليات</span>
-          </button>
+        <nav className="ga-nav">
+          {NAV.map(({ id, label, Icon }) => (
+            <button
+              key={id}
+              className={currentView === id ? "active" : ""}
+              onClick={() => handleNavigate(id)}
+            >
+              <Icon size={18} />
+              <span>{label}</span>
+            </button>
+          ))}
         </nav>
+
+        <div className="ga-sidebar-footer"><span>الإصدار 1.0.0 | النظام نشط</span></div>
       </aside>
 
       {isOpen && (
-        <div
-          className="sidebar-overlay"
-          onClick={() => setIsOpen(false)}
-          aria-hidden="true"
-        />
+        <div className="ga-overlay" onClick={() => setIsOpen(false)} aria-hidden="true" />
       )}
     </>
   );

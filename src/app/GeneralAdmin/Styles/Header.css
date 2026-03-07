@@ -22,7 +22,43 @@
   background: linear-gradient(90deg, transparent 0%, var(--gold) 20%, var(--gold-bright) 50%, var(--gold) 80%, transparent 100%);
   z-index: 1;
 }
+/* ── Append these rules to your existing Header.css ───────── */
 
+/* Wrapper for toggle + title on the right side (RTL) */
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Gold sidebar toggle button */
+.headerSidebarToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: rgba(201, 151, 42, 0.15);
+  border: 1px solid rgba(201, 151, 42, 0.35);
+  border-radius: 8px;
+  color: #e0aa35;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
+}
+.headerSidebarToggle:hover {
+  background: rgba(201, 151, 42, 0.28);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(201, 151, 42, 0.2);
+}
+.headerSidebarToggle:focus-visible {
+  outline: 2px solid #e0aa35;
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  .headerSidebarToggle { width: 34px; height: 34px; }
+}
 .headerContent {
   display: flex;
   align-items: center;

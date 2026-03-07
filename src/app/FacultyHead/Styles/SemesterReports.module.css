@@ -3,7 +3,7 @@
 /* ── Root ── */
 .root {
   direction: rtl;
-  font-family: 'Tajawal', sans-serif;
+  font-family: "Cairo", sans-serif;
   background: #F1F5F9;
   min-height: 100vh;
   padding: 24px;

@@ -98,17 +98,17 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
         {/* LEFT: conditional nav buttons */}
         <div className={styles.headerRight}>
           {showTkafol && (
-            <button className={styles.navBtn} onClick={() => nav("/uni-level")}>
+            <button className={styles.navBtn} hidden onClick={() => nav("/uni-level")}>
               التكافل الاجتماعي
             </button>
           )}
           {showFamily && (
-            <button className={styles.navBtn} onClick={() => nav("/uni-level-family")}>
+            <button className={styles.navBtn} hidden onClick={() => nav("/uni-level-family")}>
               الأسر الطلابية
             </button>
           )}
           {showActivity && (
-            <button className={styles.navBtn} onClick={() => nav("/uni-level-activities")}>
+            <button className={styles.navBtn} hidden onClick={() => nav("/uni-level-activities")}>
               الأنشطة
             </button>
           )}
@@ -133,17 +133,17 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
       {open && (
         <nav className={styles.mobileNavDropdown}>
           {showTkafol && (
-            <button className={styles.dropdownBtn} onClick={() => nav("/uni-level")}>
+            <button className={styles.dropdownBtn} hidden onClick={() => nav("/uni-level")}>
               التكافل الاجتماعي
             </button>
           )}
           {showFamily && (
-            <button className={styles.dropdownBtn} onClick={() => nav("/uni-level-family")}>
+            <button className={styles.dropdownBtn} hidden onClick={() => nav("/uni-level-family")}>
               الأسر الطلابية
             </button>
           )}
           {showActivity && (
-            <button className={styles.dropdownBtn} onClick={() => nav("/uni-level-activities")}>
+            <button className={styles.dropdownBtn} hidden onClick={() => nav("/uni-level-activities")}>
               الأنشطة
             </button>
           )}

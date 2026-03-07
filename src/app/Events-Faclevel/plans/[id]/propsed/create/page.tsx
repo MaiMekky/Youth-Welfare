@@ -21,17 +21,6 @@ const API_URL = "http://localhost:8000";
 
 type Mode = "create" | "convert";
 
-const ACTIVITY_TYPES = [
-  "نشاط رياضي",
-  "نشاط ثقافي",
-  "نشاط بيئي",
-  "نشاط اجتماعي",
-  "نشاط علمي",
-  "نشاط خدمة عامة",
-  "نشاط فني",
-  "نشاط معسكرات",
-] as const;
-
 type FormState = {
   title: string;
   description: string;
@@ -138,6 +127,23 @@ async function apiFetch<T>(
   }
 }
 
+// ── Helper: resolve dept_name from dept id using localStorage departments ──
+function resolveDeptName(
+  deptId: number | undefined,
+  fallbackType: string | undefined,
+  depts: { dept_id: number; dept_name: string }[]
+): string {
+  if (deptId) {
+    const match = depts.find((d) => d.dept_id === Number(deptId));
+    if (match) return match.dept_name;
+  }
+  if (fallbackType) {
+    const nameMatch = depts.find((d) => d.dept_name === fallbackType);
+    if (nameMatch) return nameMatch.dept_name;
+  }
+  return fallbackType ?? "";
+}
+
 export default function CreateProposedEventPage() {
   const router = useRouter();
   const params = useParams();
@@ -146,6 +152,16 @@ export default function CreateProposedEventPage() {
   const planId = String(params?.id ?? "");
   const mode = (searchParams.get("mode") ?? "create") as Mode;
   const isConvert = mode === "convert";
+
+  // ── Departments from localStorage (same as CreatePlanModal) ──
+  const [departments, setDepartments] = useState<{ dept_id: number; dept_name: string }[]>([]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("departments");
+    if (stored) {
+      try { setDepartments(JSON.parse(stored)); } catch {}
+    }
+  }, []);
 
   const [form, setForm] = useState<FormState>({
     title: "",
@@ -363,6 +379,13 @@ export default function CreateProposedEventPage() {
 
     const fallbackRow = parsed?.event ?? parsed?.row ?? parsed ?? {};
 
+    // Read departments fresh from localStorage for resolution
+    let localDepts: { dept_id: number; dept_name: string }[] = [];
+    try {
+      const stored = localStorage.getItem("departments");
+      if (stored) localDepts = JSON.parse(stored);
+    } catch {}
+
     const prefilledFromPayload: FormState = {
       title: fallbackRow?.title ?? "",
       description: fallbackRow?.description ?? "",
@@ -371,7 +394,8 @@ export default function CreateProposedEventPage() {
       end_date: fallbackRow?.end_date ?? "",
       cost: String(fallbackRow?.cost ?? ""),
       s_limit: String(fallbackRow?.s_limit ?? ""),
-      type: fallbackRow?.type ?? "",
+      // ── Resolve dept name from dept id in sessionStorage payload ──
+      type: resolveDeptName(fallbackRow?.dept, fallbackRow?.type, localDepts),
       restrictions: fallbackRow?.restrictions ?? "",
       reward: fallbackRow?.reward ?? "",
       resource: fallbackRow?.resource ?? "",
@@ -395,6 +419,13 @@ export default function CreateProposedEventPage() {
 
       const e = (res.data as any)?.data ?? res.data;
 
+      // Read departments fresh again inside async (closure may be stale)
+      let asyncDepts: { dept_id: number; dept_name: string }[] = [];
+      try {
+        const stored = localStorage.getItem("departments");
+        if (stored) asyncDepts = JSON.parse(stored);
+      } catch {}
+
       const prefilled: FormState = {
         title: e?.title ?? "",
         description: e?.description ?? "",
@@ -403,7 +434,8 @@ export default function CreateProposedEventPage() {
         end_date: e?.end_date ?? "",
         cost: e?.cost ?? "",
         s_limit: String(e?.s_limit ?? ""),
-        type: e?.type ?? "",
+        // ── KEY FIX: resolve dept id → dept_name for the select ──
+        type: resolveDeptName(e?.dept, e?.type, asyncDepts),
         restrictions: e?.restrictions ?? "",
         reward: e?.reward ?? "",
         resource: e?.resource ?? "",
@@ -427,11 +459,11 @@ export default function CreateProposedEventPage() {
   return (
     <>
       {/* ✅ Toast */}
-         {toast.show && (
-  <div className={`${styles.toast} ${styles[`toast_${toast.type}`]}`}>
-    {toast.message}
-  </div>
-)}
+      {toast.show && (
+        <div className={`${styles.toast} ${styles[`toast_${toast.type}`]}`}>
+          {toast.message}
+        </div>
+      )}
 
       <div className={styles.page}>
         <div className={styles.container}>
@@ -520,23 +552,23 @@ export default function CreateProposedEventPage() {
 
                 <div className={styles.field}>
                   <label className={styles.label}>تاريخ البداية</label>
-              <input
-                className={`${styles.input} ${errors.st_date ? styles.inputError : ""}`}
-                type="date"
-                value={form.st_date}
-                onChange={(ev) => setField("st_date", ev.target.value)}
-              />
+                  <input
+                    className={`${styles.input} ${errors.st_date ? styles.inputError : ""}`}
+                    type="date"
+                    value={form.st_date}
+                    onChange={(ev) => setField("st_date", ev.target.value)}
+                  />
                   {touched.st_date && errors.st_date && <div className={styles.errorText}>{errors.st_date}</div>}
                 </div>
 
                 <div className={styles.field}>
                   <label className={styles.label}>تاريخ النهاية</label>
-              <input
-                className={`${styles.input} ${errors.end_date ? styles.inputError : ""}`}
-                type="date"
-                value={form.end_date}
-                onChange={(ev) => setField("end_date", ev.target.value)}
-              />
+                  <input
+                    className={`${styles.input} ${errors.end_date ? styles.inputError : ""}`}
+                    type="date"
+                    value={form.end_date}
+                    onChange={(ev) => setField("end_date", ev.target.value)}
+                  />
                   {touched.end_date && errors.end_date && <div className={styles.errorText}>{errors.end_date}</div>}
                 </div>
 
@@ -572,24 +604,22 @@ export default function CreateProposedEventPage() {
                   {touched.s_limit && errors.s_limit && <div className={styles.errorText}>{errors.s_limit}</div>}
                 </div>
 
+                {/* ── نوع النشاط — from localStorage departments ── */}
                 <div className={styles.field}>
-                 <label className={styles.label}>نوع النشاط</label>
-
-              <select
-                className={`${styles.input} ${errors.type ? styles.inputError : ""}`}
-                value={form.type}
-                onChange={(ev) => setField("type", ev.target.value)}
-              >
-                <option value="" disabled>
-                  اختار نوع النشاط
-                </option>
-
-                {ACTIVITY_TYPES.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
+                  <label className={styles.label}>نوع النشاط</label>
+                  <select
+                    className={`${styles.input} ${touched.type && errors.type ? styles.inputError : ""}`}
+                    value={form.type}
+                    onChange={(ev) => setField("type", ev.target.value)}
+                    onBlur={() => onBlur("type")}
+                  >
+                    <option value="" hidden>اختار نوع النشاط</option>
+                    {departments.map((d) => (
+                      <option key={d.dept_id} value={d.dept_name}>
+                        {d.dept_name}
+                      </option>
+                    ))}
+                  </select>
                   {touched.type && errors.type && <div className={styles.errorText}>{errors.type}</div>}
                 </div>
 

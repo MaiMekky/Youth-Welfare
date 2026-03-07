@@ -7,9 +7,9 @@ import { X, Save } from "lucide-react";
 
 const API_URL = "http://localhost:8000/api";
 
-type InitialPlan = { id: number; name: string; term: number } | null;
+type InitialPlan = { id: number; name: string; term: number; dept_id?: number } | null;
 
-type FormState = { name: string; term: number };
+type FormState = { name: string; term: number; dept_id: number };
 type FormErrors = Partial<Record<keyof FormState, string>>;
 
 type ToastType = "success" | "error" | "warning";
@@ -17,8 +17,8 @@ type ToastType = "success" | "error" | "warning";
 export default function CreatePlanModal({
   open,
   onClose,
-  initialPlan, // 👈 لو موجود يبقى Edit
-  onSaved, // 👈 بعد save نعمل refresh
+  initialPlan,
+  onSaved,
 }: {
   open: boolean;
   onClose: () => void;
@@ -27,9 +27,11 @@ export default function CreatePlanModal({
 }) {
   const isEdit = !!initialPlan;
 
-  const [form, setForm] = useState<FormState>({ name: "", term: 1 });
+  const [form, setForm] = useState<FormState>({ name: "", term: 1, dept_id: 0 });
   const [errors, setErrors] = useState<FormErrors>({});
   const [saving, setSaving] = useState(false);
+
+  const [departments, setDepartments] = useState<any[]>([]);
 
   /* ===================== Toast (same style) ===================== */
   const [toast, setToast] = useState<{ show: boolean; message: string; type: ToastType }>({
@@ -44,7 +46,7 @@ export default function CreatePlanModal({
   };
 
   const reset = () => {
-    setForm({ name: "", term: 1 });
+    setForm({ name: "", term: 1, dept_id: 0 });
     setErrors({});
     setSaving(false);
   };
@@ -54,14 +56,27 @@ export default function CreatePlanModal({
     onClose();
   };
 
-  // املي الفورم لما يفتح (Create أو Edit)
+  /* ===================== GET DEPARTMENTS FROM TOKEN ===================== */
+  useEffect(() => {
+    const stored = localStorage.getItem("departments");
+    if (stored) {
+      try {
+        setDepartments(JSON.parse(stored));
+      } catch {}
+    }
+  }, []);
+
   useEffect(() => {
     if (!open) return;
 
     if (initialPlan) {
-      setForm({ name: initialPlan.name ?? "", term: initialPlan.term ?? 1 });
+      setForm({
+        name: initialPlan.name ?? "",
+        term: initialPlan.term ?? 1,
+        dept_id: initialPlan.dept_id ?? 0,
+      });
     } else {
-      setForm({ name: "", term: 1 });
+      setForm({ name: "", term: 1, dept_id: 0 });
     }
     setErrors({});
   }, [open, initialPlan]);
@@ -74,7 +89,6 @@ export default function CreatePlanModal({
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   // lock scroll
@@ -94,7 +108,8 @@ export default function CreatePlanModal({
   const validate = (): FormErrors => {
     const next: FormErrors = {};
     if (!form.name.trim()) next.name = "اسم الخطة مطلوب";
-    if (!Number.isFinite(form.term) || form.term < 1) next.term = "اختاري الترم";
+    if (!Number.isFinite(form.term) || form.term < 1) next.term = "اختار الترم";
+    if (!form.dept_id) next.dept_id = "اختار القسم";
     return next;
   };
 
@@ -104,7 +119,7 @@ export default function CreatePlanModal({
     const nextErrors = validate();
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
-      showToast("❌ راجعي الحقول المطلوبة", "error");
+      showToast("❌ مراجعة الحقول المطلوبة", "error");
       return;
     }
 
@@ -113,13 +128,14 @@ export default function CreatePlanModal({
 
       const token = localStorage.getItem("access");
       if (!token) {
-        showToast("❌ مفيش access token. اعملي تسجيل دخول تاني.", "error");
+        showToast("❌ مفيش access token. برجاء تسجيل الدخول مرة اخري.", "error");
         return;
       }
 
       const payload = {
         name: form.name.trim(),
         term: Number(form.term),
+        dept_id: Number(form.dept_id),
       };
 
       const url = isEdit
@@ -146,9 +162,9 @@ export default function CreatePlanModal({
           const j = text ? JSON.parse(text) : null;
           msg = j?.detail || j?.error || j?.message || msg;
 
-          // لو بيرجع أخطاء حقول
           if (j?.name?.[0]) setErrors((p) => ({ ...p, name: String(j.name[0]) }));
           if (j?.term?.[0]) setErrors((p) => ({ ...p, term: String(j.term[0]) }));
+          if (j?.dept_id?.[0]) setErrors((p) => ({ ...p, dept_id: String(j.dept_id[0]) }));
         } catch {}
         showToast(`❌ ${String(msg)}`, "error");
         return;
@@ -156,7 +172,7 @@ export default function CreatePlanModal({
 
       showToast("✅ تم حفظ الخطة بنجاح", "success");
 
-      onSaved(); // refresh list
+      onSaved();
       closeAndReset();
     } catch (err) {
       console.error(err);
@@ -170,7 +186,6 @@ export default function CreatePlanModal({
 
   return (
     <>
-      {/* Toast */}
       {toast.show && (
         <div className={`toast ${toast.type === "success" ? "success" : toast.type === "error" ? "error" : "warning"}`}>
           <div className="msg">{toast.message}</div>
@@ -184,7 +199,7 @@ export default function CreatePlanModal({
             <div className={styles.modalHeadText}>
               <h2 className={styles.modalTitle}>{isEdit ? "تعديل الخطة" : "إنشاء خطة جديدة"}</h2>
               <p className={styles.modalSubtitle}>
-                {isEdit ? "عدّلي الاسم أو الترم ثم احفظي" : "قم بملء البيانات الأساسية للخطة"}
+                {isEdit ? "قم بتحديث الاسم أو الترم ثم احفظي" : "قم بملء البيانات الأساسية للخطة"}
               </p>
             </div>
 
@@ -218,6 +233,23 @@ export default function CreatePlanModal({
                 </select>
                 {errors.term && <div className={styles.errorText}>{errors.term}</div>}
               </div>
+
+              <div className={styles.field}>
+                <label className={styles.label}>القسم</label>
+                <select
+                  className={`${styles.select} ${errors.dept_id ? styles.inputError : ""}`}
+                  value={String(form.dept_id)}
+                  onChange={(e) => setField("dept_id", Number(e.target.value))}
+                >
+                  <option value="0" hidden>اختار القسم</option>
+                  {departments.map((d) => (
+                    <option key={d.dept_id} value={d.dept_id}>
+                      {d.dept_name}
+                    </option>
+                  ))}
+                </select>
+                {errors.dept_id && <div className={styles.errorText}>{errors.dept_id}</div>}
+              </div>
             </div>
 
             <div className={styles.modalFooter}>
@@ -234,7 +266,6 @@ export default function CreatePlanModal({
         </div>
       </div>
 
-      {/* نفس ستايل النوتفكيشن اللي اتفقنا عليه */}
       <style jsx>{`
         .toast {
           position: fixed;

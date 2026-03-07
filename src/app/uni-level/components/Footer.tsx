@@ -7,16 +7,17 @@ export default function Footer() {
     <footer className="footer">
       <div className="footerContainer">
         <div className="footerLeft">
-          <div className="footerLogo">Helwan</div>
+        <div className="footerLogo">
+          <img src="/logo.png" alt="Logo" className="logoImage" />
+        </div>
           <div className="footerText">
-            <span>مكتب الدعم</span>
-            <span>Social Support Administration</span>
+            <span>بوابة رعاية الشباب بجامعة العاصمة</span>
+            <span>قسم خدمات الطلاب</span>
           </div>
         </div>
         <div className="footerRight">
           <p>الإصدار: 1.0.9</p>
-          <p>البريد الإلكتروني: solidarity@helwan.edu.eg</p>
-          <p>© منصة التكافل الاجتماعي - جامعة حلوان - جميع الحقوق محفوظة</p>
+          <p>© منصة رعاية الشباب - جامعة العاصمة - جميع الحقوق محفوظة</p>
         </div>
       </div>
     </footer>

@@ -1,144 +1,168 @@
-/* GeneralAdmin Header — unified with Student theme */
+/* ══════════════════════════════════════════════
+   Header — Professional Refined Dark Theme
+   ══════════════════════════════════════════════ */
 
 .header {
-  background: linear-gradient(135deg, var(--navy-deep) 0%, var(--navy) 40%, var(--navy-mid) 80%, #1d2e52 100%);
+  background: linear-gradient(
+    180deg,
+    #0f1c38 0%,
+    #132040 60%,
+    #0d1830 100%
+  );
   color: white;
-  padding: 0 var(--gutter);
+  padding: 0 28px;
   width: 100%;
-  height: var(--header-h);
+  height: 90px;
   position: sticky;
   top: 0;
   z-index: 50;
   box-sizing: border-box;
-  box-shadow: var(--shadow-lg);
-  border-bottom: 1px solid var(--gold-border);
+  box-shadow: 0 1px 0 rgba(201, 151, 42, 0.18),
+              0 4px 24px rgba(0, 0, 0, 0.35);
+  border-bottom: 1px solid rgba(201, 151, 42, 0.14);
 }
 
-.header::before {
-  content: '';
+/* Thin gold top accent */
+.headerAccentLine {
   position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, transparent 0%, var(--gold) 20%, var(--gold-bright) 50%, var(--gold) 80%, transparent 100%);
-  z-index: 1;
-}
-/* ── Append these rules to your existing Header.css ───────── */
-
-/* Wrapper for toggle + title on the right side (RTL) */
-.headerLeft {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* Gold sidebar toggle button */
-.headerSidebarToggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  background: rgba(201, 151, 42, 0.15);
-  border: 1px solid rgba(201, 151, 42, 0.35);
-  border-radius: 8px;
-  color: #e0aa35;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
-}
-.headerSidebarToggle:hover {
-  background: rgba(201, 151, 42, 0.28);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(201, 151, 42, 0.2);
-}
-.headerSidebarToggle:focus-visible {
-  outline: 2px solid #e0aa35;
-  outline-offset: 2px;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(201, 151, 42, 0.4) 15%,
+    #c9972a 40%,
+    #e8b84b 50%,
+    #c9972a 60%,
+    rgba(201, 151, 42, 0.4) 85%,
+    transparent 100%
+  );
 }
 
-@media (max-width: 768px) {
-  .headerSidebarToggle { width: 34px; height: 34px; }
-}
+/* ── Layout ─────────────────────────────────── */
+
 .headerContent {
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 100%;
   direction: rtl;
-  gap: 16px;
+  gap: 20px;
+}
+
+/* ── Sidebar toggle button ───────────────────── */
+
+.headerSidebarToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(201, 151, 42, 0.12);
+  border: 1px solid rgba(201, 151, 42, 0.28);
+  border-radius: 10px;
+  color: #e0aa35;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.22s ease, transform 0.18s ease, box-shadow 0.22s ease;
+}
+
+.headerSidebarToggle:hover {
+  background: rgba(201, 151, 42, 0.24);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(201, 151, 42, 0.2);
+}
+
+.headerSidebarToggle:focus-visible {
+  outline: 2px solid #e0aa35;
+  outline-offset: 2px;
+}
+
+/* ── Brand (logo + divider + title) ─────────── */
+
+.headerBrand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.headerLogoWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  overflow: visible;
+  flex-shrink: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  padding: 0;
+}
+
+.headerLogoWrap:hover {
+  background: transparent;
+  opacity: 0.88;
+  transform: scale(1.04);
+}
+
+.headerLogoImg {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Slim vertical separator */
+.headerDivider {
+  width: 1px;
+  height: 44px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(201, 151, 42, 0.35) 30%,
+    rgba(201, 151, 42, 0.35) 70%,
+    transparent 100%
+  );
+  flex-shrink: 0;
 }
 
 .headerTitle {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
 }
 
 .headerTitleH1 {
   font-size: 1.05rem;
   font-weight: 700;
   margin: 0;
-  color: var(--card-bg);
+  color: #f0f4ff;
   white-space: nowrap;
+  letter-spacing: 0.01em;
 }
 
 .headerTitleP {
-  font-size: 0.75rem;
-  color: var(--gold-bright);
-  opacity: 0.9;
+  font-size: 0.78rem;
+  color: #c9972a;
+  opacity: 0.85;
   margin: 0;
   white-space: nowrap;
+  font-weight: 500;
+  letter-spacing: 0.03em;
 }
+
+/* ── Actions / User dropdown ─────────────────── */
 
 .headerActions {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-direction: row-reverse;
-}
-
-.headerIconBtn {
-  width: 38px;
-  height: 38px;
-  border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.85);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all var(--transition);
-  flex-shrink: 0;
-  position: relative;
-}
-
-.headerIconBtn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: var(--card-bg);
-  transform: translateY(-1px);
-}
-
-.notifBtn {
-  position: relative;
-}
-
-.notifBadge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 100%);
-  color: var(--navy);
-  font-size: 0.65rem;
-  font-weight: 700;
-  width: 17px;
-  height: 17px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid var(--navy);
-  line-height: 1;
 }
 
 .userDropdownWrap {
@@ -149,33 +173,41 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: var(--radius-sm);
-  padding: 6px 12px 6px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 10px;
+  padding: 6px 12px 6px 10px;
   color: white;
   cursor: pointer;
-  transition: all var(--transition);
+  transition: background 0.22s ease, border-color 0.22s ease, transform 0.18s ease;
   flex-direction: row-reverse;
 }
 
 .userBtn:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(201, 151, 42, 0.28);
   transform: translateY(-1px);
+}
+
+.userBtn:focus-visible {
+  outline: 2px solid #c9972a;
+  outline-offset: 2px;
 }
 
 .userAvatar {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 100%);
-  color: var(--navy);
-  font-size: 0.75rem;
-  font-weight: 700;
+  background: linear-gradient(135deg, #b8891f 0%, #e8b84b 100%);
+  color: #0f1c38;
+  font-size: 0.7rem;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  letter-spacing: 0.03em;
+  box-shadow: 0 0 0 2px rgba(201, 151, 42, 0.25);
 }
 
 .userInfo {
@@ -186,87 +218,104 @@
 }
 
 .userName {
-  font-size: 0.85rem;
+  font-size: 0.83rem;
   font-weight: 600;
-  color: var(--card-bg);
+  color: #f0f4ff;
   white-space: nowrap;
+  line-height: 1.2;
 }
 
-.userEmail {
-  font-size: 0.7rem;
-  color: var(--gold-bright);
-  opacity: 0.85;
+.userRole {
+  font-size: 0.65rem;
+  color: #c9972a;
+  opacity: 0.8;
   white-space: nowrap;
+  font-weight: 500;
 }
 
 .chevron {
-  color: rgba(255, 255, 255, 0.7);
-  transition: transform var(--transition);
+  color: rgba(255, 255, 255, 0.45);
+  transition: transform 0.22s ease;
   flex-shrink: 0;
 }
 
 .chevron.open {
   transform: rotate(180deg);
+  color: #c9972a;
 }
+
+/* ── Dropdown menu ───────────────────────────── */
 
 .dropdown {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 10px);
   left: 0;
-  min-width: 220px;
-  background: var(--card-bg);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
+  min-width: 230px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   z-index: 200;
   direction: rtl;
-  animation: dropIn 0.2s ease;
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  animation: dropIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(0, 0, 0, 0.07);
 }
 
 @keyframes dropIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .dropdownHeader {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 16px;
-  background: var(--bg-color);
+  gap: 12px;
+  padding: 16px;
+  background: #f8f9fc;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .dropdownAvatar {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 100%);
-  color: var(--navy);
-  font-size: 0.8rem;
-  font-weight: 700;
+  background: linear-gradient(135deg, #b8891f 0%, #e8b84b 100%);
+  color: #0f1c38;
+  font-size: 0.78rem;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  letter-spacing: 0.03em;
+}
+
+.dropdownHeaderInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .dropdownName {
   font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-main);
+  font-weight: 700;
+  color: #0f1c38;
 }
 
 .dropdownEmail {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  margin-top: 1px;
+  font-size: 0.72rem;
+  color: #6b7280;
 }
 
 .dropdownDivider {
   height: 1px;
   background: rgba(0, 0, 0, 0.06);
-  margin: 0;
 }
 
 .dropdownItem {
@@ -274,36 +323,42 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 11px 16px;
+  padding: 12px 16px;
   background: transparent;
   border: none;
   cursor: pointer;
   font-size: 0.875rem;
-  color: var(--text-main);
-  transition: background var(--transition);
+  color: #374151;
+  transition: background 0.15s ease;
   text-align: right;
 }
 
 .dropdownItem:hover {
-  background: var(--bg-color);
+  background: #f3f4f6;
 }
 
 .dropdownItem.logout {
-  color: var(--danger);
+  color: #b91c1c;
 }
 
 .dropdownItem.logout:hover {
-  background: rgba(192, 57, 43, 0.06);
+  background: rgba(185, 28, 28, 0.05);
 }
+
+/* ── Responsive ──────────────────────────────── */
 
 @media (max-width: 768px) {
   .header {
-    height: var(--header-h-sm);
-    padding: 0 var(--gutter-sm);
+    height: 56px;
+    padding: 0 16px;
   }
 
   .headerTitleH1 {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
+  }
+
+  .headerDivider {
+    display: none;
   }
 
   .userInfo {
@@ -321,14 +376,15 @@
   .chevron {
     display: none;
   }
-
-  .headerActions {
-    gap: 6px;
-  }
 }
 
 @media (max-width: 480px) {
   .headerTitleP {
     display: none;
+  }
+
+  .headerLogoWrap {
+    width: 46px;
+    height: 46px;
   }
 }

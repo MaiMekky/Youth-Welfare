@@ -7,8 +7,6 @@ import {
 } from "lucide-react";
 import styles from "../Styles/Activitiesmanagement.module.css";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
 interface EventRow {
   event_id: number;
   title: string;
@@ -48,20 +46,18 @@ interface EventDetail {
   selected_facs: number[];
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 const getToken = () =>
   typeof window !== "undefined" ? localStorage.getItem("access") : null;
 
 const BASE = "http://127.0.0.1:8000";
 
 const STATUS_MAP: Record<string, { label: string; cls: string }> = {
-  "منتظر":   { label: "قيد الانتظار",  cls: "sPending"  },
-  "مقبول":   { label: "مقبول",  cls: "sApproved" },
-  "مرفوض":   { label: "مرفوض",  cls: "sRejected" },
-  "pending":  { label: "منتظر",  cls: "sPending"  },
-  "approved": { label: "مقبول",  cls: "sApproved" },
-  "rejected": { label: "مرفوض",  cls: "sRejected" },
+  "منتظر":   { label: "قيد الانتظار", cls: "sPending"  },
+  "مقبول":   { label: "مقبول",        cls: "sApproved" },
+  "مرفوض":   { label: "مرفوض",        cls: "sRejected" },
+  "pending":  { label: "منتظر",        cls: "sPending"  },
+  "approved": { label: "مقبول",        cls: "sApproved" },
+  "rejected": { label: "مرفوض",        cls: "sRejected" },
 };
 
 function statusInfo(raw: string) {
@@ -100,8 +96,6 @@ function extractTypes(events: EventRow[]): string[] {
   });
   return Array.from(set).sort();
 }
-
-// ─── Detail Modal ─────────────────────────────────────────────────────────────
 
 function DetailModal({ id, onClose }: { id: number; onClose: () => void }) {
   const [detail, setDetail] = useState<EventDetail | null>(null);
@@ -154,16 +148,16 @@ function DetailModal({ id, onClose }: { id: number; onClose: () => void }) {
               )}
               <div className={styles.detailGrid}>
                 {[
-                  { icon: <Building2 size={14} />,  label: "الجهة",           val: `${detail.faculty_name ?? "—"} / ${detail.dept_name ?? "—"}` },
-                  { icon: <Users size={14} />,       label: "منشئ الفعالية",   val: detail.created_by_name },
-                  { icon: <MapPin size={14} />,      label: "الموقع",          val: detail.location },
-                  { icon: <Calendar size={14} />,    label: "تاريخ البداية",   val: fmt(detail.st_date) },
-                  { icon: <Calendar size={14} />,    label: "تاريخ النهاية",   val: fmt(detail.end_date) },
-                  { icon: <Users size={14} />,       label: "الحد الأقصى",     val: limitLabel(detail.s_limit) },
-                  { icon: <DollarSign size={14} />,  label: "التكلفة",         val: detail.cost || "مجاني" },
-                  { icon: <Tag size={14} />,         label: "المكافأة",        val: detail.reward || "—" },
-                  { icon: <AlertCircle size={14} />, label: "القيود",          val: detail.restrictions || "لا يوجد" },
-                  { icon: <Layers size={14} />,      label: "الموارد",         val: detail.resource || "—" },
+                  { icon: <Building2 size={14} />,  label: "الجهة",         val: `${detail.faculty_name ?? "—"} / ${detail.dept_name ?? "—"}` },
+                  { icon: <Users size={14} />,       label: "منشئ الفعالية", val: detail.created_by_name },
+                  { icon: <MapPin size={14} />,      label: "الموقع",        val: detail.location },
+                  { icon: <Calendar size={14} />,    label: "تاريخ البداية", val: fmt(detail.st_date) },
+                  { icon: <Calendar size={14} />,    label: "تاريخ النهاية", val: fmt(detail.end_date) },
+                  { icon: <Users size={14} />,       label: "الحد الأقصى",   val: limitLabel(detail.s_limit) },
+                  { icon: <DollarSign size={14} />,  label: "التكلفة",       val: detail.cost || "مجاني" },
+                  { icon: <Tag size={14} />,         label: "المكافأة",      val: detail.reward || "—" },
+                  { icon: <AlertCircle size={14} />, label: "القيود",        val: detail.restrictions || "لا يوجد" },
+                  { icon: <Layers size={14} />,      label: "الموارد",       val: detail.resource || "—" },
                 ].map(({ icon, label, val }) => (
                   <div key={label} className={styles.detailItem}>
                     <div className={styles.detailIcon}>{icon}</div>
@@ -185,8 +179,6 @@ function DetailModal({ id, onClose }: { id: number; onClose: () => void }) {
     </div>
   );
 }
-
-// ─── Confirm Dialog ───────────────────────────────────────────────────────────
 
 function ConfirmDialog({ action, eventTitle, onConfirm, onCancel, loading }: {
   action: "approve" | "reject";
@@ -225,8 +217,6 @@ function ConfirmDialog({ action, eventTitle, onConfirm, onCancel, loading }: {
     </div>
   );
 }
-
-// ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function ActivitiesManagement() {
   const [events, setEvents]               = useState<EventRow[]>([]);
@@ -315,7 +305,6 @@ export default function ActivitiesManagement() {
   return (
     <div className={styles.root}>
 
-      {/* ── Header ── */}
       <div className={styles.header}>
         <div className={styles.headerText}>
           <h1>مراجعة واعتماد الفعاليات</h1>
@@ -326,7 +315,6 @@ export default function ActivitiesManagement() {
         </button>
       </div>
 
-      {/* ── Stat Cards ── */}
       <div className={styles.statsGrid}>
         <div className={`${styles.statCard} ${styles.total}`}>
           <div className={styles.statIcon}><Layers size={22} /></div>
@@ -358,10 +346,7 @@ export default function ActivitiesManagement() {
         </div>
       </div>
 
-      {/* ── Table Card ── */}
       <div className={styles.tableCard}>
-
-        {/* Toolbar */}
         <div className={styles.toolbar}>
           <h2 className={styles.toolbarTitle}>قائمة الفعاليات المقدمة</h2>
           <div className={styles.toolbarControls}>
@@ -400,7 +385,6 @@ export default function ActivitiesManagement() {
           </div>
         )}
 
-        {/* Table */}
         <div className={styles.tableWrap}>
           {loading ? (
             <div className={styles.stateBox}>
@@ -414,19 +398,17 @@ export default function ActivitiesManagement() {
             </div>
           ) : (
             <table className={styles.table}>
-              {/* ── colgroup locks each column to a fixed percentage ── */}
               <colgroup>
-                <col style={{ width: "22%" }} /> {/* عنوان الفعالية */}
-                <col style={{ width: "9%"  }} /> {/* النوع */}
-                <col style={{ width: "12%" }} /> {/* الموقع */}
-                <col style={{ width: "10%" }} /> {/* تاريخ البداية */}
-                <col style={{ width: "10%" }} /> {/* تاريخ النهاية */}
-                <col style={{ width: "9%"  }} /> {/* المشاركون */}
-                <col style={{ width: "9%"  }} /> {/* التكلفة */}
-                <col style={{ width: "8%"  }} /> {/* الحالة */}
-                <col style={{ width: "11%" }} /> {/* الإجراءات */}
+                <col style={{ width: "22%" }} />
+                <col style={{ width: "9%" }} />
+                <col style={{ width: "12%" }} />
+                <col style={{ width: "10%" }} />
+                <col style={{ width: "10%" }} />
+                <col style={{ width: "9%" }} />
+                <col style={{ width: "9%" }} />
+                <col style={{ width: "8%" }} />
+                <col style={{ width: "11%" }} />
               </colgroup>
-
               <thead>
                 <tr>
                   <th>عنوان الفعالية</th>
@@ -440,7 +422,6 @@ export default function ActivitiesManagement() {
                   <th>الإجراءات</th>
                 </tr>
               </thead>
-
               <tbody>
                 {paginated.map(ev => {
                   const si = statusInfo(ev.status);
@@ -455,49 +436,41 @@ export default function ActivitiesManagement() {
                           )}
                         </div>
                       </td>
-
                       <td>
                         <span className={styles.typeBadge}>{ev.type || "—"}</span>
                       </td>
-
                       <td>
                         <div className={styles.locationCell}>
                           <MapPin size={12} />
                           {ev.location || "—"}
                         </div>
                       </td>
-
                       <td>
                         <div className={styles.dateCell}>
                           <Calendar size={12} />
                           {fmt(ev.st_date)}
                         </div>
                       </td>
-
                       <td>
                         <div className={styles.dateCell}>
                           <Calendar size={12} />
                           {fmt(ev.end_date)}
                         </div>
                       </td>
-
                       <td>
                         <div className={styles.participantsCell}>
                           <Users size={12} style={{ color: "#9CA3AF" }} />
                           {limitLabel(ev.s_limit)}
                         </div>
                       </td>
-
                       <td className={styles.costCell}>
                         {ev.cost && ev.cost !== "0" && ev.cost !== "0.00"
                           ? `${ev.cost} جنيه`
                           : "مجاني"}
                       </td>
-
                       <td>
                         <span className={`${styles.badge} ${styles[si.cls]}`}>{si.label}</span>
                       </td>
-
                       <td>
                         <div className={styles.actions}>
                           <button
@@ -535,7 +508,6 @@ export default function ActivitiesManagement() {
           )}
         </div>
 
-        {/* Pagination */}
         {!loading && filtered.length > 0 && (
           <div className={styles.pagination}>
             <span className={styles.pgInfo}>

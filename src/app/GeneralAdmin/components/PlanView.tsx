@@ -3,12 +3,9 @@ import React, { useEffect, useState, useCallback } from "react";
 import {
   FileText, BarChart3, Download, Calendar, Building2,
   RefreshCw, AlertCircle, Eye, Filter, CheckCircle,
-  XCircle, Clock, Layers,
+  XCircle, Clock, Layers, Search,
 } from "lucide-react";
-// import SemesterReports from "./SemesterReports";
 import styles from "../Styles/Planview.module.css";
-
-// ─── Types ───────────────────────────────────────────────────────────────────
 
 interface Plan {
   plan_id: number;
@@ -19,16 +16,13 @@ interface Plan {
   events_count: number;
   created_at: string;
   updated_at: string;
-  // Optional fields the API may return
-  status?: string;           // e.g. "مكتملة" | "مفقودة" | "قيد المراجعة"
+  status?: string;
   students_count?: number;
   academic_year?: string;
-  plan_status?: string;      // e.g. "محدثة" | "غير محدثة"
+  plan_status?: string;
   submitted_at?: string;
   last_updated?: string;
 }
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const getToken = () =>
   typeof window !== "undefined" ? localStorage.getItem("access") : null;
@@ -42,7 +36,6 @@ function fmt(d?: string) {
   });
 }
 
-// Derive badge class from status string
 function statusBadgeClass(status?: string) {
   const s = status?.trim() ?? "";
   if (s === "مكتملة" || s === "مكتمل" || s === "complete") return styles.badgeComplete;
@@ -64,8 +57,6 @@ function planStatusBadgeClass(ps?: string) {
   return `${styles.metaBadge} ${styles["green"]}`;
 }
 
-// ─── Faculty Card ─────────────────────────────────────────────────────────────
-
 function FacultyCard({ plan, onDownload, downloading }: {
   plan: Plan;
   onDownload: (plan: Plan) => void;
@@ -77,14 +68,11 @@ function FacultyCard({ plan, onDownload, downloading }: {
 
   return (
     <div className={styles.facultyCard}>
-
-      {/* Top: name + status */}
       <div className={styles.cardTop}>
         <h3 className={styles.facultyName}>{plan.faculty_name || plan.name}</h3>
         <span className={`${styles.badge} ${badgeCls}`}>{label}</span>
       </div>
 
-      {/* Counts: students + events */}
       <div className={styles.cardCounts}>
         {plan.students_count !== undefined && (
           <div className={styles.countItem}>
@@ -98,7 +86,6 @@ function FacultyCard({ plan, onDownload, downloading }: {
         </div>
       </div>
 
-      {/* Meta rows */}
       <div className={styles.cardMeta}>
         {plan.academic_year && (
           <div className={styles.metaRow}>
@@ -120,7 +107,6 @@ function FacultyCard({ plan, onDownload, downloading }: {
         )}
       </div>
 
-      {/* Details box */}
       <div className={`${styles.cardDetailsBox} ${isMissing ? styles.missing : ""}`}>
         {isMissing ? (
           "لم يتم إرسال خطة لهذا الفصل الدراسي"
@@ -134,7 +120,6 @@ function FacultyCard({ plan, onDownload, downloading }: {
         )}
       </div>
 
-      {/* Actions */}
       <div className={styles.cardActions}>
         {isMissing ? (
           <button className={styles.btnView} disabled>
@@ -145,7 +130,6 @@ function FacultyCard({ plan, onDownload, downloading }: {
             <Eye size={14} /> عرض الخطة
           </button>
         )}
-
         <button
           className={styles.btnDownload}
           onClick={() => onDownload(plan)}
@@ -162,14 +146,14 @@ function FacultyCard({ plan, onDownload, downloading }: {
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
-
 export default function PlanView() {
   const [activeTab, setActiveTab]         = useState<"plans" | "reports">("plans");
   const [plans, setPlans]                 = useState<Plan[]>([]);
   const [loading, setLoading]             = useState(true);
   const [error, setError]                 = useState("");
   const [yearFilter, setYearFilter]       = useState("all");
+  const [facultyFilter, setFacultyFilter] = useState("all");   // ← NEW
+  const [facultySearch, setFacultySearch] = useState("");       // ← NEW
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
   const [toastMsg, setToastMsg]           = useState("");
 
@@ -178,7 +162,6 @@ export default function PlanView() {
     setTimeout(() => setToastMsg(""), 3500);
   };
 
-  // ── Fetch plans ──
   const fetchPlans = useCallback(async () => {
     try {
       setLoading(true);
@@ -200,7 +183,6 @@ export default function PlanView() {
     if (activeTab === "plans") fetchPlans();
   }, [activeTab, fetchPlans]);
 
-  // ── Download PDF ──
   const handleDownload = async (plan: Plan) => {
     if (downloadingId !== null) return;
     setDownloadingId(plan.plan_id);
@@ -224,21 +206,27 @@ export default function PlanView() {
     }
   };
 
-  // ── Derived stats ──
   const totalPlans    = plans.length;
   const completePlans = plans.filter(p => !p.status?.includes("مفقود") && p.status !== "missing").length;
   const missingPlans  = plans.filter(p => p.status?.includes("مفقود") || p.status === "missing").length;
 
-  // derive academic years from data
   const years = Array.from(new Set(plans.map(p => p.academic_year).filter(Boolean))) as string[];
 
-  // ── Filter ──
-  const filtered = plans.filter(p =>
-    yearFilter === "all" || p.academic_year === yearFilter
-  );
+  // ── Unique faculty names from API ──
+  const facultyNames = Array.from(
+    new Set(plans.map(p => p.faculty_name).filter(Boolean))
+  ).sort((a, b) => a.localeCompare(b, "ar"));
 
-  // current academic year from data or fallback
-  const currentYear = years[0] ?? "2024-2025";
+  // ── Apply all filters ──
+  const filtered = plans.filter(p => {
+    const matchYear    = yearFilter === "all" || p.academic_year === yearFilter;
+    const matchFaculty = facultyFilter === "all" || p.faculty_name === facultyFilter;
+    const matchSearch  = facultySearch === "" ||
+      p.faculty_name?.toLowerCase().includes(facultySearch.toLowerCase());
+    return matchYear && matchFaculty && matchSearch;
+  });
+
+  const currentYear = years[0] ?? "2026-2027";
 
   return (
     <div className={styles.root}>
@@ -249,19 +237,11 @@ export default function PlanView() {
           className={`${styles.tab} ${activeTab === "plans" ? styles.active : ""}`}
           onClick={() => setActiveTab("plans")}
         >
-          <FileText size={16} />
-          خطة الكليات
+          <FileText size={16} /> خطة الكليات
         </button>
-        <button
-          className={`${styles.tab} ${activeTab === "reports" ? styles.active : ""}`}
-          onClick={() => setActiveTab("reports")}
-        >
-          <BarChart3 size={16} />
-          التقارير الفصلية
-        </button>
+      
       </div>
 
-      {/* ── Plans Tab ── */}
       {activeTab === "plans" && (
         <>
           {/* Info banner */}
@@ -284,7 +264,6 @@ export default function PlanView() {
                 <div className={styles.statTitle}>إجمالي الكليات</div>
               </div>
             </div>
-
             <div className={styles.statItem}>
               <div className={`${styles.statIconBox} ${styles.green}`}>
                 <CheckCircle size={19} />
@@ -294,7 +273,6 @@ export default function PlanView() {
                 <div className={styles.statTitle}>خطط مكتملة</div>
               </div>
             </div>
-
             <div className={styles.statItem}>
               <div className={`${styles.statIconBox} ${styles.amber}`}>
                 <Clock size={19} />
@@ -304,7 +282,6 @@ export default function PlanView() {
                 <div className={styles.statTitle}>خطط مفقودة</div>
               </div>
             </div>
-
             <div className={styles.statItem}>
               <div className={`${styles.statIconBox} ${styles.blue}`}>
                 <Calendar size={19} />
@@ -323,6 +300,38 @@ export default function PlanView() {
               <p>مراجعة وتحميل الخطط السنوية للأنشطة الطلابية</p>
             </div>
             <div className={styles.sectionControls}>
+
+              {/* ── Faculty search input ── */}
+              <div className={styles.searchWrap}>
+                <Search size={13} className={styles.searchIcon} />
+                <input
+                  type="text"
+                  className={styles.searchInput}
+                  placeholder="ابحث باسم الكلية…"
+                  value={facultySearch}
+                  onChange={e => {
+                    setFacultySearch(e.target.value);
+                    setFacultyFilter("all"); // reset dropdown when typing
+                  }}
+                />
+              </div>
+
+              {/* ── Faculty dropdown ── */}
+              <select
+                className={styles.filterSelect}
+                value={facultyFilter}
+                onChange={e => {
+                  setFacultyFilter(e.target.value);
+                  setFacultySearch(""); // reset search when dropdown chosen
+                }}
+              >
+                <option value="all">كل الكليات</option>
+                {facultyNames.map(name => (
+                  <option key={name} value={name}>{name}</option>
+                ))}
+              </select>
+
+              {/* ── Year dropdown ── */}
               {years.length > 0 && (
                 <select
                   className={styles.filterSelect}
@@ -335,20 +344,40 @@ export default function PlanView() {
                   ))}
                 </select>
               )}
+
+              {/* ── Reset filters ── */}
+              {(facultyFilter !== "all" || yearFilter !== "all" || facultySearch !== "") && (
+                <button
+                  className={styles.resetBtn}
+                  onClick={() => {
+                    setFacultyFilter("all");
+                    setYearFilter("all");
+                    setFacultySearch("");
+                  }}
+                >
+                  <XCircle size={13} /> مسح
+                </button>
+              )}
+
               <button className={styles.filterBtn} onClick={fetchPlans}>
-                <Filter size={13} /> تصفية
+                <Filter size={13} /> تحديث
               </button>
             </div>
           </div>
 
-          {/* Error */}
+          {/* Results count */}
+          {(facultyFilter !== "all" || yearFilter !== "all" || facultySearch !== "") && (
+            <p className={styles.resultsCount}>
+              {filtered.length} نتيجة من أصل {plans.length}
+            </p>
+          )}
+
           {error && (
             <div className={styles.errorBanner}>
               <AlertCircle size={16} /> {error}
             </div>
           )}
 
-          {/* Cards */}
           {loading ? (
             <div className={styles.stateBox}>
               <RefreshCw size={36} className={styles.spinner} />
@@ -357,7 +386,7 @@ export default function PlanView() {
           ) : filtered.length === 0 ? (
             <div className={styles.stateBox}>
               <Building2 size={44} style={{ opacity: 0.3, display: "block", margin: "0 auto" }} />
-              <p>لا توجد خطط متاحة</p>
+              <p>لا توجد نتائج مطابقة</p>
             </div>
           ) : (
             <div className={styles.cardsGrid}>
@@ -374,16 +403,11 @@ export default function PlanView() {
         </>
       )}
 
-      {/* ── Reports Tab ── */}
       {activeTab === "reports" && (
-        <div className={styles.reportsWrapper}>
-        
-        </div>
+        <div className={styles.reportsWrapper} />
       )}
 
-      {/* ── Toast ── */}
       {toastMsg && <div className={styles.toast}>{toastMsg}</div>}
     </div>
   );
 }
-

@@ -38,8 +38,8 @@
   gap: 11px;
 }
 .hdr-logo-wrap {
-  width: 40px; height: 40px;
-  border-radius: 10px;
+  width: 52px; height: 52px;
+  border-radius: 12px;
   background: linear-gradient(145deg, #c9972a, #a87820);
   display: flex;
   align-items: center;
@@ -49,9 +49,9 @@
   flex-shrink: 0;
 }
 .hdr-logo-img {
-  width: 36px; height: 36px;
-  object-fit: cover;
-  border-radius: 8px;
+  width: 48px; height: 48px;
+  object-fit: fit;
+  border-radius: 10px;
 }
 .hdr-title {
   font-size: 1rem;

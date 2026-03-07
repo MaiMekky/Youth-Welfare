@@ -31,7 +31,7 @@ export default function Footer() {
         {/* Col 1 – Brand */}
         <div className="ftr-col ftr-brand-col">
           <div className="ftr-logo-area">
-            <div className="ftr-logo-badge">HU</div>
+            <div className="ftr-logo-badge">CU</div>
             <div>
               <p className="ftr-brand-name">جامعة العاصمة</p>
               <p className="ftr-brand-en">Capital University</p>

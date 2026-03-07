@@ -51,7 +51,16 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
           )}
 
           <div className="hdr-logo-wrap">
-            <Image src={logo} alt="شعار الجامعة" width={38} height={38} className="hdr-logo-img" />
+            
+            <Image
+  src={logo}
+  alt="شعار الجامعة"
+  width={48}
+  height={48}
+  className="hdr-logo-img"
+  priority
+  quality={100}
+/>
           </div>
           <div className="hdr-brand-text">
             <h1 className="hdr-title">النظام الإداري</h1>

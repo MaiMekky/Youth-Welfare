@@ -55,9 +55,8 @@ const getToken = () =>
 
 const BASE = "http://127.0.0.1:8000";
 
-// Supports Arabic statuses ("منتظر", "مقبول", "مرفوض") and English fallbacks
 const STATUS_MAP: Record<string, { label: string; cls: string }> = {
-  "منتظر":   { label: "منتظر",  cls: "sPending"  },
+  "منتظر":   { label: "قيد الانتظار",  cls: "sPending"  },
   "مقبول":   { label: "مقبول",  cls: "sApproved" },
   "مرفوض":   { label: "مرفوض",  cls: "sRejected" },
   "pending":  { label: "منتظر",  cls: "sPending"  },
@@ -94,6 +93,14 @@ function limitLabel(n: number) {
   return n >= 2147483647 ? "غير محدود" : n.toLocaleString("ar-EG");
 }
 
+function extractTypes(events: EventRow[]): string[] {
+  const set = new Set<string>();
+  events.forEach(e => {
+    if (e.type && e.type.trim()) set.add(e.type.trim());
+  });
+  return Array.from(set).sort();
+}
+
 // ─── Detail Modal ─────────────────────────────────────────────────────────────
 
 function DetailModal({ id, onClose }: { id: number; onClose: () => void }) {
@@ -122,14 +129,12 @@ function DetailModal({ id, onClose }: { id: number; onClose: () => void }) {
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
-
         <div className={styles.modalHeader}>
           <h2>{loading ? "جاري التحميل…" : detail?.title ?? "تفاصيل الفعالية"}</h2>
           <button className={styles.modalCloseBtn} onClick={onClose}>
             <X size={17} />
           </button>
         </div>
-
         <div className={styles.modalBody}>
           {loading && (
             <div className={styles.stateBox}>
@@ -144,11 +149,9 @@ function DetailModal({ id, onClose }: { id: number; onClose: () => void }) {
                 <span className={`${styles.badge} ${styles[si!.cls]}`}>{si!.label}</span>
                 {detail.type && <span className={styles.typeTag}>{detail.type}</span>}
               </div>
-
               {detail.description && (
                 <div className={styles.descBox}>{detail.description}</div>
               )}
-
               <div className={styles.detailGrid}>
                 {[
                   { icon: <Building2 size={14} />,  label: "الجهة",           val: `${detail.faculty_name ?? "—"} / ${detail.dept_name ?? "—"}` },
@@ -171,7 +174,6 @@ function DetailModal({ id, onClose }: { id: number; onClose: () => void }) {
                   </div>
                 ))}
               </div>
-
               <div className={styles.modalFooter}>
                 <span>تاريخ الإنشاء: {fmt(detail.created_at)}</span>
                 <span>آخر تحديث: {fmt(detail.updated_at)}</span>
@@ -235,6 +237,7 @@ export default function ActivitiesManagement() {
   const [actionLoading, setActionLoading] = useState(false);
   const [search, setSearch]               = useState("");
   const [filterStatus, setFilterStatus]   = useState("all");
+  const [filterType, setFilterType]       = useState("all");
   const [currentPage, setCurrentPage]     = useState(1);
   const [toastMsg, setToastMsg]           = useState("");
   const rowsPerPage = 8;
@@ -284,26 +287,26 @@ export default function ActivitiesManagement() {
     }
   };
 
-  // ── Stats ──
   const countPending  = events.filter(e => isPending(e.status)).length;
   const countApproved = events.filter(e => isApprovedStatus(e.status)).length;
   const countRejected = events.filter(e => isRejectedStatus(e.status)).length;
+  const availableTypes = extractTypes(events);
 
-  // ── Filter + Search ──
   const filtered = events.filter(e => {
     const term = search.toLowerCase();
     const matchSearch = !search ||
       e.title?.toLowerCase().includes(term) ||
       e.location?.toLowerCase().includes(term) ||
       e.type?.toLowerCase().includes(term);
-
     const matchStatus =
       filterStatus === "all" ||
       (filterStatus === "pending"  && isPending(e.status)) ||
       (filterStatus === "approved" && isApprovedStatus(e.status)) ||
       (filterStatus === "rejected" && isRejectedStatus(e.status));
-
-    return matchSearch && matchStatus;
+    const matchType =
+      filterType === "all" ||
+      (e.type?.trim() === filterType);
+    return matchSearch && matchStatus && matchType;
   });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / rowsPerPage));
@@ -332,7 +335,6 @@ export default function ActivitiesManagement() {
             <div className={styles.statLabel}>إجمالي الطلبات</div>
           </div>
         </div>
-
         <div className={`${styles.statCard} ${styles.pending}`}>
           <div className={styles.statIcon}><Clock size={22} /></div>
           <div className={styles.statBody}>
@@ -340,7 +342,6 @@ export default function ActivitiesManagement() {
             <div className={styles.statLabel}>قيد المراجعة</div>
           </div>
         </div>
-
         <div className={`${styles.statCard} ${styles.approved}`}>
           <div className={styles.statIcon}><CheckCircle size={22} /></div>
           <div className={styles.statBody}>
@@ -348,7 +349,6 @@ export default function ActivitiesManagement() {
             <div className={styles.statLabel}>معتمدة</div>
           </div>
         </div>
-
         <div className={`${styles.statCard} ${styles.rejected}`}>
           <div className={styles.statIcon}><XCircle size={22} /></div>
           <div className={styles.statBody}>
@@ -381,10 +381,19 @@ export default function ActivitiesManagement() {
               <option value="approved">معتمدة</option>
               <option value="rejected">مرفوضة</option>
             </select>
+            <select
+              className={styles.filterSelect}
+              value={filterType}
+              onChange={e => { setFilterType(e.target.value); setCurrentPage(1); }}
+            >
+              <option value="all">كل الأنشطة</option>
+              {availableTypes.map(t => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
           </div>
         </div>
 
-        {/* Error */}
         {error && (
           <div className={styles.errorBanner}>
             <AlertCircle size={17} /> {error}
@@ -405,9 +414,21 @@ export default function ActivitiesManagement() {
             </div>
           ) : (
             <table className={styles.table}>
+              {/* ── colgroup locks each column to a fixed percentage ── */}
+              <colgroup>
+                <col style={{ width: "22%" }} /> {/* عنوان الفعالية */}
+                <col style={{ width: "9%"  }} /> {/* النوع */}
+                <col style={{ width: "12%" }} /> {/* الموقع */}
+                <col style={{ width: "10%" }} /> {/* تاريخ البداية */}
+                <col style={{ width: "10%" }} /> {/* تاريخ النهاية */}
+                <col style={{ width: "9%"  }} /> {/* المشاركون */}
+                <col style={{ width: "9%"  }} /> {/* التكلفة */}
+                <col style={{ width: "8%"  }} /> {/* الحالة */}
+                <col style={{ width: "11%" }} /> {/* الإجراءات */}
+              </colgroup>
+
               <thead>
                 <tr>
-                  {/* <th>#</th> */}
                   <th>عنوان الفعالية</th>
                   <th>النوع</th>
                   <th>الموقع</th>
@@ -419,14 +440,13 @@ export default function ActivitiesManagement() {
                   <th>الإجراءات</th>
                 </tr>
               </thead>
+
               <tbody>
                 {paginated.map(ev => {
                   const si = statusInfo(ev.status);
                   const pending = isPending(ev.status);
                   return (
                     <tr key={ev.event_id}>
-                      {/* <td className={styles.idCell}>#{ev.event_id}</td> */}
-
                       <td>
                         <div className={styles.titleCell}>
                           <div className={styles.titleMain}>{ev.title}</div>
@@ -470,7 +490,7 @@ export default function ActivitiesManagement() {
 
                       <td className={styles.costCell}>
                         {ev.cost && ev.cost !== "0" && ev.cost !== "0.00"
-                          ? `${ev.cost} ر.س`
+                          ? `${ev.cost} جنيه`
                           : "مجاني"}
                       </td>
 
@@ -545,7 +565,6 @@ export default function ActivitiesManagement() {
         )}
       </div>
 
-      {/* ── Modals ── */}
       {viewId !== null && <DetailModal id={viewId} onClose={() => setViewId(null)} />}
 
       {confirm && (
@@ -558,7 +577,6 @@ export default function ActivitiesManagement() {
         />
       )}
 
-      {/* ── Toast ── */}
       {toastMsg && <div className={styles.toast}>{toastMsg}</div>}
     </div>
   );

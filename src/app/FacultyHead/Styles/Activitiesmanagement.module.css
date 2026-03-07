@@ -3,10 +3,12 @@
 /* ── Root ── */
 .root {
   direction: rtl;
-  font-family: "Cairo", sans-serif;
+  font-family: 'Tajawal', sans-serif;
   background: #F1F5F9;
   min-height: 100vh;
-  /* padding: 24px; */
+  width: 100%;
+  padding: 24px 0;
+  box-sizing: border-box;
 }
 
 /* ── Header ── */
@@ -17,8 +19,7 @@
   margin-bottom: 22px;
   flex-wrap: wrap;
   gap: 12px;
-  width: 100%;
-  max-width: 100%;
+  padding: 0 24px;
 }
 
 .headerText h1 {
@@ -61,6 +62,7 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 14px;
   margin-bottom: 22px;
+  padding: 0 24px;
 }
 
 @media (max-width: 1024px) {
@@ -78,21 +80,10 @@
   gap: 16px;
 }
 
-.statCard.total {
-  background: linear-gradient(135deg, #1E3A5F 0%, #2D5F8A 100%);
-}
-.statCard.pending {
-  background: #FFFBEB;
-  box-shadow: 0 0 0 1px #FDE68A;
-}
-.statCard.approved {
-  background: #ECFDF5;
-  box-shadow: 0 0 0 1px #A7F3D0;
-}
-.statCard.rejected {
-  background: #FEF2F2;
-  box-shadow: 0 0 0 1px #FECACA;
-}
+.statCard.total    { background: linear-gradient(135deg, #1E3A5F 0%, #2D5F8A 100%); }
+.statCard.pending  { background: #FFFBEB; box-shadow: 0 0 0 1px #FDE68A; }
+.statCard.approved { background: #ECFDF5; box-shadow: 0 0 0 1px #A7F3D0; }
+.statCard.rejected { background: #FEF2F2; box-shadow: 0 0 0 1px #FECACA; }
 
 .statIcon {
   width: 52px;
@@ -139,6 +130,7 @@
   border-radius: 14px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.07);
   overflow: hidden;
+  margin: 0 24px;
 }
 
 /* ── Toolbar ── */
@@ -163,6 +155,7 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .searchInput {
@@ -195,11 +188,10 @@
   cursor: pointer;
   color: #374151;
   transition: border 0.2s;
+  min-width: 130px;
 }
 
-.filterSelect:focus {
-  border-color: #2D5F8A;
-}
+.filterSelect:focus { border-color: #2D5F8A; }
 
 /* ── Error Banner ── */
 .errorBanner {
@@ -222,15 +214,26 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 860px;
+  min-width: 900px;
+  /* Fixed layout so column widths are respected */
+  table-layout: fixed;
 }
 
-.table thead {
-  background: #F8FAFC;
-}
+/* ── Column width distribution (9 columns = 100%) ── */
+.table thead tr th:nth-child(1) { width: 22%; } /* عنوان الفعالية – widest, has title+desc */
+.table thead tr th:nth-child(2) { width: 9%;  } /* النوع */
+.table thead tr th:nth-child(3) { width: 12%; } /* الموقع */
+.table thead tr th:nth-child(4) { width: 10%; } /* تاريخ البداية */
+.table thead tr th:nth-child(5) { width: 10%; } /* تاريخ النهاية */
+.table thead tr th:nth-child(6) { width: 9%;  } /* المشاركون */
+.table thead tr th:nth-child(7) { width: 9%;  } /* التكلفة */
+.table thead tr th:nth-child(8) { width: 8%;  } /* الحالة */
+.table thead tr th:nth-child(9) { width: 11%; } /* الإجراءات */
+
+.table thead { background: #F8FAFC; }
 
 .table th {
-  padding: 11px 14px;
+  padding: 12px 14px;
   font-size: 11.5px;
   font-weight: 700;
   color: #6B7280;
@@ -238,37 +241,29 @@
   border-bottom: 2px solid #E5E7EB;
   white-space: nowrap;
   letter-spacing: 0.3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .table td {
-  padding: 10px 14px;
+  padding: 12px 14px;
   font-size: 13px;
   color: #374151;
   border-bottom: 1px solid #F3F4F6;
   vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.table tbody tr:hover {
-  background: #F8FAFC;
-}
+.table tbody tr:last-child td { border-bottom: none; }
+.table tbody tr:hover { background: #F8FAFC; }
 
 /* ── Cell styles ── */
-.idCell {
-  color: #9CA3AF;
-  font-weight: 700;
-  font-size: 11px;
-}
-
 .titleCell .titleMain {
   font-weight: 700;
   color: #1E3A5F;
   font-size: 13px;
-  max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -278,13 +273,13 @@
   color: #9CA3AF;
   font-size: 11px;
   margin-top: 2px;
-  max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .typeBadge {
+  display: inline-block;
   background: #EFF6FF;
   color: #1D4ED8;
   padding: 3px 10px;
@@ -292,6 +287,9 @@
   font-size: 11.5px;
   font-weight: 600;
   white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .locationCell,
@@ -301,6 +299,7 @@
   gap: 4px;
   color: #4B5563;
   font-size: 12.5px;
+  overflow: hidden;
 }
 
 .locationCell svg,
@@ -326,7 +325,7 @@
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 4px 12px;
+  padding: 4px 10px;
   border-radius: 20px;
   font-size: 11.5px;
   font-weight: 700;
@@ -346,8 +345,8 @@
 }
 
 .iconBtn {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border: none;
   border-radius: 7px;
   display: inline-flex;
@@ -408,9 +407,7 @@
   color: #6B7280;
 }
 
-.pgInfo strong {
-  color: #374151;
-}
+.pgInfo strong { color: #374151; }
 
 .pgControls {
   display: flex;
@@ -703,8 +700,12 @@
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
-  .root { padding: 14px; }
+  .root { padding: 14px 0; }
+  .header { padding: 0 14px; }
+  .statsGrid { padding: 0 14px; }
+  .tableCard { margin: 0 14px; }
   .headerText h1 { font-size: 20px; }
-  .table { min-width: 700px; }
+  .table { min-width: 750px; }
   .searchInput { width: 160px; }
+  .filterSelect { min-width: 110px; }
 }

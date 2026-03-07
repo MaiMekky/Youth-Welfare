@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import "../Styles/Sidebar.css";
-import { Menu, X, User, Briefcase, BarChart3, Calendar } from "lucide-react";
+import "@/app/Styles/Sidebar.css";
+import { Menu, X, User, Briefcase, Calendar } from "lucide-react";
 import Image from "next/image";
 import logo from "@/utils/logo.png";
 
@@ -12,16 +12,7 @@ interface SidebarProps {
 
 export default function Sidebar({ onNavigate, currentView }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
   const [adminInfo, setAdminInfo] = useState({ name: "" });
-
-  useEffect(() => {
-    const checkIfMobile = () => setIsMobile(window.innerWidth <= 768);
-    checkIfMobile();
-    window.addEventListener("resize", checkIfMobile);
-    return () => window.removeEventListener("resize", checkIfMobile);
-  }, []);
 
   useEffect(() => {
     const userDataString = localStorage.getItem("user");
@@ -35,24 +26,25 @@ export default function Sidebar({ onNavigate, currentView }: SidebarProps) {
 
   const handleNavigate = (view: string) => {
     if (onNavigate) onNavigate(view);
-    if (isMobile) setIsOpen(false);
+    setIsOpen(false);
   };
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const sidebar = document.getElementById("sidebar");
-      const mobileBtn = document.querySelector(".mobile-menu-btn");
+      const menuBtn = document.querySelector(".mobile-menu-btn");
       if (
         isOpen &&
         sidebar &&
         !sidebar.contains(e.target as Node) &&
-        !mobileBtn?.contains(e.target as Node)
+        menuBtn &&
+        !(menuBtn as HTMLElement).contains(e.target as Node)
       ) {
         setIsOpen(false);
       }
     };
 
-    if (isOpen && isMobile) {
+    if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
       document.body.style.overflow = "hidden";
     } else {
@@ -63,85 +55,63 @@ export default function Sidebar({ onNavigate, currentView }: SidebarProps) {
       document.removeEventListener("mousedown", handleClickOutside);
       document.body.style.overflow = "unset";
     };
-  }, [isOpen, isMobile]);
-
-  const getInitials = (name: string) =>
-    name
-      .split(" ")
-      .map((w) => w[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase();
+  }, [isOpen]);
 
   return (
     <>
-      {isMobile && (
-        <button className="mobile-menu-btn" onClick={() => setIsOpen(true)}>
-          <Menu size={22} />
-        </button>
-      )}
+      <button
+        className="mobile-menu-btn"
+        onClick={() => setIsOpen(true)}
+        aria-label="فتح القائمة"
+      >
+        <Menu size={22} />
+      </button>
 
       <aside id="sidebar" className={`sidebar ${isOpen ? "open" : ""}`}>
-
-        {/* Header */}
         <div className="sidebar-header">
-          {isMobile && (
-            <button className="sidebar-close-btn" onClick={() => setIsOpen(false)}>
-              <X size={18} />
-            </button>
-          )}
-          <div className="sidebar-logo-wrap" title="جامعة العاصمة">
-            <Image
-              src={logo}
-              alt="شعار جامعة العاصمة"
-              className="sidebar-logo-img"
-              width={52}
-              height={52}
-              sizes="52px"
-              priority
-            />
+          <div className="logo-container" aria-hidden="true">
+            <div className="logo-wrapper">
+              <div className="logo-circle">
+                <Image
+                  src={logo}
+                  alt="شعار جامعة العاصمة"
+                  className="sidebar-logo"
+                  width={96}
+                  height={96}
+                  priority
+                />
+              </div>
+            </div>
           </div>
-          <div className="sidebar-brand">
-            <span className="sidebar-brand-title">إدارة رعاية الطلاب</span>
-            <span className="sidebar-brand-sub">جامعة العاصمة</span>
-          </div>
+          <h2 className="sidebar-title">إدارة رعاية الطلاب</h2>
+          <p className="sidebar-subtitle">جامعة العاصمة</p>
+          <button
+            className="sidebar-close-btn"
+            onClick={() => setIsOpen(false)}
+            aria-label="إغلاق القائمة"
+          >
+            <X size={18} />
+          </button>
         </div>
 
-        <div className="sidebar-divider" />
-
-        {/* Profile card */}
         <div className="profile-card">
-          <div className="profile-avatar">
-            {adminInfo.name ? getInitials(adminInfo.name) : <User size={16} />}
+          <div className="profile-icon">
+            <User size={22} />
           </div>
-          <div className="profile-info">
-            
-            <span className="profile-role">المدير العام للادارة</span>
+          <div className="admin-info">
+            <h3>{adminInfo.name || "المدير العام"}</h3>
+            <p>المدير العام للإدارة</p>
           </div>
         </div>
 
-        {/* Nav label */}
-        <div className="nav-label">القائمة الرئيسية</div>
-
-        {/* Navigation */}
         <nav className="nav">
-            
           <button
             className={currentView === "activities" ? "active" : ""}
             onClick={() => handleNavigate("activities")}
           >
             <Briefcase size={18} />
-            <span> الفعاليات العامة</span>
+            <span>الفعاليات العامة</span>
           </button>
-{/* 
-          <button
-            className={currentView === "reports" ? "active" : ""}
-            onClick={() => handleNavigate("reports")}
-          >
-            <BarChart3 size={18} />
-            <span>التقارير والإنجازات</span>
-          </button> */}
-
           <button
             className={currentView === "plan" ? "active" : ""}
             onClick={() => handleNavigate("plan")}
@@ -150,12 +120,14 @@ export default function Sidebar({ onNavigate, currentView }: SidebarProps) {
             <span>تقارير الكليات</span>
           </button>
         </nav>
-
-      
       </aside>
 
-      {isMobile && isOpen && (
-        <div className="sidebar-overlay" onClick={() => setIsOpen(false)} />
+      {isOpen && (
+        <div
+          className="sidebar-overlay"
+          onClick={() => setIsOpen(false)}
+          aria-hidden="true"
+        />
       )}
     </>
   );

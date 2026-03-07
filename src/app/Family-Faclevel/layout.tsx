@@ -1,27 +1,21 @@
+
 import React from "react";
 import "../FacLevel/globals.css";
-import FacLevelSidebar from "./components/sidebar";
-
-
+import FamilySidebar from "./components/sidebar";
+import SidebarLayout from "../FacLevel/components/SidebarLayout";
 
 export const metadata = {
-  title: "إدارة الاسر الطلابية",
-  description: "نظام إدارة طلبات الاسر الطلابية لجامعة حلوان",
+  title: "إدارة الأسر الطلابية - جامعة العاصمة",
+  description: "نظام إدارة طلبات الأسر الطلابية لجامعة حلوان",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ar">
       <body className="app-body">
-        <div className="app-container">
-          <FacLevelSidebar />
-          <div className="main-content">
-            <div className="page-wrapper">
-              {children}
-            </div>
-          
-          </div>
-        </div>
+        <SidebarLayout sidebar={<FamilySidebar />}>
+          {children}
+        </SidebarLayout>
       </body>
     </html>
   );

@@ -5,13 +5,13 @@
   min-height: 100vh;
   background-color: #f5f7fa;
   direction: rtl;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Cairo", sans-serif;
   color: #2C3A5F;
 }
 /* Global container */
 .reportsPage {
    width: 100%;
-  max-width: 1400px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 20px;
   flex: 1;

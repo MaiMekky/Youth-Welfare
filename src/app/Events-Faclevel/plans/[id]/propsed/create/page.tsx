@@ -15,7 +15,7 @@ import {
   Briefcase,
 } from "lucide-react";
 import Footer from "@/app/FacLevel/components/Footer";
-import Header from "@/app/FacLevel/components/Header";
+
 
 const API_URL = "http://localhost:8000";
 
@@ -434,7 +434,6 @@ export default function CreateProposedEventPage() {
 )}
 
       <div className={styles.page}>
-        <Header />
         <div className={styles.container}>
           <div className={styles.topBar}>
             <div className={styles.headText}>

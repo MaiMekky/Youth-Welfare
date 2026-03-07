@@ -3,7 +3,7 @@
   min-height: auto;
   padding: 15px;
   background: #f5f7fa;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: "Cairo", sans-serif;
   color: #2C3A5F;
   display: flex;
   flex-direction: column;
@@ -71,6 +71,7 @@
   max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+   border-radius: 5px;
 }
 
 .usersTable {

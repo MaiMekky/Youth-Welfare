@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import styles from './details.module.css';
 import { useParams, useRouter } from "next/navigation";
-import Header from "@/app/FacLevel/components/Header";
 import Footer from "@/app/FacLevel/components/Footer";
 
 interface FamilyData {
@@ -258,8 +257,7 @@ const handleExport = async () => {
 
   return (
     <>
-      <Header />
-            {notification && (
+        {notification && (
         <div
           className={`${styles.notification} ${
             notification.type === "success"

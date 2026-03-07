@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Header from "@/app/FacLevel/components/Header";
 import Footer from "@/app/FacLevel/components/Footer";
 
 import ReportCard from "../families-reports/components/reports";
@@ -56,8 +55,7 @@ export default function FamilyReportsPage() {
 
   return (
     <div className={styles.pageWrapper}>
-      <Header />
-
+      
       <div className={styles.reportsPage}>
         <div className={styles.pageHeaderReports}>
           <h1 className={styles.pageTitleReports}>تقارير الأسر الطلابية</h1>

@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import styles from "../CreateEvent.module.css";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowRight, Save } from "lucide-react";
-import Header from "@/app/FacLevel/components/Header";
 import Footer from "@/app/FacLevel/components/Footer";
 
 /** ================== API ================== */
@@ -404,7 +403,6 @@ export default function EventForm({
 
   return (
     <div className={styles.page}>
-      <Header />
       {/* ✅ Notification */}
       {notification && (
         <div

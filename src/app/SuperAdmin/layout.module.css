@@ -1,135 +1,67 @@
-/* ========== LAYOUT CONTAINER ========== */
-.layout {
+/* ═══════════════════════════════════════════════════════════════
+   SuperAdmin Layout — Clean full-width (sidebar closed by default)
+   Sidebar opens via fixed button, content uses full width
+═══════════════════════════════════════════════════════════════ */
+
+.dashboardContainer {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   background: #f5f6fa;
-}
-
-/* ========== LAYOUT BODY ========== */
-.layoutBody {
-  display: flex;
-  flex: 1;
-  position: relative;
-  /* Allow vertical scrolling for sticky sidebar while preventing horizontal overflow */
+  direction: rtl;
   overflow-x: hidden;
 }
 
-/* ========== MAIN CONTENT ========== */
-.main {
+/* Content area: full width, no sidebar column */
+.dashboardContent {
+  display: flex;
   flex: 1;
-  padding: clamp(1.25rem, 3vw, 2rem);
-  overflow-y: auto;
+  min-height: 0;
+  width: 100%;
+  position: relative;
+}
+
+/* Main content: full width with padding for menu button */
+.mainContent {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+  padding-top: clamp(1.25rem, 3vw, 1.75rem);
+  /* Space for fixed sidebar menu button (top-right in RTL) */
+  padding-right: clamp(4.5rem, 10vw, 5.5rem);
+  margin: 0;
   background: #f5f6fa;
-  min-height: calc(100vh - 140px); /* Adjust based on header/footer height */
-  transition: margin-right 0.3s ease;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
-/* ========== OVERLAY (Mobile only) ========== */
-.overlay {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 998;
-  backdrop-filter: blur(2px);
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* ========== DESKTOP (Above 768px) ========== */
-@media (min-width: 769px) {
-  .layoutBody {
-    /* Sidebar stays visible on desktop */
-  }
-
-  .main {
-    /* Main content automatically takes remaining space */
-  }
-
-  .overlay {
-    /* Never show overlay on desktop */
-    display: none !important;
+/* ========== RESPONSIVE ========== */
+@media (max-width: 1024px) {
+  .mainContent {
+    padding: clamp(1rem, 2vw, 1.25rem);
+    padding-right: clamp(4rem, 8vw, 4.5rem);
   }
 }
 
-/* ========== TABLET (768px and below) ========== */
 @media (max-width: 768px) {
-  .layoutBody {
-    flex-direction: column;
-  }
-
-  .main {
-    width: 100%;
-    padding: clamp(1rem, 2.5vw, 1.5rem);
-    min-height: calc(100vh - 120px);
-  }
-
-  .overlay {
-    display: block;
+  .mainContent {
+    padding: clamp(0.875rem, 2vw, 1rem);
+    padding-right: clamp(3.75rem, 6vw, 4rem);
   }
 }
 
-/* ========== MOBILE (480px and below) ========== */
 @media (max-width: 480px) {
-  .main {
-    padding: clamp(0.875rem, 2vw, 1.25rem);
-    min-height: calc(100vh - 100px);
-  }
-}
-
-/* ========== EXTRA SMALL (360px and below) ========== */
-@media (max-width: 360px) {
-  .main {
+  .mainContent {
     padding: 0.75rem;
+    padding-right: 3.5rem;
   }
 }
 
-/* ========== LANDSCAPE MOBILE ========== */
-@media (max-width: 768px) and (orientation: landscape) {
-  .main {
-    padding: 1rem;
-    min-height: calc(100vh - 100px);
+@media (max-width: 360px) {
+  .mainContent {
+    padding: 0.625rem;
+    padding-right: 3.25rem;
   }
-}
-
-/* ========== ACCESSIBILITY ========== */
-@media (prefers-reduced-motion: reduce) {
-  .main,
-  .overlay {
-    transition: none;
-    animation: none;
-  }
-}
-
-/* ========== SMOOTH SCROLLING ========== */
-.main {
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 #f1f5f9;
-}
-
-.main::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.main::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
-}
-
-.main::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-.main::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
 }

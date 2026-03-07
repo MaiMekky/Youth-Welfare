@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import CreatePlanModal from "./components/CreatePlanModal";
 import Footer from "@/app/FacLevel/components/Footer";
-import Header from "@/app/FacLevel/components/Header";
 
 type ApiPlan = {
   plan_id: number;
@@ -147,7 +146,6 @@ export default function Page() {
 
   return (
     <div className={styles.page}>
-      <Header />
       <div className={styles.container}>
         <div className={styles.header}>
           <div className={styles.headerText}>

@@ -1,13 +1,14 @@
 "use client";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import {
-  Eye, Check, X, Clock, Calendar, Users, Building2,
-  CheckCircle, XCircle, RefreshCw, AlertCircle, Layers, MapPin
+  Eye, Check, X, Clock, Calendar, Users,
+  CheckCircle, XCircle, RefreshCw, AlertCircle, Layers, MapPin,
+  User, Building2, BookOpen, DollarSign, Award, ShieldAlert, Package,
+  ChevronDown, TrendingUp, Activity,
 } from "lucide-react";
+import "../Styles/Activities.css";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-interface Activity {
+interface ActivityItem {
   event_id: number;
   title: string;
   description: string;
@@ -20,9 +21,34 @@ interface Activity {
   s_limit: number;
   faculty_id: number;
   dept_id: number;
+  dept_name?: string;
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+interface ActivityDetail {
+  created_by_name: string;
+  faculty_name: string;
+  dept_name: string;
+  family_name: string;
+  participants: string | number;
+  images: string | string[];
+  title: string;
+  description: string;
+  updated_at: string;
+  cost: string | number;
+  location: string;
+  restrictions: string | any;
+  reward: string | any;
+  status: string;
+  st_date: string;
+  end_date: string;
+  s_limit: number;
+  created_at: string;
+  type: string;
+  resource: string | any;
+  selected_facs: number[];
+}
+
+type StatusFilter = "pending" | "accepted" | "rejected";
 
 const getToken = () =>
   typeof window !== "undefined" ? localStorage.getItem("access") : null;
@@ -33,17 +59,59 @@ function isPending(raw: string) {
   const k = raw?.trim();
   return k === "منتظر" || k?.toLowerCase() === "pending";
 }
+function isAccepted(raw: string) {
+  const k = raw?.trim();
+  return k === "مقبول" || k?.toLowerCase() === "approved" || k?.toLowerCase() === "accepted";
+}
+function isRejected(raw: string) {
+  const k = raw?.trim();
+  return k === "مرفوض" || k?.toLowerCase() === "rejected";
+}
 
 function fmt(d?: string) {
   if (!d) return "—";
-  return new Date(d).toLocaleDateString("ar-EG");
+  return new Date(d).toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric" });
+}
+function fmtDateTime(d?: string) {
+  if (!d) return "—";
+  return new Date(d).toLocaleString("ar-EG", {
+    year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+  });
+}
+function safeStr(val: any): string {
+  if (val === null || val === undefined) return "";
+  if (typeof val === "string") return val;
+  if (typeof val === "number") return String(val);
+  if (Array.isArray(val)) return val.map(safeStr).filter(Boolean).join(" | ");
+  if (typeof val === "object") {
+    const pick = val.reward ?? val.name ?? val.title ?? val.label ?? val.value;
+    if (pick !== undefined) return safeStr(pick);
+    return Object.entries(val)
+      .filter(([, v]) => v !== null && v !== undefined && typeof v !== "object")
+      .map(([k, v]) => `${k}: ${v}`).join(" | ");
+  }
+  return String(val);
 }
 
-// ─── Confirm Dialog ───────────────────────────────────────────────────────────
+const deptCache = new Map<number, string>();
 
-function ConfirmDialog({
-  action, eventTitle, onConfirm, onCancel, loading,
-}: {
+async function fetchDeptName(deptId: number): Promise<string> {
+  if (deptCache.has(deptId)) return deptCache.get(deptId)!;
+  try {
+    const res = await fetch(`${BASE}/api/family/departments/${deptId}/`, {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    });
+    if (!res.ok) return `قسم ${deptId}`;
+    const data = await res.json();
+    const name = data.name || data.dept_name || data.department_name || `قسم ${deptId}`;
+    deptCache.set(deptId, name);
+    return name;
+  } catch {
+    return `قسم ${deptId}`;
+  }
+}
+
+function ConfirmDialog({ action, eventTitle, onConfirm, onCancel, loading }: {
   action: "approve" | "reject";
   eventTitle: string;
   onConfirm: () => void;
@@ -52,54 +120,23 @@ function ConfirmDialog({
 }) {
   const isApprove = action === "approve";
   return (
-    <div style={{
-      position: "fixed", inset: 0, background: "rgba(15,23,42,0.55)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      zIndex: 1000, backdropFilter: "blur(4px)",
-    }}>
-      <div style={{
-        background: "#fff", borderRadius: 20, padding: "2rem",
-        width: "min(90vw, 400px)", textAlign: "center",
-        boxShadow: "0 25px 60px rgba(15,23,42,0.18)",
-        animation: "fadeUp 0.2s ease",
-      }}>
-        <div style={{
-          width: 64, height: 64, borderRadius: "50%",
-          background: isApprove ? "#ECFDF5" : "#FEF2F2",
-          color: isApprove ? "#10B981" : "#EF4444",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          margin: "0 auto 1rem",
-        }}>
-          {isApprove ? <CheckCircle size={32} /> : <XCircle size={32} />}
+    <div className="act-overlay">
+      <div className="confirm-box">
+        <div className={`confirm-icon-wrap ${isApprove ? "ci-approve" : "ci-reject"}`}>
+          {isApprove ? <CheckCircle size={30} /> : <XCircle size={30} />}
         </div>
-        <h3 style={{ fontSize: "1.15rem", fontWeight: 700, color: "#111827", marginBottom: 8 }}>
-          {isApprove ? "تأكيد الموافقة" : "تأكيد الرفض"}
-        </h3>
-        <p style={{ color: "#6B7280", fontSize: "0.9rem", lineHeight: 1.6, marginBottom: "1.5rem" }}>
+        <h3 className="confirm-title">{isApprove ? "تأكيد الموافقة" : "تأكيد الرفض"}</h3>
+        <p className="confirm-body">
           هل أنت متأكد من {isApprove ? "الموافقة على" : "رفض"} فعالية{" "}
-          <strong style={{ color: "#111827" }}>"{eventTitle}"</strong>؟
+          <strong>"{eventTitle}"</strong>؟
         </p>
-        <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+        <div className="confirm-actions">
+          <button className="cbtn cbtn-cancel" onClick={onCancel} disabled={loading}>إلغاء</button>
           <button
-            onClick={onCancel} disabled={loading}
-            style={{
-              padding: "9px 24px", borderRadius: 10, border: "1.5px solid #E5E7EB",
-              background: "#fff", color: "#374151", fontWeight: 600,
-              cursor: "pointer", fontSize: "0.88rem", fontFamily: "inherit",
-            }}
-          >
-            إلغاء
-          </button>
-          <button
+            className={`cbtn ${isApprove ? "cbtn-approve" : "cbtn-reject"}`}
             onClick={onConfirm} disabled={loading}
-            style={{
-              padding: "9px 24px", borderRadius: 10, border: "none",
-              background: isApprove ? "#10B981" : "#EF4444", color: "#fff",
-              fontWeight: 600, cursor: "pointer", fontSize: "0.88rem",
-              fontFamily: "inherit", opacity: loading ? 0.7 : 1,
-            }}
           >
-            {loading ? "جاري التنفيذ…" : isApprove ? "موافقة" : "رفض"}
+            {loading ? <><RefreshCw size={13} className="spinning" /> جاري…</> : isApprove ? "✓ موافقة" : "✕ رفض"}
           </button>
         </div>
       </div>
@@ -107,31 +144,320 @@ function ConfirmDialog({
   );
 }
 
-// ─── Toast ───────────────────────────────────────────────────────────────────
+function DetailsModal({ detail, onClose }: { detail: ActivityDetail; onClose: () => void }) {
+  const costVal = safeStr(detail.cost);
+  const isFree  = !costVal || costVal === "0" || costVal === "0.00";
+  const imageUrl = Array.isArray(detail.images) ? detail.images[0] : safeStr(detail.images);
+  const statusAccepted = isAccepted(detail.status);
+  const statusRejected = isRejected(detail.status);
 
-function Toast({ msg }: { msg: string }) {
   return (
-    <div style={{
-      position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)",
-      background: "#1e2a5a", color: "#fff", padding: "12px 24px",
-      borderRadius: 12, fontWeight: 600, fontSize: "0.88rem",
-      boxShadow: "0 8px 30px rgba(30,42,90,0.25)", zIndex: 2000,
-      animation: "fadeUp 0.3s ease",
-    }}>
-      {msg}
+    <div className="act-overlay" onClick={onClose}>
+      <div className="detail-modal" onClick={e => e.stopPropagation()}>
+        <div className="dm-header">
+          <div className="dm-header-bg" />
+          <div className="dm-header-content">
+            <div className="dm-header-top">
+              {detail.type && <span className={`type-badge type-${detail.type}`}>{detail.type}</span>}
+              <span className={`dm-status-pill ${statusAccepted ? "dsp-accepted" : statusRejected ? "dsp-rejected" : "dsp-pending"}`}>
+                {statusAccepted ? "مقبول" : statusRejected ? "مرفوض" : "منتظر"}
+              </span>
+            </div>
+            <h2 className="dm-title">{detail.title}</h2>
+            {detail.description && <p className="dm-desc">{detail.description}</p>}
+          </div>
+          <button className="dm-close" onClick={onClose}><X size={16} /></button>
+        </div>
+
+        {imageUrl && (
+          <div className="dm-image-wrap">
+            <img src={imageUrl} alt={detail.title} className="dm-image" />
+            <div className="dm-image-overlay" />
+          </div>
+        )}
+
+        <div className="dm-body">
+          <div className="dm-stats-row">
+            <div className="dm-stat">
+              <Calendar size={16} className="dm-stat-icon" />
+              <div>
+                <span className="dm-stat-label">تاريخ البداية</span>
+                <span className="dm-stat-val">{fmt(detail.st_date)}</span>
+              </div>
+            </div>
+            <div className="dm-stat">
+              <Calendar size={16} className="dm-stat-icon" />
+              <div>
+                <span className="dm-stat-label">تاريخ النهاية</span>
+                <span className="dm-stat-val">{fmt(detail.end_date)}</span>
+              </div>
+            </div>
+            <div className="dm-stat">
+              <Users size={16} className="dm-stat-icon" />
+              <div>
+                <span className="dm-stat-label">المقاعد</span>
+                <span className="dm-stat-val">
+                  {!detail.s_limit || detail.s_limit >= 2147483647 ? "غير محدود" : detail.s_limit.toLocaleString("ar-EG")}
+                </span>
+              </div>
+            </div>
+            <div className="dm-stat">
+              <DollarSign size={16} className="dm-stat-icon" />
+              <div>
+                <span className="dm-stat-label">التكلفة</span>
+                <span className={`dm-stat-val ${isFree ? "sv-green" : "sv-orange"}`}>
+                  {isFree ? "مجاني" : `${costVal} ج.م`}
+                </span>
+              </div>
+            </div>
+            <div className="dm-stat">
+              <Users size={16} className="dm-stat-icon" />
+              
+            </div>
+            <div className="dm-stat">
+              <MapPin size={16} className="dm-stat-icon" />
+              <div>
+                <span className="dm-stat-label">الموقع</span>
+                <span className="dm-stat-val">{detail.location || "—"}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="dm-section">
+            <h4 className="dm-section-title"><User size={13} /> معلومات المنظِّم</h4>
+            <div className="dm-info-grid">
+              <div className="dm-info-item">
+                <span className="dii-label">أُنشئ بواسطة</span>
+                <span className="dii-val">{detail.created_by_name || "—"}</span>
+              </div>
+              <div className="dm-info-item">
+                <span className="dii-label">الكلية</span>
+                <span className="dii-val">{detail.faculty_name || "—"}</span>
+              </div>
+              <div className="dm-info-item">
+                <span className="dii-label">القسم</span>
+                <span className="dii-val">{detail.dept_name || "—"}</span>
+              </div>
+              <div className="dm-info-item">
+                <span className="dii-label">المجموعة</span>
+                <span className="dii-val">{detail.family_name || "—"}</span>
+              </div>
+            </div>
+          </div>
+
+          {(detail.restrictions || detail.reward || detail.resource) && (
+            <div className="dm-section">
+              <h4 className="dm-section-title"><ShieldAlert size={13} /> معلومات إضافية</h4>
+              <div className="dm-info-grid">
+                {detail.restrictions && (
+                  <div className="dm-info-item dm-info-full">
+                    <span className="dii-label">الشروط والقيود</span>
+                    <span className="dii-val">{safeStr(detail.restrictions)}</span>
+                  </div>
+                )}
+                {detail.reward && (
+                  <div className="dm-info-item">
+                    <span className="dii-label"><Award size={11} /> المكافأة</span>
+                    <span className="dii-val sv-gold">{safeStr(detail.reward)}</span>
+                  </div>
+                )}
+                {detail.resource && (
+                  <div className="dm-info-item">
+                    <span className="dii-label"><Package size={11} /> الموارد</span>
+                    <span className="dii-val">{safeStr(detail.resource)}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="dm-timestamps">
+            <span>تاريخ الإنشاء: {fmtDateTime(detail.created_at)}</span>
+            <span>آخر تحديث: {fmtDateTime(detail.updated_at)}</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+function Toast({ msg }: { msg: string }) {
+  return <div className="act-toast">{msg}</div>;
+}
+
+function ActivityCard({
+  activity, index, showActions, detailLoading,
+  onApprove, onReject, onView,
+}: {
+  activity: ActivityItem;
+  index: number;
+  showActions: boolean;
+  detailLoading: boolean;
+  onApprove: () => void;
+  onReject: () => void;
+  onView: () => void;
+}) {
+  const accepted = isAccepted(activity.status);
+  const rejected = isRejected(activity.status);
+  const isFree   = !activity.cost || activity.cost === "0" || activity.cost === "0.00";
+
+  return (
+    <div
+      className={`act-card ${accepted ? "act-card--accepted" : ""} ${rejected ? "act-card--rejected" : ""}`}
+      style={{ animationDelay: `${index * 50}ms` }}
+    >
+      <div className={`card-accent ${accepted ? "ca-accepted" : rejected ? "ca-rejected" : "ca-pending"}`} />
+      <div className="card-inner">
+        <div className="card-top">
+          <div className="card-title-group">
+            <div className="card-badges-row">
+              {activity.type && <span className={`type-badge type-${activity.type}`}>{activity.type}</span>}
+              {accepted && <span className="status-chip chip-accepted"><CheckCircle size={11} /> مقبول</span>}
+              {rejected && <span className="status-chip chip-rejected"><XCircle size={11} /> مرفوض</span>}
+              {!accepted && !rejected && <span className="status-chip chip-pending"><Clock size={11} /> منتظر</span>}
+            </div>
+            <h3 className="card-title">{activity.title}</h3>
+            {activity.dept_name && (
+              <span className="card-dept"><BookOpen size={11} /> {activity.dept_name}</span>
+            )}
+          </div>
+          <div className="card-actions">
+            <button className="btn-view" onClick={onView} disabled={detailLoading}>
+              {detailLoading ? <RefreshCw size={13} className="spinning" /> : <Eye size={14} />}
+              <span>تفاصيل</span>
+            </button>
+            {showActions && (
+              <>
+                <button className="btn-reject" onClick={onReject}><X size={13} /><span>رفض</span></button>
+                <button className="btn-approve" onClick={onApprove}><Check size={13} /><span>موافقة</span></button>
+              </>
+            )}
+          </div>
+        </div>
+        <div className="card-meta">
+          <div className="meta-pill">
+            <Calendar size={12} />
+            <span className="mp-label">البداية</span>
+            <span className="mp-val">{fmt(activity.st_date)}</span>
+          </div>
+          <div className="meta-pill">
+            <Calendar size={12} />
+            <span className="mp-label">النهاية</span>
+            <span className="mp-val">{fmt(activity.end_date)}</span>
+          </div>
+          <div className="meta-pill">
+            <Users size={12} />
+            <span className="mp-label">المقاعد</span>
+            <span className="mp-val">
+              {!activity.s_limit || activity.s_limit >= 2147483647 ? "∞ غير محدود" : activity.s_limit.toLocaleString("ar-EG")}
+            </span>
+          </div>
+          <div className="meta-pill">
+            <MapPin size={12} />
+            <span className="mp-label">الموقع</span>
+            <span className="mp-val">{activity.location || "—"}</span>
+          </div>
+          <div className="meta-pill">
+            <DollarSign size={12} />
+            <span className="mp-label">التكلفة</span>
+            <span className={`mp-val ${isFree ? "mpv-free" : "mpv-paid"}`}>
+              {isFree ? "مجاني" : `${activity.cost} ج.م`}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── StatsBar — بدون progress bar ── */
+function StatsBar({ total, pending, accepted, rejected }: {
+  total: number; pending: number; accepted: number; rejected: number;
+}) {
+  const pct = (n: number) => total ? Math.round((n / total) * 100) : 0;
+  return (
+    <div className="stats-bar">
+      <div className="stat-card sc-total">
+        <div className="sc-num">{total}</div>
+        <div className="sc-label">إجمالي الفعاليات</div>
+      </div>
+      <div className="stat-card sc-pending">
+        <div className="sc-num">{pending}</div>
+        <div className="sc-label">في الانتظار</div>
+       
+      </div>
+      <div className="stat-card sc-accepted">
+        <div className="sc-num">{accepted}</div>
+        <div className="sc-label">مقبولة</div>
+       
+      </div>
+      <div className="stat-card sc-rejected">
+        <div className="sc-num">{rejected}</div>
+        <div className="sc-label">مرفوضة</div>
+       
+      </div>
+    </div>
+  );
+}
 
 export default function Activities() {
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState("");
-  const [confirm, setConfirm]       = useState<{ id: number; action: "approve" | "reject"; title: string } | null>(null);
-  const [actionLoading, setActionLoading] = useState(false);
-  const [toastMsg, setToastMsg]     = useState("");
+  const [allActivities, setAllActivities]     = useState<ActivityItem[]>([]);
+  const [loading, setLoading]                 = useState(false);
+  const [error, setError]                     = useState("");
+  const [confirm, setConfirm]                 = useState<{ id: number; action: "approve" | "reject"; title: string } | null>(null);
+  const [actionLoading, setActionLoading]     = useState(false);
+  const [toastMsg, setToastMsg]               = useState("");
+  const [detailData, setDetailData]           = useState<ActivityDetail | null>(null);
+  const [loadingDetailId, setLoadingDetailId] = useState<number | null>(null);
+  const [statusFilter, setStatusFilter]       = useState<StatusFilter>("pending");
+  const [deptFilter, setDeptFilter]           = useState<string>("all");
+  const [deptDropOpen, setDeptDropOpen]       = useState(false);
+  const deptRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (deptRef.current && !deptRef.current.contains(e.target as Node)) setDeptDropOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const enrichWithDeptNames = useCallback(async (activities: ActivityItem[]) => {
+    const uniqueDeptIds = [...new Set(activities.map(a => a.dept_id).filter(Boolean))];
+    await Promise.all(uniqueDeptIds.map(id => fetchDeptName(id)));
+    return activities.map(a => ({
+      ...a,
+      dept_name: deptCache.get(a.dept_id) || a.dept_name || `قسم ${a.dept_id}`,
+    }));
+  }, []);
+
+  const deptOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    allActivities.forEach(a => {
+      const key = String(a.dept_id);
+      if (!map.has(key)) map.set(key, a.dept_name || `قسم ${a.dept_id}`);
+    });
+    return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
+  }, [allActivities]);
+
+  const filtered = useMemo(() => {
+    let list = allActivities;
+    if (deptFilter !== "all") list = list.filter(a => String(a.dept_id) === deptFilter);
+    if (statusFilter === "pending")  return list.filter(a => isPending(a.status));
+    if (statusFilter === "accepted") return list.filter(a => isAccepted(a.status));
+    if (statusFilter === "rejected") return list.filter(a => isRejected(a.status));
+    return list;
+  }, [allActivities, statusFilter, deptFilter]);
+
+  const counts = useMemo(() => {
+    const base = deptFilter === "all" ? allActivities : allActivities.filter(a => String(a.dept_id) === deptFilter);
+    return {
+      total:    base.length,
+      pending:  base.filter(a => isPending(a.status)).length,
+      accepted: base.filter(a => isAccepted(a.status)).length,
+      rejected: base.filter(a => isRejected(a.status)).length,
+    };
+  }, [allActivities, deptFilter]);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -141,22 +467,39 @@ export default function Activities() {
   const fetchActivities = useCallback(async () => {
     try {
       setLoading(true);
+      setError("");
       const res = await fetch(`${BASE}/api/event/get-events/`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
-      if (!res.ok) throw new Error();
-      const data: Activity[] = await res.json();
-      // Show only pending activities in this view
-      setActivities(data.filter(e => isPending(e.status)));
-      setError("");
-    } catch {
-      setError("فشل في جلب البيانات. تحقق من الاتصال.");
+      if (!res.ok) throw new Error("فشل في جلب البيانات");
+      const data: ActivityItem[] = await res.json();
+      const enriched = await enrichWithDeptNames(data);
+      setAllActivities(enriched);
+    } catch (err: any) {
+      setError(err?.message || "تعذّر الاتصال بالخادم");
+      setAllActivities([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [enrichWithDeptNames]);
 
   useEffect(() => { fetchActivities(); }, [fetchActivities]);
+
+  const openDetail = async (id: number) => {
+    setLoadingDetailId(id);
+    try {
+      const res = await fetch(`${BASE}/api/event/get-events/${id}/`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (!res.ok) throw new Error();
+      const data: ActivityDetail = await res.json();
+      setDetailData(data);
+    } catch {
+      showToast("⚠️ فشل في جلب تفاصيل الفعالية");
+    } finally {
+      setLoadingDetailId(null);
+    }
+  };
 
   const handleAction = async () => {
     if (!confirm) return;
@@ -170,320 +513,63 @@ export default function Activities() {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       if (!res.ok) throw new Error();
+      const newStatus = confirm.action === "approve" ? "مقبول" : "مرفوض";
+      setAllActivities(prev =>
+        prev.map(a => a.event_id === confirm.id ? { ...a, status: newStatus } : a)
+      );
       showToast(confirm.action === "approve" ? "✅ تم قبول الفعالية بنجاح" : "❌ تم رفض الفعالية");
       setConfirm(null);
-      fetchActivities();
     } catch {
-      showToast("⚠️ حدث خطأ أثناء تنفيذ الإجراء");
+      showToast("⚠️ فشل في تنفيذ العملية، يرجى المحاولة مجدداً");
     } finally {
       setActionLoading(false);
     }
   };
 
+  const selectedDeptLabel = deptFilter === "all"
+    ? "جميع الأقسام"
+    : deptOptions.find(d => d.id === deptFilter)?.name ?? "جميع الأقسام";
+
   return (
     <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
-
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(12px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-        @keyframes shimmer {
-          0%   { background-position: -400px 0; }
-          100% { background-position: 400px 0; }
-        }
-
-        .act-page {
-          direction: rtl;
-          font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
-          padding: clamp(1rem, 3vw, 1.75rem);
-          background: #f3f5fd;
-          min-height: 100%;
-          box-sizing: border-box;
-        }
-
-        /* ── Header ── */
-        .act-header {
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
-          gap: 1rem;
-          margin-bottom: 1.5rem;
-          flex-wrap: wrap;
-        }
-        .act-header-left { display: flex; flex-direction: column; gap: 4px; }
-        .act-title {
-          font-size: clamp(1.1rem, 2.5vw, 1.35rem);
-          font-weight: 800;
-          color: #1e2a5a;
-          margin: 0;
-        }
-        .act-subtitle {
-          font-size: clamp(0.78rem, 1.5vw, 0.875rem);
-          color: #6b7fc4;
-          margin: 0;
-        }
-        .act-header-right {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          flex-shrink: 0;
-        }
-
-        /* Pending badge */
-        .pending-badge {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          background: #fff8e6;
-          border: 1.5px solid #f0d080;
-          color: #a07b10;
-          font-size: 0.8rem;
-          font-weight: 700;
-          padding: 7px 14px;
-          border-radius: 20px;
-          white-space: nowrap;
-        }
-
-        /* Refresh button */
-        .refresh-btn {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          background: #fff;
-          border: 1.5px solid #e2e6f3;
-          color: #3b5fc0;
-          font-size: 0.82rem;
-          font-weight: 700;
-          padding: 7px 14px;
-          border-radius: 20px;
-          cursor: pointer;
-          transition: all 0.2s;
-          font-family: inherit;
-          white-space: nowrap;
-        }
-        .refresh-btn:hover {
-          background: #edf3ff;
-          border-color: #3b5fc0;
-          transform: translateY(-1px);
-        }
-        .refresh-btn svg { flex-shrink: 0; }
-        .spinning { animation: spin 1s linear infinite; }
-
-        /* ── Error Banner ── */
-        .error-banner {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          background: #FEF2F2;
-          border: 1.5px solid #FECACA;
-          color: #DC2626;
-          padding: 12px 16px;
-          border-radius: 12px;
-          font-size: 0.88rem;
-          font-weight: 600;
-          margin-bottom: 1rem;
-        }
-
-        /* ── State Box ── */
-        .state-box {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 14px;
-          padding: 4rem 2rem;
-          color: #9CA3AF;
-          text-align: center;
-        }
-        .state-box p { font-size: 0.95rem; font-weight: 600; margin: 0; }
-
-        /* ── Cards List ── */
-        .act-list {
-          display: flex;
-          flex-direction: column;
-          gap: 14px;
-        }
-
-        /* ── Single Card ── */
-        .act-card {
-          background: #ffffff;
-          border-radius: 16px;
-          padding: clamp(1rem, 2.5vw, 1.25rem) clamp(1rem, 3vw, 1.5rem);
-          box-shadow: 0 2px 12px rgba(30, 42, 90, 0.07);
-          border: 1.5px solid #eaedf6;
-          transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s;
-          animation: fadeUp 0.3s ease both;
-        }
-        .act-card:hover {
-          box-shadow: 0 8px 28px rgba(30, 42, 90, 0.12);
-          transform: translateY(-2px);
-          border-color: #d0d9f5;
-        }
-
-        /* Card top row */
-        .card-top {
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
-          gap: 1rem;
-          margin-bottom: 1rem;
-          flex-wrap: wrap;
-        }
-        .card-title-row {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          flex-wrap: wrap;
-          flex: 1;
-          min-width: 0;
-        }
-        .card-title {
-          font-size: clamp(1rem, 2vw, 1.1rem);
-          font-weight: 800;
-          color: #1e2a5a;
-          margin: 0;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        /* Type badge */
-        .type-badge {
-          display: inline-block;
-          font-size: 0.72rem;
-          font-weight: 700;
-          padding: 4px 10px;
-          border-radius: 20px;
-          white-space: nowrap;
-          flex-shrink: 0;
-          background: #f0f4ff;
-          color: #2c4ea8;
-          border: 1px solid #d0daf7;
-        }
-
-        /* Action buttons */
-        .card-actions {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          flex-shrink: 0;
-          flex-wrap: wrap;
-        }
-        .card-actions button {
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          padding: 7px 14px;
-          border-radius: 9px;
-          font-size: 0.82rem;
-          font-weight: 700;
-          cursor: pointer;
-          border: 1.5px solid transparent;
-          transition: all 0.2s ease;
-          white-space: nowrap;
-          font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
-        }
-        .btn-reject {
-          background: #fff;
-          color: #c0392b;
-          border-color: #e8c8c5 !important;
-        }
-        .btn-reject:hover {
-          background: #fff5f5;
-          border-color: #c0392b !important;
-          transform: translateY(-1px);
-        }
-        .btn-approve {
-          background: linear-gradient(135deg, #c49b3a 0%, #a67f2c 100%);
-          color: #fff;
-          box-shadow: 0 3px 10px rgba(196,155,58,0.28);
-        }
-        .btn-approve:hover {
-          background: linear-gradient(135deg, #a67f2c 0%, #8a6820 100%);
-          transform: translateY(-1px);
-          box-shadow: 0 5px 16px rgba(196,155,58,0.38);
-        }
-        .btn-view {
-          background: #fff;
-          color: #3b5fc0;
-          border-color: #c8d4f0 !important;
-        }
-        .btn-view:hover {
-          background: #edf3ff;
-          border-color: #3b5fc0 !important;
-          transform: translateY(-1px);
-        }
-
-        /* Card meta grid */
-        .card-meta {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 8px 16px;
-          padding-top: 0.85rem;
-          border-top: 1.5px solid #f0f2f8;
-        }
-        .meta-item {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          min-width: 0;
-        }
-        .meta-icon { color: #8fa3cc; flex-shrink: 0; }
-        .meta-label {
-          font-size: 0.76rem;
-          color: #8fa3cc;
-          white-space: nowrap;
-          flex-shrink: 0;
-          font-weight: 600;
-        }
-        .meta-value {
-          font-size: 0.82rem;
-          color: #2c3a5f;
-          font-weight: 700;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-        .meta-value.participants { color: #6b7fc4; }
-        .meta-value.cost-free { color: #10B981; }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-          .card-meta { grid-template-columns: repeat(2, 1fr); }
-        }
-        @media (max-width: 768px) {
-          .card-top { flex-direction: column; align-items: flex-start; }
-          .card-actions { width: 100%; justify-content: flex-start; }
-          .card-meta { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-          .card-title { white-space: normal; }
-        }
-        @media (max-width: 480px) {
-          .act-page { padding: 0.75rem; }
-          .card-meta { grid-template-columns: 1fr; gap: 8px; }
-          .card-actions { flex-wrap: wrap; gap: 6px; }
-          .card-actions button { flex: 1; justify-content: center; min-width: 90px; }
-          .act-header { flex-direction: column; align-items: flex-start; }
-          .act-header-right { flex-wrap: wrap; }
-        }
-      `}</style>
-
       <div className="act-page">
-        {/* ── Header ── */}
         <div className="act-header">
           <div className="act-header-left">
-            <h2 className="act-title">طلبات الفعاليات العامة</h2>
-            <p className="act-subtitle">الفعاليات المقترحة من مدراء الأقسام في انتظار الموافقة</p>
+            <div className="act-title-row">
+              <Activity size={22} className="act-title-icon" />
+              <h2 className="act-title">طلبات الفعاليات</h2>
+            </div>
+            <p className="act-subtitle">مراجعة وإدارة الفعاليات المقترحة من مدراء الأقسام</p>
           </div>
           <div className="act-header-right">
-            <div className="pending-badge">
-              <Clock size={14} />
-              <span>{activities.length} طلب في الانتظار</span>
-            </div>
+            {deptOptions.length > 0 && (
+              <div className="dept-filter" ref={deptRef}>
+                <button className="dept-filter-btn" onClick={() => setDeptDropOpen(o => !o)}>
+                  <BookOpen size={13} />
+                  <span>{selectedDeptLabel}</span>
+                  <ChevronDown size={12} className={deptDropOpen ? "chevron-open" : ""} />
+                </button>
+                {deptDropOpen && (
+                  <div className="dept-dropdown">
+                    <button
+                      className={`dept-opt ${deptFilter === "all" ? "dept-opt--active" : ""}`}
+                      onClick={() => { setDeptFilter("all"); setDeptDropOpen(false); }}
+                    >
+                      جميع الأقسام
+                    </button>
+                    {deptOptions.map(d => (
+                      <button
+                        key={d.id}
+                        className={`dept-opt ${deptFilter === d.id ? "dept-opt--active" : ""}`}
+                        onClick={() => { setDeptFilter(d.id); setDeptDropOpen(false); }}
+                      >
+                        {d.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             <button className="refresh-btn" onClick={fetchActivities}>
               <RefreshCw size={13} className={loading ? "spinning" : ""} />
               تحديث
@@ -491,97 +577,85 @@ export default function Activities() {
           </div>
         </div>
 
-        {/* ── Error Banner ── */}
+        <StatsBar
+          total={counts.total}
+          pending={counts.pending}
+          accepted={counts.accepted}
+          rejected={counts.rejected}
+        />
+
         {error && (
           <div className="error-banner">
-            <AlertCircle size={17} /> {error}
+            <AlertCircle size={16} /> {error}
           </div>
         )}
 
-        {/* ── Content ── */}
+        {/* Status Tabs — full width, bigger */}
+        <div className="status-tabs">
+          <button
+            className={`stab ${statusFilter === "pending" ? "stab--active stab--pending" : ""}`}
+            onClick={() => setStatusFilter("pending")}
+          >
+            <Clock size={16} />
+            <span>في الانتظار</span>
+            <span className="stab-count">{counts.pending}</span>
+          </button>
+          <button
+            className={`stab ${statusFilter === "accepted" ? "stab--active stab--accepted" : ""}`}
+            onClick={() => setStatusFilter("accepted")}
+          >
+            <CheckCircle size={16} />
+            <span>مقبولة</span>
+            <span className="stab-count">{counts.accepted}</span>
+          </button>
+          <button
+            className={`stab ${statusFilter === "rejected" ? "stab--active stab--rejected" : ""}`}
+            onClick={() => setStatusFilter("rejected")}
+          >
+            <XCircle size={16} />
+            <span>مرفوضة</span>
+            <span className="stab-count">{counts.rejected}</span>
+          </button>
+        </div>
+
         {loading ? (
           <div className="state-box">
-            <RefreshCw size={36} className="spinning" style={{ color: "#6b7fc4" }} />
+            <div className="loading-spinner">
+              <RefreshCw size={28} className="spinning" />
+            </div>
             <p>جاري تحميل البيانات…</p>
           </div>
-        ) : activities.length === 0 && !error ? (
+        ) : filtered.length === 0 ? (
           <div className="state-box">
-            <Layers size={48} style={{ color: "#d0d9f5" }} />
-            <p>لا توجد فعاليات في الانتظار حالياً</p>
+            <div className="empty-icon-wrap">
+              <Layers size={36} />
+            </div>
+            <p className="empty-title">
+              {statusFilter === "pending" ? "لا توجد فعاليات في الانتظار" :
+               statusFilter === "accepted" ? "لا توجد فعاليات مقبولة" :
+               "لا توجد فعاليات مرفوضة"}
+              {deptFilter !== "all" ? " لهذا القسم" : ""}
+            </p>
+            <p className="empty-sub">جرّب تغيير الفلتر أو القسم</p>
           </div>
         ) : (
           <div className="act-list">
-            {activities.map((activity, i) => {
-              const isFree = !activity.cost || activity.cost === "0" || activity.cost === "0.00";
-              return (
-                <div
-                  key={activity.event_id}
-                  className="act-card"
-                  style={{ animationDelay: `${i * 60}ms` }}
-                >
-                  {/* Card Top */}
-                  <div className="card-top">
-                    <div className="card-title-row">
-                      <h3 className="card-title">{activity.title}</h3>
-                      {activity.type && (
-                        <span className="type-badge">{activity.type}</span>
-                      )}
-                    </div>
-                    <div className="card-actions">
-                      <button
-                        className="btn-reject"
-                        onClick={() => setConfirm({ id: activity.event_id, action: "reject", title: activity.title })}
-                      >
-                        <X size={14} />
-                        <span>رفض</span>
-                      </button>
-                      <button
-                        className="btn-approve"
-                        onClick={() => setConfirm({ id: activity.event_id, action: "approve", title: activity.title })}
-                      >
-                        <Check size={14} />
-                        <span>موافقة</span>
-                      </button>
-                      <button className="btn-view">
-                        <Eye size={14} />
-                        <span>عرض التفاصيل</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Card Meta */}
-                  <div className="card-meta">
-                    <div className="meta-item">
-                      <Calendar size={13} className="meta-icon" />
-                      <span className="meta-label">تاريخ البداية:</span>
-                      <span className="meta-value">{fmt(activity.st_date)}</span>
-                    </div>
-                    <div className="meta-item">
-                      <Calendar size={13} className="meta-icon" />
-                      <span className="meta-label">تاريخ النهاية:</span>
-                      <span className="meta-value">{fmt(activity.end_date)}</span>
-                    </div>
-                    <div className="meta-item">
-                      <Users size={13} className="meta-icon" />
-                      <span className="meta-label">المشاركون:</span>
-                      <span className="meta-value participants">
-                        {!activity.s_limit || activity.s_limit >= 2147483647 ? "غير محدود" : activity.s_limit.toLocaleString("ar-EG")}
-                      </span>
-                    </div>
-                    <div className="meta-item">
-                      <MapPin size={13} className="meta-icon" />
-                      <span className="meta-label">الموقع:</span>
-                      <span className="meta-value">{activity.location || "—"}</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            {filtered.map((activity, i) => (
+              <ActivityCard
+                key={activity.event_id}
+                activity={activity}
+                index={i}
+                showActions={isPending(activity.status)}
+                detailLoading={loadingDetailId === activity.event_id}
+                onApprove={() => setConfirm({ id: activity.event_id, action: "approve", title: activity.title })}
+                onReject={() => setConfirm({ id: activity.event_id, action: "reject", title: activity.title })}
+                onView={() => openDetail(activity.event_id)}
+              />
+            ))}
           </div>
         )}
       </div>
 
-      {/* ── Confirm Dialog ── */}
       {confirm && (
         <ConfirmDialog
           action={confirm.action}
@@ -592,7 +666,10 @@ export default function Activities() {
         />
       )}
 
-      {/* ── Toast ── */}
+      {detailData && (
+        <DetailsModal detail={detailData} onClose={() => setDetailData(null)} />
+      )}
+
       {toastMsg && <Toast msg={toastMsg} />}
     </>
   );

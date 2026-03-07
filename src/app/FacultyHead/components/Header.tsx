@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import "../Styles/Header.css";
-import logo from "../../assets/logo.png";
+import logo from "../../assets/capital-uni-logo.png";
 import { useState, useRef, useEffect } from "react";
 import { LogOut, ChevronDown, Menu } from "lucide-react";
 
@@ -12,6 +12,23 @@ interface HeaderProps {
 export default function Header({ onSidebarOpen }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [adminInfo, setAdminInfo] = useState({
+    name: "المشرف العام",
+    email: "admin@university.edu",
+  });
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("user");
+      if (raw) {
+        const u = JSON.parse(raw);
+        setAdminInfo({
+          name: u.name || "المشرف العام",
+          email: u.email || "admin@university.edu",
+        });
+      }
+    } catch {}
+  }, []);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -34,12 +51,14 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
 
   return (
     <header className="hdr" dir="rtl">
+      {/* Gold top accent line */}
+      <div className="hdr-accent-line" />
+
       <div className="hdr-inner">
 
-        {/* ── Brand (right side in RTL) ── */}
+        {/* ── Brand (right in RTL) ── */}
         <div className="hdr-brand">
 
-          {/* Gold ☰ — opens sidebar on ALL screen sizes */}
           {onSidebarOpen && (
             <button
               className="hdr-sidebar-toggle"
@@ -51,51 +70,65 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
           )}
 
           <div className="hdr-logo-wrap">
-            
             <Image
-  src={logo}
-  alt="شعار الجامعة"
-  width={48}
-  height={48}
-  className="hdr-logo-img"
-  priority
-  quality={100}
-/>
+              src={logo}
+              alt="شعار الجامعة"
+              width={80}
+              height={80}
+              className="hdr-logo-img"
+              style={{ objectFit: "contain", width: "100%", height: "100%" }}
+              priority
+              draggable={false}
+              quality={100}
+            />
           </div>
+
+          <div className="hdr-divider" />
+
           <div className="hdr-brand-text">
             <h1 className="hdr-title">النظام الإداري</h1>
-            <h2 className="hdr-sub">النظام الإداري لرعاية الطلاب</h2>
+            <p className="hdr-sub">النظام الإداري لرعاية الطلاب</p>
           </div>
         </div>
 
-        {/* ── Actions (left side in RTL) ── */}
+        {/* ── Actions (left in RTL) ── */}
         <div className="hdr-actions">
           <div className="hdr-user-wrap" ref={menuRef}>
             <button
               className={`hdr-user-btn${menuOpen ? " hdr-user-open" : ""}`}
               onClick={() => setMenuOpen(o => !o)}
+              aria-expanded={menuOpen}
+              aria-haspopup="true"
             >
-              <span className="hdr-user-name">المشرف العام</span>
-              <ChevronDown size={13} className="hdr-chevron" />
+              <div className="hdr-user-info">
+                <span className="hdr-user-name">دكتور/  {adminInfo.name}</span>
+                <span className="hdr-user-role">مدير الكلية</span>
+              </div>
+              <ChevronDown size={14} className="hdr-chevron" />
             </button>
 
             {menuOpen && (
-              <div className="hdr-dropdown">
+              <div className="hdr-dropdown" role="menu">
                 <div className="hdr-dropdown-header">
-                  <span className="hdr-avatar hdr-avatar-lg">م</span>
-                  <div>
-                    <p className="hdr-dd-name">المشرف العام</p>
-                    <p className="hdr-dd-role">النظام الإداري لرعاية الطلاب</p>
+                  <div className="hdr-dd-info">
+                    <p className="hdr-dd-name">{adminInfo.name}</p>
+                    <p className="hdr-dd-email">{adminInfo.email}</p>
                   </div>
                 </div>
                 <div className="hdr-dropdown-divider" />
-                <button className="hdr-dd-item hdr-dd-logout" onClick={handleLogout}>
-                  <LogOut size={14} /> تسجيل الخروج
+                <button
+                  className="hdr-dd-item hdr-dd-logout"
+                  onClick={handleLogout}
+                  role="menuitem"
+                >
+                  <LogOut size={14} />
+                  <span>تسجيل الخروج</span>
                 </button>
               </div>
             )}
           </div>
         </div>
+
       </div>
     </header>
   );

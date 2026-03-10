@@ -1,61 +1,91 @@
 "use client";
 import React from "react";
 import styles from "../Styles/Footer2.module.css";
+import { MapPin, Phone, Mail, Globe, Users, Facebook, Twitter, Instagram } from "lucide-react";
+import capitalLogo from "../../../app/assets/capital-uni-logo.png";
 
-const Footer: React.FC = () => {
+export default function Footer() {
   return (
     <footer className={styles.footer}>
-      <div className={styles.footerContent}>
-        {/* Support */}
-        <div className={styles.footerSection}>
-          <h3 className={styles.sectionTitle}>الدعم</h3>
-          <p>الدعم الفني متاح على مدار الساعة</p>
-          <p>مراقبة النظام 24/7</p>
-          <p className={styles.email}>admin@university.edu</p>
-        </div>
 
-        {/* System Features */}
-        <div className={styles.footerSection}>
-          <h3 className={styles.sectionTitle}>ميزات النظام</h3>
-          <ul className={styles.featuresList}>
-            <li>التحكم في الوصول</li>
-            <li>مراقبة النشاط</li>
-            <li>تحليلات المستخدم</li>
-          </ul>
-        </div>
+      <div className={styles.footerTop}>
 
-        {/* Quick Access */}
-        <div className={styles.footerSection}>
-          <h3 className={styles.sectionTitle}>وصول سريع</h3>
-          <ul className={styles.quickAccessList}>
-            <li>إدارة الفعاليات</li>
-            <li>التكافل الاجتماعي</li>
-          </ul>
-        </div>
-
-        {/* Super Admin Dashboard */}
-        <div className={styles.footerSection}>
-          <h3 className={styles.sectionTitle}>لوحة تحكم المشرف العام</h3>
-          <p className={styles.dashboardDescription}>
-            منصة إدارة شاملة للأحداث والأنشطة وشؤون الطلاب.
-            إدارة المبادرات الثقافية والرياضية والأكاديمية بتميز وفعالية.
+        {/* Col 1: جامعة حلوان */}
+        <div className={styles.footerCol}>
+          <div className={styles.brandBlock}>
+            <div className={styles.brandIcon}>
+              <img src={capitalLogo.src} alt="Capital University Logo" width="70" height="70" draggable={false} />
+            </div>
+            <div>
+              <div className={styles.brandName}>جامعة العاصمة</div>
+              <div className={styles.brandSub}>Capital University</div>
+            </div>
+          </div>
+          <p className={styles.brandDesc}>
+            جامعة مصرية حكومية تأسست عام 1975، تضم العديد من الكليات والمعاهد المتخصصة في مختلف المجالات العلمية والتطبيقية
           </p>
+          <div className={styles.brandMeta}>
+            <div className={styles.metaRow}><MapPin size={14} /><span>عين حلوان، القاهرة، جمهورية مصر العربية</span></div>
+            <div className={styles.metaRow}><Users size={14} /><span>أكثر من 180,000 طالب وطالبة</span></div>
+          </div>
         </div>
+
+        {/* Col 2: نظام إدارة شؤون الشباب */}
+        <div className={styles.footerCol}>
+          <div className={styles.colTitle}>نظام إدارة شؤون الطلاب</div>
+          <p className={styles.colDesc}>المنصة الرقمية الموحدة لإدارة الأنشطة الطلابية والشبابية بجامعة العاصمة</p>
+          {/* <ul className={styles.colListIcon}>
+            <li><Users size={13} /><span>النظرة العامة</span></li>
+            <li><Users size={13} /><span>إدارة الفعاليات</span></li>
+            <li><Users size={13} /><span>إدارة المدراء</span></li>
+            <li><Users size={13} /><span>تقارير الكليات</span></li>
+          </ul> */}
+        </div>
+
+        {/* Col 3: إدارات رعاية الشباب */}
+        <div className={styles.footerCol}>
+          <div className={styles.colTitle}>إدارات رعاية الشباب</div>
+          <ul className={styles.colListPlain}>
+            <li>إدارة الأنشطة الرياضية</li>
+            <li>إدارة الأنشطة الاجتماعية</li>
+            <li>إدارة الكشافة والخدمة العامة</li>
+            <li>إدارة الأنشطة الفنية</li>
+            <li>إدارة الأنشطة الثقافية</li>
+            <li>إدارة الأنشطة العلمية</li>
+            <li>إدارة التضامن الاجتماعي</li>
+            <li>إدارة اتحادات الطلاب</li>
+          </ul>
+        </div>
+
+        {/* Col 4: معلومات التواصل */}
+        <div className={styles.footerCol}>
+          <div className={styles.colTitle}>معلومات التواصل</div>
+          <ul className={styles.contactList}>
+            <li><MapPin size={14} /><span>إدارة رعاية الطلاب<br/>جامعة العاصمة - عين حلوان</span></li>
+            <li><Phone size={14} /><span>(202+) 2556-0000</span></li>
+            <li><Mail size={14} /><span>youth@helwan.edu.eg</span></li>
+            <li><Globe size={14} /><span>www.helwan.edu.eg</span></li>
+          </ul>
+          <div className={styles.socialRow}>
+            <span className={styles.socialLabel}>تابعونا</span>
+            <div className={styles.socialIcons}>
+              <a href="#" className={styles.socialBtn}><Facebook size={16} /></a>
+              <a href="#" className={styles.socialBtn}><Twitter size={16} /></a>
+              <a href="#" className={styles.socialBtn}><Instagram size={16} /></a>
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      <div className={styles.footerBottom}>
-        <p className={styles.copyright}>
-          لوحة تحكم المشرف العام للجامعة - جميع الحقوق محفوظة © 2025
-        </p>
-        <div className={styles.footerBottomRow}>
-          <span className={styles.status}>
-            النظام متصل <span className={styles.statusDot}></span>
-          </span>
-          <span className={styles.poweredBy}>مدعوم بتقنيات الويب الحديثة</span>
-        </div>
-      </div>
+      {/* Stats bar
+      <div className={styles.footerStats}>
+        <div className={styles.statItem}><span className={styles.statNum}>+24</span><span className={styles.statLbl}>كلية </span></div>
+        <div className={styles.statItem}><span className={styles.statNum}>+180K</span><span className={styles.statLbl}>طالب وطالبة</span></div>
+        <div className={styles.statItem}><span className={styles.statNum}>100</span><span className={styles.statLbl}>عام من التميز</span></div>
+        <div className={styles.statItem}><span className={styles.statNum}>3</span><span className={styles.statLbl}>فروع جامعية</span></div>
+      </div> */}
+
     </footer>
   );
-};
-
-export default Footer;
+}

@@ -147,7 +147,7 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
         const depts: Dept[] = data.departments ?? [];
 
         if (roleKey === "super_admin") {
-          router.push("/SuperAdmin");
+          router.push("/CreateAdmins");
 
         } else if (roleKey === "uni_manager") {
           // Route to first accessible uni-level dept, fallback to /uni-level

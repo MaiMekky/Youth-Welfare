@@ -210,7 +210,7 @@ const stats = {
                   <span className={`${styles.status} ${getStatusClass(app.req_status)}`}>{app.req_status}</span>
                 </td>
                 <td>
-                  <button className={styles.detailsBtn} onClick={() => router.push(`/students/${app.solidarity_id}`)}>تفاصيل</button>
+                  <button className={styles.detailsBtn} onClick={() => router.push(`/students/${app.solidarity_id}`)}> تفاصيل الطلب</button>
                 </td>
               </tr>
             ))}

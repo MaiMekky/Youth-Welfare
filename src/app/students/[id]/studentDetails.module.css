@@ -201,7 +201,7 @@
   font-size: 14px;
 }
 
-.docCard a {
+.docLinkButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -215,9 +215,10 @@
   text-decoration: none;
   transition: all 0.25s ease;
   margin: 8px 0;
+  border: none;
 }
 
-.docCard a:hover {
+.docLinkButton:hover {
   background: #1f2a44;
   transform: translateY(-1px);
 }

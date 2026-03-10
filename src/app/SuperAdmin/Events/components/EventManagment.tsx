@@ -35,9 +35,6 @@ interface ApiFaculty {
   name: string;
 }
 
-/* ══════════════════════════════════════════
-   LOCAL TYPE
-══════════════════════════════════════════ */
 type EventRow = {
   event_id: number;
   cost: number;
@@ -53,15 +50,10 @@ type EventRow = {
   createdBy: string;
 };
 
-/* ══════════════════════════════════════════
-   MAPPER  (facultyMap injected at call-site)
-══════════════════════════════════════════ */
 const mapApiEvent = (e: ApiEvent, facultyMap: Map<number, string>): EventRow => {
   const facultyName =
     (e.faculty_id != null ? facultyMap.get(e.faculty_id) : undefined) ??
-    e.faculty_name ??
-    "—";
-
+    e.faculty_name ?? "—";
   return {
     event_id:    e.event_id,
     title:       e.title,
@@ -79,47 +71,72 @@ const mapApiEvent = (e: ApiEvent, facultyMap: Map<number, string>): EventRow => 
 };
 
 /* ══════════════════════════════════════════
+   STATUS BADGE CLASS
+══════════════════════════════════════════ */
+function getStatusClass(status: string): string {
+  switch (status) {
+    case "مقبول":
+    case "active":
+    case "نشطة":
+      return styles.badgeAccepted;
+    case "منتظر":
+    case "pending":
+      return styles.badgePending;
+    case "موافقة مبدئية":
+      return styles.badgeProvisional;
+    case "مرفوض":
+    case "completed":
+    case "مكتملة":
+      return styles.badgeRejected;
+    default:
+      return styles.badgeDefault;
+  }
+}
+
+/* ══════════════════════════════════════════
    ICONS
 ══════════════════════════════════════════ */
-function PeopleIcon(props: { className?: string }) {
+function MoneyIcon({ className }: { className?: string }) {
   return (
-    <svg className={props.className} viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M16 11a4 4 0 1 0-3.2-6.4A5 5 0 1 1 8 16h8a5 5 0 0 1 5 5v1H3v-1a5 5 0 0 1 5-5h2" fill="currentColor" opacity="0.18" />
-      <path d="M16 12a5 5 0 1 0-4.55-2.93A6 6 0 0 0 8 15h8a6 6 0 0 1 6 6v1H2v-1a6 6 0 0 1 6-6h2.35" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-      <path d="M16 3.6a3.4 3.4 0 1 1 0 6.8 3.4 3.4 0 0 1 0-6.8Z" fill="none" stroke="currentColor" strokeWidth="1.6" />
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" fill="currentColor" opacity="0.2" />
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M12 7v1.2M12 15.8V17M9.5 10a2.5 2.5 0 0 1 5 0c0 1.4-1.2 2-2.5 2.5S9.5 13.5 9.5 15h5"
+        stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   );
 }
-function CheckDocIcon(props: { className?: string }) {
+function CheckDocIcon({ className }: { className?: string }) {
   return (
-    <svg className={props.className} viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M7 3h7l3 3v15a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" fill="currentColor" opacity="0.18" />
-      <path d="M14 3v4a1 1 0 0 0 1 1h4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-      <path d="M7 3h7l5 5v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M7 3h7l3 3v15a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" fill="currentColor" opacity="0.2" />
+      <path d="M14 3v4a1 1 0 0 0 1 1h4M7 3h7l5 5v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"
+        fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
       <path d="m8.2 14 2 2 5-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
-function CalendarIcon(props: { className?: string }) {
+function CalendarIcon({ className }: { className?: string }) {
   return (
-    <svg className={props.className} viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M7 4h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4Z" fill="currentColor" opacity="0.18" />
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M7 4h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4Z" fill="currentColor" opacity="0.2" />
       <path d="M8 2v4M16 2v4M3 9h18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-      <path d="M7 4h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4Z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M7 4h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4Z"
+        fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
     </svg>
   );
 }
-function BoltIcon(props: { className?: string }) {
+function BoltIcon({ className }: { className?: string }) {
   return (
-    <svg className={props.className} viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M13 2 4 14h7l-1 8 10-14h-7l0-6Z" fill="currentColor" opacity="0.18" />
-      <path d="M13 2 4 14h7l-1 8 10-14h-7l0-6Z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M13 2 4 14h7l-1 8 10-14h-7Z" fill="currentColor" opacity="0.2" />
+      <path d="M13 2 4 14h7l-1 8 10-14h-7Z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
     </svg>
   );
 }
-function SearchIcon(props: { className?: string }) {
+function SearchIcon({ className }: { className?: string }) {
   return (
-    <svg className={props.className} viewBox="0 0 24 24" aria-hidden="true">
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
       <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" fill="none" stroke="currentColor" strokeWidth="1.6" />
       <path d="M16.5 16.5 21 21" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
@@ -127,7 +144,7 @@ function SearchIcon(props: { className?: string }) {
 }
 
 /* ══════════════════════════════════════════
-   SKELETON ROW — 8 cols
+   SKELETON
 ══════════════════════════════════════════ */
 function SkeletonRow() {
   return (
@@ -135,12 +152,10 @@ function SkeletonRow() {
       {Array.from({ length: 8 }).map((_, i) => (
         <td key={i} className={styles.td}>
           <div style={{
-            height: 16,
-            borderRadius: 6,
-            background: "linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)",
-            backgroundSize: "200% 100%",
-            animation: "shimmer 1.4s infinite",
-            width: i === 0 ? "140px" : "60px",
+            height: 14, borderRadius: 6,
+            background: "linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%)",
+            backgroundSize: "200% 100%", animation: "shimmer 1.4s infinite",
+            width: i === 0 ? "130px" : i === 7 ? "60px" : "70px",
           }} />
         </td>
       ))}
@@ -149,7 +164,7 @@ function SkeletonRow() {
 }
 
 /* ══════════════════════════════════════════
-   MAIN PAGE
+   PAGE
 ══════════════════════════════════════════ */
 export default function EventsPage() {
   const [data, setData]                   = useState<EventRow[]>([]);
@@ -164,47 +179,31 @@ export default function EventsPage() {
 
   const router = useRouter();
 
-  /* ── Fetch both APIs in parallel ── */
   useEffect(() => {
     const load = async () => {
       try {
-        setLoading(true);
-        setError(null);
-
+        setLoading(true); setError(null);
         const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
         const headers: HeadersInit = {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
           "Content-Type": "application/json",
         };
-
         const [eventsRes, facultiesRes] = await Promise.all([
           fetch("http://127.0.0.1:8000/api/event/get-events/", { headers }),
           fetch("http://127.0.0.1:8000/api/solidarity/super_dept/faculties/", { headers }),
         ]);
-
         if (!eventsRes.ok) {
           const body = await eventsRes.json().catch(() => ({}));
           throw new Error(body.detail || body.message || `HTTP ${eventsRes.status}`);
         }
-
         const rawEvents    = await eventsRes.json();
         const rawFaculties = facultiesRes.ok ? await facultiesRes.json().catch(() => []) : [];
-
         const facArr: ApiFaculty[] = Array.isArray(rawFaculties)
-          ? rawFaculties
-          : (rawFaculties.results ?? rawFaculties.data ?? []);
-
-        // id → name lookup
-        const facultyMap = new Map<number, string>(
-          facArr.map((f) => [f.faculty_id, f.name])
-        );
-
+          ? rawFaculties : (rawFaculties.results ?? rawFaculties.data ?? []);
+        const facultyMap = new Map<number, string>(facArr.map((f) => [f.faculty_id, f.name]));
         setFacultyList(facArr);
-
         const evArr: ApiEvent[] = Array.isArray(rawEvents)
-          ? rawEvents
-          : (rawEvents.results ?? rawEvents.data ?? []);
-
+          ? rawEvents : (rawEvents.results ?? rawEvents.data ?? []);
         setData(evArr.map((e) => mapApiEvent(e, facultyMap)));
       } catch (e: any) {
         setError(e.message ?? "حدث خطأ أثناء تحميل البيانات");
@@ -212,77 +211,74 @@ export default function EventsPage() {
         setLoading(false);
       }
     };
-
     load();
   }, []);
 
-  /* ── Filtered rows ── */
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
     return data.filter((e) => {
-      const matchesQuery =
-        !query ||
-        e.title.toLowerCase().includes(query) ||
-        e.description.toLowerCase().includes(query) ||
-        e.location.toLowerCase().includes(query) ||
-        e.createdBy.toLowerCase().includes(query);
-
-      const matchesStatus  = !statusFilter  || e.status  === statusFilter;
-      const matchesType    = !typeFilter    || e.type    === typeFilter;
-      const matchesFaculty = !facultyFilter || e.faculty === facultyFilter;
-
-      return matchesQuery && matchesStatus && matchesType && matchesFaculty;
+      const mq = !query || e.title.toLowerCase().includes(query) ||
+        e.description.toLowerCase().includes(query) || e.location.toLowerCase().includes(query);
+      return mq &&
+        (!statusFilter  || e.status  === statusFilter) &&
+        (!typeFilter    || e.type    === typeFilter) &&
+        (!facultyFilter || e.faculty === facultyFilter);
     });
   }, [data, q, statusFilter, typeFilter, facultyFilter]);
 
-  /* ── Stats ── */
-  const totalCapacity  = useMemo(() => data.reduce((s, e) => s + e.capacity, 0), [data]);
+  const totalCost      = useMemo(() => data.reduce((s, e) => s + e.cost, 0), [data]);
   const completedCount = useMemo(() => data.filter((e) => e.status === "مكتملة" || e.status === "completed").length, [data]);
-  const activeCount    = useMemo(() => data.filter((e) => e.status === "active"  || e.status === "نشطة" || e.status === "مقبول").length, [data]);
+  const activeCount    = useMemo(() => data.filter((e) => e.status === "active" || e.status === "نشطة" || e.status === "مقبول").length, [data]);
   const totalEvents    = data.length;
 
-  /* ── Dynamic filter options ── */
   const types    = useMemo(() => Array.from(new Set(data.map((e) => e.type).filter(Boolean))),   [data]);
   const statuses = useMemo(() => Array.from(new Set(data.map((e) => e.status).filter(Boolean))), [data]);
 
-  const handleView = (eventId: number) => router.push(`/SuperAdmin/Events/${eventId}`);
+  const handleView = (id: number) => router.push(`/SuperAdmin/Events/${id}`);
 
-  /* ══════════════════════════════════════════
-     RENDER
-  ══════════════════════════════════════════ */
   return (
     <div className={styles.page} dir="rtl" lang="ar">
       <style>{`
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        @keyframes spin    { to { transform: rotate(360deg); } }
+        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+        @keyframes spin    { to{transform:rotate(360deg)} }
+        @keyframes fadeUp  { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
       `}</style>
 
       <div className={styles.container}>
 
-        {/* ── Stats ── */}
+        {/* Heading */}
+        <div className={styles.pageHeading}>
+          <h1 className={styles.pageTitle}>إدارة الفعاليات</h1>
+          <p className={styles.pageSubtitle}>عرض وتصفية جميع الفعاليات المسجلة في المنظومة</p>
+        </div>
+
+        {/* Stats */}
         <section className={styles.stats}>
-          <div className={styles.statCard}>
-            <div className={styles.statIconWrap}><PeopleIcon className={styles.statIcon} /></div>
+          <div className={`${styles.statCard} ${styles.statCardGold}`}>
+            <div className={styles.statIconWrap}><MoneyIcon className={styles.statIcon} /></div>
             <div className={styles.statMeta}>
-              <div className={styles.statLabel}>السعة الإجمالية</div>
-              <div className={styles.statValue}>{loading ? "…" : totalCapacity.toLocaleString("ar-EG")}</div>
+              <div className={styles.statLabel}>التكلفة الإجمالية</div>
+              <div className={styles.statValue}>{loading ? "…" : `${totalCost.toLocaleString("EG")} ج`}</div>
             </div>
           </div>
-          <div className={styles.statCard}>
+
+          <div className={`${styles.statCard} ${styles.statCardGreen}`}>
             <div className={styles.statIconWrap}><CheckDocIcon className={styles.statIcon} /></div>
             <div className={styles.statMeta}>
               <div className={styles.statLabel}>الفعاليات المكتملة</div>
               <div className={styles.statValue}>{loading ? "…" : completedCount}</div>
             </div>
           </div>
-          <div className={styles.statCard}>
+
+          <div className={`${styles.statCard} ${styles.statCardBlue}`}>
             <div className={styles.statIconWrap}><BoltIcon className={styles.statIcon} /></div>
             <div className={styles.statMeta}>
               <div className={styles.statLabel}>الفعاليات النشطة</div>
               <div className={styles.statValue}>{loading ? "…" : activeCount}</div>
             </div>
           </div>
-          <div className={styles.statCard}>
+
+          <div className={`${styles.statCard} ${styles.statCardPurple}`}>
             <div className={styles.statIconWrap}><CalendarIcon className={styles.statIcon} /></div>
             <div className={styles.statMeta}>
               <div className={styles.statLabel}>إجمالي الفعاليات</div>
@@ -291,67 +287,55 @@ export default function EventsPage() {
           </div>
         </section>
 
-        {/* ── Management Panel ── */}
+        {/* Panel */}
         <section className={styles.panel}>
+
           <div className={styles.panelHeader}>
-            <h2 className={styles.panelTitle}>إدارة الفعاليات</h2>
-            <div className={styles.searchRow}>
-              <div className={styles.searchWrapFull}>
-                <SearchIcon className={styles.searchIcon} />
-                <input
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  className={styles.searchInput}
-                  placeholder="ابحث باسم الفعالية، المكان، الوصف"
-                />
-              </div>
+            <div className={styles.searchWrapFull}>
+              <SearchIcon className={styles.searchIcon} />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                className={styles.searchInput}
+                placeholder="ابحث باسم الفعالية، المكان، الوصف..."
+              />
             </div>
           </div>
 
-          {/* ── Filters ── */}
           <div className={styles.filters}>
             <select className={styles.select} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
               <option value="">كل الحالات</option>
               {statuses.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
-
             <select className={styles.select} value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
               <option value="">كل الأنواع</option>
               {types.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
-
-            {/* Faculty filter — from /api/solidarity/super_dept/faculties/ */}
             <select className={styles.select} value={facultyFilter} onChange={(e) => setFacultyFilter(e.target.value)}>
               <option value="">كل الكليات</option>
-              {facultyList.map((f) => (
-                <option key={f.faculty_id} value={f.name}>{f.name}</option>
-              ))}
+              {facultyList.map((f) => <option key={f.faculty_id} value={f.name}>{f.name}</option>)}
             </select>
           </div>
 
-          {/* ── Error banner ── */}
           {error && (
-            <div style={{
-              padding: "12px 16px", margin: "12px 0", borderRadius: 8,
-              background: "#fff2f2", border: "1px solid #fca5a5",
-              color: "#dc2626", fontSize: 14, display: "flex", alignItems: "center", gap: 8,
-            }}>
+            <div className={styles.errorBanner}>
               ⚠️ {error}
-              <button
-                onClick={() => window.location.reload()}
-                style={{ marginRight: "auto", fontSize: 13, color: "#dc2626", textDecoration: "underline", background: "none", border: "none", cursor: "pointer" }}
-              >
-                إعادة المحاولة
-              </button>
+              <button onClick={() => window.location.reload()} className={styles.retryBtn}>إعادة المحاولة</button>
             </div>
           )}
 
-          {/* ── Desktop Table ── */}
+          {/* {!loading && !error && (
+            <div className={styles.resultsBar}>
+              <span className={styles.resultsCount}>{filtered.length}</span> فعالية
+            </div>
+          )} */}
+
+          {/* Desktop Table */}
           <div className={styles.tableWrap}>
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th className={styles.th}>تفاصيل الفعالية</th>
+                  <th className={styles.th}>الفعالية</th>
                   <th className={styles.th}>الكلية</th>
                   <th className={styles.th}>النوع</th>
                   <th className={styles.th}>الحالة</th>
@@ -361,124 +345,115 @@ export default function EventsPage() {
                   <th className={styles.th}>إجراءات</th>
                 </tr>
               </thead>
-
               <tbody>
                 {loading && Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)}
 
                 {!loading && !error && filtered.length === 0 && (
                   <tr>
-                    <td colSpan={8} className={styles.td} style={{ textAlign: "center", padding: "40px 0", color: "#9ca3af" }}>
-                      لا توجد فعاليات تطابق معايير البحث
+                    <td colSpan={8} className={styles.emptyCell}>
+                      <div className={styles.emptyState}>
+                        <div className={styles.emptyIcon}></div>
+                        <div className={styles.emptyText}>لا توجد فعاليات تطابق معايير البحث</div>
+                      </div>
                     </td>
                   </tr>
                 )}
 
-                {!loading && filtered.map((e) => (
-                  <tr key={e.event_id} className={styles.tr}>
+                {!loading && filtered.map((e, idx) => (
+                  <tr key={e.event_id} className={styles.tr} style={{ animationDelay: `${idx * 25}ms` }}>
 
                     <td className={styles.td}>
                       <div className={styles.detailsCell}>
                         <div className={styles.detailsTitle}>{e.title}</div>
-                        
-                        {e.createdBy && (
-                          <div className={styles.detailsBy}>تم الإنشاء بواسطة: {e.createdBy}</div>
-                        )}
+                        {e.createdBy && <div className={styles.detailsBy}>بواسطة: {e.createdBy}</div>}
                       </div>
                     </td>
 
-                    <td className={styles.td}>{e.faculty}</td>
-
                     <td className={styles.td}>
-                      <span className={styles.badge}>{e.type}</span>
+                      <span className={styles.facultyChip}>{e.faculty}</span>
                     </td>
 
                     <td className={styles.td}>
-                      <span className={`${styles.badge} ${
-                        e.status === "active"    || e.status === "نشطة"   || e.status === "مقبول"  ? styles.badgeActive    :
-                        e.status === "completed" || e.status === "مكتملة" || e.status === "مرفوض"  ? styles.badgeCompleted :
-                        ""
-                      }`}>
+                      <span className={styles.typeChip}>{e.type}</span>
+                    </td>
+
+                    <td className={styles.td}>
+                      <span className={`${styles.statusBadge} ${getStatusClass(e.status)}`}>
+                        <span className={styles.statusDot} />
                         {e.status}
                       </span>
                     </td>
 
                     <td className={styles.td}>
                       <div className={styles.dateCell}>
-                        <div className={styles.dateRange}>{e.startDate} - {e.endDate}</div>
-                        <div className={styles.locationText}>… {e.location}</div>
+                        <div className={styles.dateRange}>{e.startDate} — {e.endDate}</div>
+                        <div className={styles.locationText}>{e.location}</div>
                       </div>
                     </td>
 
                     <td className={styles.td}>
                       <div className={styles.capacityCell}>
                         <div className={styles.capacityValue}>{e.capacity}</div>
-                        <div className={styles.capacityHint}>أقصى عدد طلاب</div>
+                        <div className={styles.capacityHint}>طالب</div>
                       </div>
                     </td>
 
                     <td className={styles.td}>
-                      {e.cost > 0 ? `${e.cost.toLocaleString("ar-EG")} ج` : "مجاني"}
+                      <span className={e.cost > 0 ? styles.costValue : styles.costFree}>
+                        {e.cost > 0 ? `${e.cost.toLocaleString("EG")} ج` : "مجاني"}
+                      </span>
                     </td>
 
                     <td className={styles.td}>
                       <button className={styles.viewBtn} onClick={() => handleView(e.event_id)} type="button">
-                        عرض التفاصيل
+                      عرض التفاصيل 
                       </button>
                     </td>
-
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          {/* ── Mobile Cards ── */}
+          {/* Mobile Cards */}
           <div className={styles.mobileList}>
             {loading && (
               <div style={{ textAlign: "center", padding: "40px 0", color: "#6b7280" }}>
-                <div style={{ width: 32, height: 32, border: "3px solid #e5e7eb", borderTopColor: "#6366f1", borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 12px" }} />
-                جاري تحميل الفعاليات...
+                <div style={{ width: 32, height: 32, border: "3px solid #e5e7eb", borderTopColor: "#bfa032", borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 12px" }} />
+                جاري التحميل...
               </div>
             )}
-
             {!loading && filtered.map((e) => (
               <article key={e.event_id} className={styles.mobileCard}>
                 <div className={styles.mobileTop}>
                   <div className={styles.mobileTitle}>{e.title}</div>
-                </div>
-
-                <div className={styles.mobileMeta}>
-                  <span className={`${styles.badge} ${
-                    e.status === "active" || e.status === "نشطة" || e.status === "مقبول"
-                      ? styles.badgeActive : styles.badgeCompleted
-                  }`}>
+                  <span className={`${styles.statusBadge} ${getStatusClass(e.status)}`}>
+                    <span className={styles.statusDot} />
                     {e.status}
                   </span>
-                  <span className={styles.badge}>{e.type}</span>
-                  <span className={styles.mobileChip}>{e.faculty}</span>
                 </div>
-
+                <div className={styles.mobileMeta}>
+                  <span className={styles.typeChip}>{e.type}</span>
+                  <span className={styles.facultyChip}>{e.faculty}</span>
+                </div>
                 <div className={styles.mobileRow}>
                   <div className={styles.mobileLabel}>التاريخ</div>
-                  <div className={styles.mobileValue}>{e.startDate} - {e.endDate}</div>
+                  <div className={styles.mobileValue}>{e.startDate} — {e.endDate}</div>
                 </div>
                 <div className={styles.mobileRow}>
                   <div className={styles.mobileLabel}>المكان</div>
-                  <div className={styles.mobileValue}>… {e.location}</div>
+                  <div className={styles.mobileValue}>{e.location}</div>
                 </div>
                 <div className={styles.mobileRow}>
                   <div className={styles.mobileLabel}>السعة</div>
-                  <div className={styles.mobileValue}>{e.capacity} (أقصى عدد طلاب)</div>
+                  <div className={styles.mobileValue}>{e.capacity} طالب</div>
                 </div>
                 <div className={styles.mobileRow}>
                   <div className={styles.mobileLabel}>التكلفة</div>
                   <div className={styles.mobileValue}>
-                    {e.cost > 0 ? `${e.cost.toLocaleString("ar-EG")} ج` : "مجاني"}
+                    {e.cost > 0 ? `${e.cost.toLocaleString("EG")} ج` : "مجاني"}
                   </div>
                 </div>
-
-                <div className={styles.mobileDesc}>… {e.description}</div>
-
                 <button className={styles.viewBtnMobile} onClick={() => handleView(e.event_id)} type="button">
                   عرض التفاصيل
                 </button>

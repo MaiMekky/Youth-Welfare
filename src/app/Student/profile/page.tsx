@@ -71,7 +71,9 @@ export default function ProfilePage() {
             // If it starts with /media/, add the base URL
             profilePictureUrl = `http://127.0.0.1:8000${profilePictureUrl}`;
           }
-          
+          const imageUrl =
+          (await fetchProfileImage(apiData.student_id)) ||
+          "/app/assets/profile.png";
           const mappedData: StudentProfile = {
             student_id: apiData.student_id,
             fullName: apiData.name,
@@ -86,7 +88,7 @@ export default function ProfilePage() {
             major: apiData.major || "",
             faculty: apiData.faculty,
             facultyName: facultyName,
-            profilePicture: profilePictureUrl,
+            profilePicture: imageUrl,
           };
           setProfileData(mappedData);
         } else {
@@ -113,7 +115,29 @@ export default function ProfilePage() {
   const handleCancelEdit = () => {
     setIsEditing(false);
   };
+  const fetchProfileImage = async (studentId: number) => {
+    try {
+      const token = localStorage.getItem("access");
+      if (!token) return null;
 
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/files/students/${studentId}/image/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) return null;
+
+      const blob = await response.blob();
+      return URL.createObjectURL(blob);
+    } catch (error) {
+      console.error("Error loading profile image:", error);
+      return null;
+    }
+  };
   const handleImageUpload = async (file: File) => {
     try {
       const token = localStorage.getItem("access");
@@ -137,33 +161,32 @@ export default function ProfilePage() {
         const apiData: StudentProfileAPIResponse = await response.json();
         // Map API response to UI format
         const facultyName = faculties.find(f => f.faculty_id === apiData.faculty)?.name || "";
-        
-        // Convert relative URL to absolute if needed
-        let profilePictureUrl = apiData.profile_photo_url || "/app/assets/profile.png";
-        if (profilePictureUrl && profilePictureUrl.startsWith('/media/')) {
-          // If it starts with /media/, add the base URL
-          profilePictureUrl = `http://127.0.0.1:8000${profilePictureUrl}`;
-        } else if (profilePictureUrl && !profilePictureUrl.startsWith('http') && !profilePictureUrl.startsWith('/app/')) {
-          // If it's a relative URL (not starting with /app/), make it absolute
-          profilePictureUrl = `http://127.0.0.1:8000${profilePictureUrl.startsWith('/') ? '' : '/'}${profilePictureUrl}`;
-        }
-        
-        const mappedData: StudentProfile = {
-          student_id: apiData.student_id,
-          fullName: apiData.name,
-          email: apiData.email,
-          phoneNumber: apiData.phone_number || "",
-          gender: apiData.gender === "m" ? "ذكر" : apiData.gender === "f" ? "أنثى" : apiData.gender,
-          nid: apiData.nid,
-          uid: apiData.uid,
-          address: apiData.address || "",
-          acd_year: apiData.acd_year || "",
-          grade: apiData.grade || "",
-          major: apiData.major || "",
-          faculty: apiData.faculty,
-          facultyName: facultyName,
-          profilePicture: profilePictureUrl,
-        };
+                
+        const imageUrl =
+        (await fetchProfileImage(apiData.student_id)) ||
+        "/app/assets/profile.png";
+          
+       const mappedData: StudentProfile = {
+        student_id: apiData.student_id,
+        fullName: apiData.name,
+        email: apiData.email,
+        phoneNumber: apiData.phone_number || "",
+        gender:
+          apiData.gender?.toLowerCase() === "m"
+            ? "ذكر"
+            : apiData.gender?.toLowerCase() === "f"
+            ? "أنثى"
+            : apiData.gender,
+        nid: apiData.nid,
+        uid: apiData.uid,
+        address: apiData.address || "",
+        acd_year: apiData.acd_year || "",
+        grade: apiData.grade || "",
+        major: apiData.major || "",
+        faculty: apiData.faculty,
+        facultyName: facultyName,
+        profilePicture: imageUrl,
+      };
         setProfileData(mappedData);
       } else {
         const errorData = await response.json().catch(() => ({}));

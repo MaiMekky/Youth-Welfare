@@ -52,7 +52,27 @@ export default function ApplicationDetailsPage() {
 
     fetchData();
   }, [id]);
+const openDocument = async (docId: number, mimeType?: string) => {
+  try {
+    const res = await axios.get(
+      `http://localhost:8000/api/files/solidarity/${docId}/download/`,
+      {
+        responseType: "blob",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access")}`,
+        },
+      }
+    );
 
+    const blob = new Blob([res.data], { type: mimeType || res.headers["content-type"] });
+
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, "_blank");
+
+  } catch (error) {
+    console.error("Error opening document:", error);
+  }
+};
   if (loading) return <p className="loading">جاري التحميل...</p>;
   if (errorMsg) return <p style={{ color: "red", textAlign: "center", padding: "2rem" }}>{errorMsg}</p>;
   if (!data) return <p style={{ textAlign: "center", padding: "2rem" }}>لا توجد بيانات للطلب</p>;
@@ -122,9 +142,12 @@ export default function ApplicationDetailsPage() {
               <div key={doc.doc_id} className="docCard">
                 <p><strong>{doc.doc_type}</strong></p>
                 
-                <a href={doc.file_url} rel="noopener noreferrer">
+                <button
+                onClick={() => openDocument(doc.doc_id)}
+                  className="docLinkButton"
+                >
                   افتح الملف
-                </a>
+                </button>
                 
                 <p className="uploadDate">
                   تم الرفع: {doc.uploaded_at ? doc.uploaded_at.slice(0, 10) : "-"}

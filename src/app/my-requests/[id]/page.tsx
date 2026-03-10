@@ -67,6 +67,34 @@ export default function RequestDetailsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  const handleOpenDocument = async (docId: number) => {
+    try {
+      const token = localStorage.getItem("access");
+      if (!token) return;
+
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/files/solidarity/${docId}/download/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        console.error("Failed to download document");
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+
+      window.open(url, "_blank");
+    } catch (error) {
+      console.error("Error opening document:", error);
+    }
+  };
+
   if (loading || !data) return <p className={styles.loading}>جاري التحميل...</p>;
 
   return (
@@ -168,13 +196,12 @@ export default function RequestDetailsPage() {
                     <strong>{doc.doc_type}</strong>
                   </p>
 
-                  <a
-                    href={doc.file_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    className={styles.openBtn}
+                    onClick={() => handleOpenDocument(doc.doc_id)}
                   >
-                    افتح الملف
-                  </a>
+                    فتح الملف
+                  </button>
                 </div>
               ))}
             </div>

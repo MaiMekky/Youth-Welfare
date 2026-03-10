@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./studentDetails.module.css";
+import axios from "axios";
 
 export default function StudentDetailsPage() {
   const { id } = useParams();
@@ -72,7 +73,27 @@ export default function StudentDetailsPage() {
 
     if (id) fetchDocs();
   }, [id]);
+const openDocument = async (docId: number, mimeType?: string) => {
+  try {
+    const res = await axios.get(
+      `http://localhost:8000/api/files/solidarity/${docId}/download/`,
+      {
+        responseType: "blob",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access")}`,
+        },
+      }
+    );
 
+    const blob = new Blob([res.data], { type: mimeType || res.headers["content-type"] });
+
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, "_blank");
+
+  } catch (error) {
+    console.error("Error opening document:", error);
+  }
+};
   // ====== قبول / رفض ======
 // ====== قبول الطالب ======
 const handleApprove = async () => {
@@ -238,9 +259,12 @@ console.log("docs: ", docs)
           <p><strong>{doc.doc_type}</strong></p>
 
          
-          <a href={doc.file_url} rel="noopener noreferrer">
-            افتح الملف
-          </a>
+            <button
+                onClick={() => openDocument(doc.doc_id)}
+                  className={styles.docLinkButton}
+                >
+                  افتح الملف
+                </button>
 
           <p className={styles.uploadDate}>
             تم الرفع: {doc.uploaded_at.slice(0, 10)}

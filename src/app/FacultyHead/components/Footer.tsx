@@ -1,107 +1,91 @@
 "use client";
 import React from "react";
 import "../Styles/Footer.css";
-import { MapPin, Phone, Mail, Globe, ExternalLink } from "lucide-react";
-
-const QUICK_LINKS = [
-  { label: "الموقع الرسمي للجامعة", href: "https://www.helwan.edu.eg" },
-  { label: "نظام إدارة التعلم",      href: "#" },
-  { label: "شؤون الطلاب",            href: "#" },
-  { label: "الأنشطة الطلابية",       href: "#" },
-];
-
-const DEPARTMENTS = [
-  "إدارة الأنشطة الرياضية",
-  "إدارة الأنشطة الاجتماعية",
-  "إدارة الجوالة والخدمة العامة",
-  "إدارة الأنشطة الفنية",
-  "إدارة الأنشطة الثقافية",
-  "إدارة الأنشطة العلمية",
-  "إدارة التضامن الاجتماعي",
-  "إدارة اتحادات الطلاب",
-];
+import { MapPin, Phone, Mail, Globe, Users, Facebook, Twitter, Instagram } from "lucide-react";
+import capitalLogo from "../../assets/capital-uni-logo.png";
 
 export default function Footer() {
   return (
-    <footer className="ftr" dir="rtl">
+    <footer className="footer">
 
-      {/* ── Main content ── */}
-      <div className="ftr-main">
+      <div className="footerTop">
 
-        {/* Col 1 – Brand */}
-        <div className="ftr-col ftr-brand-col">
-          <div className="ftr-logo-area">
-            <div className="ftr-logo-badge">CU</div>
+        {/* Col 1: جامعة حلوان */}
+        <div className="footerCol">
+          <div className="brandBlock">
+            <div className="brandIcon">
+              <img src={capitalLogo.src} alt="Capital University Logo" width="70" height="70" draggable={false} />
+            </div>
             <div>
-              <p className="ftr-brand-name">جامعة العاصمة</p>
-              <p className="ftr-brand-en">Capital University</p>
+              <div className="brandName">جامعة العاصمة</div>
+              <div className="brandSub">Capital University</div>
             </div>
           </div>
-          <p className="ftr-brand-desc">
-            إدارة شؤون الطلاب والأنشطة الطلابية<br />
-            نظام إدارة الفعاليات والأنشطة
+          <p className="brandDesc">
+            جامعة مصرية حكومية تأسست عام 1975، تضم العديد من الكليات والمعاهد المتخصصة في مختلف المجالات العلمية والتطبيقية
           </p>
-          <div className="ftr-version">الإصدار 1.0.9</div>
+          <div className="brandMeta">
+            <div className="metaRow"><MapPin size={14} /><span>عين حلوان، القاهرة، جمهورية مصر العربية</span></div>
+            <div className="metaRow"><Users size={14} /><span>أكثر من 180,000 طالب وطالبة</span></div>
+          </div>
         </div>
 
-        {/* Col 2 – Quick Links */}
-        <div className="ftr-col">
-          <h3 className="ftr-col-title">روابط سريعة</h3>
-          <ul className="ftr-links">
-            {QUICK_LINKS.map(l => (
-              <li key={l.label}>
-                <a href={l.href} className="ftr-link" target="_blank" rel="noopener noreferrer">
-                  <ExternalLink size={12} />
-                  {l.label}
-                </a>
-              </li>
-            ))}
+        {/* Col 2: نظام إدارة شؤون الشباب */}
+        <div className="footerCol">
+          <div className="colTitle">نظام إدارة شؤون الطلاب</div>
+          <p className="colDesc">المنصة الرقمية الموحدة لإدارة الأنشطة الطلابية والشبابية بجامعة العاصمة</p>
+          {/* <ul className="colListIcon">
+            <li><Users size={13} /><span>النظرة العامة</span></li>
+            <li><Users size={13} /><span>إدارة الفعاليات</span></li>
+            <li><Users size={13} /><span>إدارة المدراء</span></li>
+            <li><Users size={13} /><span>تقارير الكليات</span></li>
+          </ul> */}
+        </div>
+
+        {/* Col 3: إدارات رعاية الشباب */}
+        <div className="footerCol">
+          <div className="colTitle">إدارات رعاية الشباب</div>
+          <ul className="colListPlain">
+            <li>إدارة الأنشطة الرياضية</li>
+            <li>إدارة الأنشطة الاجتماعية</li>
+            <li>إدارة الكشافة والخدمة العامة</li>
+            <li>إدارة الأنشطة الفنية</li>
+            <li>إدارة الأنشطة الثقافية</li>
+            <li>إدارة الأنشطة العلمية</li>
+            <li>إدارة التضامن الاجتماعي</li>
+            <li>إدارة اتحادات الطلاب</li>
           </ul>
         </div>
 
-        {/* Col 3 – Contact */}
-        <div className="ftr-col">
-          <h3 className="ftr-col-title">معلومات الاتصال</h3>
-          <ul className="ftr-contact">
-            <li>
-              <MapPin size={14} className="ftr-contact-icon" />
-              <span>حلوان، محافظة القاهرة، مصر</span>
-            </li>
-            <li>
-              <Phone size={14} className="ftr-contact-icon" />
-              <span dir="ltr">+20 2 2555 0000</span>
-            </li>
-            <li>
-              <Mail size={14} className="ftr-contact-icon" />
-              <a href="mailto:info@helwan.edu.eg" className="ftr-contact-link">info@helwan.edu.eg</a>
-            </li>
-            <li>
-              <Globe size={14} className="ftr-contact-icon" />
-              <a href="https://www.helwan.edu.eg" className="ftr-contact-link" target="_blank" rel="noopener noreferrer">
-                www.helwan.edu.eg
-              </a>
-            </li>
+        {/* Col 4: معلومات التواصل */}
+        <div className="footerCol">
+          <div className="colTitle">معلومات التواصل</div>
+          <ul className="contactList">
+            <li><MapPin size={14} /><span>إدارة رعاية الطلاب<br/>جامعة العاصمة - عين حلوان</span></li>
+            <li><Phone size={14} /><span>(202+) 2556-0000</span></li>
+            <li><Mail size={14} /><span>youth@helwan.edu.eg</span></li>
+            <li><Globe size={14} /><span>www.helwan.edu.eg</span></li>
           </ul>
+          <div className="socialRow">
+            <span className="socialLabel">تابعونا</span>
+            <div className="socialIcons">
+              <a href="#" className="socialBtn"><Facebook size={16} /></a>
+              <a href="#" className="socialBtn"><Twitter size={16} /></a>
+              <a href="#" className="socialBtn"><Instagram size={16} /></a>
+            </div>
+          </div>
         </div>
 
-        {/* Col 4 – Departments */}
-        <div className="ftr-col">
-          <h3 className="ftr-col-title">الإدارات</h3>
-          <ul className="ftr-depts">
-            {DEPARTMENTS.map(d => (
-              <li key={d} className="ftr-dept-item">
-                <span className="ftr-dept-dot" />
-                {d}
-              </li>
-            ))}
-          </ul>
-        </div>
       </div>
 
-      {/* ── Bottom bar ── */}
-      <div className="ftr-bottom">
-        <p>© {new Date().getFullYear()} جامعة العاصمة — نظام إدارة الأنشطة الطلابية. جميع الحقوق محفوظة.</p>
-      </div>
+      {/* Stats bar
+      <div className="footerStats">
+        <div className="statItem"><span className="statNum">+24</span><span className="statLbl">كلية </span></div>
+        <div className="statItem"><span className="statNum">+180K</span><span className="statLbl">طالب وطالبة</span></div>
+        <div className="statItem"><span className="statNum">100</span><span className="statLbl">عام من التميز</span></div>
+        <div className="statItem"><span className="statNum">3</span><span className="statLbl">فروع جامعية</span></div>
+      </div> */}
+
     </footer>
   );
 }

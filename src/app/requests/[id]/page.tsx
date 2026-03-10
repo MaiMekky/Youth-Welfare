@@ -412,7 +412,27 @@ const [preApproved, setPreApproved] = useState(false);
       setActionLoading(false);
     }
   };
+const openDocument = async (docId: number, mimeType?: string) => {
+  try {
+    const res = await axios.get(
+      `http://localhost:8000/api/files/solidarity/${docId}/download/`,
+      {
+        responseType: "blob",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access")}`,
+        },
+      }
+    );
 
+    const blob = new Blob([res.data], { type: mimeType || res.headers["content-type"] });
+
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, "_blank");
+
+  } catch (error) {
+    console.error("Error opening document:", error);
+  }
+};
   return (
     <div className={styles.container}>
       <div className={styles.contentCard}>
@@ -491,13 +511,12 @@ const [preApproved, setPreApproved] = useState(false);
                 <p><strong>{doc.doc_type ?? `مستند ${doc.doc_id}`}</strong></p>
 
                 {doc.file_url ? (
-                  <a
-                    href={doc.file_url}
-                    rel="noopener noreferrer"
-                    className={styles.docLinkButton}
-                  >
-                    افتح الملف
-                  </a>
+                 <button
+                  onClick={() => openDocument(doc.doc_id)}
+                  className={styles.docLinkButton}
+                >
+                  افتح الملف
+                </button>
                 ) : (
                   <p className={styles.noLink}>لا يوجد رابط</p>
                 )}

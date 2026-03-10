@@ -63,10 +63,10 @@
 }
 
 .brandIcon {
-  width: 46px;
-  height: 46px;
-  min-width: 46px;
-  background: linear-gradient(145deg, var(--gold) 0%, var(--gold-bright) 100%);
+  width: 100px;
+  height: 100px;
+  /* min-width: 46px; */
+  background: linear-gradient(145deg,  0%, 100%);
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;

@@ -2,6 +2,7 @@
 import React from "react";
 import "../Styles/Footer.css";
 import { MapPin, Phone, Mail, Globe, Users, Facebook, Twitter, Instagram } from "lucide-react";
+import capitalLogo from "../../assets/capital-uni-logo.png";
 
 export default function Footer() {
   return (
@@ -13,9 +14,7 @@ export default function Footer() {
         <div className="footerCol">
           <div className="brandBlock">
             <div className="brandIcon">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="white">
-                <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/>
-              </svg>
+              <img src={capitalLogo.src} alt="Capital University Logo" width="70" height="70" draggable={false} />
             </div>
             <div>
               <div className="brandName">جامعة العاصمة</div>

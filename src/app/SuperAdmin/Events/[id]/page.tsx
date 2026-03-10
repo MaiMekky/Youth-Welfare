@@ -1,322 +1,448 @@
-// Events/[id]/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import React, { useEffect, useMemo, useState } from "react";
 import styles from "./Eventdetails.module.css";
+import { useParams, useRouter } from "next/navigation";
+import {
+  ArrowRight,
+  CalendarDays,
+  MapPin,
+  Users,
+  DollarSign,
+  ShieldAlert,
+  CheckCircle2,
+  Timer,
+  Award,
+  Medal,
+  Eye,
+  Image as ImageIcon,
+} from "lucide-react";
 
-/* ══════════════════════════════════════════
-   API TYPE  (matches /api/event/get-events/{id}/)
-══════════════════════════════════════════ */
-interface ApiEventDetail {
+const API_URL = "http://127.0.0.1:8000";
+
+function getAccessToken(): string | null {
+  return (
+    localStorage.getItem("access") ||
+    localStorage.getItem("access_token") ||
+    localStorage.getItem("token") ||
+    null
+  );
+}
+
+async function apiFetch<T>(
+  path: string,
+  opts: RequestInit = {}
+): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number }> {
+  const token = getAccessToken();
+  const headers: Record<string, string> = { ...(opts.headers as any) };
+  if (!headers["Content-Type"] && opts.body) headers["Content-Type"] = "application/json";
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(`${API_URL}${path}`, { ...opts, headers });
+    const text = await res.text();
+    const maybeJson = text
+      ? (() => { try { return JSON.parse(text); } catch { return text; } })()
+      : null;
+
+    if (!res.ok) {
+      const msg =
+        (typeof maybeJson === "object" && maybeJson &&
+          ((maybeJson as any).detail || (maybeJson as any).message || (maybeJson as any).error)) ||
+        (typeof maybeJson === "string" ? maybeJson : "") ||
+        `طلب غير ناجح (${res.status})`;
+      return { ok: false, message: String(msg), status: res.status };
+    }
+
+    return { ok: true, data: maybeJson as T };
+  } catch (e: any) {
+    return { ok: false, message: e?.message || "مشكلة في الاتصال" };
+  }
+}
+
+/* ===================== Types ===================== */
+type ApiParticipant = {
+  id: number;
+  student_id: string;
+  student_name: string;
+  rank: number | string | null;
+  reward: string | null;
+  status: string;
+};
+
+type ApiEventImage = {
+  doc_id: number;
+  event: number;
+  doc_type: string;
+  file_name: string;
+  file_url: string;
+  mime_type: string;
+  file_size: number;
+  uploaded_at: string;
+  uploaded_by_name: string;
+};
+
+type ApiEventDetails = {
   event_id: number;
   created_by_name: string;
   faculty_name: string | null;
   dept_name: string | null;
   family_name: string | null;
+  participants?: ApiParticipant[];
   title: string;
   description: string;
-  updated_at: string;
   cost: string;
   location: string;
-  restrictions: string | null;
-  reward: string | null;
+  restrictions: string;
+  reward: string;
   status: string;
-  imgs: string | null;
   st_date: string;
   end_date: string;
   s_limit: number;
-  created_at: string;
   type: string;
+  resource: string | null;
+  active: boolean;
+  dept: number;
+  faculty: number | null;
+  created_by: number;
+  family: number | null;
+};
+
+type StudentRow = {
+  id: number;
+  name: string;
+  studentId: string;
+  status: "مقبول" | "منتظر" | "مرفوض";
+  reward?: string;
+  rank?: string;
+};
+
+function mapParticipantStatus(s: string): StudentRow["status"] {
+  const x = (s || "").trim();
+  if (x === "مؤكد" || x === "تم القبول" || x === "مقبول" || x === "Accepted") return "مقبول";
+  if (x === "مرفوض" || x === "Rejected") return "مرفوض";
+  return "منتظر";
 }
 
-/* ══════════════════════════════════════════
-   ICONS
-══════════════════════════════════════════ */
-function XIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M18 6 6 18M6 6l12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
-  );
-}
-function SectionIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M7 3h7l5 5v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-      <path d="M14 3v4a1 1 0 0 0 1 1h4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-    </svg>
-  );
-}
-function UsersIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M8 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8ZM17 12a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z" fill="none" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M2.5 22v-1a6.5 6.5 0 0 1 13 0v1" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-      <path d="M14.2 22v-1a5 5 0 0 1 9.8 0v1" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-    </svg>
-  );
-}
-function PinIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 22s7-5.2 7-12a7 7 0 1 0-14 0c0 6.8 7 12 7 12Z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-      <path d="M12 12.2a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4Z" fill="none" stroke="currentColor" strokeWidth="1.6" />
-    </svg>
-  );
-}
-function PlusIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-/* ══════════════════════════════════════════
-   HELPERS
-══════════════════════════════════════════ */
-function formatDate(iso: string | null) {
-  if (!iso) return "—";
-  return iso.slice(0, 10);
-}
-
-function formatDateTime(iso: string | null) {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  return d.toLocaleString("ar-EG", {
-    year: "numeric", month: "long", day: "numeric",
-    hour: "2-digit", minute: "2-digit",
-  });
-}
-
-function statusBadgeClass(status: string) {
-  if (status === "مقبول"  || status === "active")    return styles.badgeActive;
-  if (status === "مرفوض"  || status === "completed") return styles.badgeCompleted;
-  if (status === "منتظر"  || status === "pending")   return styles.badgePending;
-  return styles.badgeDefault;
-}
-
-/* ── Field component ── */
-function Field({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className={styles.field}>
-      <div className={styles.fieldLabel}>{label}</div>
-      <div className={styles.fieldValue}>{value}</div>
-    </div>
-  );
-}
-
-/* ══════════════════════════════════════════
-   SKELETON
-══════════════════════════════════════════ */
-function SkeletonCard() {
-  return (
-    <div className={styles.card}>
-      <div className={styles.cardHeader}>
-        <span className={styles.cardIcon} style={{ background: "#f0f0f0" }} />
-        <div style={{ height: 18, width: 120, borderRadius: 6, background: "#efefef" }} />
-      </div>
-      <div className={styles.grid}>
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className={styles.field}>
-            <div style={{ height: 12, width: 70, borderRadius: 4, background: "#efefef", marginBottom: 6 }} />
-            <div style={{ height: 16, width: "80%", borderRadius: 4, background: "#f5f5f5" }} />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ══════════════════════════════════════════
-   MAIN PAGE
-══════════════════════════════════════════ */
+/* ===================== Page ===================== */
 export default function EventDetailsPage() {
-  const router  = useRouter();
-  const params  = useParams();
-  const eventId = params?.id;
+  const router = useRouter();
+  const params = useParams();
+  const id = String(params?.id ?? "");
 
-  const [event,   setEvent]   = useState<ApiEventDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState<string | null>(null);
+  const [event, setEvent] = useState<ApiEventDetails | null>(null);
+  const [loadingEvent, setLoadingEvent] = useState(false);
+  const [rows, setRows] = useState<StudentRow[]>([]);
 
-  useEffect(() => {
-    if (!eventId) return;
+  const [images, setImages] = useState<ApiEventImage[]>([]);
+  const [loadingImages, setLoadingImages] = useState(false);
 
-    const load = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  /* Toast */
+  const [notification, setNotification] = useState<{
+    show: boolean; message: string; type: "success" | "error" | "warning";
+  }>({ show: false, message: "", type: "success" });
 
-        const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
+  const showToast = (message: string, type: "success" | "error" | "warning" = "success") => {
+    setNotification({ show: true, message, type });
+    setTimeout(() => setNotification({ show: false, message: "", type: "success" }), 2500);
+  };
 
-        const res = await fetch(
-          `http://127.0.0.1:8000/api/event/get-events/${eventId}/`,
-          {
-            headers: {
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-              "Content-Type": "application/json",
-            },
-          }
-        );
+  const loadEvent = async () => {
+    if (!id) return;
+    setLoadingEvent(true);
+    const res = await apiFetch<ApiEventDetails>(`/api/event/get-events/${id}/`, { method: "GET" });
+    setLoadingEvent(false);
+    if (!res.ok) { showToast(res.message, "error"); return; }
+    setEvent(res.data);
+    const parts = Array.isArray(res.data.participants) ? res.data.participants : [];
+    setRows(parts.map((p) => ({
+      id: p.id,
+      name: p.student_name ?? "",
+      studentId: String(p.student_id ?? ""),
+      status: mapParticipantStatus(p.status),
+      reward: p.reward ?? "",
+      rank: p.rank === null || p.rank === undefined ? "" : String(p.rank),
+    })));
+  };
 
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          throw new Error(body.detail || body.message || `HTTP ${res.status}`);
-        }
+  const loadImages = async () => {
+    if (!id) return;
+    setLoadingImages(true);
+    const res = await apiFetch<ApiEventImage[]>(`/api/event/manage-events/${id}/images/`, { method: "GET" });
+    setLoadingImages(false);
+    if (!res.ok) return;
+    setImages(Array.isArray(res.data) ? res.data : []);
+  };
 
-        const data: ApiEventDetail = await res.json();
-        setEvent(data);
-      } catch (e: any) {
-        setError(e.message ?? "حدث خطأ أثناء تحميل البيانات");
-      } finally {
-        setLoading(false);
-      }
+  useEffect(() => { loadEvent(); loadImages(); }, [id]);
+
+  /* Derived UI */
+  const ui = useMemo(() => {
+    if (!event) return {
+      title: "", subtitle: "معلومات شاملة عن تفاصيل الفعالية والمشاركين",
+      status: "", type: "", scope: "", cost: "",
+      startDate: "", endDate: "", location: "",
+      reward: "", constraints: "", description: "", max: 0,
     };
 
-    load();
-  }, [eventId]);
+    const scope = event.dept_name
+      ? `على مستوى ${event.dept_name}`
+      : event.dept ? `القسم رقم ${event.dept}` : "—";
 
-  /* ══════════════════════════════════════════
-     RENDER
-  ══════════════════════════════════════════ */
+    const costNum = Number(String(event.cost ?? "").trim());
+    const costText = !Number.isFinite(costNum) || costNum === 0 ? "مجاني" : `${costNum} جنيه`;
+
+    return {
+      title: event.title ?? "",
+      subtitle: "معلومات شاملة عن تفاصيل الفعالية والمشاركين",
+      status: event.status ?? "",
+      type: event.type ?? "",
+      scope,
+      cost: costText,
+      startDate: event.st_date ?? "",
+      endDate: event.end_date ?? "",
+      location: event.location ?? "",
+      reward: (event.reward ?? "").trim() || "—",
+      constraints: (event.restrictions ?? "").trim() || "—",
+      description: (event.description ?? "").trim() || "—",
+      max: Number(event.s_limit ?? 0),
+    };
+  }, [event]);
+
+  const registered = rows.length;
+  const remaining = Math.max(ui.max - registered, 0);
+  const rewardsCount = rows.filter((r) => (r.reward ?? "").trim().length > 0).length;
+  const ranksCount = rows.filter((r) => (r.rank ?? "").trim().length > 0).length;
+
+  const statusBadgeClass = useMemo(() => {
+    const s = (ui.status || "").trim();
+    if (s === "نشط") return styles.badgeSuccess;
+    return styles.badgeBlue;
+  }, [ui.status]);
+
+  const participantBadgeClass = (s: StudentRow["status"]) => {
+    if (s === "مقبول") return styles.participantAccepted;
+    if (s === "منتظر") return styles.participantPending;
+    return styles.participantRejected;
+  };
+
   return (
-    <div className={styles.page} dir="rtl" lang="ar">
-      <div className={styles.overlay}>
-        <div className={styles.modal} role="dialog" aria-modal="true">
+    <div className={styles.page}>
 
-          {/* ── Header ── */}
-          <div className={styles.modalHeader}>
-            <div>
-              <h1 className={styles.title}>تفاصيل الفعالية</h1>
-              <p className={styles.subtitle}>معلومات شاملة عن الفعالية بما في ذلك المتطلبات والمواصفات.</p>
-            </div>
-            <button className={styles.closeBtn} type="button" onClick={() => router.back()} aria-label="إغلاق">
-              <XIcon className={styles.closeIcon} />
-            </button>
-          </div>
-
-          {/* ── Loading ── */}
-          {loading && (
-            <div className={styles.body}>
-              <SkeletonCard />
-              <SkeletonCard />
-              <SkeletonCard />
-            </div>
-          )}
-
-          {/* ── Error ── */}
-          {!loading && error && (
-            <div className={styles.empty}>
-              <div className={styles.emptyTitle}>⚠️ حدث خطأ</div>
-              <div className={styles.emptyText}>{error}</div>
-              <button
-                onClick={() => window.location.reload()}
-                style={{ marginTop: 12, padding: "8px 20px", borderRadius: 8, border: "none", background: "#bfa032", color: "#fff", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
-              >
-                إعادة المحاولة
-              </button>
-            </div>
-          )}
-
-          {/* ── Not found ── */}
-          {!loading && !error && !event && (
-            <div className={styles.empty}>
-              <div className={styles.emptyTitle}>لم يتم العثور على الفعالية</div>
-              <div className={styles.emptyText}>تأكد من رقم الفعالية في الرابط.</div>
-            </div>
-          )}
-
-          {/* ── Content ── */}
-          {!loading && !error && event && (
-            <div className={styles.body}>
-
-              {/* 1) Basic Information */}
-              <section className={styles.card}>
-                <div className={styles.cardHeader}>
-                  <span className={styles.cardIcon}><SectionIcon className={styles.sectionIcon} /></span>
-                  <h2 className={styles.cardTitle}>المعلومات الأساسية</h2>
-                </div>
-
-                <div className={styles.grid}>
-                  
-                  <Field label="اسم الفعالية" value={event.title} />
-                  <Field label="النوع" value={<span className={`${styles.badge} ${styles.badgeType}`}>{event.type}</span>} />
-                  <Field
-                    label="الحالة"
-                    value={<span className={`${styles.badge} ${statusBadgeClass(event.status)}`}>{event.status}</span>}
-                  />
-                </div>
-
-                <div className={styles.longField}>
-                  <div className={styles.fieldLabel}>الوصف</div>
-                  <div className={styles.longValue}>{event.description}</div>
-                </div>
-              </section>
-
-              {/* 2) Organizational Information */}
-              <section className={styles.card}>
-                <div className={styles.cardHeader}>
-                  <span className={styles.cardIcon}><UsersIcon className={styles.sectionIcon} /></span>
-                  <h2 className={styles.cardTitle}>معلومات تنظيمية</h2>
-                </div>
-
-                <div className={styles.grid}>
-                  <Field label="الكلية"             value={event.faculty_name ?? "—"} />
-                  <Field label="القسم"              value={event.dept_name    ?? "—"} />
-                  <Field label="تم الإنشاء بواسطة" value={event.created_by_name} />
-                  <Field label="تاريخ الإنشاء"     value={formatDateTime(event.created_at)} />
-                  <Field label="آخر تحديث"         value={formatDateTime(event.updated_at)} />
-                </div>
-              </section>
-
-              {/* 3) Event Details */}
-              <section className={styles.card}>
-                <div className={styles.cardHeader}>
-                  <span className={styles.cardIcon}><PinIcon className={styles.sectionIcon} /></span>
-                  <h2 className={styles.cardTitle}>تفاصيل الفعالية</h2>
-                </div>
-
-                <div className={styles.grid}>
-                  <Field label="تاريخ البدء"   value={formatDate(event.st_date)} />
-                  <Field label="تاريخ الانتهاء" value={formatDate(event.end_date)} />
-                  <Field label="المكان"         value={event.location} />
-                  <Field label="حد الطلاب"     value={`${event.s_limit} طالب`} />
-                  <Field
-                    label="التكلفة"
-                    value={
-                      parseFloat(event.cost) > 0
-                        ? `${parseFloat(event.cost).toLocaleString("ar-EG")} ج`
-                        : "مجاني"
-                    }
-                  />
-             
-                </div>
-              </section>
-
-              {/* 4) Additional Information */}
-              <section className={styles.card}>
-                <div className={styles.cardHeader}>
-                  <span className={styles.cardIcon}><PlusIcon className={styles.sectionIcon} /></span>
-                  <h2 className={styles.cardTitle}>معلومات إضافية</h2>
-                </div>
-
-                <div className={styles.gridTwo}>
-                  <div className={styles.longField}>
-                    <div className={styles.fieldLabel}>القيود</div>
-                    <div className={styles.longValue}>{event.restrictions ?? "لا يوجد"}</div>
-                  </div>
-                  <div className={styles.longField}>
-                    <div className={styles.fieldLabel}>المكافآت</div>
-                    <div className={styles.longValue}>{event.reward ?? "لا يوجد"}</div>
-                  </div>
-                </div>
-              </section>
-
-            </div>
-          )}
+      {/* Toast */}
+      {notification.show && (
+        <div className={`${styles.notification} ${
+          notification.type === "success" ? styles.success :
+          notification.type === "error" ? styles.error : styles.warning
+        }`}>
+          {notification.message}
         </div>
+      )}
+
+      <div className={styles.container}>
+
+        {/* Top bar */}
+        <div className={styles.topBar}>
+          <div className={styles.headText}>
+            <h1 className={styles.pageTitle}>تفاصيل الفعالية</h1>
+            <p className={styles.pageSubtitle}>{ui.subtitle}</p>
+          </div>
+          <button className={styles.backBtn} onClick={() => router.back()} type="button">
+            <ArrowRight size={18} />
+            رجوع
+          </button>
+        </div>
+
+        {loadingEvent && (
+          <div style={{ fontWeight: 800, opacity: 0.7, margin: "10px 0", textAlign: "right" }}>
+            جاري تحميل بيانات الفعالية...
+          </div>
+        )}
+
+        {!loadingEvent && event && (
+          <>
+            {/* Hero */}
+            <div className={styles.hero}>
+              <div className={styles.heroTitle}>{ui.title || "—"}</div>
+            </div>
+
+            {/* Stats */}
+            <div className={styles.statsRow}>
+              <div className={`${styles.statCard} ${styles.statAmber}`}>
+                <div className={styles.statIcon}><Users size={20} /></div>
+                <div className={styles.statText}>
+                  <div className={styles.statLabel}>المقاعد المتبقية</div>
+                  <div className={styles.statValue}>{remaining}</div>
+                </div>
+              </div>
+              <div className={`${styles.statCard} ${styles.statGreen}`}>
+                <div className={styles.statIcon}><CheckCircle2 size={20} /></div>
+                <div className={styles.statText}>
+                  <div className={styles.statLabel}>الحد الأقصى</div>
+                  <div className={styles.statValue}>{ui.max}</div>
+                </div>
+              </div>
+              <div className={`${styles.statCard} ${styles.statIndigo}`}>
+                <div className={styles.statIcon}><Users size={20} /></div>
+                <div className={styles.statText}>
+                  <div className={styles.statLabel}>العدد الحالي</div>
+                  <div className={styles.statValue}>{registered}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Info grid */}
+            <section className={styles.infoGrid}>
+              <div className={styles.infoCard}>
+                <div className={styles.infoLabel}><DollarSign size={16} /> التكلفة</div>
+                <div className={styles.infoValue}>{ui.cost}</div>
+              </div>
+              <div className={styles.infoCard}>
+                <div className={styles.infoLabel}><ShieldAlert size={16} /> حالة الفعالية</div>
+                <div className={statusBadgeClass}>{ui.status || "—"}</div>
+              </div>
+              <div className={styles.infoCard}>
+                <div className={styles.infoLabel}><Users size={16} /> نطاق الفعالية</div>
+                <div className={styles.infoValue}>{ui.scope || "—"}</div>
+              </div>
+              <div className={styles.infoCard}>
+                <div className={styles.infoLabel}><Timer size={16} /> نوع الفعالية</div>
+                <div className={styles.badgeBlue}>{ui.type || "—"}</div>
+              </div>
+              <div className={`${styles.infoCard} ${styles.infoWide}`}>
+                <div className={styles.infoLabel}><MapPin size={16} /> المكان</div>
+                <div className={styles.infoValue}>{ui.location || "—"}</div>
+              </div>
+              <div className={styles.infoCard}>
+                <div className={styles.infoLabel}><CalendarDays size={16} /> تاريخ البداية</div>
+                <div className={styles.infoValue} dir="ltr">{ui.startDate || "—"}</div>
+              </div>
+              <div className={styles.infoCard}>
+                <div className={styles.infoLabel}><CalendarDays size={16} /> تاريخ النهاية</div>
+                <div className={styles.infoValue} dir="ltr">{ui.endDate || "—"}</div>
+              </div>
+            </section>
+
+            {/* Reward & Constraints */}
+            <section className={styles.twoCols}>
+              <div className={styles.block}>
+                <div className={styles.blockTitle}>المكافأة</div>
+                <div className={styles.blockBody}>{ui.reward}</div>
+              </div>
+              <div className={styles.block}>
+                <div className={styles.blockTitle}>القيود والشروط</div>
+                <div className={styles.blockBody}>{ui.constraints}</div>
+              </div>
+            </section>
+
+            {/* Description */}
+            <section className={styles.block}>
+              <div className={styles.blockTitle}>وصف الفعالية</div>
+              <div className={styles.blockBody}>{ui.description}</div>
+            </section>
+
+            {/* Images — view only */}
+            <section className={styles.imagesBlock}>
+              <div className={styles.imagesHead}>
+                <div className={styles.imagesTitle}>
+                  <ImageIcon size={18} />
+                  صور الفعالية
+                </div>
+              </div>
+
+              {loadingImages ? (
+                <div style={{ fontWeight: 800, opacity: 0.7 }}>جاري تحميل الصور...</div>
+              ) : images.length === 0 ? (
+                <div className={styles.emptyImages}>لا توجد صور مضافة حتى الآن</div>
+              ) : (
+                <div className={styles.imagesGrid}>
+                  {images.map((img) => (
+                    <div key={img.doc_id} className={styles.imageCard}>
+                      <div className={styles.imagePreview}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={img.file_url} alt={img.file_name} />
+                      </div>
+                      <div className={styles.imageMeta}>
+                        <div className={styles.imageName} title={img.file_name}>{img.file_name}</div>
+                      </div>
+                      <div className={styles.imageBtns}>
+                        <a className={styles.viewLink} href={img.file_url} target="_blank" rel="noreferrer">
+                          <Eye size={16} />
+                          عرض الصورة
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* Participants Table — view only */}
+            <section className={styles.tableBlock}>
+              <div className={styles.tableHead}>
+                <div className={styles.tableTitle}>
+                  الطلاب المسجلين <span className={styles.count}>({rows.length})</span>
+                </div>
+                <div className={styles.tableChips}>
+                  <span className={styles.miniChip}><Medal size={14} /> {ranksCount}</span>
+                  <span className={styles.miniChip}><Award size={14} /> {rewardsCount}</span>
+                </div>
+              </div>
+
+              <div className={styles.tableWrap}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>اسم الطالب</th>
+                      <th>رقم الطالب</th>
+                      <th>حالة التسجيل</th>
+                      <th>الترتيب</th>
+                      <th>المكافأة</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((r) => (
+                      <tr key={r.id}>
+                        <td>{r.name}</td>
+                        <td dir="ltr">{r.studentId}</td>
+                        <td>
+                          <span className={participantBadgeClass(r.status)}>{r.status}</span>
+                        </td>
+                        <td>
+                          <span className={styles.cellValue}>
+                            {(r.rank ?? "").trim() ? r.rank : "—"}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={styles.cellValue}>
+                            {(r.reward ?? "").trim() ? r.reward : "—"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                    {rows.length === 0 && (
+                      <tr>
+                        <td colSpan={5} style={{ textAlign: "center", padding: 18, opacity: 0.7, fontWeight: 700 }}>
+                          لا يوجد مشاركين حتى الآن
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </>
+        )}
+
+        {!loadingEvent && !event && (
+          <div className={styles.block} style={{ textAlign: "center", padding: 40 }}>
+            <div style={{ fontSize: 18, fontWeight: 800, color: "#2C3A5F", marginBottom: 8 }}>
+              لم يتم العثور على الفعالية
+            </div>
+            <div style={{ color: "#64748b", fontWeight: 700 }}>تأكد من رقم الفعالية في الرابط.</div>
+          </div>
+        )}
+
       </div>
     </div>
   );

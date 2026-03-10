@@ -339,12 +339,18 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
                         </div>
                       )}
                     </div>
-                    <button
-                      className="view-details-btn"
-                      onClick={() => onViewFamilyDetails?.(fam)}
-                    >
-                      عرض التفاصيل
-                    </button>
+                    {(() => {
+                      const s = fam.memberStatus?.toLowerCase().trim();
+                      const isAccepted = s === 'مقبول' || s === 'accepted' || s === 'active';
+                      return isAccepted ? (
+                        <button
+                          className="view-details-btn"
+                          onClick={() => onViewFamilyDetails?.(fam)}
+                        >
+                          عرض التفاصيل
+                        </button>
+                      ) : null;
+                    })()}
                   </div>
                 ))}
               </div>

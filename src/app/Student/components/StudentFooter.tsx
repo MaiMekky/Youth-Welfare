@@ -1,103 +1,91 @@
 "use client";
-import React from 'react';
-import Image from "next/image";
-import logo from "@/app/assets/capital-uni-logo.png";
-import '../styles/studentFooter.css';
-import { Phone, Mail, Facebook, Twitter, Instagram, MapPin, Clock, HelpCircle, BookOpen, MessageCircle, Shield } from "lucide-react";
+import React from "react";
+import styles from "../styles/studentFooter.module.css";
+import { MapPin, Phone, Mail, Globe, Users, Facebook, Twitter, Instagram } from "lucide-react";
+import capitalLogo from "../../../app/assets/capital-uni-logo.png";
 
-const StudentFooter: React.FC = () => {
+export default function Footer() {
   return (
-    <footer className="student-footer" id="footer">
-      <div className="footer-container">
+    <footer className={styles.footer}>
 
-        {/* ── Brand / University Info ── */}
-        <div className="footer-section">
-          <div className="university-brand">
-            <div className="footer-brand-text">
-              <span className="footer-brand-name">رعاية الطلاب</span>
-              <span className="footer-brand-sub">جامعة العاصمة</span>
+      <div className={styles.footerTop}>
+
+        {/* Col 1: جامعة حلوان */}
+        <div className={styles.footerCol}>
+          <div className={styles.brandBlock}>
+            <div className={styles.brandIcon}>
+              <img src={capitalLogo.src} alt="Capital University Logo" width="70" height="70" draggable={false} />
             </div>
-            <div className="footer-logo-mark">
-              <Image
-                src={logo}
-                alt="شعار جامعة العاصمة"
-                width={60}
-                height={60}
-                style={{ objectFit: "contain", width: "100%", height: "100%" }}
-                priority
-                draggable={false}
-                quality={100}
-              />
+            <div>
+              <div className={styles.brandName}>جامعة العاصمة</div>
+              <div className={styles.brandSub}>Capital University</div>
             </div>
           </div>
-
-          <p className="university-details">
-            بوابة رعاية الطلاب — منصة شاملة تجمع جميع الأنشطة والفعاليات والخدمات الطلابية في مكان واحد، لدعم مسيرتك الجامعية.
+          <p className={styles.brandDesc}>
+            جامعة مصرية حكومية تأسست عام 1975، تضم العديد من الكليات والمعاهد المتخصصة في مختلف المجالات العلمية والتطبيقية
           </p>
-
-          <div className="footer-location">
-            <span>القاهرة، مصر</span>
-            <MapPin />
+          <div className={styles.brandMeta}>
+            <div className={styles.metaRow}><MapPin size={14} /><span>عين حلوان، القاهرة، جمهورية مصر العربية</span></div>
+            <div className={styles.metaRow}><Users size={14} /><span>أكثر من 180,000 طالب وطالبة</span></div>
           </div>
         </div>
 
-        {/* ── Contact ── */}
-        <div className="footer-section">
-          <h3>اتصل بنا</h3>
-          <div className="contact-list">
-            <div className="contact-item">
-              <span>01234567890</span>
-              <div className="contact-icon-box"><Phone /></div>
-            </div>
-            <div className="contact-item">
-              <span>youth@capital.edu.eg</span>
-              <div className="contact-icon-box"><Mail /></div>
-            </div>
-          
-          </div>
+        {/* Col 2: نظام إدارة شؤون الشباب */}
+        <div className={styles.footerCol}>
+          <div className={styles.colTitle}>نظام إدارة شؤون الطلاب</div>
+          <p className={styles.colDesc}>المنصة الرقمية الموحدة لإدارة الأنشطة الطلابية والشبابية بجامعة العاصمة</p>
+          {/* <ul className={styles.colListIcon}>
+            <li><Users size={13} /><span>النظرة العامة</span></li>
+            <li><Users size={13} /><span>إدارة الفعاليات</span></li>
+            <li><Users size={13} /><span>إدارة المدراء</span></li>
+            <li><Users size={13} /><span>تقارير الكليات</span></li>
+          </ul> */}
         </div>
 
-        {/* ── Support ── */}
-        <div className="footer-section">
-          <h3>الدعم والمساعدة</h3>
-          <ul className="support-list">
-            <li><HelpCircle    size={13} style={{color:'#c9972a', flexShrink:0}} />الأسئلة الشائعة</li>
-            <li><BookOpen      size={13} style={{color:'#c9972a', flexShrink:0}} />مركز المساعدة</li>
-            <li><MessageCircle size={13} style={{color:'#c9972a', flexShrink:0}} />التواصل مع الدعم</li>
-            <li><Shield        size={13} style={{color:'#c9972a', flexShrink:0}} />سياسة الخصوصية</li>
+        {/* Col 3: إدارات رعاية الشباب */}
+        <div className={styles.footerCol}>
+          <div className={styles.colTitle}>إدارات رعاية الشباب</div>
+          <ul className={styles.colListPlain}>
+            <li>إدارة الأنشطة الرياضية</li>
+            <li>إدارة الأنشطة الاجتماعية</li>
+            <li>إدارة الكشافة والخدمة العامة</li>
+            <li>إدارة الأنشطة الفنية</li>
+            <li>إدارة الأنشطة الثقافية</li>
+            <li>إدارة الأنشطة العلمية</li>
+            <li>إدارة التضامن الاجتماعي</li>
+            <li>إدارة اتحادات الطلاب</li>
           </ul>
         </div>
 
-        {/* ── Social Media ── */}
-        <div className="footer-section">
-          <h3>تابعنا</h3>
-          <div className="social-icons">
-            <a href="#" className="social-link" aria-label="Instagram"><Instagram /></a>
-            <a href="#" className="social-link" aria-label="Twitter"><Twitter /></a>
-            <a href="#" className="social-link" aria-label="Facebook"><Facebook /></a>
+        {/* Col 4: معلومات التواصل */}
+        <div className={styles.footerCol}>
+          <div className={styles.colTitle}>معلومات التواصل</div>
+          <ul className={styles.contactList}>
+            <li><MapPin size={14} /><span>إدارة رعاية الطلاب<br/>جامعة العاصمة - عين حلوان</span></li>
+            <li><Phone size={14} /><span>(202+) 2556-0000</span></li>
+            <li><Mail size={14} /><span>youth@helwan.edu.eg</span></li>
+            <li><Globe size={14} /><span>www.helwan.edu.eg</span></li>
+          </ul>
+          <div className={styles.socialRow}>
+            <span className={styles.socialLabel}>تابعونا</span>
+            <div className={styles.socialIcons}>
+              <a href="#" className={styles.socialBtn}><Facebook size={16} /></a>
+              <a href="#" className={styles.socialBtn}><Twitter size={16} /></a>
+              <a href="#" className={styles.socialBtn}><Instagram size={16} /></a>
+            </div>
           </div>
-          <p className="social-description">
-            تابع صفحاتنا للاطلاع على آخر الأخبار والفعاليات والإعلانات الجامعية.
-          </p>
         </div>
 
       </div>
 
-      {/* ── Bottom Bar ── */}
-      <div className="footer-bottom">
-        <div className="footer-bottom-content">
-          <p className="copyright">
-            © {new Date().getFullYear()} جامعة العاصمة — جميع الحقوق محفوظة
-          </p>
-          <div className="footer-bottom-links">
-            <a href="#">سياسة الخصوصية</a>
-            <a href="#">شروط الاستخدام</a>
-            <a href="#">تواصل معنا</a>
-          </div>
-        </div>
-      </div>
+      {/* Stats bar
+      <div className={styles.footerStats}>
+        <div className={styles.statItem}><span className={styles.statNum}>+24</span><span className={styles.statLbl}>كلية </span></div>
+        <div className={styles.statItem}><span className={styles.statNum}>+180K</span><span className={styles.statLbl}>طالب وطالبة</span></div>
+        <div className={styles.statItem}><span className={styles.statNum}>100</span><span className={styles.statLbl}>عام من التميز</span></div>
+        <div className={styles.statItem}><span className={styles.statNum}>3</span><span className={styles.statLbl}>فروع جامعية</span></div>
+      </div> */}
+
     </footer>
   );
-};
-
-export default StudentFooter;
+}

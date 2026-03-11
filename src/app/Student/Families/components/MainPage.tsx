@@ -11,6 +11,7 @@ interface ApiFamily {
   type: string;
   status: string;
   member_status: string;
+  role?: string;
   member_count: number;
   joined_at?: string;
 }
@@ -26,6 +27,7 @@ interface ProgramFamily {
   image: string;
   type: string;
   memberStatus: string;
+  memberRole?: string;
 }
 
 interface MainPageProps {
@@ -51,21 +53,30 @@ const isAccepted = (status: string) => {
   return s === 'مقبول' || s === 'accepted' || s === 'active';
 };
 
+const isElderBrother = (role?: string) => {
+  if (!role) return false;
+  const r = role.trim().replace(/_/g, ' ');
+  // Match any variant: أخ أكبر / أخ_أكبر / elder_brother / elder brother
+  return (
+    r.includes('أخ') && r.includes('أكبر') ||
+    r.toLowerCase().includes('elder') && r.toLowerCase().includes('brother')
+  );
+};
+
 export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
   const [availableFamilies, setAvailableFamilies] = useState<ProgramFamily[]>([]);
-  const [joinedFamilies, setJoinedFamilies] = useState<ProgramFamily[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [joiningId, setJoiningId] = useState<number | null>(null);
-  const [toasts, setToasts] = useState<ToastNotification[]>([]);
-  const [activeTab, setActiveTab] = useState<'accepted' | 'pending'>('accepted');
+  const [joinedFamilies, setJoinedFamilies]       = useState<ProgramFamily[]>([]);
+  const [loading, setLoading]                     = useState(true);
+  const [error, setError]                         = useState<string | null>(null);
+  const [joiningId, setJoiningId]                 = useState<number | null>(null);
+  const [toasts, setToasts]                       = useState<ToastNotification[]>([]);
+  const [activeTab, setActiveTab]                 = useState<'accepted' | 'pending'>('accepted');
 
   const token =
-    typeof window !== 'undefined'
-      ? localStorage.getItem('access')
-      : null;
+    typeof window !== 'undefined' ? localStorage.getItem('access') : null;
 
   /* ====== DERIVED LISTS ====== */
+  // Accepted = status is accepted AND role is NOT أخ أكبر
   const acceptedFamilies = joinedFamilies.filter(f => isAccepted(f.memberStatus));
   const pendingFamilies  = joinedFamilies.filter(f => !isAccepted(f.memberStatus));
 
@@ -86,6 +97,7 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
     description: family.description,
     type: family.type,
     memberStatus: family.member_status || '',
+    memberRole: family.role || '',
     createdAt: family.joined_at
       ? new Date(family.joined_at).toLocaleDateString('ar-EG')
       : '',
@@ -100,7 +112,9 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
     });
     if (!res.ok) throw new Error('فشل تحميل الأسر الحالية');
     const data = await res.json();
-    return extractArray(data).map(mapToProgramFamily);
+    return extractArray(data)
+      .filter((f: ApiFamily) => !isElderBrother(f.role))
+      .map(mapToProgramFamily);
   };
 
   const fetchAvailableFamilies = async () => {
@@ -129,7 +143,11 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
       }
       const joinedFamily = availableFamilies.find(f => f.id === familyId);
       if (joinedFamily) {
-        const updatedFamily = { ...joinedFamily, createdAt: new Date().toLocaleDateString('ar-EG'), memberStatus: 'منتظر' };
+        const updatedFamily = {
+          ...joinedFamily,
+          createdAt: new Date().toLocaleDateString('ar-EG'),
+          memberStatus: 'منتظر',
+        };
         setJoinedFamilies(prev => [...prev, updatedFamily]);
         setAvailableFamilies(prev => prev.filter(f => f.id !== familyId));
         setActiveTab('pending');
@@ -137,7 +155,10 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
       showToast('تم إرسال طلب الانضمام للأسرة بنجاح! 🎉', 'success');
       setTimeout(async () => {
         try {
-          const [joined, available] = await Promise.all([fetchJoinedFamilies(), fetchAvailableFamilies()]);
+          const [joined, available] = await Promise.all([
+            fetchJoinedFamilies(),
+            fetchAvailableFamilies(),
+          ]);
           setJoinedFamilies(joined);
           setAvailableFamilies(available);
         } catch (err) { console.error('Error refreshing data:', err); }
@@ -155,13 +176,17 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
     const loadData = async () => {
       try {
         setLoading(true);
-        const [joined, available] = await Promise.all([fetchJoinedFamilies(), fetchAvailableFamilies()]);
+        const [joined, available] = await Promise.all([
+          fetchJoinedFamilies(),
+          fetchAvailableFamilies(),
+        ]);
         setJoinedFamilies(joined);
         setAvailableFamilies(available);
-        // Default to pending tab if no accepted families
-        if (joined.filter(f => isAccepted(f.memberStatus)).length === 0 && joined.length > 0) {
-          setActiveTab('pending');
-        }
+        // Default to pending tab if no accepted (non-elder-brother) families
+        const hasAccepted = joined.some(
+          f => isAccepted(f.memberStatus)
+        );
+        if (!hasAccepted && joined.length > 0) setActiveTab('pending');
       } catch (err: any) {
         setError(err.message);
         showToast(err.message || 'فشل تحميل البيانات', 'error');
@@ -175,24 +200,23 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
   /* ====== STATUS HELPERS ====== */
   const getStatusBadgeClass = (status: string) => {
     const s = status.toLowerCase().trim();
-    if (s === 'منتظر' || s === 'pending') return 'status-badge-pending';
-    if (s === 'مقبول' || s === 'accepted' || s === 'active') return 'status-badge-accepted';
-    if (s === 'مرفوض' || s === 'rejected') return 'status-badge-rejected';
+    if (s === 'منتظر' || s === 'pending')                          return 'status-badge-pending';
+    if (s === 'مقبول' || s === 'accepted' || s === 'active')       return 'status-badge-accepted';
+    if (s === 'مرفوض' || s === 'rejected')                         return 'status-badge-rejected';
     return 'status-badge-default';
   };
 
   const getStatusText = (status: string) => {
     const s = status.toLowerCase().trim();
-    if (s === 'pending') return 'منتظر';
-    if (s === 'accepted' || s === 'active') return 'مقبول';
-    if (s === 'rejected') return 'مرفوض';
+    if (s === 'pending')                       return 'منتظر';
+    if (s === 'accepted' || s === 'active')    return 'مقبول';
+    if (s === 'rejected')                      return 'مرفوض';
     return status;
   };
 
   /* ====== RENDER ====== */
   return (
     <>
-      {/* Toast Container */}
       <div className="toast-container">
         {toasts.map(toast => (
           <Toast key={toast.id} message={toast.message} type={toast.type} onClose={() => removeToast(toast.id)} />
@@ -238,7 +262,6 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
                     </span>
                   )}
                 </button>
-
                 <button
                   className={`tab-btn ${activeTab === 'pending' ? 'tab-btn--active tab-btn--pending' : ''}`}
                   onClick={() => setActiveTab('pending')}
@@ -280,9 +303,7 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
                               <h3>{fam.title}</h3>
                             </div>
                           </div>
-
                           <p className="accepted-card-desc">{fam.subtitle}</p>
-
                           <div className="accepted-card-meta">
                             <div className="meta-chip">
                               <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -306,7 +327,6 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
                               </div>
                             )}
                           </div>
-
                           <button className="view-details-btn" onClick={() => onViewFamilyDetails?.(fam)}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
@@ -434,7 +454,11 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
                         <p className="info-value">{program.place}</p>
                       </div>
                     </div>
-                    <button className="join-btn" onClick={() => joinFamily(program.id)} disabled={joiningId === program.id}>
+                    <button
+                      className="join-btn"
+                      onClick={() => joinFamily(program.id)}
+                      disabled={joiningId === program.id}
+                    >
                       {joiningId === program.id ? (
                         <><span className="spinner"></span>جاري الانضمام...</>
                       ) : (

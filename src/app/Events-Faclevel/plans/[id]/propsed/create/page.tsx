@@ -29,7 +29,7 @@ type FormState = {
   cost: string;
   s_limit: string;
   type: string;
-  dept_id: string;   
+  // dept_id: string;   
   restrictions: string;
   reward: string;
   resource: string;
@@ -124,7 +124,7 @@ const [form, setForm] = useState<FormState>({
   cost: "",
   s_limit: "",
   type: "",
-  dept_id: "",   
+  // dept_id: "",   
   restrictions: "",
   reward: "",
   resource: "",
@@ -166,9 +166,9 @@ const [form, setForm] = useState<FormState>({
       if (!data.end_date.trim()) next.end_date = "تاريخ النهاية مطلوب";
       if (!data.cost.trim()) next.cost = "التكلفة مطلوبة";
       if (!data.type.trim()) next.type = "نوع النشاط مطلوب";
-      if (isConvert && !data.dept_id) {
-        next.dept_id = "الإدارة مطلوبة";
-      }
+      // if (isConvert && !data.dept_id) {
+      //   next.dept_id = "الإدارة مطلوبة";
+      // }
       const costNum = Number(String(data.cost).replaceAll(",", "").trim());
       if (data.cost.trim() && (Number.isNaN(costNum) || costNum < 0)) next.cost = "برجاء ادخال تكلفة صحيحة";
       if (data.s_limit.trim()) {
@@ -274,7 +274,7 @@ const [form, setForm] = useState<FormState>({
         cost: String(form.cost).trim(),
         restrictions: form.restrictions.trim(),
         reward: form.reward.trim(),
-        dept_id: Number(form.dept_id),  
+        // dept_id: Number(form.dept_id),  
     };
 
       const res2 = await apiFetch<any>(
@@ -329,7 +329,7 @@ const [form, setForm] = useState<FormState>({
       restrictions: fallbackRow?.restrictions ?? "",
       reward: fallbackRow?.reward ?? "",
       resource: fallbackRow?.resource ?? "",
-      dept_id: fallbackRow?.dept_id ?? "",
+      // dept_id: fallbackRow?.dept_id ?? "",
     };
 
     setSeed(prefilledFromPayload);
@@ -362,7 +362,7 @@ const [form, setForm] = useState<FormState>({
         restrictions: e?.restrictions ?? "",
         reward: e?.reward ?? "",
         resource: e?.resource ?? "",
-        dept_id: e?.dept_id ?? "",
+        // dept_id: e?.dept_id ?? "",
       };
 
       setEventId(Number(e?.event_id ?? idFromPayload));
@@ -534,7 +534,7 @@ const [form, setForm] = useState<FormState>({
           )}
         </div>
 
-        {isConvert && (
+        {/* {isConvert && (
           <div className={styles.field}>
             <label className={styles.label}>الإدارة المنظمة</label>
 
@@ -553,19 +553,20 @@ const [form, setForm] = useState<FormState>({
 
             </select>
           </div>
-        )}
-
-                <div className={styles.field}>
-                  <label className={styles.label}>القيود</label>
-                  <input
-                    className={styles.input}
-                    placeholder="اختياري"
+        )} */}
+          {isConvert && (
+            <div className={styles.field}>
+              <label className={styles.label}>القيود</label>
+              <input
+                className={styles.input}
+                placeholder="اختياري"
                     value={form.restrictions}
                     onChange={(e) => setField("restrictions", e.target.value)}
                     onBlur={() => onBlur("restrictions")}
                   />
                 </div>
-
+              )}
+              {isConvert && (
                 <div className={styles.field}>
                   <label className={styles.label}>المكافأة</label>
                   <input
@@ -576,7 +577,8 @@ const [form, setForm] = useState<FormState>({
                     onBlur={() => onBlur("reward")}
                   />
                 </div>
-
+              )}
+              {isConvert && (
                 <div className={styles.field}>
                   <label className={styles.label}>الموارد</label>
                   <input
@@ -587,6 +589,7 @@ const [form, setForm] = useState<FormState>({
                     onBlur={() => onBlur("resource")}
                   />
                 </div>
+              )}
                {isConvert && (
                 <div className={styles.field} style={{ gridColumn: "1 / -1" }}>
                   <label className={styles.label}>الوصف</label>
@@ -600,8 +603,8 @@ const [form, setForm] = useState<FormState>({
                   />
                 </div>
                 )}
-
-              <div className={styles.footer}>
+            </div>
+               <div className={styles.footer}>
                 <button type="button" className={styles.cancelBtn} onClick={onCancel} disabled={submitting}>
                   <X size={18} /> إلغاء
                 </button>
@@ -610,7 +613,6 @@ const [form, setForm] = useState<FormState>({
                   {submitting ? "جارٍ الحفظ..." : isConvert ? "حفظ كفعالية فعلية" : "حفظ كفعالية مقترحة"}
                 </button>
               </div>
-            </div>
             </form>
           </section>
         </div>

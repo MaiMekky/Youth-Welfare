@@ -28,7 +28,7 @@ type FormState = {
   cost: string;
   s_limit: string;
   type: string;
-  dept_id: string;   
+  // dept_id: string;   
   restrictions: string;
   reward: string;
   resource: string;
@@ -123,7 +123,7 @@ const [form, setForm] = useState<FormState>({
   cost: "",
   s_limit: "",
   type: "",
-  dept_id: "",   
+  // dept_id: "",   
   restrictions: "",
   reward: "",
   resource: "",
@@ -183,9 +183,9 @@ const toggleAllFacs = () => {
       if (!data.end_date.trim()) next.end_date = "تاريخ النهاية مطلوب";
       if (!data.cost.trim()) next.cost = "التكلفة مطلوبة";
       if (!data.type.trim()) next.type = "نوع النشاط مطلوب";
-      if (isConvert && !data.dept_id) {
-        next.dept_id = "الإدارة مطلوبة";
-      }
+      // if (isConvert && !data.dept_id) {
+      //   next.dept_id = "الإدارة مطلوبة";
+      // }
       const costNum = Number(String(data.cost).replaceAll(",", "").trim());
       if (data.cost.trim() && (Number.isNaN(costNum) || costNum < 0)) next.cost = "برجاء ادخال تكلفة صحيحة";
       if (data.s_limit.trim()) {
@@ -294,7 +294,7 @@ const toggleAllFacs = () => {
         cost: String(form.cost).trim(),
         restrictions: form.restrictions.trim(),
         reward: form.reward.trim(),
-        dept_id: Number(form.dept_id),  
+        // dept_id: Number(form.dept_id),  
         selected_facs: selectedFacultyIds,      };
 
       const res2 = await apiFetch<any>(
@@ -331,11 +331,11 @@ const toggleAllFacs = () => {
     const fallbackRow = parsed?.event ?? parsed?.row ?? parsed ?? {};
 
     // Read departments fresh from localStorage for resolution
-    let localDepts: { dept_id: number; dept_name: string }[] = [];
-    try {
-      const stored = localStorage.getItem("departments");
-      if (stored) localDepts = JSON.parse(stored);
-    } catch {}
+    // let localDepts: { dept_id: number; dept_name: string }[] = [];
+    // try {
+    //   const stored = localStorage.getItem("departments");
+    //   if (stored) localDepts = JSON.parse(stored);
+    // } catch {}
 
     const prefilledFromPayload: FormState = {
       title: fallbackRow?.title ?? "",
@@ -349,7 +349,7 @@ const toggleAllFacs = () => {
       restrictions: fallbackRow?.restrictions ?? "",
       reward: fallbackRow?.reward ?? "",
       resource: fallbackRow?.resource ?? "",
-      dept_id: fallbackRow?.dept_id ?? "",
+      // dept_id: fallbackRow?.dept_id ?? "",
     };
 
     setSeed(prefilledFromPayload);
@@ -363,12 +363,12 @@ const toggleAllFacs = () => {
       if (!res.ok) { showToast(`❌ ${res.message}`, "error"); return; }
       const e = (res.data as any)?.data ?? res.data;
 
-      // Read departments fresh again inside async (closure may be stale)
-      let asyncDepts: { dept_id: number; dept_name: string }[] = [];
-      try {
-        const stored = localStorage.getItem("departments");
-        if (stored) asyncDepts = JSON.parse(stored);
-      } catch {}
+      // // Read departments fresh again inside async (closure may be stale)
+      // let asyncDepts: { dept_id: number; dept_name: string }[] = [];
+      // try {
+      //   const stored = localStorage.getItem("departments");
+      //   if (stored) asyncDepts = JSON.parse(stored);
+      // } catch {}
 
       const prefilled: FormState = {
         title: e?.title ?? "",
@@ -382,7 +382,7 @@ const toggleAllFacs = () => {
         restrictions: e?.restrictions ?? "",
         reward: e?.reward ?? "",
         resource: e?.resource ?? "",
-        dept_id: e?.dept_id ?? "",
+        // dept_id: e?.dept_id ?? "",
       };
 
       setEventId(Number(e?.event_id ?? idFromPayload));
@@ -578,7 +578,7 @@ const toggleAllFacs = () => {
           )}
         </div>
 
-        {isConvert && (
+        {/* {isConvert && (
           <div className={styles.field}>
             <label className={styles.label}>الإدارة المنظمة</label>
 
@@ -597,8 +597,8 @@ const toggleAllFacs = () => {
 
             </select>
           </div>
-        )}
-
+        )} */}
+             {isConvert &&  (
                 <div className={styles.field}>
                   <label className={styles.label}>القيود</label>
                   <input
@@ -609,7 +609,8 @@ const toggleAllFacs = () => {
                     onBlur={() => onBlur("restrictions")}
                   />
                 </div>
-
+              )}
+               {isConvert &&  (
                 <div className={styles.field}>
                   <label className={styles.label}>المكافأة</label>
                   <input
@@ -620,7 +621,8 @@ const toggleAllFacs = () => {
                     onBlur={() => onBlur("reward")}
                   />
                 </div>
-
+                   )}
+                  {isConvert &&  (
                 <div className={styles.field}>
                   <label className={styles.label}>الموارد</label>
                   <input
@@ -631,6 +633,8 @@ const toggleAllFacs = () => {
                     onBlur={() => onBlur("resource")}
                   />
                 </div>
+                )}        
+
              {isConvert &&  (
                 <div className={styles.field} style={{ gridColumn: "1 / -1" }}>
                   <label className={styles.label}>الوصف</label>

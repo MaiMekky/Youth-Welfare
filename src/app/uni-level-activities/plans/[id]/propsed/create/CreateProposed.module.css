@@ -383,6 +383,68 @@
   transform-origin: left;
   animation: toastProgress 2.5s linear forwards;
 }
+/* Faculties */
+.facultyBox{
+  margin-top:16px;
+  border:1px solid #eef2ff;
+  background:#fbfcff;
+  border-radius:16px;
+  padding:14px;
+}
+
+.facultyHeader{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:10px;
+  font-size: 18px;
+}
+
+.facultyTitle{
+  font-weight:900;
+  color:#2C3A5F;
+}
+
+.facultyHint{
+  color:#64748b;
+  font-size:12px;
+  margin-top:4px;
+}
+
+.selectAll{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:800;
+  color:#2C3A5F;
+  user-select:none;
+}
+
+.facultyGrid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+
+.facultyItem{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  background:#fff;
+  cursor:pointer;
+  user-select:none;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.facultyItem:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 12px 22px rgba(15,23,42,.08);
+  border-color: rgba(44,58,95,.18);
+}
 
 
 .toast_success{ border-right: 6px solid #22c55e; }

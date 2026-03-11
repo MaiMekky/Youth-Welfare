@@ -28,13 +28,13 @@ type FormState = {
   cost: string;
   s_limit: string;
   type: string;
+  dept_id: string;   
   restrictions: string;
   reward: string;
   resource: string;
 };
 
-type FormErrors = Partial<Record<keyof FormState, string>>;
-
+type FormErrors = Partial<Record<keyof FormState | "selected_facs", string>>;
 /* ===================== Toast (same style) ===================== */
 type ToastType = "success" | "error" | "warning";
 
@@ -114,19 +114,20 @@ export default function CreateProposedEventPage() {
     }
   }, []);
 
-  const [form, setForm] = useState<FormState>({
-    title: "",
-    description: "",
-    location: "",
-    st_date: "",
-    end_date: "",
-    cost: "",
-    s_limit: "",
-    type: "",
-    restrictions: "",
-    reward: "",
-    resource: "",
-  });
+const [form, setForm] = useState<FormState>({
+  title: "",
+  description: "",
+  location: "",
+  st_date: "",
+  end_date: "",
+  cost: "",
+  s_limit: "",
+  type: "",
+  dept_id: "",   
+  restrictions: "",
+  reward: "",
+  resource: "",
+});
 
   const [seed, setSeed] = useState<FormState | null>(null);
   const [eventId, setEventId] = useState<number | null>(null);
@@ -134,8 +135,12 @@ export default function CreateProposedEventPage() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Partial<Record<keyof FormState, boolean>>>({});
   const [submitting, setSubmitting] = useState(false);
-  const [loadingEvent, setLoadingEvent] = useState(false);
+    const [loadingEvent, setLoadingEvent] = useState(false);
+  type Faculty = { id: number; name: string };
 
+  const [faculties, setFaculties] = useState<Faculty[]>([]);
+  const [loadingFacs, setLoadingFacs] = useState(false);
+  const [selectedFacultyIds, setSelectedFacultyIds] = useState<number[]>([]);
   /* ===================== Toast State ===================== */
   const [toast, setToast] = useState<{ show: boolean; message: string; type: ToastType }>({
     show: false,
@@ -154,6 +159,20 @@ export default function CreateProposedEventPage() {
     setForm((p) => ({ ...p, [key]: value }));
     setErrors((p) => ({ ...p, [key]: undefined }));
   };
+  const toggleFaculty = (fid: number) => {
+  setSelectedFacultyIds((prev) =>
+    prev.includes(fid)
+      ? prev.filter((x) => x !== fid)
+      : [...prev, fid]
+  );
+};
+const toggleAllFacs = () => {
+  if (selectedFacultyIds.length === faculties.length) {
+    setSelectedFacultyIds([]);
+  } else {
+    setSelectedFacultyIds(faculties.map((f) => f.id));
+  }
+};
 
   const validate = useMemo(
     () => (data: FormState): FormErrors => {
@@ -164,6 +183,9 @@ export default function CreateProposedEventPage() {
       if (!data.end_date.trim()) next.end_date = "تاريخ النهاية مطلوب";
       if (!data.cost.trim()) next.cost = "التكلفة مطلوبة";
       if (!data.type.trim()) next.type = "نوع النشاط مطلوب";
+      if (isConvert && !data.dept_id) {
+        next.dept_id = "الإدارة مطلوبة";
+      }
       const costNum = Number(String(data.cost).replaceAll(",", "").trim());
       if (data.cost.trim() && (Number.isNaN(costNum) || costNum < 0)) next.cost = "برجاء ادخال تكلفة صحيحة";
       if (data.s_limit.trim()) {
@@ -173,6 +195,9 @@ export default function CreateProposedEventPage() {
       if (data.st_date && data.end_date && data.st_date > data.end_date) {
         next.end_date = "تاريخ النهاية لازم يكون بعد/يساوي تاريخ البداية";
       }
+      if (isConvert && selectedFacultyIds.length === 0) {
+      next.selected_facs = "اختاري كلية واحدة على الأقل";
+    }
       return next;
     },
     []
@@ -205,50 +230,48 @@ export default function CreateProposedEventPage() {
     });
   };
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const nextErrors = validate(form);
-    setErrors(nextErrors);
-    touchAll();
-    if (Object.keys(nextErrors).length) {
-      showToast("⚠️ برجاء ملء الحقول المطلوبة", "warning");
-      return;
-    }
+      const onSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const nextErrors = validate(form);
+        setErrors(nextErrors);
+        touchAll();
+        // if (Object.keys(nextErrors).length) {
+        //   showToast("⚠️ برجاء ملء الحقول المطلوبة", "warning");
+        //   return;
+        // }
 
-    setSubmitting(true);
+        setSubmitting(true);
 
-    if (!isConvert) {
-      const dept = getDeptFromToken();
-      if (!dept) {
-        setSubmitting(false);
-        showToast("❌ لا يوجد رقم قسم في التوكن", "error");
-        return;
-      }
+      if (!isConvert) {
 
       const payload = {
         title: form.title.trim(),
-        description: form.description.trim(),
-        dept,
-        cost: String(form.cost).trim(),
-        location: form.location.trim(),
-        restrictions: form.restrictions.trim(),
-        reward: form.reward.trim(),
-        imgs: "", // مؤقتاً
-        st_date: form.st_date.trim(),
-        end_date: form.end_date.trim(),
-        s_limit: form.s_limit.trim() ? Number(form.s_limit) : 0,
         type: form.type.trim(),
-        resource: form.resource.trim(),
-        plan: Number(planId),
+        location: form.location.trim(),
+        st_date: form.st_date,
+        end_date: form.end_date,
+        cost: String(form.cost).trim(),
+        s_limit: form.s_limit ? Number(form.s_limit) : 0,
+        plan_id: Number(planId),
       };
 
-      const res = await apiFetch<any>("/api/event/manage-events/", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
+      const res = await apiFetch<any>(
+        "/api/events/plans/create-event/",
+        {
+          method: "POST",
+          body: JSON.stringify(payload),
+        }
+      );
+
       setSubmitting(false);
-      if (!res.ok) { console.error("خطأ إنشاء فعالية مقترحة:", res); showToast(`❌ ${res.message}`, "error"); return; }
+
+      if (!res.ok) {
+        showToast(`❌ ${res.message}`, "error");
+        return;
+      }
+
       showToast("✅ تم إنشاء فعالية مقترحة بنجاح", "success");
+
       router.push(`/uni-level-activities/plans/${planId}`);
       return;
     }
@@ -257,26 +280,30 @@ export default function CreateProposedEventPage() {
       setSubmitting(false);
       showToast("❌ لا يوجد رقم فعالية للتحويل", "error");
       return;
-    }
+        }
 
-    const payload2 = {
-      event_id: eventId,
-      title: form.title.trim(),
-      description: form.description.trim(),
-      type: form.type.trim(),
-      st_date: form.st_date.trim(),
-      end_date: form.end_date.trim(),
-      location: form.location.trim(),
-      s_limit: form.s_limit.trim() ? Number(form.s_limit) : 0,
-      cost: String(form.cost).trim(),
-      restrictions: form.restrictions.trim(),
-      reward: form.reward.trim(),
-    };
+      const payload2 = {
+        event_id: eventId,
+        title: form.title.trim(),
+        description: form.description.trim(),
+        type: form.type,
+        st_date: form.st_date,
+        end_date: form.end_date,
+        location: form.location.trim(),
+        s_limit: form.s_limit ? Number(form.s_limit) : 0,
+        cost: String(form.cost).trim(),
+        restrictions: form.restrictions.trim(),
+        reward: form.reward.trim(),
+        dept_id: Number(form.dept_id),  
+        selected_facs: selectedFacultyIds,      };
 
-    const res2 = await apiFetch<any>(`/api/events/plans/${planId}/add-event/`, {
-      method: "POST",
-      body: JSON.stringify(payload2),
-    });
+      const res2 = await apiFetch<any>(
+      `/api/events/plans/${planId}/add-event/`,
+      {
+        method: "POST",
+        body: JSON.stringify(payload2),
+      }
+    );
     setSubmitting(false);
     if (!res2.ok) { console.error("خطأ إضافة فعالية للخطة:", res2); showToast(`❌ ${res2.message}`, "error"); return; }
     sessionStorage.setItem(`converted_${planId}_${eventId}`, "1");
@@ -288,22 +315,6 @@ export default function CreateProposedEventPage() {
   // ── Helper: resolve dept_name from dept id using localStorage departments ──
   // Priority: 1) match by dept_id from departments array
   //           2) fallback to e.type string if already a name
-  const resolveDeptName = (
-    deptId: number | undefined,
-    fallbackType: string | undefined,
-    depts: { dept_id: number; dept_name: string }[]
-  ): string => {
-    if (deptId) {
-      const match = depts.find((d) => d.dept_id === Number(deptId));
-      if (match) return match.dept_name;
-    }
-    // If no match by ID, try to see if fallbackType is already a valid dept_name
-    if (fallbackType) {
-      const nameMatch = depts.find((d) => d.dept_name === fallbackType);
-      if (nameMatch) return nameMatch.dept_name;
-    }
-    return fallbackType ?? "";
-  };
 
   useEffect(() => {
     if (!isConvert) return;
@@ -334,11 +345,11 @@ export default function CreateProposedEventPage() {
       end_date: fallbackRow?.end_date ?? "",
       cost: String(fallbackRow?.cost ?? ""),
       s_limit: String(fallbackRow?.s_limit ?? ""),
-      // ── Resolve dept name from dept id in sessionStorage payload ──
-      type: resolveDeptName(fallbackRow?.dept, fallbackRow?.type, localDepts),
+      type: fallbackRow?.type ?? "",
       restrictions: fallbackRow?.restrictions ?? "",
       reward: fallbackRow?.reward ?? "",
       resource: fallbackRow?.resource ?? "",
+      dept_id: fallbackRow?.dept_id ?? "",
     };
 
     setSeed(prefilledFromPayload);
@@ -367,11 +378,11 @@ export default function CreateProposedEventPage() {
         end_date: e?.end_date ?? "",
         cost: e?.cost ?? "",
         s_limit: String(e?.s_limit ?? ""),
-        // ── KEY FIX: resolve dept_name from e.dept (the dept id from API) ──
-        type: resolveDeptName(e?.dept, e?.type, asyncDepts),
+        type: e?.type ?? "",
         restrictions: e?.restrictions ?? "",
         reward: e?.reward ?? "",
         resource: e?.resource ?? "",
+        dept_id: e?.dept_id ?? "",
       };
 
       setEventId(Number(e?.event_id ?? idFromPayload));
@@ -386,7 +397,31 @@ export default function CreateProposedEventPage() {
     return () => window.removeEventListener("keydown", onKeyDown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [planId]);
+  useEffect(() => {
+    (async () => {
+      setLoadingFacs(true);
 
+      const res = await apiFetch<any[]>("/api/family/faculties/", {
+        method: "GET",
+      });
+
+      setLoadingFacs(false);
+
+      if (!res.ok) {
+        showToast("❌ فشل تحميل الكليات", "error");
+        return;
+      }
+
+      const list = Array.isArray(res.data) ? res.data : [];
+
+      setFaculties(
+        list.map((f: any) => ({
+          id: f.faculty_id,
+          name: f.name,
+        }))
+      );
+    })();
+  }, []);
   return (
     <>
       {/* ✅ Toast */}
@@ -437,7 +472,7 @@ export default function CreateProposedEventPage() {
             <div className={styles.formHead}>
               <div className={styles.formTitle}>{isConvert ? "بيانات الفعالية النهائية" : "بيانات الفعالية المقترحة"}</div>
               <div className={styles.formMeta}>
-                {isConvert ? "عدّلي القيم ثم اضغطي حفظ." : "هذه البيانات للتخطيط ويمكن تعديلها لاحقاً."}
+                {isConvert ? "برجاء تعديل القيم ثم اضغطي حفظ." : "هذه البيانات للتخطيط ويمكن تعديلها لاحقاً."}
               </div>
             </div>
 
@@ -522,23 +557,47 @@ export default function CreateProposedEventPage() {
                 </div>
 
                 {/* ── نوع النشاط — from localStorage departments ── */}
-                <div className={styles.field}>
-                  <label className={styles.label}>نوع النشاط</label>
-                  <select
-                    className={`${styles.input} ${touched.type && errors.type ? styles.inputError : ""}`}
-                    value={form.type}
-                    onChange={(ev) => setField("type", ev.target.value)}
-                    onBlur={() => onBlur("type")}
-                  >
-                    <option value="" hidden>اختار نوع النشاط</option>
-                    {departments.map((d) => (
-                      <option key={d.dept_id} value={d.dept_name}>
-                        {d.dept_name}
-                      </option>
-                    ))}
-                  </select>
-                  {touched.type && errors.type && <div className={styles.errorText}>{errors.type}</div>}
-                </div>
+         <div className={styles.field}>
+          <label className={styles.label}>نوع النشاط</label>
+
+          <select
+            className={`${styles.input} ${touched.type && errors.type ? styles.inputError : ""}`}
+            value={form.type}
+            onChange={(ev) => setField("type", ev.target.value)}
+            onBlur={() => onBlur("type")}
+          >
+            <option value="" hidden>اختار نوع النشاط</option>
+
+            <option value="داخلي">داخلي</option>
+            <option value="خارجي">خارجي</option>
+
+          </select>
+
+          {touched.type && errors.type && (
+            <div className={styles.errorText}>{errors.type}</div>
+          )}
+        </div>
+
+        {isConvert && (
+          <div className={styles.field}>
+            <label className={styles.label}>الإدارة المنظمة</label>
+
+            <select
+              className={styles.input}
+              value={form.dept_id}
+              onChange={(e) => setField("dept_id", e.target.value)}
+            >
+              <option value="" hidden>اختار الإدارة</option>
+
+              {departments.map((d) => (
+                <option key={d.dept_id} value={d.dept_id}>
+                  {d.dept_name}
+                </option>
+              ))}
+
+            </select>
+          </div>
+        )}
 
                 <div className={styles.field}>
                   <label className={styles.label}>القيود</label>
@@ -572,18 +631,54 @@ export default function CreateProposedEventPage() {
                     onBlur={() => onBlur("resource")}
                   />
                 </div>
-
+             {isConvert &&  (
                 <div className={styles.field} style={{ gridColumn: "1 / -1" }}>
                   <label className={styles.label}>الوصف</label>
                   <textarea
                     className={styles.input}
-                    placeholder="اكتبي وصف مختصر"
+                    placeholder="اكتب وصف مختصر"
                     value={form.description}
                     onChange={(e) => setField("description", e.target.value)}
                     onBlur={() => onBlur("description")}
                     rows={3}
                   />
                 </div>
+                )}
+                {isConvert && (
+                  <div className={styles.facultyBox}>
+                    <div className={styles.facultyHeader}>
+                      <div>
+                        <div className={styles.facultyTitle}>الكليات المستهدفة</div>
+                        <div className={styles.facultyHint}>اختاري كلية أو أكثر</div>
+                      </div>
+
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={
+                            faculties.length > 0 &&
+                            selectedFacultyIds.length === faculties.length
+                          }
+                          onChange={toggleAllFacs}
+                        />
+                        اختيار كل الكليات
+                      </label>
+                    </div>
+
+                    <div className={styles.facultyGrid}>
+                      {faculties.map((f) => (
+                        <label key={f.id} className={styles.facultyItem}>
+                          <input
+                            type="checkbox"
+                            checked={selectedFacultyIds.includes(f.id)}
+                            onChange={() => toggleFaculty(f.id)}
+                          />
+                          <span>{f.name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className={styles.footer}>

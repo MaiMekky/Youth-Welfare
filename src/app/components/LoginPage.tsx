@@ -115,6 +115,7 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
         admin_id:     data.admin_id,
         user_type:    data.user_type,
       }));
+     localStorage.setItem("departments", JSON.stringify(data.departments));
 
       // ── Save departments (fac_manager + uni_manager only) ─────
       if (

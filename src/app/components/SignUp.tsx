@@ -67,7 +67,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
   useEffect(() => {
     const fetchFaculties = async () => {
       try {
-        const response = await fetch("http://localhost:8000/api/solidarity/super_dept/faculties/");
+        const response = await fetch("http://localhost:8000/api/family/faculties/");
         if (response.ok) {
           const data = await response.json();
           setFaculties(data);
@@ -137,12 +137,13 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
       newErrors.email = "صيغة البريد الإلكتروني غير صحيحة";
     }
 
-    // // password
-    // if (!formData.password.trim()) {
-    //   newErrors.password = "كلمة المرور مطلوبة";
-    // } else if (formData.password.length < 6 || formData.password.length > 14) {
-    //   newErrors.password = "كلمة المرور يجب أن تكون بين 6 و 14 حرفًا";
-    // } else if (
+    // password
+    if (!formData.password.trim()) {
+      newErrors.password = "كلمة المرور مطلوبة";
+    } else if (formData.password.length < 6 || formData.password.length > 14) {
+      newErrors.password = "كلمة المرور يجب أن تكون بين 6 و 14 حرفًا";
+     } 
+    //  else if (
     //   !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]+$/.test(formData.password)
     // ) {
     //   newErrors.password =
@@ -150,6 +151,9 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
     // }
 
     // confirm password
+    if (!formData.confirmPassword.trim()) {
+      newErrors.confirmPassword = "تأكيد كلمة المرور مطلوب";
+    }
     if (formData.confirmPassword !== formData.password) {
       newErrors.confirmPassword = "كلمتا المرور غير متطابقتين";
     }
@@ -184,12 +188,15 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
     }
 
     // // phone (optional but validate when present)
-    // if (
-    //   formData.phone &&
-    //   !/^\+20[1][0125][0-9]{8}$/.test(formData.phone)
-    // ) {
-    //   newErrors.phone = "رقم الهاتف غير صحيح، يجب أن يبدأ بـ +20";
-    // }
+    if(!formData.phone.trim()){
+        newErrors.phone = "رقم الهاتف مطلوب";
+    }
+    else if (
+      formData.phone &&
+      !/^\0[1][0125][0-9]{8}$/.test(formData.phone)
+    ) {
+      newErrors.phone = "رقم الهاتف غير صحيح، يجب أن يبدأ بـ 010 أو 011 أو 012 أو 015 ويحتوي على 11 رقمًا";
+    }
 
     // address
     if (!formData.address.trim()) {

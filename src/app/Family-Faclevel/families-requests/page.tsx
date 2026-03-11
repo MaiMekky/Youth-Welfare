@@ -51,16 +51,20 @@ export default function FamilyRequestsPage() {
       </header>
 
       <main className={styles.contentArea}>
-        {loading ? (
-          <p>جاري التحميل...</p>
-        ) : (
-          <div className={styles.requestsGrid}>
-            {requests.map((request) => (
-              <FamRequests key={request.family_id} request={request} />
-            ))}
-          </div>
-        )}
-      </main>
+  {loading ? (
+    <p>جاري التحميل...</p>
+  ) : requests.length === 0 ? (
+    <div className={styles.emptyState}>
+      لا يوجد طلبات للأسر الطلابية
+    </div>
+  ) : (
+    <div className={styles.requestsGrid}>
+      {requests.map((request) => (
+        <FamRequests key={request.family_id} request={request} />
+      ))}
+    </div>
+  )}
+</main>
 
       <Footer />
     </div>

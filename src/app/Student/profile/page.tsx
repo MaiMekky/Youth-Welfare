@@ -21,7 +21,7 @@ export default function ProfilePage() {
         if (!token) return;
         
         const response = await fetch(
-          "http://127.0.0.1:8000/api/solidarity/super_dept/faculties/",
+          "http://127.0.0.1:8000/api/family/faculties/",
           {
             headers: { Authorization: `Bearer ${token}` },
           }

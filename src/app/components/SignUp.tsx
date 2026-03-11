@@ -130,6 +130,23 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
       newErrors.email = "صيغة البريد الإلكتروني غير صحيحة";
     }
 
+    // password
+    if (!formData.password.trim()) {
+      newErrors.password = "كلمة المرور مطلوبة";
+    } else if (formData.password.length < 6 || formData.password.length > 14) {
+      newErrors.password = "كلمة المرور يجب أن تكون بين 6 و 14 حرفًا";
+     } 
+    //  else if (
+    //   !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]+$/.test(formData.password)
+    // ) {
+    //   newErrors.password =
+    //     "كلمة المرور يجب أن تحتوي على حرف كبير وحرف صغير ورقم باللغة الإنجليزية فقط";
+    // }
+
+    // confirm password
+    if (!formData.confirmPassword.trim()) {
+      newErrors.confirmPassword = "تأكيد كلمة المرور مطلوب";
+    }
     if (formData.confirmPassword !== formData.password) {
       newErrors.confirmPassword = "كلمتا المرور غير متطابقتين";
     }
@@ -158,6 +175,18 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
       newErrors.level = "الفرقة مطلوبة";
     }
 
+    // // phone (optional but validate when present)
+    if(!formData.phone.trim()){
+        newErrors.phone = "رقم الهاتف مطلوب";
+    }
+    else if (
+      formData.phone &&
+      !/^\0[1][0125][0-9]{8}$/.test(formData.phone)
+    ) {
+      newErrors.phone = "رقم الهاتف غير صحيح، يجب أن يبدأ بـ 010 أو 011 أو 012 أو 015 ويحتوي على 11 رقمًا";
+    }
+
+    // address
     if (!formData.address.trim()) {
       newErrors.address = "العنوان مطلوب";
     }

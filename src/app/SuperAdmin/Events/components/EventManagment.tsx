@@ -190,7 +190,7 @@ export default function EventsPage() {
         };
         const [eventsRes, facultiesRes] = await Promise.all([
           fetch("http://127.0.0.1:8000/api/event/get-events/", { headers }),
-          fetch("http://127.0.0.1:8000/api/solidarity/super_dept/faculties/", { headers }),
+          fetch("http://127.0.0.1:8000/api/family/faculties/", { headers }),
         ]);
         if (!eventsRes.ok) {
           const body = await eventsRes.json().catch(() => ({}));

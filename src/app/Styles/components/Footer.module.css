@@ -1,126 +1,317 @@
+/* ============================================================
+   Footer — Elegant University Theme
+   Palette: Deep navy #1B1D4B | Gold #C9A227 | Soft white #F0F1FA
+   ============================================================ */
+
+/* ---------- Base ---------- */
 .footer {
-  background-color: #27285D;
-  color: white;
+  background-color: #16183E;
+  color: #E8EAF6;
+  position: relative;
+  overflow: hidden;
+  font-family: "Cairo", sans-serif;
 }
 
+/* Subtle geometric background pattern */
+.footer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 10% 80%, rgba(201, 162, 39, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 90% 20%, rgba(201, 162, 39, 0.05) 0%, transparent 45%);
+  pointer-events: none;
+}
+
+/* ---------- Top accent bar ---------- */
+.footerTopAccent {
+  height: 3px;
+  background: linear-gradient(90deg, transparent 0%, #C9A227 30%, #E8C84A 60%, transparent 100%);
+}
+
+/* ---------- Inner container ---------- */
 .footerInner {
+  position: relative;
   max-width: min(1200px, 100%);
   margin: 0 auto;
-  padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 4vw, 1.5rem);
+  padding: clamp(2rem, 5vw, 3.5rem) clamp(1.25rem, 4vw, 2rem);
 }
 
+/* ---------- Grid layout ---------- */
 .footerGrid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2rem;
+  gap: 2.5rem;
 }
 
-.footerLogoSection {
-  grid-column: span 1;
+/* ---------- Brand column ---------- */
+.footerBrandCol {
+  display: flex;
+  flex-direction: column;
 }
 
 .footerLogoRow {
   display: flex;
   align-items: center;
-  margin-bottom: 1.5rem;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
 }
 
 .footerLogoWrapper {
-  width: 3rem;
-  height: 3rem;
-  min-width: 3rem;
-  min-height: 3rem;
-  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  /* min-width: 70px; */
   overflow: hidden;
-  background-color: white;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  margin-inline-start: 1rem;
   position: relative;
+  flex-shrink: 0;
 }
 
-.footerSocialRow {
+.footerBrandText {
   display: flex;
-  gap: 0.75rem;
-  flex-direction: row-reverse;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.brandName {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0;
+  color: #F0F1FA;
+  letter-spacing: 0.01em;
+}
+
+.brandTagline {
+  font-size: 0.8rem;
+  color: #C9A227;
+  letter-spacing: 0.04em;
+}
+
+.dividerLine {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(201, 162, 39, 0.5), transparent);
+  margin-bottom: 1.25rem;
+}
+
+.brandDesc {
+  font-size: 0.9rem;
+  line-height: 1.9;
+  color: #9FA3C7;
+  margin: 0 0 1.75rem;
+}
+
+/* ---------- Social buttons ---------- */
+.socialRow {
+  display: flex;
+  gap: 0.625rem;
+  flex-direction: row;
 }
 
 .socialBtn {
-  width: 2.5rem;
-  height: 2.5rem;
-  min-width: 2.5rem;
-  min-height: 2.5rem;
+  width: 2.25rem;
+  height: 2.25rem;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #B38E19;
-  transition: background-color 0.3s;
+  background: rgba(201, 162, 39, 0.12);
+  border: 1px solid rgba(201, 162, 39, 0.3);
+  color: #C9A227;
+  transition: background 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
   cursor: pointer;
 }
 
 .socialBtn:hover {
-  background-color: #A07E16;
+  background: #C9A227;
+  border-color: #C9A227;
+  color: #16183E;
+  transform: translateY(-2px);
 }
 
-.footerSection h4 {
-  font-size: 1.125rem;
-  font-weight: bold;
-  margin-bottom: 1.5rem;
+/* ---------- Generic columns ---------- */
+.footerCol {
+  display: flex;
+  flex-direction: column;
 }
 
-.footerLinks {
+/* ---------- Column headings ---------- */
+.colHeading {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #F0F1FA;
+  margin: 0 0 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  letter-spacing: 0.02em;
+}
+
+.colHeadingAccent {
+  display: inline-block;
+  width: 4px;
+  height: 1.1rem;
+  background: linear-gradient(180deg, #C9A227, #E8C84A);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ---------- Links ---------- */
+.linkList {
   list-style: none;
   padding: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
+  gap: 0.6rem;
+}
+
+.linkItem {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  padding-bottom: 0.6rem;
+}
+
+.linkItem:last-child {
+  border-bottom: none;
+}
+
+.footerLink {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  color: #8A90BB;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s ease, gap 0.2s ease;
+}
+
+.footerLink:hover {
+  color: #F0F1FA;
   gap: 0.75rem;
 }
 
-.footerLinks a {
-  color: #B0B0B0;
-  text-decoration: none;
-  transition: color 0.2s;
-  font-size: 0.9375rem;
-  display: block;
+.linkArrow {
+  color: #C9A227;
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
 }
 
-.footerLinks a:hover {
-  color: #ffffff;
+.footerLink:hover .linkArrow {
+  transform: translateX(-3px);
 }
 
+/* ---------- Contact items ---------- */
 .contactList {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .contactItem {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+.contactIconWrap {
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  border-radius: 8px;
+  background: rgba(201, 162, 39, 0.1);
+  border: 1px solid rgba(201, 162, 39, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #C9A227;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.contactItem:hover .contactIconWrap {
+  background: rgba(201, 162, 39, 0.2);
+}
+
+.contactText {
   font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.8);
-  transition: color 0.3s ease;
-  cursor: pointer;
+  color: #8A90BB;
+  transition: color 0.2s;
 }
 
-.contactItem:hover {
-  color: #ffffff;
+.contactItem:hover .contactText {
+  color: #E8EAF6;
 }
 
+.supportLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: #C9A227;
+  text-decoration: none;
+  border: 1px solid rgba(201, 162, 39, 0.35);
+  border-radius: 20px;
+  padding: 0.35rem 1rem;
+  width: fit-content;
+  transition: background 0.2s ease, color 0.2s ease;
+  align-self: flex-start;
+}
+
+.supportLink:hover {
+  background: rgba(201, 162, 39, 0.12);
+  color: #E8C84A;
+}
+
+/* ---------- Footer bottom ---------- */
 .footerBottom {
-  border-top: 1px solid #1f1f2e;
-  margin-top: 2rem;
-  padding-top: 2rem;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row-reverse;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  gap: 1rem;
 }
 
-.footerBottom p {
-  color: #B0B0B0;
+.copyright {
+  font-size: 0.825rem;
+  color: #5A5F8A;
   margin: 0;
-  font-size: 0.875rem;
 }
+
+.scrollTop {
+  width: 2.25rem;
+  height: 2.25rem;
+  min-width: 2.25rem;
+  border-radius: 50%;
+  border: 1px solid rgba(201, 162, 39, 0.3);
+  background: rgba(201, 162, 39, 0.08);
+  color: #C9A227;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  flex-shrink: 0;
+}
+
+.scrollTop:hover {
+  background: rgba(201, 162, 39, 0.2);
+  transform: translateY(-2px);
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
 
 @media (min-width: 640px) {
   .footerGrid {
@@ -130,25 +321,47 @@
 
 @media (min-width: 1024px) {
   .footerGrid {
-    grid-template-columns: 1.5fr 1fr 1fr;
-    gap: 2rem;
+    grid-template-columns: 1.6fr 1fr 1.1fr;
+    gap: 3rem;
   }
 }
 
 @media (max-width: 639px) {
   .footerLogoRow {
     justify-content: center;
+    flex-direction: row-reverse;
   }
 
-  .footerSocialRow {
+  .socialRow {
     justify-content: center;
   }
 
-  .footerSection {
+  .brandDesc {
     text-align: center;
+  }
+
+  .dividerLine {
+    background: linear-gradient(90deg, transparent, rgba(201, 162, 39, 0.5), transparent);
+  }
+
+  .colHeading {
+    justify-content: center;
+  }
+
+  .footerLink {
+    justify-content: center;
   }
 
   .contactItem {
     justify-content: center;
+  }
+
+  .supportLink {
+    align-self: center;
+  }
+
+  .footerBottom {
+    flex-direction: column-reverse;
+    text-align: center;
   }
 }

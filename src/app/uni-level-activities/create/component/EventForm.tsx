@@ -77,6 +77,15 @@ function getDeptFromToken(): number | null {
   } catch { return null; }
 }
 
+function getDepartments(): { dept_id: number; dept_name: string }[] {
+  try {
+    const raw = localStorage.getItem("departments");
+    if (!raw) return [];
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
 async function apiFetch<T>(
   path: string,
   opts: RequestInit = {}
@@ -114,7 +123,10 @@ type FormState = {
   s_limit: number;
   cost: string;
   description: string;
-  type: string;
+
+  type: string;   
+  dept: number | ""; 
+
   restrictions: string;
   reward: string;
   resource: string;
@@ -147,12 +159,10 @@ export default function EventForm({
   // ── Departments from localStorage (exactly like CreatePlanModal) ──
   const [departments, setDepartments] = useState<{ dept_id: number; dept_name: string }[]>([]);
 
-  useEffect(() => {
-    const stored = localStorage.getItem("departments");
-    if (stored) {
-      try { setDepartments(JSON.parse(stored)); } catch {}
-    }
-  }, []);
+ useEffect(() => {
+  const deps = getDepartments();
+  setDepartments(deps);
+}, []);
 
   /** ===== Faculties from API ===== */
   const [faculties, setFaculties] = useState<Faculty[]>([]);
@@ -175,6 +185,7 @@ export default function EventForm({
     reward: "",
     resource: "",
     imgs: "",
+    dept: "",
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -213,6 +224,7 @@ export default function EventForm({
     else if (Number.isNaN(costNum) || costNum < 0) next.cost = "التكلفة لازم تكون رقم أكبر أو يساوي 0";
     if (!form.description.trim()) next.description = "الوصف مطلوب";
     if (!form.type.trim()) next.type = "نوع النشاط مطلوب";
+    if (!form.dept) next.dept = "القسم مطلوب";
     if (selectedFacultyIds.length === 0) next.selected_facs = "اختاري كلية واحدة على الأقل";
     return next;
   };
@@ -221,7 +233,7 @@ export default function EventForm({
   useEffect(() => {
     (async () => {
       setLoadingFacs(true);
-      const res = await apiFetch<ApiFaculty[]>("/api/solidarity/super_dept/faculties/", { method: "GET" });
+      const res = await apiFetch<ApiFaculty[]>("/api/family/faculties/", { method: "GET" });
       setLoadingFacs(false);
       if (!res.ok) { showNotification(res.message || "فشل تحميل الكليات", "error"); return; }
       const list = Array.isArray(res.data) ? res.data : [];
@@ -253,6 +265,7 @@ export default function EventForm({
         reward: e?.reward ?? "",
         resource: e?.resource ?? "",
         imgs: e?.imgs ?? "",
+        dept: e?.dept ?? "",
       }));
       setSelectedFacultyIds(Array.isArray(e?.selected_facs) ? e.selected_facs : []);
     })();
@@ -274,7 +287,8 @@ export default function EventForm({
     const payload: ManageEventPayload = {
       title: form.title.trim(),
       description: form.description.trim(),
-      dept,
+      dept: Number(form.dept),   
+
       cost: String(form.cost).trim() || "0",
       location: form.location.trim(),
       restrictions: form.restrictions.trim(),
@@ -283,7 +297,9 @@ export default function EventForm({
       st_date: form.st_date,
       end_date: form.end_date,
       s_limit: Number(form.s_limit),
-      type: form.type.trim(),
+
+      type: form.type,   
+
       resource: form.resource.trim(),
       selected_facs: selectedFacultyIds,
     };
@@ -353,15 +369,13 @@ export default function EventForm({
                 onChange={(ev) => setField("type", ev.target.value)}
               >
                 <option value="" hidden>اختار نوع النشاط</option>
-                {departments.map((d) => (
-                  <option key={d.dept_id} value={d.dept_name}>
-                    {d.dept_name}
-                  </option>
-                ))}
+                <option value="داخلي">داخلي</option>
+                <option value="خارجي">خارجي</option>
               </select>
               {errors.type && <div className={styles.errorText}>{errors.type}</div>}
             </div>
 
+            
             <div className={styles.field}>
               <label className={styles.label}>تاريخ البداية</label>
               <input
@@ -384,6 +398,26 @@ export default function EventForm({
               {errors.end_date && <div className={styles.errorText}>{errors.end_date}</div>}
             </div>
 
+              <div className={styles.field}>
+              <label className={styles.label}>القسم</label>
+
+              <select
+                className={`${styles.input} ${errors.dept ? styles.inputError : ""}`}
+                value={form.dept}
+                onChange={(e) => setField("dept", Number(e.target.value))}
+              >
+                <option value="" hidden>اختار القسم</option>
+
+                {departments.map((d) => (
+                  <option key={d.dept_id} value={d.dept_id}>
+                    {d.dept_name}
+                  </option>
+                ))}
+              </select>
+
+              {errors.dept && <div className={styles.errorText}>{errors.dept}</div>}
+            </div>
+            
             <div className={styles.field}>
               <label className={styles.label}>المكان</label>
               <input

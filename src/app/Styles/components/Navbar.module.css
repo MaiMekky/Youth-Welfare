@@ -11,7 +11,7 @@
   transition: all 0.35s ease;
 }
 .headerScrolled {
-  background: #2e3266;
+  background: #16183E;
   color: white;
   box-shadow: 0 6px 18px rgba(0,0,0,0.08);
 }
@@ -109,7 +109,7 @@
   height: auto;
 }
 .logoScrolled {
-  background: #2e3266;
+  background: #16183E;
   padding: 6px 10px;
   border-radius: 18px;
 }

@@ -2,26 +2,24 @@
   position: relative;
   background-size: cover;
   background-position: center;
-  min-height: min(100vh, 100dvh);
-  padding-top: 1.25rem;
+  min-height: 100dvh;
   display: flex;
-  align-items: stretch;       
-  justify-content: center;
   flex-direction: column;
   box-sizing: border-box;
 }
+
 .overlay {
   background: rgba(0, 0, 0, 0.55);
+  flex: 1;
+  min-height: 100dvh;
   width: 100%;
-  min-height: min(100vh, 100dvh); 
-  flex: 1;                         
-  padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 4vw, 1.25rem);
+  padding: clamp(5rem, 10vw, 6rem) clamp(1rem, 4vw, 1.25rem) clamp(1.5rem, 4vw, 2.5rem);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
-  box-sizing: border-box;           
+  box-sizing: border-box;
 }
 
 .heroContent {
@@ -35,10 +33,10 @@
 }
 
 .universityName {
-  font-size: clamp(32px, 5vw, 48px);
+  font-size: clamp(28px, 5vw, 48px);
   color: #ffffff;
   margin-bottom: 12px;
-  margin-top: 50px;
+  margin-top: 0;
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: 0.5px;
@@ -54,7 +52,7 @@
 }
 
 .mainTitle {
-  font-size: clamp(22px, 4vw, 42px);
+  font-size: clamp(20px, 4vw, 42px);
   font-weight: bold;
   margin-bottom: 16px;
   color: #ffffff;
@@ -122,17 +120,16 @@
   color: rgb(20, 20, 20);
 }
 
-/* Stats wrapper below hero */
+/* Stats wrapper below hero content */
 .statsWrapper {
   width: 100%;
   margin-top: 5vh;
 }
 
-/* Tablet screens */
+/* Tablet */
 @media (max-width: 1024px) {
   .universityName {
-    font-size: clamp(28px, 5vw, 42px);
-    margin-top: 40px;
+    font-size: clamp(26px, 5vw, 40px);
   }
 
   .buttons {
@@ -145,36 +142,18 @@
   }
 }
 
-/* Mobile screens */
+/* Mobile */
 @media (max-width: 768px) {
-  .hero {
-    padding-top: 4rem;
+  .overlay {
+    justify-content: flex-start;
+    padding-top: clamp(6rem, 18vw, 8rem);
+    padding-bottom: 2rem;
   }
 
-  .universityName {
-    margin-top: 30px;
-    font-size: clamp(26px, 6vw, 36px);
-  }
-
-  .mainTitle {
-    font-size: clamp(20px, 5vw, 32px);
-  }
-
-  .description {
-    margin-bottom: 25px;
-  }
   .heroContent {
-    margin-bottom: 4vh;
+    margin-bottom: 3vh;
   }
-  .buttons {
-    gap: 0.75rem;
-  }
-}
 
-@media (max-width: 768px) {
-  .hero {
-    padding-top: 120px;
-  }
   .buttons {
     flex-direction: column;
     gap: 12px;
@@ -191,36 +170,35 @@
   }
 
   .statsWrapper {
-    margin-top: 30px;
+    margin-top: 2.5rem;
   }
 }
 
-/* Small mobile screens */
+/* Small mobile */
 @media (max-width: 480px) {
-  .hero {
-    padding-top: 3.5rem;
+  .overlay {
+    padding-top: clamp(5.5rem, 20vw, 7rem);
   }
 
   .universityName {
-    margin-top: 20px;
-    font-size: clamp(24px, 7vw, 32px);
+    font-size: clamp(22px, 7vw, 30px);
     margin-bottom: 10px;
   }
 
   .separator {
-    width: 70px;
+    width: 60px;
     height: 2.5px;
-    margin-bottom: 15px;
+    margin-bottom: 14px;
   }
 
   .mainTitle {
-    font-size: clamp(18px, 5.5vw, 28px);
+    font-size: clamp(17px, 5.5vw, 26px);
     margin-bottom: 12px;
   }
 
   .description {
-    font-size: clamp(13px, 3.5vw, 16px);
-    margin-bottom: 20px;
+    font-size: clamp(13px, 3.5vw, 15px);
+    margin-bottom: 18px;
     line-height: 1.6;
   }
 
@@ -237,18 +215,18 @@
   }
 
   .statsWrapper {
-    margin-top: 25px;
+    margin-top: 2rem;
   }
 }
 
-/* Extra small screens */
+/* Extra small */
 @media (max-width: 360px) {
   .universityName {
-    font-size: 22px;
+    font-size: 21px;
   }
 
   .mainTitle {
-    font-size: 17px;
+    font-size: 16px;
   }
 
   .description {
@@ -266,7 +244,7 @@
   }
 }
 
-/* Modal styles */
+/* Modal */
 .fullScreenOverlay {
   position: fixed;
   top: 0;
@@ -280,6 +258,7 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
+  box-sizing: border-box;
 }
 
 .modalCard {
@@ -302,12 +281,11 @@
   }
 }
 
-/* Touch device optimizations */
 @media (hover: none) and (pointer: coarse) {
   .btn:hover {
     transform: none;
   }
-  
+
   .btn:active {
     transform: scale(0.98);
   }

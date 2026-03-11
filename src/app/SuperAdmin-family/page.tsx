@@ -133,7 +133,7 @@ export default function Page() {
       try {
         const token = localStorage.getItem("access");
         const res = await fetch(
-          "http://localhost:8000/api/solidarity/super_dept/faculties/",
+          "http://localhost:8000/api/family/faculties/",
           {
             headers: {
               Authorization: `Bearer ${token}`,

@@ -17,7 +17,7 @@ interface FormData {
   confirmPassword: string;
   studentId: string;
   studentCode: string;
-  faculty: string; // This will now store the faculty ID as string
+  faculty: string;
   department: string;
   level: string;
   phone: string;
@@ -32,7 +32,6 @@ interface Faculty {
 }
 
 export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
-  // convert Arabic digits to english digits for numeric fields
   const toEnglishDigits = (str: string) =>
     str
       .replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x0660))
@@ -55,15 +54,12 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
   });
 
   const [profileImg, setProfileImg] = useState<string>(profilePlaceholder.src);
-  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>(
-    {}
-  );
+  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [loading, setLoading] = useState(false);
   const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [facultiesLoading, setFacultiesLoading] = useState(true);
- const [notification, setNotification] = useState<string | null>(null);
+  const [notification, setNotification] = useState<string | null>(null);
 
-  // Fetch faculties on component mount
   useEffect(() => {
     const fetchFaculties = async () => {
       try {
@@ -83,27 +79,26 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
 
     fetchFaculties();
   }, []);
- const showNotification = (message: string, type: "success" | "warning" | "error") => {
+
+  const showNotification = (message: string, type: "success" | "warning" | "error") => {
     setNotification(`${type}:${message}`);
     setTimeout(() => setNotification(null), 3500);
   };
+
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target as any;
     const numericFields = ["studentId", "studentCode", "phone"];
-     let newValue = value;
-  if (numericFields.includes(name)) {
-    // Remove non-digits except "+" for phone
-    newValue = value.replace(/[^\d+]/g, "");
-  }
+    let newValue = value;
+    if (numericFields.includes(name)) {
+      newValue = value.replace(/[^\d+]/g, "");
+    }
 
-  // Enforce max length
-  if (name === "studentId") newValue = newValue.slice(0, 14); // 14 digits max
-  if (name === "studentCode") newValue = newValue.slice(0, 14); // adjust if needed
-  if (name === "phone") {
-    // Ensure +20 at start
-    if (!newValue.startsWith("+20")) newValue = "+20";
-    newValue = newValue.slice(0, 13); // +20 + 11 digits = 13 chars
-  }
+    if (name === "studentId") newValue = newValue.slice(0, 14);
+    if (name === "studentCode") newValue = newValue.slice(0, 14);
+    if (name === "phone") {
+      if (!newValue.startsWith("+20")) newValue = "+20";
+      newValue = newValue.slice(0, 13);
+    }
     newValue =
       type === "radio"
         ? value
@@ -125,12 +120,10 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
   const validateForm = () => {
     const newErrors: Partial<Record<keyof FormData, string>> = {};
 
-    // fullNameEn - English letters only (as before)
     if (!formData.fullNameEn.trim()) {
       newErrors.fullNameEn = "الاسم باللغة العربية مطلوب";
     }
 
-    // email
     if (!formData.email.trim()) {
       newErrors.email = "البريد الإلكتروني مطلوب";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -158,31 +151,26 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
       newErrors.confirmPassword = "كلمتا المرور غير متطابقتين";
     }
 
-    // studentId
     if (!formData.studentId.trim()) {
       newErrors.studentId = "الرقم القومي / رقم الطالب مطلوب";
     } else if (!/^[0-9]{8,14}$/.test(formData.studentId)) {
       newErrors.studentId = "الرقم القومي/رقم الطالب غير صحيح";
     }
 
-    // studentCode
     if (!formData.studentCode.trim()) {
       newErrors.studentCode = "كود الطالب مطلوب";
     } else if (!/^[0-9]{4,8}$/.test(formData.studentCode)) {
       newErrors.studentCode = "كود الطالب غير صحيح";
     }
 
-    // faculty
     if (!formData.faculty.trim()) {
       newErrors.faculty = "الكلية مطلوبة";
     }
 
-    // department
     if (!formData.department.trim()) {
       newErrors.department = "القسم مطلوب";
     }
 
-    // level
     if (!formData.level.trim()) {
       newErrors.level = "الفرقة مطلوبة";
     }
@@ -203,7 +191,6 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
       newErrors.address = "العنوان مطلوب";
     }
 
-    // grade
     if (!formData.grade.trim()) {
       newErrors.grade = "التقدير مطلوب";
     }
@@ -219,11 +206,10 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
 
     const formDataToSend = new FormData();
 
-    // Append text fields
     formDataToSend.append("name", formData.fullNameEn);
     formDataToSend.append("email", formData.email);
     formDataToSend.append("password", formData.password);
-    formDataToSend.append("faculty", formData.faculty); // This is now the faculty ID
+    formDataToSend.append("faculty", formData.faculty);
     formDataToSend.append("gender", formData.gender);
     formDataToSend.append("nid", formData.studentId);
     formDataToSend.append("uid", formData.studentCode);
@@ -233,7 +219,6 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
     formDataToSend.append("grade", formData.grade);
     formDataToSend.append("major", formData.department);
 
-    // Append file if user uploaded one
     const profileFileInput = document.getElementById("profileUpload") as HTMLInputElement;
     if (profileFileInput?.files?.[0]) {
       formDataToSend.append("profile_image", profileFileInput.files[0]);
@@ -250,7 +235,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
       if (!response.ok) {
         const errorData = await response.json();
         console.error("API Error:", errorData);
-      showNotification( "حدث خطأ أثناء إنشاء الحساب ❌","error");
+        showNotification("حدث خطأ أثناء إنشاء الحساب ❌", "error");
         return;
       }
 
@@ -259,14 +244,14 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
         localStorage.setItem("access", data.access);
       }
 
-     showNotification( "تم إنشاء الحساب بنجاح 🎉" , "success");
+      showNotification("تم إنشاء الحساب بنجاح 🎉", "success");
 
       setTimeout(() => {
         onClose();
       }, 1500);
     } catch (err) {
       console.error(err);
-      showNotification("حدث خطأ، حاول مرة أخرى", "error" );
+      showNotification("حدث خطأ، حاول مرة أخرى", "error");
     } finally {
       setLoading(false);
     }
@@ -283,7 +268,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
       </div>
 
       <h2 className={styles.loginTitle}>إنشاء حساب جديد</h2>
-     {notification && (
+      {notification && (
         <div
           className={`${styles.notification} ${
             notification.startsWith("success")
@@ -316,7 +301,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
           style={{ display: "none" }}
         />
 
-        {/* English full name */}
+        {/* Arabic full name */}
         <input
           name="fullNameEn"
           type="text"
@@ -386,7 +371,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
         />
         {errors.studentCode && <p className={styles.errorMsg}>{errors.studentCode}</p>}
 
-        {/* faculty - Now a dropdown */}
+        {/* faculty */}
         <select
           name="faculty"
           value={formData.faculty}
@@ -417,15 +402,21 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
         />
         {errors.department && <p className={styles.errorMsg}>{errors.department}</p>}
 
-        {/* level */}
-        <input
+        {/* level - dropdown from الأولى to السادسة */}
+        <select
           name="level"
-          type="text"
-          placeholder="الفرقة"
           value={formData.level}
           onChange={handleChange}
-          className={errors.level ? styles.invalid : ""}
-        />
+          className={errors.level ? styles.invalid : styles.input}
+        >
+          <option value="" disabled hidden>اختر الفرقة</option>
+          <option value="1">الأولى</option>
+          <option value="2">الثانية</option>
+          <option value="3">الثالثة</option>
+          <option value="4">الرابعة</option>
+          <option value="5">الخامسة</option>
+          <option value="6">السادسة</option>
+        </select>
         {errors.level && <p className={styles.errorMsg}>{errors.level}</p>}
 
         {/* phone */}

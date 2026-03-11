@@ -10,7 +10,6 @@
   --white:       #ffffff;
   --surface:     #f5f7fc;
   --border:      #dde2f0;
-  --text:        #1a2744;
   --text-muted:  #6b7a99;
   --radius:      14px;
   --radius-sm:   9px;
@@ -31,7 +30,7 @@
 }
 
 /* ════════════════════════════════════════
-   HERO HEADER — full page width
+   HERO HEADER
 ════════════════════════════════════════ */
 .main-header-card {
   width: 100%;
@@ -88,11 +87,11 @@
 }
 
 /* ════════════════════════════════════════
-   CONTENT AREA — full width 2-col grid
+   CONTENT AREA
 ════════════════════════════════════════ */
 .content-area {
   width: 100%;
-  padding: 28px 40px 28px;
+  padding: 28px 40px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
@@ -100,12 +99,10 @@
   flex: 1;
 }
 
-/* First card spans full width */
 .section-card:first-child {
   grid-column: 1 / -1;
 }
 
-/* Last card: if it's alone on a row (odd number of remaining cards), span full width */
 .section-card:last-child:nth-child(even) {
   grid-column: 1 / -1;
 }
@@ -124,7 +121,6 @@
   overflow: hidden;
 }
 
-/* Gold right accent stripe (RTL) */
 .section-card::before {
   content: '';
   position: absolute;
@@ -141,7 +137,6 @@
   border-color: rgba(201,151,42,0.3);
 }
 
-/* Section title bar */
 .section-title-bar {
   display: flex;
   align-items: center;
@@ -341,7 +336,7 @@
 }
 
 /* ════════════════════════════════════════
-   FOOTER — sticky bottom bar (no middle label)
+   FOOTER
 ════════════════════════════════════════ */
 .action-footer {
   position: sticky;
@@ -381,6 +376,7 @@
   color: #fff;
   border: 1.5px solid rgba(255,255,255,0.22);
 }
+
 .button-back:hover {
   background: rgba(255,255,255,0.16);
   border-color: rgba(255,255,255,0.4);
@@ -391,15 +387,47 @@
   background: var(--gold);
   color: var(--navy);
   box-shadow: 0 4px 14px rgba(201,151,42,0.35);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: fadeSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
+
 .button-submit:hover {
   background: var(--gold-bright);
   box-shadow: 0 6px 18px rgba(201,151,42,0.5);
 }
 
-/* Hide the middle label — remove it from JSX too, but hide via CSS as fallback */
-.footer-info {
-  display: none;
+.submit-icon {
+  font-size: 1.1rem;
+  font-weight: 400;
+  line-height: 1;
+  opacity: 0.85;
+}
+
+/* ── Skeleton shimmer ── */
+.button-skeleton {
+  min-width: 160px;
+  height: 42px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.06) 25%,
+    rgba(255,255,255,0.13) 50%,
+    rgba(255,255,255,0.06) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ════════════════════════════════════════
@@ -408,7 +436,7 @@
 @media (max-width: 900px) {
   .content-area {
     grid-template-columns: 1fr;
-    padding: 24px 20px 24px;
+    padding: 24px 20px;
   }
   .section-card:first-child,
   .section-card:last-child:nth-child(even) {

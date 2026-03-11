@@ -24,9 +24,9 @@
 
 * { box-sizing: border-box; }
 
-/* ═══════════════════════════════════════════
-   PAGE WRAPPER — full viewport width, no side padding
-═══════════════════════════════════════════ */
+/* ══════════════════════════════
+   PAGE & WIZARD
+══════════════════════════════ */
 .cf-page {
   min-height: 100vh;
   background: var(--bg);
@@ -38,9 +38,6 @@
   padding: 0;
 }
 
-/* ═══════════════════════════════════════════
-   WIZARD CARD — fills full width
-═══════════════════════════════════════════ */
 .cf-wizard {
   width: 100%;
   max-width: 100%;
@@ -50,13 +47,14 @@
   flex-direction: column;
 }
 
-/* ── Progress Header ── */
+/* ══════════════════════════════
+   PROGRESS HEADER
+══════════════════════════════ */
 .cf-progress-header {
   background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
   padding: 24px 48px 0;
   position: relative;
 }
-
 .cf-progress-header::before {
   content: '';
   position: absolute;
@@ -110,12 +108,11 @@
   border-radius: 20px;
 }
 
-/* Step indicators row */
+/* ── Step indicators ── */
 .cf-steps {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0;
   margin-bottom: 16px;
 }
 
@@ -161,6 +158,8 @@
 }
 .cf-line-done { background: var(--gold); }
 
+/* pending = default, styles already set on .cf-step-circle / .cf-step-label above */
+
 .cf-step-active .cf-step-circle {
   background: var(--gold);
   border-color: var(--gold);
@@ -189,7 +188,9 @@
   border-radius: 0 2px 2px 0;
 }
 
-/* ── Step Body ── */
+/* ══════════════════════════════
+   STEP BODY
+══════════════════════════════ */
 .cf-body {
   padding: 40px 48px;
   flex: 1;
@@ -197,6 +198,8 @@
   width: 100%;
   margin: 0 auto;
 }
+
+.cf-step-content { width: 100%; }
 
 .cf-step-title {
   font-size: 1.2rem;
@@ -217,7 +220,9 @@
   background: var(--gold);
 }
 
-/* ── Fields ── */
+/* ══════════════════════════════
+   FORM FIELDS
+══════════════════════════════ */
 .cf-grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -237,11 +242,9 @@
   font-weight: 700;
   color: var(--text);
 }
-
-.cf-req   { color: var(--error); margin-right: 3px; }
+.cf-req      { color: var(--error); margin-right: 3px; }
 .cf-optional { font-weight: 400; color: var(--text-muted); font-size: 0.78rem; margin-right: 4px; }
 
-/* CLEARER INPUTS — larger, more contrast */
 .cf-input {
   width: 100%;
   padding: 13px 16px;
@@ -267,8 +270,16 @@
   background: #fafbfd;
 }
 .cf-input::placeholder { color: #b0b8cc; font-size: 0.88rem; }
-.cf-input.cf-error { border-color: var(--error); background: var(--error-bg); }
+
+.cf-input.cf-error {
+  border-color: var(--error) !important;
+  border-width: 2px;
+  background: var(--error-bg);
+  box-shadow: 0 0 0 3px rgba(217, 48, 37, 0.1);
+}
+
 .cf-textarea { resize: vertical; min-height: 90px; line-height: 1.7; }
+
 .cf-select {
   cursor: pointer;
   appearance: none;
@@ -277,14 +288,70 @@
   background-position: left 14px center;
   padding-left: 40px;
 }
+
+/* Error message pill */
 .cf-err-msg {
-  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
   color: var(--error);
   font-weight: 600;
-  margin: 2px 0 0;
+  margin: 4px 0 0;
+  padding: 6px 10px;
+  background: var(--error-bg);
+  border-radius: 6px;
+  border-right: 3px solid var(--error);
+  line-height: 1.4;
+  animation: errSlide 0.2s ease forwards;
+}
+.cf-err-icon { font-size: 13px; flex-shrink: 0; }
+
+@keyframes errSlide {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Board Members ── */
+/* ══════════════════════════════
+   ERROR BANNER (step 1)
+══════════════════════════════ */
+.cf-error-banner {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  background: #fff5f5;
+  border: 2px solid rgba(217, 48, 37, 0.3);
+  border-right: 4px solid var(--error);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 24px;
+  animation: errSlide 0.25s ease forwards;
+}
+.cf-error-banner-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.cf-error-banner strong {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--error);
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+.cf-error-list {
+  margin: 0;
+  padding-right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cf-error-list li {
+  font-size: 0.83rem;
+  color: #7a1a1a;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+/* ══════════════════════════════
+   BOARD MEMBERS
+══════════════════════════════ */
 .cf-members-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -301,6 +368,12 @@
 .cf-member-card:hover { border-color: var(--gold); box-shadow: 0 2px 12px rgba(201,151,42,0.1); }
 .cf-member-full { grid-column: span 3; }
 
+.cf-member-card-error {
+  border-color: rgba(217, 48, 37, 0.4) !important;
+  background: #fffafa !important;
+}
+.cf-member-card-error .cf-member-header { color: var(--error); }
+
 .cf-member-header {
   display: flex;
   align-items: center;
@@ -314,6 +387,22 @@
 }
 .cf-member-header svg { color: var(--gold); flex-shrink: 0; }
 
+.cf-member-error-badge {
+  margin-right: auto;
+  background: var(--error);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+  animation: pulseBadge 1.5s ease infinite;
+}
+@keyframes pulseBadge {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
 .cf-member-fields {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -321,7 +410,9 @@
 }
 .cf-member-fields .cf-field { margin-bottom: 0; }
 
-/* ── Committees accordion ── */
+/* ══════════════════════════════
+   COMMITTEES ACCORDION
+══════════════════════════════ */
 .cf-committees-list { display: flex; flex-direction: column; gap: 10px; }
 
 .cf-committee {
@@ -348,6 +439,7 @@
 }
 .cf-committee-summary::-webkit-details-marker { display: none; }
 .cf-committee[open] .cf-committee-summary { background: var(--gold-muted); }
+
 .cf-committee-dot {
   width: 8px; height: 8px;
   border-radius: 50%;
@@ -368,7 +460,9 @@
 }
 .cf-committee-body .cf-field { margin-bottom: 14px; }
 
-/* ── Review Step ── */
+/* ══════════════════════════════
+   REVIEW STEP
+══════════════════════════════ */
 .cf-review { display: flex; flex-direction: column; gap: 20px; }
 
 .cf-review-section {
@@ -417,7 +511,9 @@
 }
 .cf-review-note svg { color: var(--gold); flex-shrink: 0; }
 
-/* ── Footer Navigation ── */
+/* ══════════════════════════════
+   FOOTER NAVIGATION
+══════════════════════════════ */
 .cf-footer {
   display: flex;
   align-items: center;
@@ -428,11 +524,8 @@
   gap: 16px;
 }
 
-.cf-footer-dots {
-  display: flex;
-  gap: 7px;
-  align-items: center;
-}
+.cf-footer-dots { display: flex; gap: 7px; align-items: center; }
+
 .cf-dot {
   width: 8px; height: 8px;
   border-radius: 50%;
@@ -467,20 +560,16 @@
 .cf-btn-ghost:hover:not(:disabled) { background: var(--bg); color: var(--text); border-color: #c0c8d8; }
 .cf-btn-ghost:disabled { opacity: 0.4; cursor: not-allowed; }
 
-.cf-btn-primary {
-  background: var(--navy);
-  color: #fff;
-}
+.cf-btn-primary { background: var(--navy); color: #fff; }
 .cf-btn-primary:hover { background: var(--navy-mid); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(26,39,68,0.25); }
 
-.cf-btn-submit {
-  background: linear-gradient(135deg, var(--gold), var(--gold-bright));
-  color: var(--navy);
-}
+.cf-btn-submit { background: linear-gradient(135deg, var(--gold), var(--gold-bright)); color: var(--navy); }
 .cf-btn-submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(201,151,42,0.4); }
 .cf-btn-submit:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
-/* Toast container */
+/* ══════════════════════════════
+   TOAST CONTAINER
+══════════════════════════════ */
 .toast-container {
   position: fixed;
   top: 20px;
@@ -491,9 +580,9 @@
   gap: 10px;
 }
 
-/* ═══════════════════════════════════════════
+/* ══════════════════════════════
    RESPONSIVE
-═══════════════════════════════════════════ */
+══════════════════════════════ */
 @media (max-width: 900px) {
   .cf-members-grid { grid-template-columns: repeat(2, 1fr); }
   .cf-member-full  { grid-column: span 2; }
@@ -503,25 +592,23 @@
 
 @media (max-width: 680px) {
   .cf-progress-header { padding: 18px 20px 0; }
-  .cf-progress-bar { margin: 0 -20px; }
+  .cf-progress-bar    { margin: 0 -20px; }
   .cf-wizard-title    { font-size: 1rem; }
   .cf-back-page       { padding: 6px 10px; font-size: 0.78rem; }
   .cf-step-label      { display: none; }
   .cf-step-circle     { width: 30px; height: 30px; }
   .cf-step-line       { min-width: 14px; }
-
-  .cf-body   { padding: 20px 16px; }
-  .cf-footer { padding: 16px 16px; }
-
-  .cf-grid-2       { grid-template-columns: 1fr; }
-  .cf-members-grid { grid-template-columns: 1fr; }
-  .cf-member-full  { grid-column: span 1; }
-  .cf-member-fields{ grid-template-columns: 1fr; }
-  .cf-review-grid  { grid-template-columns: 1fr; }
-  .cf-review-full  { grid-column: span 1; }
+  .cf-body            { padding: 20px 16px; }
+  .cf-footer          { padding: 16px; }
+  .cf-grid-2          { grid-template-columns: 1fr; }
+  .cf-members-grid    { grid-template-columns: 1fr; }
+  .cf-member-full     { grid-column: span 1; }
+  .cf-member-fields   { grid-template-columns: 1fr; }
+  .cf-review-grid     { grid-template-columns: 1fr; }
+  .cf-review-full     { grid-column: span 1; }
 }
 
 @media (max-width: 400px) {
-  .cf-step-count  { display: none; }
-  .cf-progress-top{ gap: 8px; }
+  .cf-step-count   { display: none; }
+  .cf-progress-top { gap: 8px; }
 }

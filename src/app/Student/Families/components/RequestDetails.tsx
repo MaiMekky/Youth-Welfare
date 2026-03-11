@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "../styles/RequestDetails.css";
 
 interface RequestDetailsProps {
@@ -8,6 +8,44 @@ interface RequestDetailsProps {
 }
 
 const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => {
+  const [canCreateFam, setCanCreateFam] = useState<boolean>(false);
+  const [loadingProfile, setLoadingProfile] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem("access");
+        if (!token) {
+          setCanCreateFam(false);
+          return;
+        }
+
+        const res = await fetch("http://127.0.0.1:8000/api/auth/profile/", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          setCanCreateFam(false);
+          return;
+        }
+
+        const data = await res.json();
+        setCanCreateFam(data?.can_create_fam === true);
+      } catch (error) {
+        console.error("Failed to fetch profile:", error);
+        setCanCreateFam(false);
+      } finally {
+        setLoadingProfile(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
   const sections = [
     {
       id: 1,
@@ -168,14 +206,30 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => 
         ))}
       </div>
 
-      {/* ── Sticky footer — two buttons only ── */}
+      {/* ── Sticky footer ── */}
       <div className="action-footer">
-        <button className="footer-button button-back" onClick={onBack ?? (() => window.history.back())}>
+        <button
+          className="footer-button button-back"
+          onClick={onBack ?? (() => window.history.back())}
+        >
           العودة
         </button>
-        <button className="footer-button button-submit" onClick={onSubmit}>
-          تقديم طلب الإنشاء
-        </button>
+
+        {/* Loading shimmer placeholder — keeps footer height stable */}
+        {loadingProfile && (
+          <div className="button-skeleton" aria-hidden="true" />
+        )}
+
+        {/* Submit button — only rendered when permitted */}
+        {!loadingProfile && canCreateFam && (
+          <button
+            className="footer-button button-submit"
+            onClick={onSubmit}
+          >
+            <span className="submit-icon">＋</span>
+            تقديم طلب الإنشاء
+          </button>
+        )}
       </div>
 
     </div>

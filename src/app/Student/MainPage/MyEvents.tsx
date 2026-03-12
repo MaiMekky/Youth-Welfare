@@ -50,6 +50,18 @@ interface Event {
 type FilterType = 'all' | 'مقبول' | 'قيد الانتظار' | 'مرفوض';
 
 /* ══════════════════════════════════════════
+   NORMALIZE STATUS
+   يحوّل كل قيم الـ API لقيم موحدة في الـ UI
+══════════════════════════════════════════ */
+const normalizeStatus = (status: string): string => {
+  const s = status?.trim().toLowerCase();
+  if (s === 'pending'  || s === 'منتظر')           return 'قيد الانتظار';
+  if (s === 'accepted' || s === 'active' || s === 'مقبول') return 'مقبول';
+  if (s === 'rejected' || s === 'مرفوض')           return 'مرفوض';
+  return status; // fallback - إرجاع القيمة الأصلية لو مش معروفة
+};
+
+/* ══════════════════════════════════════════
    MAPPER
 ══════════════════════════════════════════ */
 const mapEvent = (e: ApiJoinedEvent): Event => ({
@@ -64,7 +76,7 @@ const mapEvent = (e: ApiJoinedEvent): Event => ({
   dept:                e.dept_name,
   cost:                e.cost,
   reward:              e.reward,
-  participationStatus: e.participation_status,
+  participationStatus: normalizeStatus(e.participation_status), // ← normalize هنا
   rank:                e.participation_rank,
   resultReward:        e.participation_reward,
   image:               e.imgs,
@@ -298,6 +310,7 @@ export default function MyEvents() {
               ) : filtered.map(event => {
                 const st         = getStatus(event.participationStatus);
                 const isAccepted = event.participationStatus === 'مقبول';
+                const isPending  = event.participationStatus === 'قيد الانتظار';
                 const hasRank    = event.rank !== null;
 
                 return (
@@ -355,14 +368,11 @@ export default function MyEvents() {
                             <button className="btn-result" onClick={() => fetchResult(event)}>
                               <ResultIcon /> نتيجتي
                             </button>
-                            {/* <button className="btn-download">
-                              <DownloadIcon /> الشهادة
-                            </button> */}
                           </>
                         ) : (
                           <div className={`status-info-bar ${st.cls}`}>
                             <span className="status-dot" style={{ background: st.dot }} />
-                            {event.participationStatus === 'قيد الانتظار' ? 'طلبك قيد المراجعة' : 'تم رفض طلبك'}
+                            {isPending ? 'طلبك قيد المراجعة' : 'تم رفض طلبك'}
                           </div>
                         )}
                       </div>

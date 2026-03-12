@@ -135,14 +135,14 @@ export default function PlanView() {
           <FileText size={17} />
           خطة الكلية
         </button>
-        <button
+        {/* <button
           className={`${styles.tab} ${activeTab === "reports" ? styles.active : ""}`}
           onClick={() => setActiveTab("reports")}
         >
           <BarChart3 size={17} />
           تقارير الفصول
-        </button>
-      </div>
+        </button>*/}
+      </div> 
 
       {/* ── Plans Tab ── */}
       {activeTab === "plans" && (

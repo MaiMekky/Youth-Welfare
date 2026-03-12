@@ -6,6 +6,7 @@ import { ChevronRight, ChevronLeft, Check, User, Users, LayoutList, FileText, Se
 import { authFetch } from "@/utils/globalFetch";
 const CACHE_KEY = 'createFamFormData';
 
+/* ─── Token decode ─── */
 const decodeToken = (token: string) => {
   try {
     const base64Url = token.split('.')[1];
@@ -17,10 +18,70 @@ const decodeToken = (token: string) => {
   } catch { return null; }
 };
 
-interface CreateFamFormProps {
-  onBack?: () => void;
-  onSubmitSuccess?: () => void;
+/* ─── API error parser ─── */
+const FIELD_LABELS: Record<string, string> = {
+  'أخ_أكبر': 'الأخ الأكبر', 'أخت_كبرى': 'الأخت الكبرى',
+  'أمين_سر': 'السكرتير / أمين السر', 'عضو_منتخب_1': 'العضو المنتخب الأول',
+  'عضو_منتخب_2': 'العضو المنتخب الثاني', 'رائد': 'رائد الأسرة',
+  'نائب_رائد': 'نائب الرائد', 'مسؤول': 'مسئول الأسرة',
+  'أمين_صندوق': 'أمين الصندوق',
+  cultural: 'اللجنة الثقافية', newspaper: 'لجنة صحف الحائط',
+  social: 'اللجنة الاجتماعية والرحلات', arts: 'اللجنة الفنية',
+  scientific: 'اللجنة العلمية', service: 'لجنة الخدمة العامة والمعسكرات',
+  sports: 'اللجنة الرياضية',
+  name: 'اسم الأسرة', description: 'وصف الأسرة',
+  family_type: 'نوع الأسرة', faculty_id: 'الكلية',
+  uid: 'كود الطالب', nid: 'الرقم القومي', ph_no: 'رقم الهاتف',
+  non_field_errors: '',
+};
+
+const CODE_MESSAGES: Record<string, string> = {
+  invalid: 'قيمة غير صالحة',
+  unique: 'هذه القيمة مستخدمة بالفعل',
+  required: 'هذا الحقل مطلوب',
+  null: 'لا يمكن أن يكون هذا الحقل فارغاً',
+  blank: 'لا يمكن أن يكون هذا الحقل فارغاً',
+  does_not_exist: 'لم يتم العثور على هذا الطالب',
+  not_found: 'لم يتم العثور على السجل',
+  permission_denied: 'غير مصرح بهذه العملية',
+  already_exists: 'هذا السجل موجود بالفعل',
+  throttled: 'الرجاء الانتظار قبل المحاولة مرة أخرى',
+};
+
+function parseApiError(err: any): string[] {
+  if (!err || typeof err !== 'object') return ['حدث خطأ غير متوقع'];
+  const messages: string[] = [];
+
+  const extract = (obj: any, parentKey = ''): void => {
+    if (typeof obj === 'string') {
+      // strip raw ErrorDetail strings e.g. "[ErrorDetail(string='...', code='invalid')]"
+      const strMatch = obj.match(/string='([^']+)'/);
+      const codeMatch = obj.match(/code='([^']+)'/);
+      const clean = strMatch ? strMatch[1] : obj;
+      const code = codeMatch?.[1];
+      const display = (code && CODE_MESSAGES[code]) ? CODE_MESSAGES[code] : clean;
+      const label = FIELD_LABELS[parentKey] ?? (parentKey || '');
+      messages.push(label ? `${label}: ${display}` : display);
+      return;
+    }
+    if (Array.isArray(obj)) {
+      obj.forEach(item => extract(item, parentKey));
+      return;
+    }
+    if (typeof obj === 'object') {
+      Object.entries(obj).forEach(([k, v]) => {
+        if (['status', 'status_code'].includes(k)) return;
+        extract(v, k);
+      });
+    }
+  };
+
+  extract(err);
+  return [...new Set(messages)].filter(Boolean);
 }
+
+/* ─── Types ─── */
+interface CreateFamFormProps { onBack?: () => void; onSubmitSuccess?: () => void; }
 interface Person { fullName: string; nationalId?: string; mobile?: string; studentId?: string; }
 interface Committee { name: string; secretary: Person; assistant: Person; plan?: string; executionDate?: string; fundingSources?: string; selectedDeptId?: string; }
 interface Department { dept_id: number; name: string; }
@@ -30,20 +91,20 @@ interface ToastNotification { id: number; message: string; type: 'success' | 'er
 const defaultPerson: Person = { fullName: '', nationalId: '', mobile: '', studentId: '' };
 
 const STEPS = [
-  { id: 0, label: 'بيانات الأسرة',    icon: FileText },
-  { id: 1, label: 'مجلس الإدارة',     icon: User     },
-  { id: 2, label: 'اللجان',           icon: Users    },
-  { id: 3, label: 'مراجعة وإرسال',    icon: Send     },
+  { id: 0, label: 'بيانات الأسرة',   icon: FileText },
+  { id: 1, label: 'مجلس الإدارة',    icon: User     },
+  { id: 2, label: 'اللجان',          icon: Users    },
+  { id: 3, label: 'مراجعة وإرسال',   icon: Send     },
 ];
 
 const defaultCommittees = {
-  cultural:  { name: 'اللجنة الثقافية',               secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
-  wall:      { name: 'لجنة صحف الحائط',               secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
-  social:    { name: 'اللجنة الاجتماعية والرحلات',    secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
-  technical: { name: 'اللجنة الفنية',                 secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
-  scientific:{ name: 'اللجنة العلمية',                secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
-  service:   { name: 'لجنة الخدمة العامة والمعسكرات', secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
-  sports:    { name: 'اللجنة الرياضية',               secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
+  cultural:   { name: 'اللجنة الثقافية',               secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
+  wall:       { name: 'لجنة صحف الحائط',               secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
+  social:     { name: 'اللجنة الاجتماعية والرحلات',    secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
+  technical:  { name: 'اللجنة الفنية',                 secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
+  scientific: { name: 'اللجنة العلمية',                secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
+  service:    { name: 'لجنة الخدمة العامة والمعسكرات', secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
+  sports:     { name: 'اللجنة الرياضية',               secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
 };
 
 const defaultBoard = {
@@ -65,23 +126,23 @@ const committeeKeys: Record<string, string> = {
 const requiresFullInfo = ['leader', 'viceLeader', 'responsible', 'treasurer'];
 
 const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }) => {
-  const [step, setStep]                         = useState(0);
-  const [familyType, setFamilyType]             = useState('');
-  const [familyName, setFamilyName]             = useState('');
-  const [familyGoals, setFamilyGoals]           = useState('');
+  const [step, setStep]                           = useState(0);
+  const [familyType, setFamilyType]               = useState('');
+  const [familyName, setFamilyName]               = useState('');
+  const [familyGoals, setFamilyGoals]             = useState('');
   const [familyDescription, setFamilyDescription] = useState('');
-  const [boardMembers, setBoardMembers]         = useState(defaultBoard);
-  const [committees, setCommittees]             = useState<Record<string, Committee>>(defaultCommittees);
-  const [errors, setErrors]                     = useState<FormErrors>({});
-  const [studentId, setStudentId]               = useState<number|null>(null);
-  const [facultyId, setFacultyId]               = useState<number|null>(null);
-  const [departments, setDepartments]           = useState<Department[]>([]);
-  const [isSubmitting, setIsSubmitting]         = useState(false);
-  const [toasts, setToasts]                     = useState<ToastNotification[]>([]);
+  const [boardMembers, setBoardMembers]           = useState(defaultBoard);
+  const [committees, setCommittees]               = useState<Record<string, Committee>>(defaultCommittees);
+  const [errors, setErrors]                       = useState<FormErrors>({});
+  const [studentId, setStudentId]                 = useState<number|null>(null);
+  const [facultyId, setFacultyId]                 = useState<number|null>(null);
+  const [departments, setDepartments]             = useState<Department[]>([]);
+  const [isSubmitting, setIsSubmitting]           = useState(false);
+  const [toasts, setToasts]                       = useState<ToastNotification[]>([]);
 
   const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
 
-  // ── Load cached data ──────────────────────────────────────
+  /* ── Cache load ── */
   useEffect(() => {
     try {
       const cached = localStorage.getItem(CACHE_KEY);
@@ -97,7 +158,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
     } catch {}
   }, []);
 
-  // ── Save to cache on change ───────────────────────────────
+  /* ── Cache save ── */
   const saveCache = useCallback(() => {
     try {
       localStorage.setItem(CACHE_KEY, JSON.stringify({
@@ -105,16 +166,15 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
       }));
     } catch {}
   }, [familyType, familyName, familyGoals, familyDescription, boardMembers, committees]);
-
   useEffect(() => { saveCache(); }, [saveCache]);
 
-  // ── Toast helpers ─────────────────────────────────────────
+  /* ── Toast ── */
   const showToast = (message: string, type: ToastNotification['type']) => {
     setToasts(prev => [...prev, { id: Date.now(), message, type }]);
   };
   const removeToast = (id: number) => setToasts(prev => prev.filter(t => t.id !== id));
 
-  // ── Fetch deps & profile ──────────────────────────────────
+  /* ── Fetch deps & profile ── */
   useEffect(() => {
     if (!token) return;
     authFetch('http://127.0.0.1:8000/api/family/departments/', { headers: { Authorization: `Bearer ${token}` } })
@@ -136,7 +196,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
       }).catch(() => {});
   }, [token]);
 
-  // ── Per-step validation ───────────────────────────────────
+  /* ── Validation ── */
   const validateStep = (s: number): FormErrors => {
     const e: FormErrors = {};
     if (s === 0) {
@@ -150,11 +210,11 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
       requiresFullInfo.forEach(key => {
         const m = boardMembers[key as keyof typeof boardMembers];
         if (!m.fullName.trim()) e[`board_${key}_fullName`] = 'الاسم مطلوب';
-        else if (m.fullName.trim().length < 3) e[`board_${key}_fullName`] = 'الاسم 3 أحرف على الأقل';
+        else if (m.fullName.trim().length < 3) e[`board_${key}_fullName`] = 'الاسم يجب أن يكون 3 أحرف على الأقل';
         if (!m.nationalId) e[`board_${key}_nationalId`] = 'الرقم القومي مطلوب';
-        else if (m.nationalId.length !== 14 || !/^\d+$/.test(m.nationalId)) e[`board_${key}_nationalId`] = 'الرقم القومي 14 رقماً';
+        else if (m.nationalId.length !== 14 || !/^\d+$/.test(m.nationalId)) e[`board_${key}_nationalId`] = 'الرقم القومي يجب أن يكون 14 رقماً';
         if (!m.mobile) e[`board_${key}_mobile`] = 'رقم الموبايل مطلوب';
-        else if (!/^01[0-2,5]{1}[0-9]{8}$/.test(m.mobile)) e[`board_${key}_mobile`] = 'رقم الموبايل غير صحيح';
+        else if (!/^01[0-2,5]{1}[0-9]{8}$/.test(m.mobile)) e[`board_${key}_mobile`] = 'رقم الموبايل غير صحيح (مثال: 01XXXXXXXXX)';
       });
     }
     return e;
@@ -162,7 +222,16 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
 
   const goNext = () => {
     const e = validateStep(step);
-    if (Object.keys(e).length) { setErrors(e); showToast('يرجى تصحيح الأخطاء قبل المتابعة', 'error'); return; }
+    if (Object.keys(e).length) {
+      setErrors(e);
+      showToast(`يوجد ${Object.keys(e).length} خطأ في البيانات، يرجى المراجعة`, 'error');
+      // scroll to first error
+      setTimeout(() => {
+        const el = document.querySelector('.cf-error, .cf-err-msg');
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+      return;
+    }
     setErrors({});
     setStep(s => Math.min(s + 1, STEPS.length - 1));
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -174,21 +243,19 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // ── Board / Committee change helpers ──────────────────────
+  /* ── Board / Committee helpers ── */
   const handleBoardChange = (key: keyof typeof boardMembers, field: string, value: string) => {
     setBoardMembers(prev => ({ ...prev, [key]: { ...prev[key], [field]: value } }));
     setErrors(prev => { const n = {...prev}; delete n[`board_${key}_${field}`]; return n; });
   };
-
   const handleCommitteeChange = (ck: string, role: 'secretary'|'assistant', field: keyof Person, value: string) => {
     setCommittees(prev => ({ ...prev, [ck]: { ...prev[ck], [role]: { ...prev[ck][role], [field]: value } } }));
   };
-
   const handleCommitteeFieldChange = (ck: string, field: string, value: string) => {
     setCommittees(prev => ({ ...prev, [ck]: { ...prev[ck], [field]: value } }));
   };
 
-  // ── Submit ────────────────────────────────────────────────
+  /* ── Submit ── */
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
@@ -241,53 +308,62 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         showToast('تم إرسال طلبك بنجاح! 🎉 يرجى انتظار مراجعته', 'success');
         setTimeout(() => { if (onSubmitSuccess) onSubmitSuccess(); }, 2000);
       } else {
-        const err = await res.json().catch(() => ({}));
-        const msg = err?.errors?.non_field_errors?.[0] || err?.detail || err?.error || 'فشل إرسال الطلب';
-        showToast(msg, 'error');
+        let errData: any = {};
+        try { errData = await res.json(); } catch {}
+
+        // Parse into human-readable lines
+        const lines = parseApiError(errData);
+
+        if (lines.length === 1) {
+          showToast(lines[0], 'error');
+        } else {
+          // Show first error as toast, rest are displayed in an inline error banner
+          showToast(lines[0], 'error');
+          // also set a special multi-error state if needed — show all as separate toasts spaced
+          lines.slice(1).forEach((line, i) => {
+            setTimeout(() => showToast(line, 'error'), (i + 1) * 600);
+          });
+        }
       }
-    } catch { showToast('فشل الاتصال بالخادم', 'error'); }
-    finally { setIsSubmitting(false); }
+    } catch {
+      showToast('فشل الاتصال بالخادم، تحقق من الاتصال بالإنترنت', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  // ══════════════════════════════════════════════════════════
-  // STEP CONTENT — inlined as JSX (NOT as sub-components) to
-  // prevent React remounting on every render, which caused
-  // inputs to lose focus after typing a single character.
-  // ══════════════════════════════════════════════════════════
+  /* ════════════════ STEP RENDERS ════════════════ */
 
   const renderStep0 = () => (
     <div className="cf-step-content">
       <h2 className="cf-step-title">بيانات الأسرة الأساسية</h2>
       <div className="cf-grid-2">
-        {/* Family Type */}
         <div className="cf-field">
           <label className="cf-label">نوع الأسرة <span className="cf-req">*</span></label>
           <select
             className={`cf-input cf-select${errors.familyType ? ' cf-error' : ''}`}
             value={familyType}
-            onChange={e => setFamilyType(e.target.value)}
+            onChange={e => { setFamilyType(e.target.value); setErrors(p => { const n={...p}; delete n.familyType; return n; }); }}
           >
             <option value="">اختر نوع الأسرة</option>
             <option value="نوعية">نوعية</option>
             <option value="مركزية">مركزية</option>
           </select>
-          {errors.familyType && <p className="cf-err-msg">⚠ {errors.familyType}</p>}
+          {errors.familyType && <p className="cf-err-msg"><span className="cf-err-icon">⚠</span> {errors.familyType}</p>}
         </div>
 
-        {/* Family Name */}
         <div className="cf-field">
           <label className="cf-label">اسم الأسرة <span className="cf-req">*</span></label>
           <input
             className={`cf-input${errors.familyName ? ' cf-error' : ''}`}
             placeholder="أدخل اسم الأسرة"
             value={familyName}
-            onChange={e => setFamilyName(e.target.value)}
+            onChange={e => { setFamilyName(e.target.value); setErrors(p => { const n={...p}; delete n.familyName; return n; }); }}
           />
-          {errors.familyName && <p className="cf-err-msg">⚠ {errors.familyName}</p>}
+          {errors.familyName && <p className="cf-err-msg"><span className="cf-err-icon">⚠</span> {errors.familyName}</p>}
         </div>
       </div>
 
-      {/* Goals */}
       <div className="cf-field">
         <label className="cf-label">أهداف الأسرة</label>
         <textarea
@@ -299,7 +375,6 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         />
       </div>
 
-      {/* Description */}
       <div className="cf-field">
         <label className="cf-label">وصف الأسرة <span className="cf-req">*</span></label>
         <textarea
@@ -307,9 +382,9 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
           placeholder="قدم وصفاً تفصيلياً للأسرة ونشاطاتها"
           rows={4}
           value={familyDescription}
-          onChange={e => setFamilyDescription(e.target.value)}
+          onChange={e => { setFamilyDescription(e.target.value); setErrors(p => { const n={...p}; delete n.familyDescription; return n; }); }}
         />
-        {errors.familyDescription && <p className="cf-err-msg">⚠ {errors.familyDescription}</p>}
+        {errors.familyDescription && <p className="cf-err-msg"><span className="cf-err-icon">⚠</span> {errors.familyDescription}</p>}
       </div>
     </div>
   );
@@ -317,14 +392,37 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
   const renderStep1 = () => (
     <div className="cf-step-content">
       <h2 className="cf-step-title">مجلس إدارة الأسرة</h2>
+
+      {/* Error summary banner if there are board errors */}
+      {Object.keys(errors).some(k => k.startsWith('board_')) && (
+        <div className="cf-error-banner">
+          <span className="cf-error-banner-icon">⚠</span>
+          <div>
+            <strong>يوجد خطأ في البيانات التالية:</strong>
+            <ul className="cf-error-list">
+              {Object.entries(errors)
+                .filter(([k]) => k.startsWith('board_'))
+                .map(([k, v]) => {
+                  const parts = k.split('_');
+                  const roleKey = parts[1];
+                  const role = boardLabels[roleKey] ?? roleKey;
+                  return <li key={k}>{role}: {v}</li>;
+                })}
+            </ul>
+          </div>
+        </div>
+      )}
+
       <div className="cf-members-grid">
         {Object.entries(boardMembers).map(([key, person]) => {
           const full = requiresFullInfo.includes(key);
+          const hasErr = Object.keys(errors).some(k => k.startsWith(`board_${key}_`));
           return (
-            <div key={key} className={`cf-member-card ${full ? 'cf-member-full' : ''}`}>
+            <div key={key} className={`cf-member-card ${full ? 'cf-member-full' : ''} ${hasErr ? 'cf-member-card-error' : ''}`}>
               <div className="cf-member-header">
                 <User size={15} />
                 <span>{boardLabels[key]}</span>
+                {hasErr && <span className="cf-member-error-badge">يوجد خطأ</span>}
               </div>
               {full ? (
                 <div className="cf-member-fields">
@@ -336,7 +434,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
                       value={person.fullName}
                       onChange={e => handleBoardChange(key as keyof typeof boardMembers, 'fullName', e.target.value)}
                     />
-                    {errors[`board_${key}_fullName`] && <p className="cf-err-msg">⚠ {errors[`board_${key}_fullName`]}</p>}
+                    {errors[`board_${key}_fullName`] && <p className="cf-err-msg"><span className="cf-err-icon">⚠</span> {errors[`board_${key}_fullName`]}</p>}
                   </div>
                   <div className="cf-field">
                     <label className="cf-label">الرقم القومي <span className="cf-req">*</span></label>
@@ -347,7 +445,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
                       value={person.nationalId || ''}
                       onChange={e => handleBoardChange(key as keyof typeof boardMembers, 'nationalId', e.target.value.replace(/\D/g, ''))}
                     />
-                    {errors[`board_${key}_nationalId`] && <p className="cf-err-msg">⚠ {errors[`board_${key}_nationalId`]}</p>}
+                    {errors[`board_${key}_nationalId`] && <p className="cf-err-msg"><span className="cf-err-icon">⚠</span> {errors[`board_${key}_nationalId`]}</p>}
                   </div>
                   <div className="cf-field">
                     <label className="cf-label">رقم الموبايل <span className="cf-req">*</span></label>
@@ -358,7 +456,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
                       value={person.mobile || ''}
                       onChange={e => handleBoardChange(key as keyof typeof boardMembers, 'mobile', e.target.value.replace(/\D/g, ''))}
                     />
-                    {errors[`board_${key}_mobile`] && <p className="cf-err-msg">⚠ {errors[`board_${key}_mobile`]}</p>}
+                    {errors[`board_${key}_mobile`] && <p className="cf-err-msg"><span className="cf-err-icon">⚠</span> {errors[`board_${key}_mobile`]}</p>}
                   </div>
                 </div>
               ) : (
@@ -510,7 +608,6 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
       </div>
 
       <div className="cf-wizard">
-
         {/* Progress Header */}
         <div className="cf-progress-header">
           <div className="cf-progress-top">
@@ -521,7 +618,6 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
             <span className="cf-step-count">{step + 1} / {STEPS.length}</span>
           </div>
 
-          {/* Step indicators */}
           <div className="cf-steps">
             {STEPS.map((s, i) => {
               const Icon = s.icon;
@@ -540,7 +636,6 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
             })}
           </div>
 
-          {/* Progress bar */}
           <div className="cf-progress-bar">
             <div className="cf-progress-fill" style={{ width: `${(step / (STEPS.length - 1)) * 100}%` }} />
           </div>
@@ -551,7 +646,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
           {stepRenderers[step]()}
         </div>
 
-        {/* Navigation Footer */}
+        {/* Footer */}
         <div className="cf-footer">
           <button className="cf-btn-ghost" onClick={goPrev} disabled={step === 0}>
             <ChevronRight size={16} /> السابق

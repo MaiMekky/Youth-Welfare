@@ -69,19 +69,62 @@ const IconLogout = () => (
 
 /* ── Component ──────────────────────────────────────────────── */
 const StudentNavbar: React.FC = () => {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled]     = useState(false);
+  const [mobileOpen, setMobileOpen]         = useState(false);
+  const [scrolled, setScrolled]             = useState(false);
+  const [isElderBrother, setIsElderBrother] = useState(false);
   const menuRef  = useRef<HTMLDivElement | null>(null);
   const pathname = usePathname();
 
-  const navItems: NavItem[] = [
-    { key: "home",         label: "الرئيسية",         icon: <IconHome />,         href: "/Student/MainPage"     },
-    { key: "activities",   label: "الأنشطة",           icon: <IconActivities />,   href: "/Student/Activities" },
-    { key: "families",     label: "الأسر الطلابية",    icon: <IconFamily />,       href: "/Student/Families"     },
-    { key: "familyManage", label: "إدارة الأسر",       icon: <IconFamilyManage />, href: "/Student/manage"       },
-    { key: "takafol",      label: "التكافل الاجتماعي", icon: <IconTakafol />,      href: "/Student/takafol"      },
-    { key: "profile",      label: "ملفي الشخصي",       icon: <IconProfile />,      href: "/Student/profile"      },
+  const token = typeof window !== 'undefined' ? localStorage.getItem('access') : null;
+
+  /* ── Check if student has أخ أكبر role ── */
+  useEffect(() => {
+    if (!token) return;
+
+    const checkRole = async () => {
+      try {
+        const res = await fetch('http://127.0.0.1:8000/api/family/student/families/', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) return;
+
+        const response = await res.json();
+
+        // استخرج الـ array من أي شكل رد ممكن
+        let families: { role: string }[] = [];
+        if (Array.isArray(response))               families = response;
+        else if (Array.isArray(response.data))     families = response.data;
+        else if (Array.isArray(response.results))  families = response.results;
+        else if (Array.isArray(response.families)) families = response.families;
+
+        // لو في أي أسرة فيها role = أخ أكبر → اظهر تاب إدارة الأسر
+        const hasElderRole = families.some(f => f.role === 'أخ أكبر');
+        setIsElderBrother(hasElderRole);
+      } catch {
+        // في حالة فشل الريكوست، مش هيظهر التاب
+      }
+    };
+
+    checkRole();
+  }, [token]);
+
+  /* ── Base nav items (بدون إدارة الأسر) ── */
+  const baseNavItems: NavItem[] = [
+    { key: "home",       label: "الرئيسية",         icon: <IconHome />,       href: "/Student/MainPage"   },
+    { key: "activities", label: "الأنشطة",           icon: <IconActivities />, href: "/Student/Activities" },
+    { key: "families",   label: "الأسر الطلابية",    icon: <IconFamily />,     href: "/Student/Families"   },
+    { key: "takafol",    label: "التكافل الاجتماعي", icon: <IconTakafol />,    href: "/Student/takafol"    },
+    { key: "profile",    label: "ملفي الشخصي",       icon: <IconProfile />,    href: "/Student/profile"    },
   ];
+
+  // أضف تاب إدارة الأسر بعد "الأسر الطلابية" بس لو الطالب أخ أكبر
+  const navItems: NavItem[] = isElderBrother
+    ? [
+        ...baseNavItems.slice(0, 3),
+        { key: "familyManage", label: "إدارة الأسر", icon: <IconFamilyManage />, href: "/Student/manage" },
+        ...baseNavItems.slice(3),
+      ]
+    : baseNavItems;
 
   const handleLogout = () => {
     localStorage.clear();
@@ -142,7 +185,6 @@ const StudentNavbar: React.FC = () => {
           </div>
         </Link>
 
-        {/* Vertical separator between brand & nav */}
         <div className="brand-divider" aria-hidden />
 
         {/* ── Desktop Nav ── */}

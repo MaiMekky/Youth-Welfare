@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import styles from "../styles/familyLeaders.module.css";
+import { authFetch } from "@/utils/globalFetch";
 
 interface Leader {
   name: string;
@@ -45,7 +46,7 @@ const FamilyLeaders: React.FC = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("access");
-      const res = await fetch("http://localhost:8000/api/family/faculty/family-founders/", {
+      const res = await authFetch("http://localhost:8000/api/family/faculty/family-founders/", {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("فشل جلب القادة");
@@ -126,7 +127,7 @@ const FamilyLeaders: React.FC = () => {
         setLeaders(updated);
         showNotification("تم تحديث بيانات القائد", "success");
       } else {
-      const res = await fetch(
+      const res = await authFetch(
       `http://localhost:8000/api/family/faculty/family-founder/${formData.nationalId}/add/`,
       {
         method: "POST",
@@ -179,7 +180,7 @@ const FamilyLeaders: React.FC = () => {
     const token = localStorage.getItem("access");
 
     try {
-      await fetch(`http://localhost:8000/api/family/faculty/family-founder/${leader.nationalId}/remove/`, {
+      await authFetch(`http://localhost:8000/api/family/faculty/family-founder/${leader.nationalId}/remove/`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ national_id: leader.nationalId }),

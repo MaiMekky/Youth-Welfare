@@ -11,7 +11,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import "../styles/overview.css";
-
+import { authFetch } from "@/utils/globalFetch";
 interface Member {
   id: number;
   name: string;
@@ -122,7 +122,7 @@ const Overview: React.FC = () => {
         console.log("🔵 Starting to fetch families...");
         console.log("🔑 Token exists:", !!token);
         
-        const res = await fetch(
+        const res = await authFetch(
           `http://127.0.0.1:8000/api/family/student/families/`,
           {
             headers: {
@@ -211,7 +211,7 @@ const Overview: React.FC = () => {
       try {
         setLoading(true);
 
-        const res = await fetch(
+        const res = await authFetch(
           `http://127.0.0.1:8000/api/family/student/${selectedFamilyId}/dashboard/`,
           {
             headers: {

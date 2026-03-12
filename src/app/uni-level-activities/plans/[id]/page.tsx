@@ -14,7 +14,7 @@ import {
   Building2,
   Layers,
 } from "lucide-react";
-
+import { authFetch } from "@/utils/globalFetch";
 const API_URL = "http://localhost:8000/api";
 
 /* ================= Types ================= */
@@ -150,7 +150,7 @@ export default function PlanDetailsPage() {
     if (token) headers.Authorization = `Bearer ${token}`;
 
     try {
-      const res = await fetch(`http://localhost:8000${path}`, { ...opts, headers });
+      const res = await authFetch(`http://localhost:8000${path}`, { ...opts, headers });
       const text = await res.text();
       const json = text
         ? (() => {
@@ -210,7 +210,7 @@ export default function PlanDetailsPage() {
         return;
       }
 
-      const res = await fetch(`${API_URL}/events/plans/${id}/details/`, {
+      const res = await authFetch(`${API_URL}/events/plans/${id}/details/`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

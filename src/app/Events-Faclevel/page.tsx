@@ -10,6 +10,7 @@ import { EventItem, ChipVariant } from "./components/EventCard";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import Footer from "@/app/FacLevel/components/Footer";
+import { authFetch } from "@/utils/globalFetch";
 
 const API_URL = "http://localhost:8000";
 
@@ -50,7 +51,7 @@ async function apiFetch<T>(
   if (token) headers.Authorization = `Bearer ${token}`;
 
   try {
-    const res = await fetch(`${API_URL}${path}`, { ...opts, headers });
+    const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
     const text = await res.text();
     const maybeJson = text
       ? (() => {

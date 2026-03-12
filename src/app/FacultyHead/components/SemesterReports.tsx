@@ -6,6 +6,7 @@ import {
   Layers, BookOpen, Hash,
 } from "lucide-react";
 import styles from "../Styles/SemesterReports.module.css";
+import { authFetch } from "@/utils/globalFetch";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -55,7 +56,7 @@ export default function SemesterReports() {
   const fetchPlans = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${BASE}/api/events/plans/list/`, {
+      const res = await authFetch(`${BASE}/api/events/plans/list/`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       if (!res.ok) throw new Error();
@@ -76,7 +77,7 @@ export default function SemesterReports() {
     if (downloadingId !== null) return;
     setDownloadingId(plan.plan_id);
     try {
-      const res = await fetch(`${BASE}/api/event/export-plan-pdf/${plan.plan_id}/`, {
+      const res = await authFetch(`${BASE}/api/event/export-plan-pdf/${plan.plan_id}/`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       if (!res.ok) throw new Error();

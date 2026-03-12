@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./studentDetails.module.css";
 import axios from "axios";
-
+import { authFetch } from "@/utils/globalFetch";
 export default function StudentDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
@@ -25,7 +25,7 @@ export default function StudentDetailsPage() {
       try {
         const token = localStorage.getItem("access");
 
-        const response = await fetch(
+        const response = await authFetch(
           `http://127.0.0.1:8000/api/solidarity/super_dept/${id}/applications/`,
           {
             headers: { Authorization: `Bearer ${token}` },
@@ -48,7 +48,7 @@ export default function StudentDetailsPage() {
       try {
         const token = localStorage.getItem("access");
 
-        const response = await fetch(
+        const response = await authFetch(
           `http://127.0.0.1:8000/api/solidarity/super_dept/${id}/documents/`,
           {
             headers: { Authorization: `Bearer ${token}` },
@@ -101,7 +101,7 @@ const handleApprove = async () => {
     const token = localStorage.getItem("access");
     if (!token) throw new Error("User not authenticated");
 
-    const response = await fetch(
+    const response = await authFetch(
       `http://127.0.0.1:8000/api/solidarity/super_dept/${id}/change_to_approve/`,
       {
         method: "POST",
@@ -132,7 +132,7 @@ const handleReject = async () => {
     const token = localStorage.getItem("access");
     if (!token) throw new Error("User not authenticated");
 
-    const response = await fetch(
+    const response = await authFetch(
       `http://127.0.0.1:8000/api/solidarity/super_dept/${id}/change_to_reject/`,
       {
         method: "POST",

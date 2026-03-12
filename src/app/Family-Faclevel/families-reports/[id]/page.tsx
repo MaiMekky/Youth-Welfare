@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import styles from './details.module.css';
 import { useParams, useRouter } from "next/navigation";
 import Footer from "@/app/FacLevel/components/Footer";
+import { authFetch } from "@/utils/globalFetch";
 
 interface FamilyData {
   name: string;
@@ -75,7 +76,7 @@ useEffect(() => {
       if (!token) throw new Error("غير مصرح");
 
       // Fetch family details
-      const resFamily = await fetch(
+      const resFamily = await authFetch(
         `http://localhost:8000/api/family/faculty/${id}/details/`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -102,7 +103,7 @@ useEffect(() => {
       setStudentsData(students);
 
       // Fetch activities
-      const resActivities = await fetch(
+      const resActivities = await authFetch(
         `http://localhost:8000/api/family/faculty_events/by-family/?family_id=${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -146,7 +147,7 @@ useEffect(() => {
   try {
     const token = localStorage.getItem("access");
 
-    const res = await fetch(
+    const res = await authFetch(
       `http://127.0.0.1:8000/api/family/faculty_members/families/${id}/members/${memberId}/`,
       {
         method: "DELETE",
@@ -221,7 +222,7 @@ const handleExport = async () => {
       return;
     }
 
-    const res = await fetch(
+    const res = await authFetch(
       `http://localhost:8000/api/family/faculty/${id}/export/`,
       {
         method: "GET",

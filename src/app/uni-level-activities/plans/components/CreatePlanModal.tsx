@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "../styles/PlansPage.module.css";
 import { X, Save } from "lucide-react";
-
+import { authFetch } from "@/utils/globalFetch";
 const API_URL = "http://localhost:8000/api";
 
 type InitialPlan = { id: number; name: string; term: number; dept_id?: number } | null;
@@ -144,7 +144,7 @@ export default function CreatePlanModal({
 
       const method = isEdit ? "PATCH" : "POST";
 
-      const res = await fetch(url, {
+      const res = await authFetch(url, {
         method,
         headers: {
           Authorization: `Bearer ${token}`,

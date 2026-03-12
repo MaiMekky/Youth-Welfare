@@ -6,7 +6,7 @@ import PlansGrid from "./components/PlansGrid";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import CreatePlanModal from "./components/CreatePlanModal";
-
+import { authFetch } from "@/utils/globalFetch";
 type ApiPlan = {
   plan_id: number;
   name: string;
@@ -87,7 +87,7 @@ export default function Page() {
         return;
       }
 
-      const res = await fetch(`${API_URL}/events/plans/list/`, {
+      const res = await authFetch(`${API_URL}/events/plans/list/`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

@@ -4,7 +4,7 @@
 import { useMemo, useState, useEffect } from "react";
 import styles from "../styles/EventManagment.module.css";
 import { useRouter } from "next/navigation";
-
+import { authFetch } from "@/utils/globalFetch";
 /* ══════════════════════════════════════════
    API TYPES
 ══════════════════════════════════════════ */
@@ -189,8 +189,8 @@ export default function EventsPage() {
           "Content-Type": "application/json",
         };
         const [eventsRes, facultiesRes] = await Promise.all([
-          fetch("http://127.0.0.1:8000/api/event/get-events/", { headers }),
-          fetch("http://127.0.0.1:8000/api/family/faculties/", { headers }),
+          authFetch("http://127.0.0.1:8000/api/event/get-events/", { headers }),
+          authFetch("http://127.0.0.1:8000/api/family/faculties/", { headers }),
         ]);
         if (!eventsRes.ok) {
           const body = await eventsRes.json().catch(() => ({}));

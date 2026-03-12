@@ -5,6 +5,8 @@ import Tabs from './Tabs';
 import styles from './deatails.module.css';
 import { useRouter, useParams } from 'next/navigation';
 type TabId = 'members' | 'events';
+import { useSearchParams } from "next/navigation";
+import { authFetch } from "@/utils/globalFetch";
 
 interface Tab {
   id: TabId;
@@ -210,7 +212,8 @@ export default function FamilyDetailsPage() {
     { id: 'members', label: 'الأعضاء' },
     { id: 'events', label: 'الفعاليات' }
   ] as const;
-
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab") || "central";
 
   useEffect(() => {
     const handleResize = () => {
@@ -238,7 +241,7 @@ export default function FamilyDetailsPage() {
         console.log('🔍 Fetching Family Data from:', url);
         console.log('🔑 Token:', token ? 'exists' : 'missing');
 
-        const response = await fetch(url, {
+        const response = await authFetch(url, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -276,7 +279,7 @@ export default function FamilyDetailsPage() {
   const handleApproveMember = async (studentId: number) => {
     try {
       const token = localStorage.getItem('access');
-      const response = await fetch(
+      const response = await authFetch(
         `http://localhost:8000/api/family/super_dept/${familyId}/members/${studentId}/approve/`,
         {
           method: 'PATCH',
@@ -306,7 +309,7 @@ export default function FamilyDetailsPage() {
   const handleRejectMember = async (studentId: number) => {
     try {
       const token = localStorage.getItem('access');
-      const response = await fetch(
+      const response = await authFetch(
         `http://localhost:8000/api/family/super_dept/${familyId}/members/${studentId}/reject/`,
         {
           method: 'PATCH',
@@ -432,8 +435,13 @@ const getFamilyStatusStyle = (status: string) => {
 
       {/* Header Section */}
       <div className={styles.header}>
-        <button className={styles.closeButton} onClick={() => router.back()}>✕</button>
-        
+        <button
+        className={styles.closeButton}
+        onClick={() => router.push(`/uni-level-family?tab=${tab}`)}
+      >
+        ✕
+      </button>
+              
         <div className={styles.headerContent}>
           <div className={styles.titleSection}>
             <h1 className={styles.title}>{familyData.name}</h1>

@@ -14,6 +14,7 @@ import {
   Lightbulb,
   Briefcase,
 } from "lucide-react";
+import { authFetch } from "@/utils/globalFetch";
 
 const API_URL = "http://localhost:8000";
 
@@ -78,7 +79,7 @@ async function apiFetch<T>(
   };
   if (token) headers.Authorization = `Bearer ${token}`;
   try {
-    const res = await fetch(`${API_URL}${path}`, { ...opts, headers });
+    const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
     const text = await res.text();
     const maybeJson = text ? (() => { try { return JSON.parse(text); } catch { return text; } })() : null;
     if (!res.ok) {

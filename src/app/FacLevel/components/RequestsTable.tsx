@@ -5,6 +5,7 @@ import styles from "../Styles/RequestsTable.module.css";
 import { FileText, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { authFetch } from "@/utils/globalFetch";
 
 interface RequestsTableProps {
   onDataFetched: (data: any[]) => void;
@@ -26,7 +27,7 @@ export const refreshToken = async (): Promise<string | null> => {
   if (!refresh) return null;
 
   try {
-    const res = await fetch("http://127.0.0.1:8000/api/auth/refresh/", {
+    const res = await authFetch("http://127.0.0.1:8000/api/auth/refresh/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh }),

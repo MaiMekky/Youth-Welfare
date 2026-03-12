@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Upload } from "lucide-react";
 import "../styles/applyForm.css";
-
+import { authFetch } from "@/utils/globalFetch";
 interface ApplicationDetailsFormProps {
   onSuccess?: () => void;
   onNotify?: (message: string, type: "success" | "warning" | "error") => void;
@@ -91,7 +91,7 @@ export default function ApplicationDetailsForm({ onSuccess, onNotify }: Applicat
 
     try {
       const token = localStorage.getItem("access");
-      const res = await fetch("http://127.0.0.1:8000/api/solidarity/student/apply/", {
+      const res = await authFetch("http://127.0.0.1:8000/api/solidarity/student/apply/", {
         method: "POST", body: payload,
         headers: { Authorization: `Bearer ${token}` },
       });

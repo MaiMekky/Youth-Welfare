@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import styles from "../styles/friends.module.css";
+import { authFetch } from "@/utils/globalFetch";
 
 type NotificationType = "success" | "error";
 
@@ -553,7 +554,7 @@ const handleAssistantChange = (role: AssistantRole, field: string, value: string
     const token = localStorage.getItem("access");
 
     try {
-      const res = await fetch("http://localhost:8000/api/family/faculty/environment-family/", {
+      const res = await authFetch("http://localhost:8000/api/family/faculty/environment-family/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import styles from "../styles/EventsGrid.module.css";
 import EventCard, { EventItem } from "./EventCard";
+import { authFetch } from "@/utils/globalFetch";
 
 const API_URL = "http://localhost:8000";
 
@@ -27,7 +28,7 @@ async function apiFetch<T>(
   if (token) headers.Authorization = `Bearer ${token}`;
 
   try {
-    const res = await fetch(`${API_URL}${path}`, { ...opts, headers });
+    const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
     const text = await res.text();
     const maybeJson = text
       ? (() => {

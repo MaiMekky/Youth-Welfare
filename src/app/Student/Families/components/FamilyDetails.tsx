@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { ArrowRight, Users, Calendar, FileText, UserRound, Clock, MapPin, Briefcase } from "lucide-react";
 import "../styles/FamilyDetails.css";
-
+import { authFetch } from "@/utils/globalFetch";
 interface FamilyDetailsProps {
   family: {
     id: number;
@@ -93,7 +93,7 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
       setLoadingPosts(true);
       setError(null);
       
-      const res = await fetch(
+      const res = await authFetch(
         `http://127.0.0.1:8000/api/family/student/${family.id}/posts/`,
         {
           headers: {
@@ -123,7 +123,7 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
       setLoadingActivities(true);
       setError(null);
       
-      const res = await fetch(
+      const res = await authFetch(
         `http://127.0.0.1:8000/api/family/student/${family.id}/event_requests/`,
         {
           headers: {
@@ -162,7 +162,7 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
     try {
       setRegisteringEventId(eventId);
       
-      const res = await fetch(
+      const res = await authFetch(
         `http://127.0.0.1:8000/api/family/student/${family.id}/events/${eventId}/register/`,
         {
           method: 'POST',

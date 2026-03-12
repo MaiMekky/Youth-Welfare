@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/mainpage.css';
 import Toast from './Toast';
-
+import { authFetch } from "@/utils/globalFetch";
 interface ApiFamily {
   family_id: number;
   name: string;
@@ -95,7 +95,7 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
   const fetchJoinedFamilies = async () => {
     if (!token) throw new Error('غير مصرح');
 
-    const res = await fetch(
+    const res = await authFetch(
       'http://127.0.0.1:8000/api/family/student/families/',
       {
         headers: {
@@ -117,7 +117,7 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
   const fetchAvailableFamilies = async () => {
     if (!token) throw new Error('غير مصرح');
 
-    const res = await fetch(
+    const res = await authFetch(
       'http://127.0.0.1:8000/api/family/student/available/',
       {
         headers: {
@@ -145,7 +145,7 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
     try {
       setJoiningId(familyId);
 
-      const res = await fetch(
+      const res = await authFetch(
         `http://127.0.0.1:8000/api/family/student/${familyId}/join/`,
         {
           method: 'POST',

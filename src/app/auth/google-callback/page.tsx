@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-
+import { authFetch } from "@/utils/globalFetch";
 export default function GoogleCallbackPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -28,7 +28,7 @@ export default function GoogleCallbackPage() {
           return;
         }
 
-        const loginRes = await fetch("http://localhost:8000/api/auth/google/login/", {
+        const loginRes = await authFetch("http://localhost:8000/api/auth/google/login/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ code })

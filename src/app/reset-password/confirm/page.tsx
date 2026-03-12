@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import logo from "@/utils/logo.png";
-
+import { authFetch } from "@/utils/globalFetch";
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 /* ── Inline styles ───────────────────────────────────────────── */
@@ -431,7 +431,7 @@ function ResetPasswordForm() {
     if (!validate()) return;
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/auth/password-reset/confirm/`, {
+      const res = await authFetch(`${API_BASE}/api/auth/password-reset/confirm/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ uid, token, new_password: newPassword, confirm_password: confirmPassword }),

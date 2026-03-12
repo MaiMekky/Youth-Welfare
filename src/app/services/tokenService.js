@@ -29,7 +29,7 @@ export const refreshToken = async () => {
   if (!refresh) return null;
 
   try {
-    const response = await fetch("http://127.0.0.1:8000/api/auth/refresh/", {
+    const response = await authFetch("http://127.0.0.1:8000/api/auth/refresh/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh }),

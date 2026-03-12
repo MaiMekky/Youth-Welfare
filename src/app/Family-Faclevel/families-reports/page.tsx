@@ -5,6 +5,7 @@ import Footer from "@/app/FacLevel/components/Footer";
 
 import ReportCard from "../families-reports/components/reports";
 import styles from "../families-reports/styles/report.module.css";
+import { authFetch } from "@/utils/globalFetch";
 
 interface Family {
   family_id: number;
@@ -28,7 +29,7 @@ export default function FamilyReportsPage() {
     const fetchFamilies = async () => {
       try {
         const token = localStorage.getItem("access");
-        const res = await fetch(
+        const res = await authFetch(
           "http://127.0.0.1:8000/api/family/faculty/families/",
           {
             headers: {

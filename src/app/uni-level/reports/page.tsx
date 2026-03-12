@@ -4,7 +4,7 @@ import Head from "next/head";
 import Layout from "../Layout";
 import "./Reports.css";
 import { useRouter } from "next/navigation";
-
+import { authFetch } from "@/utils/globalFetch";
 interface CollegeReport {
   faculty_id: number;
   faculty_name: string;
@@ -36,7 +36,7 @@ export default function ReportsPage() {
         return;
       }
 
-      const res = await fetch(
+      const res = await authFetch(
         "http://127.0.0.1:8000/api/solidarity/super_dept/faculty_summary/",
         {
           headers: {

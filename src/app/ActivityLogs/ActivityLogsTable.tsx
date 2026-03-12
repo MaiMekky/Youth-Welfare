@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "./ACtivityLogs.module.css";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
+import { authFetch } from "@/utils/globalFetch";
 // شكل الريسبونس الحقيقي اللي بترجع من الداتابيز
 interface Log {
   log_id: number;
@@ -31,7 +31,7 @@ export default function ActivityLogsTable() {
       try {
         const token = localStorage.getItem("access");
 
-        const response = await fetch(
+        const response = await authFetch(
           "http://127.0.0.1:8000/api/solidarity/super_dept/system_logs/",
           {
             method: "GET",

@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import styles from "./requestDetails.module.css";
-
+import { authFetch } from "@/utils/globalFetch";
 export default function RequestDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function RequestDetailsPage() {
       const token = localStorage.getItem("access");
       if (!token) return;
 
-      const res = await fetch(
+      const res = await authFetch(
         "http://127.0.0.1:8000/api/family/faculties/",
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -44,7 +44,7 @@ export default function RequestDetailsPage() {
       setLoading(true);
       const token = localStorage.getItem("access");
 
-      const response = await fetch(
+      const response = await authFetch(
         `http://127.0.0.1:8000/api/solidarity/student/${id}/detail/`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -72,7 +72,7 @@ export default function RequestDetailsPage() {
       const token = localStorage.getItem("access");
       if (!token) return;
 
-      const response = await fetch(
+      const response = await authFetch(
         `http://127.0.0.1:8000/api/files/solidarity/${docId}/download/`,
         {
           headers: {

@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import styles from "../Styles/studentsTable.module.css";
 import FiltersBar from "./FiltersBar";
 import SolidarityHeader from "./SolidarityHeader";
-
+import { authFetch } from "@/utils/globalFetch";
 interface Application {
   solidarity_id: number;
   student_name: string;
@@ -98,7 +98,7 @@ export default function StudentsTable() {
 
 
       const url = `http://127.0.0.1:8000/api/solidarity/super_dept/all_applications/${query ? `?${query}` : ""}`;
-      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await authFetch(url, { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error("فشل في جلب البيانات");
 
       const data = await res.json();

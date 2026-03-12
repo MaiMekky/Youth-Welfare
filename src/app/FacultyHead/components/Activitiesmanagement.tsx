@@ -6,6 +6,7 @@ import {
   ChevronRight, Layers, AlertCircle, RefreshCw,
 } from "lucide-react";
 import styles from "../Styles/Activitiesmanagement.module.css";
+import { authFetch } from "@/utils/globalFetch";
 
 interface EventRow {
   event_id: number;
@@ -105,7 +106,7 @@ function DetailModal({ id, onClose }: { id: number; onClose: () => void }) {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(`${BASE}/api/event/get-events/${id}/`, {
+        const res = await authFetch(`${BASE}/api/event/get-events/${id}/`, {
           headers: { Authorization: `Bearer ${getToken()}` },
         });
         if (!res.ok) throw new Error();
@@ -240,7 +241,7 @@ export default function ActivitiesManagement() {
   const fetchEvents = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${BASE}/api/event/get-events/`, {
+      const res = await authFetch(`${BASE}/api/event/get-events/`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       if (!res.ok) throw new Error();
@@ -262,7 +263,7 @@ export default function ActivitiesManagement() {
       const endpoint = confirm.action === "approve"
         ? `${BASE}/api/event/approve-events/${confirm.id}/approve/`
         : `${BASE}/api/event/approve-events/${confirm.id}/reject/`;
-      const res = await fetch(endpoint, {
+      const res = await authFetch(endpoint, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${getToken()}` },
       });

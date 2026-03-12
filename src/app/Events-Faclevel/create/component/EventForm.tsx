@@ -5,6 +5,7 @@ import styles from "../CreateEvent.module.css";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowRight, Save } from "lucide-react";
 import Footer from "@/app/FacLevel/components/Footer";
+import { authFetch } from "@/utils/globalFetch";
 
 /** ================== API ================== */
 const API_URL = "http://localhost:8000";
@@ -94,7 +95,7 @@ async function apiFetch<T>(
   if (!headers["Content-Type"] && opts.body) headers["Content-Type"] = "application/json";
   if (token) headers.Authorization = `Bearer ${token}`;
   try {
-    const res = await fetch(`${API_URL}${path}`, { ...opts, headers });
+    const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
     const text = await res.text();
     const maybeJson = text ? (() => { try { return JSON.parse(text); } catch { return text; } })() : null;
     if (!res.ok) {

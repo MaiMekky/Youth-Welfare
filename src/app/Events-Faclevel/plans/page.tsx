@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import CreatePlanModal from "./components/CreatePlanModal";
 import Footer from "@/app/FacLevel/components/Footer";
+import { authFetch } from "@/utils/globalFetch";
 
 type ApiPlan = {
   plan_id: number;
@@ -88,7 +89,7 @@ export default function Page() {
         return;
       }
 
-      const res = await fetch(`${API_URL}/events/plans/list/`, {
+      const res = await authFetch(`${API_URL}/events/plans/list/`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

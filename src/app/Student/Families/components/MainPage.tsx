@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/mainpage.css';
 import Toast from './Toast';
-
+import { authFetch } from "@/utils/globalFetch";
 interface ApiFamily {
   family_id: number;
   name: string;
@@ -107,9 +107,16 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
   /* ====== FETCH ====== */
   const fetchJoinedFamilies = async () => {
     if (!token) throw new Error('غير مصرح');
-    const res = await fetch('http://127.0.0.1:8000/api/family/student/families/', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+
+    const res = await authFetch(
+      'http://127.0.0.1:8000/api/family/student/families/',
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
     if (!res.ok) throw new Error('فشل تحميل الأسر الحالية');
     const data = await res.json();
     return extractArray(data)
@@ -119,9 +126,16 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
 
   const fetchAvailableFamilies = async () => {
     if (!token) throw new Error('غير مصرح');
-    const res = await fetch('http://127.0.0.1:8000/api/family/student/available/', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+
+    const res = await authFetch(
+      'http://127.0.0.1:8000/api/family/student/available/',
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
     if (!res.ok) throw new Error('فشل تحميل الأسر المتاحة');
     const data = await res.json();
     return extractArray(data).map(mapToProgramFamily);
@@ -132,10 +146,18 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
     if (!token) { showToast('غير مصرح. الرجاء تسجيل الدخول أولاً', 'error'); return; }
     try {
       setJoiningId(familyId);
-      const res = await fetch(`http://127.0.0.1:8000/api/family/student/${familyId}/join/`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      });
+
+      const res = await authFetch(
+        `http://127.0.0.1:8000/api/family/student/${familyId}/join/`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
       if (!res.ok) {
         let msg = 'فشل الانضمام للأسرة';
         try { const err = await res.json(); msg = err.message || err.detail || msg; } catch {}

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from '@/app/CreateAdmins/access-privileges.module.css';
 import { useSearchParams } from 'next/navigation';
+import { authFetch } from "@/utils/globalFetch";
 
 export default function AddUser() {
   const router = useRouter();
@@ -52,7 +53,7 @@ export default function AddUser() {
         const token = localStorage.getItem('access');
 
         // faculties
-        const facultiesRes = await fetch('http://localhost:8000/api/family/faculties/', {
+        const facultiesRes = await authFetch('http://localhost:8000/api/family/faculties/', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -67,7 +68,7 @@ export default function AddUser() {
         setFaculties(facultiesData);
 
         // ✅ departments
-        const departmentsRes = await fetch('http://localhost:8000/api/family/departments/', {
+        const departmentsRes = await authFetch('http://localhost:8000/api/family/departments/', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -96,7 +97,7 @@ export default function AddUser() {
     if (isEdit && faculties.length > 0) {
       const token = localStorage.getItem('access');
 
-      fetch(`http://localhost:8000/api/auth/admin_management/${admin_id}/`, {
+      authFetch(`http://localhost:8000/api/auth/admin_management/${admin_id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       })
         .then(res => res.json())
@@ -222,7 +223,7 @@ export default function AddUser() {
         can_delete: formData.permissions.includes("D"),
       };
 
-      const res = await fetch(url, {
+      const res = await authFetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',

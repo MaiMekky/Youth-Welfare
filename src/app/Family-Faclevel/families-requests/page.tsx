@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Footer from "@/app/FacLevel/components/Footer";
 import FamRequests from "../families-requests/components/famRequests";
 import styles from "../families-requests/styles/famRequests.module.css";
+import { authFetch } from "@/utils/globalFetch";
 
 export default function FamilyRequestsPage() {
   const [requests, setRequests] = useState<any[]>([]);
@@ -14,7 +15,7 @@ export default function FamilyRequestsPage() {
       try {
         const token = localStorage.getItem("access");
 
-        const res = await fetch(
+        const res = await authFetch(
           "http://127.0.0.1:8000/api/family/faculty/pending_requests/",
           {
             headers: {

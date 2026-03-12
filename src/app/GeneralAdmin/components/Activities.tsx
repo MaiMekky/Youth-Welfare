@@ -7,6 +7,7 @@ import {
   ChevronDown, TrendingUp, Activity,
 } from "lucide-react";
 import "../Styles/Activities.css";
+import { authFetch } from "@/utils/globalFetch";
 
 interface ActivityItem {
   event_id: number;
@@ -98,7 +99,7 @@ const deptCache = new Map<number, string>();
 async function fetchDeptName(deptId: number): Promise<string> {
   if (deptCache.has(deptId)) return deptCache.get(deptId)!;
   try {
-    const res = await fetch(`${BASE}/api/family/departments/${deptId}/`, {
+    const res = await authFetch(`${BASE}/api/family/departments/${deptId}/`, {
       headers: { Authorization: `Bearer ${getToken()}` },
     });
     if (!res.ok) return `قسم ${deptId}`;
@@ -468,7 +469,7 @@ export default function Activities() {
     try {
       setLoading(true);
       setError("");
-      const res = await fetch(`${BASE}/api/event/get-events/`, {
+      const res = await authFetch(`${BASE}/api/event/get-events/`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       if (!res.ok) throw new Error("فشل في جلب البيانات");
@@ -488,7 +489,7 @@ export default function Activities() {
   const openDetail = async (id: number) => {
     setLoadingDetailId(id);
     try {
-      const res = await fetch(`${BASE}/api/event/get-events/${id}/`, {
+      const res = await authFetch(`${BASE}/api/event/get-events/${id}/`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       if (!res.ok) throw new Error();
@@ -508,7 +509,7 @@ export default function Activities() {
       const endpoint = confirm.action === "approve"
         ? `${BASE}/api/event/approve-events/${confirm.id}/approve/`
         : `${BASE}/api/event/approve-events/${confirm.id}/reject/`;
-      const res = await fetch(endpoint, {
+      const res = await authFetch(endpoint, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${getToken()}` },
       });

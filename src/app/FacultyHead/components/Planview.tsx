@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import SemesterReports from "./SemesterReports";
 import styles from "../Styles/PlanView.module.css";
+import { authFetch } from "@/utils/globalFetch";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -59,7 +60,7 @@ export default function PlanView() {
   const fetchPlans = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${BASE}/api/events/plans/list/`, {
+      const res = await authFetch(`${BASE}/api/events/plans/list/`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       if (!res.ok) throw new Error();
@@ -82,7 +83,7 @@ export default function PlanView() {
     if (downloadingId !== null) return;
     setDownloadingId(plan.plan_id);
     try {
-      const res = await fetch(`${BASE}/api/event/export-plan-pdf/${plan.plan_id}/`, {
+      const res = await authFetch(`${BASE}/api/event/export-plan-pdf/${plan.plan_id}/`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       if (!res.ok) throw new Error();

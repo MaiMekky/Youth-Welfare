@@ -22,7 +22,7 @@ import {
   Trash2,
   FileText,
 } from "lucide-react";
-
+import { authFetch } from "@/utils/globalFetch";
 const API_URL = "http://localhost:8000";
 
 function getAccessToken(): string | null {
@@ -49,7 +49,7 @@ async function apiFetch<T>(
   if (token) headers.Authorization = `Bearer ${token}`;
 
   try {
-    const res = await fetch(`${API_URL}${path}`, { ...opts, headers });
+    const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
     const text = await res.text();
     const maybeJson = text
       ? (() => {
@@ -264,7 +264,7 @@ async function downloadPdf(path: string, opts: RequestInit = {}, fallbackName = 
   if (!headers["Content-Type"] && opts.body) headers["Content-Type"] = "application/json";
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(`${API_URL}${path}`, { ...opts, headers });
+  const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
 
   if (!res.ok) {
     const text = await res.text();
@@ -468,7 +468,7 @@ export default function EventDetailsPage() {
       Array.from(files).forEach((f) => fd.append("images", f));
       fd.append("doc_type", docType);
 
-      const res = await fetch(`${API_URL}/api/event/manage-events/${id}/upload-images/`, {
+      const res = await authFetch(`${API_URL}/api/event/manage-events/${id}/upload-images/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

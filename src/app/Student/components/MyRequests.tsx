@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Eye, CheckCircle, X } from "lucide-react";
 import "../styles/myRequests.css";
 import { useRouter } from "next/navigation";
-
+import { authFetch } from "@/utils/globalFetch";
 interface Request {
   id: string;
   requestNumber: string;
@@ -78,7 +78,7 @@ export default function MyRequests({ onStatusesLoaded }: any) {
       const token = localStorage.getItem("access");
       if (!token) return;
 
-      const response = await fetch(
+      const response = await authFetch(
         "http://127.0.0.1:8000/api/solidarity/student/status/",
         {
           headers: { Authorization: `Bearer ${token}` },

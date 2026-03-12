@@ -8,7 +8,7 @@ export const googleAuthService = {
     console.log("🔄 Sending auth code to backend:", code.substring(0, 20) + "...");
     
     try {
-      const response = await fetch(`${API_BASE}/api/auth/google/login/`, {
+      const response = await authFetch(`${API_BASE}/api/auth/google/login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

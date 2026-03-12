@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "../styles/TrackRequest.module.css";
 import { ArrowRight, Building2, Users, Calendar, Clock, CheckCircle, XCircle, AlertCircle, FileSearch } from "lucide-react";
-
+import { authFetch } from "@/utils/globalFetch";
 interface FamilyRequest {
   family_id: number;
   name: string;
@@ -34,7 +34,7 @@ const TrackRequest: React.FC<TrackRequestProps> = ({ onBack }) => {
     const fetchRequests = async () => {
       try {
         const token = localStorage.getItem("access");
-        const res = await fetch(
+        const res = await authFetch(
           "http://localhost:8000/api/family/student/family_creation_request/",
           { headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` } }
         );

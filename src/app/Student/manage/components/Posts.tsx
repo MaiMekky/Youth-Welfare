@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import "../styles/Posts.css";
-
+import { authFetch } from "@/utils/globalFetch";
 // ========= Types ==========
 export type PostType = "Post" | "Reminder";
 
@@ -133,7 +133,7 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
 
     const fetchFamilyId = async () => {
       try {
-        const res = await fetch(
+        const res = await authFetch(
           `http://127.0.0.1:8000/api/family/student/families/`,
           {
             headers: {
@@ -194,7 +194,7 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
 
         const endpoint = `http://127.0.0.1:8000/api/family/student/${selectedFamilyId}/posts/`;
 
-        const response = await fetch(endpoint, {
+        const response = await authFetch(endpoint, {
           headers: { Authorization: `Bearer ${token}` }
         });
 

@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { X, Mail, Lock, ArrowRight } from "lucide-react";
 import styles from "../Styles/components/ForgotPasswordModal.module.css";
-
+import { authFetch } from "@/utils/globalFetch";
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 type Step = "email" | "confirm" | "success";
@@ -76,7 +76,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
     setLoading(true);
     setErrors({});
     try {
-      const res = await fetch(`${API_BASE}/api/auth/password-reset/`, {
+      const res = await authFetch(`${API_BASE}/api/auth/password-reset/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim() }),
@@ -116,7 +116,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
     setLoading(true);
     setErrors({});
     try {
-      const res = await fetch(`${API_BASE}/api/auth/password-reset/confirm/`, {
+      const res = await authFetch(`${API_BASE}/api/auth/password-reset/confirm/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

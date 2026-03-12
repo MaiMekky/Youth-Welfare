@@ -5,6 +5,7 @@ import styles from "../styles/Activities.module.css";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { useRouter } from "next/navigation";
+import { authFetch } from "@/utils/globalFetch";
 
 interface ActivityCardProps {
   eventId: number;
@@ -48,7 +49,7 @@ const router = useRouter();
     const token = localStorage.getItem("access");
 
     try {
-      const res = await fetch(
+      const res = await authFetch(
         `http://127.0.0.1:8000/api/family/faculty_events/${eventId}/${action}/`,
         {
           method: "POST",

@@ -7,16 +7,21 @@ import Tabs from "./components/Tabs";
 import Filters from "./components/Filters";
 import AddButton from "./components/AddButton";
 import FamiliesGrid from "./components/FamiliesGrid";
-
+import { useSearchParams } from "next/navigation";
+import { authFetch } from "@/utils/globalFetch";
 const API_URL = "http://localhost:8000/api";
 
 export default function Page() {
-  const [activeTab, setActiveTab] = useState<string>("central");
+  
   const [selectedFaculty, setSelectedFaculty] = useState<string>("الكل"); // Changed to string for faculty name
   const [selectedFamilyType, setSelectedFamilyType] = useState<string>("all"); // Added family type filter
 
   const [families, setFamilies] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const searchParams = useSearchParams();
+const initialTab = searchParams.get("tab") || "central";
+
+const [activeTab, setActiveTab] = useState(initialTab);
 
   /* ================= Reset filters when switching tabs ================= */
   useEffect(() => {
@@ -32,7 +37,7 @@ export default function Page() {
 
       const token = localStorage.getItem("access");
 
-      const response = await fetch(`${API_URL}/family/super_dept/`, {
+      const response = await authFetch(`${API_URL}/family/super_dept/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -51,7 +56,7 @@ export default function Page() {
   }
 
   useEffect(() => {
-    fetchFamilies();
+    
   }, []);
 
   /* ================= تقسيم حسب النوع ================= */
@@ -124,64 +129,85 @@ export default function Page() {
   }, [families, selectedFaculty, selectedFamilyType]);
 
   /* ================= approve / reject ================= */
+   const [toast, setToast] = useState<{
+      message: string;
+      type: "success" | "error" | "warning";
+    } | null>(null);
 
-  async function handleApproveFamily(familyId: number) {
-    try {
-      const token = localStorage.getItem("access");
+    const showToast = (
+  message: string,
+  type: "success" | "error" | "warning"
+) => {
+  setToast({ message, type });
 
-      const response = await fetch(
-        `${API_URL}/family/super_dept/${familyId}/final_approve/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({}),
-        }
-      );
+  setTimeout(() => {
+    setToast(null);
+  }, 4000);
+};
+async function handleApproveFamily(familyId: number) {
+  try {
+    const token = localStorage.getItem("access");
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Approve error:", errorData);
-        throw new Error("فشل الموافقة");
+    const response = await authFetch(
+      `${API_URL}/family/super_dept/${familyId}/final_approve/`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({}),
       }
+    );
 
-      alert("تم قبول الأسرة بنجاح");
-      fetchFamilies();
-    } catch (err) {
-      alert("فشل قبول الأسرة");
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Approve error:", errorData);
+      throw new Error("فشل الموافقة");
     }
+
+    // ✅ Update UI without refetch
+    setFamilies((prev) =>
+      prev.map((f) =>
+        f.family_id === familyId ? { ...f, status: "مقبول" } : f
+      )
+    );
+
+    showToast("تم قبول الأسرة بنجاح", "success");
+  } catch (err) {
+    showToast("فشل قبول الأسرة", "error");
   }
+}
+async function handleRejectFamily(familyId: number) {
+  try {
+    const token = localStorage.getItem("access");
 
-  async function handleRejectFamily(familyId: number) {
-    try {
-      const token = localStorage.getItem("access");
-
-      const response = await fetch(
-        `${API_URL}/family/super_dept/${familyId}/reject/`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({}),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Reject error:", errorData);
-        throw new Error("فشل الرفض");
+    const response = await authFetch(
+      `${API_URL}/family/super_dept/${familyId}/reject/`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({}),
       }
+    );
 
-      alert("تم رفض الأسرة");
-      fetchFamilies();
-    } catch (err) {
-      alert("فشل رفض الأسرة");
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Reject error:", errorData);
+      throw new Error("فشل الرفض");
     }
+
+    // ✅ Remove rejected family from UI
+    setFamilies((prev) => prev.filter((f) => f.family_id !== familyId));
+
+    showToast("تم رفض الأسرة", "warning");
+  } catch (err) {
+    showToast("فشل رفض الأسرة", "error");
   }
+}
 
   /* ================= Stats ================= */
 
@@ -223,6 +249,19 @@ export default function Page() {
 
   return (
     <div className={styles.container}>
+      {toast && (
+        <div className={`${styles.toast} ${styles[toast.type]}`}>
+          <span>{toast.message}</span>
+
+          <button
+            className={styles.toastClose}
+            onClick={() => setToast(null)}
+          >
+          </button>
+
+          <div className={styles.toastProgress}></div>
+        </div>
+      )}
       <header className={styles.headerCard}>
         <h1 className={styles.pageTitle}>إدارة الأسر الطلابية</h1>
         <p className={styles.pageSubtitle}>
@@ -247,7 +286,7 @@ export default function Page() {
         {activeTab === "central" && (
           <>
             {/* <AddButton /> */}
-            <FamiliesGrid families={centralFamilies} showActions={false} />
+            <FamiliesGrid families={centralFamilies} showActions={false} activeTab={activeTab} />
           </>
         )}
 
@@ -262,6 +301,7 @@ export default function Page() {
             <FamiliesGrid
               families={filteredNonCentralFamilies}
               showActions={true}
+              activeTab={activeTab}
               onApprove={handleApproveFamily}
               onReject={handleRejectFamily}
             />
@@ -281,6 +321,7 @@ export default function Page() {
               <FamiliesGrid
                 families={filteredNonCentralFamilies}
                 showActions={false} 
+                activeTab={activeTab}
               />
             </>
           )}

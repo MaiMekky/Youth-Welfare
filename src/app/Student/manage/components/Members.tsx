@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import "../styles/Members.css";
 import { UserRound } from "lucide-react";
-
+import { authFetch } from "@/utils/globalFetch";
 interface Member {
   student_id: number;
   student_name: string;
@@ -48,7 +48,7 @@ const Members: React.FC = () => {
 
     const fetchFamilyId = async () => {
       try {
-        const res = await fetch(
+        const res = await authFetch(
           `http://127.0.0.1:8000/api/family/student/families/`,
           {
             headers: {
@@ -106,7 +106,7 @@ const Members: React.FC = () => {
       try {
         setLoading(true);
 
-        const response = await fetch(
+        const response = await authFetch(
           `http://127.0.0.1:8000/api/family/student/${selectedFamilyId}/members/`,
           {
             headers: {

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-
+import { authFetch } from "@/utils/globalFetch";
 interface GoogleCallbackHandlerProps {
   onLoginSuccess: (data: any) => void;
   onLoginError: (message: string) => void;
@@ -48,7 +48,7 @@ export default function GoogleCallbackHandler({
     try {
       console.log("🔄 Exchanging code for tokens...");
 
-      const res = await fetch(
+      const res = await authFetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/accounts/auth/google/login/`,
         {
           method: "POST",

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Tabs from './Tabs';
 import styles from './deatails.module.css';
 import { useRouter, useParams } from 'next/navigation';
-
+import { authFetch } from "@/utils/globalFetch";
 export default function FamilyDetailsPage() {
   const router = useRouter();
   const { id } = useParams();
@@ -92,7 +92,7 @@ export default function FamilyDetailsPage() {
       try {
         const token = localStorage.getItem('access');
 
-        const res = await fetch(
+        const res = await authFetch(
           `http://localhost:8000/api/family/super_dept/${id}`,
           {
             headers: {

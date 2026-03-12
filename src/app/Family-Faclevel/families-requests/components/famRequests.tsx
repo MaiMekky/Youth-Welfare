@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import styles from "../styles/famRequests.module.css";
+import { authFetch } from "@/utils/globalFetch";
 
 type Status = "منتظر" | "موافقة مبدئية" | "مرفوض";
 
@@ -43,7 +44,7 @@ const FamRequests = ({ request }: { request: any }) => {
       setLoading(true);
       const token = localStorage.getItem("access");
 
-      const res = await fetch(
+      const res = await authFetch(
         `http://127.0.0.1:8000/api/family/faculty/${request.family_id}/pre-approve/`,
         {
           method: "POST",
@@ -76,7 +77,7 @@ const FamRequests = ({ request }: { request: any }) => {
       setLoading(true);
       const token = localStorage.getItem("access");
 
-      const res = await fetch(
+      const res = await authFetch(
         `http://127.0.0.1:8000/api/family/faculty/${request.family_id}/reject/`,
         {
           method: "POST",

@@ -7,7 +7,7 @@ import StatsGrid from "./components/StatsGrid";
 import Tabs from "./components/Tabs";
 import Filters from "./components/Filters";
 import FamiliesGrid from "./components/FamiliesGrid";
-
+import { authFetch } from "@/utils/globalFetch";
 export default function Page() {
   const [activeTab, setActiveTab] = useState<string>("central");
   const [selectedFaculty, setSelectedFaculty] = useState<number>(-1);
@@ -132,7 +132,7 @@ export default function Page() {
     const fetchFaculties = async () => {
       try {
         const token = localStorage.getItem("access");
-        const res = await fetch(
+        const res = await authFetch(
           "http://localhost:8000/api/family/faculties/",
           {
             headers: {
@@ -171,7 +171,7 @@ export default function Page() {
           params.append("faculty_id", selectedFaculty.toString());
         }
 
-        const res = await fetch(
+        const res = await authFetch(
           `http://localhost:8000/api/family/super_dept/?${params.toString()}`,
           {
             headers: {

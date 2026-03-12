@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import "../styles/Activities.css";
 import { Calendar, Users, Briefcase, MapPin } from "lucide-react";
-
+import { authFetch } from "@/utils/globalFetch";
 interface Activity {
   id: number;
   title: string;
@@ -154,7 +154,7 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
 
     const fetchFamilyId = async () => {
       try {
-        const res = await fetch(
+        const res = await authFetch(
           `http://127.0.0.1:8000/api/family/student/families/`,
           {
             headers: {
@@ -210,7 +210,7 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
       try {
         if (!token) return;
 
-        const response = await fetch('http://127.0.0.1:8000/api/family/departments/', {
+        const response = await authFetch('http://127.0.0.1:8000/api/family/departments/', {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -253,7 +253,7 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
 
         const endpoint = `http://127.0.0.1:8000/api/family/student/${selectedFamilyId}/event_requests/`;
 
-        const response = await fetch(endpoint, {
+        const response = await authFetch(endpoint, {
           method: 'GET',
           headers: { 
             'Authorization': `Bearer ${token}`,

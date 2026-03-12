@@ -4,7 +4,7 @@ import Image from "next/image";
 import logo from "@/app/assets/logo.png";
 import profilePlaceholder from "@/app/assets/profile.png";
 import styles from "../Styles/components/LoginPage.module.css"; // reuse popup styles
-
+import { authFetch } from "@/utils/globalFetch";
 interface SignupProps {
   onClose: () => void;
   onSwitchToLogin: () => void;
@@ -63,7 +63,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
   useEffect(() => {
     const fetchFaculties = async () => {
       try {
-        const response = await fetch("http://localhost:8000/api/family/faculties/");
+        const response = await authFetch("http://localhost:8000/api/family/faculties/");
         if (response.ok) {
           const data = await response.json();
           setFaculties(data);
@@ -227,7 +227,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
     setLoading(true);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/auth/signUp/", {
+      const response = await authFetch("http://127.0.0.1:8000/api/auth/signUp/", {
         method: "POST",
         body: formDataToSend,
       });

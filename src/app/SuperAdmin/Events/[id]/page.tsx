@@ -17,7 +17,7 @@ import {
   Eye,
   Image as ImageIcon,
 } from "lucide-react";
-
+import { authFetch } from "@/utils/globalFetch";
 const API_URL = "http://127.0.0.1:8000";
 
 function getAccessToken(): string | null {
@@ -39,7 +39,7 @@ async function apiFetch<T>(
   if (token) headers.Authorization = `Bearer ${token}`;
 
   try {
-    const res = await fetch(`${API_URL}${path}`, { ...opts, headers });
+    const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
     const text = await res.text();
     const maybeJson = text
       ? (() => { try { return JSON.parse(text); } catch { return text; } })()

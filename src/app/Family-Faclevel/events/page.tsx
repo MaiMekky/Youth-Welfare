@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Footer from "@/app/FacLevel/components/Footer";
 import ActivityCard from "./components/ActivityCard";
 import styles from "./styles/Activities.module.css";
+import { authFetch } from "@/utils/globalFetch";
 
 interface Event {
   event_id: number;
@@ -25,7 +26,7 @@ export default function ActivitiesPage() {
       try {
         const token = localStorage.getItem("access"); 
 
-            const res = await fetch(
+            const res = await authFetch(
         "http://127.0.0.1:8000/api/family/faculty_events/pending/",
         {
           headers: {

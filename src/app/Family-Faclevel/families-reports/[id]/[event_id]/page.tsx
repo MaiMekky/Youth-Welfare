@@ -5,6 +5,7 @@ import styles from "./detail.module.css";
 import { useParams, useRouter } from "next/navigation";
 
 import Footer from "@/app/FacLevel/components/Footer";
+import { authFetch } from "@/utils/globalFetch";
 
 /* ================= Interfaces ================= */
 
@@ -78,7 +79,7 @@ const [eventData, setEventData] = useState<EventData>({
       try {
         const token = localStorage.getItem("access");
 
-        const res = await fetch(
+        const res = await authFetch(
           `http://127.0.0.1:8000/api/family/faculty_events/${event_id}/`,
           {
             headers: {
@@ -136,7 +137,7 @@ setStudentsData(
     try {
       const token = localStorage.getItem("access");
 
-      const res = await fetch(
+      const res = await authFetch(
         `http://127.0.0.1:8000/api/family/faculty_events/${event_id}/members/${memberId}/`,
         {
           method: "DELETE",
@@ -165,7 +166,7 @@ setStudentsData(
   try {
     const token = localStorage.getItem("access");
 
-    const res = await fetch(
+    const res = await authFetch(
       `http://127.0.0.1:8000/api/family/faculty_events/${event_id}/participants/${studentId}/${action}/`,
       {
         method: "POST",
@@ -210,7 +211,7 @@ const handleApproveAll = async () => {
     // Loop through students and approve each
     for (const student of studentsData) {
       if (student.status !== "approved") {
-        const res = await fetch(
+        const res = await authFetch(
           `http://127.0.0.1:8000/api/family/faculty_events/${event_id}/approve-all-participants/`,
           {
             method: "POST",

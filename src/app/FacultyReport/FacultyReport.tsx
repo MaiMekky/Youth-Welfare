@@ -6,6 +6,7 @@ import axios from "axios";
 import Footer from "../FacLevel/components/Footer";
 import { useRouter } from "next/navigation";
 
+
 interface StudentType {
   name: string;
   id: number | string;

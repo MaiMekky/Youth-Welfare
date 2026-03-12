@@ -6,15 +6,22 @@ import { useRouter } from "next/navigation";
 interface FamilyCardProps {
   family: any;
   showActions: boolean;
+  activeTab: string;
   onApprove?: (familyId: number) => void;
   onReject?: (familyId: number) => void;
+  onToast?: (
+    message: string,
+    type: "success" | "error" | "warning"
+  ) => void;
 }
 
 export default function FamilyCard({
   family,
   showActions,
+  activeTab,
   onApprove,
   onReject,
+  onToast
 }: FamilyCardProps) {
   const router = useRouter();
 
@@ -30,22 +37,25 @@ const isEcoFamily = family.type === "اصدقاء البيئة";
     }
   };
 
-  const handleApprove = () => {
-    onApprove?.(family.family_id);
-  };
+ const handleApprove = () => {
+  onApprove?.(family.family_id);
+  onToast?.("تمت الموافقة على الأسرة بنجاح", "success");
+};
 
-  const handleReject = () => {
-    onReject?.(family.family_id);
-  };
+const handleReject = () => {
+  onReject?.(family.family_id);
+  onToast?.("تم رفض الأسرة", "warning");
+};
 
   const handleViewDetails = () => {
-    router.push(`/uni-level-family/details/${family.family_id}`);
+    router.push(`/uni-level-family/details/${family.family_id}?tab=${activeTab}`);
   };
 
   // Check if approve/reject buttons should be shown
-  const shouldShowApproveReject = showActions && family.status !== "مقبول";
+  const shouldShowApproveReject = showActions && family.status === "موافقة مبدئية" && !isEcoFamily;
 
   return (
+    
     <div className={styles.familyCard}>
       {/* Header */}
       <div className={styles.cardHeader}>
@@ -89,7 +99,7 @@ const isEcoFamily = family.type === "اصدقاء البيئة";
 
           {/* Actions */}
       <div className={styles.cardActions}>
-        {showActions && !isEcoFamily && (
+        {showActions && !isEcoFamily && shouldShowApproveReject && (
           <div className={styles.actionRow}>
             <button
               className={`${styles.btn} ${styles.btnApprove}`}

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import styles from './access-privileges.module.css';
 import { useRouter } from 'next/navigation';
+import { authFetch } from "@/utils/globalFetch";
 
 interface User {
   id: string;
@@ -38,7 +39,7 @@ export default function AccessPrivileges() {
         const token = localStorage.getItem('access');
         if (!token) throw new Error('Token not found');
 
-        const res = await fetch('http://localhost:8000/api/auth/admin_management/', {
+        const res = await authFetch('http://localhost:8000/api/auth/admin_management/', {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -92,7 +93,7 @@ export default function AccessPrivileges() {
 
       const updatedStatus = !user.status;
 
-      const res = await fetch(`http://localhost:8000/api/auth/admin_management/${id}/`, {
+      const res = await authFetch(`http://localhost:8000/api/auth/admin_management/${id}/`, {
         method: 'PATCH',
         headers: {
           Authorization: `Bearer ${token}`,

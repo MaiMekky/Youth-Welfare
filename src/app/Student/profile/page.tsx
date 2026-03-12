@@ -6,7 +6,7 @@ import ProfileSummaryCard from "./components/ProfileSummaryCard";
 import ProfileDetailsSection from "./components/ProfileDetailsSection";
 import type { StudentProfile, StudentProfileAPIResponse, UpdateProfileRequest } from "./types";
 import "../styles/profile.css";
-
+import { authFetch } from "@/utils/globalFetch";
 export default function ProfilePage() {
   const [profileData, setProfileData] = useState<StudentProfile | null>(null);
   const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[]>([]);
@@ -20,7 +20,7 @@ export default function ProfilePage() {
         const token = localStorage.getItem("access");
         if (!token) return;
         
-        const response = await fetch(
+        const response = await authFetch(
           "http://127.0.0.1:8000/api/family/faculties/",
           {
             headers: { Authorization: `Bearer ${token}` },
@@ -51,7 +51,7 @@ export default function ProfilePage() {
           return;
         }
 
-        const response = await fetch(
+        const response = await authFetch(
           "http://127.0.0.1:8000/api/auth/profile/",
           {
             headers: { Authorization: `Bearer ${token}` },
@@ -120,7 +120,7 @@ export default function ProfilePage() {
       const token = localStorage.getItem("access");
       if (!token) return null;
 
-      const response = await fetch(
+      const response = await authFetch(
         `http://127.0.0.1:8000/api/files/students/${studentId}/image/`,
         {
           headers: {
@@ -146,7 +146,7 @@ export default function ProfilePage() {
       const formData = new FormData();
       formData.append("profile_photo", file);
 
-      const response = await fetch(
+      const response = await authFetch(
         "http://127.0.0.1:8000/api/auth/profile/update_profile/",
         {
           method: "PATCH",
@@ -235,7 +235,7 @@ export default function ProfilePage() {
         formData.append("major", updatedData.major);
       }
 
-      const response = await fetch(
+      const response = await authFetch(
         "http://127.0.0.1:8000/api/auth/profile/update_profile/",
         {
           method: "PATCH",

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import styles from "../styles/friends.module.css";
+import { authFetch } from "@/utils/globalFetch";
 import { User, Users, ChevronLeft, Plus, Trash2, Send } from "lucide-react";
 
 type NotificationType = "success" | "error";
@@ -243,8 +244,8 @@ export default function FriendsForm() {
     if (err) { showNotif(`❌ ${err}`, "error"); return; }
     setIsSubmitting(true);
     try {
-      const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
-      const res = await fetch("http://localhost:8000/api/family/faculty/environment-family/", {
+       const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
+      const res = await authFetch("http://localhost:8000/api/family/faculty/environment-family/", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(buildBody()),

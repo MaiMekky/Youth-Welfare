@@ -4,7 +4,7 @@ import React, { useMemo, useState } from "react";
 import styles from "../styles/PlanCard.module.css";
 import type { PlanItem } from "../page";
 import { Eye, CalendarDays, Building2, ClipboardList, Pencil, Download } from "lucide-react";
-
+import { authFetch } from "@/utils/globalFetch";
 const API_URL = "http://localhost:8000";
 
 function fmt(iso: string) {
@@ -38,7 +38,7 @@ export default function PlanCard({
       setExporting(true);
 
       const token = getAccessToken();
-      const res = await fetch(`${API_URL}/api/event/export-plan-pdf/${item.id}/`, {
+      const res = await authFetch(`${API_URL}/api/event/export-plan-pdf/${item.id}/`, {
         method: "GET",
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),

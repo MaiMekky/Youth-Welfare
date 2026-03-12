@@ -2,8 +2,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import '../styles/CreateFam.css';
 import Toast from './Toast';
-import { ChevronRight, ChevronLeft, Check, User, Users, FileText, Send } from 'lucide-react';
-
+import { ChevronRight, ChevronLeft, Check, User, Users, LayoutList, FileText, Send } from 'lucide-react';
+import { authFetch } from "@/utils/globalFetch";
 const CACHE_KEY = 'createFamFormData';
 
 /* ─── Token decode ─── */
@@ -177,7 +177,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
   /* ── Fetch deps & profile ── */
   useEffect(() => {
     if (!token) return;
-    fetch('http://127.0.0.1:8000/api/family/departments/', { headers: { Authorization: `Bearer ${token}` } })
+    authFetch('http://127.0.0.1:8000/api/family/departments/', { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (!data) return; const d = Array.isArray(data) ? data : data.departments ?? data.results ?? []; setDepartments(d); })
       .catch(() => {});
@@ -186,7 +186,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
   useEffect(() => {
     if (!token) return;
     const decoded = decodeToken(token);
-    fetch("http://127.0.0.1:8000/api/auth/profile/", { headers: { Authorization: `Bearer ${token}` } })
+    authFetch("http://127.0.0.1:8000/api/auth/profile/", { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (!data) return;
@@ -297,7 +297,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         committees: committeesData,
       };
 
-      const res = await fetch('http://127.0.0.1:8000/api/family/student/create/', {
+      const res = await authFetch('http://127.0.0.1:8000/api/family/student/create/', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

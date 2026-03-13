@@ -369,7 +369,6 @@ export default function EventForm({
                 onChange={(ev) => setField("type", ev.target.value)}
               >
                 <option value="" hidden>اختار نوع النشاط</option>
-                <option value="داخلي">داخلي</option>
                 <option value="خارجي">خارجي</option>
               </select>
               {errors.type && <div className={styles.errorText}>{errors.type}</div>}

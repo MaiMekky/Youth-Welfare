@@ -568,8 +568,6 @@ const toggleAllFacs = () => {
             onBlur={() => onBlur("type")}
           >
             <option value="" hidden>اختار نوع النشاط</option>
-
-            <option value="داخلي">داخلي</option>
             <option value="خارجي">خارجي</option>
 
           </select>

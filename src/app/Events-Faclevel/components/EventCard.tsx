@@ -106,22 +106,27 @@ export default function EventCard({
           <span>{item.priceText}</span>
         </div>
       </div>
+     <div className={styles.actions}>
 
-      <div className={styles.actions}>
-        <button className={styles.danger} onClick={() => onDelete(item.id)}>
-          <Trash2 size={18} />
-          الغاء
-        </button>
-
-        <button className={styles.secondary} onClick={() => onEdit(item.id)}>
-          <Pencil size={18} />
-          تعديل
-        </button>
-
-        <button className={styles.secondary} onClick={() => onView(item.id)}>
+         <button className={styles.secondary} onClick={() => onView(item.id)}>
           <Eye size={18} />
           عرض التفاصيل
         </button>
+        {!hideToggle && (
+          <>
+            <button className={styles.secondary} onClick={() => onEdit(item.id)}>
+              <Pencil size={18} />
+              تعديل
+            </button>
+
+            <button className={styles.danger} onClick={() => onDelete(item.id)}>
+              <Trash2 size={18} />
+              الغاء
+            </button>
+          </>
+        )}
+
+     
       </div>
     </article>
   );

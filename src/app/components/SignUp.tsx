@@ -179,12 +179,13 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
     if(!formData.phone.trim()){
         newErrors.phone = "رقم الهاتف مطلوب";
     }
-    else if (
-      formData.phone &&
-      !/^\0[1][0125][0-9]{8}$/.test(formData.phone)
-    ) {
-      newErrors.phone = "رقم الهاتف غير صحيح، يجب أن يبدأ بـ 010 أو 011 أو 012 أو 015 ويحتوي على 11 رقمًا";
-    }
+   else if (
+        formData.phone &&
+        !/^(01[0125])[0-9]{8}$/.test(formData.phone)
+      ) {
+        newErrors.phone =
+          "رقم الهاتف غير صحيح، يجب أن يبدأ بـ 010 أو 011 أو 012 أو 015 ويحتوي على 11 رقمًا";
+      }
 
     // address
     if (!formData.address.trim()) {
@@ -402,21 +403,15 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
         />
         {errors.department && <p className={styles.errorMsg}>{errors.department}</p>}
 
-        {/* level - dropdown from الأولى to السادسة */}
-        <select
+        {/* level */}
+        <input
           name="level"
+          type="text"
+          placeholder="الفرقة"
           value={formData.level}
           onChange={handleChange}
-          className={errors.level ? styles.invalid : styles.input}
-        >
-          <option value="" disabled hidden>اختر الفرقة</option>
-          <option value="1">الأولى</option>
-          <option value="2">الثانية</option>
-          <option value="3">الثالثة</option>
-          <option value="4">الرابعة</option>
-          <option value="5">الخامسة</option>
-          <option value="6">السادسة</option>
-        </select>
+          className={errors.level ? styles.invalid : ""}
+        />
         {errors.level && <p className={styles.errorMsg}>{errors.level}</p>}
 
         {/* phone */}
@@ -427,7 +422,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
           value={formData.phone}
           onChange={handleChange}
           className={errors.phone ? styles.invalid : ""}
-          maxLength={13}
+          maxLength={11}
         />
         {errors.phone && <p className={styles.errorMsg}>{errors.phone}</p>}
 

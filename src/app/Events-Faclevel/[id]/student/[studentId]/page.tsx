@@ -18,43 +18,10 @@ function getAccessToken(): string | null {
   );
 }
 
-async function apiFetch<T>(
-  path: string,
-  opts: RequestInit = {}
-): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number; raw?: any }> {
-  const token = getAccessToken();
-  const headers: Record<string, string> = { ...(opts.headers as any) };
-  if (!headers["Content-Type"] && opts.body) headers["Content-Type"] = "application/json";
-  if (token) headers.Authorization = `Bearer ${token}`;
-
-  try {
-    const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
-    const text = await res.text();
-    const maybeJson = text
-      ? (() => {
-          try {
-            return JSON.parse(text);
-          } catch {
-            return text;
-          }
-        })()
-      : null;
-
-    if (!res.ok) {
-      const msg =
-        (typeof maybeJson === "object" &&
-          maybeJson &&
-          ((maybeJson as any).detail || (maybeJson as any).message || (maybeJson as any).error)) ||
-        (typeof maybeJson === "string" ? maybeJson : "") ||
-        `طلب غير ناجح (${res.status})`;
-      return { ok: false, message: String(msg), status: res.status, raw: maybeJson };
-    }
-
-    return { ok: true, data: maybeJson as T };
-  } catch (e: any) {
-    return { ok: false, message: e?.message || "مشكلة في الاتصال" };
-  }
-}
+type Faculty = {
+  faculty_id: number;
+  name: string;
+};
 
 type ApiStudentDetails = {
   student_id: number;
@@ -76,6 +43,38 @@ type ApiStudentDetails = {
   last_google_login: string | null;
 };
 
+async function apiFetch<T>(
+  path: string,
+  opts: RequestInit = {}
+): Promise<{ ok: true; data: T } | { ok: false; message: string }> {
+  const token = getAccessToken();
+
+  const headers: Record<string, string> = { ...(opts.headers as any) };
+
+  if (!headers["Content-Type"] && opts.body) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  try {
+    const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return {
+        ok: false,
+        message: data?.detail || "طلب غير ناجح",
+      };
+    }
+
+    return { ok: true, data };
+  } catch (e: any) {
+    return { ok: false, message: e?.message || "مشكلة في الاتصال" };
+  }
+}
+
 export default function StudentDetailsPage() {
   const router = useRouter();
   const params = useParams();
@@ -83,28 +82,40 @@ export default function StudentDetailsPage() {
   const studentId = String(params?.studentId ?? "");
 
   const [student, setStudent] = useState<ApiStudentDetails | null>(null);
+  const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [loading, setLoading] = useState(false);
 
+  /* ---------- load student ---------- */
   const loadStudent = async () => {
     if (!studentId) return;
-    setLoading(true);
-    const res = await apiFetch<ApiStudentDetails>(
-      `/api/event/manage-participants/student-details/${studentId}/`,
-      { method: "GET" }
-    );
-    setLoading(false);
 
-    if (!res.ok) {
+    setLoading(true);
+
+    const res = await apiFetch<ApiStudentDetails>(
+      `/api/event/manage-participants/student-details/${studentId}/`
+    );
+
+    if (res.ok) {
+      setStudent(res.data);
+    } else {
       window.alert(res.message);
-      return;
     }
 
-    setStudent(res.data);
+    setLoading(false);
+  };
+
+  /* ---------- load faculties ---------- */
+  const loadFaculties = async () => {
+    const res = await apiFetch<Faculty[]>(`/api/family/faculties/`);
+
+    if (res.ok) {
+      setFaculties(res.data);
+    }
   };
 
   useEffect(() => {
     loadStudent();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    loadFaculties();
   }, [studentId]);
 
   const ui = useMemo(() => {
@@ -126,6 +137,18 @@ export default function StudentDetailsPage() {
       };
     }
 
+    /* ---------- convert faculty id → name ---------- */
+    const facultyName =
+      faculties.find((f) => f.faculty_id === student.faculty)?.name ?? "—";
+
+    /* ---------- convert gender ---------- */
+    const genderLabel =
+      student.gender === "M"
+        ? "ذكر"
+        : student.gender === "F"
+        ? "أنثى"
+        : "—";
+
     return {
       name: student.name ?? "",
       subtitle: "تفاصيل كاملة عن بيانات الطالب",
@@ -134,18 +157,17 @@ export default function StudentDetailsPage() {
       nid: student.nid ?? "—",
       phone: student.phone_number ?? "—",
       address: student.address ?? "—",
-      faculty: student.faculty === null || student.faculty === undefined ? "—" : String(student.faculty),
-      gender: student.gender ?? "—",
+      faculty: facultyName,
+      gender: genderLabel,
       major: student.major ?? "—",
       acdYear: student.acd_year ?? "—",
       grade: student.grade ?? "—",
       auth: student.auth_method ?? "—",
     };
-  }, [student]);
+  }, [student, faculties]);
 
   return (
     <div className={styles.page} dir="rtl">
-
       <div className={styles.container}>
         <div className={styles.topBar}>
           <div className={styles.headText}>
@@ -153,7 +175,11 @@ export default function StudentDetailsPage() {
             <p className={styles.pageSubtitle}>{ui.subtitle}</p>
           </div>
 
-          <button className={styles.backBtn} onClick={() => router.push(`/Events-Faclevel/${params?.id}`)} type="button">
+          <button
+            className={styles.backBtn}
+            onClick={() => router.push(`/Events-Faclevel/${params?.id}`)}
+            type="button"
+          >
             <ArrowRight size={18} />
             رجوع
           </button>
@@ -256,6 +282,7 @@ export default function StudentDetailsPage() {
           </div>
         </section>
       </div>
+
       <Footer />
     </div>
   );

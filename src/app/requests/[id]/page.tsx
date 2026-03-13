@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import api from "../../../services/api";
 import styles from "./RequestDetails.module.css";
-import axios from "axios";
+import { authFetch } from "@/utils/globalFetch";
 
 /*
   What I implemented:
@@ -114,13 +114,13 @@ const [preApproved, setPreApproved] = useState(false);
 
   const fetchApplication = async () => {
     try {
-      const res = await axios.get(
-        `http://127.0.0.1:8000/api/solidarity/faculty/${id}/applications/`,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
-        }
+          const res = await authFetch(
+        `http://127.0.0.1:8000/api/solidarity/faculty/${id}/applications/`
       );
-      const data = res.data;
+
+      if (!res.ok) throw new Error("API_ERROR");
+
+      const data = await res.json();
       let item: Application | null = null;
       if (Array.isArray(data)) {
         const bySolidarity = data.find((it: any) => String(it.solidarity_id) === String(id));
@@ -145,13 +145,13 @@ const [preApproved, setPreApproved] = useState(false);
 
   const fetchDocuments = async () => {
     try {
-      const res = await axios.get(
-        `http://127.0.0.1:8000/api/solidarity/faculty/${id}/documents/`,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
-        }
-      );
-      const data = res.data;
+      const res = await authFetch(
+      `http://127.0.0.1:8000/api/solidarity/faculty/${id}/documents/`
+    );
+
+    if (!res.ok) throw new Error("DOCS_ERROR");
+
+    const data = await res.json();
       setDocuments(Array.isArray(data) ? data : data ? [data] : []);
     } catch (err: any) {
       console.error("fetchDocuments error:", err);
@@ -162,13 +162,13 @@ const [preApproved, setPreApproved] = useState(false);
 
   const fetchDiscountValues = async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:8000/api/solidarity/faculty/faculty/discounts/`,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
-        }
+      const res = await authFetch(
+        `http://localhost:8000/api/solidarity/faculty/faculty/discounts/`
       );
-      const data = res.data;
+
+      if (!res.ok) throw new Error("DISCOUNT_ERROR");
+
+      const data = await res.json();
       setAvailableDiscounts(data.discounts || { bk_discount: [], reg_discount: [], aff_discount: [], full_discount: [] });
     } catch (err: any) {
       console.error("fetchDiscountValues error:", err);
@@ -227,14 +227,16 @@ const [preApproved, setPreApproved] = useState(false);
     setApplication((prev) => ({ ...(prev ?? {}), req_status: optimisticStatus }));
 
     try {
-      const res = await axios.post(
-        `http://localhost:8000/api/solidarity/faculty/${id}/${suffix}/`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
-        }
-      );
-      const data = res.data;
+    const res = await authFetch(
+      `http://localhost:8000/api/solidarity/faculty/${id}/${suffix}/`,
+      {
+        method: "POST",
+      }
+    );
+
+    if (!res.ok) throw new Error("ACTION_ERROR");
+
+    const data = await res.json();
       setApplication((prev) => ({ ...(prev ?? {}), ...(data ?? {}) }));
       await fetchDocuments(); // documents may change after verification actions
       showNotification(successMsg, "success");
@@ -289,16 +291,16 @@ const [preApproved, setPreApproved] = useState(false);
     
     setActionLoading(true);
     try {
-      const response = await axios.post(
-        `http://localhost:8000/api/solidarity/faculty/${application.solidarity_id}/pre_approve/`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
-        }
-      );
-      
+      const response = await authFetch(
+      `http://localhost:8000/api/solidarity/faculty/${application.solidarity_id}/pre_approve/`,
+      { method: "POST" }
+    );
+
+    if (!response.ok) throw new Error("PRE_APPROVE_ERROR");
+
+    const data = await response.json();
       // Update application state with response data
-      setApplication((prev) => ({ ...(prev ?? {}), ...response.data }));
+      setApplication((prev) => ({ ...(prev ?? {}), ...data }));
       showNotification("تمت الموافقة مبدئية بنجاح", "success");
       
       // Refresh documents if needed
@@ -384,14 +386,18 @@ const [preApproved, setPreApproved] = useState(false);
         "discounts": payloadDiscounts
       }
 
-      const res = await axios({
-        method: 'patch',
-        url: `http://127.0.0.1:8000/api/solidarity/faculty/${application?.solidarity_id}/assign_discount/`,
-        headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
-        data: payload
-      });
+        const res = await authFetch(
+          `http://127.0.0.1:8000/api/solidarity/faculty/${application?.solidarity_id}/assign_discount/`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          }
+        );
 
-      const data = res.data;
+        if (!res.ok) throw new Error("DISCOUNT_ASSIGN_ERROR");
+
+        const data = await res.json();
       // merge returned fields into application (server may return updated totals)
       setApplication((prev) => ({ ...(prev ?? {}), ...(data ?? {}) }));
       showNotification("تم حفظ الخصومات بنجاح", "success");
@@ -414,17 +420,13 @@ const [preApproved, setPreApproved] = useState(false);
   };
 const openDocument = async (docId: number, mimeType?: string) => {
   try {
-    const res = await axios.get(
-      `http://localhost:8000/api/files/solidarity/${docId}/download/`,
-      {
-        responseType: "blob",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access")}`,
-        },
-      }
+    const res = await authFetch(
+      `http://localhost:8000/api/files/solidarity/${docId}/download/`
     );
 
-    const blob = new Blob([res.data], { type: mimeType || res.headers["content-type"] });
+    if (!res.ok) throw new Error("FILE_ERROR");
+
+    const blob = await res.blob();
 
     const url = window.URL.createObjectURL(blob);
     window.open(url, "_blank");

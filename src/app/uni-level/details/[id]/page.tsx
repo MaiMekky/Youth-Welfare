@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import axios from "axios";
 import "./ApplicationDetails.css";
+import { authFetch } from "@/utils/globalFetch";
 
 export default function ApplicationDetailsPage() {
   const { id } = useParams(); // solidarity_id من URL
@@ -15,56 +15,51 @@ export default function ApplicationDetailsPage() {
   const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!id) {
-        setErrorMsg("لا يوجد معرف للطلب في الرابط");
-        setLoading(false);
-        return;
-      }
+const fetchData = async () => {
+  if (!id) {
+    setErrorMsg("لا يوجد معرف للطلب في الرابط");
+    setLoading(false);
+    return;
+  }
 
-      try {
-        const token = localStorage.getItem("access");
-        if (!token) throw new Error("غير مسموح بالوصول: لم يتم العثور على توكن.");
-
-        const headers = { Authorization: `Bearer ${token}` };
-
-        // ====== جلب بيانات الطلب ======
-        const appRes = await axios.get(
-          `http://127.0.0.1:8000/api/solidarity/super_dept/${id}/applications/`,
-          { headers }
-        );
-        setData(appRes.data);
-
-        // ====== جلب المستندات ======
-        const docsRes = await axios.get(
-          `http://127.0.0.1:8000/api/solidarity/super_dept/${id}/documents/`,
-          { headers }
-        );
-        setDocs(docsRes.data);
-
-      } catch (err: any) {
-        console.error(err);
-        setErrorMsg("حدث خطأ أثناء تحميل البيانات");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [id]);
-const openDocument = async (docId: number, mimeType?: string) => {
   try {
-    const res = await axios.get(
-      `http://localhost:8000/api/files/solidarity/${docId}/download/`,
-      {
-        responseType: "blob",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access")}`,
-        },
-      }
+    // ====== جلب بيانات الطلب ======
+    const appRes = await authFetch(
+      `http://127.0.0.1:8000/api/solidarity/super_dept/${id}/applications/`
     );
 
-    const blob = new Blob([res.data], { type: mimeType || res.headers["content-type"] });
+    if (!appRes.ok) throw new Error("APPLICATION_ERROR");
+
+    const appData = await appRes.json();
+    setData(appData);
+
+    // ====== جلب المستندات ======
+    const docsRes = await authFetch(
+      `http://127.0.0.1:8000/api/solidarity/super_dept/${id}/documents/`
+    );
+
+    if (!docsRes.ok) throw new Error("DOCS_ERROR");
+
+    const docsData = await docsRes.json();
+    setDocs(docsData);
+
+  } catch (err) {
+    console.error(err);
+    setErrorMsg("حدث خطأ أثناء تحميل البيانات");
+  } finally {
+    setLoading(false);
+  }
+};
+    fetchData();
+  }, [id]);const openDocument = async (docId: number) => {
+  try {
+    const res = await authFetch(
+      `http://localhost:8000/api/files/solidarity/${docId}/download/`
+    );
+
+    if (!res.ok) throw new Error("FILE_ERROR");
+
+    const blob = await res.blob();
 
     const url = window.URL.createObjectURL(blob);
     window.open(url, "_blank");

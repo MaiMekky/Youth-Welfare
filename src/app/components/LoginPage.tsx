@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState , useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import logo from "../assets/logo.png";
@@ -58,6 +58,61 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
   const [notification, setNotification] = useState<string | null>(null);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+
+  useEffect(() => {
+  const access = localStorage.getItem("access");
+  const role = localStorage.getItem("role");
+  const departments = JSON.parse(localStorage.getItem("departments") || "[]");
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+
+  if (!access || !user) return;
+
+  const userType = user.user_type;
+
+  if (userType === "student") {
+    router.replace("/Student");
+    return;
+  }
+
+  if (userType === "admin") {
+    const roleName = role?.trim();
+
+    let roleKey = "";
+
+    if (roleName === "مشرف النظام") roleKey = "super_admin";
+    else if (roleName === "مدير ادارة") roleKey = "uni_manager";
+    else if (roleName === "مسؤول كلية") roleKey = "fac_manager";
+    else if (roleName === "مدير كلية") roleKey = "fac_head";
+    else if (roleName === "مدير عام") roleKey = "General_admin";
+
+    if (roleKey === "super_admin") {
+      router.replace("/CreateAdmins");
+      return;
+    }
+
+    if (roleKey === "uni_manager") {
+      const route = getFirstRoute(departments, UNI_ROUTE_MAP);
+      router.replace(route ?? "/uni-level");
+      return;
+    }
+
+    if (roleKey === "fac_manager") {
+      const route = getFirstRoute(departments, FAC_ROUTE_MAP);
+      router.replace(route ?? "/FacLevel");
+      return;
+    }
+
+    if (roleKey === "fac_head") {
+      router.replace("/FacultyHead");
+      return;
+    }
+
+    if (roleKey === "General_admin") {
+      router.replace("/GeneralAdmin");
+      return;
+    }
+  }
+}, []);
 
   const showNotification = (message: string, type: "success" | "warning" | "error") => {
     setNotification(`${type}:${message}`);

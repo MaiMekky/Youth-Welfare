@@ -369,7 +369,6 @@ export default function EventForm({
                 onChange={(ev) => setField("type", ev.target.value)}
               >
                 <option value="" hidden>اختار نوع النشاط</option>
-                <option value="داخلي">داخلي</option>
                 <option value="خارجي">خارجي</option>
               </select>
               {errors.type && <div className={styles.errorText}>{errors.type}</div>}
@@ -429,17 +428,18 @@ export default function EventForm({
               {errors.location && <div className={styles.errorText}>{errors.location}</div>}
             </div>
 
-            <div className={styles.field}>
-              <label className={styles.label}>الحد الأقصى للمشاركين</label>
-              <input
-                className={`${styles.input} ${styles.numberInput} ${errors.s_limit ? styles.inputError : ""}`}
-                type="number"
-                min={1}
-                value={form.s_limit}
-                onChange={(ev) => setField("s_limit", Number(ev.target.value))}
-              />
-              {errors.s_limit && <div className={styles.errorText}>{errors.s_limit}</div>}
-            </div>
+         <div className={styles.field}>
+            <label className={styles.label}>الحد الأقصى للمشاركين</label>
+            <input
+              className={`${styles.input} ${styles.numberInput} ${errors.s_limit ? styles.inputError : ""}`}
+              type="number"
+              min={1}
+              placeholder="100"
+              value={form.s_limit || ""}
+              onChange={(ev) => setField("s_limit", Number(ev.target.value))}
+            />
+            {errors.s_limit && <div className={styles.errorText}>{errors.s_limit}</div>}
+          </div>
 
             <div className={styles.field}>
               <label className={styles.label}>التكلفة</label>

@@ -50,10 +50,11 @@ export const refreshToken = async (): Promise<string | null> => {
 // ===============================
 const API_URL = "http://127.0.0.1:8000/api/solidarity/faculty/applications/";
 
-const fetchApplications = async () => {
-  const res = await authFetch("/api/solidarity/faculty/applications/", {
-    method: "GET",
-  });
+  const fetchApplications = async () => {
+  const res = await authFetch(
+    "http://127.0.0.1:8000/api/solidarity/faculty/applications/",
+    { method: "GET" }
+  );
 
   if (!res.ok) {
     throw new Error("API_ERROR");
@@ -61,6 +62,7 @@ const fetchApplications = async () => {
 
   return await res.json();
 };
+
 
 // ===============================
 // RequestsTable Component

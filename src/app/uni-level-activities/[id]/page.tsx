@@ -731,13 +731,25 @@ export default function EventDetailsPage() {
     await assignResult(row.studentId, rankNum, draftReward);
   };
 
-  const saveRank = async (rowId: number) => {
-    const row = rows.find((r) => r.id === rowId);
-    if (!row) return;
+   const saveRank = async (rowId: number) => {
+      const row = rows.find((r) => r.id === rowId);
+      if (!row) return;
 
-    const rankNum = toRankNumber(draftRank);
-    await assignResult(row.studentId, rankNum, row.reward ?? "");
-  };
+      const value = draftRank.trim();
+      if (!value) {
+        showToast("⚠️ من فضلك أدخل رقم الترتيب", "warning");
+        return;
+      }
+
+      if (!/^\d+$/.test(value)) {
+        showToast("❌ الترتيب يجب أن يكون رقم صحيح فقط", "error");
+        return;
+      }
+
+      const rankNum = Number(value);
+
+      await assignResult(row.studentId, rankNum, row.reward ?? "");
+    };
 
   const pendingCount = rows.filter((r) => r.status === "منتظر").length;
   const isFacultyEvent = (event?.faculty ?? null) !== null;
@@ -1010,7 +1022,7 @@ export default function EventDetailsPage() {
               <ImageIcon size={18} />
               صور الفعالية
             </div>
-
+          {(  !isFacultyEvent &&
             <div className={styles.imagesActions}>
               <input
                 ref={fileRef}
@@ -1033,6 +1045,7 @@ export default function EventDetailsPage() {
                 {uploading ? "جاري الرفع..." : "إضافة صورة"}
               </button>
             </div>
+          )}
           </div>
 
           {loadingImages ? (
@@ -1059,7 +1072,7 @@ export default function EventDetailsPage() {
                       <Eye size={16} />
                       عرض الصورة
                     </a>
-
+                {!isFacultyEvent && (
                     <button
                       type="button"
                       className={styles.deleteImgBtn}
@@ -1070,6 +1083,7 @@ export default function EventDetailsPage() {
                       <Trash2 size={16} />
                       {deletingDocId === img.doc_id ? "..." : "مسح الصورة"}
                     </button>
+                     )}
                   </div>
                 </div>
               ))}
@@ -1077,7 +1091,7 @@ export default function EventDetailsPage() {
           )}
         </section>
 
-        {reportOpen && (
+        {reportOpen && !isFacultyEvent && (
           <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-label="تقرير الفعالية">
             <div className={styles.modalCard}>
               <div className={styles.modalHead}>
@@ -1559,6 +1573,8 @@ export default function EventDetailsPage() {
                         <div className={styles.inlineEdit}>
                           <input
                             className={styles.inlineInput}
+                            type="number"
+                            min={1}
                             value={draftRank}
                             onChange={(e) => setDraftRank(e.target.value)}
                             placeholder="المركز"

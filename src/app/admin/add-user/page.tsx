@@ -329,7 +329,7 @@ export default function AddUser() {
             </select>
 
             {/* مسؤول كلية */}
-            {formData.role === "faculty_admin" || formData.role === "faculty_head" && (
+            {(formData.role === "faculty_admin" || formData.role === "faculty_head") && (
               <>
                 <h3 className={styles.sectionTitle}>اختر الكلية</h3>
                 <select

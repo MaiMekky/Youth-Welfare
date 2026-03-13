@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import styles from "../Styles/RequestsTable.module.css";
 import { FileText, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import { authFetch } from "@/utils/globalFetch";
 
 interface RequestsTableProps {
@@ -51,16 +50,16 @@ export const refreshToken = async (): Promise<string | null> => {
 // ===============================
 const API_URL = "http://127.0.0.1:8000/api/solidarity/faculty/applications/";
 
-const fetchApplications = async (token: string) => {
-  try {
-    const res = await axios.get(API_URL, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return res.data;
-  } catch (err: any) {
-    if (err.response?.status === 401) throw new Error("TOKEN_EXPIRED");
-    throw err;
+const fetchApplications = async () => {
+  const res = await authFetch("/api/solidarity/faculty/applications/", {
+    method: "GET",
+  });
+
+  if (!res.ok) {
+    throw new Error("API_ERROR");
   }
+
+  return await res.json();
 };
 
 // ===============================
@@ -82,24 +81,10 @@ export default function RequestsTable({ onDataFetched, filteredRequests }: Reque
     const loadApplications = async () => {
       setLoading(true);
       try {
-        let token = getAccessToken();
-        if (!token) throw new Error("No access token");
-
-        try {
-          const data = await fetchApplications(token);
-          formatData(data);
-        } catch (err: any) {
-          if (err.message === "TOKEN_EXPIRED") {
-            token = await refreshToken();
-            if (!token) throw new Error("Refresh failed");
-            const data = await fetchApplications(token);
-            formatData(data);
-          } else {
-            console.error("API fetch error:", err);
-          }
-        }
+        const data = await fetchApplications();
+        formatData(data);
       } catch (err) {
-        console.error(err);
+        console.error("API fetch error:", err);
       } finally {
         setLoading(false);
       }

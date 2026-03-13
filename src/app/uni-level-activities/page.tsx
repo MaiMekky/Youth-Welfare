@@ -106,8 +106,7 @@ function toPriceText(cost: string) {
   if (!Number.isFinite(n) || n === 0) return "مجاني";
   return `${n} جنيه`;
 }
-
-function toEventItem(e: ApiEvent): EventItem {
+function toEventItem(e: ApiEvent, facultyMap: Record<number, string>): EventItem {
   const apiActive = toBool(e.active);
   const statusBool = toBool(e.status);
   const statusText = typeof e.status === "string" ? e.status : "";
@@ -129,24 +128,47 @@ function toEventItem(e: ApiEvent): EventItem {
     priceText: toPriceText(e.cost),
     isActive: Boolean(isActive),
     hideToggle: e.faculty_id !== null,
+    facultyName: e.faculty_id ? facultyMap[e.faculty_id] : undefined,
   };
 }
 
 type NotifType = "success" | "error" | "warning";
-
+type Faculty = {
+  faculty_id: number;
+  name: string;
+};
 export default function Page() {
   const router = useRouter();
   const goCreate = () => router.push("/uni-level-activities/create");
 
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(false);
-
+  const [faculties, setFaculties] = useState<Faculty[]>([]);
   // ✅ Notification (Toast)
   const [notification, setNotification] = useState<{ message: string; type: NotifType } | null>(null);
   const showNotification = (message: string, type: NotifType) => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 2500);
   };
+  const fetchFaculties = async () => {
+    const res = await apiFetch<Faculty[]>("/api/family/faculties/", {
+      method: "GET",
+    });
+
+    if (!res.ok) {
+      showNotification("فشل تحميل الكليات", "error");
+      return;
+    }
+
+    setFaculties(res.data);
+  };
+const facultyMap = useMemo(() => {
+  const map: Record<number, string> = {};
+  faculties.forEach((f) => {
+    map[f.faculty_id] = f.name;
+  });
+  return map;
+}, [faculties]);
 
   const fetchEvents = async () => {
     setLoading(true);
@@ -159,14 +181,18 @@ export default function Page() {
     }
 
     const list = Array.isArray(res.data) ? res.data : [];
-    setEvents(list.map(toEventItem));
+    setEvents(list.map((e) => toEventItem(e, facultyMap)));
   };
 
-  useEffect(() => {
-    fetchEvents();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+useEffect(() => {
+  fetchFaculties();
+}, []);
 
+useEffect(() => {
+  if (faculties.length) {
+    fetchEvents();
+  }
+}, [faculties]);
   const stats: StatItem[] = useMemo(() => {
     const active = events.filter((e) => e.isActive).length;
     const inactive = events.filter((e) => !e.isActive).length;

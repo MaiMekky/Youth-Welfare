@@ -21,8 +21,8 @@ export type EventItem = {
   priceText: string;
   isActive: boolean;
   hideToggle?: boolean;
+  facultyName?: string;  
 };
-
 function Chip({ label, variant }: { label: string; variant: ChipVariant }) {
   return <span className={`${styles.chip} ${styles[variant]}`}>{label}</span>;
 }
@@ -77,6 +77,11 @@ export default function EventCard({
         <div className={styles.chips}>
           <Chip label={item.statusLabel} variant={item.statusVariant} />
           <Chip label={item.categoryLabel} variant={item.categoryVariant} />
+              {item.facultyName && (
+              <div className={styles.facultyTag}>
+                {item.facultyName}
+              </div>
+            )}
         </div>
       </div>
 
@@ -105,21 +110,27 @@ export default function EventCard({
         </div>
       </div>
 
-      <div className={styles.actions}>
-        <button className={styles.danger} onClick={() => onDelete(item.id)}>
-          <Trash2 size={18} />
-          الغاء
-        </button>
+     <div className={styles.actions}>
 
-        <button className={styles.secondary} onClick={() => onEdit(item.id)}>
-          <Pencil size={18} />
-          تعديل
-        </button>
-
-        <button className={styles.secondary} onClick={() => onView(item.id)}>
+         <button className={styles.secondary} onClick={() => onView(item.id)}>
           <Eye size={18} />
           عرض التفاصيل
         </button>
+        {!hideToggle && (
+          <>
+            <button className={styles.secondary} onClick={() => onEdit(item.id)}>
+              <Pencil size={18} />
+              تعديل
+            </button>
+
+            <button className={styles.danger} onClick={() => onDelete(item.id)}>
+              <Trash2 size={18} />
+              الغاء
+            </button>
+          </>
+        )}
+
+     
       </div>
     </article>
   );

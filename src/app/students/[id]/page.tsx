@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./studentDetails.module.css";
-import axios from "axios";
 import { authFetch } from "@/utils/globalFetch";
 export default function StudentDetailsPage() {
   const { id } = useParams();
@@ -73,19 +72,15 @@ export default function StudentDetailsPage() {
 
     if (id) fetchDocs();
   }, [id]);
-const openDocument = async (docId: number, mimeType?: string) => {
+const openDocument = async (docId: number) => {
   try {
-    const res = await axios.get(
-      `http://localhost:8000/api/files/solidarity/${docId}/download/`,
-      {
-        responseType: "blob",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access")}`,
-        },
-      }
+    const res = await authFetch(
+      `http://localhost:8000/api/files/solidarity/${docId}/download/`
     );
 
-    const blob = new Blob([res.data], { type: mimeType || res.headers["content-type"] });
+    if (!res.ok) throw new Error("FILE_ERROR");
+
+    const blob = await res.blob();
 
     const url = window.URL.createObjectURL(blob);
     window.open(url, "_blank");

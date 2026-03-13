@@ -397,22 +397,23 @@ export default function EventForm({
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>الحد الأقصى للمشاركين</label>
-              <input
-                className={`${styles.input} ${styles.numberInput} ${errors.s_limit ? styles.inputError : ""}`}
-                type="number"
-                min={1}
-                value={form.s_limit}
-                onChange={(ev) => setField("s_limit", Number(ev.target.value))}
-              />
-              {errors.s_limit && <div className={styles.errorText}>{errors.s_limit}</div>}
-            </div>
-
+            <label className={styles.label}>الحد الأقصى للمشاركين</label>
+            <input
+              className={`${styles.input} ${styles.numberInput} ${errors.s_limit ? styles.inputError : ""}`}
+              type="number"
+              min={1}
+              placeholder="100"
+              value={form.s_limit || ""}
+              onChange={(ev) => setField("s_limit", Number(ev.target.value))}
+            />
+            {errors.s_limit && <div className={styles.errorText}>{errors.s_limit}</div>}
+          </div>
             <div className={styles.field}>
               <label className={styles.label}>التكلفة</label>
               <input
                 className={`${styles.input} ${styles.numberInput} ${errors.cost ? styles.inputError : ""}`}
                 type="number"
+                placeholder="التكلفة"
                 min={0}
                 value={form.cost}
                 onChange={(ev) => setField("cost", ev.target.value)}

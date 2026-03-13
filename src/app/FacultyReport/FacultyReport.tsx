@@ -2,10 +2,9 @@
 import React, { useState, useEffect } from "react";
 import styles from "./FacultyReport.module.css";
 import { ChevronLeft, ChevronRight, Search, Wallet, Users, FileText } from "lucide-react";
-import axios from "axios";
 import Footer from "../FacLevel/components/Footer";
 import { useRouter } from "next/navigation";
-
+import { authFetch } from "@/utils/globalFetch";
 
 interface StudentType {
   name: string;
@@ -19,43 +18,47 @@ interface StudentType {
 export default function FacultyReport() {
   const [students, setStudents]       = useState<StudentType[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [token, setToken]             = useState<string | null>(null);
   const [userData, setUserData]       = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const router = useRouter();
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [academicYear, setAcademicYear] = useState("");
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) setUserData(JSON.parse(storedUser));
   }, []);
 
-  useEffect(() => {
-    setToken(localStorage.getItem("access"));
-  }, []);
+useEffect(() => {
+  fetchData();
+}, []);
+const fetchData = async () => {
+  try {
+    const res = await authFetch(
+      "http://127.0.0.1:8000/api/solidarity/faculty/faculty_approved/"
+    );
 
-  const fetchData = async () => {
-    if (!token) return;
-    try {
-      const res = await axios.get(
-        "http://127.0.0.1:8000/api/solidarity/faculty/faculty_approved/",
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      const mapped: StudentType[] = res.data.results.map((item: any) => ({
-        name:   item.student_name,
-        id:     item.student_id,
-        req:    item.solidarity_id,
-        amount: Number(item.total_income) || 0,
-        date:   "-",
-        gpa:    "-",
-      }));
-      setStudents(mapped);
-    } catch (err) {
-      console.error("API Error:", err);
-    }
-  };
+    if (!res.ok) throw new Error("API_ERROR");
 
-  useEffect(() => { if (token) fetchData(); }, [token]);
+    const data = await res.json();
+
+    const mapped: StudentType[] = data.results.map((item: any) => ({
+      name: item.student_name,
+      id: item.student_id,
+      req: item.solidarity_id,
+      amount: Number(item.total_income) || 0,
+      date: "-",
+      gpa: "-",
+    }));
+
+    setStudents(mapped);
+
+  } catch (err) {
+    console.error("API Error:", err);
+  }
+};
+
 
   const filteredStudents = students.filter((s) =>
     [s.name, s.id, String(s.req)].join(" ").toLowerCase().includes(searchQuery.toLowerCase())
@@ -65,30 +68,75 @@ export default function FacultyReport() {
   const startIndex     = (currentPage - 1) * rowsPerPage;
   const currentStudents = filteredStudents.slice(startIndex, startIndex + rowsPerPage);
   const totalAmount    = filteredStudents.reduce((acc, s) => acc + (s.amount || 0), 0);
+const handleExport = async () => {
+  try {
+const res = await authFetch(
+  `http://127.0.0.1:8000/api/solidarity/faculty/export/?acd_year=${academicYear}`
+);
 
-  const handleExport = async () => {
-    try {
-      const res = await axios.get(
-        "http://127.0.0.1:8000/api/solidarity/faculty/export",
-        { headers: { Authorization: `Bearer ${localStorage.getItem("access")}` }, responseType: "blob" }
-      );
-      const url  = window.URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
-      const link = document.createElement("a");
-      link.href  = url;
-      const cd   = res.headers["content-disposition"];
-      link.download = cd?.match(/filename="?(.+)"?/)?.[1] ?? "document.pdf";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("Export error:", err);
-    }
-  };
+if (!res.ok) throw new Error("EXPORT_ERROR");
 
+const blob = await res.blob();
+    const url = window.URL.createObjectURL(
+new Blob([blob], { type: "application/pdf" })
+    );
+
+    const link = document.createElement("a");
+    link.href = url;
+
+const cd = res.headers.get("content-disposition");
+    link.download = cd?.match(/filename="?(.+)"?/)?.[1] ?? "report.pdf";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    window.URL.revokeObjectURL(url);
+
+    setShowExportModal(false);
+
+  } catch (err) {
+    console.error("Export error:", err);
+  }
+};
   return (
     <div className={styles.facultyReportPage}>
+      {showExportModal && (
+        <div className={styles.exportModalOverlay}>
+          <div className={styles.exportModal}>
+            <h3>اختر السنة الدراسية</h3>
 
+            <select
+              value={academicYear}
+              onChange={(e) => setAcademicYear(e.target.value)}
+              className={styles.yearSelect}
+            >
+              <option value="" disabled hidden>اختر السنة</option>
+              <option value="الفرقة الاولى">الفرقة الأولى</option>
+              <option value="الفرقة الثانية">الفرقة الثانية</option>
+              <option value="الفرقة الثالثة">الفرقة الثالثة</option>
+              <option value="الفرقة الرابعة">الفرقة الرابعة</option>
+            </select>
+
+            <div className={styles.modalButtons}>
+              <button
+                className={styles.cancelBtn}
+                onClick={() => setShowExportModal(false)}
+              >
+                إلغاء
+              </button>
+
+              <button
+                className={styles.confirmBtn}
+                onClick={handleExport}
+                disabled={!academicYear}
+              >
+                تصدير
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <main className={styles.facultyMain}>
 
         {/* ── Page title bar ── */}
@@ -132,7 +180,7 @@ export default function FacultyReport() {
         <div className={styles.tableContainer}>
           <div className={styles.tableHeader}>
             <h2>تفاصيل طلبات الطلاب</h2>
-            <button className={styles.exportBtn} onClick={handleExport}>
+            <button className={styles.exportBtn} onClick={() => setShowExportModal(true)}>
               <FileText size={16} /><span>تصدير PDF</span>
             </button>
           </div>

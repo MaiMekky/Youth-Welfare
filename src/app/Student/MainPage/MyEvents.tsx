@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './MyEvents.css';
 import { authFetch } from "@/utils/globalFetch";
+
 /* ══════════════════════════════════════════
    TYPES
 ══════════════════════════════════════════ */
@@ -44,21 +45,19 @@ interface Event {
   participationStatus: string;
   rank: number | null;
   resultReward: string | null;
-  image: string | null;
 }
 
 type FilterType = 'all' | 'مقبول' | 'قيد الانتظار' | 'مرفوض';
 
 /* ══════════════════════════════════════════
    NORMALIZE STATUS
-   يحوّل كل قيم الـ API لقيم موحدة في الـ UI
 ══════════════════════════════════════════ */
 const normalizeStatus = (status: string): string => {
   const s = status?.trim().toLowerCase();
-  if (s === 'pending'  || s === 'منتظر')           return 'قيد الانتظار';
-  if (s === 'accepted' || s === 'active' || s === 'مقبول') return 'مقبول';
-  if (s === 'rejected' || s === 'مرفوض')           return 'مرفوض';
-  return status; // fallback - إرجاع القيمة الأصلية لو مش معروفة
+  if (s === 'pending'  || s === 'منتظر')                    return 'قيد الانتظار';
+  if (s === 'accepted' || s === 'active' || s === 'مقبول')  return 'مقبول';
+  if (s === 'rejected' || s === 'مرفوض')                    return 'مرفوض';
+  return status;
 };
 
 /* ══════════════════════════════════════════
@@ -76,10 +75,9 @@ const mapEvent = (e: ApiJoinedEvent): Event => ({
   dept:                e.dept_name,
   cost:                e.cost,
   reward:              e.reward,
-  participationStatus: normalizeStatus(e.participation_status), // ← normalize هنا
+  participationStatus: normalizeStatus(e.participation_status),
   rank:                e.participation_rank,
   resultReward:        e.participation_reward,
-  image:               e.imgs,
 });
 
 /* ══════════════════════════════════════════
@@ -129,11 +127,6 @@ const GiftIcon = () => (
     <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
   </svg>
 );
-const DownloadIcon = () => (
-  <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-    <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-  </svg>
-);
 const ResultIcon = () => (
   <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
     <circle cx="12" cy="12" r="10"/>
@@ -160,9 +153,9 @@ const EmptyTrophyIcon = () => (
    STATUS HELPERS
 ══════════════════════════════════════════ */
 const STATUS_META: Record<string, { cls: string; dot: string }> = {
-  'مقبول':        { cls: 'status-accepted', dot: '#16a34a' },
-  'قيد الانتظار': { cls: 'status-pending',  dot: '#d97706' },
-  'مرفوض':        { cls: 'status-rejected', dot: '#dc2626' },
+  'مقبول':        { cls: 'status-accepted', dot: '#15803d' },
+  'قيد الانتظار': { cls: 'status-pending',  dot: '#b45309' },
+  'مرفوض':        { cls: 'status-rejected', dot: '#b91c1c' },
 };
 const getStatus = (s: string) => STATUS_META[s] ?? { cls: 'status-default', dot: '#6b7a99' };
 
@@ -189,7 +182,6 @@ export default function MyEvents() {
 
   const token = typeof window !== 'undefined' ? localStorage.getItem('access') : null;
 
-  /* ── Fetch joined events ── */
   useEffect(() => {
     const load = async () => {
       try {
@@ -207,7 +199,6 @@ export default function MyEvents() {
     load();
   }, []);
 
-  /* ── Fetch result modal ── */
   const fetchResult = useCallback(async (event: Event) => {
     setResultModal({ event, result: null, loading: true });
     try {
@@ -219,43 +210,39 @@ export default function MyEvents() {
       const d   = raw.data ?? raw;
       setResultModal({ event, loading: false, result: { rank: d.rank, reward: d.reward, message: d.message } });
     } catch {
-      setResultModal(prev => prev
-        ? { ...prev, loading: false, result: { rank: null, reward: null, message: 'تعذّر تحميل النتيجة' } }
-        : null
+      setResultModal(prev =>
+        prev ? { ...prev, loading: false, result: { rank: null, reward: null, message: 'تعذّر تحميل النتيجة' } } : null
       );
     }
   }, [token]);
 
-  /* ── Counts ── */
   const counts = {
-    all:              events.length,
-    'مقبول':         events.filter(e => e.participationStatus === 'مقبول').length,
-    'قيد الانتظار':  events.filter(e => e.participationStatus === 'قيد الانتظار').length,
-    'مرفوض':         events.filter(e => e.participationStatus === 'مرفوض').length,
+    all:             events.length,
+    'مقبول':        events.filter(e => e.participationStatus === 'مقبول').length,
+    'قيد الانتظار': events.filter(e => e.participationStatus === 'قيد الانتظار').length,
+    'مرفوض':        events.filter(e => e.participationStatus === 'مرفوض').length,
   };
 
   const filtered = activeFilter === 'all'
     ? events
     : events.filter(e => e.participationStatus === activeFilter);
 
-  /* ══════════════════════════════════════════
-     RENDER
-  ══════════════════════════════════════════ */
   return (
     <div className="my-events-page" dir="rtl">
 
       {/* ══ HERO ══ */}
       <div className="my-events-hero">
         <div className="hero-inner">
-          <div>
+          <div className="hero-text">
             <h1 className="hero-title">أنشطتي</h1>
+            <span className="hero-title-accent" />
             <p className="hero-sub">تتبع جميع الأنشطة والفعاليات التي سجّلت بها أو شاركت فيها</p>
           </div>
           <div className="hero-stats">
             {[
-              { num: counts.all,             lbl: 'إجمالي'      },
-              { num: counts['مقبول'],        lbl: 'مقبول'       },
-              { num: counts['مرفوض'],        lbl: 'مرفوض'       },
+              { num: counts.all,            lbl: 'إجمالي' },
+              { num: counts['مقبول'],       lbl: 'مقبول'  },
+              { num: counts['مرفوض'],       lbl: 'مرفوض'  },
             ].map(s => (
               <div key={s.lbl} className="stat-pill">
                 <span className="stat-num">{s.num}</span>
@@ -316,36 +303,32 @@ export default function MyEvents() {
                 return (
                   <div key={event.id} className={`event-card${isAccepted ? ' card-accepted' : ''}`}>
 
-                    {/* ── Image ── */}
-                    <div className="event-img-wrap">
-                      {event.image
-                        ? <img src={event.image} alt={event.title} className="event-img" />
-                        : <div className="event-img-placeholder">
-                            <div className="placeholder-icon"><TrophyIcon /></div>
-                            <span>{event.type}</span>
-                          </div>
-                      }
-                      <span className={`status-chip ${st.cls}`}>
-                        <span className="status-dot" style={{ background: st.dot }} />
-                        {event.participationStatus}
-                      </span>
-                      {hasRank && <span className="rank-chip">🏆 #{event.rank}</span>}
+                    {/* ── HEADER: type pill + title + status/rank chips ── */}
+                    <div className="card-header">
+                      <div className="card-header-top">
+                        <span className="type-pill">{event.type}</span>
+                        <div className="card-chips">
+                          <span className={`status-chip ${st.cls}`}>
+                            <span className="status-dot" style={{ background: st.dot }} />
+                            {event.participationStatus}
+                          </span>
+                          {hasRank && <span className="rank-chip">🏆 #{event.rank}</span>}
+                        </div>
+                      </div>
+                      <h3 className="event-title">{event.title}</h3>
                     </div>
 
-                    {/* ── Content ── */}
+                    {/* ── BODY: description + meta + reward + actions ── */}
                     <div className="event-content">
-                      <span className="type-pill">{event.type}</span>
-                      <h3 className="event-title">{event.title}</h3>
                       <p className="event-description">{event.description}</p>
 
                       <div className="event-meta">
-                        <div className="meta-item"><CalIcon />{event.date}</div>
-                        <div className="meta-item"><PinIcon />{event.location}</div>
-                        <div className="meta-item"><BuildingIcon />{event.faculty}</div>
-                        <div className="meta-item"><TagIcon />{event.dept}</div>
+                        <div className="meta-item"><CalIcon /><span>{event.date}</span></div>
+                        <div className="meta-item"><PinIcon /><span>{event.location}</span></div>
+                        <div className="meta-item"><BuildingIcon /><span>{event.faculty}</span></div>
+                        <div className="meta-item"><TagIcon /><span>{event.dept}</span></div>
                       </div>
 
-                      {/* Reward strip */}
                       {event.reward && (
                         <div className="reward-strip">
                           <GiftIcon />
@@ -353,22 +336,18 @@ export default function MyEvents() {
                         </div>
                       )}
 
-                      {/* Inline result (already known) */}
                       {(event.rank !== null || event.resultReward) && (
                         <div className="result-inline">
-                          {event.rank !== null  && <span className="result-tag">🏅 المركز {event.rank}</span>}
-                          {event.resultReward   && <span className="result-tag">🎁 {event.resultReward}</span>}
+                          {event.rank !== null && <span className="result-tag">🏅 المركز {event.rank}</span>}
+                          {event.resultReward  && <span className="result-tag">🎁 {event.resultReward}</span>}
                         </div>
                       )}
 
-                      {/* CTA row */}
                       <div className="card-actions">
                         {isAccepted ? (
-                          <>
-                            <button className="btn-result" onClick={() => fetchResult(event)}>
-                              <ResultIcon /> نتيجتي
-                            </button>
-                          </>
+                          <button className="btn-result" onClick={() => fetchResult(event)}>
+                            <ResultIcon /> نتيجتي
+                          </button>
                         ) : (
                           <div className={`status-info-bar ${st.cls}`}>
                             <span className="status-dot" style={{ background: st.dot }} />
@@ -377,6 +356,7 @@ export default function MyEvents() {
                         )}
                       </div>
                     </div>
+
                   </div>
                 );
               })}
@@ -406,19 +386,13 @@ export default function MyEvents() {
                 </div>
               ) : !resultModal.result?.rank && !resultModal.result?.reward ? (
                 <div className="modal-pending">
-                  <div className="modal-icon-wrap modal-icon-pending">
-                    <TrophyIcon />
-                  </div>
-                  <p className="modal-main-msg">
-                    {resultModal.result?.message ?? 'لم تُنشر النتائج بعد'}
-                  </p>
+                  <div className="modal-icon-wrap modal-icon-pending"><TrophyIcon /></div>
+                  <p className="modal-main-msg">{resultModal.result?.message ?? 'لم تُنشر النتائج بعد'}</p>
                   <p className="modal-sub-msg">ستظهر نتيجتك هنا بعد نشرها من قِبَل الإدارة</p>
                 </div>
               ) : (
                 <div className="modal-result-content">
-                  <div className="modal-icon-wrap modal-icon-trophy">
-                    <TrophyIcon />
-                  </div>
+                  <div className="modal-icon-wrap modal-icon-trophy"><TrophyIcon /></div>
                   <p className="modal-congrats">مبروك على مشاركتك! 🎉</p>
 
                   {resultModal.result?.rank && (

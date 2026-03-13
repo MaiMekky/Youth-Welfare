@@ -3,10 +3,12 @@ import React, { useEffect, useState, useCallback } from "react";
 import {
   FileText, BarChart3, Download, Calendar, Building2,
   RefreshCw, AlertCircle, Eye, Filter, CheckCircle,
-  XCircle, Clock, Layers, Search,
+  XCircle, Clock, Layers, X, MapPin, Users, Tag,
+  DollarSign, BookOpen, ChevronRight, Info,
 } from "lucide-react";
 import styles from "../Styles/Planview.module.css";
 import { authFetch } from "@/utils/globalFetch";
+
 interface Plan {
   plan_id: number;
   name: string;
@@ -22,6 +24,48 @@ interface Plan {
   plan_status?: string;
   submitted_at?: string;
   last_updated?: string;
+}
+
+interface PlanEvent {
+  event_id: number;
+  title: string;
+  description: string;
+  dept: number;
+  dept_name: string;
+  faculty: number;
+  faculty_name: string;
+  created_by: number;
+  created_by_name: string;
+  family: number;
+  family_name: string;
+  cost: string;
+  location: string;
+  restrictions: string;
+  reward: string;
+  status: string;
+  type: string;
+  st_date: string;
+  end_date: string;
+  s_limit: number;
+  resource: string;
+  selected_facs: number[];
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+interface PlanDetails {
+  name: string;
+  term: number;
+  faculty: number;
+  faculty_name: string;
+  dept: number;
+  dept_name: string;
+  created_by: number;
+  created_by_name: string;
+  events: PlanEvent[];
+  created_at: string;
+  updated_at: string;
 }
 
 const getToken = () =>
@@ -57,10 +101,264 @@ function planStatusBadgeClass(ps?: string) {
   return `${styles.metaBadge} ${styles["green"]}`;
 }
 
-function FacultyCard({ plan, onDownload, downloading }: {
+function eventStatusClass(status?: string) {
+  const s = status?.trim() ?? "";
+  if (s === "مكتمل" || s === "complete" || s === "approved") return styles.eventBadgeComplete;
+  if (s === "ملغي" || s === "cancelled") return styles.eventBadgeCancelled;
+  return styles.eventBadgePending;
+}
+
+/* ── Plan Details Modal ── */
+function PlanDetailsModal({
+  plan,
+  onClose,
+}: {
+  plan: Plan;
+  onClose: () => void;
+}) {
+  const [details, setDetails]     = useState<PlanDetails | null>(null);
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState("");
+  const [activeEvent, setActiveEvent] = useState<PlanEvent | null>(null);
+
+  useEffect(() => {
+    const fetchDetails = async () => {
+      try {
+        setLoading(true);
+        const res = await authFetch(`${BASE}/api/events/plans/${plan.plan_id}/details/`, {
+          headers: { Authorization: `Bearer ${getToken()}` },
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        setDetails(data);
+        setError("");
+      } catch {
+        setError("فشل في جلب تفاصيل الخطة.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDetails();
+  }, [plan.plan_id]);
+
+  // Close on backdrop click
+  const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) onClose();
+  };
+
+  return (
+    <div className={styles.modalBackdrop} onClick={handleBackdrop}>
+      <div className={styles.modalSheet}>
+
+        {/* Modal Header */}
+        <div className={styles.modalHeader}>
+          <div className={styles.modalHeaderLeft}>
+            <button className={styles.modalCloseBtn} onClick={onClose}>
+              <X size={18} />
+            </button>
+          </div>
+          <div className={styles.modalHeaderRight}>
+            <h2 className={styles.modalTitle}>{plan.faculty_name || plan.name}</h2>
+            <p className={styles.modalSubtitle}>
+              تفاصيل الخطة السنوية · الفصل الدراسي {plan.term}
+            </p>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className={styles.modalState}>
+            <RefreshCw size={34} className={styles.spinner} />
+            <p>جاري تحميل التفاصيل…</p>
+          </div>
+        ) : error ? (
+          <div className={styles.modalState}>
+            <AlertCircle size={34} style={{ color: "#DC2626" }} />
+            <p style={{ color: "#DC2626" }}>{error}</p>
+          </div>
+        ) : details ? (
+          <div className={styles.modalBody}>
+
+            {/* Plan Meta Info */}
+            <div className={styles.planMetaGrid}>
+              <div className={styles.planMetaItem}>
+                <span className={styles.planMetaLabel}>الكلية</span>
+                <span className={styles.planMetaValue}>{details.faculty_name}</span>
+              </div>
+              <div className={styles.planMetaItem}>
+                <span className={styles.planMetaLabel}>القسم</span>
+                <span className={styles.planMetaValue}>{details.dept_name || "—"}</span>
+              </div>
+              <div className={styles.planMetaItem}>
+                <span className={styles.planMetaLabel}>منشئ الخطة</span>
+                <span className={styles.planMetaValue}>{details.created_by_name}</span>
+              </div>
+              <div className={styles.planMetaItem}>
+                <span className={styles.planMetaLabel}>تاريخ الإنشاء</span>
+                <span className={styles.planMetaValue}>{fmt(details.created_at)}</span>
+              </div>
+              <div className={styles.planMetaItem}>
+                <span className={styles.planMetaLabel}>آخر تحديث</span>
+                <span className={styles.planMetaValue}>{fmt(details.updated_at)}</span>
+              </div>
+              <div className={styles.planMetaItem}>
+                <span className={styles.planMetaLabel}>عدد الفعاليات</span>
+                <span className={`${styles.planMetaValue} ${styles.planMetaCount}`}>
+                  {details.events.length}
+                </span>
+              </div>
+            </div>
+
+            {/* Events Section */}
+            <div className={styles.eventsSection}>
+              <div className={styles.eventsSectionHeader}>
+                <BookOpen size={15} />
+                <h3>الفعاليات المخططة</h3>
+                <span className={styles.eventsCountBadge}>{details.events.length}</span>
+              </div>
+
+              {details.events.length === 0 ? (
+                <div className={styles.noEvents}>
+                  <Info size={28} style={{ opacity: 0.3 }} />
+                  <p>لا توجد فعاليات مسجلة في هذه الخطة</p>
+                </div>
+              ) : (
+                <div className={styles.eventsTable}>
+                  {/* Table Header */}
+                  <div className={styles.eventsTableHead}>
+                    <span className={styles.colTitle}>الفعالية</span>
+                    <span className={styles.colDept}>القسم</span>
+                    <span className={styles.colDates}>التواريخ</span>
+                    <span className={styles.colCost}>التكلفة</span>
+                    <span className={styles.colLimit}>الحد الأقصى</span>
+                    <span className={styles.colStatus}>الحالة</span>
+                    <span className={styles.colAction}></span>
+                  </div>
+
+                  {/* Table Rows */}
+                  {details.events.map((ev, idx) => (
+                    <div
+                      key={ev.event_id}
+                      className={`${styles.eventsTableRow} ${activeEvent?.event_id === ev.event_id ? styles.rowActive : ""}`}
+                    >
+                      <span className={styles.colTitle}>
+                        <span className={styles.eventIndex}>{idx + 1}</span>
+                        <span className={styles.eventTitle}>{ev.title}</span>
+                      </span>
+                      <span className={styles.colDept}>{ev.dept_name || "—"}</span>
+                      <span className={styles.colDates}>
+                        <span className={styles.dateRange}>
+                          {fmt(ev.st_date)}
+                          {ev.end_date && ev.end_date !== ev.st_date && (
+                            <> — {fmt(ev.end_date)}</>
+                          )}
+                        </span>
+                      </span>
+                      <span className={styles.colCost}>
+                        {ev.cost && ev.cost !== "0" ? `${ev.cost} ج.م` : "مجاني"}
+                      </span>
+                      <span className={styles.colLimit}>
+                        {ev.s_limit > 0 ? ev.s_limit.toLocaleString("ar-EG") : "—"}
+                      </span>
+                      <span className={styles.colStatus}>
+                        <span className={`${styles.eventBadge} ${eventStatusClass(ev.status)}`}>
+                          {ev.status || "قيد المراجعة"}
+                        </span>
+                      </span>
+                      <span className={styles.colAction}>
+                        <button
+                          className={styles.eventExpandBtn}
+                          onClick={() => setActiveEvent(activeEvent?.event_id === ev.event_id ? null : ev)}
+                          title="تفاصيل"
+                        >
+                          <ChevronRight
+                            size={14}
+                            style={{
+                              transform: activeEvent?.event_id === ev.event_id ? "rotate(90deg)" : "rotate(0deg)",
+                              transition: "transform 0.2s",
+                            }}
+                          />
+                        </button>
+                      </span>
+
+                      {/* Expanded Details */}
+                      {activeEvent?.event_id === ev.event_id && (
+                        <div className={styles.eventExpandedDetails}>
+                          <div className={styles.eventDetailGrid}>
+                            {ev.description && (
+                              <div className={styles.eventDetailFull}>
+                                <span className={styles.eventDetailLabel}>الوصف</span>
+                                <span className={styles.eventDetailValue}>{ev.description}</span>
+                              </div>
+                            )}
+                            {ev.location && (
+                              <div className={styles.eventDetailItem}>
+                                <MapPin size={12} />
+                                <span className={styles.eventDetailLabel}>الموقع</span>
+                                <span className={styles.eventDetailValue}>{ev.location}</span>
+                              </div>
+                            )}
+                            {ev.type && (
+                              <div className={styles.eventDetailItem}>
+                                <Tag size={12} />
+                                <span className={styles.eventDetailLabel}>النوع</span>
+                                <span className={styles.eventDetailValue}>{ev.type}</span>
+                              </div>
+                            )}
+                            {ev.family_name && (
+                              <div className={styles.eventDetailItem}>
+                                <Users size={12} />
+                                <span className={styles.eventDetailLabel}>الفئة</span>
+                                <span className={styles.eventDetailValue}>{ev.family_name}</span>
+                              </div>
+                            )}
+                            {ev.reward && (
+                              <div className={styles.eventDetailItem}>
+                                <DollarSign size={12} />
+                                <span className={styles.eventDetailLabel}>المكافأة</span>
+                                <span className={styles.eventDetailValue}>{ev.reward}</span>
+                              </div>
+                            )}
+                            {ev.restrictions && (
+                              <div className={styles.eventDetailItem}>
+                                <Info size={12} />
+                                <span className={styles.eventDetailLabel}>القيود</span>
+                                <span className={styles.eventDetailValue}>{ev.restrictions}</span>
+                              </div>
+                            )}
+                            {ev.resource && (
+                              <div className={styles.eventDetailItem}>
+                                <BookOpen size={12} />
+                                <span className={styles.eventDetailLabel}>الموارد</span>
+                                <span className={styles.eventDetailValue}>{ev.resource}</span>
+                              </div>
+                            )}
+                            {ev.created_by_name && (
+                              <div className={styles.eventDetailItem}>
+                                <Users size={12} />
+                                <span className={styles.eventDetailLabel}>منشئ الفعالية</span>
+                                <span className={styles.eventDetailValue}>{ev.created_by_name}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function FacultyCard({ plan, onDownload, downloading, onView }: {
   plan: Plan;
   onDownload: (plan: Plan) => void;
   downloading: boolean;
+  onView: (plan: Plan) => void;
 }) {
   const isMissing = plan.status?.includes("مفقود") || plan.status === "missing";
   const badgeCls  = statusBadgeClass(plan.status);
@@ -126,7 +424,7 @@ function FacultyCard({ plan, onDownload, downloading }: {
             <Eye size={14} /> عرض الخطة
           </button>
         ) : (
-          <button className={styles.btnView}>
+          <button className={styles.btnView} onClick={() => onView(plan)}>
             <Eye size={14} /> عرض الخطة
           </button>
         )}
@@ -152,10 +450,10 @@ export default function PlanView() {
   const [loading, setLoading]             = useState(true);
   const [error, setError]                 = useState("");
   const [yearFilter, setYearFilter]       = useState("all");
-  const [facultyFilter, setFacultyFilter] = useState("all");   // ← NEW
-  const [facultySearch, setFacultySearch] = useState("");       // ← NEW
+  const [facultyFilter, setFacultyFilter] = useState("all");
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
   const [toastMsg, setToastMsg]           = useState("");
+  const [viewingPlan, setViewingPlan]     = useState<Plan | null>(null);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -212,18 +510,14 @@ export default function PlanView() {
 
   const years = Array.from(new Set(plans.map(p => p.academic_year).filter(Boolean))) as string[];
 
-  // ── Unique faculty names from API ──
   const facultyNames = Array.from(
     new Set(plans.map(p => p.faculty_name).filter(Boolean))
   ).sort((a, b) => a.localeCompare(b, "ar"));
 
-  // ── Apply all filters ──
   const filtered = plans.filter(p => {
     const matchYear    = yearFilter === "all" || p.academic_year === yearFilter;
     const matchFaculty = facultyFilter === "all" || p.faculty_name === facultyFilter;
-    const matchSearch  = facultySearch === "" ||
-      p.faculty_name?.toLowerCase().includes(facultySearch.toLowerCase());
-    return matchYear && matchFaculty && matchSearch;
+    return matchYear && matchFaculty;
   });
 
   const currentYear = years[0] ?? "2026-2027";
@@ -239,7 +533,6 @@ export default function PlanView() {
         >
           <FileText size={16} /> خطة الكليات
         </button>
-      
       </div>
 
       {activeTab === "plans" && (
@@ -301,35 +594,17 @@ export default function PlanView() {
             </div>
             <div className={styles.sectionControls}>
 
-              {/* ── Faculty search input ── */}
-              <div className={styles.searchWrap}>
-                <Search size={13} className={styles.searchIcon} />
-                <input
-                  type="text"
-                  className={styles.searchInput}
-                  placeholder="ابحث باسم الكلية…"
-                  value={facultySearch}
-                  onChange={e => {
-                    setFacultySearch(e.target.value);
-                    setFacultyFilter("all"); // reset dropdown when typing
-                  }}
-                />
-              </div>
-
-              {/* ── Faculty dropdown ── */}
+              {/* ── Faculty dropdown ──
               <select
                 className={styles.filterSelect}
                 value={facultyFilter}
-                onChange={e => {
-                  setFacultyFilter(e.target.value);
-                  setFacultySearch(""); // reset search when dropdown chosen
-                }}
+                onChange={e => setFacultyFilter(e.target.value)}
               >
                 <option value="all">كل الكليات</option>
                 {facultyNames.map(name => (
                   <option key={name} value={name}>{name}</option>
                 ))}
-              </select>
+              </select> */}
 
               {/* ── Year dropdown ── */}
               {years.length > 0 && (
@@ -346,13 +621,12 @@ export default function PlanView() {
               )}
 
               {/* ── Reset filters ── */}
-              {(facultyFilter !== "all" || yearFilter !== "all" || facultySearch !== "") && (
+              {(facultyFilter !== "all" || yearFilter !== "all") && (
                 <button
                   className={styles.resetBtn}
                   onClick={() => {
                     setFacultyFilter("all");
                     setYearFilter("all");
-                    setFacultySearch("");
                   }}
                 >
                   <XCircle size={13} /> مسح
@@ -366,7 +640,7 @@ export default function PlanView() {
           </div>
 
           {/* Results count */}
-          {(facultyFilter !== "all" || yearFilter !== "all" || facultySearch !== "") && (
+          {(facultyFilter !== "all" || yearFilter !== "all") && (
             <p className={styles.resultsCount}>
               {filtered.length} نتيجة من أصل {plans.length}
             </p>
@@ -396,6 +670,7 @@ export default function PlanView() {
                   plan={plan}
                   onDownload={handleDownload}
                   downloading={downloadingId === plan.plan_id}
+                  onView={setViewingPlan}
                 />
               ))}
             </div>
@@ -405,6 +680,14 @@ export default function PlanView() {
 
       {activeTab === "reports" && (
         <div className={styles.reportsWrapper} />
+      )}
+
+      {/* ── Plan Details Modal ── */}
+      {viewingPlan && (
+        <PlanDetailsModal
+          plan={viewingPlan}
+          onClose={() => setViewingPlan(null)}
+        />
       )}
 
       {toastMsg && <div className={styles.toast}>{toastMsg}</div>}

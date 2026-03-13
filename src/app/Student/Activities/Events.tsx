@@ -38,7 +38,6 @@ interface Event {
   cost: string;
   reward: string;
   isFull: boolean;
-  image: string | null;
   daysLeft: number;
 }
 
@@ -46,21 +45,20 @@ interface Event {
    MAPPER
 ══════════════════════════════════════════ */
 const mapEvent = (e: ApiEvent): Event => ({
-  id:         e.event_id,
-  title:      e.title,
-  description:e.description,
-  date:       new Date(e.st_date).toLocaleDateString('ar-EG', { day:'numeric', month:'long', year:'numeric' }),
-  location:   e.location,
-  seats:      e.s_limit,
-  takenSeats: e.current_participants,
-  type:       e.type,
-  faculty:    e.faculty_name,
-  dept:       e.dept_name,
-  cost:       e.cost,
-  reward:     e.reward,
-  isFull:     e.is_full,
-  image:      e.imgs,
-  daysLeft:   e.days_remaining,
+  id:          e.event_id,
+  title:       e.title,
+  description: e.description,
+  date:        new Date(e.st_date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }),
+  location:    e.location,
+  seats:       e.s_limit,
+  takenSeats:  e.current_participants,
+  type:        e.type,
+  faculty:     e.faculty_name,
+  dept:        e.dept_name,
+  cost:        e.cost,
+  reward:      e.reward,
+  isFull:      e.is_full,
+  daysLeft:    e.days_remaining,
 });
 
 /* ══════════════════════════════════════════
@@ -222,7 +220,6 @@ export default function Events() {
           <span className="hero-count">{filtered.length} فعالية</span>
         </div>
 
-        {/* Dynamic type tabs from API data */}
         <div className="hero-filters">
           {types.map(t => (
             <button
@@ -256,7 +253,6 @@ export default function Events() {
           <span className="results-label">عرض <strong>{filtered.length}</strong> فعالية</span>
         </div>
 
-        {/* Loading */}
         {loading && (
           <div className="ev-center-state">
             <div className="ev-spinner" />
@@ -264,14 +260,12 @@ export default function Events() {
           </div>
         )}
 
-        {/* Error */}
         {!loading && error && (
           <div className="ev-center-state ev-error">
             <p>⚠️ {error}</p>
           </div>
         )}
 
-        {/* Grid */}
         {!loading && !error && (
           <div className="events-grid">
             {filtered.length === 0 && (
@@ -286,42 +280,41 @@ export default function Events() {
               return (
                 <div key={event.id} className="event-card">
 
-                  {/* Image */}
-                  <div className="event-image">
-                    {event.image
-                      ? <img src={event.image} alt={event.title} />
-                      : <div className="event-img-placeholder">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1">
-                            <rect x="3" y="3" width="18" height="18" rx="2"/>
-                            <circle cx="8.5" cy="8.5" r="1.5"/>
-                            <polyline points="21 15 16 10 5 21"/>
-                          </svg>
-                          <span>{event.type}</span>
-                        </div>
-                    }
-                    <span className={`event-badge ${getBadgeClass(event.type)}`}>{event.type}</span>
-                    {isReg         && <span className="status-badge">✓ مسجّل</span>}
-                    {event.isFull && !isReg && <span className="full-badge">مكتمل</span>}
-                    {event.daysLeft > 0 && <span className="days-chip">{event.daysLeft} يوم</span>}
+                  {/* ── CARD HEADER: type badge + title + status chips ── */}
+                  <div className="card-header">
+                    <div className="card-header-top">
+                      <span className={`event-badge ${getBadgeClass(event.type)}`}>{event.type}</span>
+                      <div className="card-chips">
+                        {isReg && (
+                          <span className="status-badge">✓ مسجّل</span>
+                        )}
+                        {event.isFull && !isReg && (
+                          <span className="full-badge">مكتمل</span>
+                        )}
+                        {event.daysLeft > 0 && (
+                          <span className="days-chip">{event.daysLeft} يوم</span>
+                        )}
+                      </div>
+                    </div>
+                    <h3 className="event-title">{event.title}</h3>
                   </div>
 
-                  {/* Content */}
+                  {/* ── CARD BODY ── */}
                   <div className="event-content">
-                    <h3 className="event-title">{event.title}</h3>
                     <p className="event-description">{event.description}</p>
 
                     <div className="event-meta">
-                      <div className="meta-item"><CalendarIcon />{event.date}</div>
-                      <div className="meta-item"><PinIcon />{event.location}</div>
-                      <div className="meta-item"><BuildingIcon />{event.faculty}</div>
+                      <div className="meta-item"><CalendarIcon /><span>{event.date}</span></div>
+                      <div className="meta-item"><PinIcon /><span>{event.location}</span></div>
+                      <div className="meta-item"><BuildingIcon /><span>{event.faculty}</span></div>
                       <div className="meta-item">
-                        <UsersIcon />{event.takenSeats} / {event.seats} مقعد
+                        <UsersIcon /><span>{event.takenSeats} / {event.seats} مقعد</span>
                       </div>
                       {Number(event.cost) > 0 && (
-                        <div className="meta-item"><CoinIcon />{event.cost} ج.م</div>
+                        <div className="meta-item"><CoinIcon /><span>{event.cost} ج.م</span></div>
                       )}
                       {event.reward && (
-                        <div className="meta-item meta-wide"><GiftIcon />{event.reward}</div>
+                        <div className="meta-item meta-wide"><GiftIcon /><span>{event.reward}</span></div>
                       )}
                     </div>
 
@@ -336,7 +329,7 @@ export default function Events() {
                       <span className="seats-pct">{pct}%</span>
                     </div>
 
-                    {/* CTA button — no form, direct API call */}
+                    {/* CTA button */}
                     {isReg ? (
                       <button className="register-btn registered-btn" disabled>
                         <CheckIcon /> تم التسجيل

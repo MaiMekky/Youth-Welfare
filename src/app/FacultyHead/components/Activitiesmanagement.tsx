@@ -481,7 +481,7 @@ export default function ActivitiesManagement() {
                           >
                             <Eye size={15} />
                           </button>
-                          {pending && (
+                          {!pending && (
                             <>
                               <button
                                 className={`${styles.iconBtn} ${styles.btnApprove}`}

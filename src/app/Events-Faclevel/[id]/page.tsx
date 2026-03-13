@@ -1451,7 +1451,7 @@ export default function EventDetailsPage() {
               <span className={styles.miniChip}>
                 <Award size={14} /> {rewardsCount}
               </span>
-             {!isFacultyEvent && (
+             {isFacultyEvent && (
               <button
                 className={`${styles.actionBtn} ${styles.acceptBtn}`}
                 type="button"
@@ -1500,7 +1500,7 @@ export default function EventDetailsPage() {
                     <td>
                      <div className={styles.rowActions}>
   {/* ✅ لو Faculty Event: عرض التفاصيل فقط */}
-                  {isFacultyEvent ? (
+                  {!isFacultyEvent ? (
                     <button
                       className={styles.actionBtn}
                       type="button"

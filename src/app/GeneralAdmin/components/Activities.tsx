@@ -124,17 +124,17 @@ function ConfirmDialog({ action, eventTitle, onConfirm, onCancel, loading }: {
     <div className="act-overlay">
       <div className="confirm-box">
         <div className={`confirm-icon-wrap ${isApprove ? "ci-approve" : "ci-reject"}`}>
-          {!isApprove ? <CheckCircle size={30} /> : <XCircle size={30} />}
+          {isApprove ? <CheckCircle size={30} /> : <XCircle size={30} />}
         </div>
-        <h3 className="confirm-title">{!isApprove ? "تأكيد الموافقة" : "تأكيد الرفض"}</h3>
+        <h3 className="confirm-title">{isApprove ? "تأكيد الموافقة" : "تأكيد الرفض"}</h3>
         <p className="confirm-body">
-          هل أنت متأكد من {!isApprove ? "الموافقة على" : "رفض"} فعالية{" "}
+          هل أنت متأكد من {isApprove ? "الموافقة على" : "رفض"} فعالية{" "}
           <strong>"{eventTitle}"</strong>؟
         </p>
         <div className="confirm-actions">
           <button className="cbtn cbtn-cancel" onClick={onCancel} disabled={loading}>إلغاء</button>
           <button
-            className={`cbtn ${!isApprove ? "cbtn-approve" : "cbtn-reject"}`}
+            className={`cbtn ${isApprove ? "cbtn-approve" : "cbtn-reject"}`}
             onClick={onConfirm} disabled={loading}
           >
             {loading ? <><RefreshCw size={13} className="spinning" /> جاري…</> : isApprove ? "✓ موافقة" : "✕ رفض"}

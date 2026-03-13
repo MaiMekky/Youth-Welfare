@@ -58,7 +58,7 @@ const BASE = "http://127.0.0.1:8000";
 
 function isPending(raw: string) {
   const k = raw?.trim();
-  return k === "منتظر" || k?.toLowerCase() === "pending";
+  return k === "موافقة مبدئية" || k?.toLowerCase() === "pending";
 }
 function isAccepted(raw: string) {
   const k = raw?.trim();

@@ -1,6 +1,7 @@
 import "./globals.css";
 import { LanguageProvider } from "./context/LanguageContext";
 import AuthBackGuard from "./components/AuthBackGuard";
+import RouteTracker from "./components/RouteTracker";
 
 import type { Metadata } from "next";
 
@@ -18,9 +19,15 @@ export default function RootLayout({
     <html lang="ar">
       <body className="app-body">
         <LanguageProvider>
-          {/* don't allow to go back after  logout */}
+
+          {/* Track last visited page */}
+          <RouteTracker />
+
+          {/* don't allow to go back after logout */}
           <AuthBackGuard />
+
           {children}
+
         </LanguageProvider>
       </body>
     </html>

@@ -48,7 +48,6 @@ const protectedRoutes = [
 
 const allowedByRoleKey: Record<string, Record<string, string[]>> = {
   admin: {
-
     super_admin: [
       "/SuperAdmin",
       "/SuperAdmin/Events",
@@ -59,13 +58,13 @@ const allowedByRoleKey: Record<string, Record<string, string[]>> = {
       "/students",
     ],
 
-        uni_manager: [
-        "/uni-level",
-        "/uni-level-family",
-        "/uni-level-activities",
-      ],
+    uni_manager: [
+      "/uni-level",
+      "/uni-level-family",
+      "/uni-level-activities",
+    ],
 
-        fac_manager: [
+    fac_manager: [
       "/FacLevel",
       "/Family-Faclevel",
       "/FacultyReport",
@@ -118,17 +117,11 @@ function redirectTo(resUrl: string, req: NextRequest) {
 function defaultRedirect(userType: string, roleKey: string) {
 
   if (userType === "admin") {
-
     if (roleKey === "super_admin") return "/SuperAdmin";
-
     if (roleKey === "uni_manager") return "/uni-level";
-
     if (roleKey === "fac_manager") return "/FacLevel";
-
     if (roleKey === "fac_head") return "/FacultyHead";
-
     if (roleKey === "General_admin") return "/GeneralAdmin";
-
     return "/";
   }
 
@@ -141,6 +134,11 @@ export function middleware(req: NextRequest) {
 
   const path = req.nextUrl.pathname;
 
+  const token = req.cookies.get("access")?.value;
+  const userType = req.cookies.get("user_type")?.value || "";
+  const roleKey = req.cookies.get("roleKey")?.value || "";
+  const lastRoute = req.cookies.get("lastRoute")?.value;
+
   const isStaticFile = /\.(.*)$/.test(path);
 
   if (
@@ -152,15 +150,16 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // Auto redirect logged-in users from landing page
+  if (path === "/" && token && lastRoute) {
+    return redirectTo(lastRoute, req);
+  }
+
   const isProtected = protectedRoutes.some((route) =>
     path.startsWith(route)
   );
 
   if (!isProtected) return NextResponse.next();
-
-  const token = req.cookies.get("access")?.value;
-  const userType = req.cookies.get("user_type")?.value || "";
-  const roleKey = req.cookies.get("roleKey")?.value || "";
 
   if (!token) return redirectTo("/", req);
 

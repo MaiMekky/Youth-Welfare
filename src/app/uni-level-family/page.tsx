@@ -56,7 +56,7 @@ const [activeTab, setActiveTab] = useState(initialTab);
   }
 
   useEffect(() => {
-    
+    fetchFamilies();
   }, []);
 
   /* ================= تقسيم حسب النوع ================= */

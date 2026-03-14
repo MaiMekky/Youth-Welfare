@@ -132,7 +132,12 @@ export default function AddUser() {
             ],
             status: data.acc_status === 'active',
             faculty: facultyId,
-            departments: data.dept_fac_ls
+            departments:
+            data.dept !== null && data.dept !== undefined
+              ? [String(data.dept)]
+              : Array.isArray(data.dept_fac_ls)
+                ? data.dept_fac_ls.map((d: number | string) => String(d))
+                : [],
           });
         })
         .catch(err => console.error('Error fetching admin data:', err));

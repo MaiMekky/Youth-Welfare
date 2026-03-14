@@ -454,44 +454,84 @@ export default function EventDetailsPage() {
     setImages(Array.isArray(res.data) ? res.data : []);
   };
 
-  const uploadImages = async (files: FileList | null) => {
-    if (!id || !files || files.length === 0) return;
+const uploadImages = async (files: FileList | null) => {
+  if (!id || !files || files.length === 0) return;
 
-    const token = getAccessToken();
-    if (!token) {
-      showToast(" لا يوجد توكن (access).", "error");
-      return;
-    }
+  const token = getAccessToken();
+  if (!token) {
+    showToast("❌ لا يوجد توكن (access).", "error");
+    return;
+  }
 
-    try {
-      setUploading(true);
+  setUploading(true);
 
-      const fd = new FormData();
-      Array.from(files).forEach((f) => fd.append("images", f));
-      fd.append("doc_type", docType);
+  try {
+    const fd = new FormData();
+    Array.from(files).forEach((f) => fd.append("images", f));
+    fd.append("doc_type", docType);
 
-      const res = await authFetch(`${API_URL}/api/event/manage-events/${id}/upload-images/`, {
+    const res = await authFetch(
+      `${API_URL}/api/event/manage-events/${id}/upload-images/`,
+      {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
         },
         body: fd,
-      });
-
-      if (!res.ok) {
-        const t = await res.text();
-        showToast(`حدث خطأ أثناء رفع الصور: ${t}`, "error");
-        return;
       }
+    );
 
-      if (fileRef.current) fileRef.current.value = "";
-      await loadImages();
-      showToast("✅ تم رفع الصور بنجاح", "success");
-    } finally {
-      setUploading(false);
+    let errorMessage = "";
+    let successMessage = "";
+
+    if (!res.ok) {
+      try {
+        const data = await res.json();
+        if (data.detail) {
+          switch (data.detail) {
+            case "Only the event creator can upload images for this event":
+              errorMessage = "❌ لا يمكنك رفع الصور إلا إذا كنت منشئ النشاط";
+              break;
+            default:
+              errorMessage = `❌ ${data.detail}`;
+          }
+        }
+
+        else if (data.images && Array.isArray(data.images)) {
+          const messages: string[] = [];
+          data.images.forEach((msg: string) => {
+            if (msg.includes("exceeds")) {
+              messages.push("❌ حجم الصورة أكبر من 20 ميجابايت");
+            } else if (msg.includes("invalid extension")) {
+              messages.push("❌ الصورة يجب أن تكون بصيغة jpg أو jpeg أو png أو pdf");
+            } else {
+              messages.push(`❌ ${msg}`);
+            }
+          });
+          errorMessage = messages.join(", ");
+        }
+        else if (data.doc_type && Array.isArray(data.doc_type)) {
+          errorMessage = "❌ نوع المستند غير مدعوم";
+        }
+      } catch (err) {
+        console.error("Error parsing server response:", err);
+        errorMessage = "❌ حدث خطأ أثناء رفع الصور";
+      }
+    } else {
+      successMessage = "✅ تم رفع الصور بنجاح";
     }
-  };
+    if (errorMessage) showToast(errorMessage, "error");
+    if (successMessage) showToast(successMessage, "success");
 
+    if (fileRef.current) fileRef.current.value = "";
+
+    if (!errorMessage) {
+      await loadImages(); 
+    }
+  } finally {
+    setUploading(false);
+  }
+};
   const deleteImage = async (docId: number) => {
     if (!id || !docId) return;
 

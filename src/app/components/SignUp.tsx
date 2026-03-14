@@ -3,8 +3,9 @@ import React, { ChangeEvent, FormEvent, useState, useEffect } from "react";
 import Image from "next/image";
 import logo from "@/app/assets/logo.png";
 import profilePlaceholder from "@/app/assets/profile.png";
-import styles from "../Styles/components/LoginPage.module.css"; // reuse popup styles
+import styles from "../Styles/components/LoginPage.module.css";
 import { authFetch } from "@/utils/globalFetch";
+
 interface SignupProps {
   onClose: () => void;
   onSwitchToLogin: () => void;
@@ -23,7 +24,7 @@ interface FormData {
   phone: string;
   address: string;
   gender: string;
-  grade: string; 
+  grade: string;
 }
 
 interface Faculty {
@@ -67,8 +68,6 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
         if (response.ok) {
           const data = await response.json();
           setFaculties(data);
-        } else {
-          console.error("Failed to fetch faculties");
         }
       } catch (error) {
         console.error("Error fetching faculties:", error);
@@ -76,7 +75,6 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
         setFacultiesLoading(false);
       }
     };
-
     fetchFaculties();
   }, []);
 
@@ -89,21 +87,26 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
     const { name, value, type } = e.target as any;
     const numericFields = ["studentId", "studentCode", "phone"];
     let newValue = value;
+
     if (numericFields.includes(name)) {
       newValue = value.replace(/[^\d+]/g, "");
     }
 
-    if (name === "studentId") newValue = newValue.slice(0, 14);
+    if (name === "studentId")  newValue = newValue.slice(0, 14);
     if (name === "studentCode") newValue = newValue.slice(0, 14);
     if (name === "phone") {
       if (!newValue.startsWith("+20")) newValue = "+20";
       newValue = newValue.slice(0, 13);
     }
+
     newValue =
       type === "radio"
         ? value
         : numericFields.includes(name)
         ? toEnglishDigits(value)
+        // ✅ force email to lowercase as the user types
+        : name === "email"
+        ? value.toLowerCase()
         : value;
 
     setFormData((prev) => ({ ...prev, [name]: newValue }));
@@ -120,9 +123,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
   const validateForm = () => {
     const newErrors: Partial<Record<keyof FormData, string>> = {};
 
-    if (!formData.fullNameEn.trim()) {
-      newErrors.fullNameEn = "الاسم باللغة العربية مطلوب";
-    }
+    if (!formData.fullNameEn.trim()) newErrors.fullNameEn = "الاسم باللغة العربية مطلوب";
 
     if (!formData.email.trim()) {
       newErrors.email = "البريد الإلكتروني مطلوب";
@@ -130,20 +131,12 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
       newErrors.email = "صيغة البريد الإلكتروني غير صحيحة";
     }
 
-    // password
     if (!formData.password.trim()) {
       newErrors.password = "كلمة المرور مطلوبة";
     } else if (formData.password.length < 6 || formData.password.length > 14) {
       newErrors.password = "كلمة المرور يجب أن تكون بين 6 و 14 حرفًا";
-     } 
-    //  else if (
-    //   !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]+$/.test(formData.password)
-    // ) {
-    //   newErrors.password =
-    //     "كلمة المرور يجب أن تحتوي على حرف كبير وحرف صغير ورقم باللغة الإنجليزية فقط";
-    // }
+    }
 
-    // confirm password
     if (!formData.confirmPassword.trim()) {
       newErrors.confirmPassword = "تأكيد كلمة المرور مطلوب";
     }
@@ -163,38 +156,18 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
       newErrors.studentCode = "كود الطالب غير صحيح";
     }
 
-    if (!formData.faculty.trim()) {
-      newErrors.faculty = "الكلية مطلوبة";
+    if (!formData.faculty.trim())     newErrors.faculty    = "الكلية مطلوبة";
+    if (!formData.department.trim())  newErrors.department = "القسم مطلوب";
+    if (!formData.level.trim())       newErrors.level      = "الفرقة مطلوبة";
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = "رقم الهاتف مطلوب";
+    } else if (!/^(01[0125])[0-9]{8}$/.test(formData.phone)) {
+      newErrors.phone = "رقم الهاتف غير صحيح، يجب أن يبدأ بـ 010 أو 011 أو 012 أو 015 ويحتوي على 11 رقمًا";
     }
 
-    if (!formData.department.trim()) {
-      newErrors.department = "القسم مطلوب";
-    }
-
-    if (!formData.level.trim()) {
-      newErrors.level = "الفرقة مطلوبة";
-    }
-
-    // // phone (optional but validate when present)
-    if(!formData.phone.trim()){
-        newErrors.phone = "رقم الهاتف مطلوب";
-    }
-   else if (
-        formData.phone &&
-        !/^(01[0125])[0-9]{8}$/.test(formData.phone)
-      ) {
-        newErrors.phone =
-          "رقم الهاتف غير صحيح، يجب أن يبدأ بـ 010 أو 011 أو 012 أو 015 ويحتوي على 11 رقمًا";
-      }
-
-    // address
-    if (!formData.address.trim()) {
-      newErrors.address = "العنوان مطلوب";
-    }
-
-    if (!formData.grade.trim()) {
-      newErrors.grade = "التقدير مطلوب";
-    }
+    if (!formData.address.trim()) newErrors.address = "العنوان مطلوب";
+    if (!formData.grade.trim())   newErrors.grade   = "التقدير مطلوب";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -202,23 +175,24 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
     if (!validateForm()) return;
 
-    const formDataToSend = new FormData();
+    // ✅ normalize email: trim + lowercase before sending
+    const normalizedEmail = formData.email.trim().toLowerCase();
 
-    formDataToSend.append("name", formData.fullNameEn);
-    formDataToSend.append("email", formData.email);
-    formDataToSend.append("password", formData.password);
-    formDataToSend.append("faculty", formData.faculty);
-    formDataToSend.append("gender", formData.gender);
-    formDataToSend.append("nid", formData.studentId);
-    formDataToSend.append("uid", formData.studentCode);
+    const formDataToSend = new FormData();
+    formDataToSend.append("name",         formData.fullNameEn);
+    formDataToSend.append("email",        normalizedEmail);
+    formDataToSend.append("password",     formData.password);
+    formDataToSend.append("faculty",      formData.faculty);
+    formDataToSend.append("gender",       formData.gender);
+    formDataToSend.append("nid",          formData.studentId);
+    formDataToSend.append("uid",          formData.studentCode);
     formDataToSend.append("phone_number", formData.phone);
-    formDataToSend.append("address", formData.address);
-    formDataToSend.append("acd_year", formData.level);
-    formDataToSend.append("grade", formData.grade);
-    formDataToSend.append("major", formData.department);
+    formDataToSend.append("address",      formData.address);
+    formDataToSend.append("acd_year",     formData.level);
+    formDataToSend.append("grade",        formData.grade);
+    formDataToSend.append("major",        formData.department);
 
     const profileFileInput = document.getElementById("profileUpload") as HTMLInputElement;
     if (profileFileInput?.files?.[0]) {
@@ -246,10 +220,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
       }
 
       showNotification("تم إنشاء الحساب بنجاح 🎉", "success");
-
-      setTimeout(() => {
-        onClose();
-      }, 1500);
+      setTimeout(() => { onClose(); }, 1500);
     } catch (err) {
       console.error(err);
       showNotification("حدث خطأ، حاول مرة أخرى", "error");
@@ -257,28 +228,22 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
       setLoading(false);
     }
   };
-  
+
   return (
     <div className={styles.loginBox}>
-      <button className={styles.closeBtn} onClick={onClose} aria-label="close">
-        ✕
-      </button>
+      <button className={styles.closeBtn} onClick={onClose} aria-label="close">✕</button>
 
       <div className={styles.logoContainer}>
         <Image src={logo} alt="logo" width={150} height={150} draggable={false} />
       </div>
 
       <h2 className={styles.loginTitle}>إنشاء حساب جديد</h2>
+
       {notification && (
-        <div
-          className={`${styles.notification} ${
-            notification.startsWith("success")
-              ? styles.success
-              : notification.startsWith("warning")
-              ? styles.warning
-              : styles.error
-          }`}
-        >
+        <div className={`${styles.notification} ${
+          notification.startsWith("success") ? styles.success :
+          notification.startsWith("warning") ? styles.warning : styles.error
+        }`}>
           {notification.split(":")[1]}
         </div>
       )}
@@ -286,164 +251,59 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
       <form onSubmit={handleSubmit} className={styles.loginForm} noValidate>
         {/* profile upload */}
         <label htmlFor="profileUpload" style={{ cursor: "pointer", marginBottom: 8 }}>
-          <Image
-            src={profileImg}
-            alt="profile"
-            width={90}
-            height={90}
-            className={styles.profileImg}
-          />
+          <Image src={profileImg} alt="profile" width={90} height={90} className={styles.profileImg} />
         </label>
-        <input
-          id="profileUpload"
-          type="file"
-          accept="image/*"
-          onChange={handleImageUpload}
-          style={{ display: "none" }}
-        />
+        <input id="profileUpload" type="file" accept="image/*" onChange={handleImageUpload} style={{ display: "none" }} />
 
-        {/* Arabic full name */}
-        <input
-          name="fullNameEn"
-          type="text"
-          placeholder="الاسم رباعي باللغة العربية"
-          value={formData.fullNameEn}
-          onChange={handleChange}
-          className={errors.fullNameEn ? styles.invalid : ""}
-        />
+        <input name="fullNameEn" type="text" placeholder="الاسم رباعي باللغة العربية" value={formData.fullNameEn} onChange={handleChange} className={errors.fullNameEn ? styles.invalid : ""} />
         {errors.fullNameEn && <p className={styles.errorMsg}>{errors.fullNameEn}</p>}
 
-        {/* email */}
-        <input
-          name="email"
-          type="email"
-          placeholder="البريد الإلكتروني"
-          value={formData.email}
-          onChange={handleChange}
-          className={errors.email ? styles.invalid : ""}
-        />
+        {/* ✅ email field — value is always lowercase thanks to handleChange */}
+        <input name="email" type="email" placeholder="البريد الإلكتروني" value={formData.email} onChange={handleChange} className={errors.email ? styles.invalid : ""} />
         {errors.email && <p className={styles.errorMsg}>{errors.email}</p>}
 
-        {/* password */}
-        <input
-          name="password"
-          type="password"
-          placeholder="كلمة المرور"
-          value={formData.password}
-          onChange={handleChange}
-          className={errors.password ? styles.invalid : ""}
-        />
+        <input name="password" type="password" placeholder="كلمة المرور" value={formData.password} onChange={handleChange} className={errors.password ? styles.invalid : ""} />
         {errors.password && <p className={styles.errorMsg}>{errors.password}</p>}
 
-        {/* confirm password */}
-        <input
-          name="confirmPassword"
-          type="password"
-          placeholder="تأكيد كلمة المرور"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          className={errors.confirmPassword ? styles.invalid : ""}
-        />
-        {errors.confirmPassword && (
-          <p className={styles.errorMsg}>{errors.confirmPassword}</p>
-        )}
+        <input name="confirmPassword" type="password" placeholder="تأكيد كلمة المرور" value={formData.confirmPassword} onChange={handleChange} className={errors.confirmPassword ? styles.invalid : ""} />
+        {errors.confirmPassword && <p className={styles.errorMsg}>{errors.confirmPassword}</p>}
 
-        {/* studentId */}
-        <input
-          name="studentId"
-          type="text"
-          placeholder="الرقم القومي"
-          value={formData.studentId}
-          onChange={handleChange}
-          className={errors.studentId ? styles.invalid : ""}
-          maxLength={14}
-        />
+        <input name="studentId" type="text" placeholder="الرقم القومي" value={formData.studentId} onChange={handleChange} className={errors.studentId ? styles.invalid : ""} maxLength={14} />
         {errors.studentId && <p className={styles.errorMsg}>{errors.studentId}</p>}
 
-        {/* studentCode */}
-        <input
-          name="studentCode"
-          type="text"
-          placeholder="كود الطالب"
-          value={formData.studentCode}
-          onChange={handleChange}
-          className={errors.studentCode ? styles.invalid : ""}
-          maxLength={8}
-        />
+        <input name="studentCode" type="text" placeholder="كود الطالب" value={formData.studentCode} onChange={handleChange} className={errors.studentCode ? styles.invalid : ""} maxLength={8} />
         {errors.studentCode && <p className={styles.errorMsg}>{errors.studentCode}</p>}
 
-        {/* faculty */}
-        <select
-          name="faculty"
-          value={formData.faculty}
-          onChange={handleChange}
-          className={errors.faculty ? styles.invalid : styles.input}
-        >
+        <select name="faculty" value={formData.faculty} onChange={handleChange} className={errors.faculty ? styles.invalid : styles.input}>
           <option value="" disabled hidden>اختر الكلية</option>
-          {facultiesLoading ? (
-            <option value="" disabled>جاري تحميل الكليات...</option>
-          ) : (
-            faculties.map((faculty) => (
-              <option key={faculty.faculty_id} value={faculty.faculty_id}>
-                {faculty.name}
-              </option>
-            ))
-          )}
+          {facultiesLoading
+            ? <option value="" disabled>جاري تحميل الكليات...</option>
+            : faculties.map((f) => <option key={f.faculty_id} value={f.faculty_id}>{f.name}</option>)
+          }
         </select>
         {errors.faculty && <p className={styles.errorMsg}>{errors.faculty}</p>}
 
-        {/* department */}
-        <input
-          name="department"
-          type="text"
-          placeholder="القسم"
-          value={formData.department}
-          onChange={handleChange}
-          className={errors.department ? styles.invalid : ""}
-        />
+        <input name="department" type="text" placeholder="القسم" value={formData.department} onChange={handleChange} className={errors.department ? styles.invalid : ""} />
         {errors.department && <p className={styles.errorMsg}>{errors.department}</p>}
 
-        {/* level */}
-        <input
-          name="level"
-          type="text"
-          placeholder="الفرقة"
-          value={formData.level}
-          onChange={handleChange}
-          className={errors.level ? styles.invalid : ""}
-        />
+        <select name="level" value={formData.level} onChange={handleChange} className={errors.level ? styles.invalid : styles.input}>
+          <option value="" disabled hidden>اختر الفرقة</option>
+          <option value="الفرقة الأولى">الفرقة الأولى</option>
+          <option value="الفرقة الثانية">الفرقة الثانية</option>
+          <option value="الفرقة الثالثة">الفرقة الثالثة</option>
+          <option value="الفرقة الرابعة">الفرقة الرابعة</option>
+          <option value="الفرقة الخامسة">الفرقة الخامسة</option>
+          <option value="الفرقة السادسة">الفرقة السادسة</option>
+        </select>
         {errors.level && <p className={styles.errorMsg}>{errors.level}</p>}
 
-        {/* phone */}
-        <input
-          name="phone"
-          type="text"
-          placeholder="التليفون"
-          value={formData.phone}
-          onChange={handleChange}
-          className={errors.phone ? styles.invalid : ""}
-          maxLength={11}
-        />
+        <input name="phone" type="text" placeholder="التليفون" value={formData.phone} onChange={handleChange} className={errors.phone ? styles.invalid : ""} maxLength={11} />
         {errors.phone && <p className={styles.errorMsg}>{errors.phone}</p>}
 
-        {/* address */}
-        <input
-          name="address"
-          type="text"
-          placeholder="العنوان"
-          value={formData.address}
-          onChange={handleChange}
-          className={errors.address ? styles.invalid : ""}
-        />
+        <input name="address" type="text" placeholder="العنوان" value={formData.address} onChange={handleChange} className={errors.address ? styles.invalid : ""} />
         {errors.address && <p className={styles.errorMsg}>{errors.address}</p>}
 
-        {/* grade */}
-        <select
-          name="grade"
-          value={formData.grade}
-          onChange={handleChange}
-          className={errors.grade ? styles.invalid : styles.input}
-        >
+        <select name="grade" value={formData.grade} onChange={handleChange} className={errors.grade ? styles.invalid : styles.input}>
           <option value="" disabled hidden>اختر التقدير</option>
           <option value="امتياز">امتياز</option>
           <option value="جيد جدا">جيد جدًا</option>
@@ -452,49 +312,23 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
         </select>
         {errors.grade && <p className={styles.errorMsg}>{errors.grade}</p>}
 
-        {/* gender */}
         <div style={{ display: "flex", gap: 12, color: "#2C3A5F", marginTop: 8 }}>
           <label style={{ cursor: "pointer" }}>
-            <input
-              type="radio"
-              name="gender"
-              value="M"
-              checked={formData.gender === "M"}
-              onChange={handleChange}
-            />{" "}
-            ذكر
+            <input type="radio" name="gender" value="M" checked={formData.gender === "M"} onChange={handleChange} /> ذكر
           </label>
           <label style={{ cursor: "pointer" }}>
-            <input
-              type="radio"
-              name="gender"
-              value="F"
-              checked={formData.gender === "F"}
-              onChange={handleChange}
-            />{" "}
-            أنثى
+            <input type="radio" name="gender" value="F" checked={formData.gender === "F"} onChange={handleChange} /> أنثى
           </label>
         </div>
 
-        <button
-          type="submit"
-          className={styles.loginButton}
-          style={{ marginTop: 14 }}
-          disabled={loading}
-        >
+        <button type="submit" className={styles.loginButton} style={{ marginTop: 14 }} disabled={loading}>
           {loading ? "جارٍ الإنشاء..." : "تسجيل"}
         </button>
       </form>
 
       <p className={styles.signupText} style={{ marginTop: 12 }}>
         لديك حساب؟{" "}
-        <span
-          className={styles.linkSwitch}
-          onClick={() => {
-            onSwitchToLogin();
-          }}
-          style={{ cursor: "pointer" }}
-        >
+        <span className={styles.linkSwitch} onClick={onSwitchToLogin} style={{ cursor: "pointer" }}>
           تسجيل الدخول
         </span>
       </p>

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import './Events.css';
 import { authFetch } from "@/utils/globalFetch";
+
 /* ══════════════════════════════════════════
    TYPES
 ══════════════════════════════════════════ */
@@ -143,7 +144,7 @@ export default function Events() {
 
   const showToast = (msg: string, ok: boolean) => {
     setToast({ msg, ok });
-    setTimeout(() => setToast(null), 3500);
+    setTimeout(() => setToast(null), 4000);
   };
 
   /* ── Fetch ── */
@@ -178,11 +179,12 @@ export default function Events() {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || err.detail || 'فشل التسجيل');
+        throw new Error(err.message || err.detail || 'فشل إرسال الطلب');
       }
       setRegistered(prev => new Set([...prev, id]));
       setEvents(prev => prev.map(e => e.id === id ? { ...e, takenSeats: e.takenSeats + 1 } : e));
-      showToast('تم التسجيل في الفعالية بنجاح! 🎉', true);
+      // ✅ التوست الجديد
+      showToast('تم إرسال الطلب بنجاح', true);
     } catch (e: any) {
       showToast(e.message, false);
     } finally {
@@ -194,7 +196,7 @@ export default function Events() {
   const types    = ['all', ...Array.from(new Set(events.map(e => e.type)))];
   const filtered = events.filter(e =>
     (activeType === 'all' || e.type === activeType) &&
-    (!searchQuery || e.title.includes(searchQuery) || e.description.includes(searchQuery))
+    (!searchQuery || e.title.includes(searchQuery) || (e.description ?? '').includes(searchQuery))
   );
 
   /* ══════════════════════════════════════════
@@ -280,7 +282,7 @@ export default function Events() {
               return (
                 <div key={event.id} className="event-card">
 
-                  {/* ── CARD HEADER: type badge + title + status chips ── */}
+                  {/* ── CARD HEADER ── */}
                   <div className="card-header">
                     <div className="card-header-top">
                       <span className={`event-badge ${getBadgeClass(event.type)}`}>{event.type}</span>
@@ -345,7 +347,7 @@ export default function Events() {
                         disabled={isJoining}
                       >
                         {isJoining
-                          ? <><span className="btn-spinner" /> جاري التسجيل...</>
+                          ? <><span className="btn-spinner" /> جاري إرسال الطلب...</>
                           : 'التسجيل في الفعالية'
                         }
                       </button>

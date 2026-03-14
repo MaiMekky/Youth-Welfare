@@ -4,6 +4,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import { X, Mail, Lock, ArrowRight } from "lucide-react";
 import styles from "../Styles/components/ForgotPasswordModal.module.css";
 import { authFetch } from "@/utils/globalFetch";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 type Step = "email" | "confirm" | "success";
@@ -31,18 +32,16 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
 
   // Close on Escape
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
+    const handleEscape = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
   }, [onClose]);
 
-  // If uid & token are present in the URL (from email link), pre-fill and jump to confirm step
+  // If uid & token are in URL (from email link), pre-fill and jump to confirm step
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
-    const urlUid = params.get("uid");
+    const urlUid   = params.get("uid");
     const urlToken = params.get("token");
     if (urlUid && urlToken) {
       setUid(urlUid);
@@ -69,17 +68,20 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
     return Object.keys(e).length === 0;
   };
 
-  // Backend: POST { email } → sends password-reset email (with uid + token in link)
   const handleRequestEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateEmail()) return;
     setLoading(true);
     setErrors({});
+
+    // ✅ normalize: trim + lowercase before sending
+    const normalizedEmail = email.trim().toLowerCase();
+
     try {
       const res = await authFetch(`${API_BASE}/api/auth/password-reset/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ email: normalizedEmail }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -102,12 +104,10 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
     }
   };
 
-  // Backend: POST { uid, token, new_password, confirm_password } → confirms reset
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateConfirmStep()) return;
 
-    // Safety check — uid/token must exist (they come from the URL)
     if (!uid || !token) {
       showMessage("رابط إعادة التعيين غير صالح. يرجى النقر على الرابط الموجود في بريدك مرة أخرى.", "error");
       return;
@@ -120,9 +120,9 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          uid: uid.trim(),
-          token: token.trim(),
-          new_password: newPassword,
+          uid:              uid.trim(),
+          token:            token.trim(),
+          new_password:     newPassword,
           confirm_password: confirmPassword,
         }),
       });
@@ -136,10 +136,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
         return;
       }
       setStep("success");
-      setTimeout(() => {
-        onSuccess?.();
-        onClose();
-      }, 2500);
+      setTimeout(() => { onSuccess?.(); onClose(); }, 2500);
     } catch (err) {
       console.error(err);
       showMessage("حدث خطأ في الاتصال. حاولي مرة أخرى.", "error");
@@ -150,13 +147,9 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
 
   const handleBackToEmail = () => {
     setStep("email");
-    setUid("");
-    setToken("");
-    setNewPassword("");
-    setConfirmPassword("");
-    setErrors({});
-    setMessage(null);
-    // Clear uid/token from URL without page reload
+    setUid(""); setToken("");
+    setNewPassword(""); setConfirmPassword("");
+    setErrors({}); setMessage(null);
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
       url.searchParams.delete("uid");
@@ -168,17 +161,12 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true" aria-labelledby="forgot-password-title">
       <div className={styles.box} dir="rtl">
-        <button
-          type="button"
-          className={styles.closeBtn}
-          onClick={onClose}
-          aria-label="إغلاق"
-        >
+        <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="إغلاق">
           <X size={22} />
         </button>
 
         <h2 id="forgot-password-title" className={styles.title}>
-          {step === "email" && "نسيت كلمة المرور"}
+          {step === "email"   && "نسيت كلمة المرور"}
           {step === "confirm" && "تعيين كلمة مرور جديدة"}
           {step === "success" && "تم بنجاح"}
         </h2>
@@ -202,7 +190,8 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
                   type="email"
                   placeholder="البريد الجامعي"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  // ✅ force lowercase as the user types
+                  onChange={(e) => setEmail(e.target.value.toLowerCase())}
                   className={errors.email ? styles.invalid : ""}
                   autoComplete="email"
                   autoFocus
@@ -216,12 +205,10 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
           </>
         )}
 
-        {/* ── Step 2: Set new password (uid & token come from URL, hidden from user) ── */}
+        {/* ── Step 2: Set new password ── */}
         {step === "confirm" && (
           <>
-            <p className={styles.subtitle}>
-              أدخلي كلمة المرور الجديدة لحسابك.
-            </p>
+            <p className={styles.subtitle}>أدخلي كلمة المرور الجديدة لحسابك.</p>
             <form onSubmit={handleResetPassword} className={styles.form}>
               <div className={styles.inputWrap}>
                 <Lock className={styles.inputIcon} size={18} />
@@ -254,12 +241,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
                 {loading ? "جاري الحفظ..." : "تغيير كلمة المرور"}
               </button>
 
-              <button
-                type="button"
-                className={styles.backBtn}
-                onClick={handleBackToEmail}
-                disabled={loading}
-              >
+              <button type="button" className={styles.backBtn} onClick={handleBackToEmail} disabled={loading}>
                 <ArrowRight size={16} />
                 إرسال رابط جديد
               </button>

@@ -2,8 +2,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import {
   Eye, CheckCircle, XCircle, Clock, Calendar, MapPin,
-  Users, DollarSign, Building2, Tag, X, ChevronLeft,
-  ChevronRight, Layers, AlertCircle, RefreshCw, FileDown,
+  Users, DollarSign, Building2, Tag, X,
+  Layers, AlertCircle, RefreshCw, FileDown,
 } from "lucide-react";
 import styles from "../Styles/Activitiesmanagement.module.css";
 import { authFetch } from "@/utils/globalFetch";
@@ -52,6 +52,8 @@ const getToken = () =>
 
 const BASE = "http://127.0.0.1:8000";
 
+type TabKey = "pending" | "approved" | "rejected";
+
 const STATUS_MAP: Record<string, { label: string; cls: string; accent: string }> = {
   "موافقة مبدئية": { label: "قيد الانتظار", cls: "sPending",  accent: "accentPending"  },
   "مقبول":         { label: "مقبول",         cls: "sApproved", accent: "accentApproved" },
@@ -68,9 +70,9 @@ function statusInfo(raw: string) {
     STATUS_MAP[key?.toLowerCase()] ?? { label: raw, cls: "sPending", accent: "accentPending" }
   );
 }
-function isPending(raw: string)       { const k=raw?.trim(); return k==="موافقة مبدئية"||k?.toLowerCase()==="pending"; }
-function isApprovedStatus(raw: string){ const k=raw?.trim(); return k==="مقبول"||k?.toLowerCase()==="approved"; }
-function isRejectedStatus(raw: string){ const k=raw?.trim(); return k==="مرفوض"||k?.toLowerCase()==="rejected"; }
+function isPending(raw: string)        { const k=raw?.trim(); return k==="موافقة مبدئية"||k?.toLowerCase()==="pending"; }
+function isApprovedStatus(raw: string) { const k=raw?.trim(); return k==="مقبول"||k?.toLowerCase()==="approved"; }
+function isRejectedStatus(raw: string) { const k=raw?.trim(); return k==="مرفوض"||k?.toLowerCase()==="rejected"; }
 
 function fmt(d?: string) {
   if (!d) return "—";
@@ -111,11 +113,11 @@ function DetailModal({ id, onClose }: { id: number; onClose: () => void }) {
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
         <div className={styles.modalHeader}>
           <h2>{loading ? "جاري التحميل…" : detail?.title ?? "تفاصيل الفعالية"}</h2>
-          <button className={styles.modalCloseBtn} onClick={onClose}><X size={17}/></button>
+          <button className={styles.modalCloseBtn} onClick={onClose}><X size={18}/></button>
         </div>
         <div className={styles.modalBody}>
-          {loading && <div className={styles.stateBox}><RefreshCw size={34} className={styles.spinner}/><p>جاري التحميل…</p></div>}
-          {err && <p style={{color:"#EF4444",textAlign:"center"}}>{err}</p>}
+          {loading && <div className={styles.stateBox}><RefreshCw size={36} className={styles.spinner}/><p>جاري التحميل…</p></div>}
+          {err && <p style={{color:"#EF4444",textAlign:"center",fontWeight:600}}>{err}</p>}
           {detail && !loading && (
             <>
               <div className={styles.modalTopRow}>
@@ -125,16 +127,16 @@ function DetailModal({ id, onClose }: { id: number; onClose: () => void }) {
               {detail.description && <div className={styles.descBox}>{detail.description}</div>}
               <div className={styles.detailGrid}>
                 {[
-                  { icon:<Building2 size={14}/>,  label:"الجهة",         val:`${detail.faculty_name??"—"} / ${detail.dept_name??"—"}` },
-                  { icon:<Users size={14}/>,       label:"منشئ الفعالية", val:detail.created_by_name },
-                  { icon:<MapPin size={14}/>,      label:"الموقع",        val:detail.location },
-                  { icon:<Calendar size={14}/>,    label:"تاريخ البداية", val:fmt(detail.st_date) },
-                  { icon:<Calendar size={14}/>,    label:"تاريخ النهاية", val:fmt(detail.end_date) },
-                  { icon:<Users size={14}/>,       label:"الحد الأقصى",   val:limitLabel(detail.s_limit) },
-                  { icon:<DollarSign size={14}/>,  label:"التكلفة",       val:detail.cost||"مجاني" },
-                  { icon:<Tag size={14}/>,         label:"المكافأة",      val:detail.reward||"—" },
-                  { icon:<AlertCircle size={14}/>, label:"القيود",        val:detail.restrictions||"لا يوجد" },
-                  { icon:<Layers size={14}/>,      label:"الموارد",       val:detail.resource||"—" },
+                  { icon:<Building2 size={15}/>,  label:"الجهة",         val:`${detail.faculty_name??"—"} / ${detail.dept_name??"—"}` },
+                  { icon:<Users size={15}/>,       label:"منشئ الفعالية", val:detail.created_by_name },
+                  { icon:<MapPin size={15}/>,      label:"الموقع",        val:detail.location },
+                  { icon:<Calendar size={15}/>,    label:"تاريخ البداية", val:fmt(detail.st_date) },
+                  { icon:<Calendar size={15}/>,    label:"تاريخ النهاية", val:fmt(detail.end_date) },
+                  { icon:<Users size={15}/>,       label:"الحد الأقصى",   val:limitLabel(detail.s_limit) },
+                  { icon:<DollarSign size={15}/>,  label:"التكلفة",       val:detail.cost||"مجاني" },
+                  { icon:<Tag size={15}/>,         label:"المكافأة",      val:detail.reward||"—" },
+                  { icon:<AlertCircle size={15}/>, label:"القيود",        val:detail.restrictions||"لا يوجد" },
+                  { icon:<Layers size={15}/>,      label:"الموارد",       val:detail.resource||"—" },
                 ].map(({icon,label,val}) => (
                   <div key={label} className={styles.detailItem}>
                     <div className={styles.detailIcon}>{icon}</div>
@@ -167,13 +169,18 @@ function ConfirmDialog({ action, eventTitle, onConfirm, onCancel, loading }: {
     <div className={styles.confirmOverlay}>
       <div className={styles.confirmBox}>
         <div className={styles.confirmIcon} style={{background:isApprove?"#ECFDF5":"#FEF2F2",color:isApprove?"#10B981":"#EF4444"}}>
-          {isApprove ? <CheckCircle size={28}/> : <XCircle size={28}/>}
+          {isApprove ? <CheckCircle size={32}/> : <XCircle size={32}/>}
         </div>
         <h3>{isApprove?"تأكيد الاعتماد":"تأكيد الرفض"}</h3>
         <p>هل أنت متأكد من {isApprove?"اعتماد":"رفض"} فعالية<br/><strong style={{color:"#111827"}}>"{eventTitle}"</strong>؟</p>
         <div className={styles.confirmBtns}>
           <button className={styles.cancelBtn} onClick={onCancel} disabled={loading}>إلغاء</button>
-          <button className={styles.confirmActionBtn} style={{background:isApprove?"#10B981":"#EF4444"}} onClick={onConfirm} disabled={loading}>
+          <button
+            className={styles.confirmActionBtn}
+            style={{background:isApprove?"#10B981":"#EF4444"}}
+            onClick={onConfirm}
+            disabled={loading}
+          >
             {loading?"جاري التنفيذ…":isApprove?"اعتماد":"رفض"}
           </button>
         </div>
@@ -182,7 +189,7 @@ function ConfirmDialog({ action, eventTitle, onConfirm, onCancel, loading }: {
   );
 }
 
-/* ─── Event Card ─── */
+/* ─── Event Card – Full Width ─── */
 function EventCard({ ev, onView, onExport, onApprove, onReject, isExporting, pdfError }: {
   ev: EventRow;
   onView: ()=>void;
@@ -212,35 +219,35 @@ function EventCard({ ev, onView, onExport, onApprove, onReject, isExporting, pdf
 
         <div className={styles.cardMeta}>
           <div className={styles.metaItem}>
-            <span className={styles.metaIcon}><MapPin size={13}/></span>
+            <span className={styles.metaIcon}><MapPin size={16}/></span>
             <div className={styles.metaContent}>
               <div className={styles.metaLabel}>الموقع</div>
               <div className={styles.metaValue}>{ev.location || "—"}</div>
             </div>
           </div>
           <div className={styles.metaItem}>
-            <span className={styles.metaIcon}><Users size={13}/></span>
+            <span className={styles.metaIcon}><Users size={16}/></span>
             <div className={styles.metaContent}>
               <div className={styles.metaLabel}>المشاركون</div>
               <div className={styles.metaValue}>{limitLabel(ev.s_limit)}</div>
             </div>
           </div>
           <div className={styles.metaItem}>
-            <span className={styles.metaIcon}><Calendar size={13}/></span>
+            <span className={styles.metaIcon}><Calendar size={16}/></span>
             <div className={styles.metaContent}>
               <div className={styles.metaLabel}>البداية</div>
               <div className={styles.metaValue}>{fmt(ev.st_date)}</div>
             </div>
           </div>
           <div className={styles.metaItem}>
-            <span className={styles.metaIcon}><Calendar size={13}/></span>
+            <span className={styles.metaIcon}><Calendar size={16}/></span>
             <div className={styles.metaContent}>
               <div className={styles.metaLabel}>النهاية</div>
               <div className={styles.metaValue}>{fmt(ev.end_date)}</div>
             </div>
           </div>
           <div className={styles.metaItem}>
-            <span className={styles.metaIcon}><DollarSign size={13}/></span>
+            <span className={styles.metaIcon}><DollarSign size={16}/></span>
             <div className={styles.metaContent}>
               <div className={styles.metaLabel}>التكلفة</div>
               {isFree
@@ -251,17 +258,16 @@ function EventCard({ ev, onView, onExport, onApprove, onReject, isExporting, pdf
           </div>
         </div>
 
-        {/* PDF error hint under the card body */}
         {pdfError && (
           <div className={styles.pdfErrorHint}>
-            <AlertCircle size={11}/> {pdfError}
+            <AlertCircle size={13}/> {pdfError}
           </div>
         )}
       </div>
 
       <div className={styles.cardFooter}>
         <button className={`${styles.iconBtn} ${styles.btnView}`} onClick={onView}>
-          <Eye size={13}/> <span className={styles.btnLabel}>تفاصيل</span>
+          <Eye size={15}/> <span className={styles.btnLabel}>عرض التفاصيل</span>
         </button>
         <button
           className={`${styles.iconBtn} ${styles.btnExport} ${pdfError ? styles.btnExportError : ""}`}
@@ -270,31 +276,21 @@ function EventCard({ ev, onView, onExport, onApprove, onReject, isExporting, pdf
           title={pdfError ?? "تصدير PDF"}
         >
           {isExporting
-            ? <><RefreshCw size={13} className={styles.spinnerSm}/> <span className={styles.btnLabel}>جاري…</span></>
-            : <><FileDown size={13}/> <span className={styles.btnLabel}>PDF</span></>
+            ? <><RefreshCw size={15} className={styles.spinnerSm}/> <span className={styles.btnLabel}>جاري التصدير…</span></>
+            : <><FileDown size={15}/> <span className={styles.btnLabel}>تصدير PDF</span></>
           }
         </button>
         {pending && (
           <>
             <button className={`${styles.iconBtn} ${styles.btnApprove}`} onClick={onApprove}>
-              <CheckCircle size={13}/> <span className={styles.btnLabel}>اعتماد</span>
+              <CheckCircle size={15}/> <span className={styles.btnLabel}>اعتماد</span>
             </button>
             <button className={`${styles.iconBtn} ${styles.btnReject}`} onClick={onReject}>
-              <XCircle size={13}/> <span className={styles.btnLabel}>رفض</span>
+              <XCircle size={15}/> <span className={styles.btnLabel}>رفض</span>
             </button>
           </>
         )}
       </div>
-    </div>
-  );
-}
-
-/* ─── Section Header ─── */
-function SectionHeader({ label, count, cls }: { label: string; count: number; cls: string }) {
-  return (
-    <div className={`${styles.sectionHeader} ${styles[cls]}`}>
-      <span className={styles.sectionLabel}>{label}</span>
-      <span className={styles.sectionCount}>{count}</span>
     </div>
   );
 }
@@ -311,6 +307,7 @@ export default function ActivitiesManagement() {
   const [pdfErrors, setPdfErrors]         = useState<Record<number,string>>({});
   const [search, setSearch]               = useState("");
   const [filterType, setFilterType]       = useState("all");
+  const [activeTab, setActiveTab]         = useState<TabKey>("pending");
   const [toastMsg, setToastMsg]           = useState("");
 
   const showToast = (msg: string) => { setToastMsg(msg); setTimeout(()=>setToastMsg(""),4000); };
@@ -347,22 +344,13 @@ export default function ActivitiesManagement() {
 
   const handleExportPDF = async (eventId: number, eventTitle: string) => {
     setExportingId(eventId);
-    // clear previous error for this card
     setPdfErrors(prev => { const n={...prev}; delete n[eventId]; return n; });
     try {
       const res = await authFetch(
         `${BASE}/api/event/summary-reports/${eventId}/summary-pdf/`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${getToken()}`,
-            Accept: "application/pdf",
-          },
-        }
+        { method:"GET", headers:{ Authorization:`Bearer ${getToken()}`, Accept:"application/pdf" } }
       );
-
       if (!res.ok) {
-        // Try to read error message from server
         let serverMsg = `خطأ ${res.status}`;
         try {
           const ct = res.headers.get("content-type") ?? "";
@@ -373,43 +361,26 @@ export default function ActivitiesManagement() {
             const t = await res.text();
             if (t && t.length < 200) serverMsg = t;
           }
-        } catch { /* ignore parse errors */ }
-        console.error(`[PDF Export] status=${res.status} id=${eventId} msg=${serverMsg}`);
+        } catch { /* ignore */ }
         setPdfErrors(prev => ({...prev, [eventId]: `فشل التصدير: ${serverMsg}`}));
         showToast(`⚠️ فشل تصدير PDF — ${serverMsg}`);
         return;
       }
-
-      const contentType = res.headers.get("content-type") ?? "";
-      if (!contentType.includes("pdf") && !contentType.includes("octet-stream")) {
-        // Server returned 200 but not a PDF — probably JSON error
-        const text = await res.text();
-        console.error(`[PDF Export] unexpected content-type: ${contentType}`, text.slice(0,300));
-        setPdfErrors(prev => ({...prev, [eventId]: "السيرفر لم يرجع ملف PDF"}));
-        showToast("⚠️ السيرفر لم يرجع ملف PDF — تحقق من الـ console");
-        return;
-      }
-
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url;
-      a.download = `تقرير-${eventTitle}.pdf`;
+      a.href = url; a.download = `تقرير-${eventTitle}.pdf`;
       document.body.appendChild(a); a.click(); a.remove();
       window.URL.revokeObjectURL(url);
       showToast("📄 تم تصدير التقرير بنجاح");
-    } catch (e) {
-      console.error("[PDF Export] network error", e);
+    } catch {
       setPdfErrors(prev => ({...prev, [eventId]: "خطأ في الشبكة"}));
       showToast("⚠️ خطأ في الشبكة أثناء تصدير PDF");
-    } finally {
-      setExportingId(null);
-    }
+    } finally { setExportingId(null); }
   };
 
   const availableTypes = extractTypes(events);
 
-  // Filter by search + type only (status handled by sections)
   const applyFilters = (list: EventRow[]) => list.filter(e => {
     const term = search.toLowerCase();
     const matchSearch = !search ||
@@ -425,9 +396,14 @@ export default function ActivitiesManagement() {
   const approvedList  = allFiltered.filter(e => isApprovedStatus(e.status));
   const rejectedList  = allFiltered.filter(e => isRejectedStatus(e.status));
 
+  // Raw counts (without search filter) for tab badges
   const countPending  = events.filter(e=>isPending(e.status)).length;
   const countApproved = events.filter(e=>isApprovedStatus(e.status)).length;
   const countRejected = events.filter(e=>isRejectedStatus(e.status)).length;
+
+  const activeList =
+    activeTab==="pending"  ? pendingList  :
+    activeTab==="approved" ? approvedList : rejectedList;
 
   const renderCards = (list: EventRow[]) => list.map(ev => (
     <EventCard
@@ -452,32 +428,33 @@ export default function ActivitiesManagement() {
           <p>إدارة ومتابعة طلبات الفعاليات المقدمة من إدارات الكليات</p>
         </div>
         <button className={styles.refreshBtn} onClick={fetchEvents}>
-          <RefreshCw size={14}/> تحديث
+          <RefreshCw size={15}/> تحديث البيانات
         </button>
       </div>
 
       {/* Stats */}
       <div className={styles.statsGrid}>
         <div className={`${styles.statCard} ${styles.total}`}>
-          <div className={styles.statIcon}><Layers size={22}/></div>
+          <div className={styles.statIcon}><Layers size={24}/></div>
           <div className={styles.statBody}><div className={styles.statNum}>{events.length}</div><div className={styles.statLabel}>إجمالي الطلبات</div></div>
         </div>
         <div className={`${styles.statCard} ${styles.pending}`}>
-          <div className={styles.statIcon}><Clock size={22}/></div>
+          <div className={styles.statIcon}><Clock size={24}/></div>
           <div className={styles.statBody}><div className={styles.statNum}>{countPending}</div><div className={styles.statLabel}>قيد المراجعة</div></div>
         </div>
         <div className={`${styles.statCard} ${styles.approved}`}>
-          <div className={styles.statIcon}><CheckCircle size={22}/></div>
+          <div className={styles.statIcon}><CheckCircle size={24}/></div>
           <div className={styles.statBody}><div className={styles.statNum}>{countApproved}</div><div className={styles.statLabel}>معتمدة</div></div>
         </div>
         <div className={`${styles.statCard} ${styles.rejected}`}>
-          <div className={styles.statIcon}><XCircle size={22}/></div>
+          <div className={styles.statIcon}><XCircle size={24}/></div>
           <div className={styles.statBody}><div className={styles.statNum}>{countRejected}</div><div className={styles.statLabel}>مرفوضة</div></div>
         </div>
       </div>
 
       {/* Main Card */}
       <div className={styles.tableCard}>
+
         {/* Toolbar */}
         <div className={styles.toolbar}>
           <h2 className={styles.toolbarTitle}>قائمة الفعاليات المقدمة</h2>
@@ -495,51 +472,49 @@ export default function ActivitiesManagement() {
           </div>
         </div>
 
+        {/* Status Tabs */}
+        <div className={styles.tabsRow}>
+          <button
+            className={`${styles.tabBtn} ${styles.tabPending} ${activeTab==="pending" ? styles.tabActive : ""}`}
+            onClick={()=>setActiveTab("pending")}
+          >
+            <Clock size={17}/>
+            قيد الانتظار
+            <span className={styles.tabCount}>{countPending}</span>
+          </button>
+          <button
+            className={`${styles.tabBtn} ${styles.tabApproved} ${activeTab==="approved" ? styles.tabActive : ""}`}
+            onClick={()=>setActiveTab("approved")}
+          >
+            <CheckCircle size={17}/>
+            معتمدة
+            <span className={styles.tabCount}>{countApproved}</span>
+          </button>
+          <button
+            className={`${styles.tabBtn} ${styles.tabRejected} ${activeTab==="rejected" ? styles.tabActive : ""}`}
+            onClick={()=>setActiveTab("rejected")}
+          >
+            <XCircle size={17}/>
+            مرفوضة
+            <span className={styles.tabCount}>{countRejected}</span>
+          </button>
+        </div>
+
         {error && <div className={styles.errorBanner}><AlertCircle size={17}/> {error}</div>}
 
         {loading ? (
           <div className={styles.stateBox}>
-            <RefreshCw size={36} className={styles.spinner}/>
+            <RefreshCw size={40} className={styles.spinner}/>
             <p>جاري تحميل البيانات…</p>
           </div>
-        ) : allFiltered.length === 0 ? (
+        ) : activeList.length === 0 ? (
           <div className={styles.stateBox}>
-            <Layers size={44}/>
-            <p>لا توجد فعاليات مطابقة</p>
+            <Layers size={48}/>
+            <p>لا توجد فعاليات في هذا القسم</p>
           </div>
         ) : (
-          <div className={styles.sectionsWrapper}>
-
-            {/* ── Section: Pending ── */}
-            {pendingList.length > 0 && (
-              <div className={styles.section}>
-                <SectionHeader label="قيد الانتظار — تحتاج مراجعة" count={pendingList.length} cls="sectionPending" />
-                <div className={styles.cardsGrid}>
-                  {renderCards(pendingList)}
-                </div>
-              </div>
-            )}
-
-            {/* ── Section: Approved ── */}
-            {approvedList.length > 0 && (
-              <div className={styles.section}>
-                <SectionHeader label="معتمدة" count={approvedList.length} cls="sectionApproved" />
-                <div className={styles.cardsGrid}>
-                  {renderCards(approvedList)}
-                </div>
-              </div>
-            )}
-
-            {/* ── Section: Rejected ── */}
-            {rejectedList.length > 0 && (
-              <div className={styles.section}>
-                <SectionHeader label="مرفوضة" count={rejectedList.length} cls="sectionRejected" />
-                <div className={styles.cardsGrid}>
-                  {renderCards(rejectedList)}
-                </div>
-              </div>
-            )}
-
+          <div className={styles.cardsGrid}>
+            {renderCards(activeList)}
           </div>
         )}
       </div>

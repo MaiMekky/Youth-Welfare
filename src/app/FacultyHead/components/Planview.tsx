@@ -3,7 +3,9 @@ import React, { useEffect, useState, useCallback } from "react";
 import {
   FileText, BarChart3, Download, Calendar, Building2,
   RefreshCw, AlertCircle, ChevronLeft, ChevronRight,
-  Layers, Hash, BookOpen,
+  Layers, Hash, BookOpen, Eye, X, MapPin, Users,
+  Tag, Clock, DollarSign, Star, User, Briefcase,
+  ChevronDown, ChevronUp, CheckCircle, XCircle, AlertTriangle
 } from "lucide-react";
 import SemesterReports from "./SemesterReports";
 import styles from "../Styles/PlanView.module.css";
@@ -22,6 +24,45 @@ interface Plan {
   updated_at: string;
 }
 
+interface EventDetail {
+  event_id: number;
+  title: string;
+  description: string;
+  dept: number;
+  dept_name: string;
+  faculty: number;
+  faculty_name: string;
+  created_by: number;
+  created_by_name: string;
+  family: number;
+  family_name: string;
+  cost: string;
+  location: string;
+  restrictions: string;
+  reward: string;
+  status: string;
+  type: string;
+  st_date: string;
+  end_date: string;
+  s_limit: number;
+  resource: string;
+  selected_facs: number[];
+  active: boolean;
+  created_at: string;
+}
+
+interface PlanDetail {
+  name: string;
+  term: number;
+  faculty: number;
+  faculty_name: string;
+  dept: number;
+  dept_name: string;
+  created_by: number;
+  created_by_name: string;
+  events: EventDetail[];
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const getToken = () =>
@@ -34,6 +75,238 @@ function fmt(d?: string) {
   return new Date(d).toLocaleDateString("ar-EG", {
     year: "numeric", month: "short", day: "numeric",
   });
+}
+
+function statusConfig(status: string) {
+  switch (status?.toLowerCase()) {
+    case "approved": case "مقبول": return { label: "مقبول", cls: "approved" };
+    case "pending":  case "معلق":  return { label: "معلق",  cls: "pending"  };
+    case "rejected": case "مرفوض": return { label: "مرفوض", cls: "rejected" };
+    default: return { label: status || "—", cls: "default" };
+  }
+}
+
+// ─── Plan Details Modal ───────────────────────────────────────────────────────
+
+function PlanDetailsModal({ planId, planName, onClose }: {
+  planId: number;
+  planName: string;
+  onClose: () => void;
+}) {
+  const [detail, setDetail]       = useState<PlanDetail | null>(null);
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState("");
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchDetail = async () => {
+      try {
+        setLoading(true);
+        const res = await authFetch(`${BASE}/api/events/plans/${planId}/details/`, {
+          headers: { Authorization: `Bearer ${getToken()}` },
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        setDetail(data);
+        setError("");
+      } catch {
+        setError("فشل في جلب تفاصيل الخطة. تحقق من الاتصال.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDetail();
+  }, [planId]);
+
+  // Close on backdrop click
+  const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) onClose();
+  };
+
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  return (
+    <div className={styles.modalBackdrop} onClick={handleBackdrop}>
+      <div className={styles.modal}>
+
+        {/* Modal Header */}
+        <div className={styles.modalHeader}>
+          <div className={styles.modalHeaderLeft}>
+            <div className={styles.modalIcon}><FileText size={20} /></div>
+            <div>
+              <h2 className={styles.modalTitle}>{planName}</h2>
+              {detail && (
+                <p className={styles.modalSubtitle}>
+                  {detail.faculty_name} · {detail.dept_name} · الفصل {detail.term}
+                </p>
+              )}
+            </div>
+          </div>
+          <button className={styles.modalClose} onClick={onClose}>
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Modal Body */}
+        <div className={styles.modalBody}>
+          {loading ? (
+            <div className={styles.modalLoading}>
+              <RefreshCw size={32} className={styles.spinner} />
+              <p>جاري تحميل التفاصيل…</p>
+            </div>
+          ) : error ? (
+            <div className={styles.modalError}>
+              <AlertCircle size={18} /> {error}
+            </div>
+          ) : detail ? (
+            <>
+              {/* Plan Info Strip */}
+              <div className={styles.planInfoStrip}>
+                <div className={styles.planInfoItem}>
+                  <Building2 size={14} />
+                  <span className={styles.planInfoLabel}>الكلية</span>
+                  <span className={styles.planInfoVal}>{detail.faculty_name || "—"}</span>
+                </div>
+                <div className={styles.planInfoDivider} />
+                <div className={styles.planInfoItem}>
+                  <Briefcase size={14} />
+                  <span className={styles.planInfoLabel}>القسم</span>
+                  <span className={styles.planInfoVal}>{detail.dept_name || "—"}</span>
+                </div>
+                <div className={styles.planInfoDivider} />
+                <div className={styles.planInfoItem}>
+                  <User size={14} />
+                  <span className={styles.planInfoLabel}>أنشئت بواسطة</span>
+                  <span className={styles.planInfoVal}>{detail.created_by_name || "—"}</span>
+                </div>
+                <div className={styles.planInfoDivider} />
+                <div className={styles.planInfoItem}>
+                  <Hash size={14} />
+                  <span className={styles.planInfoLabel}>الفصل</span>
+                  <span className={styles.termPill}>الفصل {detail.term}</span>
+                </div>
+              </div>
+
+              {/* Events Section */}
+              <div className={styles.eventsSection}>
+                <div className={styles.eventsSectionHeader}>
+                  <h3 className={styles.eventsSectionTitle}>
+                    الفعاليات
+                    <span className={styles.eventsCount}>{detail.events.length}</span>
+                  </h3>
+                </div>
+
+                {detail.events.length === 0 ? (
+                  <div className={styles.noEvents}>
+                    <BookOpen size={36} />
+                    <p>لا توجد فعاليات في هذه الخطة</p>
+                  </div>
+                ) : (
+                  <div className={styles.eventsList}>
+                    {detail.events.map((ev) => {
+                      const sc = statusConfig(ev.status);
+                      const isExpanded = expandedId === ev.event_id;
+                      return (
+                        <div
+                          key={ev.event_id}
+                          className={`${styles.eventCard} ${isExpanded ? styles.eventCardExpanded : ""}`}
+                        >
+                          {/* Event Header */}
+                          <div
+                            className={styles.eventCardHeader}
+                            onClick={() => setExpandedId(isExpanded ? null : ev.event_id)}
+                          >
+                            <div className={styles.eventCardLeft}>
+                              <div className={`${styles.eventStatusDot} ${styles[sc.cls]}`} />
+                              <div>
+                                <div className={styles.eventTitle}>{ev.title || "—"}</div>
+                                <div className={styles.eventMeta}>
+                                  <span><MapPin size={11} /> {ev.location || "—"}</span>
+                                  <span><Calendar size={11} /> {fmt(ev.st_date)} – {fmt(ev.end_date)}</span>
+                                  <span><Tag size={11} /> {ev.family_name || "—"}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className={styles.eventCardRight}>
+                              <span className={`${styles.statusBadge} ${styles[sc.cls]}`}>{sc.label}</span>
+                              <span className={`${styles.activeBadge} ${ev.active ? styles.activeOn : styles.activeOff}`}>
+                                {ev.active ? <><CheckCircle size={11} /> نشط</> : <><XCircle size={11} /> غير نشط</>}
+                              </span>
+                              <button className={styles.expandBtn}>
+                                {isExpanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Event Expanded Details */}
+                          {isExpanded && (
+                            <div className={styles.eventDetails}>
+                              {ev.description && (
+                                <div className={styles.eventDesc}>{ev.description}</div>
+                              )}
+                              <div className={styles.eventGrid}>
+                                <div className={styles.eventGridItem}>
+                                  <span className={styles.gridLabel}><Building2 size={12} /> الكلية</span>
+                                  <span className={styles.gridVal}>{ev.faculty_name || "—"}</span>
+                                </div>
+                                <div className={styles.eventGridItem}>
+                                  <span className={styles.gridLabel}><Briefcase size={12} /> القسم</span>
+                                  <span className={styles.gridVal}>{ev.dept_name || "—"}</span>
+                                </div>
+                                <div className={styles.eventGridItem}>
+                                  <span className={styles.gridLabel}><User size={12} /> المنشئ</span>
+                                  <span className={styles.gridVal}>{ev.created_by_name || "—"}</span>
+                                </div>
+                                <div className={styles.eventGridItem}>
+                                  <span className={styles.gridLabel}><Tag size={12} /> النوع</span>
+                                  <span className={styles.gridVal}>{ev.type || "—"}</span>
+                                </div>
+                                <div className={styles.eventGridItem}>
+                                  <span className={styles.gridLabel}><DollarSign size={12} /> التكلفة</span>
+                                  <span className={styles.gridVal}>{ev.cost ? `${ev.cost} ج.م` : "—"}</span>
+                                </div>
+                                <div className={styles.eventGridItem}>
+                                  <span className={styles.gridLabel}><Users size={12} /> حد المقاعد</span>
+                                  <span className={styles.gridVal}>{ev.s_limit || "—"}</span>
+                                </div>
+                                {ev.reward && (
+                                  <div className={styles.eventGridItem}>
+                                    <span className={styles.gridLabel}><Star size={12} /> المكافأة</span>
+                                    <span className={styles.gridVal}>{ev.reward}</span>
+                                  </div>
+                                )}
+                                {ev.restrictions && (
+                                  <div className={styles.eventGridItem}>
+                                    <span className={styles.gridLabel}><AlertTriangle size={12} /> القيود</span>
+                                    <span className={styles.gridVal}>{ev.restrictions}</span>
+                                  </div>
+                                )}
+                                {ev.resource && (
+                                  <div className={styles.eventGridItem}>
+                                    <span className={styles.gridLabel}><BookOpen size={12} /> المورد</span>
+                                    <span className={styles.gridVal}>{ev.resource}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
@@ -49,6 +322,10 @@ export default function PlanView() {
   const [currentPage, setCurrentPage]     = useState(1);
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
   const [toastMsg, setToastMsg]           = useState("");
+
+  // ── Detail Modal state ──
+  const [detailPlan, setDetailPlan] = useState<{ id: number; name: string } | null>(null);
+
   const rowsPerPage = 8;
 
   const showToast = (msg: string) => {
@@ -106,13 +383,14 @@ export default function PlanView() {
   const totalFaculties = new Set(plans.map(p => p.faculty)).size;
   const totalEvents    = plans.reduce((sum, p) => sum + (p.events_count ?? 0), 0);
 
-  // ── Filter ──
+  // ── Filter (name + term only) ──
   const filtered = plans.filter(p => {
-    const term = search.toLowerCase();
-    return !search ||
+    const term = search.toLowerCase().trim();
+    if (!term) return true;
+    return (
       p.name?.toLowerCase().includes(term) ||
-      p.faculty_name?.toLowerCase().includes(term) ||
-      p.term?.toString().includes(term);
+      p.term?.toString().includes(term)
+    );
   });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / rowsPerPage));
@@ -133,16 +411,9 @@ export default function PlanView() {
           onClick={() => setActiveTab("plans")}
         >
           <FileText size={17} />
-          خطة الكلية
+          خطط الكلية
         </button>
-        {/* <button
-          className={`${styles.tab} ${activeTab === "reports" ? styles.active : ""}`}
-          onClick={() => setActiveTab("reports")}
-        >
-          <BarChart3 size={17} />
-          تقارير الفصول
-        </button>*/}
-      </div> 
+      </div>
 
       {/* ── Plans Tab ── */}
       {activeTab === "plans" && (
@@ -179,7 +450,7 @@ export default function PlanView() {
             <div className={styles.toolbarControls}>
               <input
                 className={styles.searchInput}
-                placeholder="🔍 ابحث بالاسم، الكلية، الفصل…"
+                placeholder="🔍 ابحث بالاسم أو الفصل…"
                 value={search}
                 onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
               />
@@ -212,34 +483,22 @@ export default function PlanView() {
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    {/* <th>#</th> */}
                     <th>اسم الخطة</th>
-                    {/* <th>الكلية</th> */}
                     <th>الفصل الدراسي</th>
                     <th>عدد الفعاليات</th>
                     <th>تاريخ الإنشاء</th>
-                    {/* <th>آخر تحديث</th> */}
                     <th>الإجراءات</th>
                   </tr>
                 </thead>
                 <tbody>
                   {paginated.map(plan => (
                     <tr key={plan.plan_id}>
-                      {/* <td className={styles.idCell}>#{plan.plan_id}</td> */}
-
                       <td>
                         <div className={styles.fileNameCell}>
                           <FileText size={14} />
                           {plan.name || "—"}
                         </div>
                       </td>
-
-                      {/* <td>
-                        <div className={styles.facultyCell}>
-                          <Building2 size={13} />
-                          {plan.faculty_name || "—"}
-                        </div>
-                      </td> */}
 
                       <td>
                         <span className={styles.termBadge}>الفصل {plan.term ?? "—"}</span>
@@ -259,32 +518,35 @@ export default function PlanView() {
                         </div>
                       </td>
 
-                      {/* <td>
-                        <div className={styles.dateCell}>
-                          <Calendar size={12} />
-                          {fmt(plan.updated_at)}
-                        </div>
-                      </td> */}
-
                       <td>
-                        <button
-                          className={styles.downloadBtn}
-                          onClick={() => handleDownload(plan)}
-                          disabled={downloadingId === plan.plan_id}
-                          title={`تحميل خطة ${plan.name}`}
-                        >
-                          {downloadingId === plan.plan_id ? (
-                            <>
-                              <RefreshCw size={12} style={{ animation: "spin 1s linear infinite" }} />
-                              جاري…
-                            </>
-                          ) : (
-                            <>
-                              <Download size={13} />
-                              تحميل PDF
-                            </>
-                          )}
-                        </button>
+                        <div className={styles.actionBtns}>
+                          <button
+                            className={styles.detailBtn}
+                            onClick={() => setDetailPlan({ id: plan.plan_id, name: plan.name })}
+                            title={`عرض تفاصيل ${plan.name}`}
+                          >
+                            <Eye size={13} />
+                            عرض التفاصيل
+                          </button>
+                          <button
+                            className={styles.downloadBtn}
+                            onClick={() => handleDownload(plan)}
+                            disabled={downloadingId === plan.plan_id}
+                            title={`تحميل خطة ${plan.name}`}
+                          >
+                            {downloadingId === plan.plan_id ? (
+                              <>
+                                <RefreshCw size={12} style={{ animation: "spin 1s linear infinite" }} />
+                                جاري…
+                              </>
+                            ) : (
+                              <>
+                                <Download size={13} />
+                                تحميل PDF
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -329,6 +591,15 @@ export default function PlanView() {
         <div className={styles.reportsWrapper}>
           <SemesterReports />
         </div>
+      )}
+
+      {/* ── Detail Modal ── */}
+      {detailPlan && (
+        <PlanDetailsModal
+          planId={detailPlan.id}
+          planName={detailPlan.name}
+          onClose={() => setDetailPlan(null)}
+        />
       )}
 
       {/* ── Toast ── */}

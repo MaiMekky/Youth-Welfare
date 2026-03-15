@@ -64,7 +64,12 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
   const role = localStorage.getItem("role");
   const departments = JSON.parse(localStorage.getItem("departments") || "[]");
   const user = JSON.parse(localStorage.getItem("user") || "null");
+  const lastRoute = localStorage.getItem("lastRoute");
 
+  if (access && lastRoute) {
+    router.replace(lastRoute);
+    return;
+  }
   if (!access || !user) return;
 
   const userType = user.user_type;
@@ -198,7 +203,12 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
       document.cookie = `refresh=${data.refresh}; path=/; max-age=604800; SameSite=Lax`;
       document.cookie = `user_type=${data.user_type}; path=/; max-age=604800; SameSite=Lax`;
       document.cookie = `roleKey=${roleKey}; path=/; max-age=604800; SameSite=Lax`;
+      const lastRoute = localStorage.getItem("lastRoute");
 
+      if (lastRoute) {
+        router.push(lastRoute);
+        return;
+      }
       // ── Routing ──────────────────────────────────────────────
       if (data.user_type === "admin") {
         const depts: Dept[] = data.departments ?? [];

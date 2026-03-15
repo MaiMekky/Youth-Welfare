@@ -1,18 +1,20 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import styles from "../Styles/DiscountsSection.module.css";
-import api from "../../../services/api";
-import axios from "axios";
+import { authFetch } from "@/utils/globalFetch";
 
 type DiscountsState = {
   books: string[];
-  distant: string[]; // aff_discount
-  regular: string[]; // reg_discount
-  full: string[]; // full_discount
+  distant: string[];
+  regular: string[];
+  full: string[];
 };
 
-const API_GET = "http://127.0.0.1:8000/api/solidarity/faculty/faculty/discounts/";
-const API_PATCH = "http://127.0.0.1:8000/api/solidarity/faculty/update_faculty_discounts/";
+const API_GET =
+  "http://127.0.0.1:8000/api/solidarity/faculty/faculty/discounts/";
+const API_PATCH =
+  "http://127.0.0.1:8000/api/solidarity/faculty/update_faculty_discounts/";
 
 export default function DiscountsSection() {
   const [isEditing, setIsEditing] = useState(false);
@@ -28,7 +30,9 @@ export default function DiscountsSection() {
   });
 
   const serverToLocal = (data: any): DiscountsState => {
-    const asArrayOfStrings = (v: any) => (Array.isArray(v) ? v.map((x) => String(x)) : []);
+    const asArrayOfStrings = (v: any) =>
+      Array.isArray(v) ? v.map((x) => String(x)) : [];
+
     return {
       books: asArrayOfStrings(data?.bk_discount ?? []),
       distant: asArrayOfStrings(data?.aff_discount ?? []),
@@ -38,50 +42,50 @@ export default function DiscountsSection() {
   };
 
   const localToServer = (local: DiscountsState) => ({
-    aff_discount: local.distant.map((v) => {
-      const n = Number(v);
-      return Number.isFinite(n) ? n : 0;
-    }),
-    reg_discount: local.regular.map((v) => {
-      const n = Number(v);
-      return Number.isFinite(n) ? n : 0;
-    }),
-    bk_discount: local.books.map((v) => {
-      const n = Number(v);
-      return Number.isFinite(n) ? n : 0;
-    }),
-    full_discount: local.full.map((v) => {
-      const n = Number(v);
-      return Number.isFinite(n) ? n : 0;
-    }),
+    bk_discount: local.books
+      .map((v) => Number(v))
+      .filter((n) => !Number.isNaN(n)),
+    aff_discount: local.distant
+      .map((v) => Number(v))
+      .filter((n) => !Number.isNaN(n)),
+    reg_discount: local.regular
+      .map((v) => Number(v))
+      .filter((n) => !Number.isNaN(n)),
+    full_discount: local.full
+      .map((v) => Number(v))
+      .filter((n) => !Number.isNaN(n)),
   });
 
   const fetchDiscounts = async () => {
     setLoading(true);
     setError(null);
+
     try {
-      const res = await axios({
-        method: 'get',
-        url: API_GET,
+      const res = await authFetch(API_GET, {
+        method: "GET",
         headers: {
-          "Authorization": `Bearer ${localStorage.getItem("access")}`
-        }
+          Authorization: `Bearer ${localStorage.getItem("access")}`,
+        },
       });
-      const serverDiscounts = res.data?.discounts ?? res.data;
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`GET failed: ${res.status} ${errorText}`);
+      }
+
+      const json = await res.json();
+      const serverDiscounts = json?.discounts ?? json;
       const mapped = serverToLocal(serverDiscounts);
-      setDiscounts((prev) => ({
-        books: mapped.books.length ? mapped.books : prev.books,
-        distant: mapped.distant.length ? mapped.distant : prev.distant,
-        regular: mapped.regular.length ? mapped.regular : prev.regular,
-        full: mapped.full.length ? mapped.full : prev.full,
-      }));
+
+      setDiscounts({
+        books: mapped.books.length ? mapped.books : [""],
+        distant: mapped.distant.length ? mapped.distant : [""],
+        regular: mapped.regular.length ? mapped.regular : [""],
+        full: mapped.full.length ? mapped.full : [""],
+      });
     } catch (err: any) {
       console.error("GET error:", err);
-      const details =
-        err?.response?.status && err?.response?.data
-          ? `Status ${err.response.status}: ${JSON.stringify(err.response.data)}`
-          : err?.message ?? "Unknown error";
-      setError(`فشل جلب البيانات — ${details}`);
+      setError(`فشل جلب البيانات — ${err?.message ?? "Unknown error"}`);
     } finally {
       setLoading(false);
     }
@@ -89,15 +93,15 @@ export default function DiscountsSection() {
 
   useEffect(() => {
     fetchDiscounts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleChange = (type: keyof DiscountsState, index: number, value: string) => {
+  const handleChange = (
+    type: keyof DiscountsState,
+    index: number,
+    value: string
+  ) => {
     setDiscounts((prev) => {
       const updated = [...prev[type]];
-      if (index >= updated.length) {
-        for (let i = updated.length; i <= index; i++) updated[i] = "";
-      }
       updated[index] = value;
       return { ...prev, [type]: updated };
     });
@@ -106,64 +110,52 @@ export default function DiscountsSection() {
   const handleAddDiscount = (type: keyof DiscountsState) => {
     setDiscounts((prev) => ({
       ...prev,
-      [type]: [...prev[type], ""] // Add empty string for new discount
+      [type]: [...prev[type], ""],
     }));
   };
 
   const handleRemoveDiscount = (type: keyof DiscountsState, index: number) => {
-    if (discounts[type].length <= 1) return; // Keep at least one input
-    
+    if (discounts[type].length <= 1) return;
+
     setDiscounts((prev) => ({
       ...prev,
-      [type]: prev[type].filter((_, i) => i !== index)
+      [type]: prev[type].filter((_, i) => i !== index),
     }));
   };
+const handleSave = async () => {
+  setSaving(true);
+  setError(null);
 
-  const handleSave = async () => {
-    setSaving(true);
-    setError(null);
+  const payload = localToServer(discounts);
+  console.log("PATCH payload:", payload);
 
-    const payload = localToServer(discounts);
-    console.log("Attempting save payload:", payload);
+  try {
+    const res = await authFetch(API_PATCH, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("access")}`,
+      },
+      body: JSON.stringify(payload),
+    });
 
-    try {
-      // Try PATCH first
-      let res;
-      try {
-        res = await axios({
-          method: 'patch',
-          url: API_PATCH,
-          headers: {
-            "Authorization": `Bearer ${localStorage.getItem("access")}`
-          },
-          data: payload
-        });
+    const responseText = await res.text();
+    console.log("PATCH status:", res.status);
+    console.log("PATCH response text:", responseText);
 
-      } catch (err: any) {
-        const status = err?.response?.status;
-      }
-
-      // If we reach here, request succeeded
-      console.log("Save response:", res?.status, res?.data);
-
-      // Re-fetch from server to reflect DB state (this ensures UI shows saved values from DB)
-      await fetchDiscounts();
-
-      setIsEditing(false);
-    } catch (err: any) {
-      console.error("Save error:", err);
-      // Build a helpful error message for UI
-      if (err?.response) {
-        const resp = err.response;
-        const body = resp.data ? JSON.stringify(resp.data) : "";
-        setError(`حصل خطأ أثناء الحفظ — ${resp.status} ${resp.statusText} ${body}`);
-      } else {
-        setError(`حصل خطأ أثناء الحفظ — ${err?.message ?? "Unknown error"}`);
-      }
-    } finally {
-      setSaving(false);
+    if (!res.ok) {
+      throw new Error(`PATCH failed: ${res.status} ${responseText}`);
     }
-  };
+
+    await fetchDiscounts();
+    setIsEditing(false);
+  } catch (err: any) {
+    console.error("Save error:", err);
+    setError(err?.message ?? "Unknown error");
+  } finally {
+    setSaving(false);
+  }
+};
 
   const renderInputs = (type: keyof DiscountsState) =>
     (discounts[type].length ? discounts[type] : [""]).map((val, idx) => (
@@ -176,7 +168,7 @@ export default function DiscountsSection() {
           placeholder="أدخل قيمة الخصم"
         />
         {isEditing && discounts[type].length > 1 && (
-          <button 
+          <button
             type="button"
             className={styles.removeBtn}
             onClick={() => handleRemoveDiscount(type, idx)}
@@ -194,7 +186,7 @@ export default function DiscountsSection() {
       {isEditing ? (
         <div className={styles.editableSection}>
           {renderInputs(type)}
-          <button 
+          <button
             type="button"
             className={styles.addBtn}
             onClick={() => handleAddDiscount(type)}
@@ -222,15 +214,23 @@ export default function DiscountsSection() {
 
       <div className={styles.actions}>
         {isEditing ? (
-          <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>
+          <button
+            className={styles.saveBtn}
+            onClick={handleSave}
+            disabled={saving}
+          >
             {saving ? "جاري الحفظ..." : "حفظ"}
           </button>
         ) : (
-          <button className={styles.editBtn} onClick={() => setIsEditing(true)}>
+          <button
+            className={styles.editBtn}
+            onClick={() => setIsEditing(true)}
+          >
             تعديل
           </button>
         )}
-        {error && <div className={styles.error}>{String(error)}</div>}
+
+        {error && <div className={styles.error}>{error}</div>}
       </div>
     </div>
   );

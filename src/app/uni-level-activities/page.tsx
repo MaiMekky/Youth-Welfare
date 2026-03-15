@@ -23,6 +23,7 @@ type ApiEvent = {
   cost: string;
   s_limit: number;
   faculty_id: number | null;
+  faculty_name: string | null;
   dept_id: number;
   active?: any;
 };
@@ -128,7 +129,7 @@ function toEventItem(e: ApiEvent, facultyMap: Record<number, string>): EventItem
     priceText: toPriceText(e.cost),
     isActive: Boolean(isActive),
     hideToggle: e.faculty_id !== null,
-    facultyName: e.faculty_id ? facultyMap[e.faculty_id] : undefined,
+    facultyName: e.faculty_name ?? "فعالية على مستوى الجامعة",
   };
 }
 

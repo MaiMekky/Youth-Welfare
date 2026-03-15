@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "../Styles/Header.module.css";
 import Image from "next/image";
-import logo from "@/app/assets/logo.png";
+import logo from "@/app/assets/capital-uni-logo.png";
 import { useRouter } from "next/navigation";
 import { Menu } from "lucide-react";
 
@@ -76,7 +76,7 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
             </button>
           )}
           <div className={styles.headerIcon}>
-            <Image className={styles.headerLogo} src={logo} alt="شعار جامعة العاصمة" priority />
+            <Image className={styles.headerLogo} src={logo} alt="شعار جامعة العاصمة" priority draggable={false} />
           </div>
           <div className={styles.headerTitle}>
             <h1 className={styles.headerTitleH1}>إدارة رعاية الطلاب</h1>

@@ -453,7 +453,7 @@ const openDocument = async (docId: number, mimeType?: string) => {
         </div>
       )}
        <button
-          onClick={() => router.back()}
+          onClick={() => router.push("/FacLevel")}
           className={styles.backBtn}
         >
           العودة ←

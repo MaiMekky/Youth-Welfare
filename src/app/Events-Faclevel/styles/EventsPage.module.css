@@ -13,6 +13,32 @@
   overflow:visible;
   flex:1;
 }
+.filtersBar{
+display:flex;
+gap:12px;
+align-items:center;
+margin:18px 0;
+}
+
+.searchBox{
+display:flex;
+align-items:center;
+gap:8px;
+border:1px solid #e5e7eb;
+padding:8px 12px;
+border-radius:10px;
+background:#fff;
+flex:1;
+color: #2C3A5F;
+}
+
+.searchBox input{
+border:none;
+outline:none;
+width:100%;
+color: #2C3A5F;
+}
+
 
 /* ===== Header ===== */
 .header{

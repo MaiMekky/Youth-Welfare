@@ -56,24 +56,6 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Col 4: معلومات التواصل */}
-        <div className={styles.footerCol}>
-          <div className={styles.colTitle}>معلومات التواصل</div>
-          <ul className={styles.contactList}>
-            <li><MapPin size={14} /><span>إدارة رعاية الطلاب<br/>جامعة العاصمة - عين حلوان</span></li>
-            <li><Phone size={14} /><span>(202+) 2556-0000</span></li>
-            <li><Mail size={14} /><span>youth@helwan.edu.eg</span></li>
-            <li><Globe size={14} /><span>www.helwan.edu.eg</span></li>
-          </ul>
-          <div className={styles.socialRow}>
-            <span className={styles.socialLabel}>تابعونا</span>
-            <div className={styles.socialIcons}>
-              <a href="#" className={styles.socialBtn}><Facebook size={16} /></a>
-              <a href="#" className={styles.socialBtn}><Twitter size={16} /></a>
-              <a href="#" className={styles.socialBtn}><Instagram size={16} /></a>
-            </div>
-          </div>
-        </div>
 
       </div>
 

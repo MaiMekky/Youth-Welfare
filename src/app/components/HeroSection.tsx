@@ -60,12 +60,7 @@ const HeroSection: React.FC = () => {
             </button>
 
             {/* 🟦 Scroll to Footer Instead of Signup */}
-            <button
-              className={`${styles.btn} ${styles.outline}`}
-              onClick={handleScrollToFooter}
-            >
-              تواصل معنا
-            </button>
+
           </div>
         </div>
 

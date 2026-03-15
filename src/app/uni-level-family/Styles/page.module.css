@@ -19,7 +19,6 @@
   width: 100%;
   box-sizing: border-box;
 }
-
 .pageTitle {
   font-size: clamp(1.5rem, 4vw, 2.5rem);
   font-weight: 700;
@@ -27,58 +26,62 @@
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
   word-wrap: break-word;
 }
-
 .pageSubtitle {
   font-size: clamp(0.9375rem, 2vw, 1.1rem);
   opacity: 0.95;
   line-height: 1.6;
 }
-
-.controlsRow { 
-  margin-bottom: clamp(1rem, 2vw, 1.25rem); 
+.controlsRow {
+  margin-bottom: clamp(1rem, 2vw, 1.25rem);
 }
-.tabContent { 
-  animation: fadeIn 0.3s ease; 
+.tabContent {
+  animation: fadeIn 0.3s ease;
 }
-.contentSection { 
-  background: white; 
-  border-radius: 12px; 
-  padding: clamp(1rem, 3vw, 1.875rem); 
-  min-height: auto; 
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.contentSection {
+  background: white;
+  border-radius: 12px;
+  padding: clamp(1rem, 3vw, 1.875rem);
+  min-height: auto;
   width: 100%;
   box-sizing: border-box;
 }
-.sectionDescription { 
-  font-size: clamp(0.875rem, 2vw, 1rem); 
-  color: #6C757D; 
-  margin-bottom: clamp(1rem, 2vw, 1.25rem); 
-  text-align: right; 
+.sectionDescription {
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  color: #6C757D;
+  margin-bottom: clamp(1rem, 2vw, 1.25rem);
+  text-align: right;
 }
-.modalOverlay { 
-  position: fixed; 
-  inset: 0; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  background: rgba(0,0,0,0.4); 
-  z-index: 80; 
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.4);
+  z-index: 80;
   padding: clamp(1rem, 3vw, 1.5rem);
 }
-.formPage { 
-  background: white; 
-  border-radius: 16px; 
-  padding: clamp(1rem, 3vw, 1.5rem); 
-  width: min(90%, 900px); 
+.formPage {
+  background: white;
+  border-radius: 16px;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  width: min(90%, 900px);
   max-width: calc(100% - 2rem);
   box-sizing: border-box;
 }
-.formHeader { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
+.formHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   flex-wrap: wrap;
   gap: clamp(0.5rem, 1.5vw, 0.75rem);
 }
+
+/* ── Toast ──────────────────────────────────────────────── */
 .toast {
   position: fixed;
   top: 20px;
@@ -95,26 +98,15 @@
   z-index: 9999;
   animation: slideIn 0.3s ease;
 }
-
-.toast.success {
-  border-right: 6px solid #2ecc71;
-}
-
-.toast.error {
-  border-right: 6px solid #e74c3c;
-}
-
-.toast.warning {
-  border-right: 6px solid #f39c12;
-}
-
+.toast.success { border-right: 6px solid #2ecc71; }
+.toast.error   { border-right: 6px solid #e74c3c; }
+.toast.warning { border-right: 6px solid #f39c12; }
 .toastClose {
   background: none;
   border: none;
   font-size: 16px;
   cursor: pointer;
 }
-
 .toastProgress {
   position: absolute;
   bottom: 0;
@@ -124,7 +116,6 @@
   background: rgba(0,0,0,0.1);
   overflow: hidden;
 }
-
 .toastProgress::after {
   content: "";
   display: block;
@@ -133,19 +124,80 @@
   background: #2C3A5F;
   animation: progress 4s linear forwards;
 }
-
 @keyframes slideIn {
-  from {
-    transform: translateX(-20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+  from { transform: translateX(-20px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
 }
-
 @keyframes progress {
   from { width: 100%; }
-  to { width: 0; }
+  to   { width: 0; }
+}
+
+/* ── Loading ──────────────────────────────────────────────── */
+.loadingWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  gap: 16px;
+}
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(44, 58, 95, 0.12);
+  border-top-color: #d4af37;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.loadingText {
+  font-size: 15px;
+  font-weight: 700;
+  color: #64748b;
+  margin: 0;
+}
+
+/* ── Empty State ──────────────────────────────────────────── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 72px 24px 80px;
+  background: #fff;
+  border: 1px dashed rgba(44, 58, 95, 0.18);
+  border-radius: 20px;
+  gap: 14px;
+  margin-top: 8px;
+  animation: fadeIn 0.3s ease;
+}
+.emptyIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fdf8ec 0%, #fef3c7 100%);
+  color: #b38e19;
+  margin-bottom: 4px;
+  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.15);
+}
+.emptyTitle {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 900;
+  color: #2C3A5F;
+}
+.emptyDesc {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #64748b;
+  max-width: 380px;
+  line-height: 1.7;
 }

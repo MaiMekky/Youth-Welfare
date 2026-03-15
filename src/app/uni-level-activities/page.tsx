@@ -7,7 +7,7 @@ import StatsGrid from "./component/StatsGrid";
 import type { StatItem } from "./component/StatsGrid";
 import { EventItem, ChipVariant } from "./component/EventCard";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Plus, CalendarX } from "lucide-react";
 import { authFetch } from "@/utils/globalFetch";
 const API_URL = "http://localhost:8000";
 
@@ -107,11 +107,11 @@ function toPriceText(cost: string) {
   if (!Number.isFinite(n) || n === 0) return "مجاني";
   return `${n} جنيه`;
 }
+
 function toEventItem(e: ApiEvent, facultyMap: Record<number, string>): EventItem {
   const apiActive = toBool(e.active);
   const statusBool = toBool(e.status);
   const statusText = typeof e.status === "string" ? e.status : "";
-
   const isActive = apiActive ?? statusBool ?? statusText === "نشط";
 
   return {
@@ -134,10 +134,8 @@ function toEventItem(e: ApiEvent, facultyMap: Record<number, string>): EventItem
 }
 
 type NotifType = "success" | "error" | "warning";
-type Faculty = {
-  faculty_id: number;
-  name: string;
-};
+type Faculty = { faculty_id: number; name: string };
+
 export default function Page() {
   const router = useRouter();
   const goCreate = () => router.push("/uni-level-activities/create");
@@ -145,100 +143,62 @@ export default function Page() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [faculties, setFaculties] = useState<Faculty[]>([]);
-  // ✅ Notification (Toast)
   const [notification, setNotification] = useState<{ message: string; type: NotifType } | null>(null);
+
   const showNotification = (message: string, type: NotifType) => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 2500);
   };
+
   const fetchFaculties = async () => {
-    const res = await apiFetch<Faculty[]>("/api/family/faculties/", {
-      method: "GET",
-    });
-
-    if (!res.ok) {
-      showNotification("فشل تحميل الكليات", "error");
-      return;
-    }
-
+    const res = await apiFetch<Faculty[]>("/api/family/faculties/", { method: "GET" });
+    if (!res.ok) { showNotification("فشل تحميل الكليات", "error"); return; }
     setFaculties(res.data);
   };
-const facultyMap = useMemo(() => {
-  const map: Record<number, string> = {};
-  faculties.forEach((f) => {
-    map[f.faculty_id] = f.name;
-  });
-  return map;
-}, [faculties]);
+
+  const facultyMap = useMemo(() => {
+    const map: Record<number, string> = {};
+    faculties.forEach((f) => { map[f.faculty_id] = f.name; });
+    return map;
+  }, [faculties]);
 
   const fetchEvents = async () => {
     setLoading(true);
     const res = await apiFetch<ApiEvent[]>("/api/event/get-events/", { method: "GET" });
     setLoading(false);
-
-    if (!res.ok) {
-      showNotification(res.message || "فشل تحميل الفعاليات", "error");
-      return;
-    }
-
+    if (!res.ok) { showNotification(res.message || "فشل تحميل الفعاليات", "error"); return; }
     const list = Array.isArray(res.data) ? res.data : [];
     setEvents(list.map((e) => toEventItem(e, facultyMap)));
   };
 
-useEffect(() => {
-  fetchFaculties();
-}, []);
+  useEffect(() => { fetchFaculties(); }, []);
+  useEffect(() => { if (faculties.length) fetchEvents(); }, [faculties]);
 
-useEffect(() => {
-  if (faculties.length) {
-    fetchEvents();
-  }
-}, [faculties]);
   const stats: StatItem[] = useMemo(() => {
-    const active = events.filter((e) => e.isActive).length;
+    const active   = events.filter((e) => e.isActive).length;
     const inactive = events.filter((e) => !e.isActive).length;
-    const total = events.length;
-
+    const total    = events.length;
     return [
-      { title: "إجمالي الفعاليات", value: String(total), meta: "", icon: "calendar", accent: "gold" },
-      { title: "الفعاليات النشطة", value: String(active), meta: "", icon: "check", accent: "green" },
-      { title: "فعاليات غير نشطة", value: String(inactive), meta: "", icon: "clock", accent: "indigo" },
+      { title: "إجمالي الفعاليات",   value: String(total),    meta: "", icon: "calendar", accent: "gold"   },
+      { title: "الفعاليات النشطة",    value: String(active),   meta: "", icon: "check",    accent: "green"  },
+      { title: "فعاليات غير نشطة",   value: String(inactive), meta: "", icon: "clock",    accent: "indigo" },
     ];
   }, [events]);
 
-  const onView = (id: number) => router.push(`/uni-level-activities/${id}`);
-  const onEdit = (id: number) => router.push(`/uni-level-activities/create/${id}`);
-
+  const onView   = (id: number) => router.push(`/uni-level-activities/${id}`);
+  const onEdit   = (id: number) => router.push(`/uni-level-activities/create/${id}`);
   const onDelete = async (id: number) => {
     const prev = events;
-
-    const res = await apiFetch<any>(`/api/event/get-events/${id}/`, {
-      method: "DELETE",
-    });
-
-    if (!res.ok) {
-      setEvents(prev);
-      showNotification(res.message || "فشل الغاء الفعالية", "error");
-      return;
-    }
-
+    const res = await apiFetch<any>(`/api/event/get-events/${id}/`, { method: "DELETE" });
+    if (!res.ok) { setEvents(prev); showNotification(res.message || "فشل الغاء الفعالية", "error"); return; }
     showNotification("✅ تم الغاء الفعالية بنجاح", "success");
     await fetchEvents();
   };
 
   return (
     <div className={styles.page}>
-      {/* ✅ Notification */}
       {notification && (
-        <div
-          className={`${styles.notification} ${
-            notification.type === "success"
-              ? styles.success
-              : notification.type === "warning"
-              ? styles.warning
-              : styles.error
-          }`}
-        >
+        <div className={`${styles.notification} ${styles[notification.type]}`}>
           {notification.message}
         </div>
       )}
@@ -249,7 +209,6 @@ useEffect(() => {
             <h1 className={styles.pageTitle}>إدارة الفعاليات</h1>
             <p className={styles.pageSubtitle}>إنشاء وتعديل وإدارة فعاليات الجامعة</p>
           </div>
-
           <button className={styles.createBtnTop} onClick={goCreate}>
             <Plus size={18} />
             إنشاء فعالية جديدة
@@ -259,19 +218,41 @@ useEffect(() => {
         <StatsGrid items={stats} />
 
         <div className={styles.eventsSection}>
+          {/* Loading skeleton */}
           {loading && (
-            <div style={{ fontWeight: 800, opacity: 0.8, marginBottom: 12 }}>
-              جاري تحميل الفعاليات...
+            <div className={styles.loadingWrap}>
+              <div className={styles.spinner} />
+              <p className={styles.loadingText}>جاري تحميل الفعاليات...</p>
             </div>
           )}
 
-          <EventsGrid
-            items={events}
-            onItemsChange={setEvents}
-            onView={onView}
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
+          {/* Empty state — only when done loading and no data */}
+          {!loading && events.length === 0 && (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyIcon}>
+                <CalendarX size={52} strokeWidth={1.4} />
+              </div>
+              <h3 className={styles.emptyTitle}>لا توجد فعاليات حتى الآن</h3>
+              <p className={styles.emptyDesc}>
+                لم يتم إنشاء أي فعاليات بعد. ابدأ بإضافة فعالية جديدة لعرضها هنا.
+              </p>
+              <button className={styles.emptyBtn} onClick={goCreate}>
+                <Plus size={16} />
+                إنشاء أول فعالية
+              </button>
+            </div>
+          )}
+
+          {/* Events grid — only when there's data */}
+          {!loading && events.length > 0 && (
+            <EventsGrid
+              items={events}
+              onItemsChange={setEvents}
+              onView={onView}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          )}
         </div>
       </div>
     </div>

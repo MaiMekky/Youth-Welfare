@@ -2,49 +2,64 @@
 
 import React, { useMemo, useState, useEffect } from "react";
 import styles from "./Styles/page.module.css";
-import StatsGrid from "./components/StatsGrid";
 import Tabs from "./components/Tabs";
 import Filters from "./components/Filters";
-import AddButton from "./components/AddButton";
 import FamiliesGrid from "./components/FamiliesGrid";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Users, Leaf, Star } from "lucide-react";
 import { authFetch } from "@/utils/globalFetch";
+
 const API_URL = "http://localhost:8000/api";
+const TAB_STORAGE_KEY = "families_active_tab";
 
 export default function Page() {
-  
-  const [selectedFaculty, setSelectedFaculty] = useState<string>("الكل"); // Changed to string for faculty name
-  const [selectedFamilyType, setSelectedFamilyType] = useState<string>("all"); // Added family type filter
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
+  /* ── Tab persistence: always start with searchParam or "central",
+       then correct from localStorage after mount (avoids SSR mismatch) ── */
+  const [activeTab, setActiveTab] = useState<string>(
+    searchParams.get("tab") || "central"
+  );
+
+  useEffect(() => {
+    const fromUrl = searchParams.get("tab");
+    if (fromUrl) {
+      localStorage.setItem(TAB_STORAGE_KEY, fromUrl);
+      setActiveTab(fromUrl);
+    } else {
+      const saved = localStorage.getItem(TAB_STORAGE_KEY);
+      if (saved) setActiveTab(saved);
+    }
+  }, []);
+
+  // Persist tab to localStorage whenever it changes
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    localStorage.setItem(TAB_STORAGE_KEY, tab);
+  };
+
+  const [selectedFaculty, setSelectedFaculty] = useState<string>("الكل");
+  const [selectedFamilyType, setSelectedFamilyType] = useState<string>("all");
   const [families, setFamilies] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const searchParams = useSearchParams();
-const initialTab = searchParams.get("tab") || "central";
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "warning" } | null>(null);
 
-const [activeTab, setActiveTab] = useState(initialTab);
-
-  /* ================= Reset filters when switching tabs ================= */
+  /* Reset filters when switching tabs */
   useEffect(() => {
     setSelectedFaculty("الكل");
     setSelectedFamilyType("all");
   }, [activeTab]);
 
-  /* ================= API ================= */
-
+  /* ── API ── */
   async function fetchFamilies() {
     try {
       setLoading(true);
-
       const token = localStorage.getItem("access");
-
       const response = await authFetch(`${API_URL}/family/super_dept/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
       if (!response.ok) throw new Error("Unauthorized");
-
       const data = await response.json();
       setFamilies(data);
     } catch (error) {
@@ -55,242 +70,117 @@ const [activeTab, setActiveTab] = useState(initialTab);
     }
   }
 
-  useEffect(() => {
-    fetchFamilies();
-  }, []);
+  useEffect(() => { fetchFamilies(); }, []);
 
-  /* ================= تقسيم حسب النوع ================= */
+  /* ── Derived data ── */
+  const centralFamilies = useMemo(() => families.filter((f) => f.type === "مركزية"), [families]);
+  const qualityFamilies = useMemo(() => families.filter((f) => f.type === "نوعية"), [families]);
+  const ecoFamilies     = useMemo(() => families.filter((f) => f.type === "اصدقاء البيئة"), [families]);
 
-  const centralFamilies = useMemo(
-    () => families.filter((f) => f.type === "مركزية"),
-    [families]
-  );
-
-  const qualityFamilies = useMemo(
-    () => families.filter((f) => f.type === "نوعية"),
-    [families]
-  );
-
-  const ecoFamilies = useMemo(
-    () => families.filter((f) => f.type === "اصدقاء البيئة"),
-    [families]
-  );
-
-  /* ================= فلترة حسب الكلية ونوع الأسرة ================= */
-
-  const filteredQualityFamilies = useMemo(() => {
-    let filtered = qualityFamilies;
-
-    // Filter by faculty name
-    if (selectedFaculty !== "الكل") {
-      filtered = filtered.filter((f) => f.faculty_name === selectedFaculty);
-    }
-
-    // Filter by family type (if not "all")
-    if (selectedFamilyType !== "all") {
-      filtered = filtered.filter((f) => f.type === selectedFamilyType);
-    }
-
-    return filtered;
-  }, [qualityFamilies, selectedFaculty, selectedFamilyType]);
-
-  const filteredEcoFamilies = useMemo(() => {
-    let filtered = ecoFamilies;
-
-    // Filter by faculty name
-    if (selectedFaculty !== "الكل") {
-      filtered = filtered.filter((f) => f.faculty_name === selectedFaculty);
-    }
-
-    // Filter by family type (if not "all")
-    if (selectedFamilyType !== "all") {
-      filtered = filtered.filter((f) => f.type === selectedFamilyType);
-    }
-
-    return filtered;
-  }, [ecoFamilies, selectedFaculty, selectedFamilyType]);
-
-  /* ================= Combined filtered families for "quality" and "eco" tabs ================= */
-  
   const filteredNonCentralFamilies = useMemo(() => {
     let filtered = families.filter((f) => f.type !== "مركزية");
-
-    // Filter by faculty name
-    if (selectedFaculty !== "الكل") {
-      filtered = filtered.filter((f) => f.faculty_name === selectedFaculty);
-    }
-
-    // Filter by family type
-    if (selectedFamilyType !== "all") {
-      filtered = filtered.filter((f) => f.type === selectedFamilyType);
-    }
-
+    if (selectedFaculty !== "الكل") filtered = filtered.filter((f) => f.faculty_name === selectedFaculty);
+    if (selectedFamilyType !== "all") filtered = filtered.filter((f) => f.type === selectedFamilyType);
     return filtered;
   }, [families, selectedFaculty, selectedFamilyType]);
 
-  /* ================= approve / reject ================= */
-   const [toast, setToast] = useState<{
-      message: string;
-      type: "success" | "error" | "warning";
-    } | null>(null);
+  /* ── Toast ── */
+  const showToast = (message: string, type: "success" | "error" | "warning") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  };
 
-    const showToast = (
-  message: string,
-  type: "success" | "error" | "warning"
-) => {
-  setToast({ message, type });
-
-  setTimeout(() => {
-    setToast(null);
-  }, 4000);
-};
-async function handleApproveFamily(familyId: number) {
-  try {
-    const token = localStorage.getItem("access");
-
-    const response = await authFetch(
-      `${API_URL}/family/super_dept/${familyId}/final_approve/`,
-      {
+  /* ── Approve / Reject ── */
+  async function handleApproveFamily(familyId: number) {
+    try {
+      const token = localStorage.getItem("access");
+      const response = await authFetch(`${API_URL}/family/super_dept/${familyId}/final_approve/`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({}),
-      }
-    );
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Approve error:", errorData);
-      throw new Error("فشل الموافقة");
+      });
+      if (!response.ok) throw new Error("فشل الموافقة");
+      setFamilies((prev) => prev.map((f) => f.family_id === familyId ? { ...f, status: "مقبول" } : f));
+      showToast("تم قبول الأسرة بنجاح", "success");
+    } catch {
+      showToast("فشل قبول الأسرة", "error");
     }
-
-    // ✅ Update UI without refetch
-    setFamilies((prev) =>
-      prev.map((f) =>
-        f.family_id === familyId ? { ...f, status: "مقبول" } : f
-      )
-    );
-
-    showToast("تم قبول الأسرة بنجاح", "success");
-  } catch (err) {
-    showToast("فشل قبول الأسرة", "error");
   }
-}
-async function handleRejectFamily(familyId: number) {
-  try {
-    const token = localStorage.getItem("access");
 
-    const response = await authFetch(
-      `${API_URL}/family/super_dept/${familyId}/reject/`,
-      {
+  async function handleRejectFamily(familyId: number) {
+    try {
+      const token = localStorage.getItem("access");
+      const response = await authFetch(`${API_URL}/family/super_dept/${familyId}/reject/`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({}),
-      }
-    );
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Reject error:", errorData);
-      throw new Error("فشل الرفض");
+      });
+      if (!response.ok) throw new Error("فشل الرفض");
+      setFamilies((prev) => prev.filter((f) => f.family_id !== familyId));
+      showToast("تم رفض الأسرة", "warning");
+    } catch {
+      showToast("فشل رفض الأسرة", "error");
     }
-
-    // ✅ Remove rejected family from UI
-    setFamilies((prev) => prev.filter((f) => f.family_id !== familyId));
-
-    showToast("تم رفض الأسرة", "warning");
-  } catch (err) {
-    showToast("فشل رفض الأسرة", "error");
-  }
-}
-
-  /* ================= Stats ================= */
-
-  function getStats() {
-    const qualityPending = qualityFamilies.filter(
-      (f) => f.status === "في الانتظار"
-    ).length;
-
-    const ecoPending = ecoFamilies.filter((f) => f.status === "في الانتظار")
-      .length;
-
-    const totalNonPending =
-      qualityFamilies.length + ecoFamilies.length - (qualityPending + ecoPending);
-
-    const totalQualityEco = qualityFamilies.length + ecoFamilies.length;
-
-    const approvalRate = totalQualityEco
-      ? Math.round((totalNonPending / totalQualityEco) * 100) + "%"
-      : "0%";
-
-    return [
-      { id: 1, label: "إجمالي الأسر", value: families.length.toString() },
-      { id: 2, label: "الأسر المركزية", value: centralFamilies.length.toString() },
-      { id: 3, label: "طلبات في الانتظار", value: (qualityPending + ecoPending).toString() },
-      { id: 4, label: "معدل الموافقة", value: approvalRate },
-    ];
   }
 
-  const stats = useMemo(() => getStats(), [families]);
+  /* ── Stats ── */
+  const qualityPendingCount = qualityFamilies.filter((f) => f.status === "في الانتظار").length;
+  const ecoPendingCount     = ecoFamilies.filter((f) => f.status === "في الانتظار").length;
 
-  const qualityPendingCount = qualityFamilies.filter(
-    (f) => f.status === "في الانتظار"
-  ).length;
-
-  const ecoPendingCount = ecoFamilies.filter((f) => f.status === "في الانتظار")
-    .length;
-
-  /* ================= UI ================= */
+  /* ── Current tab's display list (for empty state check) ── */
+  const currentList = activeTab === "central"
+    ? centralFamilies
+    : filteredNonCentralFamilies;
 
   return (
     <div className={styles.container}>
+      {/* Toast */}
       {toast && (
         <div className={`${styles.toast} ${styles[toast.type]}`}>
           <span>{toast.message}</span>
-
-          <button
-            className={styles.toastClose}
-            onClick={() => setToast(null)}
-          >
-          </button>
-
-          <div className={styles.toastProgress}></div>
+          <button className={styles.toastClose} onClick={() => setToast(null)} />
+          <div className={styles.toastProgress} />
         </div>
       )}
+
       <header className={styles.headerCard}>
         <h1 className={styles.pageTitle}>إدارة الأسر الطلابية</h1>
-        <p className={styles.pageSubtitle}>
-          إدارة ومتابعة جميع الأسر الطلابية
-        </p>
+        <p className={styles.pageSubtitle}>إدارة ومتابعة جميع الأسر الطلابية</p>
       </header>
-
-      {/* <StatsGrid stats={stats} /> */}
 
       <Tabs
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleTabChange}
         qualityPendingCount={qualityPendingCount}
         ecoPendingCount={ecoPendingCount}
       />
 
+      {/* Loading */}
       {loading && (
-        <div style={{ textAlign: "center", padding: 20 }}>جاري التحميل...</div>
+        <div className={styles.loadingWrap}>
+          <div className={styles.spinner} />
+          <p className={styles.loadingText}>جاري تحميل الأسر...</p>
+        </div>
       )}
 
       <main className={styles.tabContent}>
-        {activeTab === "central" && (
+        {/* ── Central tab ── */}
+        {!loading && activeTab === "central" && (
           <>
-            {/* <AddButton /> */}
-            <FamiliesGrid families={centralFamilies} showActions={false} activeTab={activeTab} />
+            {centralFamilies.length === 0 ? (
+              <EmptyState
+                icon={<Users size={52} strokeWidth={1.4} />}
+                title="لا توجد أسر مركزية"
+                desc="لم يتم تسجيل أي أسرة مركزية حتى الآن."
+              />
+            ) : (
+              <FamiliesGrid families={centralFamilies} showActions={false} activeTab={activeTab} />
+            )}
           </>
         )}
 
-        {activeTab === "quality" && (
+        {/* ── Quality tab ── */}
+        {!loading && activeTab === "quality" && (
           <>
             <Filters
               selectedFaculty={selectedFaculty}
@@ -298,36 +188,68 @@ async function handleRejectFamily(familyId: number) {
               selectedFamilyType={selectedFamilyType}
               setSelectedFamilyType={setSelectedFamilyType}
             />
-            <FamiliesGrid
-              families={filteredNonCentralFamilies}
-              showActions={true}
-              activeTab={activeTab}
-              onApprove={handleApproveFamily}
-              onReject={handleRejectFamily}
-            />
+            {filteredNonCentralFamilies.length === 0 ? (
+              <EmptyState
+                icon={<Star size={52} strokeWidth={1.4} />}
+                title="لا توجد أسر نوعية"
+                desc={
+                  selectedFaculty !== "الكل" || selectedFamilyType !== "all"
+                    ? "لا توجد نتائج تطابق الفلاتر المحددة"
+                    : "لم يتم تسجيل أي أسرة نوعية حتى الآن."
+                }
+              />
+            ) : (
+              <FamiliesGrid
+                families={filteredNonCentralFamilies}
+                showActions={true}
+                activeTab={activeTab}
+                onApprove={handleApproveFamily}
+                onReject={handleRejectFamily}
+              />
+            )}
           </>
         )}
 
-        {activeTab === "eco" && (
+        {/* ── Eco tab ── */}
+        {!loading && activeTab === "eco" && (
           <>
-           {activeTab === "eco" && (
-            <>
-              <Filters
-                selectedFaculty={selectedFaculty}
-                setSelectedFaculty={setSelectedFaculty}
-                selectedFamilyType={selectedFamilyType}
-                setSelectedFamilyType={setSelectedFamilyType}
+            <Filters
+              selectedFaculty={selectedFaculty}
+              setSelectedFaculty={setSelectedFaculty}
+              selectedFamilyType={selectedFamilyType}
+              setSelectedFamilyType={setSelectedFamilyType}
+            />
+            {filteredNonCentralFamilies.length === 0 ? (
+              <EmptyState
+                icon={<Leaf size={52} strokeWidth={1.4} />}
+                title="لا توجد أسر أصدقاء البيئة"
+                desc={
+                  selectedFaculty !== "الكل" || selectedFamilyType !== "all"
+                    ? "لا توجد نتائج تطابق الفلاتر المحددة. جرّب تغيير الفلتر."
+                    : "لم يتم تسجيل أي أسرة بيئية حتى الآن."
+                }
               />
+            ) : (
               <FamiliesGrid
                 families={filteredNonCentralFamilies}
-                showActions={false} 
+                showActions={false}
                 activeTab={activeTab}
               />
-            </>
-          )}
+            )}
           </>
         )}
       </main>
+    </div>
+  );
+}
+
+/* ── Reusable empty state component ── */
+function EmptyState({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
+  return (
+    <div className={styles.emptyState}>
+      <div className={styles.emptyIcon}>{icon}</div>
+      <h3 className={styles.emptyTitle}>{title}</h3>
+      <p className={styles.emptyDesc}>{desc}</p>
     </div>
   );
 }

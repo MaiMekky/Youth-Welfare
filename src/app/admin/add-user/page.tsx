@@ -15,8 +15,6 @@ export default function AddUser() {
   const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState<string | null>(null);
-
-  // ✅ departments now fetched from API instead of hard-coded map
   const [departments, setDepartments] = useState<{ dept_id: number; name: string }[]>([]);
 
   const [formData, setFormData] = useState({
@@ -26,7 +24,7 @@ export default function AddUser() {
     role: '',
     permissions: [] as string[],
     status: true,
-    faculty: '', // This will store faculty ID as string
+    faculty: '',
     departments: [] as string[],
   });
 
@@ -36,122 +34,91 @@ export default function AddUser() {
   };
 
   const roleMap: { [key: string]: string } = {
-    "faculty_admin": "مسؤول كلية",
-    "faculty_head": "مدير كلية",
-    "department_manager": "مدير ادارة",
-    "general_admin": "مدير عام",
-    "super_admin": "مشرف النظام",
+    "faculty_admin":       "مسؤول كلية",
+    "faculty_head":        "مدير كلية",
+    "department_manager":  "مدير ادارة",
+    "general_admin":       "مدير عام",
+    "super_admin":         "مشرف النظام",
   };
 
-  // ✅ departmentsList from API (same usage as before)
   const departmentsList = departments.map(d => d.name);
 
-  // Fetch faculties + departments on component mount
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
         const token = localStorage.getItem('access');
 
-        // faculties
-        const facultiesRes = await authFetch('http://localhost:8000/api/family/faculties/', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
+        const [facultiesRes, departmentsRes] = await Promise.all([
+          authFetch('http://localhost:8000/api/family/faculties/', {
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+          }),
+          authFetch('http://localhost:8000/api/family/departments/', {
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+          }),
+        ]);
 
-        if (!facultiesRes.ok) {
-          throw new Error('Failed to fetch faculties');
-        }
+        if (!facultiesRes.ok)   throw new Error('Failed to fetch faculties');
+        if (!departmentsRes.ok) throw new Error('Failed to fetch departments');
 
-        const facultiesData = await facultiesRes.json();
-        setFaculties(facultiesData);
-
-        // ✅ departments
-        const departmentsRes = await authFetch('http://localhost:8000/api/family/departments/', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (!departmentsRes.ok) {
-          throw new Error('Failed to fetch departments');
-        }
-
-        const departmentsData = await departmentsRes.json();
-        setDepartments(departmentsData);
-
+        setFaculties(await facultiesRes.json());
+        setDepartments(await departmentsRes.json());
       } catch (error) {
         console.error('Error fetching initial data:', error);
-        showNotification("حدث خطاء في تحميل البيانات", "error");
+        showNotification("حدث خطأ في تحميل البيانات", "error");
       } finally {
         setLoading(false);
       }
     };
-
     fetchInitialData();
   }, []);
 
   useEffect(() => {
     if (isEdit && faculties.length > 0) {
       const token = localStorage.getItem('access');
-
       authFetch(`http://localhost:8000/api/auth/admin_management/${admin_id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       })
         .then(res => res.json())
         .then(data => {
           let deptNames: string[] = [];
-
-          
           if (Array.isArray(data.dept_name)) {
             deptNames = data.dept_name;
+          } else if (typeof data.dept_name === "string") {
+            deptNames = data.dept_name.replace(/[{}]/g, '').split(',').map(s => s.trim());
           }
-
-          else if (typeof data.dept_name === "string") {
-            deptNames = data.dept_name
-              .replace(/[{}]/g, '')  
-              .split(',')            
-              .map(s => s.trim());   
-          }
-
-          // Store faculty ID directly (convert to string for consistency with form state)
-          const facultyId = data.faculty ? data.faculty.toString() : '';
 
           setFormData({
-            name: data.name,
-            email: data.email,
-            password: '',
-            role: Object.keys(roleMap).find(k => roleMap[k] === data.role) || '',
+            name:        data.name,
+            email:       data.email,
+            password:    '',
+            role:        Object.keys(roleMap).find(k => roleMap[k] === data.role) || '',
             permissions: [
               ...(data.can_create ? ['C'] : []),
-              ...(data.can_read ? ['R'] : []),
+              ...(data.can_read   ? ['R'] : []),
               ...(data.can_update ? ['U'] : []),
-              ...(data.can_delete ? ['D'] : [])
+              ...(data.can_delete ? ['D'] : []),
             ],
-            status: data.acc_status === 'active',
-            faculty: facultyId,
-            departments:
-            data.dept !== null && data.dept !== undefined
-              ? [String(data.dept)]
-              : Array.isArray(data.dept_fac_ls)
-                ? data.dept_fac_ls.map((d: number | string) => String(d))
-                : [],
+            status:      data.acc_status === 'active',
+            faculty:     data.faculty ? data.faculty.toString() : '',
+            departments: data.dept_fac_ls,
           });
         })
         .catch(err => console.error('Error fetching admin data:', err));
     }
-  }, [admin_id, faculties]); // keep same dependencies as your file
+  }, [admin_id, faculties]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, checked, type } = e.target;
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+
+    // ✅ force email lowercase as user types
+    if (name === 'email') {
+      setFormData(prev => ({ ...prev, email: value.toLowerCase() }));
+      return;
+    }
 
     if (formData.role === "department_manager" && name === "departments") {
-      setFormData(prev => ({
-        ...prev,
-        departments: [value]
-      }));
+      setFormData(prev => ({ ...prev, departments: [value] }));
       return;
     }
 
@@ -183,69 +150,50 @@ export default function AddUser() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       const token = localStorage.getItem('access');
       if (!token) throw new Error('User not authenticated');
 
-      const url = isEdit
-        ? `http://localhost:8000/api/auth/admin_management/${admin_id}/`
-        : 'http://localhost:8000/api/auth/admin_management/';
-
+      const url    = isEdit ? `http://localhost:8000/api/auth/admin_management/${admin_id}/` : 'http://localhost:8000/api/auth/admin_management/';
       const method = isEdit ? 'PATCH' : 'POST';
 
-      // Convert faculty ID to number (empty string becomes null)
-      const facultyId = formData.faculty ? Number(formData.faculty) : null;
-
-      // Find faculty name by ID for faculty_name field
+      const facultyId   = formData.faculty ? Number(formData.faculty) : null;
       const facultyName = faculties.find(f => f.faculty_id === facultyId)?.name || null;
+
+      // ✅ normalize email before sending
+      const normalizedEmail = formData.email.trim().toLowerCase();
 
       const payload = {
         ...(isEdit ? {} : { admin_id: 0 }),
-        name: formData.name,
-        email: formData.email,
+        name:         formData.name,
+        email:        normalizedEmail,
         ...(formData.password && { password: formData.password }),
-        role: roleMap[formData.role] || formData.role,
-
-        faculty: facultyId, // Send faculty ID directly
+        role:         roleMap[formData.role] || formData.role,
+        faculty:      facultyId,
         faculty_name: facultyName,
-
-        dept:
-          formData.role === "department_manager"
-            ? Number(formData.departments[0])
-            : null,
-
-        dept_fac_ls:
-          formData.role === "faculty_admin"
-            ? formData.departments
-            : [],
-
-        acc_status: formData.status ? "active" : "inactive",
-
-        can_create: formData.permissions.includes("C"),
-        can_read: formData.permissions.includes("R"),
-        can_update: formData.permissions.includes("U"),
-        can_delete: formData.permissions.includes("D"),
+        dept:         formData.role === "department_manager" ? Number(formData.departments[0]) : null,
+        dept_fac_ls:  formData.role === "faculty_admin" ? formData.departments : [],
+        acc_status:   formData.status ? "active" : "inactive",
+        can_create:   formData.permissions.includes("C"),
+        can_read:     formData.permissions.includes("R"),
+        can_update:   formData.permissions.includes("U"),
+        can_delete:   formData.permissions.includes("D"),
       };
 
       const res = await authFetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
         const errorText = await res.text();
-        showNotification("حدث خطأ" + errorText, "error");
+        showNotification("حدث خطأ: " + errorText, "error");
         return;
       }
 
       showNotification(isEdit ? "تم التحديث بنجاح 🎉" : "تم الإنشاء بنجاح 🎉", "success");
       router.push('/CreateAdmins');
-
     } catch (err) {
       console.error(err);
       showNotification("حدث خطأ ما.", "error");
@@ -255,177 +203,214 @@ export default function AddUser() {
   if (loading) {
     return (
       <div className={styles.pageWrapper} dir="rtl">
-        <div className={styles.centerWrapper}>
-          <div className={styles.formCard}>
-            <p>جاري تحميل البيانات...</p>
+        <div className={styles.addUserWrapper}>
+          <div className={styles.addUserCard}>
+            <p style={{ textAlign: 'center', color: '#6B8299', padding: '40px 0' }}>جاري تحميل البيانات…</p>
           </div>
         </div>
       </div>
     );
   }
 
+  const permLabels: Record<string, string> = { C: 'إنشاء', R: 'قراءة', U: 'تعديل', D: 'حذف' };
+
   return (
     <div className={styles.pageWrapper} dir="rtl">
-      <div className={styles.centerWrapper}>
-        <div className={styles.formCard}>
-          <h2 className={styles.formTitle}>
-            {isEdit ? "تعديل المستخدم" : "إنشاء مستخدم جديد"}
-          </h2>
 
-          {notification && (
-            <div
-              className={`${styles.notification} ${notification.startsWith("success")
-                ? styles.success
-                : notification.startsWith("warning")
-                  ? styles.warning
-                  : styles.error
-                }`}
-            >
-              {notification.split(":")[1]}
+      {notification && (
+        <div className={`${styles.notification} ${
+          notification.startsWith("success") ? styles.success :
+          notification.startsWith("warning") ? styles.warning : styles.error
+        }`}>
+          {notification.split(":")[1]}
+        </div>
+      )}
+
+      <div className={styles.addUserWrapper}>
+        <div className={styles.addUserCard}>
+
+          {/* ── Header ── */}
+          <div className={styles.addUserHeader}>
+            <div className={styles.addUserHeaderIcon}>
+              {isEdit ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              )}
             </div>
-          )}
+            <div>
+              <h2 className={styles.addUserTitle}>{isEdit ? "تعديل المستخدم" : "إنشاء مستخدم جديد"}</h2>
+              <p className={styles.addUserSubtitle}>{isEdit ? "تعديل بيانات وصلاحيات المستخدم" : "إضافة مستخدم جديد وتحديد دوره وصلاحياته"}</p>
+            </div>
+          </div>
 
-          <form onSubmit={handleSubmit} className={styles.formContent}>
-            <h3 className={styles.sectionTitle}>معلومات المستخدم</h3>
+          <form onSubmit={handleSubmit} className={styles.addUserForm}>
 
-            <input
-              type="text"
-              name="name"
-              className={styles.inputField}
-              placeholder="الاسم"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
+            {/* ── Section: User Info ── */}
+            <div className={styles.formSection}>
+              <div className={styles.formSectionLabel}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                معلومات المستخدم
+              </div>
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label className={styles.fieldLabel}>الاسم</label>
+                  <input
+                    type="text" name="name"
+                    className={styles.addUserInput}
+                    placeholder="أدخل الاسم الكامل"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.fieldLabel}>البريد الإلكتروني</label>
+                  {/* ✅ email always lowercase */}
+                  <input
+                    type="email" name="email"
+                    className={styles.addUserInput}
+                    placeholder="example@domain.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.fieldLabel}>{isEdit ? "كلمة المرور (اتركها فارغة للإبقاء)" : "كلمة المرور"}</label>
+                  <input
+                    type="password" name="password"
+                    className={styles.addUserInput}
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required={!isEdit}
+                  />
+                </div>
+              </div>
+            </div>
 
-            <input
-              type="email"
-              name="email"
-              className={styles.inputField}
-              placeholder="البريد الإلكتروني"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
+            {/* ── Section: Role ── */}
+            <div className={styles.formSection}>
+              <div className={styles.formSectionLabel}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                الدور الوظيفي
+              </div>
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label className={styles.fieldLabel}>الدور</label>
+                  <select name="role" className={styles.addUserSelect} value={formData.role} onChange={handleChange}>
+                    <option value="" hidden>اختر الدور</option>
+                    <option value="faculty_admin">مسؤول كلية</option>
+                    <option value="faculty_head">مدير كلية</option>
+                    <option value="department_manager">مدير ادارة</option>
+                    <option value="general_admin">مدير عام</option>
+                    <option value="super_admin">مشرف النظام</option>
+                  </select>
+                </div>
 
-            <input
-              type="password"
-              name="password"
-              className={styles.inputField}
-              placeholder="كلمة المرور"
-              value={formData.password}
-              onChange={handleChange}
-              required={!isEdit}
-            />
+                {/* Faculty select */}
+                {(formData.role === "faculty_admin" || formData.role === "faculty_head") && (
+                  <div className={styles.formGroup}>
+                    <label className={styles.fieldLabel}>الكلية</label>
+                    <select name="faculty" className={styles.addUserSelect} value={formData.faculty} onChange={handleChange}>
+                      <option value="" hidden>اختر الكلية</option>
+                      {faculties.map(f => (
+                        <option key={f.faculty_id} value={f.faculty_id.toString()}>{f.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
 
-            <h3 className={styles.sectionTitle}>الدور</h3>
-            <select
-              name="role"
-              className={styles.selectField}
-              value={formData.role}
-              onChange={handleChange}
-            >
-              <option value="" hidden>اختر الدور</option>
-              <option value="faculty_admin">مسؤول كلية</option>
-              <option value="faculty_head">مدير كلية</option>
-              <option value="department_manager">مدير ادارة</option>
-              <option value="general_admin">مدير عام</option>
-              <option value="super_admin">مشرف النظام</option>
-            </select>
-
-            {/* مسؤول كلية */}
-            {(formData.role === "faculty_admin" || formData.role === "faculty_head") && (
-              <>
-                <h3 className={styles.sectionTitle}>اختر الكلية</h3>
-                <select
-                  name="faculty"
-                  className={styles.selectField}
-                  value={formData.faculty}
-                  onChange={handleChange}
-                >
-                  <option value="" hidden>اختر الكلية</option>
-                  {faculties.map(faculty => (
-                    <option key={faculty.faculty_id} value={faculty.faculty_id.toString()}>
-                      {faculty.name}
-                    </option>
-                  ))}
-                </select>
-
-                <h3 className={styles.sectionTitle}>اختر الأقسام</h3>
-                {departmentsList.map(dep => (
-                  <label key={dep} className={styles.checkboxRow}>
-                    <input
-                      type="checkbox"
+                {/* Department manager select */}
+                {formData.role === "department_manager" && (
+                  <div className={styles.formGroup}>
+                    <label className={styles.fieldLabel}>القسم</label>
+                    <select
                       name="departments"
-                      value={dep}
-                      checked={formData.departments.includes(dep)}
+                      className={styles.addUserSelect}
+                      value={formData.departments[0] || ""}
+                      onChange={e => setFormData(prev => ({ ...prev, departments: [e.target.value] }))}
+                    >
+                      <option value="" hidden>اختر القسم</option>
+                      {departments.map(dep => (
+                        <option key={dep.dept_id} value={dep.dept_id}>{dep.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              {/* Departments checkboxes for faculty roles */}
+              {(formData.role === "faculty_admin" || formData.role === "faculty_head") && (
+                <div className={styles.formGroup} style={{ marginTop: 12 }}>
+                  <label className={styles.fieldLabel}>الأقسام</label>
+                  <div className={styles.checkboxGrid}>
+                    {departmentsList.map(dep => (
+                      <label key={dep} className={styles.checkboxCard}>
+                        <input
+                          type="checkbox" name="departments" value={dep}
+                          checked={formData.departments.includes(dep)}
+                          onChange={handleChange}
+                        />
+                        <span>{dep}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ── Section: Permissions ── */}
+            <div className={styles.formSection}>
+              <div className={styles.formSectionLabel}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                صلاحيات الوصول
+              </div>
+              <div className={styles.permissionsGrid}>
+                {["C", "R", "U", "D"].map(p => (
+                  <label key={p} className={`${styles.permCard} ${formData.permissions.includes(p) ? styles.permCardActive : ''}`}>
+                    <input
+                      type="checkbox" name="permissions" value={p}
+                      checked={formData.permissions.includes(p)}
                       onChange={handleChange}
+                      style={{ display: 'none' }}
                     />
-                    {dep}
+                    <span className={styles.permCardIcon}>
+                      {p === 'C' ? '➕' : p === 'R' ? '👁' : p === 'U' ? '✏️' : '🗑'}
+                    </span>
+                    <span className={styles.permCardLabel}>{permLabels[p]}</span>
                   </label>
                 ))}
-              </>
-            )}
+              </div>
+            </div>
 
-            {/* مدير إدارة */}
-            {formData.role === "department_manager" && (
-              <>
-                <h3 className={styles.sectionTitle}>اختر القسم</h3>
-                <select
-                  name="departments"
-                  className={styles.selectField}
-                  value={formData.departments[0] || ""}
-                  onChange={(e) =>
-                    setFormData(prev => ({
-                      ...prev,
-                      departments: [e.target.value],
-                    }))
-                  }
-                >
-                  <option value="" hidden>اختر القسم</option>
-
-                  {/* ✅ now built from API, but keeps EXACT same behavior (value is dept_id number) */}
-                  {departments.map(dep => (
-                    <option key={dep.dept_id} value={dep.dept_id}>
-                      {dep.name}
-                    </option>
-                  ))}
-                </select>
-              </>
-            )}
-
-            <h3 className={styles.sectionTitle}>صلاحيات الوصول</h3>
-            {["C", "R", "U", "D"].map((p) => (
-              <label key={p} className={styles.checkboxRow}>
-                <input
-                  type="checkbox"
-                  name="permissions"
-                  value={p}
-                  checked={formData.permissions.includes(p)}
-                  onChange={handleChange}
-                />
-                {p === "C" ? "إنشاء" :
-                  p === "R" ? "قراءة" :
-                    p === "U" ? "تعديل" : "حذف"}
+            {/* ── Section: Status ── */}
+            <div className={styles.formSection}>
+              <div className={styles.formSectionLabel}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                حالة الحساب
+              </div>
+              <label className={styles.statusToggleRow}>
+                <div className={styles.toggleSwitch}>
+                  <input type="checkbox" name="status" checked={formData.status} onChange={handleChange} />
+                  <span className={styles.toggleSlider}></span>
+                </div>
+                <span className={styles.statusToggleLabel}>
+                  {formData.status ? 'الحساب نشط' : 'الحساب غير نشط'}
+                </span>
+                <span className={`${styles.statusPill} ${formData.status ? styles.statusPillActive : styles.statusPillInactive}`}>
+                  {formData.status ? 'نشط' : 'معطل'}
+                </span>
               </label>
-            ))}
+            </div>
 
-            <h3 className={styles.sectionTitle}>حالة الحساب</h3>
-            <label className={styles.checkboxRow}>
-              <input
-                type="checkbox"
-                name="status"
-                checked={formData.status}
-                onChange={handleChange}
-              />
-              الحساب نشط
-            </label>
-
-            <div className={styles.buttonsRow}>
-              <button type="button" onClick={() => router.back()} className={styles.btnCancel}>
+            {/* ── Buttons ── */}
+            <div className={styles.addUserBtns}>
+              <button type="button" onClick={() => router.back()} className={styles.addUserBtnCancel}>
                 إلغاء
               </button>
-              <button type="submit" className={styles.btnAddUser}>
+              <button type="submit" className={styles.addUserBtnSubmit}>
                 {isEdit ? "تحديث المستخدم" : "إنشاء مستخدم"}
               </button>
             </div>

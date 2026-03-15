@@ -141,7 +141,6 @@ function PlanDetailsModal({
     fetchDetails();
   }, [plan.plan_id]);
 
-  // Close on backdrop click
   const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) onClose();
   };
@@ -154,7 +153,7 @@ function PlanDetailsModal({
         <div className={styles.modalHeader}>
           <div className={styles.modalHeaderLeft}>
             <button className={styles.modalCloseBtn} onClick={onClose}>
-              <X size={18} />
+              <X size={20} />
             </button>
           </div>
           <div className={styles.modalHeaderRight}>
@@ -167,23 +166,19 @@ function PlanDetailsModal({
 
         {loading ? (
           <div className={styles.modalState}>
-            <RefreshCw size={34} className={styles.spinner} />
+            <RefreshCw size={38} className={styles.spinner} />
             <p>جاري تحميل التفاصيل…</p>
           </div>
         ) : error ? (
           <div className={styles.modalState}>
-            <AlertCircle size={34} style={{ color: "#DC2626" }} />
+            <AlertCircle size={38} style={{ color: "#DC2626" }} />
             <p style={{ color: "#DC2626" }}>{error}</p>
           </div>
         ) : details ? (
           <div className={styles.modalBody}>
 
-            {/* Plan Meta Info */}
+            {/* Plan Meta Info — الكلية removed */}
             <div className={styles.planMetaGrid}>
-              <div className={styles.planMetaItem}>
-                <span className={styles.planMetaLabel}>الكلية</span>
-                <span className={styles.planMetaValue}>{details.faculty_name}</span>
-              </div>
               <div className={styles.planMetaItem}>
                 <span className={styles.planMetaLabel}>القسم</span>
                 <span className={styles.planMetaValue}>{details.dept_name || "—"}</span>
@@ -211,14 +206,14 @@ function PlanDetailsModal({
             {/* Events Section */}
             <div className={styles.eventsSection}>
               <div className={styles.eventsSectionHeader}>
-                <BookOpen size={15} />
+                <BookOpen size={17} />
                 <h3>الفعاليات المخططة</h3>
                 <span className={styles.eventsCountBadge}>{details.events.length}</span>
               </div>
 
               {details.events.length === 0 ? (
                 <div className={styles.noEvents}>
-                  <Info size={28} style={{ opacity: 0.3 }} />
+                  <Info size={32} style={{ opacity: 0.3 }} />
                   <p>لا توجد فعاليات مسجلة في هذه الخطة</p>
                 </div>
               ) : (
@@ -271,7 +266,7 @@ function PlanDetailsModal({
                           title="تفاصيل"
                         >
                           <ChevronRight
-                            size={14}
+                            size={15}
                             style={{
                               transform: activeEvent?.event_id === ev.event_id ? "rotate(90deg)" : "rotate(0deg)",
                               transition: "transform 0.2s",
@@ -292,49 +287,49 @@ function PlanDetailsModal({
                             )}
                             {ev.location && (
                               <div className={styles.eventDetailItem}>
-                                <MapPin size={12} />
+                                <MapPin size={13} />
                                 <span className={styles.eventDetailLabel}>الموقع</span>
                                 <span className={styles.eventDetailValue}>{ev.location}</span>
                               </div>
                             )}
                             {ev.type && (
                               <div className={styles.eventDetailItem}>
-                                <Tag size={12} />
+                                <Tag size={13} />
                                 <span className={styles.eventDetailLabel}>النوع</span>
                                 <span className={styles.eventDetailValue}>{ev.type}</span>
                               </div>
                             )}
                             {ev.family_name && (
                               <div className={styles.eventDetailItem}>
-                                <Users size={12} />
+                                <Users size={13} />
                                 <span className={styles.eventDetailLabel}>الفئة</span>
                                 <span className={styles.eventDetailValue}>{ev.family_name}</span>
                               </div>
                             )}
                             {ev.reward && (
                               <div className={styles.eventDetailItem}>
-                                <DollarSign size={12} />
+                                <DollarSign size={13} />
                                 <span className={styles.eventDetailLabel}>المكافأة</span>
                                 <span className={styles.eventDetailValue}>{ev.reward}</span>
                               </div>
                             )}
                             {ev.restrictions && (
                               <div className={styles.eventDetailItem}>
-                                <Info size={12} />
+                                <Info size={13} />
                                 <span className={styles.eventDetailLabel}>القيود</span>
                                 <span className={styles.eventDetailValue}>{ev.restrictions}</span>
                               </div>
                             )}
                             {ev.resource && (
                               <div className={styles.eventDetailItem}>
-                                <BookOpen size={12} />
+                                <BookOpen size={13} />
                                 <span className={styles.eventDetailLabel}>الموارد</span>
                                 <span className={styles.eventDetailValue}>{ev.resource}</span>
                               </div>
                             )}
                             {ev.created_by_name && (
                               <div className={styles.eventDetailItem}>
-                                <Users size={12} />
+                                <Users size={13} />
                                 <span className={styles.eventDetailLabel}>منشئ الفعالية</span>
                                 <span className={styles.eventDetailValue}>{ev.created_by_name}</span>
                               </div>
@@ -421,11 +416,11 @@ function FacultyCard({ plan, onDownload, downloading, onView }: {
       <div className={styles.cardActions}>
         {isMissing ? (
           <button className={styles.btnView} disabled>
-            <Eye size={14} /> عرض الخطة
+            <Eye size={16} /> عرض الخطة
           </button>
         ) : (
           <button className={styles.btnView} onClick={() => onView(plan)}>
-            <Eye size={14} /> عرض الخطة
+            <Eye size={16} /> عرض الخطة
           </button>
         )}
         <button
@@ -435,8 +430,8 @@ function FacultyCard({ plan, onDownload, downloading, onView }: {
           title="تحميل PDF"
         >
           {downloading
-            ? <RefreshCw size={13} style={{ animation: "spin 1s linear infinite" }} />
-            : <Download size={13} />}
+            ? <RefreshCw size={15} style={{ animation: "spin 1s linear infinite" }} />
+            : <Download size={15} />}
           تحميل
         </button>
       </div>
@@ -531,7 +526,7 @@ export default function PlanView() {
           className={`${styles.tab} ${activeTab === "plans" ? styles.active : ""}`}
           onClick={() => setActiveTab("plans")}
         >
-          <FileText size={16} /> خطة الكليات
+          <FileText size={18} /> خطط الاقسام
         </button>
       </div>
 
@@ -539,10 +534,10 @@ export default function PlanView() {
         <>
           {/* Info banner */}
           <div className={styles.infoBanner}>
-            <CheckCircle size={18} />
+            <CheckCircle size={22} />
             <div className={styles.infoBannerText}>
-              <h3>خطط الكليات السنوية</h3>
-              <p>عرض ومراجعة الخطط السنوية المرسلة من كل كلية للأنشطة الطلابية والفعاليات. يتم تحديث هذه الخطط في بداية كل عام دراسي.</p>
+              <h3>خطط الاقسام السنوية</h3>
+              <p>عرض ومراجعة الخطط السنوية المرسلة من كل قسم للأنشطة الطلابية والفعاليات. يتم تحديث هذه الخطط في بداية كل عام دراسي.</p>
             </div>
           </div>
 
@@ -550,16 +545,16 @@ export default function PlanView() {
           <div className={styles.statsRow}>
             <div className={styles.statItem}>
               <div className={`${styles.statIconBox} ${styles.navy}`}>
-                <Layers size={19} />
+                <Layers size={22} />
               </div>
               <div className={styles.statContent}>
                 <div className={styles.statValue}>{totalPlans}</div>
-                <div className={styles.statTitle}>إجمالي الكليات</div>
+                <div className={styles.statTitle}>إجمالي الأقسام</div>
               </div>
             </div>
             <div className={styles.statItem}>
               <div className={`${styles.statIconBox} ${styles.green}`}>
-                <CheckCircle size={19} />
+                <CheckCircle size={22} />
               </div>
               <div className={styles.statContent}>
                 <div className={styles.statValue}>{completePlans}</div>
@@ -568,7 +563,7 @@ export default function PlanView() {
             </div>
             <div className={styles.statItem}>
               <div className={`${styles.statIconBox} ${styles.amber}`}>
-                <Clock size={19} />
+                <Clock size={22} />
               </div>
               <div className={styles.statContent}>
                 <div className={styles.statValue}>{missingPlans}</div>
@@ -577,7 +572,7 @@ export default function PlanView() {
             </div>
             <div className={styles.statItem}>
               <div className={`${styles.statIconBox} ${styles.blue}`}>
-                <Calendar size={19} />
+                <Calendar size={22} />
               </div>
               <div className={styles.statContent}>
                 <div className={`${styles.statValue} ${styles.yearValue}`}>{currentYear}</div>
@@ -589,24 +584,10 @@ export default function PlanView() {
           {/* Section header */}
           <div className={styles.sectionHeader}>
             <div className={styles.sectionHeaderText}>
-              <h2>خطط الكليات</h2>
+              <h2>خطط الاقسام</h2>
               <p>مراجعة وتحميل الخطط السنوية للأنشطة الطلابية</p>
             </div>
             <div className={styles.sectionControls}>
-
-              {/* ── Faculty dropdown ──
-              <select
-                className={styles.filterSelect}
-                value={facultyFilter}
-                onChange={e => setFacultyFilter(e.target.value)}
-              >
-                <option value="all">كل الكليات</option>
-                {facultyNames.map(name => (
-                  <option key={name} value={name}>{name}</option>
-                ))}
-              </select> */}
-
-              {/* ── Year dropdown ── */}
               {years.length > 0 && (
                 <select
                   className={styles.filterSelect}
@@ -620,7 +601,6 @@ export default function PlanView() {
                 </select>
               )}
 
-              {/* ── Reset filters ── */}
               {(facultyFilter !== "all" || yearFilter !== "all") && (
                 <button
                   className={styles.resetBtn}
@@ -629,17 +609,16 @@ export default function PlanView() {
                     setYearFilter("all");
                   }}
                 >
-                  <XCircle size={13} /> مسح
+                  <XCircle size={14} /> مسح
                 </button>
               )}
 
               <button className={styles.filterBtn} onClick={fetchPlans}>
-                <Filter size={13} /> تحديث
+                <Filter size={14} /> تحديث
               </button>
             </div>
           </div>
 
-          {/* Results count */}
           {(facultyFilter !== "all" || yearFilter !== "all") && (
             <p className={styles.resultsCount}>
               {filtered.length} نتيجة من أصل {plans.length}
@@ -648,18 +627,18 @@ export default function PlanView() {
 
           {error && (
             <div className={styles.errorBanner}>
-              <AlertCircle size={16} /> {error}
+              <AlertCircle size={18} /> {error}
             </div>
           )}
 
           {loading ? (
             <div className={styles.stateBox}>
-              <RefreshCw size={36} className={styles.spinner} />
+              <RefreshCw size={42} className={styles.spinner} />
               <p>جاري تحميل البيانات…</p>
             </div>
           ) : filtered.length === 0 ? (
             <div className={styles.stateBox}>
-              <Building2 size={44} style={{ opacity: 0.3, display: "block", margin: "0 auto" }} />
+              <Building2 size={52} style={{ opacity: 0.3, display: "block", margin: "0 auto" }} />
               <p>لا توجد نتائج مطابقة</p>
             </div>
           ) : (
@@ -682,7 +661,6 @@ export default function PlanView() {
         <div className={styles.reportsWrapper} />
       )}
 
-      {/* ── Plan Details Modal ── */}
       {viewingPlan && (
         <PlanDetailsModal
           plan={viewingPlan}

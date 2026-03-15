@@ -25,10 +25,10 @@ const TrackReqButton: React.FC<TrackReqButtonProps> = ({ onCreateClick, onReview
 
         {/* Right: action buttons */}
         <div className={styles.heroActions}>
-          <button className={styles.btnPrimary} onClick={onCreateClick}>
+          {/* <button className={styles.btnPrimary} onClick={onCreateClick}>
             <Plus size={17} strokeWidth={2.5} />
             إنشاء طلب أسرة
-          </button>
+          </button> */}
           <button className={styles.btnSecondary} onClick={onReviewClick}>
             <FileSearch size={17} strokeWidth={2} />
             متابعة الطلب

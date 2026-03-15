@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Head from 'next/head';
 import styles from './access-privileges.module.css';
 import { useRouter } from 'next/navigation';
 import { authFetch } from "@/utils/globalFetch";
@@ -26,14 +25,21 @@ export default function AccessPrivileges() {
   const router = useRouter();
   const [toast, setToast] = useState<string | null>(null);
 
+  const permissionLabels: { [key: string]: string } = {
+    D: 'حذف',
+    U: 'تعديل',
+    R: 'قراءة',
+    C: 'إنشاء',
+  };
+
   const permissionColors: { [key: string]: string } = {
     D: styles.permissionD,
     U: styles.permissionU,
     R: styles.permissionR,
-    C: styles.permissionC
+    C: styles.permissionC,
   };
 
- useEffect(() => {
+  useEffect(() => {
     const fetchUsers = async () => {
       try {
         const token = localStorage.getItem('access');
@@ -58,7 +64,7 @@ export default function AccessPrivileges() {
           role: u.role || 'غير محدد',
           permissions: [
             u.can_create ? 'C' : '',
-            u.can_read ? 'R' : '',
+            u.can_read   ? 'R' : '',
             u.can_update ? 'U' : '',
             u.can_delete ? 'D' : '',
           ].filter(Boolean),
@@ -76,13 +82,13 @@ export default function AccessPrivileges() {
     fetchUsers();
   }, []);
 
+  // ✅ email lowercase filter
   const filteredUsers = users.filter(user =>
     (selectedRole === 'جميع الأدوار' || user.role === selectedRole) &&
     (user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()))
+      user.email.toLowerCase().includes(searchTerm.trim().toLowerCase()))
   );
 
-  // Toggle status and call PATCH
   const toggleStatus = async (id: string) => {
     const user = users.find(u => u.id === id);
     if (!user) return;
@@ -108,49 +114,65 @@ export default function AccessPrivileges() {
         prev.map(u => (u.id === id ? { ...u, status: updatedStatus } : u))
       );
 
-      setToast(`${user.name} أصبح ${updatedStatus ? 'نشط' : 'غير نشط'} الآن`);
+      setToast(`${user.name} أصبح ${updatedStatus ? 'نشطاً' : 'غير نشط'} الآن`);
       setTimeout(() => setToast(null), 3000);
     } catch (err) {
       console.error(err);
     }
   };
 
-
-  // const filteredUsers = users.filter(user =>
-  //   (selectedRole === 'جميع الأدوار' || user.role === selectedRole) &&
-  //   (user.name.toLowerCase().includes(searchTerm.toLowerCase()) || user.email.toLowerCase().includes(searchTerm.toLowerCase()))
-  // );
-
-  // const toggleStatus = (id: string) => {
-  //   setUsers(prev =>
-  //     prev.map(user =>
-  //       user.id === id ? { ...user, status: !user.status } : user
-  //     )
-  //   );
-
-  //   const updatedUser = users.find(u => u.id === id);
-  //   if (updatedUser) {
-  //     setToast(`${updatedUser.name} أصبح ${updatedUser.status ? 'غير نشط' : 'نشط'} الآن`);
-  //     setTimeout(() => setToast(null), 3000);
-  //   }
-  // };
-
-  const addUser = () => {
-    router.push('/admin/add-user'); // فتح صفحة إضافة مستخدم جديد
-  };
-
   return (
     <>
-      <Head>
-        <title>إدارة صلاحيات الوصول</title>
-      </Head>
-
       <div className={styles.pageWrapper} dir="rtl">
+
+        {/* ── Toast ── */}
         {toast && <div className={styles.toast}>{toast}</div>}
 
-        <div className={styles.controlsBar}>
-          <button className={styles.btnAddUser} onClick={addUser}>إضافة مستخدم</button>
+        {/* ── Page Header ── */}
+        <div className={styles.pageHeader}>
+          <div>
+            <h1 className={styles.pageTitle}>إدارة صلاحيات الوصول</h1>
+            <p className={styles.pageSubtitle}>إدارة المستخدمين وتحديد أدوارهم وصلاحياتهم في النظام</p>
+          </div>
+          <button className={styles.btnAddUser} onClick={() => router.push('/admin/add-user')}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            إضافة مستخدم
+          </button>
+        </div>
 
+        {/* ── Stats Row ── */}
+        <div className={styles.statsRow}>
+          <div className={`${styles.statCard} ${styles.statTotal}`}>
+            <div className={styles.statNum}>{users.length}</div>
+            <div className={styles.statLabel}>إجمالي المستخدمين</div>
+          </div>
+          <div className={`${styles.statCard} ${styles.statActive}`}>
+            <div className={styles.statNum}>{users.filter(u => u.status).length}</div>
+            <div className={styles.statLabel}>نشط</div>
+          </div>
+          <div className={`${styles.statCard} ${styles.statInactive}`}>
+            <div className={styles.statNum}>{users.filter(u => !u.status).length}</div>
+            <div className={styles.statLabel}>غير نشط</div>
+          </div>
+          <div className={`${styles.statCard} ${styles.statFiltered}`}>
+            <div className={styles.statNum}>{filteredUsers.length}</div>
+            <div className={styles.statLabel}>نتائج البحث</div>
+          </div>
+        </div>
+
+        {/* ── Controls ── */}
+        <div className={styles.controlsBar}>
+          <div className={styles.searchWrapper}>
+            <svg className={styles.searchIcon} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input
+              type="text"
+              placeholder="ابحث بالاسم أو البريد الإلكتروني…"
+              value={searchTerm}
+              // ✅ lowercase as user types
+              onChange={e => setSearchTerm(e.target.value.toLowerCase())}
+              className={styles.searchInput}
+            />
+          </div>
           <div className={styles.selectWrapper}>
             <select value={selectedRole} onChange={e => setSelectedRole(e.target.value)} className={styles.roleSelect}>
               <option>جميع الأدوار</option>
@@ -158,116 +180,103 @@ export default function AccessPrivileges() {
               <option>مدير عام</option>
               <option>مدير إدارة</option>
               <option>مدير كلية</option>
-              <option>مسؤول الكلية</option>
+              <option>مسؤول كلية</option>
             </select>
           </div>
-
-          <div className={styles.searchWrapper}>
-            <input type="text" placeholder="...ابحث بالاسم أو البريد الإلكتروني" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className={styles.searchInput} />
-          </div>
         </div>
 
-        <div className={styles.tableContainer}>
-          <table className={styles.usersTable}>
-            <thead>
-              <tr>
-                <th>الإجراءات</th>
-                <th>آخر تعديل</th>
-                <th>الحالة</th>
-                <th>الصلاحيات</th>
-                <th>الدور</th>
-                <th>المستخدم</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.map(user => (
-                <tr key={user.id}>
-                  <td>
-  <div className={styles.actionButtons}>
-    {/* زر حذف */}
-    {/* <button className={`${styles.btnAction} ${styles.btnDelete}`} title="حذف">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        viewBox="0 0 24 24"
-      >
-        <polyline points="3 6 5 6 21 6"></polyline>
-        <path d="M19 6l-1 14H6L5 6"></path>
-        <path d="M10 11v6"></path>
-        <path d="M14 11v6"></path>
-      </svg>
-    </button> */}
+               <div className={styles.tableContainer}>
+  <table className={styles.usersTable}>
+    <thead>
+      <tr>
+        <th className={styles.thUser}>المستخدم</th>
+        <th className={styles.thRole}>الدور</th>
+        <th className={styles.thPerms}>الصلاحيات</th>
+        <th className={styles.thStatus}>الحالة</th>
+        <th className={styles.thDate}>تاريخ الإنشاء</th>
+        <th className={styles.thActions}>الإجراءات</th>
+      </tr>
+    </thead>
+    <tbody>
+      {filteredUsers.length === 0 ? (
+        <tr>
+          <td colSpan={6} className={styles.emptyState}>
+            <div className={styles.emptyIcon}>👤</div>
+            <p>لا يوجد مستخدمون مطابقون للبحث</p>
+          </td>
+        </tr>
+      ) : (
+        filteredUsers.map(user => (
+          <tr key={user.id}>
 
-    {/* زر تعديل */}
-    <button
-      className={`${styles.btnAction} ${styles.btnEdit}`}
-      title="تعديل"
-      onClick={() => router.push(`/admin/add-user?id=${user.id}`)}
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        viewBox="0 0 24 24"
-      >
-        <path d="M12 20h9"></path>
-        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-      </svg>
-    </button>
-  </div>
-</td>
+            <td className={styles.tdUser}>
+              <div className={styles.userInfo}>
+                <div className={styles.userAvatar}>{user.name.charAt(0)}</div>
+                <div className={styles.userDetails}>
+                  <div className={styles.userName}>{user.name}</div>
+                  <div className={styles.userEmail}>{user.email}</div>
+                  {user.faculty && <div className={styles.userMeta}>{user.faculty}</div>}
+                  {user.departments && <div className={styles.userMeta}>{user.departments}</div>}
+                </div>
+              </div>
+            </td>
 
-                  <td>
-                    <div className={styles.modifiedInfo}>
-                      <div className={styles.date}>{user.lastModified}</div>
-                      { 
-                        // <div className={styles.modifiedBy}>{user.modifiedBy}</div>
-                      }
-                    </div>
-                  </td>
-                  <td>
-                    <div className={styles.statusCell}>
-                      <span className={`${styles.statusTag} ${user.status ? 'active' : 'inactive'}`}>
-                        {user.status ? 'نشط' : 'غير نشط'}
-                      </span>
-                      <label className={styles.toggleSwitch}>
-                        <input type="checkbox" checked={user.status} onChange={() => toggleStatus(user.id)} />
-                        <span className={styles.toggleSlider}></span>
-                      </label>
-                    </div>
-                  </td>
-                  <td>
-                    <div className={styles.permissions}>
-                      {user.permissions.map(perm => (
-                        <span key={perm} className={`${styles.permissionBadge} ${permissionColors[perm]}`}>{perm}</span>
-                      ))}
-                    </div>
-                  </td>
-                  <td><span className={styles.roleBadge}>{user.role}</span></td>
-                  <td>
-                    <div className={styles.userInfo}>
-                      <div className={styles.userName}>{user.name}</div>
-                      <div className={styles.userEmail}>{user.email}</div>
-                      {user.faculty && <div className={styles.userMeta}>{user.faculty}</div>}
-                      {user.departments && <div className={styles.userMeta}>{user.departments}</div>}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            <td className={styles.tdRole}>
+              <span className={styles.roleBadge}>{user.role}</span>
+            </td>
+
+            <td className={styles.tdPerms}>
+              <div className={styles.permissions}>
+                {user.permissions.length === 0
+                  ? <span className={styles.noPerms}>—</span>
+                  : user.permissions.map(perm => (
+                    <span
+                      key={perm}
+                      className={`${styles.permissionBadge} ${permissionColors[perm]}`}
+                      title={permissionLabels[perm]}
+                    >
+                      {permissionLabels[perm]}
+                    </span>
+                  ))
+                }
+              </div>
+            </td>
+
+            <td className={styles.tdStatus}>
+              <div className={styles.statusCell}>
+                <label className={styles.toggleSwitch} title={user.status ? 'إلغاء التفعيل' : 'تفعيل'}>
+                  <input type="checkbox" checked={user.status} onChange={() => toggleStatus(user.id)} />
+                  <span className={styles.toggleSlider}></span>
+                </label>
+                <span className={`${styles.statusTag} ${user.status ? styles.statusActive : styles.statusInactive}`}>
+                  {user.status ? 'نشط' : 'غير نشط'}
+                </span>
+              </div>
+            </td>
+
+            <td className={styles.tdDate}>
+              <span className={styles.dateText}>{user.lastModified}</span>
+            </td>
+
+            <td className={styles.tdActions}>
+              <button
+                className={styles.btnEdit}
+                title="تعديل"
+                onClick={() => router.push(`/admin/add-user?id=${user.id}`)}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+                تعديل
+              </button>
+            </td>
+
+          </tr>
+        ))
+      )}
+    </tbody>
+  </table>
+</div>
       </div>
     </>
   );

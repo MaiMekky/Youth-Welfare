@@ -3,10 +3,10 @@
 
 import React, { useMemo, useState, useEffect } from "react";
 import styles from "./Styles/page.module.css";
-import StatsGrid from "./components/StatsGrid";
-import Tabs from "./components/Tabs";
-import Filters from "./components/Filters";
-import FamiliesGrid from "./components/FamiliesGrid";
+import StatsGrid from "././components/StatsGrid";
+import Tabs from "././components/Tabs";
+import Filters from "././components/Filters";
+import FamiliesGrid from "././components/FamiliesGrid";
 import { authFetch } from "@/utils/globalFetch";
 export default function Page() {
   const [activeTab, setActiveTab] = useState<string>("central");
@@ -261,19 +261,14 @@ export default function Page() {
       <main className={styles.tabContent}>
         {activeTab === "central" && (
           <div className={styles.contentSection}>
-            <p className={styles.sectionDescription}>
-              جميع الأسر المركزية التي تديرها الإدارة المركزية
-            </p>
+            
             <FamiliesGrid families={centralFamilies} showActions={false} />
           </div>
         )}
 
         {activeTab === "quality" && (
           <div className={styles.contentSection}>
-            <p className={styles.sectionDescription}>
-              طلبات الأسر النوعية وأصدقاء البيئة الواردة من الكليات
-            </p>
-
+          
             <Filters
               faculties={faculties}
               familyTypes={["all", "نوعية", "اصدقاء البيئة"]}

@@ -180,102 +180,103 @@ export default function AccessPrivileges() {
               <option>مدير عام</option>
               <option>مدير إدارة</option>
               <option>مدير كلية</option>
-              <option>مسؤول الكلية</option>
+              <option>مسؤول كلية</option>
             </select>
           </div>
         </div>
 
-        {/* ── Table ── */}
-        <div className={styles.tableContainer}>
-          <table className={styles.usersTable}>
-            <thead>
-              <tr>
-                <th>المستخدم</th>
-                <th>الدور</th>
-                <th>الصلاحيات</th>
-                <th>الحالة</th>
-                <th>تاريخ الإنشاء</th>
-                <th>الإجراءات</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className={styles.emptyState}>
-                    <div className={styles.emptyIcon}>👤</div>
-                    <p>لا يوجد مستخدمون مطابقون للبحث</p>
-                  </td>
-                </tr>
-              ) : (
-                filteredUsers.map(user => (
-                  <tr key={user.id}>
-                    {/* User Info */}
-                    <td>
-                      <div className={styles.userInfo}>
-                        <div className={styles.userAvatar}>
-                          {user.name.charAt(0)}
-                        </div>
-                        <div className={styles.userDetails}>
-                          <div className={styles.userName}>{user.name}</div>
-                          <div className={styles.userEmail}>{user.email}</div>
-                          {user.faculty && <div className={styles.userMeta}>{user.faculty}</div>}
-                          {user.departments && <div className={styles.userMeta}>{user.departments}</div>}
-                        </div>
-                      </div>
-                    </td>
+               <div className={styles.tableContainer}>
+  <table className={styles.usersTable}>
+    <thead>
+      <tr>
+        <th className={styles.thUser}>المستخدم</th>
+        <th className={styles.thRole}>الدور</th>
+        <th className={styles.thPerms}>الصلاحيات</th>
+        <th className={styles.thStatus}>الحالة</th>
+        <th className={styles.thDate}>تاريخ الإنشاء</th>
+        <th className={styles.thActions}>الإجراءات</th>
+      </tr>
+    </thead>
+    <tbody>
+      {filteredUsers.length === 0 ? (
+        <tr>
+          <td colSpan={6} className={styles.emptyState}>
+            <div className={styles.emptyIcon}>👤</div>
+            <p>لا يوجد مستخدمون مطابقون للبحث</p>
+          </td>
+        </tr>
+      ) : (
+        filteredUsers.map(user => (
+          <tr key={user.id}>
 
-                    {/* Role */}
-                    <td><span className={styles.roleBadge}>{user.role}</span></td>
+            <td className={styles.tdUser}>
+              <div className={styles.userInfo}>
+                <div className={styles.userAvatar}>{user.name.charAt(0)}</div>
+                <div className={styles.userDetails}>
+                  <div className={styles.userName}>{user.name}</div>
+                  <div className={styles.userEmail}>{user.email}</div>
+                  {user.faculty && <div className={styles.userMeta}>{user.faculty}</div>}
+                  {user.departments && <div className={styles.userMeta}>{user.departments}</div>}
+                </div>
+              </div>
+            </td>
 
-                    {/* Permissions */}
-                    <td>
-                      <div className={styles.permissions}>
-                        {user.permissions.length === 0
-                          ? <span className={styles.noPerms}>—</span>
-                          : user.permissions.map(perm => (
-                            <span key={perm} className={`${styles.permissionBadge} ${permissionColors[perm]}`} title={permissionLabels[perm]}>
-                              {permissionLabels[perm]}
-                            </span>
-                          ))
-                        }
-                      </div>
-                    </td>
+            <td className={styles.tdRole}>
+              <span className={styles.roleBadge}>{user.role}</span>
+            </td>
 
-                    {/* Status */}
-                    <td>
-                      <div className={styles.statusCell}>
-                        <label className={styles.toggleSwitch} title={user.status ? 'إلغاء التفعيل' : 'تفعيل'}>
-                          <input type="checkbox" checked={user.status} onChange={() => toggleStatus(user.id)} />
-                          <span className={styles.toggleSlider}></span>
-                        </label>
-                        <span className={`${styles.statusTag} ${user.status ? styles.statusActive : styles.statusInactive}`}>
-                          {user.status ? 'نشط' : 'غير نشط'}
-                        </span>
-                      </div>
-                    </td>
+            <td className={styles.tdPerms}>
+              <div className={styles.permissions}>
+                {user.permissions.length === 0
+                  ? <span className={styles.noPerms}>—</span>
+                  : user.permissions.map(perm => (
+                    <span
+                      key={perm}
+                      className={`${styles.permissionBadge} ${permissionColors[perm]}`}
+                      title={permissionLabels[perm]}
+                    >
+                      {permissionLabels[perm]}
+                    </span>
+                  ))
+                }
+              </div>
+            </td>
 
-                    {/* Date */}
-                    <td><span className={styles.dateText}>{user.lastModified}</span></td>
+            <td className={styles.tdStatus}>
+              <div className={styles.statusCell}>
+                <label className={styles.toggleSwitch} title={user.status ? 'إلغاء التفعيل' : 'تفعيل'}>
+                  <input type="checkbox" checked={user.status} onChange={() => toggleStatus(user.id)} />
+                  <span className={styles.toggleSlider}></span>
+                </label>
+                <span className={`${styles.statusTag} ${user.status ? styles.statusActive : styles.statusInactive}`}>
+                  {user.status ? 'نشط' : 'غير نشط'}
+                </span>
+              </div>
+            </td>
 
-                    {/* Actions */}
-                    <td>
-                      <button
-                        className={styles.btnEdit}
-                        title="تعديل"
-                        onClick={() => router.push(`/admin/add-user?id=${user.id}`)}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                          <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-                        </svg>
-                        تعديل
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+            <td className={styles.tdDate}>
+              <span className={styles.dateText}>{user.lastModified}</span>
+            </td>
+
+            <td className={styles.tdActions}>
+              <button
+                className={styles.btnEdit}
+                title="تعديل"
+                onClick={() => router.push(`/admin/add-user?id=${user.id}`)}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+                تعديل
+              </button>
+            </td>
+
+          </tr>
+        ))
+      )}
+    </tbody>
+  </table>
+</div>
       </div>
     </>
   );

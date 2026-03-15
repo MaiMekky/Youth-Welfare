@@ -293,7 +293,7 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
           type="text"
           placeholder="البريد الجامعي"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.target.value.toLowerCase())}
           className={errors.email ? styles.invalid : ""}
         />
         {errors.email && <p className={styles.errorMsg}>{errors.email}</p>}

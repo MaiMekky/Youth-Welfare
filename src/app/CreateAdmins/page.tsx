@@ -178,7 +178,7 @@ export default function AccessPrivileges() {
               <option>جميع الأدوار</option>
               <option>مشرف النظام</option>
               <option>مدير عام</option>
-              <option>مدير إدارة</option>
+              <option>مدير ادارة</option>
               <option>مدير كلية</option>
               <option>مسؤول كلية</option>
             </select>

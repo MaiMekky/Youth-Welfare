@@ -59,24 +59,24 @@
 }
 
 .headerIcon {
-  width: clamp(46px, 10vw, 54px);
-  height: clamp(46px, 10vw, 54px);
-  background: white;
-  padding: 4px;
-  border-radius: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  overflow: visible;
   flex-shrink: 0;
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(201, 151, 42, 0.28);
-  transition: box-shadow 0.22s ease, transform 0.22s ease;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  padding: 0;
 }
 
 .headerIcon:hover {
-  box-shadow: 0 6px 20px rgba(0,0,0,0.2), 0 0 0 1px rgba(201,151,42,0.4);
-  transform: translateY(-1px);
+  background: transparent;
+  opacity: 0.88;
+  transform: scale(1.04);
 }
 
 .headerLogo {

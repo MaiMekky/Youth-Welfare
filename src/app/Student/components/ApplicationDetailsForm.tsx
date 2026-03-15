@@ -45,8 +45,16 @@ export default function ApplicationDetailsForm({ onSuccess, onNotify }: Applicat
     if (formData.motherStatus !== "متوفاة" && !formData.MotherIncome.trim()) e.MotherIncome = "دخل الأم مطلوب";
     if (!formData.familyMembers.trim()) e.familyMembers = "عدد أفراد الأسرة مطلوب";
     if (!formData.siblingOrder.trim())  e.siblingOrder  = "الترتيب بين الإخوات مطلوب";
-    if (!/^\+20\d{10}$/.test(formData.fatherPhone)) e.fatherPhone = "صيغة +20XXXXXXXXXX";
-    if (!/^\+20\d{10}$/.test(formData.motherPhone)) e.motherPhone = "صيغة +20XXXXXXXXXX";
+    const egyptMobilePattern = /^(010|011|012|015)\d{8}$/;
+
+    if (!egyptMobilePattern.test(formData.fatherPhone?.trim() || "")) {
+      e.fatherPhone = "صيغة صحيحة: 010XXXXXXXX أو 011XXXXXXXX أو 012XXXXXXXX أو 015XXXXXXXX";
+    }
+
+    if (!egyptMobilePattern.test(formData.motherPhone?.trim() || "")) {
+      e.motherPhone = "صيغة صحيحة: 010XXXXXXXX أو 011XXXXXXXX أو 012XXXXXXXX أو 015XXXXXXXX";
+    }
+
     if (!formData.disability)      e.disability      = "يرجى تحديد حالة الإعاقة";
     if (!formData.housingStatus)   e.housingStatus   = "يرجى تحديد حالة المسكن";
     if (!formData.supportReason.trim()) e.supportReason = "يرجى إدخال سبب طلب الدعم";
@@ -232,13 +240,13 @@ export default function ApplicationDetailsForm({ onSuccess, onNotify }: Applicat
 
             <div className="form-group">
               <label>رقم موبايل الأب</label>
-              <input type="text" name="fatherPhone" value={formData.fatherPhone} onChange={handleChange} placeholder="+20XXXXXXXXXX" maxLength={13} />
+              <input type="text" name="fatherPhone" value={formData.fatherPhone} onChange={handleChange} placeholder="0XXXXXXXXXXX" maxLength={11} />
               {errors.fatherPhone && <span className="error">{errors.fatherPhone}</span>}
             </div>
 
             <div className="form-group">
               <label>رقم موبايل الأم</label>
-              <input type="text" name="motherPhone" value={formData.motherPhone} onChange={handleChange} placeholder="+20XXXXXXXXXX" maxLength={13} />
+              <input type="text" name="motherPhone" value={formData.motherPhone} onChange={handleChange} placeholder="0XXXXXXXXXXX" maxLength={11} />
               {errors.motherPhone && <span className="error">{errors.motherPhone}</span>}
             </div>
 

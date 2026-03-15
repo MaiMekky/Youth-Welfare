@@ -240,13 +240,13 @@ export default function ApplicationDetailsForm({ onSuccess, onNotify }: Applicat
 
             <div className="form-group">
               <label>رقم موبايل الأب</label>
-              <input type="text" name="fatherPhone" value={formData.fatherPhone} onChange={handleChange} placeholder="+20XXXXXXXXXX" maxLength={13} />
+              <input type="text" name="fatherPhone" value={formData.fatherPhone} onChange={handleChange} placeholder="0XXXXXXXXXXX" maxLength={11} />
               {errors.fatherPhone && <span className="error">{errors.fatherPhone}</span>}
             </div>
 
             <div className="form-group">
               <label>رقم موبايل الأم</label>
-              <input type="text" name="motherPhone" value={formData.motherPhone} onChange={handleChange} placeholder="+20XXXXXXXXXX" maxLength={13} />
+              <input type="text" name="motherPhone" value={formData.motherPhone} onChange={handleChange} placeholder="0XXXXXXXXXXX" maxLength={11} />
               {errors.motherPhone && <span className="error">{errors.motherPhone}</span>}
             </div>
 

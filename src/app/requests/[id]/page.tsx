@@ -2,19 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import api from "../../../services/api";
 import styles from "./RequestDetails.module.css";
 import { authFetch } from "@/utils/globalFetch";
-
-/*
-  What I implemented:
-  - GET /api/solidarity/faculty/{id}/applications/  -> fetchApplication()
-  - GET /api/solidarity/faculty/{id}/documents/     -> fetchDocuments()
-  - POST /api/solidarity/faculty/{id}/pre_approve/  -> handlePreApprove()
-  - POST /api/solidarity/faculty/{id}/approve/      -> handleApprove()
-  - POST /api/solidarity/faculty/{id}/reject/       -> handleReject()
-
-*/
 
 type Application = {
   solidarity_id?: number;
@@ -70,8 +59,15 @@ type SelectedDiscounts = {
   full_discount: string;
 };
 
+const EMPTY_DISCOUNTS: SelectedDiscounts = {
+  bk_discount: "none",
+  reg_discount: "none",
+  aff_discount: "none",
+  full_discount: "none",
+};
+
 export default function RequestDetailsPage() {
-  const { id } = useParams(); // faculty id (route param)
+  const { id } = useParams();
   const router = useRouter();
 
   const [application, setApplication] = useState<Application | null>(null);
@@ -80,21 +76,20 @@ export default function RequestDetailsPage() {
   const [actionLoading, setActionLoading] = useState<boolean>(false);
   const [notification, setNotification] = useState<string | null>(null);
 
-  // Discounts as select values ("none" or numeric string)
-  const [availableDiscounts, setAvailableDiscounts] = useState<Discounts>({ bk_discount: [], reg_discount: [], aff_discount: [], full_discount: [] });
-  const [selectedDiscounts, setSelectedDiscounts] = useState<SelectedDiscounts>({
-    bk_discount: "none",
-    reg_discount: "none",
-    aff_discount: "none",
-    full_discount: "none"
+  const [availableDiscounts, setAvailableDiscounts] = useState<Discounts>({
+    bk_discount: [],
+    reg_discount: [],
+    aff_discount: [],
+    full_discount: [],
   });
-const [preApproved, setPreApproved] = useState(false);
+  const [selectedDiscounts, setSelectedDiscounts] = useState<SelectedDiscounts>(EMPTY_DISCOUNTS);
+  const [discountsSaved, setDiscountsSaved] = useState(false);
+
   const baseAmount = 1500;
 
   useEffect(() => {
     if (!id) return;
     loadAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const showNotification = (message: string, type: "success" | "warning" | "error") => {
@@ -102,7 +97,6 @@ const [preApproved, setPreApproved] = useState(false);
     setTimeout(() => setNotification(null), 3500);
   };
 
-  // Load application & documents
   const loadAll = async () => {
     setLoading(true);
     try {
@@ -114,12 +108,8 @@ const [preApproved, setPreApproved] = useState(false);
 
   const fetchApplication = async () => {
     try {
-          const res = await authFetch(
-        `http://127.0.0.1:8000/api/solidarity/faculty/${id}/applications/`
-      );
-
+      const res = await authFetch(`http://127.0.0.1:8000/api/solidarity/faculty/${id}/applications/`);
       if (!res.ok) throw new Error("API_ERROR");
-
       const data = await res.json();
       let item: Application | null = null;
       if (Array.isArray(data)) {
@@ -127,14 +117,8 @@ const [preApproved, setPreApproved] = useState(false);
         item = bySolidarity ?? (data.length > 0 ? data[0] : null);
       } else if (data && typeof data === "object") {
         item = data;
-      } else {
-        item = null;
       }
       setApplication(item);
-
-      // If server returned a total_discount we could attempt to split it into selects,
-      // but since there is no breakdown in the response, we leave selects unchanged.
-      // If you want to populate select values from server, return breakdown fields.
     } catch (err: any) {
       console.error("fetchApplication error:", err);
       if (err?.response?.status === 401) showNotification("Unauthorized — please log in.", "error");
@@ -145,13 +129,9 @@ const [preApproved, setPreApproved] = useState(false);
 
   const fetchDocuments = async () => {
     try {
-      const res = await authFetch(
-      `http://127.0.0.1:8000/api/solidarity/faculty/${id}/documents/`
-    );
-
-    if (!res.ok) throw new Error("DOCS_ERROR");
-
-    const data = await res.json();
+      const res = await authFetch(`http://127.0.0.1:8000/api/solidarity/faculty/${id}/documents/`);
+      if (!res.ok) throw new Error("DOCS_ERROR");
+      const data = await res.json();
       setDocuments(Array.isArray(data) ? data : data ? [data] : []);
     } catch (err: any) {
       console.error("fetchDocuments error:", err);
@@ -162,14 +142,12 @@ const [preApproved, setPreApproved] = useState(false);
 
   const fetchDiscountValues = async () => {
     try {
-      const res = await authFetch(
-        `http://localhost:8000/api/solidarity/faculty/faculty/discounts/`
-      );
-
+      const res = await authFetch(`http://localhost:8000/api/solidarity/faculty/faculty/discounts/`);
       if (!res.ok) throw new Error("DISCOUNT_ERROR");
-
       const data = await res.json();
-      setAvailableDiscounts(data.discounts || { bk_discount: [], reg_discount: [], aff_discount: [], full_discount: [] });
+      setAvailableDiscounts(
+        data.discounts || { bk_discount: [], reg_discount: [], aff_discount: [], full_discount: [] }
+      );
     } catch (err: any) {
       console.error("fetchDiscountValues error:", err);
       showNotification("فشل في تحميل discounts", "error");
@@ -177,18 +155,6 @@ const [preApproved, setPreApproved] = useState(false);
     }
   };
 
-  // FILE / DOC helpers
-  const formatBytes = (bytes?: number | null) => {
-    if (!bytes || bytes <= 0) return "-";
-    const units = ["B", "KB", "MB", "GB"];
-    let i = 0;
-    let val = bytes;
-    while (val >= 1024 && i < units.length - 1) {
-      val /= 1024;
-      i++;
-    }
-    return `${Math.round(val * 10) / 10} ${units[i]}`;
-  };
   const formatDate = (iso?: string | null) => {
     if (!iso) return "-";
     try {
@@ -198,59 +164,39 @@ const [preApproved, setPreApproved] = useState(false);
     }
   };
 
-  // UPDATED: Status visibility helpers with Arabic status values
-  const canPreApprove = (status?: string | null) => {
-    if (!status) return false;
-    return status === "منتظر"; // Only show for "منتظر" status
-  };
-  
-  const canApprove = (status?: string | null) => {
-    if (!status) return false;
-    return status === "موافقة مبدئية"; // Only show for "موافقة مبدئية" status
-  };
-  
-  const canReject = (status?: string | null) => {
-    if (!status) return true;
-    return status !== "مقبول" && status !== "مرفوض"; // Hide for final states
-  };
+  const canPreApprove = (status?: string | null) => status === "منتظر";
+  const canApprove = (status?: string | null) => status === "موافقة مبدئية";
+  const canReject = (status?: string | null) => status !== "مقبول" && status !== "مرفوض";
 
-  // Generic POST action (pre_approve / approve / reject) with optimistic update
   const postAction = async (
     suffix: "pre_approve" | "approve" | "reject",
     optimisticStatus: string,
     successMsg: string
   ) => {
-    if (!id) return;
-    if (actionLoading) return;
+    if (!id || actionLoading) return;
     setActionLoading(true);
     const prevApp = application;
     setApplication((prev) => ({ ...(prev ?? {}), req_status: optimisticStatus }));
-
     try {
-    const res = await authFetch(
-      `http://localhost:8000/api/solidarity/faculty/${id}/${suffix}/`,
-      {
-        method: "POST",
-      }
-    );
-
-    if (!res.ok) throw new Error("ACTION_ERROR");
-
-    const data = await res.json();
+      const res = await authFetch(
+        `http://localhost:8000/api/solidarity/faculty/${id}/${suffix}/`,
+        { method: "POST" }
+      );
+      if (!res.ok) throw new Error("ACTION_ERROR");
+      const data = await res.json();
       setApplication((prev) => ({ ...(prev ?? {}), ...(data ?? {}) }));
-      await fetchDocuments(); // documents may change after verification actions
+      await fetchDocuments();
       showNotification(successMsg, "success");
       return data;
     } catch (err: any) {
       console.error(`${suffix} error:`, err);
       setApplication(prevApp);
-      if (err?.response?.data) {
-        const serverMsg =
-          typeof err.response.data === "string" ? err.response.data : JSON.stringify(err.response.data);
-        showNotification(serverMsg, "error");
-      } else {
-        showNotification("فشل في تنفيذ الإجراء على الخادم", "error");
-      }
+      const serverMsg = err?.response?.data
+        ? typeof err.response.data === "string"
+          ? err.response.data
+          : JSON.stringify(err.response.data)
+        : "فشل في تنفيذ الإجراء على الخادم";
+      showNotification(serverMsg, "error");
       throw err;
     } finally {
       setActionLoading(false);
@@ -258,7 +204,6 @@ const [preApproved, setPreApproved] = useState(false);
   };
 
   const handleApprove = async () => {
-    // تحقق من وجود خصم
     const hasDiscount =
       selectedDiscounts.full_discount !== "none" ||
       selectedDiscounts.bk_discount !== "none" ||
@@ -270,7 +215,6 @@ const [preApproved, setPreApproved] = useState(false);
       showNotification("يجب اختيار نوع خصم أو تطبيق خصم قبل الموافقة النهائية", "warning");
       return;
     }
-
     await postAction("approve", "مقبول", "تمت الموافقة النهائية بنجاح");
     window.location.reload();
   };
@@ -280,48 +224,35 @@ const [preApproved, setPreApproved] = useState(false);
     window.location.reload();
   };
 
-  // NEW: Direct initial approval function
   const handleInitialApproval = async () => {
-    if (!application?.solidarity_id) {
-      showNotification("لا يوجد معرف طلب صالح", "error");
-      return;
-    }
-
-    if (actionLoading) return;
-    
+    if (!application?.solidarity_id || actionLoading) return;
     setActionLoading(true);
     try {
       const response = await authFetch(
-      `http://localhost:8000/api/solidarity/faculty/${application.solidarity_id}/pre_approve/`,
-      { method: "POST" }
-    );
-
-    if (!response.ok) throw new Error("PRE_APPROVE_ERROR");
-
-    const data = await response.json();
-      // Update application state with response data
+        `http://localhost:8000/api/solidarity/faculty/${application.solidarity_id}/pre_approve/`,
+        { method: "POST" }
+      );
+      if (!response.ok) throw new Error("PRE_APPROVE_ERROR");
+      const data = await response.json();
       setApplication((prev) => ({ ...(prev ?? {}), ...data }));
       showNotification("تمت الموافقة مبدئية بنجاح", "success");
-      
-      // Refresh documents if needed
       await fetchDocuments();
     } catch (err: any) {
       console.error("Initial approval error:", err);
-      if (err?.response?.data) {
-        const serverMsg = typeof err.response.data === "string" ? err.response.data : JSON.stringify(err.response.data);
-        showNotification(serverMsg, "error");
-      } else {
-        showNotification("فشل في تنفيذ الموافقة مبدئية", "error");
-      }
+      const serverMsg = err?.response?.data
+        ? typeof err.response.data === "string"
+          ? err.response.data
+          : JSON.stringify(err.response.data)
+        : "فشل في تنفيذ الموافقة مبدئية";
+      showNotification(serverMsg, "error");
     } finally {
       setActionLoading(false);
       window.location.reload();
     }
   };
 
-  // Discounts UI handling
   const calculateDiscount = () => {
-    if (application && application.total_discount) {
+    if (application?.total_discount) {
       const v = Number(application.total_discount);
       return isNaN(v) ? baseAmount : v;
     }
@@ -334,6 +265,7 @@ const [preApproved, setPreApproved] = useState(false);
   };
 
   const handleDiscountChange = (field: keyof SelectedDiscounts, value: string) => {
+    setDiscountsSaved(false);
     setSelectedDiscounts((prev) => {
       if (field === "full_discount" && value !== "none") {
         return { bk_discount: "none", reg_discount: "none", aff_discount: "none", full_discount: value };
@@ -353,12 +285,9 @@ const [preApproved, setPreApproved] = useState(false);
   };
 
   const assignDiscounts = async () => {
-    if (!id) return;
-    if (actionLoading) return;
+    if (!id || actionLoading) return;
 
-    // Build discounts payload from UI selections
-    let payloadDiscounts: any = [];
-
+    const payloadDiscounts: any[] = [];
     (Object.keys(selectedDiscounts) as Array<keyof SelectedDiscounts>).forEach((key) => {
       const val = selectedDiscounts[key];
       if (val && val !== "none") {
@@ -376,288 +305,263 @@ const [preApproved, setPreApproved] = useState(false);
 
     setActionLoading(true);
     const prevApp = application;
-    // optimistic: update total_discount and keep breakdown in UI (we don't have server breakdown)
-    const optimisticTotal = payloadDiscounts.reduce((sum: number, d: { discount_value: any; }) => sum + Number(d.discount_value || 0), 0);
+    const optimisticTotal = payloadDiscounts.reduce(
+      (sum: number, d: { discount_value: any }) => sum + Number(d.discount_value || 0),
+      0
+    );
     setApplication((prev) => ({ ...(prev ?? {}), total_discount: String(optimisticTotal) }));
 
     try {
-      // adjusting the structure of the payload
-      const payload = { 
-        "discounts": payloadDiscounts
-      }
-
-        const res = await authFetch(
-          `http://127.0.0.1:8000/api/solidarity/faculty/${application?.solidarity_id}/assign_discount/`,
-          {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          }
-        );
-
-        if (!res.ok) throw new Error("DISCOUNT_ASSIGN_ERROR");
-
-        const data = await res.json();
-      // merge returned fields into application (server may return updated totals)
+      const res = await authFetch(
+        `http://127.0.0.1:8000/api/solidarity/faculty/${application?.solidarity_id}/assign_discount/`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ discounts: payloadDiscounts }),
+        }
+      );
+      if (!res.ok) throw new Error("DISCOUNT_ASSIGN_ERROR");
+      const data = await res.json();
       setApplication((prev) => ({ ...(prev ?? {}), ...(data ?? {}) }));
       showNotification("تم حفظ الخصومات بنجاح", "success");
-      // refresh documents in case assigning discounts triggers doc/state changes
+      setDiscountsSaved(true);
       await fetchDocuments();
     } catch (err: any) {
       console.error("assignDiscounts error:", err);
-      // rollback optimistic update
       setApplication(prevApp);
-      if (err?.response?.data) {
-        const serverMsg =
-          typeof err.response.data === "string" ? err.response.data : JSON.stringify(err.response.data);
-        showNotification(serverMsg, "error");
-      } else {
-        showNotification("فشل حفظ الخصومات على الخادم", "error");
-      }
+      const serverMsg = err?.response?.data
+        ? typeof err.response.data === "string"
+          ? err.response.data
+          : JSON.stringify(err.response.data)
+        : "فشل حفظ الخصومات على الخادم";
+      showNotification(serverMsg, "error");
     } finally {
       setActionLoading(false);
     }
   };
-const openDocument = async (docId: number, mimeType?: string) => {
-  try {
-    const res = await authFetch(
-      `http://localhost:8000/api/files/solidarity/${docId}/download/`
-    );
 
-    if (!res.ok) throw new Error("FILE_ERROR");
+  const handleResetDiscounts = () => {
+    setSelectedDiscounts(EMPTY_DISCOUNTS);
+    setDiscountsSaved(false);
+    fetchApplication();
+    showNotification("تم إعادة تعيين الاختيارات", "warning");
+  };
 
-    const blob = await res.blob();
+  const openDocument = async (docId: number) => {
+    try {
+      const res = await authFetch(`http://localhost:8000/api/files/solidarity/${docId}/download/`);
+      if (!res.ok) throw new Error("FILE_ERROR");
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    } catch (error) {
+      console.error("Error opening document:", error);
+    }
+  };
 
-    const url = window.URL.createObjectURL(blob);
-    window.open(url, "_blank");
-
-  } catch (error) {
-    console.error("Error opening document:", error);
-  }
-};
   return (
     <div className={styles.container}>
       <div className={styles.contentCard}>
-        
-      {notification && (
-        <div
-          className={`${styles.notification} ${
-            notification.startsWith("success")
-              ? styles.success
-              : notification.startsWith("warning")
-              ? styles.warning
-              : styles.error
-          }`}
-        >
-          {notification.split(":")[1]}
-        </div>
-      )}
-       <button
-          onClick={() => router.push("/FacLevel")}
-          className={styles.backBtn}
-        >
+
+        {notification && (
+          <div
+            className={`${styles.notification} ${
+              notification.startsWith("success")
+                ? styles.success
+                : notification.startsWith("warning")
+                ? styles.warning
+                : styles.error
+            }`}
+          >
+            {notification.split(":")[1]}
+          </div>
+        )}
+
+        <button onClick={() => router.push("/FacLevel")} className={styles.backBtn}>
           العودة ←
         </button>
-      <h2 className={styles.pageTitle}>تفاصيل الطالب - {application?.student_name ?? "جارٍ التحميل..."}</h2>
 
-      {loading && <p>جارٍ التحميل...</p>}
+        <h2 className={styles.pageTitle}>
+          تفاصيل الطالب - {application?.student_name ?? "جارٍ التحميل..."}
+        </h2>
 
-      <section className={styles.section}>
-        <h3>المعلومات الشخصية</h3>
-        <div className={styles.infoGrid}>
-          <p><strong>الاسم الكامل:</strong> {application?.student_name ?? "-"}</p>
-          <p><strong>الرقم القومي / رقم الطالب:</strong> {application?.student_uid ?? "-"}</p>
-          <p><strong>الكلية:</strong> {application?.faculty_name ?? "-"}</p>
-          <p><strong>حالة الطلب:</strong> {application?.req_status ?? "-"}</p>
-          <p><strong>تاريخ التقديم:</strong> {formatDate(application?.created_at)}</p>
-          <p><strong>المعدل / الدرجة:</strong> {application?.grade ?? "-"}</p>
-          <p><strong>هاتف الأب:</strong> {application?.f_phone_num ?? "-"}</p>
-          <p><strong>هاتف الأم:</strong> {application?.m_phone_num ?? "-"}</p>
-        </div>
-      </section>
+        {loading && <p>جارٍ التحميل...</p>}
 
-      <section className={styles.section}>
-        <h3>معلومات الأسرة و الدخل</h3>
-        <div className={styles.infoGrid}>
-          <p><strong>عدد أفراد الأسرة:</strong> {application?.family_numbers ?? "-"}</p>
-          <p><strong>ترتيب الأبناء:</strong> {application?.arrange_of_brothers ?? "-"}</p>
-          <p><strong>حالة الأب:</strong> {application?.father_status ?? "-"}</p>
-          <p><strong>حالة الأم:</strong> {application?.mother_status ?? "-"}</p>
-          <p><strong>دخل الأب:</strong> {application?.father_income ?? "-"}</p>
-          <p><strong>دخل الأم:</strong> {application?.mother_income ?? "-"}</p>
-          <p><strong>إجمالي الدخل:</strong> {application?.total_income ?? "-"}</p>
-          <p><strong>حالة السكن:</strong> {application?.housing_status ?? "-"}</p>
-          <p><strong>العنوان:</strong> {application?.address ?? "-"}</p>
-        </div>
-      </section>
-
-      <section className={styles.section}>
-        <h3>معلومات طلب الدعم</h3>
-        <div className={styles.infoGrid}>
-          <p><strong>الخصم المحسوب:</strong> {calculateDiscount()} جنيه</p>
-          <p><strong>إجمالي الخصم من الخادم:</strong> {application?.total_discount ?? "-"}</p>
-          <p><strong>سبب التقديم:</strong> {application?.reason ?? "-"}</p>
-          <p><strong>إعاقات:</strong> {application?.disabilities ?? "-"}</p>
-          <p><strong>الحالة الأكاديمية:</strong> {application?.acd_status ?? "-"}</p>
-        </div>
-      </section>
-
-      <section className={styles.section}>
-        <h3>المستندات</h3>
-        {documents.length === 0 ? (
-          <p>لا توجد مستندات.</p>
-        ) : (
-          <div className={styles.docsContainer}>
-            {documents.map((doc) => (
-              <div key={doc.doc_id} className={styles.docCard}>
-                <p><strong>{doc.doc_type ?? `مستند ${doc.doc_id}`}</strong></p>
-
-                {doc.file_url ? (
-                 <button
-                  onClick={() => openDocument(doc.doc_id)}
-                  className={styles.docLinkButton}
-                >
-                  افتح الملف
-                </button>
-                ) : (
-                  <p className={styles.noLink}>لا يوجد رابط</p>
-                )}
-
-                <p className={styles.uploadDate}>
-                  تم الرفع: {doc.uploaded_at ? doc.uploaded_at.slice(0, 10) : "-"}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-        <div className={styles.docsNote}>
-          تُعرض المستندات المرفوعة من الطالب هنا. يمكن فتح كل مستند في نافذة جديدة للمعاينة أو التحميل.
-        </div>
-      </section>
-
-      { application?.req_status === "موافقة مبدئية" ?
         <section className={styles.section}>
-          <h3>الخصومات المتاحة</h3>
-          <div className={styles.discountsBox}>
-            <div className={styles.discountSelect}>
-              <label>خصم مصاريف الكتب:</label>
-              <select 
-                value={selectedDiscounts.bk_discount} 
-                onChange={(e) => handleDiscountChange("bk_discount", e.target.value)}
-              >
-                <option value="none">لا يوجد</option>
-                {availableDiscounts.bk_discount.map((item, index) => ( 
-                  <option key={index} value={item}>{item}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.discountSelect}>
-              <label>خصم مصاريف الانتساب:</label>
-              <select 
-                value={selectedDiscounts.aff_discount} 
-                onChange={(e) => handleDiscountChange("aff_discount", e.target.value)}
-              >
-                <option value="none">لا يوجد</option>
-                {availableDiscounts.aff_discount.map((item, index) => ( 
-                  <option key={index} value={item}>{item}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.discountSelect}>
-              <label>خصم مصاريف الانتظام:</label>
-              <select 
-                value={selectedDiscounts.reg_discount} 
-                onChange={(e) => handleDiscountChange("reg_discount", e.target.value)}
-              >
-                <option value="none">لا يوجد</option>
-                {availableDiscounts.reg_discount.map((item, index) => ( 
-                  <option key={index} value={item}>{item}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.discountSelect}>
-              <label>خصم المصاريف كاملة:</label>
-              <select 
-                value={selectedDiscounts.full_discount} 
-                onChange={(e) => handleDiscountChange("full_discount", e.target.value)}
-              >
-                <option value="none">لا يوجد</option>
-                {availableDiscounts.full_discount.map((item, index) => ( 
-                  <option key={index} value={item}>{item}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 12 }}>
-            <button
-              onClick={assignDiscounts}
-              disabled={actionLoading}
-              className={styles.btnApprove}
-            >
-              {actionLoading ? "جاري الحفظ..." : "حفظ الخصومات"}
-            </button>
-
-            <button
-              onClick={() => {
-                // reset UI selections to none and reload from server if needed
-                setSelectedDiscounts({
-                  bk_discount: "none",
-                  reg_discount: "none", 
-                  aff_discount: "none",
-                  full_discount: "none"
-                });
-                fetchApplication();
-                showNotification("تم إعادة تعيين الاختيارات", "warning");
-              }}
-              className={styles.btnReject}
-              disabled={actionLoading}
-            >
-              إعادة تعيين
-            </button>
+          <h3>المعلومات الشخصية</h3>
+          <div className={styles.infoGrid}>
+            <p><strong>الاسم الكامل:</strong> {application?.student_name ?? "-"}</p>
+            <p><strong>الرقم القومي / رقم الطالب:</strong> {application?.student_uid ?? "-"}</p>
+            <p><strong>الكلية:</strong> {application?.faculty_name ?? "-"}</p>
+            <p><strong>حالة الطلب:</strong> {application?.req_status ?? "-"}</p>
+            <p><strong>تاريخ التقديم:</strong> {formatDate(application?.created_at)}</p>
+            <p><strong>المعدل / الدرجة:</strong> {application?.grade ?? "-"}</p>
+            <p><strong>هاتف الأب:</strong> {application?.f_phone_num ?? "-"}</p>
+            <p><strong>هاتف الأم:</strong> {application?.m_phone_num ?? "-"}</p>
           </div>
         </section>
-        : <div></div>
-      }
-<div className={styles.actions}>
-  {/* {canPreApprove(application?.req_status) && (
-    <button onClick={handlePreApprove} disabled={actionLoading} className={styles.btnApprove}>
-      {actionLoading ? "جاري..." : "موافقة مبدئية"}
-    </button>
-  )} */}
 
-      <div className={styles.actions}>
-        {/* NEW: Initial Approval Button - shows for "منتظر" status */}
-        {canPreApprove(application?.req_status) && (
-          <button onClick={handleInitialApproval} disabled={actionLoading} className={styles.btnApprove}>
-            {actionLoading ? "جاري..." : "موافقة مبدئية"}
-          </button>
+        <section className={styles.section}>
+          <h3>معلومات الأسرة و الدخل</h3>
+          <div className={styles.infoGrid}>
+            <p><strong>عدد أفراد الأسرة:</strong> {application?.family_numbers ?? "-"}</p>
+            <p><strong>ترتيب الأبناء:</strong> {application?.arrange_of_brothers ?? "-"}</p>
+            <p><strong>حالة الأب:</strong> {application?.father_status ?? "-"}</p>
+            <p><strong>حالة الأم:</strong> {application?.mother_status ?? "-"}</p>
+            <p><strong>دخل الأب:</strong> {application?.father_income ?? "-"}</p>
+            <p><strong>دخل الأم:</strong> {application?.mother_income ?? "-"}</p>
+            <p><strong>إجمالي الدخل:</strong> {application?.total_income ?? "-"}</p>
+            <p><strong>حالة السكن:</strong> {application?.housing_status ?? "-"}</p>
+            <p><strong>العنوان:</strong> {application?.address ?? "-"}</p>
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <h3>معلومات طلب الدعم</h3>
+          <div className={styles.infoGrid}>
+            <p><strong>الخصم المحسوب:</strong> {calculateDiscount()} جنيه</p>
+            <p><strong>إجمالي الخصم من الخادم:</strong> {application?.total_discount ?? "-"}</p>
+            <p><strong>سبب التقديم:</strong> {application?.reason ?? "-"}</p>
+            <p><strong>إعاقات:</strong> {application?.disabilities ?? "-"}</p>
+            <p><strong>الحالة الأكاديمية:</strong> {application?.acd_status ?? "-"}</p>
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <h3>المستندات</h3>
+          {documents.length === 0 ? (
+            <p>لا توجد مستندات.</p>
+          ) : (
+            <div className={styles.docsContainer}>
+              {documents.map((doc) => (
+                <div key={doc.doc_id} className={styles.docCard}>
+                  <p><strong>{doc.doc_type ?? `مستند ${doc.doc_id}`}</strong></p>
+                  {doc.file_url ? (
+                    <button onClick={() => openDocument(doc.doc_id)} className={styles.docLinkButton}>
+                      افتح الملف
+                    </button>
+                  ) : (
+                    <p className={styles.noLink}>لا يوجد رابط</p>
+                  )}
+                  <p className={styles.uploadDate}>
+                    تم الرفع: {doc.uploaded_at ? doc.uploaded_at.slice(0, 10) : "-"}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className={styles.docsNote}>
+            تُعرض المستندات المرفوعة من الطالب هنا. يمكن فتح كل مستند في نافذة جديدة للمعاينة أو التحميل.
+          </div>
+        </section>
+
+        {application?.req_status === "موافقة مبدئية" && (
+          <section className={styles.section}>
+            <h3>الخصومات المتاحة</h3>
+            <div className={styles.discountsBox}>
+              <div className={styles.discountSelect}>
+                <label>خصم مصاريف الكتب:</label>
+                <select
+                  value={selectedDiscounts.bk_discount}
+                  onChange={(e) => handleDiscountChange("bk_discount", e.target.value)}
+                >
+                  <option value="none">لا يوجد</option>
+                  {availableDiscounts.bk_discount.map((item, index) => (
+                    <option key={index} value={item}>{item}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={styles.discountSelect}>
+                <label>خصم مصاريف الانتساب:</label>
+                <select
+                  value={selectedDiscounts.aff_discount}
+                  onChange={(e) => handleDiscountChange("aff_discount", e.target.value)}
+                >
+                  <option value="none">لا يوجد</option>
+                  {availableDiscounts.aff_discount.map((item, index) => (
+                    <option key={index} value={item}>{item}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={styles.discountSelect}>
+                <label>خصم مصاريف الانتظام:</label>
+                <select
+                  value={selectedDiscounts.reg_discount}
+                  onChange={(e) => handleDiscountChange("reg_discount", e.target.value)}
+                >
+                  <option value="none">لا يوجد</option>
+                  {availableDiscounts.reg_discount.map((item, index) => (
+                    <option key={index} value={item}>{item}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={styles.discountSelect}>
+                <label>خصم المصاريف كاملة:</label>
+                <select
+                  value={selectedDiscounts.full_discount}
+                  onChange={(e) => handleDiscountChange("full_discount", e.target.value)}
+                >
+                  <option value="none">لا يوجد</option>
+                  {availableDiscounts.full_discount.map((item, index) => (
+                    <option key={index} value={item}>{item}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 12 }}>
+              {!discountsSaved && (
+                <button
+                  onClick={assignDiscounts}
+                  disabled={actionLoading}
+                  className={styles.btnApprove}
+                >
+                  {actionLoading ? "جاري الحفظ..." : "حفظ الخصومات"}
+                </button>
+              )}
+
+              <button
+                onClick={handleResetDiscounts}
+                className={styles.btnReject}
+                disabled={actionLoading}
+              >
+                إعادة تعيين
+              </button>
+            </div>
+          </section>
         )}
 
-        {/* Final approval button - shows for "موافقة مبدئية" status */}
-        {canApprove(application?.req_status) && (
-          <button onClick={handleApprove} disabled={actionLoading} className={styles.btnApprove}>
-            {actionLoading ? "جاري..." : "مقبول"}
-          </button>
-        )}
+        <div className={styles.actions}>
+          {canPreApprove(application?.req_status) && (
+            <button onClick={handleInitialApproval} disabled={actionLoading} className={styles.btnApprove}>
+              {actionLoading ? "جاري..." : "موافقة مبدئية"}
+            </button>
+          )}
 
-        {/* Reject button - shows for all statuses except "مقبول" and "مرفوض" */}
-        {canReject(application?.req_status) && (
-          <button onClick={handleReject} disabled={actionLoading} className={styles.btnReject}>
-            {actionLoading ? "جاري..." : "رفض"}
-          </button>
-        )}
+          {canApprove(application?.req_status) && (
+            <button onClick={handleApprove} disabled={actionLoading} className={styles.btnApprove}>
+              {actionLoading ? "جاري..." : "مقبول"}
+            </button>
+          )}
+
+          {canReject(application?.req_status) && (
+            <button onClick={handleReject} disabled={actionLoading} className={styles.btnReject}>
+              {actionLoading ? "جاري..." : "رفض"}
+            </button>
+          )}
+
+          {application?.req_status === "مقبول" && (
+            <div className={styles.btnReceived}>✅ تم اعتماد الطلب نهائيًا</div>
+          )}
+          {application?.req_status === "مرفوض" && (
+            <div className={styles.btnReceived}>❌ تم رفض الطلب</div>
+          )}
+        </div>
+
       </div>
-
-      {/* Show final status message */}
-      {application?.req_status === "مقبول" && <div className={styles.btnReceived}>✅ تم اعتماد الطلب نهائيًا</div>}
-      {application?.req_status === "مرفوض" && <div className={styles.btnReceived}>❌ تم رفض الطلب</div>}
-
     </div>
-  </div>
-  </div>
   );
 }

@@ -31,7 +31,7 @@ export type PlanItem = {
   eventsCount: number;
   createdAt: string;
   updatedAt: string;
-  dept?: number
+  dept?: number;
 };
 
 const API_URL = "http://localhost:8000/api";
@@ -40,29 +40,25 @@ export default function Page() {
   const router = useRouter();
   const goDetails = (id: number) => router.push(`/Events-Faclevel/plans/${id}`);
 
-
   const [plans, setPlans] = useState<PlanItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-    // داخل Page()
   const [openModal, setOpenModal] = useState(false);
-  const [editingPlan, setEditingPlan] = useState<null | { id: number; name: string; term: number; dept?: number;}>(null);
+  const [editingPlan, setEditingPlan] = useState<null | { id: number; name: string; term: number; dept?: number }>(null);
 
-  // Create
   const openCreate = () => {
     setEditingPlan(null);
     setOpenModal(true);
   };
 
-  // Edit
   const openEdit = (p: PlanItem) => {
-    setEditingPlan({ id: p.id, name: p.title, term: p.term , dept: p.dept });
+    setEditingPlan({ id: p.id, name: p.title, term: p.term, dept: p.dept });
     setOpenModal(true);
   };
+
   const toPlanItem = (p: ApiPlan): PlanItem => {
     const hasEvents = (p.events_count ?? 0) > 0;
-
     return {
       id: p.plan_id,
       title: p.name,
@@ -98,8 +94,6 @@ export default function Page() {
       });
 
       const text = await res.text();
-      console.log("GET plans status:", res.status);
-      console.log("GET plans raw body:", text);
 
       if (!res.ok) {
         setPlans([]);
@@ -116,8 +110,7 @@ export default function Page() {
         return;
       }
 
-      const mapped = data.map(toPlanItem);
-      setPlans(mapped);
+      setPlans(data.map(toPlanItem));
     } catch (e) {
       console.error(e);
       setPlans([]);
@@ -131,7 +124,6 @@ export default function Page() {
     fetchPlans();
   }, []);
 
-  // (اختياري) إنشاء خطة محلياً فقط (لحد ما تربطي POST)
   const onSubmitPlan = (payload: { title: string; year: string }) => {
     const newPlan: PlanItem = {
       id: Date.now(),
@@ -152,26 +144,31 @@ export default function Page() {
     <div className={styles.page}>
       <div className={styles.container}>
         <div className={styles.header}>
-          <div className={styles.headerText}>
-            <h1 className={styles.pageTitle}>إدارة الخطط</h1>
-            <p className={styles.pageSubtitle}>إنشاء وإدارة خطط الأنشطة</p>
-          </div>
-
-         <button className={styles.createBtnTop} onClick={openCreate}>
-          <Plus size={18} />
-          إنشاء خطة جديدة
-        </button>
+          <button className={styles.createBtnTop} onClick={openCreate}>
+            <Plus size={18} />
+            إنشاء خطة جديدة
+          </button>
         </div>
 
         {loading && (
-          <div style={{ textAlign: "center", padding: 16 }}>جاري تحميل الخطط...</div>
+          <div style={{ textAlign: "center", padding: "64px 0", color: "#9ca3af", fontSize: "1rem", fontWeight: 600 }}>
+            جاري تحميل الخطط...
+          </div>
         )}
 
         {error && (
           <div style={{ textAlign: "center", padding: 16, color: "crimson" }}>{error}</div>
         )}
 
-        <PlansGrid items={plans} onView={goDetails} onEdit={openEdit} />
+        {!loading && !error && plans.length === 0 ? (
+          <div className={styles.emptyState}>
+            <div className={styles.emptyIcon}>📋</div>
+            <p className={styles.emptyTitle}>لا توجد خطط أُنشئت حتى الآن</p>
+            <p className={styles.emptySubtitle}>ابدأ بإنشاء خطتك الأولى من خلال الزر أعلاه</p>
+          </div>
+        ) : (
+          <PlansGrid items={plans} onView={goDetails} onEdit={openEdit} />
+        )}
 
         <CreatePlanModal
           open={openModal}

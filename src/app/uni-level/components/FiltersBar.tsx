@@ -160,11 +160,11 @@ export default function FiltersBar({ filters, setFilters, onApply, onSearchChang
         </div>
         <div className={styles.buttonsWrapper}>
   <button onClick={clearAllFilters} className={styles.clearBtn}>
-    مسح جميع الفلاتر
+     تعيين افتراضي
   </button>
 
   <button onClick={onApply} className={styles.applyBtn}>
-    تطبيق الفلاتر
+     عرض النتائج
   </button>
 </div>
 

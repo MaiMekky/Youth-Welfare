@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import styles from "./ACtivityLogs.module.css";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { authFetch } from "@/utils/globalFetch";
-// شكل الريسبونس الحقيقي اللي بترجع من الداتابيز
+
 interface Log {
   log_id: number;
   actor_name: string;
@@ -43,7 +43,13 @@ export default function ActivityLogsTable() {
         );
 
         const data = await response.json();
-        setLogs(data);
+        // Handle array, paginated { results: [] }, or unexpected shapes
+        const logsArray = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.results)
+          ? data.results
+          : [];
+        setLogs(logsArray);
       } catch (error) {
         console.error("Error fetching logs: ", error);
       }
@@ -76,12 +82,11 @@ export default function ActivityLogsTable() {
 
   // 🔍 الفلاتر
   const filteredLogs = mappedLogs.filter((log) => {
-   const term = search.trim().toLowerCase();
-   const matchesSearch =
-  log.who.toLowerCase().includes(term) ||
-  log.action.toLowerCase().includes(term) ||
-  log.which.toLowerCase().includes(term);
-
+    const term = search.trim().toLowerCase();
+    const matchesSearch =
+      log.who.toLowerCase().includes(term) ||
+      log.action.toLowerCase().includes(term) ||
+      log.which.toLowerCase().includes(term);
 
     const matchesAction =
       actionFilter === "all" || log.action === actionFilter;
@@ -102,9 +107,7 @@ export default function ActivityLogsTable() {
 
   return (
     <div className={styles.activityLogsContainer}>
-      
       <div className={styles.filters}>
-        {/* <button>تصدير ⬇</button> */}
         <input type="date" />
 
         <select onChange={(e) => setActionFilter(e.target.value)}>
@@ -116,7 +119,6 @@ export default function ActivityLogsTable() {
           <option value="عرض بيانات الطلب">عرض بيانات الطلب</option>
         </select>
 
-        {/* ✅ فلتر النشاط الجديد */}
         <select onChange={(e) => setActivityFilter(e.target.value)}>
           <option value="all">كل الأنشطة</option>
           <option value="تكافل">تكافل</option>
@@ -131,7 +133,7 @@ export default function ActivityLogsTable() {
         />
       </div>
 
-      {/* ✅ TABLE WRAPPER - Only wraps the table */}
+      {/* TABLE WRAPPER */}
       <div className={styles.tableWrapper}>
         <table className={styles.logsTable}>
           <thead>
@@ -149,25 +151,53 @@ export default function ActivityLogsTable() {
           </thead>
 
           <tbody>
-            {displayedLogs.map((log) => (
-              <tr key={log.id}>
-                <td>{log.who}</td>
-                <td>{log.action}</td>
-                <td>{log.when}</td>
-                <td>{log.role}</td>
-                <td>{log.faculty}</td>
-                <td>{log.ip}</td>
-                <td style={{ fontWeight: "bold" }}>{log.which}</td>
-                <td>{log.what}</td>
-                <td>
-                  <span
-                    className={`${styles.statusTag} ${styles[log.statusClass]}`}
+            {displayedLogs.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={9}
+                  style={{
+                    textAlign: "center",
+                    padding: "48px 0",
+                    color: "#9ca3af",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}
                   >
-                    {log.status}
-                  </span>
+                    <span style={{ fontSize: "2rem" }}>🗂️</span>
+                    <span style={{ fontSize: "1rem", fontWeight: 600 }}>
+                      لا توجد سجلات
+                    </span>
+                   
+                  </div>
                 </td>
               </tr>
-            ))}
+            ) : (
+              displayedLogs.map((log) => (
+                <tr key={log.id}>
+                  <td>{log.who}</td>
+                  <td>{log.action}</td>
+                  <td>{log.when}</td>
+                  <td>{log.role}</td>
+                  <td>{log.faculty}</td>
+                  <td>{log.ip}</td>
+                  <td style={{ fontWeight: "bold" }}>{log.which}</td>
+                  <td>{log.what}</td>
+                  <td>
+                    <span
+                      className={`${styles.statusTag} ${styles[log.statusClass]}`}
+                    >
+                      {log.status}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

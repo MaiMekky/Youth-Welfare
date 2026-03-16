@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Eye, CheckCircle, X } from "lucide-react";
+import { Eye, CheckCircle, X, AlertTriangle } from "lucide-react";
 import "../styles/myRequests.css";
 import { useRouter } from "next/navigation";
 import { authFetch } from "@/utils/globalFetch";
+
 interface Request {
   id: string;
   requestNumber: string;
@@ -16,9 +17,15 @@ interface Request {
   reason: string;
   currentStep: number;
   totalSteps: number;
+  discountType: string[];
 }
 
-export default function MyRequests({ onStatusesLoaded }: any) {
+interface MyRequestsProps {
+  onStatusesLoaded: (statuses: string[]) => void;
+  showAlert: boolean;
+}
+
+export default function MyRequests({ onStatusesLoaded, showAlert }: MyRequestsProps) {
   const [requests, setRequests] = useState<Request[]>([]);
   const [filteredRequests, setFilteredRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,19 +33,12 @@ export default function MyRequests({ onStatusesLoaded }: any) {
   const [notification, setNotification] = useState<{ message: string; type: string } | null>(null);
   const router = useRouter();
 
-  const handleNotify = (message: string, type: "success" | "warning" | "error") => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3500);
-  };
-
   const mapStatus = (status: string) => {
     const st = status.trim();
-
     if (["pending", "منتظر"].includes(st)) return "pending";
     if (["under-review", "موافقة مبدئية"].includes(st)) return "under-review";
     if (["approved", "مقبول"].includes(st)) return "approved";
     if (["rejected", "مرفوض"].includes(st)) return "rejected";
-
     return "pending";
   };
 
@@ -76,14 +76,20 @@ export default function MyRequests({ onStatusesLoaded }: any) {
       setLoading(true);
 
       const token = localStorage.getItem("access");
-      if (!token) return;
+      if (!token) {
+        setLoading(false);
+        return;
+      }
 
       const response = await authFetch(
         "http://127.0.0.1:8000/api/solidarity/student/status/",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
+
+      if (!response.ok) {
+        setLoading(false);
+        return;
+      }
 
       const data = await response.json();
 
@@ -102,6 +108,9 @@ export default function MyRequests({ onStatusesLoaded }: any) {
         reason: item.reason,
         currentStep: statusToStep(item.req_status),
         totalSteps: 3,
+        discountType: Array.isArray(item.discount_type)
+          ? item.discount_type.filter((d: string) => d && d.trim() !== "")
+          : [],
       }));
 
       setRequests(mapped);
@@ -120,22 +129,16 @@ export default function MyRequests({ onStatusesLoaded }: any) {
     if (activeTab === "all") {
       setFilteredRequests(requests);
     } else {
-      setFilteredRequests(
-        requests.filter((r) => mapStatus(r.status) === activeTab)
-      );
+      setFilteredRequests(requests.filter((r) => mapStatus(r.status) === activeTab));
     }
   }, [activeTab, requests]);
-
-  const handleViewDetails = (id: string) => router.push(`/my-requests/${id}`);
-
-  useEffect(() => {
-    fetchRequests();
-  }, []);
 
   useEffect(() => {
     const statuses = requests.map((r) => r.status);
     onStatusesLoaded(statuses);
   }, [requests]);
+
+  const handleViewDetails = (id: string) => router.push(`/my-requests/${id}`);
 
   if (loading) {
     return (
@@ -150,6 +153,21 @@ export default function MyRequests({ onStatusesLoaded }: any) {
 
   return (
     <div className="my-requests-container">
+
+      {showAlert && (
+        <div className="important-notice">
+          <div className="notice-icon">
+            <AlertTriangle size={22} />
+          </div>
+          <div className="notice-content">
+            <span className="notice-title">تنبيه هام</span>
+            <span className="notice-text">
+              يرجى التوجه لرعاية شباب الكلية لتسليم المستندات الورقية خلال فترة من 3 إلى 5 أيام من تاريخ تقديم الطلب.
+            </span>
+          </div>
+        </div>
+      )}
+
       <div className="requests-tabs">
         <button
           className={`tab-button ${activeTab === "all" ? "active" : ""}`}
@@ -174,7 +192,6 @@ export default function MyRequests({ onStatusesLoaded }: any) {
                   <h3>{req.type}</h3>
                   <p className="request-number">رقم الطلب: {req.requestNumber}</p>
                 </div>
-
                 <span className={`status-badge ${mapStatus(req.status)}`}>
                   {getStatusText(req.status)}
                 </span>
@@ -185,15 +202,27 @@ export default function MyRequests({ onStatusesLoaded }: any) {
                   <span className="detail-label">تاريخ التقديم</span>
                   <span className="detail-value">{req.submissionDate}</span>
                 </div>
-
                 <div className="detail-item">
                   <span className="detail-label">عدد أفراد الأسرة</span>
                   <span className="detail-value">{req.familyMembers} أفراد</span>
                 </div>
-
                 <div className="detail-item">
                   <span className="detail-label">دخل الأسرة</span>
                   <span className="detail-value">{req.familyIncome}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">نوع الخصم</span>
+                  <span className="detail-value">
+                    {req.discountType.length > 0 ? (
+                      <span className="discount-tags">
+                        {req.discountType.map((d, i) => (
+                          <span key={i} className="discount-tag">{d}</span>
+                        ))}
+                      </span>
+                    ) : (
+                      <span className="no-discount">لا يوجد</span>
+                    )}
+                  </span>
                 </div>
               </div>
 
@@ -202,19 +231,14 @@ export default function MyRequests({ onStatusesLoaded }: any) {
                 <p>{req.reason}</p>
               </div>
 
-              {/* 🔥 Progress Bar */}
               <div className="progress-tracker">
                 <h4>تتبع حالة الطلب</h4>
-
                 <div className="progress-steps">
                   <div className="progress-line">
                     <div
                       className="progress-line-fill"
                       style={{
-                        width: `${getProgressPercentage(
-                          req.currentStep,
-                          req.totalSteps
-                        )}%`,
+                        width: `${getProgressPercentage(req.currentStep, req.totalSteps)}%`,
                         background: req.status === "rejected" ? "#ef4444" : "#22c55e",
                       }}
                     ></div>
@@ -224,13 +248,12 @@ export default function MyRequests({ onStatusesLoaded }: any) {
                     const step = index + 1;
                     const isLastStep = step === req.totalSteps;
 
-                    // تحديد لون الدائرة الأخيرة حسب الحالة
-                    let circleBackground = "#e5e7eb"; // افتراضي
+                    let circleBackground = "#e5e7eb";
                     let circleContent: JSX.Element | number = step;
                     let circleColor = "#9ca3af";
 
                     if (step < req.currentStep) {
-                      circleBackground = "#22c55e"; // أخضر للخطوات المكتملة
+                      circleBackground = "#22c55e";
                       circleContent = <CheckCircle size={18} color="#ffffff" />;
                       circleColor = "#ffffff";
                     } else if (isLastStep) {
@@ -239,57 +262,50 @@ export default function MyRequests({ onStatusesLoaded }: any) {
                         circleContent = <CheckCircle size={18} color="#ffffff" />;
                         circleColor = "#ffffff";
                       } else if (req.status === "rejected") {
-                        circleBackground = "#ef4444" ;
-                        circleContent = <X size={22} color="#ffffff"/>             
+                        circleBackground = "#ef4444";
+                        circleContent = <X size={22} color="#ffffff" />;
                         circleColor = "#ffffff";
                       } else if (step === req.currentStep) {
-                        circleBackground = "#3b82f6"; // أزرق للموافقة المبدئية
+                        circleBackground = "#3b82f6";
                         circleContent = step;
                         circleColor = "#ffffff";
                       }
                     } else if (step === req.currentStep) {
-                      circleBackground = "#3b82f6"; // أزرق للموافقة المبدئية
+                      circleBackground = "#3b82f6";
                       circleContent = step;
                       circleColor = "#ffffff";
                     }
 
-  return (
-   <div
-  key={index}
-  className={`progress-step ${
-    step < req.currentStep
-      ? "completed"
-      : step === req.currentStep
-      ? "active current-step"
-      : ""
-  }`}
->
-
-      <div
-  className="step-circle"
-  style={{
-    background: circleBackground,
-    color: circleColor,
-    ...(index === 2 && req.status === "rejected" && { marginRight: "6px" }),
-  }}
->
-
-        {circleContent}
-      </div>
-
-      <span className="step-label">{getStepLabel(step, req.status)}</span>
-    </div>
-  );
-})}
-
+                    return (
+                      <div
+                        key={index}
+                        className={`progress-step ${
+                          step < req.currentStep
+                            ? "completed"
+                            : step === req.currentStep
+                            ? "active current-step"
+                            : ""
+                        }`}
+                      >
+                        <div
+                          className="step-circle"
+                          style={{
+                            background: circleBackground,
+                            color: circleColor,
+                            ...(index === 2 && req.status === "rejected" && { marginRight: "6px" }),
+                          }}
+                        >
+                          {circleContent}
+                        </div>
+                        <span className="step-label">{getStepLabel(step, req.status)}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
               <div className="request-actions">
-                <button
-                  className="action-btn view"
-                  onClick={() => handleViewDetails(req.id)}
-                >
+                <button className="action-btn view" onClick={() => handleViewDetails(req.id)}>
                   <Eye size={18} />
                   عرض التفاصيل
                 </button>
@@ -298,7 +314,10 @@ export default function MyRequests({ onStatusesLoaded }: any) {
           ))
         )}
       </div>
-        {notification && <div className={`notification ${notification.type}`}>{notification.message}</div>}
+
+      {notification && (
+        <div className={`notification ${notification.type}`}>{notification.message}</div>
+      )}
     </div>
   );
 }

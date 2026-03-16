@@ -111,7 +111,6 @@ export default function AddUser() {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
 
-    // ✅ force email lowercase as user types
     if (name === 'email') {
       setFormData(prev => ({ ...prev, email: value.toLowerCase() }));
       return;
@@ -160,7 +159,6 @@ export default function AddUser() {
       const facultyId   = formData.faculty ? Number(formData.faculty) : null;
       const facultyName = faculties.find(f => f.faculty_id === facultyId)?.name || null;
 
-      // ✅ normalize email before sending
       const normalizedEmail = formData.email.trim().toLowerCase();
 
       const payload = {
@@ -266,7 +264,6 @@ export default function AddUser() {
                 </div>
                 <div className={styles.formGroup}>
                   <label className={styles.fieldLabel}>البريد الإلكتروني</label>
-                  {/* ✅ email always lowercase */}
                   <input
                     type="email" name="email"
                     className={styles.addUserInput}
@@ -309,7 +306,6 @@ export default function AddUser() {
                   </select>
                 </div>
 
-                {/* Faculty select */}
                 {(formData.role === "faculty_admin" || formData.role === "faculty_head") && (
                   <div className={styles.formGroup}>
                     <label className={styles.fieldLabel}>الكلية</label>
@@ -322,7 +318,6 @@ export default function AddUser() {
                   </div>
                 )}
 
-                {/* Department manager select */}
                 {formData.role === "department_manager" && (
                   <div className={styles.formGroup}>
                     <label className={styles.fieldLabel}>القسم</label>
@@ -341,7 +336,6 @@ export default function AddUser() {
                 )}
               </div>
 
-              {/* Departments checkboxes for faculty roles */}
               {(formData.role === "faculty_admin" || formData.role === "faculty_head") && (
                 <div className={styles.formGroup} style={{ marginTop: 12 }}>
                   <label className={styles.fieldLabel}>الأقسام</label>
@@ -369,16 +363,18 @@ export default function AddUser() {
               </div>
               <div className={styles.permissionsGrid}>
                 {["C", "R", "U", "D"].map(p => (
-                  <label key={p} className={`${styles.permCard} ${formData.permissions.includes(p) ? styles.permCardActive : ''}`}>
+                  <label
+                    key={p}
+                    data-perm={p}
+                    className={`${styles.permCard} ${formData.permissions.includes(p) ? styles.permCardActive : ''}`}
+                  >
                     <input
-                      type="checkbox" name="permissions" value={p}
+                      type="checkbox"
+                      name="permissions"
+                      value={p}
                       checked={formData.permissions.includes(p)}
                       onChange={handleChange}
-                      style={{ display: 'none' }}
                     />
-                    <span className={styles.permCardIcon}>
-                      {p === 'C' ? '➕' : p === 'R' ? '👁' : p === 'U' ? '✏️' : '🗑'}
-                    </span>
                     <span className={styles.permCardLabel}>{permLabels[p]}</span>
                   </label>
                 ))}

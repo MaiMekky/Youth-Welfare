@@ -7,6 +7,7 @@
   box-sizing: border-box;
   overflow-x: hidden;
 }
+
 .headerCard {
   background: linear-gradient(135deg, #d4af37 0%, #2C3A5F 100%);
   border-radius: 14px;
@@ -33,17 +34,53 @@
   line-height: 1.6;
 }
 
-.controlsRow { margin-bottom: 16px; }
-.tabContent { animation: fadeIn 0.3s ease; }
-.contentSection { background: white; border-radius: 12px; padding: 24px; min-height: 320px; }
-.sectionDescription { font-size: 15px; color: #6C757D; margin-bottom: 16px; text-align: right; }
-.modalOverlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); z-index: 80; }
-.formPage { background: white; border-radius: 16px; padding: 24px; width: 90%; max-width: 900px; }
-.formHeader { display:flex; justify-content: space-between; align-items:center; }
+.controlsRow {
+  margin-bottom: 16px;
+}
 
-/* Add these notification styles to your page.module.css and deatails.module.css */
+.tabContent {
+  animation: fadeIn 0.3s ease;
+}
 
-/* ✅ Notification positioned at top-right */
+.contentSection {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  min-height: 320px;
+}
+
+.sectionDescription {
+  font-size: 15px;
+  color: #6C757D;
+  margin-bottom: 16px;
+  text-align: right;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 80;
+}
+
+.formPage {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  width: 90%;
+  max-width: 900px;
+}
+
+.formHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ── Notification ─────────────────────────────────────────── */
 .notification {
   position: fixed;
   top: clamp(1rem, 3vw, 1.25rem);
@@ -57,13 +94,12 @@
   font-weight: 600;
   color: #333;
   z-index: 9999;
-  animation: fadeIn 0.4s ease forwards;
+  animation: slideInNotif 0.4s ease forwards;
   overflow: hidden;
   box-sizing: border-box;
   font-size: clamp(0.8125rem, 1.5vw, 0.875rem);
 }
 
-/* ✅ Success and Error colors */
 .success {
   border-right: 6px solid #4caf50;
 }
@@ -72,7 +108,6 @@
   border-right: 6px solid #f44336;
 }
 
-/* ✅ Yellow progress bar */
 .notification::after {
   content: "";
   position: absolute;
@@ -84,8 +119,225 @@
   transform-origin: left;
 }
 
-/* ✅ Animations */
+/* ── Loading ──────────────────────────────────────────────── */
+.loadingWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  gap: 16px;
+}
+
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(44, 58, 95, 0.12);
+  border-top-color: #d4af37;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+.loadingText {
+  font-size: 15px;
+  font-weight: 700;
+  color: #64748b;
+  margin: 0;
+}
+
+/* ── Empty State ──────────────────────────────────────────── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 72px 24px 80px;
+  background: #fff;
+  border: 1px dashed rgba(44, 58, 95, 0.18);
+  border-radius: 20px;
+  gap: 14px;
+  margin-top: 8px;
+  animation: fadeIn 0.3s ease;
+}
+
+.emptyIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fdf8ec 0%, #fef3c7 100%);
+  color: #b38e19;
+  margin-bottom: 4px;
+  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.15);
+}
+
+.emptyTitle {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 900;
+  color: #2C3A5F;
+}
+
+.emptyDesc {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #64748b;
+  max-width: 380px;
+  line-height: 1.7;
+}
+
+/* ── Families Grid ────────────────────────────────────────── */
+.familiesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 8px;
+}
+
+.familyCard {
+  background: #fff;
+  border: 1px solid rgba(44, 58, 95, 0.1);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 2px 12px rgba(44, 58, 95, 0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  animation: fadeIn 0.3s ease;
+}
+
+.familyCard:hover {
+  box-shadow: 0 6px 24px rgba(44, 58, 95, 0.12);
+  transform: translateY(-2px);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.cardTitle {
+  font-size: 16px;
+  font-weight: 800;
+  color: #2C3A5F;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.statusBadge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.cardDescription {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.typeBadge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  width: fit-content;
+}
+
+.cardActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.approveBtn {
+  flex: 1;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #d4af37, #b8960c);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  font-family: inherit;
+}
+
+.approveBtn:hover {
+  opacity: 0.88;
+}
+
+.viewBtn {
+  flex: 1;
+  padding: 8px 16px;
+  background: transparent;
+  color: #2C3A5F;
+  border: 1.5px solid rgba(44, 58, 95, 0.25);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  font-family: inherit;
+}
+
+.viewBtn:hover {
+  background: rgba(44, 58, 95, 0.05);
+  border-color: rgba(44, 58, 95, 0.4);
+}
+
+/* ── Animations ───────────────────────────────────────────── */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInNotif {
   from {
     opacity: 0;
     transform: translateX(40px);
@@ -105,13 +357,19 @@
   }
 }
 
+/* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 768px) {
   .container {
     padding: 16px;
   }
+
   .headerCard {
     margin-bottom: 16px;
     padding: 16px;
+  }
+
+  .familiesGrid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -119,7 +377,13 @@
   .container {
     padding: 12px;
   }
+
   .contentSection {
     padding: 18px;
+  }
+
+  .familiesGrid {
+    grid-template-columns: 1fr;
+    gap: 14px;
   }
 }

@@ -8,12 +8,9 @@ import { authFetch } from "@/utils/globalFetch";
 
 interface RequestsTableProps {
   onDataFetched: (data: any[]) => void;
-   filteredRequests: any[];
+  filteredRequests: any[];
 }
 
-// ===============================
-// Token Service
-// ===============================
 export const getAccessToken = () => localStorage.getItem("access");
 export const getRefreshToken = () => localStorage.getItem("refresh");
 export const saveTokens = (access: string, refresh?: string) => {
@@ -24,14 +21,12 @@ export const saveTokens = (access: string, refresh?: string) => {
 export const refreshToken = async (): Promise<string | null> => {
   const refresh = getRefreshToken();
   if (!refresh) return null;
-
   try {
     const res = await authFetch("http://127.0.0.1:8000/api/auth/refresh/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh }),
     });
-
     if (!res.ok) return null;
     const data = await res.json();
     if (data?.access) {
@@ -45,36 +40,21 @@ export const refreshToken = async (): Promise<string | null> => {
   }
 };
 
-// ===============================
-// API Service
-// ===============================
-const API_URL = "http://127.0.0.1:8000/api/solidarity/faculty/applications/";
-
-  const fetchApplications = async () => {
+const fetchApplications = async () => {
   const res = await authFetch(
     "http://127.0.0.1:8000/api/solidarity/faculty/applications/",
     { method: "GET" }
   );
-
-  if (!res.ok) {
-    throw new Error("API_ERROR");
-  }
-
+  if (!res.ok) throw new Error("API_ERROR");
   return await res.json();
 };
 
-
-// ===============================
-// RequestsTable Component
-// ===============================
 export default function RequestsTable({ onDataFetched, filteredRequests }: RequestsTableProps) {
   const router = useRouter();
-  const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  // ⚡ استخدام filteredRequests بدل requests للعرض
   const totalPages = Math.ceil(filteredRequests.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
   const visibleRequests = filteredRequests.slice(startIndex, startIndex + rowsPerPage);
@@ -91,7 +71,6 @@ export default function RequestsTable({ onDataFetched, filteredRequests }: Reque
         setLoading(false);
       }
     };
-
     loadApplications();
   }, []);
 
@@ -105,22 +84,16 @@ export default function RequestsTable({ onDataFetched, filteredRequests }: Reque
       amount: item.total_discount,
       status: item.req_status,
     }));
-    setRequests(formatted);
-    onDataFetched(formatted); // تبعت للـ parent
+    onDataFetched(formatted);
   };
 
   const translateStatus = (status: string) => {
     switch (status) {
-      case "received":
-        return "منتظر";
-      case "review":
-        return "موافقة مبدئية";
-      case "approved":
-        return "مقبول";
-      case "rejected":
-        return "مرفوض";
-      default:
-        return status;
+      case "received": return "منتظر";
+      case "review": return "موافقة مبدئية";
+      case "approved": return "مقبول";
+      case "rejected": return "مرفوض";
+      default: return status;
     }
   };
 
@@ -128,7 +101,11 @@ export default function RequestsTable({ onDataFetched, filteredRequests }: Reque
     router.push(`/requests/${id}`);
   };
 
-  if (loading) return <p>جاري تحميل البيانات...</p>;
+  if (loading) return (
+    <div style={{ textAlign: "center", padding: "64px 0", color: "#9ca3af", fontSize: "1rem", fontWeight: 600 }}>
+      جاري تحميل البيانات...
+    </div>
+  );
 
   return (
     <div className={styles.tableSection}>
@@ -137,10 +114,9 @@ export default function RequestsTable({ onDataFetched, filteredRequests }: Reque
           <FileText size={20} />
           <h3>طلبات الدعم المالي</h3>
         </div>
-      <p className={styles.tableSubtitle}>
-  عرض {filteredRequests.length} {filteredRequests.length === 1 ? "طلب" : "طلبات"}
-</p>
-
+        <p className={styles.tableSubtitle}>
+          عرض {filteredRequests.length} {filteredRequests.length === 1 ? "طلب" : "طلبات"}
+        </p>
       </div>
 
       <div className={styles.tableWrapper}>
@@ -157,7 +133,24 @@ export default function RequestsTable({ onDataFetched, filteredRequests }: Reque
             </tr>
           </thead>
           <tbody>
-            {visibleRequests.length > 0 ? (
+            {visibleRequests.length === 0 ? (
+              <tr>
+                <td colSpan={7}>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "48px 0",
+                      color: "#9ca3af",
+                    }}
+                  >
+                    <span style={{ fontSize: "2rem", fontWeight: 600 }}>لا توجد طلبات</span>
+                  </div>
+                </td>
+              </tr>
+            ) : (
               visibleRequests.map((req) => (
                 <tr key={req.id}>
                   <td>{req.name}</td>
@@ -167,21 +160,20 @@ export default function RequestsTable({ onDataFetched, filteredRequests }: Reque
                   <td>{req.amount || "---"}</td>
                   <td>
                     <span
-                  className={`${styles.statusBadge} ${
-                    req.status === "منتظر"
-                      ? styles.statusWait
-                      : req.status === "موافقة مبدئية"
-                      ? styles.statusReview
-                      : req.status === "مقبول"
-                      ? styles.statusApproved
-                      : req.status === "مرفوض"
-                      ? styles.statusRejected
-                      : ""
-                  }`}
-                >
-                  {translateStatus(req.status)}
-                </span>
-
+                      className={`${styles.statusBadge} ${
+                        req.status === "منتظر"
+                          ? styles.statusWait
+                          : req.status === "موافقة مبدئية"
+                          ? styles.statusReview
+                          : req.status === "مقبول"
+                          ? styles.statusApproved
+                          : req.status === "مرفوض"
+                          ? styles.statusRejected
+                          : ""
+                      }`}
+                    >
+                      {translateStatus(req.status)}
+                    </span>
                   </td>
                   <td>
                     <button
@@ -193,17 +185,16 @@ export default function RequestsTable({ onDataFetched, filteredRequests }: Reque
                   </td>
                 </tr>
               ))
-            ) : (
-              <tr>
-                <td colSpan={7}>لا توجد نتائج</td>
-              </tr>
             )}
           </tbody>
         </table>
       </div>
- <div className={styles.tableFooter}>
+
+      <div className={styles.tableFooter}>
         <div className={styles.footerLeft}>
-          عرض <strong>{startIndex + 1}</strong>–<strong>{Math.min(startIndex + rowsPerPage, filteredRequests.length)}</strong> من <strong>{filteredRequests.length}</strong>
+          عرض <strong>{startIndex + 1}</strong>–
+          <strong>{Math.min(startIndex + rowsPerPage, filteredRequests.length)}</strong> من{" "}
+          <strong>{filteredRequests.length}</strong>
         </div>
 
         <div className={styles.footerRight}>

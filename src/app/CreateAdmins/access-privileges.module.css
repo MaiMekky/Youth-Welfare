@@ -161,7 +161,6 @@
 }
 .roleSelect:focus { border-color: var(--navy-mid); background: #fff; }
 
-/* ── Table Container ── */
 .tableContainer {
   width: 100%;
   background: #fff;
@@ -171,7 +170,6 @@
   border: 1px solid #E8EFF7;
 }
 
-/* ── Table — no fixed layout, explicit classes on every th/td ── */
 .usersTable {
   width: 100%;
   min-width: 900px;
@@ -179,11 +177,6 @@
   table-layout: auto;
 }
 
-/*
-  Dedicated class per column, applied to BOTH <th> AND <td> in JSX.
-  This is the only reliable way with CSS Modules (nth-child doesn't
-  work when hashed class names break colgroup inheritance).
-*/
 .thUser,    .tdUser    { width: 240px; }
 .thRole,    .tdRole    { width: 140px; }
 .thPerms,   .tdPerms   { width: 230px; }
@@ -191,7 +184,6 @@
 .thDate,    .tdDate    { width: 120px; }
 .thActions, .tdActions { width: 110px; }
 
-/* ── White header ── */
 .usersTable thead {
   background: #FAFBFD;
   border-bottom: 1.5px solid #E8EFF7;
@@ -216,7 +208,6 @@
 .usersTable tbody tr:last-child td { border-bottom: none; }
 .usersTable tbody tr:hover { background: #F8FAFD; transition: background .15s; }
 
-/* ── User Info Cell ── */
 .userInfo { display: flex; align-items: center; gap: 12px; }
 .userAvatar {
   width: 42px; height: 42px;
@@ -240,7 +231,6 @@
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-/* ── Role Badge ── */
 .roleBadge {
   display: inline-flex; align-items: center;
   padding: 6px 14px; border-radius: 20px;
@@ -249,7 +239,6 @@
   white-space: nowrap; border: 1px solid #E2E8F0;
 }
 
-/* ── Permissions ── */
 .permissions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 .permissionBadge {
   display: inline-flex; align-items: center; justify-content: center;
@@ -262,7 +251,6 @@
 .permissionC { background: #FEF3C7; color: #92400E; }
 .noPerms { color: #CBD5E1; font-size: 16px; }
 
-/* ── Status Cell ── */
 .statusCell { display: flex; align-items: center; gap: 10px; }
 .statusTag {
   display: inline-flex; align-items: center; gap: 6px;
@@ -278,7 +266,6 @@
 .statusInactive { background: var(--red-bg); color: #991B1B; border: 1px solid #FECACA; }
 .statusInactive::before { background: var(--red); }
 
-/* ── Toggle Switch ── */
 .toggleSwitch {
   position: relative; display: inline-block;
   width: 46px; height: 26px; flex-shrink: 0; cursor: pointer;
@@ -297,10 +284,8 @@
 .toggleSwitch input:checked + .toggleSlider { background: var(--green); }
 .toggleSwitch input:checked + .toggleSlider::before { transform: translateX(20px); }
 
-/* ── Date ── */
 .dateText { font-size: 13.5px; font-weight: 600; color: var(--mute); white-space: nowrap; }
 
-/* ── Edit Button ── */
 .btnEdit {
   display: inline-flex; align-items: center; gap: 7px;
   padding: 9px 16px; background: var(--navy); color: #fff;
@@ -311,12 +296,10 @@
 }
 .btnEdit:hover { background: var(--navy-mid); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(30,58,95,.3); }
 
-/* ── Empty State ── */
 .emptyState { text-align: center; padding: 60px 20px !important; color: var(--mute); }
 .emptyIcon { font-size: 42px; margin-bottom: 12px; opacity: 0.4; }
 .emptyState p { font-size: 15px; font-weight: 600; color: #9CA3AF; margin: 0; }
 
-/* ── Toast ── */
 .toast {
   position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
   background: #1A2E42; color: #fff; padding: 12px 24px; border-radius: 10px;
@@ -418,26 +401,57 @@
 .checkboxCard:hover { border-color: var(--navy-mid); background: var(--navy-light); }
 .checkboxCard input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--navy-mid); flex-shrink: 0; cursor: pointer; }
 
+/* ── Permissions Grid ── */
 .permissionsGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
 .permCard {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 6px; padding: 20px 12px;
-  border: 1.5px solid var(--border); border-radius: 12px; background: #fff;
-  cursor: pointer; transition: all .18s; user-select: none;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  padding: 22px 24px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  transition: all .18s;
+  user-select: none;
 }
 .permCard:hover { border-color: var(--navy-mid); background: var(--navy-light); }
-.permCardActive { border-color: var(--navy-mid) !important; background: var(--navy-light) !important; box-shadow: 0 0 0 3px rgba(45,95,138,.12); }
-.permCardIcon { display: none; }
-.permCardLabel { font-size: 16px; font-weight: 800; color: var(--navy); }
+.permCardActive {
+  border-color: var(--navy-mid) !important;
+  background: var(--navy-light) !important;
+  box-shadow: 0 0 0 3px rgba(45,95,138,.12);
+}
+
+.permCard input[type="checkbox"] {
+  display: block !important;
+  width: 22px;
+  height: 22px;
+  accent-color: var(--navy-mid);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.permCardIcon  { display: none; }
+.permCardLabel { font-size: 22px; font-weight: 900; color: var(--navy); }
 
 .permCard[data-perm="C"].permCardActive { background: #FEF3C7 !important; border-color: #D97706 !important; box-shadow: 0 0 0 3px rgba(217,119,6,.1); }
 .permCard[data-perm="C"].permCardActive .permCardLabel { color: #92400E; }
+.permCard[data-perm="C"].permCardActive input[type="checkbox"] { accent-color: #D97706; }
+
 .permCard[data-perm="R"].permCardActive { background: #D1FAE5 !important; border-color: #059669 !important; box-shadow: 0 0 0 3px rgba(5,150,105,.1); }
 .permCard[data-perm="R"].permCardActive .permCardLabel { color: #065F46; }
+.permCard[data-perm="R"].permCardActive input[type="checkbox"] { accent-color: #059669; }
+
 .permCard[data-perm="U"].permCardActive { background: #DBEAFE !important; border-color: #2563EB !important; box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
 .permCard[data-perm="U"].permCardActive .permCardLabel { color: #1E40AF; }
+.permCard[data-perm="U"].permCardActive input[type="checkbox"] { accent-color: #2563EB; }
+
 .permCard[data-perm="D"].permCardActive { background: #FEE2E2 !important; border-color: #DC2626 !important; box-shadow: 0 0 0 3px rgba(220,38,38,.1); }
 .permCard[data-perm="D"].permCardActive .permCardLabel { color: #991B1B; }
+.permCard[data-perm="D"].permCardActive input[type="checkbox"] { accent-color: #DC2626; }
 
 .statusToggleRow { display: flex; align-items: center; gap: 16px; cursor: pointer; padding: 6px 0; }
 .statusToggleLabel { font-size: 16px; font-weight: 700; color: var(--text); flex: 1; }
@@ -484,6 +498,7 @@
   .addUserForm   { padding: 20px 18px 24px; }
   .formRow       { grid-template-columns: 1fr; }
   .permissionsGrid { grid-template-columns: repeat(2, 1fr); }
+  .permCardLabel { font-size: 18px; }
   .addUserBtns   { flex-direction: column-reverse; }
   .addUserBtnCancel, .addUserBtnSubmit { width: 100%; text-align: center; }
 }

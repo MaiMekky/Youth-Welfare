@@ -1,8 +1,6 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import Footer from "@/app/FacLevel/components/Footer";
-
 import ReportCard from "../families-reports/components/reports";
 import styles from "../families-reports/styles/report.module.css";
 import { authFetch } from "@/utils/globalFetch";
@@ -38,9 +36,7 @@ export default function FamilyReportsPage() {
             },
           }
         );
-
         if (!res.ok) throw new Error("Failed to fetch families");
-
         const data = await res.json();
         setFamilies(data);
       } catch (err) {
@@ -50,13 +46,19 @@ export default function FamilyReportsPage() {
         setLoading(false);
       }
     };
-
     fetchFamilies();
   }, []);
 
+  const centeredStateStyle: React.CSSProperties = {
+    textAlign: "center",
+    padding: "64px 0",
+    color: "#9ca3af",
+    fontSize: "2rem",
+    fontWeight: 600,
+  };
+
   return (
     <div className={styles.pageWrapper}>
-      
       <div className={styles.reportsPage}>
         <div className={styles.pageHeaderReports}>
           <h1 className={styles.pageTitleReports}>تقارير الأسر الطلابية</h1>
@@ -68,7 +70,9 @@ export default function FamilyReportsPage() {
         </div>
 
         {loading ? (
-          <p>جاري تحميل الأسر...</p>
+          <div style={centeredStateStyle}>جاري تحميل الأسر...</div>
+        ) : families.length === 0 ? (
+          <div style={centeredStateStyle}>لا يوجد أسر مسجلة حاليًا</div>
         ) : (
           <div className={styles.reportsList}>
             {families.map((family) => (
@@ -83,14 +87,13 @@ export default function FamilyReportsPage() {
                   foundingDate: new Date(family.created_at).toLocaleDateString("ar-EG"),
                   category: family.type,
                   description: family.description,
-                  status: family.status,  
+                  status: family.status,
                 }}
               />
             ))}
           </div>
         )}
       </div>
-
       <Footer />
     </div>
   );

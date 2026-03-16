@@ -9,10 +9,7 @@ interface FamilyCardProps {
   activeTab: string;
   onApprove?: (familyId: number) => void;
   onReject?: (familyId: number) => void;
-  onToast?: (
-    message: string,
-    type: "success" | "error" | "warning"
-  ) => void;
+  onToast?: (message: string, type: "success" | "error" | "warning") => void;
 }
 
 export default function FamilyCard({
@@ -21,41 +18,39 @@ export default function FamilyCard({
   activeTab,
   onApprove,
   onReject,
-  onToast
+  onToast,
 }: FamilyCardProps) {
   const router = useRouter();
 
-const isEcoFamily = family.type === "اصدقاء البيئة";
+  const isEcoFamily     = family.type === "اصدقاء البيئة";
+  const isCentralFamily = family.type === "مركزية";
+
   if (!family) return null;
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "موافقة مبدئية":
-        return "#F3F5FD";
-      default:
-        return "#E8EAF0";
+      case "موافقة مبدئية": return "#F3F5FD";
+      default:              return "#E8EAF0";
     }
   };
 
- const handleApprove = () => {
-  onApprove?.(family.family_id);
-  onToast?.("تمت الموافقة على الأسرة بنجاح", "success");
-};
+  const handleApprove = () => {
+    onApprove?.(family.family_id);
+    onToast?.("تمت الموافقة على الأسرة بنجاح", "success");
+  };
 
-const handleReject = () => {
-  onReject?.(family.family_id);
-  onToast?.("تم رفض الأسرة", "warning");
-};
+  const handleReject = () => {
+    onReject?.(family.family_id);
+    onToast?.("تم رفض الأسرة", "warning");
+  };
 
   const handleViewDetails = () => {
     router.push(`/uni-level-family/details/${family.family_id}?tab=${activeTab}`);
   };
 
-  // Check if approve/reject buttons should be shown
   const shouldShowApproveReject = showActions && family.status === "موافقة مبدئية" && !isEcoFamily;
 
   return (
-    
     <div className={styles.familyCard}>
       {/* Header */}
       <div className={styles.cardHeader}>
@@ -66,11 +61,7 @@ const handleReject = () => {
         <div className={styles.statusBadges}>
           <span
             className={styles.badge}
-            style={{
-              backgroundColor: getStatusColor(family.status),
-              color: "#2C3A5F",
-              fontWeight: 600,
-            }}
+            style={{ backgroundColor: getStatusColor(family.status), color: "#2C3A5F", fontWeight: 600 }}
           >
             {family.status}
           </span>
@@ -85,41 +76,33 @@ const handleReject = () => {
         </div>
       </div>
 
-      {/* Info */}
-      <div className={styles.familyInfo}>
-        <div className={styles.infoRow}>
-          <span className={styles.infoLabel}>الكلية:</span>
-          <span className={styles.infoValue}>{family.faculty_name}</span>
+      {/* Info — hidden for central families */}
+      {!isCentralFamily && (
+        <div className={styles.familyInfo}>
+          <div className={styles.infoRow}>
+            <span className={styles.infoLabel}>الكلية:</span>
+            <span className={styles.infoValue}>{family.faculty_name}</span>
+          </div>
+          <div className={styles.infoRow}>
+            <span className={styles.infoLabel}>النوع:</span>
+            <span className={styles.infoValue}>{family.type}</span>
+          </div>
         </div>
-        <div className={styles.infoRow}>
-          <span className={styles.infoLabel}>النوع:</span>
-          <span className={styles.infoValue}>{family.type}</span>
-        </div>
-      </div>
+      )}
 
-          {/* Actions */}
+      {/* Actions */}
       <div className={styles.cardActions}>
-        {showActions && !isEcoFamily && shouldShowApproveReject && (
+        {shouldShowApproveReject && (
           <div className={styles.actionRow}>
-            <button
-              className={`${styles.btn} ${styles.btnApprove}`}
-              onClick={handleApprove}
-            >
+            <button className={`${styles.btn} ${styles.btnApprove}`} onClick={handleApprove}>
               موافقة نهائية
             </button>
-            <button
-              className={`${styles.btn} ${styles.btnReject}`}
-              onClick={handleReject}
-            >
+            <button className={`${styles.btn} ${styles.btnReject}`} onClick={handleReject}>
               رفض
             </button>
           </div>
         )}
-
-        <button
-          className={`${styles.btn} ${styles.btnDetails}`}
-          onClick={handleViewDetails}
-        >
+        <button className={`${styles.btn} ${styles.btnDetails}`} onClick={handleViewDetails}>
           عرض التفاصيل
         </button>
       </div>

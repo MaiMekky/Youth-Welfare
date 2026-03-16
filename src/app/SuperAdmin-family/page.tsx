@@ -1,4 +1,3 @@
-// File: app/page.tsx
 "use client";
 
 import React, { useMemo, useState, useEffect } from "react";
@@ -8,8 +7,12 @@ import Tabs from "././components/Tabs";
 import Filters from "././components/Filters";
 import FamiliesGrid from "././components/FamiliesGrid";
 import { authFetch } from "@/utils/globalFetch";
+
 export default function Page() {
+  // ✅ Always start with "central" on SSR, then sync from localStorage after mount
   const [activeTab, setActiveTab] = useState<string>("central");
+  const [tabReady, setTabReady] = useState(false);
+
   const [selectedFaculty, setSelectedFaculty] = useState<number>(-1);
   const [selectedFamilyType, setSelectedFamilyType] = useState<string>("all");
 
@@ -22,6 +25,19 @@ export default function Page() {
     message: string;
     type: "success" | "error";
   }>({ show: false, message: "", type: "success" });
+
+  // ✅ After mount: restore saved tab from localStorage (avoids SSR mismatch)
+  useEffect(() => {
+    const saved = localStorage.getItem("familiesActiveTab");
+    if (saved) setActiveTab(saved);
+    setTabReady(true);
+  }, []);
+
+  // ✅ Persist tab on every change (only after mount)
+  useEffect(() => {
+    if (!tabReady) return;
+    localStorage.setItem("familiesActiveTab", activeTab);
+  }, [activeTab, tabReady]);
 
   // Show notification helper
   const showNotification = (message: string, type: "success" | "error") => {
@@ -97,23 +113,21 @@ export default function Page() {
     members: f.member_count,
     scope: "على مستوى الجامعة",
     createdBy: f.created_by_name || f.faculty_name,
-    faculty: f.faculty, 
+    faculty: f.faculty,
     type: f.type,
     status: f.status,
-    // Status badge colors - matching the family badge style
     statusColor:
       f.status === "مقبول"
-        ? "#D4F4DD"  // Light green (same as eco-friendly badge)
+        ? "#D4F4DD"
         : f.status === "منتظر"
-        ? "#FFF3E0"  // Light orange
-        : "#FFE0E0",  // Light red
+        ? "#FFF3E0"
+        : "#FFE0E0",
     statusTextColor:
       f.status === "مقبول"
-        ? "#2E7D32"  // Dark green text
+        ? "#2E7D32"
         : f.status === "منتظر"
-        ? "#E65100"  // Dark orange text
-        : "#C62828",  // Dark red text
-    // Family type badge colors
+        ? "#E65100"
+        : "#C62828",
     badge: f.type === "اصدقاء البيئة" ? "صديقة للبيئة" : undefined,
     badgeColor: f.type === "اصدقاء البيئة" ? "#D4F4DD" : undefined,
     badgeTextColor: f.type === "اصدقاء البيئة" ? "#2E7D32" : undefined,
@@ -142,9 +156,7 @@ export default function Page() {
           }
         );
 
-        if (!res.ok) {
-          throw new Error("فشل في تحميل الكليات");
-        }
+        if (!res.ok) throw new Error("فشل في تحميل الكليات");
 
         const data: Faculty[] = await res.json();
         setFaculties([{ faculty_id: -1, name: "الكل" }, ...data]);
@@ -163,10 +175,8 @@ export default function Page() {
       setLoadingFamilies(true);
       try {
         const token = localStorage.getItem("access");
-
         const params = new URLSearchParams();
 
-        // Only send faculty_id if it's a valid number and not -1 (all)
         if (!isNaN(selectedFaculty) && selectedFaculty !== -1) {
           params.append("faculty_id", selectedFaculty.toString());
         }
@@ -181,9 +191,7 @@ export default function Page() {
           }
         );
 
-        if (!res.ok) {
-          throw new Error("فشل في تحميل الأسر");
-        }
+        if (!res.ok) throw new Error("فشل في تحميل الأسر");
 
         const data = await res.json();
         setFamilies(data.map(mapFamilyFromApi));
@@ -213,12 +221,10 @@ export default function Page() {
   const filteredQualityFamilies = useMemo(() => {
     let filtered = qualityFamilies;
 
-    // Filter by faculty
     if (selectedFaculty !== -1) {
       filtered = filtered.filter((f) => f.faculty === selectedFaculty);
     }
 
-    // Filter by family type
     if (selectedFamilyType !== "all") {
       filtered = filtered.filter((f) => f.type === selectedFamilyType);
     }
@@ -261,14 +267,16 @@ export default function Page() {
       <main className={styles.tabContent}>
         {activeTab === "central" && (
           <div className={styles.contentSection}>
-            
-            <FamiliesGrid families={centralFamilies} showActions={false} />
+            <FamiliesGrid
+              families={centralFamilies}
+              showActions={false}
+              loading={loadingFamilies}
+            />
           </div>
         )}
 
         {activeTab === "quality" && (
           <div className={styles.contentSection}>
-          
             <Filters
               faculties={faculties}
               familyTypes={["all", "نوعية", "اصدقاء البيئة"]}
@@ -277,10 +285,10 @@ export default function Page() {
               selectedFamilyType={selectedFamilyType}
               setSelectedFamilyType={setSelectedFamilyType}
             />
-
             <FamiliesGrid
               families={filteredQualityFamilies}
               showActions={true}
+              loading={loadingFamilies}
             />
           </div>
         )}

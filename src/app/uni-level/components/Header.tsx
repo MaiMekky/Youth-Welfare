@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import styles from "../styles/Header.module.css";
-import logo from "@/utils/logo.png";
+import logo from "../../assets/capital-uni-logo.png";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Menu } from "lucide-react";
@@ -25,7 +25,7 @@ interface Dept { dept_id: number; dept_name: string; }
 function readDepts(): Dept[] | null {
   try {
     const raw = localStorage.getItem("departments");
-    if (!raw) return null;            // key doesn't exist → unrestricted role
+    if (!raw) return null;
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : null;
   } catch { return null; }
@@ -35,7 +35,6 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
-  // Start all as FALSE — only flip to true once we know the user can see them
   const [showTkafol,   setShowTkafol]   = useState(false);
   const [showFamily,   setShowFamily]   = useState(false);
   const [showActivity, setShowActivity] = useState(false);
@@ -44,15 +43,12 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
     const depts = readDepts();
 
     if (depts === null) {
-      // No departments key in storage → unrestricted role (super_admin, fac_head, etc.)
-      // Show all buttons
       setShowTkafol(true);
       setShowFamily(true);
       setShowActivity(true);
       return;
     }
 
-    // Departments key exists → restricted role: only show what's in the list
     const names = depts.map((d) => d.dept_name.trim());
     setShowTkafol(names.some((n) => TKAFOL_NAMES.has(n)));
     setShowFamily(names.some((n) => FAMILY_NAMES.has(n)));
@@ -87,7 +83,17 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
             </button>
           )}
           <div className={styles.headerIcon}>
-            <Image className={styles.headerLogo} src={logo} alt="شعار الجامعة" priority />
+            <Image
+              className={styles.headerLogo}
+              src={logo}
+              alt="شعار الجامعة"
+              width={80}
+              height={80}
+              style={{ objectFit: "contain", width: "100%", height: "100%" }}
+              priority
+              draggable={false}
+              quality={100}
+            />
           </div>
           <div className={styles.headerTitle}>
             <h1 className={styles.headerTitleH1}>النظام الإداري</h1>

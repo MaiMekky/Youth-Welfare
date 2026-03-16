@@ -14,7 +14,6 @@
   box-sizing: border-box;
 }
 
-/* Gold accent line */
 .header::before {
   content: '';
   position: absolute;
@@ -24,21 +23,20 @@
   z-index: 1;
 }
 
-/* ── Content row (RTL: brand on right, controls on left) ── */
+/* ── Inner row ── */
 .inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: clamp(12px, 2vw, 20px);
   width: 100%;
-  max-width: 100%;
-  margin: auto;
-  padding: clamp(12px, 2vw, 16px) clamp(16px, 4vw, 24px);
+  padding: 0 clamp(16px, 4vw, 24px);
+  height: 90px;
   direction: rtl;
   box-sizing: border-box;
 }
 
-/* ── RIGHT: sidebar toggle + brand ── */
+/* ── Brand (right in RTL) ── */
 .brand {
   display: flex;
   align-items: center;
@@ -47,7 +45,7 @@
   direction: rtl;
 }
 
-/* ── LEFT: profile + logout + hamburger ── */
+/* ── Controls (left in RTL) ── */
 .controls {
   display: flex;
   align-items: center;
@@ -55,7 +53,7 @@
   flex-wrap: nowrap;
 }
 
-/* ── Gold sidebar toggle button ── */
+/* ── Gold sidebar toggle ── */
 .sidebarToggleBtn {
   display: flex;
   align-items: center;
@@ -70,16 +68,48 @@
   flex-shrink: 0;
   transition: background 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
 }
-
 .sidebarToggleBtn:hover {
   background: rgba(201, 151, 42, 0.28);
   transform: translateY(-1px);
   box-shadow: 0 4px 14px rgba(201, 151, 42, 0.2);
 }
+.sidebarToggleBtn:focus-visible { outline: 2px solid #e0aa35; outline-offset: 2px; }
 
-.sidebarToggleBtn:focus-visible {
-  outline: 2px solid #e0aa35;
-  outline-offset: 2px;
+/* ── Logo — transparent, no bg, no border, no shadow ── */
+.logoWrap {
+  width: 80px;
+  height: 80px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: visible;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.logoWrap:hover { opacity: 0.88; transform: scale(1.04); }
+
+.logoImg {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  display: block;
+}
+
+/* ── Gold vertical divider ── */
+.brandDivider {
+  width: 1px;
+  height: 44px;
+  flex-shrink: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(201, 151, 42, 0.35) 30%,
+    rgba(201, 151, 42, 0.35) 70%,
+    transparent 100%
+  );
 }
 
 /* ── Brand text ── */
@@ -89,25 +119,23 @@
   gap: 3px;
   text-align: right;
 }
-
 .title {
-  font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+  font-size: clamp(1.05rem, 2.5vw, 1.25rem);
   font-weight: 800;
   margin: 0;
   color: #ffffff;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
 }
-
 .subtitle {
-  font-size: clamp(0.68rem, 1.5vw, 0.78rem);
+  font-size: clamp(0.72rem, 1.5vw, 0.82rem);
   margin: 0;
   color: #e0aa35;
   opacity: 0.92;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-weight: 600;
+  letter-spacing: 0.03em;
 }
 
 /* ── Profile box ── */
@@ -121,7 +149,6 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: background 0.2s ease;
 }
-
 .profileBox:hover { background: rgba(255, 255, 255, 0.13); }
 
 .profileIcon {
@@ -135,32 +162,20 @@
   color: #e0aa35;
   flex-shrink: 0;
 }
-
-.profileInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  text-align: right;
-}
-
+.profileInfo { display: flex; flex-direction: column; gap: 1px; text-align: right; }
 .profileName {
   font-size: clamp(0.82rem, 1.8vw, 0.9rem);
   font-weight: 600;
   color: #fff;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
-
 .profileRole {
   font-size: clamp(0.7rem, 1.4vw, 0.78rem);
   color: rgba(255, 255, 255, 0.65);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-/* ── Logout button ── */
+/* ── Logout ── */
 .logoutBtn {
   background: rgba(192, 57, 43, 0.18);
   color: #f5b2ae;
@@ -174,7 +189,6 @@
   transition: all 0.22s ease;
   white-space: nowrap;
 }
-
 .logoutBtn:hover {
   background: rgba(192, 57, 43, 0.3);
   color: #ffffff;
@@ -183,7 +197,7 @@
   box-shadow: 0 4px 12px rgba(192, 57, 43, 0.25);
 }
 
-/* ── Mobile hamburger (hidden on desktop) ── */
+/* ── Mobile hamburger ── */
 .navHamburger {
   display: none;
   flex-direction: column;
@@ -199,7 +213,6 @@
   flex-shrink: 0;
   transition: background 0.2s;
 }
-
 .navHamburger:hover { background: rgba(255, 255, 255, 0.16); }
 
 .hamburgerLine {
@@ -210,7 +223,6 @@
   transition: all 0.3s ease;
   display: block;
 }
-
 .hamburgerLine.lineOpen:nth-child(1) { transform: rotate(45deg) translate(4px, 4px); }
 .hamburgerLine.lineOpen:nth-child(2) { opacity: 0; transform: scaleX(0); }
 .hamburgerLine.lineOpen:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
@@ -226,7 +238,6 @@
   animation: slideDown 0.28s ease;
   direction: rtl;
 }
-
 @keyframes slideDown {
   from { opacity: 0; transform: translateY(-8px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -242,19 +253,8 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #e0aa35;
 }
-
-.dropdownName {
-  margin: 0;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.dropdownRole {
-  margin: 0;
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.6);
-}
+.dropdownName { margin: 0; font-size: 0.9rem; font-weight: 600; color: #ffffff; }
+.dropdownRole { margin: 0; font-size: 0.75rem; color: rgba(255, 255, 255, 0.6); }
 
 .dropdownLogoutBtn {
   display: flex !important;
@@ -271,7 +271,6 @@
   border: 1px solid rgba(192, 57, 43, 0.35);
   transition: background 0.2s ease;
 }
-
 .dropdownLogoutBtn:hover { background: rgba(192, 57, 43, 0.38); color: #fff; }
 
 /* ── Focus ── */
@@ -281,20 +280,28 @@
 
 /* ── Responsive ── */
 @media (max-width: 900px) {
-  /* Hide profile box and logout on mobile — shown in dropdown instead */
   .profileBox, .logoutBtn { display: none; }
   .navHamburger { display: flex; }
+  .inner { height: 72px; }
+  .logoWrap { width: 56px; height: 56px; }
+  .brandDivider { display: none; }
 }
 
 @media (max-width: 640px) {
-  .inner { padding: 10px 14px; gap: 10px; }
+  .inner { padding: 0 14px; gap: 10px; }
   .subtitle { display: none; }
   .sidebarToggleBtn { width: 36px; height: 36px; }
+  .logoWrap { width: 46px; height: 46px; }
+}
+
+@media (max-width: 480px) {
+  .brandText { display: none; }
+  .logoWrap { width: 40px; height: 40px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .header, .sidebarToggleBtn, .logoutBtn,
-  .navHamburger, .hamburgerLine, .mobileDropdown {
+  .navHamburger, .hamburgerLine, .mobileDropdown, .logoWrap {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }

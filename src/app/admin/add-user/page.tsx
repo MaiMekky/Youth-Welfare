@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from '@/app/CreateAdmins/access-privileges.module.css';
 import { useSearchParams } from 'next/navigation';
 import { authFetch } from "@/utils/globalFetch";
 
-function AddUserContent() {
+export default function AddUser() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const admin_id = searchParams.get("id");
@@ -415,13 +415,5 @@ function AddUserContent() {
         </div>
       </div>
     </div>
-  );
-}
-
-export default function AddUser() {
-  return (
-    <Suspense fallback={<div style={{ padding: 40, textAlign: "center" }}>جاري التحميل...</div>}>
-      <AddUserContent />
-    </Suspense>
   );
 }

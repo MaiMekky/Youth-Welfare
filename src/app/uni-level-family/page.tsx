@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useEffect, Suspense } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import styles from "./Styles/page.module.css";
 import Tabs from "./components/Tabs";
 import Filters from "./components/Filters";
@@ -14,7 +14,7 @@ const TAB_STORAGE_KEY = "families_active_tab";
 
 type TabType = "central" | "quality" | "eco";
 
-function PageContent() {
+export default function Page() {
   const searchParams = useSearchParams();
   const router = useRouter();
 

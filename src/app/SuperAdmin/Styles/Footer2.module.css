@@ -1,4 +1,13 @@
 /* GeneralAdmin Footer — unified with Student theme */
+.pageWrapper {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.pageContent {
+  flex: 1;
+}
 
 .footer {
   background: linear-gradient(170deg, var(--navy-deep) 0%, var(--navy) 40%, var(--navy-mid) 80%, #162038 100%);

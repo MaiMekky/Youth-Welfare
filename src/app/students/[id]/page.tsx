@@ -170,7 +170,7 @@ console.log("docs: ", docs)
       )}
 
       <div className={styles.contentCard}>
-        <button className={styles.backBtn} onClick={() => router.back()}>
+        <button className={styles.backBtn} onClick={() => router.push('/SuperAdmin')}>
           ← العودة
         </button>
 

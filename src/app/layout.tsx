@@ -2,6 +2,7 @@ import "./globals.css";
 import { LanguageProvider } from "./context/LanguageContext";
 import AuthBackGuard from "./components/AuthBackGuard";
 import RouteTracker from "./components/RouteTracker";
+import SessionTracker from "./components/SessionTracker";
 
 import type { Metadata } from "next";
 
@@ -20,10 +21,13 @@ export default function RootLayout({
       <body className="app-body">
         <LanguageProvider>
 
+          {/* Detect active session (used to decide if expired session message should appear) */}
+          <SessionTracker />
+
           {/* Track last visited page */}
           <RouteTracker />
 
-          {/* don't allow to go back after logout */}
+          {/* Prevent navigating back after logout */}
           <AuthBackGuard />
 
           {children}

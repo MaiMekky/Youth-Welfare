@@ -135,7 +135,7 @@ export default function FamilyDetailsPage() {
       <div className={styles.header}>
         <button
           className={styles.closeButton}
-          onClick={() => router.back()}
+          onClick={() => router.push('/SuperAdmin-family')}
         >
           ✕
         </button>

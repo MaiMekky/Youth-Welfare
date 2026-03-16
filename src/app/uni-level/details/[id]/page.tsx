@@ -74,7 +74,7 @@ const fetchData = async () => {
 
   return (
     <div className="details-container">
-      <button className="btnBack" onClick={() => router.back()}>
+      <button className="btnBack" onClick={() => router.push('/uni-level')}>
         ← العودة
       </button>
 

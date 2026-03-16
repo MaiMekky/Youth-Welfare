@@ -371,7 +371,7 @@ export default function FamilyDetailsPage() {
         <div style={{ textAlign: 'center', padding: '50px', color: '#dc3545' }}>
           <p>{error || 'لم يتم العثور على بيانات الأسرة'}</p>
           <button 
-            onClick={() => router.back()} 
+            onClick={() => router.push('/uni-level-family')} 
             style={{ 
               marginTop: '20px', 
               padding: '10px 20px', 

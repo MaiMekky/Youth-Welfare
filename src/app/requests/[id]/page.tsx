@@ -15,7 +15,16 @@ import { authFetch } from "@/utils/globalFetch";
   - POST /api/solidarity/faculty/{id}/reject/       -> handleReject()
 
 */
-
+const rejectionReasons = [
+  { id: 1, text: "إزعاج أو تكرار التقديم بشكل غير مبرر" },
+  { id: 2, text: "المستندات المرفوعة غير واضحة أو غير صحيحة" },
+  { id: 3, text: "وجود بيانات غير صحيحة في الطلب" },
+  { id: 4, text: "الدخل المسجل غير مطابق للمستندات" },
+  { id: 5, text: "الطلب لا يستوفي شروط الدعم" },
+  { id: 6, text: "المستندات لا تخص الطالب" },
+  { id: 7, text: "اشتباه في تزوير المستندات" },
+  { id: 8, text: "سبب آخر" }
+];
 type Application = {
   solidarity_id?: number;
   student_name?: string;
@@ -90,6 +99,9 @@ export default function RequestDetailsPage() {
   });
 const [preApproved, setPreApproved] = useState(false);
   const baseAmount = 1500;
+
+  const [showRejectModal, setShowRejectModal] = useState(false);
+const [selectedReason, setSelectedReason] = useState<number | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -275,10 +287,42 @@ const [preApproved, setPreApproved] = useState(false);
     window.location.reload();
   };
 
-  const handleReject = async () => {
-    await postAction("reject", "مرفوض", "تم رفض الطلب بنجاح");
+const handleReject = async () => {
+  if (!selectedReason) {
+    showNotification("يرجى اختيار سبب الرفض", "warning");
+    return;
+  }
+
+  if (!id) return;
+
+  setActionLoading(true);
+
+  try {
+    const res = await authFetch(
+      `http://localhost:8000/api/solidarity/faculty/${id}/reject/`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          rejection_reason: selectedReason
+        })
+      }
+    );
+
+    if (!res.ok) throw new Error("REJECT_ERROR");
+
+    showNotification("تم رفض الطلب بنجاح", "success");
+    setShowRejectModal(false);
+
     window.location.reload();
-  };
+
+  } catch (error) {
+    console.error(error);
+    showNotification("فشل في رفض الطلب", "error");
+  } finally {
+    setActionLoading(false);
+  }
+};
 
   // NEW: Direct initial approval function
   const handleInitialApproval = async () => {
@@ -435,6 +479,7 @@ const openDocument = async (docId: number, mimeType?: string) => {
     console.error("Error opening document:", error);
   }
 };
+
   return (
     <div className={styles.container}>
       <div className={styles.contentCard}>
@@ -646,7 +691,11 @@ const openDocument = async (docId: number, mimeType?: string) => {
 
         {/* Reject button - shows for all statuses except "مقبول" and "مرفوض" */}
         {canReject(application?.req_status) && (
-          <button onClick={handleReject} disabled={actionLoading} className={styles.btnReject}>
+         <button
+            onClick={() => setShowRejectModal(true)}
+            disabled={actionLoading}
+            className={styles.btnReject}
+          >
             {actionLoading ? "جاري..." : "رفض"}
           </button>
         )}
@@ -658,6 +707,47 @@ const openDocument = async (docId: number, mimeType?: string) => {
 
     </div>
   </div>
+  {showRejectModal && (
+  <div className={styles.modalOverlay}>
+    <div className={styles.modalBox}>
+
+      <h3 className={styles.modalTitle}>سبب رفض الطلب</h3>
+
+      <div className={styles.reasonList}>
+        {rejectionReasons.map((reason) => (
+          <label key={reason.id} className={styles.reasonItem}>
+            <input
+              type="radio"
+              name="rejectReason"
+              value={reason.id}
+              checked={selectedReason === reason.id}
+              onChange={() => setSelectedReason(reason.id)}
+            />
+            {reason.text}
+          </label>
+        ))}
+      </div>
+
+      <div className={styles.modalActions}>
+        <button
+          onClick={handleReject}
+          className={styles.btnReject}
+          disabled={actionLoading}
+        >
+          {actionLoading ? "جاري..." : "تأكيد الرفض"}
+        </button>
+
+        <button
+          onClick={() => setShowRejectModal(false)}
+          className={styles.btnCancel}
+        >
+          إلغاء
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
   </div>
   );
 }

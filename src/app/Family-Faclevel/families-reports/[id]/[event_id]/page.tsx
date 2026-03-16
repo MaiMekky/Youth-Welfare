@@ -103,7 +103,7 @@ setEventData({
   cost: data.cost,
   startDate: new Date(data.st_date).toLocaleDateString("ar-EG"),
   endDate: new Date(data.end_date).toLocaleDateString("ar-EG"),
-  participantsLimit: data.participants_limit,
+  participantsLimit: data.s_limit,
   createdAt: data.created_at,
   deptName: data.dept_name,
   familyName: data.family_name,

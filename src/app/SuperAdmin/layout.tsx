@@ -5,7 +5,7 @@ import Sidebar from "./components/sidebar";
 import Footer from "./components/Footer2";
 import styles from "./layout.module.css";
 
-export const metadata = { title: "Dashboard" };
+export const metadata = { title: " التكافل الاجتماعي - جامعة العاصمة" };
 
 export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   return (

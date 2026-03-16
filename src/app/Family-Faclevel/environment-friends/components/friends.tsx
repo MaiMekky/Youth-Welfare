@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "../styles/friends.module.css";
 import { authFetch } from "@/utils/globalFetch";
 import { User, Users, ChevronLeft, Plus, Trash2, Send } from "lucide-react";
@@ -43,6 +43,11 @@ type Committee = {
   activities: Activity[];
 };
 
+type Department = {
+  dept_id: number;
+  name: string;
+};
+
 const committeeNames: Record<string, string> = {
   cultural:   "اللجنة الثقافية",
   newspaper:  "لجنة صحف الحائط",
@@ -51,6 +56,11 @@ const committeeNames: Record<string, string> = {
   scientific: "اللجنة العلمية",
   service:    "لجنة الخدمة العامة والمعسكرات",
   sports:     "اللجنة الرياضية",
+
+  "public-service": "لجنة الخدمة العامة",
+  "environmental-pollution": "لجنة التلوث البيئي وسلوكيات البيئة",
+  "community-service": "لجنة خدمة المجتمع وتنمية البيئة",
+  "public-relations": "لجنة العلاقات العامة",
 };
 
 const FULL_INFO_ROLES: AssistantRole[] = ["رائد", "نائب_رائد", "مسؤول", "أمين_صندوق"];
@@ -73,14 +83,24 @@ export default function FriendsForm() {
     "عضو_منتخب_2": { uid: "" },
   };
 
-  const initialCommittees: Committee[] = [
-    "cultural","newspaper","social","arts","scientific","service","sports",
-  ].map((key, i) => ({
-    committee_key: key,
-    head:      { uid: "", dept_id: String([4,4,6,4,7,5,3][i]) },
-    assistant: { uid: "", dept_id: String([4,4,6,4,7,5,3][i]) },
-    activities: [{ title:"", description:"", st_date:"", end_date:"", location:"", cost:"" }],
-  }));
+const initialCommittees: Committee[] = [
+  "cultural",
+  "newspaper",
+  "social",
+  "arts",
+  "scientific",
+  "service",
+  "sports",
+  "public-service",
+  "environmental-pollution",
+  "community-service",
+  "public-relations",
+].map((key, i) => ({
+  committee_key: key,
+  head:      { uid: "", dept_id: "" },
+  assistant: { uid: "", dept_id: "" },
+  activities: [{ title:"", description:"", st_date:"", end_date:"", location:"", cost:"" }],
+}));
 
   const makeMembers = (n: number): Member[] =>
     Array.from({ length: n }, () => ({ nid: "" }));
@@ -94,6 +114,7 @@ export default function FriendsForm() {
   const [openCommittees, setOpenCommittees] = useState<Record<number, boolean>>({});
   const [notification, setNotification] = useState<{ message: string; type: NotificationType } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [departments, setDepartments] = useState<Department[]>([]);
 
   /* ── helpers ── */
   const hasErr = (k: string) => Boolean(fieldErrors[k]);
@@ -148,9 +169,8 @@ export default function FriendsForm() {
       if (!c.head.uid)      errs[`committees.${ci}.head.uid`]      = "الرقم الجامعي للأمين مطلوب";
       if (!c.assistant.uid) errs[`committees.${ci}.assistant.uid`] = "الرقم الجامعي للأمين المساعد مطلوب";
       c.activities.forEach((a, ai) => {
-        if (!a.title.trim()) errs[`committees.${ci}.activities.${ai}.title`]  = "عنوان النشاط مطلوب";
-        if (!a.st_date)      errs[`committees.${ci}.activities.${ai}.st_date`] = "تاريخ البداية مطلوب";
-        if (!a.end_date)     errs[`committees.${ci}.activities.${ai}.end_date`]= "تاريخ النهاية مطلوب";
+        if (!a.title.trim()) errs[`committees.${ci}.activities.${ai}.title`]  = "اسم المشروع مطلوب";
+        if (!a.st_date)      errs[`committees.${ci}.activities.${ai}.st_date`] = "موعد التنفيذ مطلوب";
       });
     });
 
@@ -238,7 +258,19 @@ export default function FriendsForm() {
       })),
     };
   };
+useEffect(() => {
+  const fetchDepartments = async () => {
+    try {
+      const res = await authFetch("http://localhost:8000/api/family/departments/");
+      const data = await res.json();
+      setDepartments(data);
+    } catch (err) {
+      console.error("Failed to load departments", err);
+    }
+  };
 
+  fetchDepartments();
+}, []);
   const handleSubmit = async () => {
     const err = validate();
     if (err) { showNotif(`❌ ${err}`, "error"); return; }
@@ -477,6 +509,27 @@ export default function FriendsForm() {
                             className={`${styles["member-input"]} ${hasErr(`committees.${ci}.assistant.uid`) ? styles.inputError : ""}`}
                           />
                         </div>
+                        <div className={styles["member-form-group"]}>
+                        <label className={styles.committeeFieldLabel}>
+                          القسم
+                        </label>
+
+                        <select
+                          value={c.head.dept_id}
+                          onChange={(e) => {
+                            handleCommitteeChange(ci,"head","dept_id",e.target.value);
+                            handleCommitteeChange(ci,"assistant","dept_id",e.target.value);
+                          }}
+                          className={`${styles["member-input"]} ${hasErr(`committees.${ci}.assistant.uid`) ? styles.inputError : ""}`}
+                        >
+                          <option value=""hidden>اختر القسم</option>
+                          {departments.map((d) => (
+                            <option key={d.dept_id} value={d.dept_id}>
+                              {d.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                       </div>
 
                       {/* الأنشطة */}
@@ -484,7 +537,7 @@ export default function FriendsForm() {
                         c.activities.map((a, ai) => (
                           <div key={ai} className={styles.activityCard}>
                             <div className={styles.activityCardHeader}>
-                              <span>فعالية {ai + 1}</span>
+                              <span>مشروع {ai + 1}</span>
                               <button
                                 type="button"
                                 onClick={() => removeActivity(ci, ai)}
@@ -496,25 +549,16 @@ export default function FriendsForm() {
                             </div>
                             <div className={styles.activityGrid}>
                               <div className={`${styles["member-form-group"]} ${styles.activityGridFull}`}>
-                                <label className={styles.committeeFieldLabel}>عنوان النشاط <span style={{color:"var(--error)"}}>*</span></label>
+                                <label className={styles.committeeFieldLabel}>اسم المشروع <span style={{color:"var(--error)"}}>*</span></label>
                                 <input
-                                  placeholder="عنوان النشاط"
+                                  placeholder="اسم المشروع"
                                   value={a.title}
                                   onChange={e => handleActivityChange(ci,ai,"title",e.target.value)}
                                   className={`${styles["member-input"]} ${hasErr(`committees.${ci}.activities.${ai}.title`) ? styles.inputError : ""}`}
                                 />
                               </div>
-                              <div className={`${styles["member-form-group"]} ${styles.activityGridFull}`}>
-                                <label className={styles.committeeFieldLabel}>وصف النشاط</label>
-                                <input
-                                  placeholder="وصف النشاط"
-                                  value={a.description}
-                                  onChange={e => handleActivityChange(ci,ai,"description",e.target.value)}
-                                  className={styles["member-input"]}
-                                />
-                              </div>
                               <div className={styles["member-form-group"]}>
-                                <label className={styles.committeeFieldLabel}>تاريخ البداية <span style={{color:"var(--error)"}}>*</span></label>
+                                <label className={styles.committeeFieldLabel}>موعد التنفيذ <span style={{color:"var(--error)"}}>*</span></label>
                                 <input
                                   type="date"
                                   value={a.st_date}
@@ -523,27 +567,9 @@ export default function FriendsForm() {
                                 />
                               </div>
                               <div className={styles["member-form-group"]}>
-                                <label className={styles.committeeFieldLabel}>تاريخ النهاية <span style={{color:"var(--error)"}}>*</span></label>
+                                <label className={styles.committeeFieldLabel}>مصادر التمويل</label>
                                 <input
-                                  type="date"
-                                  value={a.end_date}
-                                  onChange={e => handleActivityChange(ci,ai,"end_date",e.target.value)}
-                                  className={`${styles["member-input"]} ${hasErr(`committees.${ci}.activities.${ai}.end_date`) ? styles.inputError : ""}`}
-                                />
-                              </div>
-                              <div className={styles["member-form-group"]}>
-                                <label className={styles.committeeFieldLabel}>المكان</label>
-                                <input
-                                  placeholder="المكان"
-                                  value={a.location}
-                                  onChange={e => handleActivityChange(ci,ai,"location",e.target.value)}
-                                  className={styles["member-input"]}
-                                />
-                              </div>
-                              <div className={styles["member-form-group"]}>
-                                <label className={styles.committeeFieldLabel}>التكلفة</label>
-                                <input
-                                  placeholder="التكلفة"
+                                  placeholder="مصادر التمويل"
                                   value={a.cost}
                                   onChange={e => handleActivityChange(ci,ai,"cost",e.target.value)}
                                   className={styles["member-input"]}

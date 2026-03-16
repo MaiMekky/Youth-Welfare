@@ -247,7 +247,7 @@ export default function EventDetailsPage() {
             <h1 className={styles.pageTitle}>تفاصيل الفعالية</h1>
             <p className={styles.pageSubtitle}>{ui.subtitle}</p>
           </div>
-          <button className={styles.backBtn} onClick={() => router.back()} type="button">
+          <button className={styles.backBtn} onClick={() => router.push('/SuperAdmin/Events')} type="button">
             <ArrowRight size={18} />
             رجوع
           </button>

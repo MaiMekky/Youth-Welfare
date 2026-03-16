@@ -192,7 +192,7 @@ const [form, setForm] = useState<FormState>({
 
   const onCancel = () => {
     sessionStorage.removeItem("convert_proposed_payload");
-    router.back();
+    router.push('/Events-Faclevel/plans');
   };
 
   const touchAll = () => {
@@ -397,7 +397,7 @@ const [form, setForm] = useState<FormState>({
                 {isConvert ? "يتم تحميل البيانات من الفعالية المقترحة ويمكن تعديلها" : "املئي البيانات الأساسية للفعالية"}
               </p>
             </div>
-            <button className={styles.backBtn} onClick={() => router.back()} type="button">
+            <button className={styles.backBtn} onClick={() => router.push('/Events-Faclevel/plans')} type="button">
               <ArrowRight size={18} /> العودة للخطة
             </button>
           </div>

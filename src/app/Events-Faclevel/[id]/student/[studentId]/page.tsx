@@ -18,16 +18,13 @@ function getAccessToken(): string | null {
   );
 }
 
-type Faculty = {
-  faculty_id: number;
-  name: string;
-};
 
 type ApiStudentDetails = {
   student_id: number;
   name: string;
   email: string;
   faculty: number | null;
+  faculty_name: string | null;
   gender: string | null;
   nid: string | null;
   uid: string | null;
@@ -41,8 +38,8 @@ type ApiStudentDetails = {
   is_google_auth: boolean;
   auth_method: string | null;
   last_google_login: string | null;
+  can_create_fam: boolean;
 };
-
 async function apiFetch<T>(
   path: string,
   opts: RequestInit = {}
@@ -82,7 +79,6 @@ export default function StudentDetailsPage() {
   const studentId = String(params?.studentId ?? "");
 
   const [student, setStudent] = useState<ApiStudentDetails | null>(null);
-  const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [loading, setLoading] = useState(false);
 
   /* ---------- load student ---------- */
@@ -104,19 +100,9 @@ export default function StudentDetailsPage() {
     setLoading(false);
   };
 
-  /* ---------- load faculties ---------- */
-  const loadFaculties = async () => {
-    const res = await apiFetch<Faculty[]>(`/api/family/faculties/`);
-
-    if (res.ok) {
-      setFaculties(res.data);
-    }
-  };
-
-  useEffect(() => {
-    loadStudent();
-    loadFaculties();
-  }, [studentId]);
+useEffect(() => {
+  loadStudent();
+}, [studentId]);
 
   const ui = useMemo(() => {
     if (!student) {
@@ -138,9 +124,7 @@ export default function StudentDetailsPage() {
     }
 
     /* ---------- convert faculty id → name ---------- */
-    const facultyName =
-      faculties.find((f) => f.faculty_id === student.faculty)?.name ?? "—";
-
+const facultyName = student.faculty_name ?? "—";
     /* ---------- convert gender ---------- */
     const genderLabel =
       student.gender === "M"
@@ -164,7 +148,7 @@ export default function StudentDetailsPage() {
       grade: student.grade ?? "—",
       auth: student.auth_method ?? "—",
     };
-  }, [student, faculties]);
+  }, [student]);
 
   return (
     <div className={styles.page} dir="rtl">

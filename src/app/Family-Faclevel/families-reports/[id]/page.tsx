@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import styles from './details.module.css';
 import { useParams, useRouter } from "next/navigation";
 import Footer from "@/app/FacLevel/components/Footer";
@@ -57,10 +57,12 @@ export default function FamilyDetailsPage() {
   const [activitiesData, setActivitiesData] = useState<Activity[]>([]);
   const [studentsData, setStudentsData] = useState<Student[]>([]);
   const [goalsData, setGoalsData] = useState<string[]>([]);
-const [notification, setNotification] = useState<{
-  message: string;
-  type: "success" | "error";
-} | null>(null);
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
+  const [nid, setNid] = useState("");
+  const [adding, setAdding] = useState(false);
 
 const showNotification = (message: string, type: "success" | "error") => {
   setNotification({ message, type });
@@ -69,7 +71,6 @@ const showNotification = (message: string, type: "success" | "error") => {
 
 useEffect(() => {
   if (!id) return;
-
   const fetchFamilyInfo = async () => {
     try {
       const token = localStorage.getItem("access");
@@ -180,7 +181,64 @@ useEffect(() => {
     showNotification("❌ فشل حذف الطالب", "error");
   }
 };
+const handleAddMember = async () => {
+  if (!nid.trim()) {
+    showNotification("❌ أدخل الرقم القومي أولاً", "error");
+    return;
+  }
 
+  try {
+    setAdding(true);
+
+    const token = localStorage.getItem("access");
+
+    const res = await authFetch(
+      `http://127.0.0.1:8000/api/family/faculty_members/families/${id}/add-member/${nid}/`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!res.ok) throw new Error("Failed");
+
+
+  const newMember = await res.json();
+
+  const student = {
+    memberId: newMember.student_id || newMember.id,
+    name: newMember.student_name || newMember.name,
+    id: newMember.u_id || newMember.university_id,
+    major: newMember.dept_name || newMember.major,
+    role: newMember.role || "عضو",
+    joinDate: newMember.joined_at
+      ? new Date(newMember.joined_at).toLocaleDateString("ar-EG")
+      : new Date().toLocaleDateString("ar-EG"),
+  };
+
+  setStudentsData((prev) => {
+    const updated = [...prev, student];
+    return updated;
+  });
+
+  setFamilyData((prev) => ({
+    ...prev,
+    totalMembers: prev.totalMembers + 1,
+  }));
+
+    setNid("");
+
+    showNotification("✅ تم إضافة الطالب بنجاح", "success");
+  } catch (err) {
+    console.error(err);
+    showNotification("❌ فشل إضافة الطالب", "error");
+  } finally {
+    setAdding(false);
+  }
+ 
+};
 
   // SVG icons
   const icons = {
@@ -428,7 +486,29 @@ const handleExport = async () => {
 
         {/* --- Students Table --- */}
         <div className={styles.studentsCard}>
+          <div className={styles.studentsHeader}>
           <h2 className={styles.cardTitle}>الطلاب المسجلون</h2>
+
+          {familyData.category === "اصدقاء البيئة" && (
+            <div className={styles.addMemberBox}>
+              <input
+                type="text"
+                placeholder="ادخل الرقم القومي"
+                value={nid}
+                onChange={(e) => setNid(e.target.value)}
+                className={styles.nidInput}
+              />
+
+              <button
+                className={styles.addBtn}
+                onClick={handleAddMember}
+                disabled={adding}
+              >
+                إضافة
+              </button>
+            </div>
+          )}
+        </div>
           <div className={styles.tableContainer}>
             <table className={styles.studentsTable}>
               <thead>

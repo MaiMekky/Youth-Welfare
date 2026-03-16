@@ -97,7 +97,7 @@ export default function RequestDetailsPage() {
   return (
     <div className={styles.container}>
       <div className={styles.contentCard}>
-        <button className={styles.backBtn} onClick={() => router.back()}>
+        <button className={styles.backBtn} onClick={() => router.push('/Student/takafol')}>
           ← العودة
         </button>
 

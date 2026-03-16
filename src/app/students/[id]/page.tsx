@@ -3,6 +3,16 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./studentDetails.module.css";
 import { authFetch } from "@/utils/globalFetch";
+const rejectionReasons = [
+  { id: 1, text: "إزعاج أو تكرار التقديم بشكل غير مبرر" },
+  { id: 2, text: "المستندات المرفوعة غير واضحة أو غير صحيحة" },
+  { id: 3, text: "وجود بيانات غير صحيحة في الطلب" },
+  { id: 4, text: "الدخل المسجل غير مطابق للمستندات" },
+  { id: 5, text: "الطلب لا يستوفي شروط الدعم" },
+  { id: 6, text: "المستندات لا تخص الطالب" },
+  { id: 7, text: "اشتباه في تزوير المستندات" },
+  { id: 8, text: "سبب آخر" }
+];
 export default function StudentDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
@@ -12,7 +22,8 @@ export default function StudentDetailsPage() {
   const [loading, setLoading] = useState(true);
 
   const [notification, setNotification] = useState<{ message: string; type: string } | null>(null);
-
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [selectedReason, setSelectedReason] = useState<number | null>(null);
   const showNotification = (message: string, type: string) => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 2500);
@@ -124,6 +135,11 @@ const handleApprove = async () => {
  // ====== رفض الطالب ======
 const handleReject = async () => {
   try {
+    if (!selectedReason) {
+      showNotification("يرجى اختيار سبب الرفض", "error");
+      return;
+    }
+
     const token = localStorage.getItem("access");
     if (!token) throw new Error("User not authenticated");
 
@@ -135,16 +151,22 @@ const handleReject = async () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify({
+          rejection_reason: selectedReason
+        })
       }
     );
 
     if (!response.ok) throw new Error("حدث خطأ أثناء رفض الطالب");
 
-    const result = await response.json();
+    await response.json();
 
-    // تحديث الحالة في الواجهة بعد نجاح الطلب
     setData((prev: any) => ({ ...prev, req_status: "مرفوض" }));
+    setShowRejectModal(false);
+    setSelectedReason(null);
+
     showNotification("❌ تم رفض الطالب بنجاح", "error");
+
   } catch (error) {
     console.error(error);
     showNotification("❌ فشل رفض الطالب", "error");
@@ -170,7 +192,7 @@ console.log("docs: ", docs)
       )}
 
       <div className={styles.contentCard}>
-        <button className={styles.backBtn} onClick={() => router.back()}>
+        <button className={styles.backBtn} onClick={() => router.push('/SuperAdmin')}>
           ← العودة
         </button>
 
@@ -274,21 +296,68 @@ console.log("docs: ", docs)
         {/* ====== الأزرار ====== */}
         <div className={styles.actions}>
           {data.req_status === "مقبول" ? (
-            <button className={styles.rejectBtn} onClick={handleReject}>
+            <button className={styles.rejectBtn} onClick={() => setShowRejectModal(true)}>
               رفض الطالب
             </button>
+            
           ) : (
             <>
               <button className={styles.approveBtn} onClick={handleApprove}>
                 قبول الطالب
               </button>
-              <button className={styles.rejectBtn} onClick={handleReject}>
+              <button
+                onClick={() => setShowRejectModal(true)}
+                className={styles.rejectBtn}
+              >
                 رفض الطالب
               </button>
             </>
           )}
         </div>
       </div>
+      {showRejectModal && (
+  <div className={styles.modalOverlay}>
+    <div className={styles.modalBox}>
+
+      <h3 className={styles.modalTitle}>اختر سبب رفض الطلب</h3>
+
+      <div className={styles.reasonList}>
+        {rejectionReasons.map((reason) => (
+          <label key={reason.id} className={styles.reasonItem}>
+            <input
+              type="radio"
+              name="rejectReason"
+              value={reason.id}
+              checked={selectedReason === reason.id}
+              onChange={() => setSelectedReason(reason.id)}
+            />
+            {reason.text}
+          </label>
+        ))}
+      </div>
+
+      <div className={styles.modalActions}>
+        <button
+          className={styles.rejectBtn}
+          onClick={handleReject}
+        >
+          تأكيد الرفض
+        </button>
+
+        <button
+          className={styles.cancelBtn}
+          onClick={() => {
+            setShowRejectModal(false);
+            setSelectedReason(null);
+          }}
+        >
+          إلغاء
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
     </div>
   );
 }

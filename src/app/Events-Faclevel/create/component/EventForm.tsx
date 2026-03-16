@@ -304,7 +304,7 @@ export default function EventForm({
             <h1 className={styles.title}>{isEditMode ? "تعديل الفعالية" : "إنشاء فعالية جديدة"}</h1>
             <p className={styles.subtitle}>{isEditMode ? "برجاء تعديل البيانات ثم حفظ" : "برجاء ملء البيانات لإنشاء فعالية جديدة"}</p>
           </div>
-          <button className={styles.backBtn} onClick={() => router.back()} type="button" disabled={submitting}>
+          <button className={styles.backBtn} onClick={() => router.push('/Events-Faclevel')} type="button" disabled={submitting}>
             <ArrowRight size={18} /> رجوع
           </button>
         </header>
@@ -465,7 +465,7 @@ export default function EventForm({
           </div>
 
           <div className={styles.footer}>
-            <button type="button" className={styles.cancelBtn} onClick={() => router.back()} disabled={submitting}>
+            <button type="button" className={styles.cancelBtn} onClick={() => router.push('/Events-Faclevel')} disabled={submitting}>
               إلغاء
             </button>
             <button type="submit" className={styles.saveBtn} disabled={submitting}>

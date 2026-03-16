@@ -62,7 +62,7 @@ export default function CollegeDetailsPage() {
     studentsCount: 45,
   };
 
-  const handleBackClick = () => router.back();
+  const handleBackClick = () => router.push('/uni-level');
   const handleExportClick = () => console.log("Exporting data...");
   const handlePrintClick = () => window.print();
 

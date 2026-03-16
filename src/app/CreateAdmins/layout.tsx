@@ -5,7 +5,7 @@ import Sidebar from "../SuperAdmin/components/sidebar";
 import Footer from "../SuperAdmin/components/Footer2";
 import styles from "../SuperAdmin/layout.module.css";
 
-export const metadata = { title: "Dashboard" };
+export const metadata = { title: "صلاحيات الوصول - جامعة العاصمة" };
 
 export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   return (

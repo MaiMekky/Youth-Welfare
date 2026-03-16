@@ -5,7 +5,12 @@ import { MapPin, Users } from "lucide-react";
 import capitalLogo from "../../../app/assets/capital-uni-logo.png";
 
 export default function Footer() {
-  return (
+  return ( 
+  <div className={styles.pageWrapper}>
+    
+    <div className={styles.pageContent}>
+
+    </div>
     <footer className={styles.footer}>
       <div className={styles.footerTop}>
 
@@ -66,5 +71,6 @@ export default function Footer() {
 
       </div>
     </footer>
+    </div>
   );
 }

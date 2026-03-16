@@ -403,7 +403,7 @@ export default function AddUser() {
 
             {/* ── Buttons ── */}
             <div className={styles.addUserBtns}>
-              <button type="button" onClick={() => router.back()} className={styles.addUserBtnCancel}>
+              <button type="button" onClick={() => router.push('/CreateAdmins')} className={styles.addUserBtnCancel}>
                 إلغاء
               </button>
               <button type="submit" className={styles.addUserBtnSubmit}>

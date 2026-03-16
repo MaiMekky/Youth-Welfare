@@ -169,7 +169,7 @@ export default function Page() {
     [events]
   );
 
-  const tabItems = [
+  const tabItems: { key: EventsTab; label: string; badge: number }[] = [
     { key: "faculty", label: "فعاليات الكلية", badge: facultyCount },
     { key: "dept", label: "فعاليات القسم", badge: deptCount },
   ];

@@ -249,7 +249,7 @@ export default function MyRequests({ onStatusesLoaded, showAlert }: MyRequestsPr
                     const isLastStep = step === req.totalSteps;
 
                     let circleBackground = "#e5e7eb";
-                    let circleContent: JSX.Element | number = step;
+                    let circleContent: React.ReactElement | number = step;
                     let circleColor = "#9ca3af";
 
                     if (step < req.currentStep) {

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 // ✅ Own CSS file — does NOT conflict with shared Sidebar.css
-import "@/app/FacultyHead/styles/Sidebar.css";
+import "../Styles/Sidebar.css";
 import { X, User, Briefcase, Calendar } from "lucide-react";
 import Image from "next/image";
 import logo from "@/app/assets/logo.png";

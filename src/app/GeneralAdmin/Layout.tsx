@@ -2,7 +2,7 @@
 import React from "react";
 import SidebarLayout from "./components/Sidebarlayout";
 import Sidebar from "./components/Sidebar";
-import "./styles/Layout.css";
+import "./Styles/Layout.css";
 
 interface LayoutProps {
   children: React.ReactNode;

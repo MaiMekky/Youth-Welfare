@@ -413,11 +413,6 @@ const handleReject = async () => {
     }
   };
 
-  } catch (error) {
-    console.error("Error opening document:", error);
-  }
-};
-
   return (
     <div className={styles.container}>
       <div className={styles.contentCard}>
@@ -607,7 +602,7 @@ const handleReject = async () => {
           )}
 
           {canReject(application?.req_status) && (
-            <button onClick={handleReject} disabled={actionLoading} className={styles.btnReject}>
+            <button onClick={() => setShowRejectModal(true)} disabled={actionLoading} className={styles.btnReject}>
               {actionLoading ? "جاري..." : "رفض"}
             </button>
           )}
@@ -620,60 +615,7 @@ const handleReject = async () => {
           )}
         </div>
 
-        {/* Reject button - shows for all statuses except "مقبول" and "مرفوض" */}
-        {canReject(application?.req_status) && (
-         <button
-            onClick={() => setShowRejectModal(true)}
-            disabled={actionLoading}
-            className={styles.btnReject}
-          >
-            {actionLoading ? "جاري..." : "رفض"}
-          </button>
-        )}
       </div>
     </div>
-  </div>
-  {showRejectModal && (
-  <div className={styles.modalOverlay}>
-    <div className={styles.modalBox}>
-
-      <h3 className={styles.modalTitle}>سبب رفض الطلب</h3>
-
-      <div className={styles.reasonList}>
-        {rejectionReasons.map((reason) => (
-          <label key={reason.id} className={styles.reasonItem}>
-            <input
-              type="radio"
-              name="rejectReason"
-              value={reason.id}
-              checked={selectedReason === reason.id}
-              onChange={() => setSelectedReason(reason.id)}
-            />
-            {reason.text}
-          </label>
-        ))}
-      </div>
-
-      <div className={styles.modalActions}>
-        <button
-          onClick={handleReject}
-          className={styles.btnReject}
-          disabled={actionLoading}
-        >
-          {actionLoading ? "جاري..." : "تأكيد الرفض"}
-        </button>
-
-        <button
-          onClick={() => setShowRejectModal(false)}
-          className={styles.btnCancel}
-        >
-          إلغاء
-        </button>
-      </div>
-
-    </div>
-  </div>
-)}
-  </div>
   );
 }

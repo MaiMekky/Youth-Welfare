@@ -1,14 +1,15 @@
 /* ══════════════════════════════════════════
    Layout — RTL: sidebar on right, content left
 ══════════════════════════════════════════ */
-.layout-container {
+
+.layoutContainer {
   display: flex;
   flex-direction: column;
   direction: rtl;
   min-height: 100vh;
   background-color: #f3f5fd;
   overflow-x: hidden;
-    width: 100%;
+  width: 100%;
   max-width: 100%;
 }
 
@@ -16,7 +17,7 @@
 .sidebar {
   position: fixed;
   top: 0;
-  right: -100%;          /* off-screen to the right */
+  right: -100%;
   height: 100vh;
   width: min(260px, 85vw);
   max-width: 85vw;
@@ -26,12 +27,12 @@
 }
 
 /* Slide in when open */
-.sidebar.open {
+.sidebarOpen {
   right: 0;
 }
 
-/* ── Main area fills the whole width (sidebar is overlaid) ── */
-.layout-main {
+/* ── Main area fills the whole width ── */
+.layoutMain {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -43,7 +44,7 @@
 }
 
 /* ── Page content ── */
-.layout-content {
+.layoutContent {
   flex: 1;
   max-width: 100%;
   width: 100%;
@@ -56,7 +57,7 @@
 }
 
 /* ── Footer ── */
-footer {
+.footer {
   margin-top: auto;
   padding: clamp(0.75rem, 2vw, 1rem) clamp(1rem, 3vw, 1.25rem);
   text-align: center;
@@ -69,14 +70,18 @@ footer {
 
 /* ── Responsive ── */
 @media (max-width: 1024px) {
-  .layout-content { padding: 16px; }
+  .layoutContent { padding: 16px; }
 }
 
 @media (max-width: 768px) {
-  .layout-content { padding: 16px 12px; }
+  .layoutContent { padding: 16px 12px; }
 }
 
 @media (max-width: 576px) {
-  .layout-content { padding: 12px; }
-  footer { font-size: 0.8rem; padding: 12px 10px; }
+  .layoutContent { padding: 12px; }
+
+  .footer {
+    font-size: 0.8rem;
+    padding: 12px 10px;
+  }
 }

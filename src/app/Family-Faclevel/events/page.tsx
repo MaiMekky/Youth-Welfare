@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import Footer from "@/app/FacLevel/components/Footer";
 import ActivityCard from "./components/ActivityCard";
@@ -24,21 +23,17 @@ export default function ActivitiesPage() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const token = localStorage.getItem("access"); 
-
-            const res = await authFetch(
-        "http://127.0.0.1:8000/api/family/faculty_events/pending/",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-
+        const token = localStorage.getItem("access");
+        const res = await authFetch(
+          "http://127.0.0.1:8000/api/family/faculty_events/pending/",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
         if (!res.ok) throw new Error("Unauthorized or failed request");
-
         const data = await res.json();
         setEvents(data);
       } catch (err) {
@@ -47,14 +42,11 @@ export default function ActivitiesPage() {
         setLoading(false);
       }
     };
-
     fetchEvents();
   }, []);
 
   return (
     <div className={styles.pageWrapper}>
-
-
       <main className={styles.container}>
         <div className={styles.pageHeader}>
           <h1 className={styles.mainTitle}>اعتماد الفعاليات</h1>
@@ -65,6 +57,18 @@ export default function ActivitiesPage() {
 
         {loading ? (
           <p>جاري تحميل الفعاليات...</p>
+        ) : events.length === 0 ? (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "64px 0",
+              color: "#9ca3af",
+              fontSize: "2rem",
+              fontWeight: 600,
+            }}
+          >
+            لا يوجد فعاليات في الانتظار
+          </div>
         ) : (
           <div className={styles.eventsContainer}>
             {events.map((event) => (
@@ -83,7 +87,6 @@ export default function ActivitiesPage() {
           </div>
         )}
       </main>
-
       <Footer />
     </div>
   );

@@ -4,7 +4,7 @@ import "../styles/studentNavbar.css";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import logo from "@/utils/logo.png";
+import logo from "../../assets/capital-uni-logo.png";
 
 type NavItem = {
   key: string;
@@ -77,7 +77,6 @@ const StudentNavbar: React.FC = () => {
 
   const token = typeof window !== 'undefined' ? localStorage.getItem('access') : null;
 
-  /* ── Check if student has أخ أكبر role ── */
   useEffect(() => {
     if (!token) return;
 
@@ -90,34 +89,30 @@ const StudentNavbar: React.FC = () => {
 
         const response = await res.json();
 
-        // استخرج الـ array من أي شكل رد ممكن
         let families: { role: string }[] = [];
         if (Array.isArray(response))               families = response;
         else if (Array.isArray(response.data))     families = response.data;
         else if (Array.isArray(response.results))  families = response.results;
         else if (Array.isArray(response.families)) families = response.families;
 
-        // لو في أي أسرة فيها role = أخ أكبر → اظهر تاب إدارة الأسر
         const hasElderRole = families.some(f => f.role === 'أخ أكبر');
         setIsElderBrother(hasElderRole);
       } catch {
-        // في حالة فشل الريكوست، مش هيظهر التاب
+        // silent fail
       }
     };
 
     checkRole();
   }, [token]);
 
-  /* ── Base nav items (بدون إدارة الأسر) ── */
   const baseNavItems: NavItem[] = [
-    { key: "home",       label: "أنشطتي",         icon: <IconHome />,       href: "/Student/MainPage"   },
-    { key: "activities", label: "الأنشطة",           icon: <IconActivities />, href: "/Student/Activities" },
-    { key: "families",   label: "الأسر الطلابية",    icon: <IconFamily />,     href: "/Student/Families"   },
-    { key: "takafol",    label: "التكافل الاجتماعي", icon: <IconTakafol />,    href: "/Student/takafol"    },
-    { key: "profile",    label: "ملفي الشخصي",       icon: <IconProfile />,    href: "/Student/profile"    },
+    { key: "home",       label: "أنشطتي",            icon: <IconHome />,       href: "/Student/MainPage"   },
+    { key: "activities", label: "الأنشطة",            icon: <IconActivities />, href: "/Student/Activities" },
+    { key: "families",   label: "الأسر الطلابية",     icon: <IconFamily />,     href: "/Student/Families"   },
+    { key: "takafol",    label: "التكافل الاجتماعي",  icon: <IconTakafol />,    href: "/Student/takafol"    },
+    { key: "profile",    label: "ملفي الشخصي",        icon: <IconProfile />,    href: "/Student/profile"    },
   ];
 
-  // أضف تاب إدارة الأسر بعد "الأسر الطلابية" بس لو الطالب أخ أكبر
   const navItems: NavItem[] = isElderBrother
     ? [
         ...baseNavItems.slice(0, 3),
@@ -176,7 +171,10 @@ const StudentNavbar: React.FC = () => {
               className="brand-logo-img"
               width={82}
               height={82}
+              style={{ objectFit: "contain", width: "100%", height: "100%" }}
               priority
+              draggable={false}
+              quality={100}
             />
           </div>
           <div className="brand-text">
@@ -194,8 +192,8 @@ const StudentNavbar: React.FC = () => {
               key={item.key}
               href={item.href}
               className={isActive(item.href)
-                ? "nav-link nav-link-with-icon active-pill"
-                : "nav-link nav-link-with-icon"}
+                ? "nav-link active-pill"
+                : "nav-link"}
               aria-current={isActive(item.href) ? "page" : undefined}
               title={item.label}
             >

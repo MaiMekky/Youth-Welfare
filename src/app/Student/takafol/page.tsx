@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import "../styles/applyForm.css";
 import HeaderCard from "../components/HeaderCard";
@@ -10,69 +9,37 @@ import Cards from "../components/Cards";
 export default function TakafolPage() {
   const [activeTab, setActiveTab] = useState<string>("info");
   const [showAlert, setShowAlert] = useState(false);
-
-
   const [requestsStatus, setRequestsStatus] = useState<string[]>([]);
 
   useEffect(() => {
     if (requestsStatus.length === 0) return;
-
-    // 🔥 يظهر التنويه فقط لو في طلب حالته "موافقة مبدئية"
-    const hasUnderReview =
-      requestsStatus.some(
-        (st) =>
-          st === "موافقة مبدئية" ||
-          st === "under-review" ||
-          st === "under_review"
-      );
-
+    const hasUnderReview = requestsStatus.some(
+      (st) => st === "موافقة مبدئية" || st === "under-review" || st === "under_review"
+    );
     setShowAlert(hasUnderReview);
   }, [requestsStatus]);
 
-  // ======================================================
-  // 🔥 لما الطالب يخلص تقديم الطلب → نروح طلباتي + alert يظهر
-  // ======================================================
   const navigateToRequests = () => {
     setActiveTab("myRequests");
     setShowAlert(true);
-
     setTimeout(() => {
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
   };
 
-  // ======================================================
-  // 🔥 محتوى الصفحات
-  // ======================================================
   const renderContent = () => {
     switch (activeTab) {
       case "info":
         return <Cards />;
-
       case "apply":
         return <ApplyForm onNavigateToRequests={navigateToRequests} />;
-
       case "myRequests":
         return (
-          <>
-            {showAlert && (
-              <div className="important-alert">
-                <h4>تنبيه هام</h4>
-                <p>
-                  يرجى التوجه لرعاية شباب الكلية لتسليم المستندات الورقية خلال فترة
-                  من <strong>3 إلى 5 أيام</strong> من تاريخ تقديم الطلب.
-                </p>
-              </div>
-            )}
-
-            <MyRequests
-              onStatusesLoaded={(statuses: string[]) =>
-                setRequestsStatus(statuses)
-              }
-            />
-          </>
+          <MyRequests
+            showAlert={showAlert}
+            onStatusesLoaded={(statuses: string[]) => setRequestsStatus(statuses)}
+          />
         );
-
       default:
         return <Cards />;
     }
@@ -85,4 +52,3 @@ export default function TakafolPage() {
     </div>
   );
 }
-

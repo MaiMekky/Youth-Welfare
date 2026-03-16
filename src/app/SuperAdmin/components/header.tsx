@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import styles from "../Styles/Header.module.css";
 import { User, Menu } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import logo from "../../assets/capital-uni-logo.png";
 
 interface HeaderProps {
   onSidebarOpen?: () => void;
@@ -24,11 +26,9 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
     localStorage.clear();
     const isProd = process.env.NODE_ENV === "production";
     const cookieEnd = `path=/; max-age=0; SameSite=Lax${isProd ? "; Secure" : ""}`;
-    document.cookie = `access=; ${cookieEnd}`;
-    document.cookie = `refresh=; ${cookieEnd}`;
-    document.cookie = `user_type=; ${cookieEnd}`;
-    document.cookie = `roleKey=; ${cookieEnd}`;
-    document.cookie = `role=; ${cookieEnd}`;
+    ["access", "refresh", "user_type", "roleKey", "role"].forEach(k => {
+      document.cookie = `${k}=; ${cookieEnd}`;
+    });
     window.location.replace("/");
   };
 
@@ -36,10 +36,8 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
     <header className={styles.header}>
       <div className={styles.inner}>
 
-        {/* ── RIGHT: sidebar toggle + brand ── */}
+        {/* ── RIGHT: sidebar toggle + logo + brand text ── */}
         <div className={styles.brand}>
-
-          {/* Gold ☰ — opens sidebar on all screen sizes */}
           {onSidebarOpen && (
             <button
               className={styles.sidebarToggleBtn}
@@ -50,6 +48,23 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
             </button>
           )}
 
+          {/* Transparent logo — same style as student navbar */}
+          <div className={styles.logoWrap}>
+            <Image
+              src={logo}
+              alt="شعار جامعة العاصمة"
+              width={80}
+              height={80}
+              className={styles.logoImg}
+              style={{ objectFit: "contain", width: "100%", height: "100%" }}
+              priority
+              draggable={false}
+              quality={90}
+            />
+          </div>
+
+          <div className={styles.brandDivider} aria-hidden />
+
           <div className={styles.brandText}>
             <h1 className={styles.title}>نظام إدارة رعاية الطلاب</h1>
             <p className={styles.subtitle}>طلبات الدعم المالي والأنشطة المعتمدة للطلاب</p>
@@ -58,8 +73,6 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
 
         {/* ── LEFT: profile + logout + mobile hamburger ── */}
         <div className={styles.controls}>
-
-          {/* Profile box */}
           <div className={styles.profileBox}>
             <div className={styles.profileIcon}>
               <User size={20} />
@@ -70,12 +83,10 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
             </div>
           </div>
 
-          {/* Logout */}
           <button className={styles.logoutBtn} onClick={handleLogout} aria-label="تسجيل الخروج">
             تسجيل خروج
           </button>
 
-          {/* Mobile hamburger — toggles profile/logout dropdown */}
           <button
             className={styles.navHamburger}
             onClick={() => setOpen(!open)}

@@ -102,17 +102,17 @@ const FamilyLeaders: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isEditMode) {
-    if (!formData.nationalId.trim()) {
-      setNationalIdError(true);
-      showNotification("الرجاء إدخال الرقم القومي", "error");
-      return;
+      if (!formData.nationalId.trim()) {
+        setNationalIdError(true);
+        showNotification("الرجاء إدخال الرقم القومي", "error");
+        return;
+      }
+      if (formData.nationalId.length !== 14) {
+        showNotification("الرقم القومي يجب أن يكون 14 رقم", "error");
+        return;
+      }
+      setNationalIdError(false);
     }
-    if (formData.nationalId.length !== 14) {
-    showNotification("الرقم القومي يجب أن يكون 14 رقم", "error");
-    return;
-  }
-    setNationalIdError(false); // clear error if valid
-  }
     setLoading(true);
 
     const token = localStorage.getItem("access");
@@ -127,43 +127,38 @@ const FamilyLeaders: React.FC = () => {
         setLeaders(updated);
         showNotification("تم تحديث بيانات القائد", "success");
       } else {
-      const res = await authFetch(
-      `http://localhost:8000/api/family/faculty/family-founder/${formData.nationalId}/add/`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          national_id: formData.nationalId,
-        }),
-      }
-    );
+        const res = await authFetch(
+          `http://localhost:8000/api/family/faculty/family-founder/${formData.nationalId}/add/`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              national_id: formData.nationalId,
+            }),
+          }
+        );
 
+        let data: any = null;
+        try {
+          data = await res.json();
+        } catch {}
 
-    let data: any = null;
-    try {
-      data = await res.json();
-    } catch {
+        if (!res.ok) {
+          if (data?.detail) {
+            showNotification(data.detail, "error");
+          } else if (data?.error) {
+            showNotification(data.error, "error");
+          } else {
+            showNotification("فشل إضافة القائد", "error");
+          }
+          return;
+        }
 
-    }
-
-    if (!res.ok) {
-
-      if (data?.detail) {
-        showNotification(data.detail, "error");
-      } else if (data?.error) {
-        showNotification(data.error, "error");
-      } else {
-        showNotification("فشل إضافة القائد", "error");
-      }
-      return;
-    }
-
-
-    showNotification("تم إضافة القائد بنجاح", "success");
-    await fetchLeaders();
+        showNotification("تم إضافة القائد بنجاح", "success");
+        await fetchLeaders();
       }
       setIsModalOpen(false);
     } catch {
@@ -251,32 +246,59 @@ const FamilyLeaders: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-            {filteredLeaders.map((leader, index) => (
-              <tr key={index}>
-                <td data-label="الاسم">{leader.name}</td>
-                <td data-label="الرقم الجامعي">{leader.universityId}</td>
-                <td data-label="الرقم القومي">{leader.nationalId}</td>
-                <td data-label="الهاتف">{leader.phone}</td>
-                <td data-label="البريد الإلكتروني">{leader.email}</td>
-                <td data-label="الدور">
-                  <span className={leader.role.includes("قائد") ? styles.roleLeader : styles.roleAssistant}>
-                    {leader.role}
-                  </span>
-                </td>
-                <td data-label="تاريخ الإنشاء">{leader.createdAt}</td>
-                <td data-label="الإجراءات" className={styles.actionButtons}>
-                  <button className={styles.deleteButton} onClick={() => handleDelete(index)} disabled={loading}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                      <polyline points="3 6 5 6 21 6" />
-                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                      <path d="M10 11v6" />
-                      <path d="M14 11v6" />
-                    </svg>
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
+              {filteredLeaders.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={8}
+                    style={{
+                      textAlign: "center",
+                      padding: "48px 0",
+                      color: "#9ca3af",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      
+                      <span style={{ fontSize: "1.5rem", fontWeight: 600 }}>
+                        لا يوجد قادة أسر
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredLeaders.map((leader, index) => (
+                  <tr key={index}>
+                    <td data-label="الاسم">{leader.name}</td>
+                    <td data-label="الرقم الجامعي">{leader.universityId}</td>
+                    <td data-label="الرقم القومي">{leader.nationalId}</td>
+                    <td data-label="الهاتف">{leader.phone}</td>
+                    <td data-label="البريد الإلكتروني">{leader.email}</td>
+                    <td data-label="الدور">
+                      <span className={leader.role.includes("قائد") ? styles.roleLeader : styles.roleAssistant}>
+                        {leader.role}
+                      </span>
+                    </td>
+                    <td data-label="تاريخ الإنشاء">{leader.createdAt}</td>
+                    <td data-label="الإجراءات" className={styles.actionButtons}>
+                      <button className={styles.deleteButton} onClick={() => handleDelete(index)} disabled={loading}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                          <polyline points="3 6 5 6 21 6" />
+                          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                          <path d="M10 11v6" />
+                          <path d="M14 11v6" />
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
           </table>
         </div>
 
@@ -298,18 +320,18 @@ const FamilyLeaders: React.FC = () => {
                 {!isEditMode && (
                   <div className={styles.formGroup}>
                     <label>الرقم القومي</label>
-                <input
-                  name="nationalId"
-                  type="text"
-                  placeholder="أدخل الرقم القومي المكوّن من 14 رقم"
-                  value={formData.nationalId}
-                  onChange={(e) => {
-                    handleChange(e);
-                    setNationalIdError(false); // clear error on typing
-                  }}
-                  maxLength={14}
-                  style={{ borderColor: nationalIdError ? "red" : undefined }}
-                />
+                    <input
+                      name="nationalId"
+                      type="text"
+                      placeholder="أدخل الرقم القومي المكوّن من 14 رقم"
+                      value={formData.nationalId}
+                      onChange={(e) => {
+                        handleChange(e);
+                        setNationalIdError(false);
+                      }}
+                      maxLength={14}
+                      style={{ borderColor: nationalIdError ? "red" : undefined }}
+                    />
                   </div>
                 )}
 

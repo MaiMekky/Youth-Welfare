@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation";
 import { Plus, Search } from "lucide-react";
 import Footer from "@/app/FacLevel/components/Footer";
 import { authFetch } from "@/utils/globalFetch";
-import { get } from "http";
 
 const API_URL = "http://localhost:8000";
 
@@ -40,53 +39,36 @@ function getAccessToken(): string | null {
   );
 }
 
-/* ===============================
-   Departments From Token
-================================ */
 function getDepartmentsFromToken(): { dept_id: number; dept_name: string }[] {
   if (typeof window === "undefined") return [];
-
   const stored = localStorage.getItem("departments");
-
   if (!stored) return [];
-
   try {
     const departments = JSON.parse(stored);
-
     const excluded = ["التكافل الإجتماعي", "الأسر الطلابية"];
-
-    return departments.filter(
-      (d: any) => !excluded.includes(d.dept_name)
-    );
+    return departments.filter((d: any) => !excluded.includes(d.dept_name));
   } catch (err) {
     console.error("Departments parse error:", err);
     return [];
   }
 }
 
-
 async function apiFetch<T>(
   path: string,
   opts: RequestInit = {}
 ): Promise<{ ok: true; data: T } | { ok: false; message: string }> {
   const token = getAccessToken();
-
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(opts.headers as any),
   };
-
   if (token) headers.Authorization = `Bearer ${token}`;
-
   try {
     const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
-
     const data = await res.json();
-
     if (!res.ok) {
       return { ok: false, message: data?.detail || "فشل الطلب" };
     }
-
     return { ok: true, data };
   } catch (e: any) {
     return { ok: false, message: e?.message || "مشكلة في الاتصال" };
@@ -125,9 +107,7 @@ function toPriceText(cost: string) {
 
 function toEventItem(e: ApiEvent): EventItem {
   const isActive = toBool(e.active) ?? toBool(e.status) ?? false;
-
   const isDeptEvent = e.faculty_id === null;
-
   return {
     id: e.event_id,
     title: e.title ?? "",
@@ -155,50 +135,29 @@ export default function Page() {
 
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(false);
-
   const [activeTab, setActiveTab] = useState<EventsTab>("faculty");
-
-  /* ===============================
-     Filters
-  ================================ */
-
- const [userDepartments, setUserDepartments] = useState<any[]>([]);
-
+  const [userDepartments, setUserDepartments] = useState<any[]>([]);
   const [deptFilter, setDeptFilter] = useState<number | "all">("all");
   const [search, setSearch] = useState("");
 
   const showFilters = userDepartments.length > 1;
 
   useEffect(() => {
-  const depts = getDepartmentsFromToken();
-  console.log("Departments:", depts);
-  setUserDepartments(depts);
-}, []);
-
-
-  /* ===============================
-     Fetch Events
-  ================================ */
+    const depts = getDepartmentsFromToken();
+    setUserDepartments(depts);
+  }, []);
 
   const fetchEvents = async () => {
     setLoading(true);
-
     const res = await apiFetch<ApiEvent[]>("/api/event/get-events/");
-
     setLoading(false);
-
     if (!res.ok) return;
-
     setEvents(res.data.map(toEventItem));
   };
 
   useEffect(() => {
     fetchEvents();
   }, []);
-
-  /* ===============================
-     Tabs Counts
-  ================================ */
 
   const facultyCount = useMemo(
     () => events.filter((e) => e.faculty_id !== null).length,
@@ -215,40 +174,27 @@ export default function Page() {
     { key: "dept", label: "فعاليات القسم", badge: deptCount },
   ];
 
-  /* ===============================
-     Visible Events (Filters)
-  ================================ */
-
   const visibleEvents = useMemo(() => {
     let list = events;
-
     if (activeTab === "faculty") {
       list = list.filter((e) => e.faculty_id !== null);
     } else {
       list = list.filter((e) => e.faculty_id === null);
     }
-
     if (deptFilter !== "all") {
       list = list.filter((e) => e.dept_id === deptFilter);
     }
-
     if (search.trim()) {
       list = list.filter((e) =>
         e.title.toLowerCase().includes(search.toLowerCase())
       );
     }
-
     return list;
   }, [events, activeTab, deptFilter, search]);
-
-  /* ===============================
-     Stats
-  ================================ */
 
   const stats: StatItem[] = useMemo(() => {
     const active = visibleEvents.filter((e) => e.isActive).length;
     const inactive = visibleEvents.filter((e) => !e.isActive).length;
-
     return [
       {
         title: "إجمالي الفعاليات",
@@ -275,14 +221,8 @@ export default function Page() {
   }, [visibleEvents]);
 
   const goCreate = () => router.push("/Events-Faclevel/create");
-
   const onView = (id: number) => router.push(`/Events-Faclevel/${id}`);
-
   const onEdit = (id: number) => router.push(`/Events-Faclevel/create/${id}`);
-
-  /* ===============================
-     UI
-  ================================ */
 
   return (
     <div className={styles.page}>
@@ -294,7 +234,6 @@ export default function Page() {
               إنشاء وتعديل وإدارة فعاليات الجامعة
             </p>
           </div>
-
           <button className={styles.createBtnTop} onClick={goCreate}>
             <Plus size={18} />
             إنشاء فعالية جديدة
@@ -307,7 +246,6 @@ export default function Page() {
           items={tabItems}
         />
 
-        {/* Filters */}
         {showFilters && (
           <div className={styles.filtersBar}>
             <div className={styles.searchBox}>
@@ -328,29 +266,51 @@ export default function Page() {
               }
             >
               <option value="all">كل الأقسام</option>
-
               {userDepartments.map((d: any) => (
                 <option key={d.dept_id} value={d.dept_id}>
                   {d.dept_name}
                 </option>
               ))}
             </select>
-
           </div>
         )}
 
         <StatsGrid items={stats} />
 
         <div className={styles.eventsSection}>
-          {loading && <div>جاري تحميل الفعاليات...</div>}
-
-          <EventsGrid
-            items={visibleEvents}
-            onItemsChange={setEvents}
-            onView={onView}
-            onEdit={onEdit}
-            onDelete={() => {}}
-          />
+          {loading ? (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "64px 0",
+                color: "#9ca3af",
+                fontSize: "2rem",
+                fontWeight: 600,
+              }}
+            >
+              جاري تحميل الفعاليات...
+            </div>
+          ) : visibleEvents.length === 0 ? (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "64px 0",
+                color: "#9ca3af",
+                fontSize: "2rem",
+                fontWeight: 600,
+              }}
+            >
+              لا يوجد فعاليات حتي الان 
+            </div>
+          ) : (
+            <EventsGrid
+              items={visibleEvents}
+              onItemsChange={setEvents}
+              onView={onView}
+              onEdit={onEdit}
+              onDelete={() => {}}
+            />
+          )}
         </div>
       </div>
 

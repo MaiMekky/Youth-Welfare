@@ -70,32 +70,32 @@
   box-shadow: 0 4px 14px rgba(201, 151, 42, 0.2);
 }
 
-/* Logo icon box */
+/* ── Logo — plain transparent container, no bg, no border-radius, no shadow ── */
 .headerIcon {
-  width: clamp(42px, 9vw, 50px);
-  height: clamp(42px, 9vw, 50px);
-  background: white;
-  padding: 4px;
-  border-radius: 11px;
+  width: clamp(42px, 9vw, 80px);
+  height: clamp(42px, 9vw, 80px);
+  background: transparent;
+  border: none;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15), 0 0 0 1px rgba(201,151,42,0.28);
-  transition: box-shadow 0.22s ease, transform 0.22s ease;
-  overflow: hidden;
+  overflow: visible;
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
 .headerIcon:hover {
-  box-shadow: 0 6px 20px rgba(0,0,0,0.2), 0 0 0 1px rgba(201,151,42,0.4);
-  transform: translateY(-1px);
+  opacity: 0.88;
+  transform: scale(1.04);
 }
 
 .headerLogo {
   width: 100% !important;
   height: 100% !important;
   object-fit: contain !important;
-  border-radius: 6px;
+  display: block;
+  border-radius: 0;
 }
 
 .headerTitle {
@@ -106,21 +106,24 @@
 }
 
 .headerTitleH1 {
-  font-size: clamp(0.95rem, 3vw, 1.15rem);
-  font-weight: 700;
+  font-size: clamp(1.15rem, 3.5vw, 1.45rem);
+  font-weight: 800;
   margin: 0;
   line-height: 1.2;
   color: #ffffff;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
 }
 
 .headerTitleP {
-  font-size: clamp(0.68rem, 1.8vw, 0.78rem);
+  font-size: clamp(0.78rem, 2vw, 0.92rem);
   color: #e0aa35;
   margin: 0;
   line-height: 1.3;
   opacity: 0.95;
+  font-weight: 600;
+  letter-spacing: 0.04em;
 }
-
 /* Desktop nav buttons */
 .navBtn {
   background: rgba(255, 255, 255, 0.08);
@@ -214,7 +217,7 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Dropdown buttons — own classes, never hidden by media queries */
+/* Dropdown buttons */
 .dropdownBtn {
   display: flex !important;
   width: 100%;
@@ -267,6 +270,19 @@
   .headerContent { padding: 10px 14px; gap: 10px; }
   .headerTitleP { display: none; }
   .sidebarToggleBtn { width: 36px; height: 36px; }
+  /* Logo shrinks on mobile, stays inside header */
+  .headerIcon {
+    width: 46px;
+    height: 46px;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerTitle { display: none; }
+  .headerIcon {
+    width: 38px;
+    height: 38px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

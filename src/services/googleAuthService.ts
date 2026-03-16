@@ -1,6 +1,7 @@
 // This file handles all API communication with your Django backend
-
+import { authFetch } from "@/utils/globalFetch";
 const API_BASE = "http://localhost:8000";
+
 
 export const googleAuthService = {
   // Function to send Google auth code to backend

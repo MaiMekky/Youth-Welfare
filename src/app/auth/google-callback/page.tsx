@@ -1,10 +1,11 @@
 "use client";
 
 export const dynamic = 'force-dynamic';
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authFetch } from "@/utils/globalFetch";
-export default function GoogleCallbackPage() {
+
+function GoogleCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [message, setMessage] = useState("");
@@ -147,5 +148,50 @@ export default function GoogleCallbackPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function GoogleCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+        backgroundColor: "#f5f5f5"
+      }}>
+        <div style={{
+          textAlign: "center",
+          padding: "40px",
+          backgroundColor: "white",
+          borderRadius: "12px",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.1)"
+        }}>
+          <div style={{
+            fontSize: "48px",
+            marginBottom: "15px"
+          }}>
+            ⏳
+          </div>
+          <h2 style={{
+            color: "#2563eb",
+            margin: "0 0 10px",
+            fontSize: "18px"
+          }}>
+            جاري المعالجة
+          </h2>
+          <p style={{
+            color: "#666",
+            fontSize: "15px",
+            margin: "0"
+          }}>
+            يرجى الانتظار...
+          </p>
+        </div>
+      </div>
+    }>
+      <GoogleCallbackContent />
+    </Suspense>
   );
 }

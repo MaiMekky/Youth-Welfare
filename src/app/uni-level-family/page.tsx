@@ -12,29 +12,31 @@ import { authFetch } from "@/utils/globalFetch";
 const API_URL = "http://localhost:8000/api";
 const TAB_STORAGE_KEY = "families_active_tab";
 
+type TabType = "central" | "quality" | "eco";
+
 export default function Page() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
   /* ── Tab persistence: always start with searchParam or "central",
        then correct from localStorage after mount (avoids SSR mismatch) ── */
-  const [activeTab, setActiveTab] = useState<string>(
-    searchParams.get("tab") || "central"
+  const [activeTab, setActiveTab] = useState<TabType>(
+    (searchParams.get("tab") as TabType) || "central"
   );
 
   useEffect(() => {
-    const fromUrl = searchParams.get("tab");
+    const fromUrl = searchParams.get("tab") as TabType;
     if (fromUrl) {
       localStorage.setItem(TAB_STORAGE_KEY, fromUrl);
       setActiveTab(fromUrl);
     } else {
-      const saved = localStorage.getItem(TAB_STORAGE_KEY);
+      const saved = localStorage.getItem(TAB_STORAGE_KEY) as TabType;
       if (saved) setActiveTab(saved);
     }
   }, []);
 
   // Persist tab to localStorage whenever it changes
-  const handleTabChange = (tab: string) => {
+  const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
     localStorage.setItem(TAB_STORAGE_KEY, tab);
   };

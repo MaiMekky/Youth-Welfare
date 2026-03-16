@@ -51,10 +51,10 @@ export default function AddUser() {
         const token = localStorage.getItem('access');
 
         const [facultiesRes, departmentsRes] = await Promise.all([
-          authFetch('http://localhost:8000/api/family/faculties/', {
+          authFetch(`${process.env.NEXT_PUBLIC_API_URL}/api/family/faculties/`, {
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
           }),
-          authFetch('http://localhost:8000/api/family/departments/', {
+          authFetch(`${process.env.NEXT_PUBLIC_API_URL}/api/family/departments/`, {
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
           }),
         ]);
@@ -77,7 +77,7 @@ export default function AddUser() {
   useEffect(() => {
     if (isEdit && faculties.length > 0) {
       const token = localStorage.getItem('access');
-      authFetch(`http://localhost:8000/api/auth/admin_management/${admin_id}/`, {
+      authFetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/admin_management/${admin_id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       })
         .then(res => res.json())
@@ -155,7 +155,7 @@ export default function AddUser() {
       const token = localStorage.getItem('access');
       if (!token) throw new Error('User not authenticated');
 
-      const url    = isEdit ? `http://localhost:8000/api/auth/admin_management/${admin_id}/` : 'http://localhost:8000/api/auth/admin_management/';
+      const url    = isEdit ? `${process.env.NEXT_PUBLIC_API_URL}/api/auth/admin_management/${admin_id}/` : `${process.env.NEXT_PUBLIC_API_URL}/api/auth/admin_management/`;
       const method = isEdit ? 'PATCH' : 'POST';
 
       const facultyId   = formData.faculty ? Number(formData.faculty) : null;

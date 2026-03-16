@@ -254,7 +254,13 @@ const initialCommittees: Committee[] = [
         committee_key: c.committee_key,
         head:      { uid: Number(c.head.uid),      dept_id: Number(c.head.dept_id) },
         assistant: { uid: Number(c.assistant.uid), dept_id: Number(c.assistant.dept_id) },
-        activities: c.activities.map(a => ({ ...a })),
+        activities: c.activities.map(a => ({
+          title: a.title,
+          description: a.description,
+          st_date: a.st_date,
+          end_date: a.end_date || a.st_date,
+          location: a.location,
+        }))
       })),
     };
   };
@@ -570,8 +576,8 @@ useEffect(() => {
                                 <label className={styles.committeeFieldLabel}>مصادر التمويل</label>
                                 <input
                                   placeholder="مصادر التمويل"
-                                  value={a.cost}
-                                  onChange={e => handleActivityChange(ci,ai,"cost",e.target.value)}
+                                  value={a.description}
+                                  onChange={e => handleActivityChange(ci,ai,"description",e.target.value)}
                                   className={styles["member-input"]}
                                 />
                               </div>

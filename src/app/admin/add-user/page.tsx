@@ -84,7 +84,7 @@ export default function AddUser() {
           if (Array.isArray(data.dept_name)) {
             deptNames = data.dept_name;
           } else if (typeof data.dept_name === "string") {
-            deptNames = data.dept_name.replace(/[{}]/g, '').split(',').map(s => s.trim());
+            deptNames = data.dept_name.replace(/[{}]/g, '').split(',').map((s: string) => s.trim());
           }
 
           setFormData({

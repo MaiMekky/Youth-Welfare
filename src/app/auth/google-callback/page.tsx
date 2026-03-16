@@ -30,7 +30,7 @@ export default function GoogleCallbackPage() {
           return;
         }
 
-        const loginRes = await authFetch("http://localhost:8000/api/auth/google/login/", {
+        const loginRes = await authFetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/google/login/`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ code })

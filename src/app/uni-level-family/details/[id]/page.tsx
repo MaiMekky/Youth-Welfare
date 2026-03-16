@@ -208,10 +208,10 @@ export default function FamilyDetailsPage() {
   const params = useParams();
   const familyId = params.id as string;
 
-  const tabs = [
+  const tabs: Tab[] = [
     { id: 'members', label: 'الأعضاء' },
     { id: 'events', label: 'الفعاليات' }
-  ] as const;
+  ];
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab") || "central";
 

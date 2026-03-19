@@ -3,36 +3,7 @@
 /* ══════════════════════════════════════════════
    CSS VARIABLES
 ══════════════════════════════════════════════ */
-:root {
-  --navy:        #0F2547;
-  --navy-mid:    #1A3A6B;
-  --navy-light:  #2D5F8A;
-  --gold:        #C49B3A;
-  --gold-light:  #E8C76A;
-  --gold-pale:   #FBF5E6;
-  --surface:     #F4F6FA;
-  --card-bg:     #FFFFFF;
-  --border:      #E8ECF4;
-  --text-primary:#0F2547;
-  --text-mid:    #374151;
-  --text-soft:   #6B7280;
-  --text-muted:  #9CA3AF;
-  --green:       #059669;
-  --green-bg:    #ECFDF5;
-  --green-border:#A7F3D0;
-  --red:         #DC2626;
-  --red-bg:      #FEF2F2;
-  --amber:       #D97706;
-  --amber-bg:    #FFFBEB;
-  --blue:        #2563EB;
-  --blue-bg:     #EFF6FF;
-  --radius-sm:   8px;
-  --radius-md:   12px;
-  --radius-lg:   16px;
-  --shadow-sm:   0 1px 4px rgba(15,37,71,0.06);
-  --shadow-md:   0 4px 16px rgba(15,37,71,0.1);
-  --shadow-lg:   0 12px 40px rgba(15,37,71,0.15);
-}
+/* Variables are defined globally in src/app/globals.css */
 
 /* ══════════════════════════════════════════════
    ROOT

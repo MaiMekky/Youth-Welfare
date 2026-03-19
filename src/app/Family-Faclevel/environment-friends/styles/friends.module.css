@@ -1,28 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
 
-:root {
-  --navy:        #1a2744;
-  --navy-mid:    #243358;
-  --navy-light:  #2e4070;
-  --gold:        #c9972a;
-  --gold-bright: #e0aa35;
-  --gold-muted:  rgba(201,151,42,0.14);
-  --bg:          #eef0f7;
-  --white:       #ffffff;
-  --surface:     #f5f7fc;
-  --border:      #cdd3e8;
-  --text:        #1a2744;
-  --text-muted:  #6b7a99;
-  --error:       #d93025;
-  --error-bg:    #fdf2f1;
-  --success:     #1e7e34;
-  --success-bg:  #f0fff4;
-  --radius:      12px;
-  --radius-sm:   8px;
-  --shadow:      0 4px 20px rgba(26,39,68,0.08);
-  --shadow-lg:   0 8px 36px rgba(26,39,68,0.14);
-  --transition:  0.2s cubic-bezier(0.4,0,0.2,1);
-}
 /* 
 * { box-sizing: border-box; } */
 

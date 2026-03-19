@@ -182,10 +182,6 @@
   box-shadow: 0 0 3px rgba(37, 99, 235, 0.4);
 }
 
-select::-ms-expand {
-  display: none;
-}
-
 /* ========== Validation ========== */
 .invalid {
   border-color: #e74c3c !important;

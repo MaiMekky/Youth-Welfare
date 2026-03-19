@@ -225,6 +225,11 @@ img {
   box-shadow: 0 0 0 3px var(--gold-pale);
 }
 
+/* Remove default dropdown arrow in IE/Edge */
+select::-ms-expand {
+  display: none;
+}
+
 /* Badges */
 .badge {
   display: inline-flex;

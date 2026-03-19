@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
+import { Suspense, useMemo, useState, useEffect } from "react";
 import styles from "./Styles/page.module.css";
 import Tabs from "./components/Tabs";
 import Filters from "./components/Filters";
@@ -9,12 +9,22 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Users, Leaf, Star } from "lucide-react";
 import { authFetch } from "@/utils/globalFetch";
 
+export const dynamic = "force-dynamic";
+
 const API_URL = "http://localhost:8000/api";
 const TAB_STORAGE_KEY = "families_active_tab";
 
 type TabType = "central" | "quality" | "eco";
 
 export default function Page() {
+  return (
+    <Suspense fallback={<div style={{ padding: 32, textAlign: "center" }}>Loading...</div>}>
+      <FamiliesPageClient />
+    </Suspense>
+  );
+}
+
+function FamiliesPageClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -129,7 +139,6 @@ export default function Page() {
   const qualityPendingCount = qualityFamilies.filter((f) => f.status === "في الانتظار").length;
   const ecoPendingCount     = ecoFamilies.filter((f) => f.status === "في الانتظار").length;
 
-  /* ── Current tab's display list (for empty state check) ── */
   const currentList = activeTab === "central"
     ? centralFamilies
     : filteredNonCentralFamilies;

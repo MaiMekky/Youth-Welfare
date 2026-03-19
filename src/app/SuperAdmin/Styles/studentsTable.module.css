@@ -241,12 +241,6 @@
   font-size: 22px;
   cursor: pointer;
 }
-/* Base: RTL and font */
-:global(body) {
-  font-family: "Cairo", "Segoe UI", Roboto, system-ui, -apple-system, "Helvetica Neue", Arial;
-  direction: rtl;
-}
-
 /* Overlay (blur + dark) */
 .overlay {
   position: fixed;

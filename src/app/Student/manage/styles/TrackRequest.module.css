@@ -1,22 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
 
-:root {
-  --navy:        #1a2744;
-  --navy-mid:    #243358;
-  --gold:        #c9972a;
-  --gold-bright: #e0aa35;
-  --bg:          #eef0f7;
-  --white:       #ffffff;
-  --surface:     #f5f7fc;
-  --border:      #dde2f0;
-  --text:        #1a2744;
-  --text-muted:  #6b7a99;
-  --radius:      14px;
-  --radius-sm:   9px;
-  --shadow:      0 4px 20px rgba(26,39,68,0.08);
-  --shadow-lg:   0 8px 36px rgba(26,39,68,0.14);
-  --transition:  0.22s cubic-bezier(0.4,0,0.2,1);
-}
+/* Variables are defined globally in src/app/globals.css */
 
 /* ═══════════════════════════════════════════
    PAGE

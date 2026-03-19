@@ -1,5 +1,6 @@
 import EventForm from "../component/EventForm";
 
-export default function Page({ params }: { params: { id: string } }) {
-  return <EventForm mode="edit" id={params.id} />;
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <EventForm mode="edit" id={id} />;
 }

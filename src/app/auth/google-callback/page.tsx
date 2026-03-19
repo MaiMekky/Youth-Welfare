@@ -1,10 +1,22 @@
 "use client";
 
-export const dynamic = 'force-dynamic';
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authFetch } from "@/utils/globalFetch";
-export default function GoogleCallbackPage() {
+
+export const dynamic = "force-dynamic";
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div style={{ padding: 32, textAlign: "center" }}>Loading...</div>}>
+      <GoogleCallbackClient />
+    </Suspense>
+  );
+}
+
+function GoogleCallbackClient() {
+  "use client";
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const [message, setMessage] = useState("");
@@ -40,15 +52,10 @@ export default function GoogleCallbackPage() {
 
         if (!loginRes.ok) {
           if (loginRes.status === 404) {
-            // ✅ Email not registered - show message and redirect
             setMessageType("info");
             setMessage("⚠️ هذا البريد غير مسجل في النظام. سيتم تحويلك للصفحة الرئيسية");
-            
-            // Clear any stored data
             sessionStorage.removeItem("google_code");
             sessionStorage.removeItem("google_email");
-            
-            // Redirect to home after 2 seconds
             setTimeout(() => router.push("/"), 3000);
             return;
           }
@@ -59,10 +66,9 @@ export default function GoogleCallbackPage() {
           return;
         }
 
-        // ✅ Success - login user
         setMessageType("success");
         setMessage("✅ تم تسجيل الدخول بنجاح");
-        
+
         localStorage.setItem("access", loginData.access_token);
         localStorage.setItem("refresh", loginData.refresh_token);
         localStorage.setItem("user", JSON.stringify({
@@ -78,9 +84,7 @@ export default function GoogleCallbackPage() {
         document.cookie = `refresh=${loginData.refresh_token}; path=/; max-age=604800; SameSite=Lax`;
         document.cookie = `user_type=student; path=/; max-age=604800; SameSite=Lax`;
 
-        // Redirect to dashboard
         setTimeout(() => router.push("/Student"), 1500);
-
       } catch (error) {
         console.error("Error:", error);
         setMessageType("error");
@@ -122,10 +126,10 @@ export default function GoogleCallbackPage() {
           margin: "0 0 10px",
           fontSize: "18px"
         }}>
-          {messageType === "success" 
-            ? "نجاح" 
-            : messageType === "error" 
-            ? "خطأ" 
+          {messageType === "success"
+            ? "نجاح"
+            : messageType === "error"
+            ? "خطأ"
             : "جاري المعالجة"}
         </h2>
 

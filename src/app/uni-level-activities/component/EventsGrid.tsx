@@ -22,7 +22,7 @@ async function apiFetch<T>(
   const token = getAccessToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(opts.headers as any),
+    ...(opts.headers as Record<string, string>),
   };
   if (token) headers.Authorization = `Bearer ${token}`;
 
@@ -43,15 +43,15 @@ async function apiFetch<T>(
       const msg =
         (typeof maybeJson === "object" &&
           maybeJson &&
-          ((maybeJson as any).detail || (maybeJson as any).message)) ||
+          ((maybeJson as Record<string, unknown>).detail || (maybeJson as Record<string, unknown>).message)) ||
         (typeof maybeJson === "string" ? maybeJson : "") ||
         `طلب غير ناجح (${res.status})`;
       return { ok: false, message: String(msg) };
     }
 
     return { ok: true, data: maybeJson as T };
-  } catch (e: any) {
-    return { ok: false, message: e?.message || "مشكلة في الاتصال" };
+  } catch (e: unknown) {
+    return { ok: false, message: e instanceof Error ? e.message : String(e) || "مشكلة في الاتصال" };
   }
 }
 

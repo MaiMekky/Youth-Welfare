@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import HeadPage from "./components/HeadPage";
 import RequestDetails from "./components/RequestDetails";
 import CreateFamForm from "../manage/components/CreateFamForm";
-import MainPage from "./components/MainPage";
+import MainPage, { type ProgramFamily } from "./components/MainPage";
 import TrackRequest from "../manage/components/TrackRequest";
 import FamilyDetails from "./components/FamilyDetails";
 
@@ -11,7 +11,7 @@ type View = "home" | "requestDetails" | "createForm" | "trackRequest" | "familyD
 
 export default function FamiliesPage() {
   const [currentView, setCurrentView] = useState<View>("home");
-  const [selectedFamily, setSelectedFamily] = useState<any>(null);
+  const [selectedFamily, setSelectedFamily] = useState<ProgramFamily | null>(null);
 
   const handleNavigateToRequestDetails = () => {
     setCurrentView("requestDetails");
@@ -36,7 +36,7 @@ export default function FamiliesPage() {
     setCurrentView("trackRequest");
   };
 
-  const handleViewFamilyDetails = (family: any) => {
+  const handleViewFamilyDetails = (family: ProgramFamily) => {
     setSelectedFamily(family);
     setCurrentView("familyDetails");
   };

@@ -6,7 +6,7 @@ import { authFetch } from "@/utils/globalFetch";
 
 type Status = "منتظر" | "موافقة مبدئية" | "مرفوض";
 
-const FamRequests = ({ request }: { request: any }) => {
+const FamRequests = ({ request }: { request: Record<string, unknown> }) => {
   const [minMembers, setMinMembers] = useState(
     request.min_limit?.toString() || ""
   );
@@ -15,7 +15,7 @@ const FamRequests = ({ request }: { request: any }) => {
 
   
   const [status, setStatus] = useState<Status>(
-    request.status || "منتظر"
+    (request.status as Status) || "منتظر"
   );
 
   const [notification, setNotification] = useState<{
@@ -117,7 +117,7 @@ const FamRequests = ({ request }: { request: any }) => {
       {/* ===== Header ===== */}
       <div className={styles.cardHeader}>
         <div className={styles.titleRow}>
-          <h2 className={styles.familyName}>{request.name}</h2>
+          <h2 className={styles.familyName}>{request.name as string}</h2>
 
           <span className={styles.creationBadge}>طلب إنشاء</span>
 
@@ -139,40 +139,40 @@ const FamRequests = ({ request }: { request: any }) => {
       <div className={styles.infoGrid}>
         <div>
           <span className={styles.label}>الفئة:</span>
-          <span>{request.type}</span>
+          <span>{request.type as string}</span>
         </div>
 
         <div>
           <span className={styles.label}>الكلية:</span>
-          <span>{request.faculty_name}</span>
+          <span>{request.faculty_name as string}</span>
         </div>
 
         <div>
           <span className={styles.label}>رئيس الأسرة:</span>
-          <span>{request.president_name}</span>
+          <span>{request.president_name as string}</span>
         </div>
 
         <div>
           <span className={styles.label}>نائب الرئيس:</span>
-          <span>{request.vice_president_name}</span>
+          <span>{request.vice_president_name as string}</span>
         </div>
 
         <div>
           <span className={styles.label}>عدد الأعضاء الحالي:</span>
-          <span>{request.member_count}</span>
+          <span>{request.member_count as string}</span>
         </div>
 
         <div>
           <span className={styles.label}>تاريخ التقديم:</span>
           <span>
-            {new Date(request.created_at).toLocaleDateString("ar-EG")}
+            {new Date(request.created_at as string).toLocaleDateString("ar-EG")}
           </span>
         </div>
 
         <div>
           <span className={styles.label}>وصف الأسرة:</span>
           <span className={styles.description}>
-            {request.description}
+            {request.description as string}
           </span>
         </div>
       </div>

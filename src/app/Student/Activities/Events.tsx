@@ -159,13 +159,14 @@ export default function Events() {
         const raw = await res.json();
         const arr: ApiEvent[] = Array.isArray(raw) ? raw : (raw.results ?? raw.data ?? []);
         setEvents(arr.map(mapEvent));
-      } catch (e: any) {
-        setError(e.message);
+      } catch (e: unknown) {
+        setError(e instanceof Error ? e.message : 'فشل تحميل الفعاليات');
       } finally {
         setLoading(false);
       }
     };
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /* ── Join ── */
@@ -183,10 +184,9 @@ export default function Events() {
       }
       setRegistered(prev => new Set([...prev, id]));
       setEvents(prev => prev.map(e => e.id === id ? { ...e, takenSeats: e.takenSeats + 1 } : e));
-      // ✅ التوست الجديد
       showToast('تم إرسال الطلب بنجاح', true);
-    } catch (e: any) {
-      showToast(e.message, false);
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : 'حدث خطأ', false);
     } finally {
       setJoiningId(null);
     }

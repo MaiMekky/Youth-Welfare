@@ -46,7 +46,7 @@ async function apiFetch<T>(
 ): Promise<{ ok: true; data: T } | { ok: false; message: string }> {
   const token = getAccessToken();
 
-  const headers: Record<string, string> = { ...(opts.headers as any) };
+  const headers: Record<string, string> = { ...(opts.headers as Record<string, string>) };
 
   if (!headers["Content-Type"] && opts.body) {
     headers["Content-Type"] = "application/json";
@@ -67,8 +67,8 @@ async function apiFetch<T>(
     }
 
     return { ok: true, data };
-  } catch (e: any) {
-    return { ok: false, message: e?.message || "مشكلة في الاتصال" };
+  } catch (e: unknown) {
+    return { ok: false, message: (e as Error)?.message || "مشكلة في الاتصال" };
   }
 }
 
@@ -102,6 +102,7 @@ export default function StudentDetailsPage() {
 
 useEffect(() => {
   loadStudent();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
 }, [studentId]);
 
   const ui = useMemo(() => {

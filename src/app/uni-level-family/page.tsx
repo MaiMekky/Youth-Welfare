@@ -1,22 +1,21 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, Suspense } from "react";
+import { Users, Leaf, Star } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { authFetch } from "@/utils/globalFetch";
 import styles from "./Styles/page.module.css";
 import Tabs from "./components/Tabs";
-import Filters from "./components/Filters";
 import FamiliesGrid from "./components/FamiliesGrid";
-import { useSearchParams, useRouter } from "next/navigation";
-import { Users, Leaf, Star } from "lucide-react";
-import { authFetch } from "@/utils/globalFetch";
+import Filters from "./components/Filters";
 
 const API_URL = "http://localhost:8000/api";
 const TAB_STORAGE_KEY = "families_active_tab";
 
 type TabType = "central" | "quality" | "eco";
 
-export default function Page() {
+function PageContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   /* ── Tab persistence: always start with searchParam or "central",
        then correct from localStorage after mount (avoids SSR mismatch) ── */
@@ -33,7 +32,7 @@ export default function Page() {
       const saved = localStorage.getItem(TAB_STORAGE_KEY) as TabType;
       if (saved) setActiveTab(saved);
     }
-  }, []);
+  }, [searchParams]);
 
   // Persist tab to localStorage whenever it changes
   const handleTabChange = (tab: TabType) => {
@@ -43,7 +42,7 @@ export default function Page() {
 
   const [selectedFaculty, setSelectedFaculty] = useState<string>("الكل");
   const [selectedFamilyType, setSelectedFamilyType] = useState<string>("all");
-  const [families, setFamilies] = useState<any[]>([]);
+  const [families, setFamilies] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "warning" } | null>(null);
 
@@ -128,11 +127,6 @@ export default function Page() {
   /* ── Stats ── */
   const qualityPendingCount = qualityFamilies.filter((f) => f.status === "في الانتظار").length;
   const ecoPendingCount     = ecoFamilies.filter((f) => f.status === "في الانتظار").length;
-
-  /* ── Current tab's display list (for empty state check) ── */
-  const currentList = activeTab === "central"
-    ? centralFamilies
-    : filteredNonCentralFamilies;
 
   return (
     <div className={styles.container}>
@@ -242,6 +236,20 @@ export default function Page() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={
+      <div className={styles.container}>
+        <div style={{ textAlign: "center", padding: "50px", color: "#2C3A5F" }}>
+          <p>جاري تحميل الأسر...</p>
+        </div>
+      </div>
+    }>
+      <PageContent />
+    </Suspense>
   );
 }
 

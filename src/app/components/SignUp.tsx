@@ -84,7 +84,8 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target as any;
+    const target = e.target as HTMLInputElement | HTMLSelectElement;
+    const { name, value, type } = target;
     const numericFields = ["studentId", "studentCode", "phone"];
     let newValue = value;
 

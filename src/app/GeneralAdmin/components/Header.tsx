@@ -1,6 +1,5 @@
 "use client";
 import "../Styles/Header.css";
-import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { ChevronDown, LogOut, Menu } from "lucide-react";
 import Image from "next/image";
@@ -52,15 +51,7 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
     });
     window.location.replace("/");
   };
-
-  const getInitials = (name: string) =>
-    name
-      .split(" ")
-      .map((w) => w[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase();
-
+      
   return (
     <header className="header">
       {/* Subtle top accent line */}

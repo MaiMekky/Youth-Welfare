@@ -1,23 +1,17 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "../Styles/components/Navbar.module.css";
-import { Search, User, Globe } from "lucide-react";
 import LoginPage from "./LoginPage";
 import SignupPage from "./SignUp";
 import Image from "next/image";
 import logo from "../assets/capital-uni-logo.png";
-import { useEffect } from "react";
 
 const Navbar: React.FC = () => {
-  const [lang, setLang] = useState("ar");
+  const [lang] = useState("ar");
   const [scrolled, setScrolled] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
   const [activeScreen, setActiveScreen] = useState<"login" | "signup">("login");
-
-  const toggleLang = () => {
-    setLang(lang === "ar" ? "en" : "ar");
-  };
     useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 120); // trigger after hero

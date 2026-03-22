@@ -14,11 +14,6 @@ const HeroSection: React.FC = () => {
     if (section) section.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleScrollToFooter = () => {
-    const footer = document.getElementById("footer");
-    if (footer) footer.scrollIntoView({ behavior: "smooth" });
-  };
-
   return (
     <section
       className={styles.hero}

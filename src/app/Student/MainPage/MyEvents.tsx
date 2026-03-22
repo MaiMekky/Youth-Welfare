@@ -193,10 +193,14 @@ export default function MyEvents() {
         const raw = await res.json();
         const arr: ApiJoinedEvent[] = raw.data ?? raw.results ?? (Array.isArray(raw) ? raw : []);
         setEvents(arr.map(mapEvent));
-      } catch (e: any) { setError(e.message); }
-      finally { setLoading(false); }
+      } catch (e: unknown) { 
+        setError(e instanceof Error ? e.message : String(e)); 
+      } finally { 
+        setLoading(false); 
+      }
     };
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchResult = useCallback(async (event: Event) => {

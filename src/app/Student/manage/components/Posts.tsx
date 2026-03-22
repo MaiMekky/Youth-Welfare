@@ -174,8 +174,8 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
           setError("لا توجد أسرة بدور 'أخ أكبر'");
           setLoading(false);
         }
-      } catch (err: any) {
-        setError(err.message || "حصل خطأ أثناء تحميل قائمة الأسر");
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "حصل خطأ أثناء تحميل قائمة الأسر");
         setLoading(false);
       }
     };
@@ -213,7 +213,7 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
         
         const mappedPosts = postsArray.map(mapApiPostToPost);
         setPosts(mappedPosts);
-      } catch (err) {
+      } catch {
         setError('فشل في تحميل المنشورات');
         setPosts([]);
       } finally {

@@ -18,18 +18,6 @@ interface TabsProps {
 export default function Tabs({ tabs, activeTab, onTabChange }: TabsProps) {
   const tabsWrapperRef = useRef<HTMLDivElement>(null);
 
-  const scrollLeft = () => {
-    if (tabsWrapperRef.current) {
-      tabsWrapperRef.current.scrollBy({ left: -200, behavior: 'smooth' });
-    }
-  };
-
-  const scrollRight = () => {
-    if (tabsWrapperRef.current) {
-      tabsWrapperRef.current.scrollBy({ left: 200, behavior: 'smooth' });
-    }
-  };
-
   return (
     <div className={styles.tabsContainer}>
       <div className={styles.tabsWrapper} ref={tabsWrapperRef}>

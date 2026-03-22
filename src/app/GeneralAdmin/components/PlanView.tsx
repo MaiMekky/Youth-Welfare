@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
 import {
-  FileText, BarChart3, Download, Calendar, Building2,
+  FileText, Download, Calendar, Building2,
   RefreshCw, AlertCircle, Eye, Filter, CheckCircle,
   XCircle, Clock, Layers, X, MapPin, Users, Tag,
   DollarSign, BookOpen, ChevronRight, Info,
@@ -504,10 +504,6 @@ export default function PlanView() {
   const missingPlans  = plans.filter(p => p.status?.includes("مفقود") || p.status === "missing").length;
 
   const years = Array.from(new Set(plans.map(p => p.academic_year).filter(Boolean))) as string[];
-
-  const facultyNames = Array.from(
-    new Set(plans.map(p => p.faculty_name).filter(Boolean))
-  ).sort((a, b) => a.localeCompare(b, "ar"));
 
   const filtered = plans.filter(p => {
     const matchYear    = yearFilter === "all" || p.academic_year === yearFilter;

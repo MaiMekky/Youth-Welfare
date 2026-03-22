@@ -13,12 +13,6 @@ interface Tab {
   label: string;
 }
 
-interface TabsProps {
-  tabs: Tab[];
-  activeTab: TabId;
-  onTabChange: (tabId: TabId) => void;
-}
-
 interface FamilyMember {
   student_id: number;
   student_name: string;
@@ -201,7 +195,6 @@ export default function FamilyDetailsPage() {
   const [familyData, setFamilyData] = useState<FamilyData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
   const [alert, setAlert] = useState<{ message: string; type: 'success' | 'error' | 'warning' | 'info' } | null>(null);
   
   const router = useRouter();
@@ -214,16 +207,6 @@ export default function FamilyDetailsPage() {
   ];
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab") || "central";
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   useEffect(() => {
     const fetchFamilyData = async () => {

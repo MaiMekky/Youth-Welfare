@@ -110,7 +110,7 @@ setEventData({
 });
 
 setStudentsData(
-  data.registered_members.map((m: any) => ({
+  data.registered_members.map((m: Record<string, unknown>) => ({
     studentId: m.student_id,
     name: m.student_name,
     nationalId: m.student_nid,
@@ -133,32 +133,7 @@ setStudentsData(
   const handleBack = () =>
     router.push("/Family-Faclevel/families-reports/" + params.id);
 
-  const handleRemoveMember = async (memberId: number) => {
-    try {
-      const token = localStorage.getItem("access");
 
-      const res = await authFetch(
-        `http://127.0.0.1:8000/api/family/faculty_events/${event_id}/members/${memberId}/`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!res.ok) throw new Error("Failed to delete member");
-
-      // setStudentsData((prev) =>
-      //   prev.filter((student) => student.nationalId !== nationalId)
-      // );
-
-      showNotification("✅ تم حذف الطالب بنجاح", "success");
-    } catch (err) {
-      console.error(err);
-      showNotification("❌ فشل حذف الطالب", "error");
-    }
-  };
   const handleParticipantAction = async (
     studentId: number,
   action: "approve" | "reject"

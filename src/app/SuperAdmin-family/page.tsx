@@ -16,7 +16,7 @@ export default function Page() {
   const [selectedFaculty, setSelectedFaculty] = useState<number>(-1);
   const [selectedFamilyType, setSelectedFamilyType] = useState<string>("all");
 
-  const [families, setFamilies] = useState<any[]>([]);
+  const [families, setFamilies] = useState<Record<string, unknown>[]>([]);
   const [loadingFamilies, setLoadingFamilies] = useState(false);
 
   // Notification state
@@ -106,7 +106,7 @@ export default function Page() {
   }, [families]);
 
   /* ===================== API Mapping ===================== */
-  const mapFamilyFromApi = (f: any) => ({
+  const mapFamilyFromApi = (f: Record<string, unknown>) => ({
     id: f.family_id,
     title: f.name,
     description: f.description,

@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import Head from "next/head";
 import Layout from "../Layout";
 import "./Reports.css";
-import { useRouter } from "next/navigation";
 import { authFetch } from "@/utils/globalFetch";
 interface CollegeReport {
   faculty_id: number;
@@ -14,8 +13,6 @@ interface CollegeReport {
 }
 
 export default function ReportsPage() {
-  const router = useRouter();
-
   const [reports, setReports] = useState<CollegeReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState({

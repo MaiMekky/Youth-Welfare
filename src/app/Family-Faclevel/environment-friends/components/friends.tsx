@@ -8,6 +8,14 @@ import { User, Users, ChevronLeft, Plus, Trash2, Send } from "lucide-react";
 type NotificationType = "success" | "error";
 type Member = { nid: string };
 
+interface AssistantItem {
+  name?: string;
+  nid?: string;
+  ph_no?: string;
+  uid?: string;
+  [key: string]: unknown;
+}
+
 type AssistantRole =
   | "رائد"
   | "نائب_رائد"
@@ -95,7 +103,7 @@ const initialCommittees: Committee[] = [
   "environmental-pollution",
   "community-service",
   "public-relations",
-].map((key, i) => ({
+].map((key) => ({
   committee_key: key,
   head:      { uid: "", dept_id: "" },
   assistant: { uid: "", dept_id: "" },
@@ -151,18 +159,18 @@ const initialCommittees: Committee[] = [
     });
 
     FULL_INFO_ROLES.forEach(role => {
-      const a = assistants[role] as any;
+      const a = assistants[role] as AssistantItem;
       if (!a.name?.trim())                    errs[`assistants.${role}.name`]  = `اسم ${role} مطلوب`;
       if (!a.nid?.trim())                     errs[`assistants.${role}.nid`]   = `الرقم القومي لـ ${role} مطلوب`;
-      else if (!/^\d{14}$/.test(a.nid))       errs[`assistants.${role}.nid`]   = `14 رقم مطلوب`;
+      else if (!/^\d{14}$/.test(a.nid as string))       errs[`assistants.${role}.nid`]   = `14 رقم مطلوب`;
       if (!a.ph_no?.trim())                   errs[`assistants.${role}.ph_no`] = `رقم الهاتف لـ ${role} مطلوب`;
-      else if (!/^\d{11}$/.test(a.ph_no))     errs[`assistants.${role}.ph_no`] = `11 رقم مطلوب`;
+      else if (!/^\d{11}$/.test(a.ph_no as string))     errs[`assistants.${role}.ph_no`] = `11 رقم مطلوب`;
     });
 
     UID_ROLES.forEach(role => {
-      const a = assistants[role] as any;
+      const a = assistants[role] as AssistantItem;
       if (!a.uid?.trim())              errs[`assistants.${role}.uid`] = `الرقم الجامعي لـ ${role} مطلوب`;
-      else if (!/^\d+$/.test(a.uid))   errs[`assistants.${role}.uid`] = `أرقام فقط`;
+      else if (!/^\d+$/.test(a.uid as string))   errs[`assistants.${role}.uid`] = `أرقام فقط`;
     });
 
     committees.forEach((c, ci) => {
@@ -205,14 +213,18 @@ const initialCommittees: Committee[] = [
   };
 
   const handleAssistantChange = (role: AssistantRole, field: string, value: string) => {
-    setAssistants(p => ({ ...p, [role]: { ...(p as any)[role], [field]: value } }));
+    setAssistants(p => ({ ...p, [role]: { ...(p[role] as AssistantItem), [field]: value } }));
     clearErr(`assistants.${role}.${field}`);
   };
 
   const handleCommitteeChange = (i: number, field: string, sub: string, val: string) => {
     setCommittees(p => {
-      const c=[...p]; const t:any=c[i];
-      if (sub) t[field][sub]=val; else t[field]=val;
+      const c=[...p];
+      if (sub) {
+        ((c[i] as unknown as Record<string, Record<string, string>>)[field][sub]=val);
+      } else {
+        ((c[i] as unknown as Record<string, string>)[field]=val);
+      }
       return c;
     });
     if (field==="head"      && sub==="uid") clearErr(`committees.${i}.head.uid`);
@@ -396,7 +408,7 @@ useEffect(() => {
 
             {/* الأعضاء ذوو البيانات الكاملة */}
             {FULL_INFO_ROLES.map(role => {
-              const a = assistants[role] as any;
+              const a = assistants[role] as AssistantItem;
               return (
                 <div key={role} className={`${styles.assistantCard} ${styles.assistantCardFull}`}>
                   <div className={styles.assistantCardHeader}>
@@ -442,7 +454,7 @@ useEffect(() => {
 
             {/* الأعضاء ذوو الرقم الجامعي فقط */}
             {UID_ROLES.map(role => {
-              const a = assistants[role] as any;
+              const a = assistants[role] as AssistantItem;
               return (
                 <div key={role} className={styles.assistantCard}>
                   <div className={styles.assistantCardHeader}>

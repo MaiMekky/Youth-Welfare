@@ -1,10 +1,11 @@
 "use client";
 import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import Image from "next/image";
 import {
   Eye, Check, X, Clock, Calendar, Users,
   CheckCircle, XCircle, RefreshCw, AlertCircle, Layers, MapPin,
-  User, Building2, BookOpen, DollarSign, Award, ShieldAlert, Package,
-  ChevronDown, TrendingUp, Activity,
+  User, BookOpen, DollarSign, Award, ShieldAlert, Package,
+  ChevronDown, Activity,
 } from "lucide-react";
 import "../Styles/Activities.css";
 import { authFetch } from "@/utils/globalFetch";
@@ -37,15 +38,15 @@ interface ActivityDetail {
   updated_at: string;
   cost: string | number;
   location: string;
-  restrictions: string | any;
-  reward: string | any;
+  restrictions: string | Record<string, unknown>;
+  reward: string | Record<string, unknown>;
   status: string;
   st_date: string;
   end_date: string;
   s_limit: number;
   created_at: string;
   type: string;
-  resource: string | any;
+  resource: string | Record<string, unknown>;
   selected_facs: number[];
 }
 
@@ -79,15 +80,15 @@ function fmtDateTime(d?: string) {
     year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
   });
 }
-function safeStr(val: any): string {
+function safeStr(val: unknown): string {
   if (val === null || val === undefined) return "";
   if (typeof val === "string") return val;
   if (typeof val === "number") return String(val);
   if (Array.isArray(val)) return val.map(safeStr).filter(Boolean).join(" | ");
-  if (typeof val === "object") {
-    const pick = val.reward ?? val.name ?? val.title ?? val.label ?? val.value;
+  if (typeof val === "object" && val !== null) {
+    const pick = (val as Record<string, unknown>).reward ?? (val as Record<string, unknown>).name ?? (val as Record<string, unknown>).title ?? (val as Record<string, unknown>).label ?? (val as Record<string, unknown>).value;
     if (pick !== undefined) return safeStr(pick);
-    return Object.entries(val)
+    return Object.entries(val as Record<string, unknown>)
       .filter(([, v]) => v !== null && v !== undefined && typeof v !== "object")
       .map(([k, v]) => `${k}: ${v}`).join(" | ");
   }
@@ -129,7 +130,7 @@ function ConfirmDialog({ action, eventTitle, onConfirm, onCancel, loading }: {
         <h3 className="confirm-title">{isApprove ? "تأكيد الموافقة" : "تأكيد الرفض"}</h3>
         <p className="confirm-body">
           هل أنت متأكد من {isApprove ? "الموافقة على" : "رفض"} فعالية{" "}
-          <strong>"{eventTitle}"</strong>؟
+          <strong>&quot;{eventTitle}&quot;</strong>؟
         </p>
         <div className="confirm-actions">
           <button className="cbtn cbtn-cancel" onClick={onCancel} disabled={loading}>إلغاء</button>
@@ -172,7 +173,7 @@ function DetailsModal({ detail, onClose }: { detail: ActivityDetail; onClose: ()
 
         {imageUrl && (
           <div className="dm-image-wrap">
-            <img src={imageUrl} alt={detail.title} className="dm-image" />
+            <Image src={imageUrl} alt={detail.title} className="dm-image" width={400} height={300} />
             <div className="dm-image-overlay" />
           </div>
         )}
@@ -375,7 +376,6 @@ function ActivityCard({
 function StatsBar({ total, pending, accepted, rejected }: {
   total: number; pending: number; accepted: number; rejected: number;
 }) {
-  const pct = (n: number) => total ? Math.round((n / total) * 100) : 0;
   return (
     <div className="stats-bar">
       <div className="stat-card sc-total">
@@ -476,8 +476,8 @@ export default function Activities() {
       const data: ActivityItem[] = await res.json();
       const enriched = await enrichWithDeptNames(data);
       setAllActivities(enriched);
-    } catch (err: any) {
-      setError(err?.message || "تعذّر الاتصال بالخادم");
+    } catch (err: unknown) {
+      setError((err as Error)?.message || "تعذّر الاتصال بالخادم");
       setAllActivities([]);
     } finally {
       setLoading(false);

@@ -8,7 +8,6 @@ import {
   Save,
   X,
   MapPin,
-  CalendarDays,
   DollarSign,
   Users,
   Lightbulb,
@@ -49,34 +48,16 @@ function getAccessToken(): string | null {
   );
 }
 
-function getDeptFromToken(): number | null {
-  const token = getAccessToken();
-  if (!token) return null;
-  try {
-    const parts = token.split(".");
-    if (parts.length < 2) return null;
-    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
-    const payload = JSON.parse(atob(padded));
-    const departments = payload?.departments;
-    const deptId1 = Array.isArray(departments) ? departments?.[0]?.dept_id : undefined;
-    const deptIds = payload?.dept_ids;
-    const deptId2 = Array.isArray(deptIds) ? deptIds?.[0] : undefined;
-    const candidate = deptId1 ?? deptId2;
-    if (typeof candidate === "number") return candidate;
-    if (typeof candidate === "string") { const n = Number(candidate); return Number.isFinite(n) ? n : null; }
-    return null;
-  } catch { return null; }
-}
+
 
 async function apiFetch<T>(
   path: string,
   opts: RequestInit = {}
-): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number; raw?: any }> {
+): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number; raw?: Record<string, unknown> }> {
   const token = getAccessToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(opts.headers as any),
+    ...(opts.headers as Record<string, string>),
   };
   if (token) headers.Authorization = `Bearer ${token}`;
   try {
@@ -86,14 +67,14 @@ async function apiFetch<T>(
     if (!res.ok) {
       const msg =
         (typeof maybeJson === "object" && maybeJson &&
-          ((maybeJson as any).detail || (maybeJson as any).message || (maybeJson as any).error)) ||
+          ((maybeJson as Record<string, unknown>).detail || (maybeJson as Record<string, unknown>).message || (maybeJson as Record<string, unknown>).error)) ||
         (typeof maybeJson === "string" ? maybeJson : "") ||
         `طلب غير ناجح (${res.status})`;
       return { ok: false, message: String(msg), status: res.status, raw: maybeJson };
     }
     return { ok: true, data: maybeJson as T };
-  } catch (e: any) {
-    return { ok: false, message: e?.message || "مشكلة في الاتصال" };
+  } catch (e: unknown) {
+    return { ok: false, message: (e as Error)?.message || "مشكلة في الاتصال" };
   }
 }
 
@@ -105,16 +86,6 @@ export default function CreateProposedEventPage() {
   const planId = String(params?.id ?? "");
   const mode = (searchParams.get("mode") ?? "create") as Mode;
   const isConvert = mode === "convert";
-
-  // ── Departments from localStorage (exactly like CreatePlanModal) ──
-  const [departments, setDepartments] = useState<{ dept_id: number; dept_name: string }[]>([]);
-
-  useEffect(() => {
-    const stored = localStorage.getItem("departments");
-    if (stored) {
-      try { setDepartments(JSON.parse(stored)); } catch {}
-    }
-  }, []);
 
 const [form, setForm] = useState<FormState>({
   title: "",
@@ -137,7 +108,6 @@ const [form, setForm] = useState<FormState>({
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Partial<Record<keyof FormState, boolean>>>({});
   const [submitting, setSubmitting] = useState(false);
-  const [loadingEvent, setLoadingEvent] = useState(false);
 
   /* ===================== Toast State ===================== */
   const [toast, setToast] = useState<{ show: boolean; message: string; type: ToastType }>({
@@ -236,7 +206,7 @@ const [form, setForm] = useState<FormState>({
         plan_id: Number(planId),
       };
 
-      const res = await apiFetch<any>(
+      const res = await apiFetch<Record<string, unknown>>(
         "/api/events/plans/create-event/",
         {
           method: "POST",
@@ -278,7 +248,7 @@ const [form, setForm] = useState<FormState>({
         // dept_id: Number(form.dept_id),  
     };
 
-      const res2 = await apiFetch<any>(
+      const res2 = await apiFetch<Record<string, unknown>>(
       `/api/events/plans/${planId}/add-event/`,
       {
         method: "POST",
@@ -301,35 +271,28 @@ const [form, setForm] = useState<FormState>({
     if (!isConvert) return;
     const raw = sessionStorage.getItem("convert_proposed_payload");
     if (!raw) return;
-    let parsed: any = null;
+    let parsed: Record<string, unknown> | null = null;
     try { parsed = JSON.parse(raw); } catch { return; }
 
     const idFromPayload =
-      parsed?.event?.event_id ?? parsed?.event?.id ??
-      parsed?.row?.event_id ?? parsed?.row?.id ??
+      (parsed?.event as Record<string, unknown>)?.event_id ?? (parsed?.event as Record<string, unknown>)?.id ??
+      (parsed?.row as Record<string, unknown>)?.event_id ?? (parsed?.row as Record<string, unknown>)?.id ??
       parsed?.event_id ?? parsed?.id ?? null;
 
-    const fallbackRow = parsed?.event ?? parsed?.row ?? parsed ?? {};
-
-    // Read departments fresh from localStorage for resolution
-    let localDepts: { dept_id: number; dept_name: string }[] = [];
-    try {
-      const stored = localStorage.getItem("departments");
-      if (stored) localDepts = JSON.parse(stored);
-    } catch {}
+    const fallbackRow = (parsed?.event ?? parsed?.row ?? parsed ?? {}) as Record<string, unknown>;
 
     const prefilledFromPayload: FormState = {
-      title: fallbackRow?.title ?? "",
-      description: fallbackRow?.description ?? "",
-      location: fallbackRow?.location ?? "",
-      st_date: fallbackRow?.st_date ?? "",
-      end_date: fallbackRow?.end_date ?? "",
+      title: (fallbackRow?.title as string) ?? "",
+      description: (fallbackRow?.description as string) ?? "",
+      location: (fallbackRow?.location as string) ?? "",
+      st_date: (fallbackRow?.st_date as string) ?? "",
+      end_date: (fallbackRow?.end_date as string) ?? "",
       cost: String(fallbackRow?.cost ?? ""),
       s_limit: String(fallbackRow?.s_limit ?? ""),
-      type: fallbackRow?.type ?? "",
-      restrictions: fallbackRow?.restrictions ?? "",
-      reward: fallbackRow?.reward ?? "",
-      resource: fallbackRow?.resource ?? "",
+      type: (fallbackRow?.type as string) ?? "",
+      restrictions: (fallbackRow?.restrictions as string) ?? "",
+      reward: (fallbackRow?.reward as string) ?? "",
+      resource: (fallbackRow?.resource as string) ?? "",
       // dept_id: fallbackRow?.dept_id ?? "",
     };
 
@@ -337,32 +300,23 @@ const [form, setForm] = useState<FormState>({
     setForm((p) => ({ ...p, ...prefilledFromPayload }));
     if (!idFromPayload) return;
 
-    setLoadingEvent(true);
     (async () => {
-      const res = await apiFetch<any>(`/api/event/get-events/${idFromPayload}/`, { method: "GET" });
-      setLoadingEvent(false);
+      const res = await apiFetch<Record<string, unknown>>(`/api/event/get-events/${idFromPayload}/`, { method: "GET" });
       if (!res.ok) { showToast(`❌ ${res.message}`, "error"); return; }
-      const e = (res.data as any)?.data ?? res.data;
-
-      // Read departments fresh again inside async (closure may be stale)
-      let asyncDepts: { dept_id: number; dept_name: string }[] = [];
-      try {
-        const stored = localStorage.getItem("departments");
-        if (stored) asyncDepts = JSON.parse(stored);
-      } catch {}
+      const e = ((res.data as Record<string, unknown>)?.data ?? res.data) as Record<string, unknown>;
 
       const prefilled: FormState = {
-        title: e?.title ?? "",
-        description: e?.description ?? "",
-        location: e?.location ?? "",
-        st_date: e?.st_date ?? "",
-        end_date: e?.end_date ?? "",
-        cost: e?.cost ?? "",
+        title: (e?.title as string) ?? "",
+        description: (e?.description as string) ?? "",
+        location: (e?.location as string) ?? "",
+        st_date: (e?.st_date as string) ?? "",
+        end_date: (e?.end_date as string) ?? "",
+        cost: (e?.cost as string) ?? "",
         s_limit: String(e?.s_limit ?? ""),
-        type: e?.type ?? "",
-        restrictions: e?.restrictions ?? "",
-        reward: e?.reward ?? "",
-        resource: e?.resource ?? "",
+        type: (e?.type as string) ?? "",
+        restrictions: (e?.restrictions as string) ?? "",
+        reward: (e?.reward as string) ?? "",
+        resource: (e?.resource as string) ?? "",
         // dept_id: e?.dept_id ?? "",
       };
 
@@ -432,10 +386,6 @@ const [form, setForm] = useState<FormState>({
                 {isConvert ? "برجاء تعديل القيم ثم اضغطي حفظ." : "هذه البيانات للتخطيط ويمكن تعديلها لاحقاً."}
               </div>
             </div>
-
-            {isConvert && loadingEvent && (
-              <div style={{ marginBottom: 12, fontWeight: 800, opacity: 0.8 }}>جاري تحميل البيانات...</div>
-            )}
 
             <form className={styles.form} onSubmit={onSubmit} noValidate>
               <div className={styles.grid2}>

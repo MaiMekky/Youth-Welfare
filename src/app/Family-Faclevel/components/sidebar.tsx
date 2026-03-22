@@ -4,7 +4,6 @@ import { usePathname, useRouter } from "next/navigation";
 import "@/app/Styles/Sidebar.css";
 import {
   User,
-  Menu,
   X,
   BarChart3,
   ClipboardList,
@@ -60,16 +59,14 @@ export default function FacLevelSidebar({ isOpen = false, setIsOpen = () => {} }
       document.removeEventListener("mousedown", handleClickOutside);
       document.body.style.overflow = "unset";
     };
-  }, [isOpen]);
+  }, [isOpen, setIsOpen]);
 
   const handleNavigation = (path: string) => {
     router.push(path);
     setIsOpen(false);
   };
     // Close on route change
-    useEffect(() => { setIsOpen(false); }, [pathname]);
-  
-    const go = (path: string) => { router.push(path); setIsOpen(false); };
+    useEffect(() => { setIsOpen(false); }, [pathname, setIsOpen]);
   
     // ✅ NO <button className="mobileMenuBtn"> here — it's now in Header
 

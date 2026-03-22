@@ -2,12 +2,19 @@ import React from "react";
 import styles from "../Styles/FiltersSection.module.css";
 import { Filter, Search } from "lucide-react";
 
+interface FiltersSectionProps {
+  selectedFilter: string;
+  setSelectedFilter: (filter: string) => void;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+}
+
 export default function FiltersSection({
   selectedFilter,
   setSelectedFilter,
   searchQuery,
   setSearchQuery,
-}: any) {
+}: FiltersSectionProps) {
   return (
     <div className={styles.filtersSection}>
       <div className={styles.filtersHeader}>

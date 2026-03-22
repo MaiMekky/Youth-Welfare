@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './details.module.css';
 import { useParams, useRouter } from "next/navigation";
 import Footer from "@/app/FacLevel/components/Footer";
@@ -56,7 +56,6 @@ export default function FamilyDetailsPage() {
 
   const [activitiesData, setActivitiesData] = useState<Activity[]>([]);
   const [studentsData, setStudentsData] = useState<Student[]>([]);
-  const [goalsData, setGoalsData] = useState<string[]>([]);
   const [notification, setNotification] = useState<{
     message: string;
     type: "success" | "error";
@@ -86,20 +85,20 @@ useEffect(() => {
 
       // Extract coordinator & supervisor
       const coordinatorMember = dataFamily.family_members.find(
-        (m: any) => m.role === "أخ أكبر"
+        (m: Record<string, unknown>) => m.role === "أخ أكبر"
       );
       const supervisorMember = dataFamily.family_members.find(
-        (m: any) => m.role === "أخت كبرى"
+        (m: Record<string, unknown>) => m.role === "أخت كبرى"
       );
 
       // Map students
-      const students = dataFamily.family_members.map((member: any) => ({
+      const students = dataFamily.family_members.map((member: Record<string, unknown>) => ({
         memberId: member.student_id,
         name: member.student_name,
         id: member.u_id,
         major: member.dept_name,
         role: member.role,
-        joinDate: new Date(member.joined_at).toLocaleDateString("ar-EG"),
+        joinDate: new Date(member.joined_at as string).toLocaleDateString("ar-EG"),
       }));
       setStudentsData(students);
 
@@ -111,10 +110,10 @@ useEffect(() => {
       if (!resActivities.ok) throw new Error("فشل جلب الأنشطة");
       const dataActivities = await resActivities.json();
 
-      const activities = dataActivities.map((event: any) => ({
+      const activities = dataActivities.map((event: Record<string, unknown>) => ({
         eventId: event.event_id,
         name: event.title,
-        date: new Date(event.st_date).toLocaleDateString("ar-EG"),
+        date: new Date(event.st_date as string).toLocaleDateString("ar-EG"),
         type: event.type,
         participants: Number(event.s_limit),
       }));

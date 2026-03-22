@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import styles from "./CreateProposed.module.css";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
@@ -8,7 +8,6 @@ import {
   Save,
   X,
   MapPin,
-  CalendarDays,
   DollarSign,
   Users,
   Lightbulb,
@@ -48,34 +47,14 @@ function getAccessToken(): string | null {
   );
 }
 
-function getDeptFromToken(): number | null {
-  const token = getAccessToken();
-  if (!token) return null;
-  try {
-    const parts = token.split(".");
-    if (parts.length < 2) return null;
-    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
-    const payload = JSON.parse(atob(padded));
-    const departments = payload?.departments;
-    const deptId1 = Array.isArray(departments) ? departments?.[0]?.dept_id : undefined;
-    const deptIds = payload?.dept_ids;
-    const deptId2 = Array.isArray(deptIds) ? deptIds?.[0] : undefined;
-    const candidate = deptId1 ?? deptId2;
-    if (typeof candidate === "number") return candidate;
-    if (typeof candidate === "string") { const n = Number(candidate); return Number.isFinite(n) ? n : null; }
-    return null;
-  } catch { return null; }
-}
-
 async function apiFetch<T>(
   path: string,
   opts: RequestInit = {}
-): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number; raw?: any }> {
+): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number; raw?: Record<string, unknown> }> {
   const token = getAccessToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(opts.headers as any),
+    ...(opts.headers as Record<string, string>),
   };
   if (token) headers.Authorization = `Bearer ${token}`;
   try {
@@ -85,14 +64,14 @@ async function apiFetch<T>(
     if (!res.ok) {
       const msg =
         (typeof maybeJson === "object" && maybeJson &&
-          ((maybeJson as any).detail || (maybeJson as any).message || (maybeJson as any).error)) ||
+          ((maybeJson as Record<string, unknown>).detail || (maybeJson as Record<string, unknown>).message || (maybeJson as Record<string, unknown>).error)) ||
         (typeof maybeJson === "string" ? maybeJson : "") ||
         `طلب غير ناجح (${res.status})`;
       return { ok: false, message: String(msg), status: res.status, raw: maybeJson };
     }
     return { ok: true, data: maybeJson as T };
-  } catch (e: any) {
-    return { ok: false, message: e?.message || "مشكلة في الاتصال" };
+  } catch (e: unknown) {
+    return { ok: false, message: (e as Error)?.message || "مشكلة في الاتصال" };
   }
 }
 
@@ -106,12 +85,10 @@ export default function CreateProposedEventPage() {
   const isConvert = mode === "convert";
 
   // ── Departments from localStorage (exactly like CreatePlanModal) ──
-  const [departments, setDepartments] = useState<{ dept_id: number; dept_name: string }[]>([]);
-
   useEffect(() => {
     const stored = localStorage.getItem("departments");
     if (stored) {
-      try { setDepartments(JSON.parse(stored)); } catch {}
+      try { JSON.parse(stored); } catch {}
     }
   }, []);
 
@@ -140,7 +117,6 @@ const [form, setForm] = useState<FormState>({
   type Faculty = { id: number; name: string };
 
   const [faculties, setFaculties] = useState<Faculty[]>([]);
-  const [loadingFacs, setLoadingFacs] = useState(false);
   const [selectedFacultyIds, setSelectedFacultyIds] = useState<number[]>([]);
   /* ===================== Toast State ===================== */
   const [toast, setToast] = useState<{ show: boolean; message: string; type: ToastType }>({
@@ -201,7 +177,7 @@ const toggleAllFacs = () => {
     }
       return next;
     },
-    []
+    [isConvert, selectedFacultyIds.length]
   );
 
   const onBlur = (k: keyof FormState) => {
@@ -210,10 +186,10 @@ const toggleAllFacs = () => {
     setErrors((p) => ({ ...p, [k]: nextErrors[k] }));
   };
 
-  const onCancel = () => {
+  const onCancel = useCallback(() => {
     sessionStorage.removeItem("convert_proposed_payload");
     router.back();
-  };
+  }, [router]);
 
   const touchAll = () => {
     setTouched({
@@ -256,7 +232,7 @@ const toggleAllFacs = () => {
         plan_id: Number(planId),
       };
 
-      const res = await apiFetch<any>(
+      const res = await apiFetch<Record<string, unknown>>(
         "/api/events/plans/create-event/",
         {
           method: "POST",
@@ -298,7 +274,7 @@ const toggleAllFacs = () => {
         // dept_id: Number(form.dept_id),  
         selected_facs: selectedFacultyIds,      };
 
-      const res2 = await apiFetch<any>(
+      const res2 = await apiFetch<Record<string, unknown>>(
       `/api/events/plans/${planId}/add-event/`,
       {
         method: "POST",
@@ -321,15 +297,15 @@ const toggleAllFacs = () => {
     if (!isConvert) return;
     const raw = sessionStorage.getItem("convert_proposed_payload");
     if (!raw) return;
-    let parsed: any = null;
+    let parsed: Record<string, unknown> | null = null;
     try { parsed = JSON.parse(raw); } catch { return; }
 
     const idFromPayload =
-      parsed?.event?.event_id ?? parsed?.event?.id ??
-      parsed?.row?.event_id ?? parsed?.row?.id ??
+      (parsed?.event as Record<string, unknown>)?.event_id ?? (parsed?.event as Record<string, unknown>)?.id ??
+      (parsed?.row as Record<string, unknown>)?.event_id ?? (parsed?.row as Record<string, unknown>)?.id ??
       parsed?.event_id ?? parsed?.id ?? null;
 
-    const fallbackRow = parsed?.event ?? parsed?.row ?? parsed ?? {};
+    const fallbackRow = (parsed?.event ?? parsed?.row ?? parsed ?? {}) as Record<string, unknown>;
 
     // Read departments fresh from localStorage for resolution
     // let localDepts: { dept_id: number; dept_name: string }[] = [];
@@ -339,17 +315,17 @@ const toggleAllFacs = () => {
     // } catch {}
 
     const prefilledFromPayload: FormState = {
-      title: fallbackRow?.title ?? "",
-      description: fallbackRow?.description ?? "",
-      location: fallbackRow?.location ?? "",
-      st_date: fallbackRow?.st_date ?? "",
-      end_date: fallbackRow?.end_date ?? "",
+      title: (fallbackRow?.title as string) ?? "",
+      description: (fallbackRow?.description as string) ?? "",
+      location: (fallbackRow?.location as string) ?? "",
+      st_date: (fallbackRow?.st_date as string) ?? "",
+      end_date: (fallbackRow?.end_date as string) ?? "",
       cost: String(fallbackRow?.cost ?? ""),
       s_limit: String(fallbackRow?.s_limit ?? ""),
-      type: fallbackRow?.type ?? "",
-      restrictions: fallbackRow?.restrictions ?? "",
-      reward: fallbackRow?.reward ?? "",
-      resource: fallbackRow?.resource ?? "",
+      type: (fallbackRow?.type as string) ?? "",
+      restrictions: (fallbackRow?.restrictions as string) ?? "",
+      reward: (fallbackRow?.reward as string) ?? "",
+      resource: (fallbackRow?.resource as string) ?? "",
       // dept_id: fallbackRow?.dept_id ?? "",
     };
 
@@ -359,10 +335,10 @@ const toggleAllFacs = () => {
 
     setLoadingEvent(true);
     (async () => {
-      const res = await apiFetch<any>(`/api/event/get-events/${idFromPayload}/`, { method: "GET" });
+      const res = await apiFetch<Record<string, unknown>>(`/api/event/get-events/${idFromPayload}/`, { method: "GET" });
       setLoadingEvent(false);
       if (!res.ok) { showToast(`❌ ${res.message}`, "error"); return; }
-      const e = (res.data as any)?.data ?? res.data;
+      const e = ((res.data as Record<string, unknown>)?.data ?? res.data) as Record<string, unknown>;
 
       // // Read departments fresh again inside async (closure may be stale)
       // let asyncDepts: { dept_id: number; dept_name: string }[] = [];
@@ -372,17 +348,17 @@ const toggleAllFacs = () => {
       // } catch {}
 
       const prefilled: FormState = {
-        title: e?.title ?? "",
-        description: e?.description ?? "",
-        location: e?.location ?? "",
-        st_date: e?.st_date ?? "",
-        end_date: e?.end_date ?? "",
-        cost: e?.cost ?? "",
+        title: (e?.title as string) ?? "",
+        description: (e?.description as string) ?? "",
+        location: (e?.location as string) ?? "",
+        st_date: (e?.st_date as string) ?? "",
+        end_date: (e?.end_date as string) ?? "",
+        cost: (e?.cost as string) ?? "",
         s_limit: String(e?.s_limit ?? ""),
-        type: e?.type ?? "",
-        restrictions: e?.restrictions ?? "",
-        reward: e?.reward ?? "",
-        resource: e?.resource ?? "",
+        type: (e?.type as string) ?? "",
+        restrictions: (e?.restrictions as string) ?? "",
+        reward: (e?.reward as string) ?? "",
+        resource: (e?.resource as string) ?? "",
         // dept_id: e?.dept_id ?? "",
       };
 
@@ -396,17 +372,12 @@ const toggleAllFacs = () => {
     const onKeyDown = (e: KeyboardEvent) => { if (e.key === "Escape") onCancel(); };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [planId]);
+  }, [onCancel]);
   useEffect(() => {
     (async () => {
-      setLoadingFacs(true);
-
-      const res = await apiFetch<any[]>("/api/family/faculties/", {
+      const res = await apiFetch<Record<string, unknown>[]>("/api/family/faculties/", {
         method: "GET",
       });
-
-      setLoadingFacs(false);
 
       if (!res.ok) {
         showToast("❌ فشل تحميل الكليات", "error");
@@ -416,9 +387,9 @@ const toggleAllFacs = () => {
       const list = Array.isArray(res.data) ? res.data : [];
 
       setFaculties(
-        list.map((f: any) => ({
-          id: f.faculty_id,
-          name: f.name,
+        list.map((f: Record<string, unknown>) => ({
+          id: f.faculty_id as number,
+          name: f.name as string,
         }))
       );
     })();

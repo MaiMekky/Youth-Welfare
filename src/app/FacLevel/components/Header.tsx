@@ -38,13 +38,11 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
   const [showTkafol,   setShowTkafol]   = useState(true);
   const [showFamily,   setShowFamily]   = useState(true);
   const [showActivity, setShowActivity] = useState(true);
-  const [deptRestricted, setDeptRestricted] = useState(false);
 
   useEffect(() => {
     const depts = readDepts();
     if (!depts.length) return; // no restriction — show all buttons (super_admin / fac_head etc.)
 
-    setDeptRestricted(true);
     const names = depts.map((d) => d.dept_name.trim());
 
     setShowTkafol(names.some((n) => TKAFOL_NAMES.has(n)));

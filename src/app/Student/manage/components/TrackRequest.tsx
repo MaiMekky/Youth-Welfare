@@ -41,8 +41,8 @@ const TrackRequest: React.FC<TrackRequestProps> = ({ onBack }) => {
         if (!res.ok) throw new Error("فشل تحميل طلبات الأسر");
         const data = await res.json();
         setRequests(data.requests || []);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : String(err));
       } finally {
         setLoading(false);
       }

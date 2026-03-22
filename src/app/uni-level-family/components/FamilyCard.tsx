@@ -4,7 +4,7 @@ import styles from "../Styles/FamilyCard.module.css";
 import { useRouter } from "next/navigation";
 
 interface FamilyCardProps {
-  family: any;
+  family: Record<string, unknown>;
   showActions: boolean;
   activeTab: string;
   onApprove?: (familyId: number) => void;
@@ -35,12 +35,12 @@ export default function FamilyCard({
   };
 
   const handleApprove = () => {
-    onApprove?.(family.family_id);
+    onApprove?.(Number(family.family_id));
     onToast?.("تمت الموافقة على الأسرة بنجاح", "success");
   };
 
   const handleReject = () => {
-    onReject?.(family.family_id);
+    onReject?.(Number(family.family_id));
     onToast?.("تم رفض الأسرة", "warning");
   };
 
@@ -55,15 +55,15 @@ export default function FamilyCard({
       {/* Header */}
       <div className={styles.cardHeader}>
         <div className={styles.titleDescContainer}>
-          <h3 className={styles.familyTitle}>{family.name}</h3>
-          <p className={styles.familyDescription}>{family.description}</p>
+          <h3 className={styles.familyTitle}>{String(family.name)}</h3>
+          <p className={styles.familyDescription}>{String(family.description)}</p>
         </div>
         <div className={styles.statusBadges}>
           <span
             className={styles.badge}
-            style={{ backgroundColor: getStatusColor(family.status), color: "#2C3A5F", fontWeight: 600 }}
+            style={{ backgroundColor: getStatusColor(String(family.status)), color: "#2C3A5F", fontWeight: 600 }}
           >
-            {family.status}
+            {String(family.status)}
           </span>
         </div>
       </div>
@@ -72,7 +72,7 @@ export default function FamilyCard({
       <div className={styles.familyMeta}>
         <div className={styles.metaItem}>
           <span className={styles.metaIcon}></span>
-          <span>{family.member_count} عضو</span>
+          <span>{String(family.member_count)} عضو</span>
         </div>
       </div>
 
@@ -81,11 +81,11 @@ export default function FamilyCard({
         <div className={styles.familyInfo}>
           <div className={styles.infoRow}>
             <span className={styles.infoLabel}>الكلية:</span>
-            <span className={styles.infoValue}>{family.faculty_name}</span>
+            <span className={styles.infoValue}>{String(family.faculty_name)}</span>
           </div>
           <div className={styles.infoRow}>
             <span className={styles.infoLabel}>النوع:</span>
-            <span className={styles.infoValue}>{family.type}</span>
+            <span className={styles.infoValue}>{String(family.type)}</span>
           </div>
         </div>
       )}

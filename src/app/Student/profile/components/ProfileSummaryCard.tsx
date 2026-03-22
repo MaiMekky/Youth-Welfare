@@ -8,15 +8,11 @@ import type { StudentProfile } from "../types";
 interface ProfileSummaryCardProps {
   profileData: StudentProfile;
   onImageUpload: (file: File) => void;
-  isEditing: boolean;
-  onCancelEdit: () => void;
 }
 
 export default function ProfileSummaryCard({
   profileData,
   onImageUpload,
-  isEditing,
-  onCancelEdit,
 }: ProfileSummaryCardProps) {
   const [profileImage, setProfileImage] = useState(profileData.profilePicture);
 
@@ -66,7 +62,7 @@ export default function ProfileSummaryCard({
         <div className="profile-image-section">
           <div className="profile-image-wrapper">
             {profileImage && profileImage.trim() !== "" && profileImage !== "/app/assets/profile.png" ? (
-              <img
+              <Image
                 src={profileImage}
                 alt="Profile"
                 width={120}

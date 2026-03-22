@@ -4,13 +4,15 @@ import Image from "next/image";
 import styles from "@/app/Styles/components/activites.module.css";
 import photo from "@/app/assets/IMG-20251014-WA0013.jpg";
 
+import { StaticImageData } from "next/image";
+
 type Activity = {
   id: number;
   title: string;
   date: string;
   category: string;
   description: string;
-  imageUrl: any;
+  imageUrl: StaticImageData;
 };
 
 const categories = [

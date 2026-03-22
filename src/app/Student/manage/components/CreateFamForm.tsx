@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import '../styles/CreateFam.css';
 import Toast from './Toast';
-import { ChevronRight, ChevronLeft, Check, User, Users, LayoutList, FileText, Send } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Check, User, Users, FileText, Send } from 'lucide-react';
 import { authFetch } from "@/utils/globalFetch";
 const CACHE_KEY = 'createFamFormData';
 
@@ -48,11 +48,11 @@ const CODE_MESSAGES: Record<string, string> = {
   throttled: 'الرجاء الانتظار قبل المحاولة مرة أخرى',
 };
 
-function parseApiError(err: any): string[] {
+function parseApiError(err: unknown): string[] {
   if (!err || typeof err !== 'object') return ['حدث خطأ غير متوقع'];
   const messages: string[] = [];
 
-  const extract = (obj: any, parentKey = ''): void => {
+  const extract = (obj: unknown, parentKey = ''): void => {
     if (typeof obj === 'string') {
       // strip raw ErrorDetail strings e.g. "[ErrorDetail(string='...', code='invalid')]"
       const strMatch = obj.match(/string='([^']+)'/);
@@ -68,8 +68,8 @@ function parseApiError(err: any): string[] {
       obj.forEach(item => extract(item, parentKey));
       return;
     }
-    if (typeof obj === 'object') {
-      Object.entries(obj).forEach(([k, v]) => {
+    if (typeof obj === 'object' && obj !== null) {
+      Object.entries(obj as Record<string, unknown>).forEach(([k, v]) => {
         if (['status', 'status_code'].includes(k)) return;
         extract(v, k);
       });
@@ -134,7 +134,6 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
   const [boardMembers, setBoardMembers]           = useState(defaultBoard);
   const [committees, setCommittees]               = useState<Record<string, Committee>>(defaultCommittees);
   const [errors, setErrors]                       = useState<FormErrors>({});
-  const [studentId, setStudentId]                 = useState<number|null>(null);
   const [facultyId, setFacultyId]                 = useState<number|null>(null);
   const [departments, setDepartments]             = useState<Department[]>([]);
   const [isSubmitting, setIsSubmitting]           = useState(false);
@@ -190,7 +189,6 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (!data) return;
-        setStudentId(data.student_id);
         const fid = (data.faculty && data.faculty !== 0) ? data.faculty : decoded?.faculty_id ?? null;
         if (fid) setFacultyId(fid);
       }).catch(() => {});
@@ -263,7 +261,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
 
       const committeesData = Object.entries(committees).map(([key, c]) => {
         const deptId = c.selectedDeptId ? parseInt(c.selectedDeptId) : (facultyId || 0);
-        const activities: any[] = [];
+        const activities: Record<string, unknown>[] = [];
         if (c.plan || c.executionDate || c.fundingSources) {
           activities.push({
             title: `نشاط ${c.name}`, description: c.plan || '',
@@ -308,7 +306,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         showToast('تم إرسال طلبك بنجاح! 🎉 يرجى انتظار مراجعته', 'success');
         setTimeout(() => { if (onSubmitSuccess) onSubmitSuccess(); }, 2000);
       } else {
-        let errData: any = {};
+        let errData: Record<string, unknown> = {};
         try { errData = await res.json(); } catch {}
 
         // Parse into human-readable lines

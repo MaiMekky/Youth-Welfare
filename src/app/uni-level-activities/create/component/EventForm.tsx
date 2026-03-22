@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "../CreateEvent.module.css";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowRight, Save } from "lucide-react";
@@ -89,9 +89,9 @@ function getDepartments(): { dept_id: number; dept_name: string }[] {
 async function apiFetch<T>(
   path: string,
   opts: RequestInit = {}
-): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number; raw?: any }> {
+): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number; raw?: unknown }> {
   const token = getAccessToken();
-  const headers: Record<string, string> = { ...(opts.headers as any) };
+  const headers: Record<string, string> = { ...(opts.headers as Record<string, string>) };
   if (!headers["Content-Type"] && opts.body) headers["Content-Type"] = "application/json";
   if (token) headers.Authorization = `Bearer ${token}`;
   try {
@@ -101,14 +101,14 @@ async function apiFetch<T>(
     if (!res.ok) {
       const msg =
         (typeof maybeJson === "object" && maybeJson &&
-          ((maybeJson as any).detail || (maybeJson as any).message || (maybeJson as any).error)) ||
+          ((maybeJson as Record<string, unknown>).detail || (maybeJson as Record<string, unknown>).message || (maybeJson as Record<string, unknown>).error)) ||
         (typeof maybeJson === "string" ? maybeJson : "") ||
         `طلب غير ناجح (${res.status})`;
       return { ok: false, message: String(msg), status: res.status, raw: maybeJson };
     }
     return { ok: true, data: maybeJson as T };
-  } catch (e: any) {
-    return { ok: false, message: e?.message || "مشكلة في الاتصال" };
+  } catch (e: unknown) {
+    return { ok: false, message: e instanceof Error ? e.message : String(e) || "مشكلة في الاتصال" };
   }
 }
 
@@ -159,10 +159,10 @@ export default function EventForm({
   // ── Departments from localStorage (exactly like CreatePlanModal) ──
   const [departments, setDepartments] = useState<{ dept_id: number; dept_name: string }[]>([]);
 
- useEffect(() => {
-  const deps = getDepartments();
-  setDepartments(deps);
-}, []);
+  useEffect(() => {
+    const deps = getDepartments();
+    setDepartments(deps);
+  }, []);
 
   /** ===== Faculties from API ===== */
   const [faculties, setFaculties] = useState<Faculty[]>([]);
@@ -239,7 +239,6 @@ export default function EventForm({
       const list = Array.isArray(res.data) ? res.data : [];
       setFaculties(list.map((f) => ({ id: f.faculty_id, name: f.name })));
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /** ===== Load event details for edit ===== */
@@ -269,7 +268,6 @@ export default function EventForm({
       }));
       setSelectedFacultyIds(Array.isArray(e?.selected_facs) ? e.selected_facs : []);
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditMode, eventId]);
 
   /** ===== Submit ===== */
@@ -306,12 +304,12 @@ export default function EventForm({
 
     setSubmitting(true);
     if (isEditMode) {
-      const res = await apiFetch<any>(`/api/event/manage-events/${eventId}/`, { method: "PATCH", body: JSON.stringify(payload) });
+      const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-events/${eventId}/`, { method: "PATCH", body: JSON.stringify(payload) });
       setSubmitting(false);
       if (!res.ok) { showNotification(res.message || "❌ حصل خطأ أثناء تعديل الفعالية", "error"); return; }
       showNotification("✅ تم تعديل الفعالية بنجاح", "success");
     } else {
-      const res = await apiFetch<any>("/api/event/manage-events/", { method: "POST", body: JSON.stringify(payload) });
+      const res = await apiFetch<Record<string, unknown>>("/api/event/manage-events/", { method: "POST", body: JSON.stringify(payload) });
       setSubmitting(false);
       if (!res.ok) { showNotification(res.message || "❌ حصل خطأ أثناء إنشاء الفعالية", "error"); return; }
       showNotification("✅ تم إنشاء الفعالية بنجاح", "success");

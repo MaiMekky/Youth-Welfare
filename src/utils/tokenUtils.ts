@@ -1,4 +1,4 @@
-export const decodeToken = (token: string): Record<string, any> | null => {
+export const decodeToken = (token: string): Record<string, unknown> | null => {
   try {
     const parts = token.split('.');
     if (parts.length !== 3) return null;
@@ -18,7 +18,8 @@ export const getFacultyIdFromToken = (): number | null => {
   const decoded = decodeToken(token);
   if (!decoded) return null;
 
-  return decoded.faculty_id || decoded.faculty || null;
+  const value = decoded.faculty_id || decoded.faculty;
+  return typeof value === 'number' ? value : null;
 };
 
 export const getStudentIdFromToken = (): number | null => {
@@ -28,5 +29,6 @@ export const getStudentIdFromToken = (): number | null => {
   const decoded = decodeToken(token);
   if (!decoded) return null;
 
-  return decoded.user_id || decoded.student_id || decoded.id || null;
+  const value = decoded.user_id || decoded.student_id || decoded.id;
+  return typeof value === 'number' ? value : null;
 };

@@ -5,12 +5,34 @@ import { useParams, useRouter } from "next/navigation";
 import "./ApplicationDetails.css";
 import { authFetch } from "@/utils/globalFetch";
 
+interface StudentDetail {
+  solidarity_id?: string | number;
+  student_name?: string;
+  student_uid?: string | number;
+  faculty_name?: string;
+  acd_status?: string;
+  family_numbers?: string | number;
+  father_income?: string | number;
+  mother_income?: string | number;
+  total_income?: string | number;
+  m_phone_num?: string;
+  f_phone_num?: string;
+  housing_status?: string;
+  address?: string;
+  reason?: string;
+  disabilities?: string;
+  arrange_of_brothers?: string | number;
+  approved_by?: string;
+  updated_at?: string;
+  [key: string]: unknown;
+}
+
 export default function ApplicationDetailsPage() {
   const { id } = useParams(); // solidarity_id من URL
   const router = useRouter();
 
-  const [data, setData] = useState<any>(null);
-  const [docs, setDocs] = useState<any[]>([]);
+  const [data, setData] = useState<StudentDetail | null>(null);
+  const [docs, setDocs] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -31,7 +53,7 @@ const fetchData = async () => {
     if (!appRes.ok) throw new Error("APPLICATION_ERROR");
 
     const appData = await appRes.json();
-    setData(appData);
+    setData(appData as StudentDetail);
 
     // ====== جلب المستندات ======
     const docsRes = await authFetch(
@@ -84,12 +106,12 @@ const fetchData = async () => {
       <section className="section info">
         <h3>البيانات الأساسية</h3>
         <ul>
-          <li><strong>رقم التضامن:</strong> {data.solidarity_id}</li>
-          <li><strong>الاسم:</strong> {data.student_name}</li>
-          <li><strong>الرقم الجامعي:</strong> {data.student_uid}</li>
-          <li><strong>الكلية:</strong> {data.faculty_name}</li>
-          <li><strong>الحالة الدراسية:</strong> {data.acd_status}</li>
-          <li><strong>عدد أفراد الأسرة:</strong> {data.family_numbers}</li>
+          <li><strong>رقم التضامن:</strong> {String(data?.solidarity_id ?? '')}</li>
+          <li><strong>الاسم:</strong> {data?.student_name}</li>
+          <li><strong>الرقم الجامعي:</strong> {String(data?.student_uid ?? '')}</li>
+          <li><strong>الكلية:</strong> {data?.faculty_name}</li>
+          <li><strong>الحالة الدراسية:</strong> {data?.acd_status}</li>
+          <li><strong>عدد أفراد الأسرة:</strong> {String(data?.family_numbers ?? '')}</li>
         </ul>
       </section>
 
@@ -97,9 +119,9 @@ const fetchData = async () => {
       <section className="section info">
         <h3>المعلومات المالية</h3>
         <ul>
-          <li><strong>دخل الأب:</strong> {data.father_income}</li>
-          <li><strong>دخل الأم:</strong> {data.mother_income}</li>
-          <li><strong>إجمالي الدخل:</strong> {data.total_income}</li>
+          <li><strong>دخل الأب:</strong> {String(data?.father_income ?? '')}</li>
+          <li><strong>دخل الأم:</strong> {String(data?.mother_income ?? '')}</li>
+          <li><strong>إجمالي الدخل:</strong> {String(data?.total_income ?? '')}</li>
         </ul>
       </section>
 
@@ -107,10 +129,10 @@ const fetchData = async () => {
       <section className="section info">
         <h3>معلومات الاتصال والسكن</h3>
         <ul>
-          <li><strong>هاتف الأم:</strong> {data.m_phone_num}</li>
-          <li><strong>هاتف الأب:</strong> {data.f_phone_num}</li>
-          <li><strong>السكن:</strong> {data.housing_status}</li>
-          <li><strong>العنوان:</strong> {data.address}</li>
+          <li><strong>هاتف الأم:</strong> {data?.m_phone_num}</li>
+          <li><strong>هاتف الأب:</strong> {data?.f_phone_num}</li>
+          <li><strong>السكن:</strong> {data?.housing_status}</li>
+          <li><strong>العنوان:</strong> {data?.address}</li>
         </ul>
       </section>
 
@@ -118,11 +140,11 @@ const fetchData = async () => {
       <section className="section info">
         <h3>معلومات إضافية</h3>
         <ul>
-          <li><strong>سبب الطلب:</strong> {data.reason}</li>
-          <li><strong>الإعاقة:</strong> {data.disabilities}</li>
-          <li><strong>الترتيب بين الإخوة:</strong> {data.arrange_of_brothers}</li>
-          <li><strong>الموافقة من:</strong> {data.approved_by}</li>
-          <li><strong>آخر تحديث:</strong> {new Date(data.updated_at).toLocaleString()}</li>
+          <li><strong>سبب الطلب:</strong> {data?.reason}</li>
+          <li><strong>الإعاقة:</strong> {data?.disabilities}</li>
+          <li><strong>الترتيب بين الإخوة:</strong> {String(data?.arrange_of_brothers ?? '')}</li>
+          <li><strong>الموافقة من:</strong> {data?.approved_by}</li>
+          <li><strong>آخر تحديث:</strong> {data?.updated_at ? new Date(data.updated_at).toLocaleString() : '-'}</li>
         </ul>
       </section>
 
@@ -134,18 +156,18 @@ const fetchData = async () => {
         ) : (
           <div className="docsContainer">
             {docs.map((doc) => (
-              <div key={doc.doc_id} className="docCard">
-                <p><strong>{doc.doc_type}</strong></p>
+              <div key={String(doc.doc_id ?? '')} className="docCard">
+                <p><strong>{String(doc.doc_type ?? '')}</strong></p>
                 
                 <button
-                onClick={() => openDocument(doc.doc_id)}
+                onClick={() => openDocument(Number(doc.doc_id))}
                   className="docLinkButton"
                 >
                   افتح الملف
                 </button>
                 
                 <p className="uploadDate">
-                  تم الرفع: {doc.uploaded_at ? doc.uploaded_at.slice(0, 10) : "-"}
+                  تم الرفع: {doc.uploaded_at ? String(doc.uploaded_at).slice(0, 10) : "-"}
                 </p>
               </div>
             ))}

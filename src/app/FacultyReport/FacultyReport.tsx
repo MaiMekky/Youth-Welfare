@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import styles from "./FacultyReport.module.css";
 import { ChevronLeft, ChevronRight, Search, Wallet, Users, FileText } from "lucide-react";
 import Footer from "../FacLevel/components/Footer";
-import { useRouter } from "next/navigation";
+
 import { authFetch } from "@/utils/globalFetch";
 
 interface StudentType {
@@ -18,10 +18,9 @@ interface StudentType {
 export default function FacultyReport() {
   const [students, setStudents]       = useState<StudentType[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [userData, setUserData]       = useState<any>(null);
+  const [userData, setUserData]       = useState<Record<string, unknown> | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const router = useRouter();
   const [showExportModal, setShowExportModal] = useState(false);
   const [academicYear, setAcademicYear] = useState("");
 
@@ -43,7 +42,7 @@ const fetchData = async () => {
 
     const data = await res.json();
 
-    const mapped: StudentType[] = data.results.map((item: any) => ({
+    const mapped: StudentType[] = data.results.map((item: Record<string, unknown>) => ({
       name: item.student_name,
       id: item.student_id,
       req: item.solidarity_id,

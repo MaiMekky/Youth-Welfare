@@ -41,10 +41,10 @@ export default function Sidebar({ isOpen = false, setIsOpen = () => {} }: Sideba
       document.removeEventListener("mousedown", handleOutside);
       document.body.style.overflow = "unset";
     };
-  }, [isOpen]);
+  }, [isOpen, setIsOpen]);
 
   // Close on route change
-  useEffect(() => { setIsOpen(false); }, [pathname]);
+  useEffect(() => { setIsOpen(false); }, [pathname, setIsOpen]);
 
   return (
     <>

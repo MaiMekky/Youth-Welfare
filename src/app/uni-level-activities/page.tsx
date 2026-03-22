@@ -18,14 +18,14 @@ type ApiEvent = {
   st_date: string;
   end_date: string;
   location: string;
-  status: any;
+  status: Record<string, unknown>;
   type: string;
   cost: string;
   s_limit: number;
   faculty_id: number | null;
   faculty_name: string | null;
   dept_id: number;
-  active?: any;
+  active?: Record<string, unknown>;
 };
 
 function getAccessToken(): string | null {
@@ -40,11 +40,11 @@ function getAccessToken(): string | null {
 async function apiFetch<T>(
   path: string,
   opts: RequestInit = {}
-): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number; raw?: any }> {
+): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number; raw?: unknown }> {
   const token = getAccessToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(opts.headers as any),
+    ...(opts.headers as Record<string, string>),
   };
   if (token) headers.Authorization = `Bearer ${token}`;
 
@@ -65,7 +65,7 @@ async function apiFetch<T>(
       const msg =
         (typeof maybeJson === "object" &&
           maybeJson &&
-          ((maybeJson as any).detail || (maybeJson as any).message || (maybeJson as any).error)) ||
+          ((maybeJson as Record<string, unknown>).detail || (maybeJson as Record<string, unknown>).message || (maybeJson as Record<string, unknown>).error)) ||
         (typeof maybeJson === "string" ? maybeJson : "") ||
         `طلب غير ناجح (${res.status})`;
 
@@ -73,12 +73,12 @@ async function apiFetch<T>(
     }
 
     return { ok: true, data: maybeJson as T };
-  } catch (e: any) {
-    return { ok: false, message: e?.message || "مشكلة في الاتصال" };
+  } catch (e: unknown) {
+    return { ok: false, message: e instanceof Error ? e.message : String(e) || "مشكلة في الاتصال" };
   }
 }
 
-function toBool(v: any): boolean | null {
+function toBool(v: unknown): boolean | null {
   if (typeof v === "boolean") return v;
   if (typeof v === "number") return v === 1 ? true : v === 0 ? false : null;
   if (typeof v === "string") {
@@ -98,7 +98,7 @@ function statusVariant(status: string): ChipVariant {
   return "purple";
 }
 
-function categoryVariant(_type: string): ChipVariant {
+function categoryVariant(): ChipVariant {
   return "info";
 }
 
@@ -108,11 +108,11 @@ function toPriceText(cost: string) {
   return `${n} جنيه`;
 }
 
-function toEventItem(e: ApiEvent, facultyMap: Record<number, string>): EventItem {
+function toEventItem(e: ApiEvent): EventItem {
   const apiActive = toBool(e.active);
   const statusBool = toBool(e.status);
   const statusText = typeof e.status === "string" ? e.status : "";
-  const isActive = apiActive ?? statusBool ?? statusText === "نشط";
+  const isActive = apiActive ?? statusBool ?? Boolean(statusText && statusText === "نشط");
 
   return {
     id: e.event_id,
@@ -121,7 +121,7 @@ function toEventItem(e: ApiEvent, facultyMap: Record<number, string>): EventItem
     statusLabel: statusText ?? "",
     statusVariant: statusVariant(statusText),
     categoryLabel: e.type ?? "",
-    categoryVariant: categoryVariant(e.type),
+    categoryVariant: categoryVariant(),
     date: e.st_date || "",
     time: e.end_date || "",
     location: e.location ?? "",
@@ -156,22 +156,18 @@ export default function Page() {
     setFaculties(res.data);
   };
 
-  const facultyMap = useMemo(() => {
-    const map: Record<number, string> = {};
-    faculties.forEach((f) => { map[f.faculty_id] = f.name; });
-    return map;
-  }, [faculties]);
-
   const fetchEvents = async () => {
     setLoading(true);
     const res = await apiFetch<ApiEvent[]>("/api/event/get-events/", { method: "GET" });
     setLoading(false);
     if (!res.ok) { showNotification(res.message || "فشل تحميل الفعاليات", "error"); return; }
     const list = Array.isArray(res.data) ? res.data : [];
-    setEvents(list.map((e) => toEventItem(e, facultyMap)));
+    setEvents(list.map((e) => toEventItem(e)));
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchFaculties(); }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (faculties.length) fetchEvents(); }, [faculties]);
 
   const stats: StatItem[] = useMemo(() => {
@@ -189,7 +185,7 @@ export default function Page() {
   const onEdit   = (id: number) => router.push(`/uni-level-activities/create/${id}`);
   const onDelete = async (id: number) => {
     const prev = events;
-    const res = await apiFetch<any>(`/api/event/get-events/${id}/`, { method: "DELETE" });
+    const res = await apiFetch<Record<string, unknown>>(`/api/event/get-events/${id}/`, { method: "DELETE" });
     if (!res.ok) { setEvents(prev); showNotification(res.message || "فشل الغاء الفعالية", "error"); return; }
     showNotification("✅ تم الغاء الفعالية بنجاح", "success");
     await fetchEvents();

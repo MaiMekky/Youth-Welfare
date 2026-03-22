@@ -1,5 +1,5 @@
 "use client";
-import React, { useState , useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import logo from "../assets/logo.png";
@@ -56,7 +56,6 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
   const [errors, setErrors]     = useState<Record<string, string>>({});
   const [loading, setLoading]   = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   useEffect(() => {
@@ -117,6 +116,7 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
       return;
     }
   }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
 }, []);
 
   const showNotification = (message: string, type: "success" | "warning" | "error") => {
@@ -250,7 +250,6 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
   };
  // ======= Google Login Handler =======
   const handleGoogleLogin = async () => {
-    setGoogleLoading(true);
     try {
       // Step 1: Get the Google authorization URL from your backend
       const initRes = await authFetch(
@@ -265,7 +264,6 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
       
       if (!initRes.ok) {
         showNotification("فشل في الاتصال بـ Google ❌", "error");
-        setGoogleLoading(false);
         return;
       }
 
@@ -275,7 +273,6 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
     } catch (error) {
       console.error(error);
       showNotification("خطأ في عملية تسجيل الدخول بـ Google ❌", "error");
-      setGoogleLoading(false);
     }
   };
 

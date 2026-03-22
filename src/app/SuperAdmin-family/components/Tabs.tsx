@@ -9,7 +9,7 @@ interface Props {
   pendingCount?: number;
 }
 
-export default function Tabs({ activeTab, setActiveTab, pendingCount = 0 }: Props) {
+export default function Tabs({ activeTab, setActiveTab }: Props) {
   return (
     <div className={styles.tabsContainer}>
     

@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { authFetch } from "@/utils/globalFetch";
 interface GoogleCallbackHandlerProps {
-  onLoginSuccess: (data: any) => void;
+  onLoginSuccess: (data: Record<string, unknown>) => void;
   onLoginError: (message: string) => void;
 }
 
@@ -11,7 +11,6 @@ export default function GoogleCallbackHandler({
   onLoginSuccess,
   onLoginError,
 }: GoogleCallbackHandlerProps) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [processed, setProcessed] = useState(false);
 
@@ -42,6 +41,7 @@ export default function GoogleCallbackHandler({
       setProcessed(true);
       exchangeCodeForToken(code);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, processed]);
 
   const exchangeCodeForToken = async (code: string) => {

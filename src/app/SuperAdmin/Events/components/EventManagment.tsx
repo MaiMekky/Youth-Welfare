@@ -205,8 +205,8 @@ export default function EventsPage() {
         const evArr: ApiEvent[] = Array.isArray(rawEvents)
           ? rawEvents : (rawEvents.results ?? rawEvents.data ?? []);
         setData(evArr.map((e) => mapApiEvent(e, facultyMap)));
-      } catch (e: any) {
-        setError(e.message ?? "حدث خطأ أثناء تحميل البيانات");
+      } catch (e: unknown) {
+        setError(e instanceof Error ? e.message : "حدث خطأ أثناء تحميل البيانات");
       } finally {
         setLoading(false);
       }

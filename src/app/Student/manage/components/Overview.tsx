@@ -2,11 +2,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import {
   Users,
-  Calendar,
   UserCircle,
-  Trophy,
   BookOpen,
-  Handshake,
   Clock,
   CheckCircle,
 } from "lucide-react";
@@ -86,7 +83,7 @@ interface DashboardResponse {
       role: string;
     }>;
   };
-  recent_activities: any[];
+  recent_activities: Record<string, unknown>[];
   recent_posts: Array<{
     post_id: number;
     title: string;
@@ -193,9 +190,9 @@ const Overview: React.FC = () => {
           setError("لا توجد أسرة بدور 'أخ أكبر'");
           setLoading(false);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("❌ Error fetching families:", err);
-        setError(err.message || "حصل خطأ أثناء تحميل قائمة الأسر");
+        setError(err instanceof Error ? err.message : String(err));
         setLoading(false);
       }
     };
@@ -274,9 +271,9 @@ const Overview: React.FC = () => {
 
         setPosts(recentPosts);
 
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error fetching dashboard:", err);
-        setError(err.message || "حصل خطأ أثناء تحميل البيانات");
+        setError(err instanceof Error ? err.message : "حصل خطأ أثناء تحميل البيانات");
       } finally {
         setLoading(false);
       }

@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Image from "next/image";
 import styles from "../Styles/Footer2.module.css";
 import { MapPin, Users } from "lucide-react";
 import capitalLogo from "../../../app/assets/capital-uni-logo.png";
@@ -18,11 +19,11 @@ export default function Footer() {
         <div className={styles.footerCol}>
           <div className={styles.brandBlock}>
             <div className={styles.brandIcon}>
-              <img
-                src={capitalLogo.src}
+              <Image
+                src={capitalLogo}
                 alt="Capital University Logo"
-                width="70"
-                height="70"
+                width={70}
+                height={70}
                 draggable={false}
               />
             </div>

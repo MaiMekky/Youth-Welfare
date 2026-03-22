@@ -8,9 +8,18 @@ import RequestsTable from "./components/RequestsTable";
 import Footer from "./components/Footer";
 import DiscountsSection from "./components/DiscountsSection";
 
+interface RequestItem {
+  id: string | number;
+  name: string;
+  studentId: string | number;
+  reqNumber: string | number;
+  date: string;
+  amount: string;
+  status: string;
+}
 
 export default function FinancialSupportPage() {
-  const [requests, setRequests] = useState<any[]>([]);
+  const [requests, setRequests] = useState<RequestItem[]>([]);
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -19,9 +28,9 @@ export default function FinancialSupportPage() {
     return requests.filter((req) => {
       const matchFilter = selectedFilter === "all" || req.status === selectedFilter;
       const matchSearch =
-        req.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        req.studentId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(req.reqNumber)?.toLowerCase().includes(searchQuery.toLowerCase());
+        String(req.name).toLowerCase().includes(searchQuery.toLowerCase()) ||
+        String(req.studentId).toLowerCase().includes(searchQuery.toLowerCase()) ||
+        String(req.reqNumber).toLowerCase().includes(searchQuery.toLowerCase());
       return matchFilter && matchSearch;
     });
   }, [selectedFilter, searchQuery, requests]);

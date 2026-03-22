@@ -173,7 +173,7 @@ function ConfirmDialog({ action, eventTitle, onConfirm, onCancel, loading }: {
           {isApprove ? <CheckCircle size={32}/> : <XCircle size={32}/>}
         </div>
         <h3>{isApprove?"تأكيد الاعتماد":"تأكيد الرفض"}</h3>
-        <p>هل أنت متأكد من {isApprove?"اعتماد":"رفض"} فعالية<br/><strong style={{color:"#111827"}}>"{eventTitle}"</strong>؟</p>
+        <p>هل أنت متأكد من {isApprove?"اعتماد":"رفض"} فعالية<br/><strong style={{color:"#111827"}}>&quot;{eventTitle}&quot;</strong>؟</p>
         <div className={styles.confirmBtns}>
           <button className={styles.cancelBtn} onClick={onCancel} disabled={loading}>إلغاء</button>
           <button

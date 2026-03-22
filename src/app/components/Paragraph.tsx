@@ -3,7 +3,7 @@ import React from "react";
 import { useLanguage } from "../context/LanguageContext";
 
 const Paragraph: React.FC = () => {
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
 
   const paragraphStyle: React.CSSProperties = {
     textAlign: language === "ar" ? "right" : "left",

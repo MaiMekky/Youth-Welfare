@@ -1,9 +1,16 @@
 "use client";
+
 import React from "react";
 import FamilyCard from "./FamilyCard";
 import styles from "../Styles/FamilyCard.module.css";
 
-export default function FamiliesGrid({ families, showActions, loading }: any) {
+interface FamiliesGridProps {
+  families: Record<string, unknown>[];
+  showActions?: boolean;
+  loading?: boolean;
+}
+
+export default function FamiliesGrid({ families, showActions, loading }: FamiliesGridProps) {
   if (loading) {
     return (
       <div className={styles.loadingWrap}>
@@ -35,7 +42,7 @@ export default function FamiliesGrid({ families, showActions, loading }: any) {
         </div>
         <h3 className={styles.emptyTitle}>لا توجد أسر</h3>
         <p className={styles.emptyDesc}>
-          لم يتم العثور على أي أسر طلابية تطابق  البحث 
+          لم يتم العثور على أي أسر طلابية تطابق  البحث
         </p>
       </div>
     );
@@ -43,8 +50,8 @@ export default function FamiliesGrid({ families, showActions, loading }: any) {
 
   return (
     <div className={styles.familiesGrid}>
-      {families.map((f: any) => (
-        <FamilyCard key={f.id} family={f} showActions={showActions} />
+      {families.map((f: Record<string, unknown>) => (
+        <FamilyCard key={String(f.id)} family={f} showActions={showActions ?? false} />
       ))}
     </div>
   );

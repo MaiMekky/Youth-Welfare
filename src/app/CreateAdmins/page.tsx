@@ -55,21 +55,21 @@ export default function AccessPrivileges() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
-        const mappedUsers: User[] = data.map((u: any) => ({
-          id: u.admin_id.toString(),
-          name: u.name,
-          email: u.email,
-          faculty: u.faculty_name || '',
-          departments: u.dept_name || '',
-          role: u.role || 'غير محدد',
+        const mappedUsers: User[] = data.map((u: Record<string, unknown>) => ({
+          id: (u.admin_id as number).toString(),
+          name: u.name as string,
+          email: u.email as string,
+          faculty: (u.faculty_name as string) || '',
+          departments: (u.dept_name as string) || '',
+          role: (u.role as string) || 'غير محدد',
           permissions: [
             u.can_create ? 'C' : '',
             u.can_read   ? 'R' : '',
             u.can_update ? 'U' : '',
             u.can_delete ? 'D' : '',
-          ].filter(Boolean),
+          ].filter(Boolean) as string[],
           status: u.acc_status === 'active',
-          lastModified: new Date(u.created_at).toLocaleDateString('ar-EG'),
+          lastModified: new Date(u.created_at as string).toLocaleDateString('ar-EG'),
           modifiedBy: 'مشرف النظام',
         }));
 

@@ -66,8 +66,8 @@ export default function PlanCard({
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
-    } catch (e: any) {
-      window.alert(e?.message || "حدث خطأ أثناء التصدير");
+    } catch (e: unknown) {
+      window.alert(e instanceof Error ? e.message : String(e) || "حدث خطأ أثناء التصدير");
     } finally {
       setExporting(false);
     }

@@ -314,8 +314,6 @@ export default function ProfilePage() {
       <ProfileSummaryCard
         profileData={profileData}
         onImageUpload={handleImageUpload}
-        isEditing={isEditing}
-        onCancelEdit={handleCancelEdit}
       />
       <ProfileDetailsSection
         profileData={profileData}

@@ -9,29 +9,6 @@ import Overview from "./Overview";
 import Toast from "./Toast";
 import { X, Upload, CalendarPlus } from "lucide-react";
 import { authFetch } from "@/utils/globalFetch";
-interface Member {
-  id: number;
-  name: string;
-  college: string;
-  joinedAt: string;
-  lastActive: string;
-  role: "عضو" | "مساعد" | "مؤسس";
-  isOnline: boolean;
-}
-
-interface Activity {
-  id: number;
-  title: string;
-  type: string;
-  date: string;
-  time: string;
-  location: string;
-  description: string;
-  participants: string;
-  status: "قادمة" | "مكتملة";
-  color: string;
-}
-
 export interface Post {
   id: number;
   author: string;
@@ -68,8 +45,6 @@ interface ToastNotification {
 }
 
 const Dashboard: React.FC = () => {
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [posts, setPosts] = useState<Post[]>([]);
   const [activeTab, setActiveTab] = useState<"overview" | "activities" | "members" | "posts">("overview");
 
   const [showCreateContentForm, setShowCreateContentForm] = useState(false);
@@ -117,14 +92,14 @@ const Dashboard: React.FC = () => {
         });
         if (!res.ok) throw new Error(`فشل تحميل قائمة الأسر (Status: ${res.status})`);
         const response = await res.json();
-        let families: Family[] = Array.isArray(response) ? response
+        const families: Family[] = Array.isArray(response) ? response
           : response.data ?? response.results ?? response.families ?? [];
         if (!families.length) { showToast("لا توجد أسر متاحة", "warning"); return; }
         const elderFamily = families.find(f => f.role === "أخ أكبر");
         if (elderFamily) { setSelectedFamilyId(elderFamily.family_id); setFamilyName(elderFamily.name); }
         else showToast("لا توجد أسرة بدور 'أخ أكبر'", "warning");
-      } catch (err: any) {
-        showToast(err.message || "حصل خطأ أثناء تحميل قائمة الأسر", "error");
+      } catch (err: unknown) {
+        showToast(err instanceof Error ? err.message : "حصل خطأ أثناء تحميل قائمة الأسر", "error");
       } finally { setProfileLoading(false); }
     };
     fetchFamilyData();

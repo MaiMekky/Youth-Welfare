@@ -3,8 +3,32 @@ import React, { useMemo } from "react";
 import styles from "../Styles/FiltersBar.module.css";
 
 interface FiltersBarProps {
-  filters: any;
-  setFilters: (filters: any) => void;
+  filters: {
+    search: string;
+    fatherStatus: string;
+    motherStatus: string;
+    housingStatus: string;
+    brothers: string;
+    totalIncome: string;
+    faculty: string;
+    grade: string;
+    disability: string;
+    status: string;
+    [key: string]: string;
+  };
+  setFilters: React.Dispatch<React.SetStateAction<{
+    search: string;
+    fatherStatus: string;
+    motherStatus: string;
+    housingStatus: string;
+    brothers: string;
+    totalIncome: string;
+    faculty: string;
+    grade: string;
+    disability: string;
+    status: string;
+    [key: string]: string;
+  }>>;
   onApply: () => void;
   onSearchChange: (value: string) => void;
 }
@@ -39,7 +63,7 @@ export default function FiltersBar({
 }: FiltersBarProps) {
 
   const handleChange = (key: string, value: string) => {
-    setFilters((prev: any) => ({ ...prev, [key]: value }));
+    setFilters((prev) => ({ ...prev, [key]: value }));
     if (key === "search") onSearchChange(value);
   };
 
@@ -50,7 +74,7 @@ export default function FiltersBar({
 
   // count how many non-search filters are active
   const activeCount = useMemo(() => {
-    const { search, ...rest } = filters;
+    const { ...rest } = filters;
     return Object.values(rest).filter((v) => v && v !== "").length;
   }, [filters]);
 

@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import React, { useEffect, useState, useCallback } from "react";
 import styles from "../styles/PlansPage.module.css";
 import { X, Save } from "lucide-react";
 import { authFetch } from "@/utils/globalFetch";
@@ -31,7 +30,7 @@ export default function CreatePlanModal({
   const [errors, setErrors] = useState<FormErrors>({});
   const [saving, setSaving] = useState(false);
 
-  const [departments, setDepartments] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<Record<string, unknown>[]>([]);
 
   /* ===================== Toast (same style) ===================== */
   const [toast, setToast] = useState<{ show: boolean; message: string; type: ToastType }>({
@@ -45,16 +44,12 @@ export default function CreatePlanModal({
     window.setTimeout(() => setToast({ show: false, message: "", type: "success" }), 2500);
   };
 
-  const reset = () => {
+  const closeAndReset = useCallback(() => {
     setForm({ name: "", term: 1, dept_id: 0 });
     setErrors({});
     setSaving(false);
-  };
-
-  const closeAndReset = () => {
-    reset();
     onClose();
-  };
+  }, [onClose]);
 
   /* ===================== GET DEPARTMENTS FROM TOKEN ===================== */
   useEffect(() => {
@@ -89,7 +84,7 @@ export default function CreatePlanModal({
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open]);
+  }, [open, closeAndReset]);
 
   // lock scroll
   useEffect(() => {
@@ -243,8 +238,8 @@ export default function CreatePlanModal({
                 >
                   <option value="0" hidden>اختار القسم</option>
                   {departments.map((d) => (
-                    <option key={d.dept_id} value={d.dept_id}>
-                      {d.dept_name}
+                    <option key={String(d.dept_id)} value={String(d.dept_id)}>
+                      {String(d.dept_name)}
                     </option>
                   ))}
                 </select>

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import "../styles/applyForm.css";
 import ApplicationDetailsForm from "./ApplicationDetailsForm";
 
-export default function ApplyForm({ onNavigateToRequests }: any) {
+export default function ApplyForm({ onNavigateToRequests }: { onNavigateToRequests: () => void }) {
   const [showForm, setShowForm] = useState(false);
    const [notification, setNotification] = useState<{ message: string; type: string } | null>(null);
 
@@ -43,7 +43,7 @@ export default function ApplyForm({ onNavigateToRequests }: any) {
     onSuccess={() => {
       // alert("🔔 تنبيه هام:\n\nيرجى التوجه إلى الجامعة وتسليم المستندات الرسمية خلال مدة من 3 إلى 5 أيام عمل من تاريخ تقديم الطلب لضمان مراجعة ملفك دون تأخير.");
       // // تغيير التبويب من Apply إلى MyRequests
-      // const changeTab = (window as any).changeTabToMyRequests;
+      // const changeTab = (window as Record<string, unknown>).changeTabToMyRequests;
       // if (changeTab) changeTab();
       handleSuccess();
     }}

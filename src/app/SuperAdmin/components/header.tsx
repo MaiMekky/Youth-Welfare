@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import styles from "../Styles/Header.module.css";
 import { User, Menu } from "lucide-react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import logo from "../../assets/capital-uni-logo.png";
 
@@ -11,7 +10,6 @@ interface HeaderProps {
 }
 
 export default function Header({ onSidebarOpen }: HeaderProps) {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [userData, setUserData] = useState<{ name?: string; role?: string } | null>(null);
 

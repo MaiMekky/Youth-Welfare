@@ -33,17 +33,17 @@ export const googleAuthService = {
   },
 
   // Function to save auth data to browser storage
-  saveAuthData(data: any) {
+  saveAuthData(data: Record<string, unknown>) {
     console.log("💾 Saving auth data to localStorage");
     
-    localStorage.setItem("access", data.access_token);
-    localStorage.setItem("refresh", data.refresh_token);
-    localStorage.setItem("student_id", data.user_id);
-    localStorage.setItem("name", data.name);
-    localStorage.setItem("email", data.email);
+    localStorage.setItem("access", String(data.access_token ?? ''));
+    localStorage.setItem("refresh", String(data.refresh_token ?? ''));
+    localStorage.setItem("student_id", String(data.user_id ?? ''));
+    localStorage.setItem("name", String(data.name ?? ''));
+    localStorage.setItem("email", String(data.email ?? ''));
     
     // Also save as cookie
-    document.cookie = `access=${data.access_token}; path=/; max-age=604800`;
-    document.cookie = `refresh=${data.refresh_token}; path=/; max-age=604800`;
+    document.cookie = `access=${String(data.access_token ?? '')}; path=/; max-age=604800`;
+    document.cookie = `refresh=${String(data.refresh_token ?? '')}; path=/; max-age=604800`;
   },
 };

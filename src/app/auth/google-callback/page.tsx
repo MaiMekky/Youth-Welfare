@@ -1,10 +1,9 @@
 "use client";
-
-export const dynamic = 'force-dynamic';
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authFetch } from "@/utils/globalFetch";
-export default function GoogleCallbackPage() {
+
+function GoogleCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [message, setMessage] = useState("");
@@ -63,19 +62,20 @@ export default function GoogleCallbackPage() {
         setMessageType("success");
         setMessage("✅ تم تسجيل الدخول بنجاح");
         
-        localStorage.setItem("access", loginData.access_token);
-        localStorage.setItem("refresh", loginData.refresh_token);
+        const data = loginData as Record<string, unknown>;
+        localStorage.setItem("access", String(data.access_token ?? ''));
+        localStorage.setItem("refresh", String(data.refresh_token ?? ''));
         localStorage.setItem("user", JSON.stringify({
-          name: loginData.name,
-          email: loginData.email,
-          picture: loginData.picture,
+          name: data.name,
+          email: data.email,
+          picture: data.picture,
           user_type: "student"
         }));
-        localStorage.setItem("student_id", loginData.user_id.toString());
-        localStorage.setItem("name", loginData.name);
+        localStorage.setItem("student_id", String(data.user_id ?? ''));
+        localStorage.setItem("name", String(data.name ?? ''));
 
-        document.cookie = `access=${loginData.access_token}; path=/; max-age=604800; SameSite=Lax`;
-        document.cookie = `refresh=${loginData.refresh_token}; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `access=${String(data.access_token ?? '')}; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `refresh=${String(data.refresh_token ?? '')}; path=/; max-age=604800; SameSite=Lax`;
         document.cookie = `user_type=student; path=/; max-age=604800; SameSite=Lax`;
 
         // Redirect to dashboard
@@ -147,5 +147,32 @@ export default function GoogleCallbackPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function GoogleCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+        backgroundColor: "#f5f5f5"
+      }}>
+        <div style={{
+          textAlign: "center",
+          padding: "40px",
+          backgroundColor: "white",
+          borderRadius: "12px",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.1)"
+        }}>
+          <div style={{ fontSize: "48px", marginBottom: "15px" }}>⏳</div>
+          <p style={{ color: "#666" }}>جاري المعالجة...</p>
+        </div>
+      </div>
+    }>
+      <GoogleCallbackContent />
+    </Suspense>
   );
 }

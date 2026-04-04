@@ -1,23 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Head from "next/head";
 import PageHeader from "./components/PageHeader";
-import Toolbar from "./components/Toolbar";
 import SummaryCard from "./components/SummaryCard";
 import ApplicationsTable from "./components/ApplicationsTable";
 import Layout from "./Layout";
 import "./ApplicationsPage.css";
-
-interface Application {
-  id: string;
-  requestNumber: string;
-  studentName: string;
-  department: string;
-  college: string;
-  amount: string;
-  date: string;
-  status: string;
-}
 
 export default function ApplicationsPage() {
 
@@ -25,7 +13,6 @@ export default function ApplicationsPage() {
  interface Application {
   amount: string;
 }
-const [applications, setApplications] = useState<Application[]>([]);
 const [summaryData, setSummaryData] = useState({
   totalRequests: 0,
   totalAmount: "0 ج.م",
@@ -45,7 +32,6 @@ const calculateSummary = (apps: Application[]) => {
 };
 
 const handleDataLoaded = (apps: Application[]) => {
-  setApplications(apps); // 🔹 هنا التطبيقات في الجدول
   setSummaryData(calculateSummary(apps)); // 🔹 نفس الدالة لحساب الملخص
 };
 

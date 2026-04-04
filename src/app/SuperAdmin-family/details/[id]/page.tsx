@@ -5,12 +5,45 @@ import Tabs from './Tabs';
 import styles from './deatails.module.css';
 import { useRouter, useParams } from 'next/navigation';
 import { authFetch } from "@/utils/globalFetch";
+
+interface FamilyMember {
+  student_id: string | number;
+  student_name: string;
+  u_id: string;
+  national_id: string;
+  dept_name?: string;
+  role: string;
+  status: string;
+  joined_at: string;
+}
+
+interface FamilyEvent {
+  event_id: number;
+  title: string;
+  status: string;
+  st_date: string;
+  cost: string | number;
+}
+
+interface FamilyDetail {
+  id: number | string;
+  name: string;
+  description?: string;
+  status?: string;
+  faculty_name?: string;
+  type?: string;
+  created_at: string;
+  family_members: FamilyMember[];
+  family_events: FamilyEvent[];
+  [key: string]: unknown;
+}
+
 export default function FamilyDetailsPage() {
   const router = useRouter();
   const { id } = useParams();
 
   const [activeTab, setActiveTab] = useState('members');
-  const [family, setFamily] = useState<any>(null);
+  const [family, setFamily] = useState<FamilyDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Notification state
@@ -107,7 +140,7 @@ export default function FamilyDetailsPage() {
         }
 
         const data = await res.json();
-        setFamily(data);
+        setFamily(data as FamilyDetail);
       } catch (error) {
         console.error('Error fetching family:', error);
         showNotification('فشل في تحميل بيانات الأسرة', 'error');
@@ -145,14 +178,14 @@ export default function FamilyDetailsPage() {
             <h1 className={styles.title}>{family.name}</h1>
             <span 
               className={styles.statusBadge}
-              style={getFamilyStatusStyle(family.status)}
+              style={getFamilyStatusStyle(family.status ?? '')}
             >
-              {family.status}
+              {family.status ?? ''}
             </span>
           </div>
 
           <p className={styles.description}>
-            {family.description}
+            {family.description ?? ''}
           </p>
         </div>
       </div>
@@ -161,7 +194,7 @@ export default function FamilyDetailsPage() {
       <div className={styles.infoCards}>
         <div className={styles.infoCard}>
           <span className={styles.infoLabel}>
-            {family.faculty_name}
+            {family.faculty_name ?? ''}
           </span>
         </div>
 
@@ -175,7 +208,7 @@ export default function FamilyDetailsPage() {
         <div className={styles.infoCard}>
           <span className={styles.infoLabel}>نوع الأسرة:</span>
           <span className={styles.infoBadge}>
-            {family.type}
+            {family.type ?? ''}
           </span>
         </div>
 
@@ -218,7 +251,7 @@ export default function FamilyDetailsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {family.family_members.map((m: any) => (
+                  {family.family_members.map((m) => (
                     <tr key={m.student_id}>
                       <td data-label="الاسم">{m.student_name}</td>
                       <td data-label="الرقم الجامعي">{m.u_id}</td>
@@ -253,7 +286,7 @@ export default function FamilyDetailsPage() {
             </div>
           ) : (
             <div className={styles.eventsGrid}>
-              {family.family_events.map((event: any) => (
+              {family.family_events.map((event) => (
                 <div
                   key={event.event_id}
                   className={styles.eventCard}

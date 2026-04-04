@@ -33,21 +33,21 @@ const facultyMap: { [key: string]: number } = {
 export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (apps: Application[]) => void }) {
   const router = useRouter();
   const [applications, setApplications] = useState<Application[]>([]);
-  const [filters, setFilters] = useState<any>({});
+  const [filters, setFilters] = useState<Record<string, string>>({});
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   
   // fetch البيانات مع الفلاتر فقط عند الضغط على زر "تطبيق الفلاتر"
-  const fetchApplications = async (appliedFilters: any = {}) => {
+  const fetchApplications = async (appliedFilters: Record<string, string> = {}) => {
     try {
       setLoading(true);
       const token = localStorage.getItem("access");
       if (!token) return;
 
       const query = Object.entries(appliedFilters)
-  .filter(([_, value]) => value && value !== "none")
+  .filter(([, value]) => value && value !== "none")
   .map(([key, value]) => {
     let apiKey = key;
     let apiValue = value;
@@ -60,7 +60,7 @@ export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (ap
 
       case "faculty":
         apiKey = "faculty";
-        apiValue = facultyMap[value as string] ?? "";
+        apiValue = String(facultyMap[value as string] ?? "");
         break;
 
       case "brothers":
@@ -110,13 +110,13 @@ export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (ap
 
       const data = await res.json();
 
-      const mappedApps: Application[] = data.map((app: any) => ({
+      const mappedApps: Application[] = data.map((app: Record<string, unknown>) => ({
         id: app.solidarity_id,
         studentName: app.student_name,
         requestNumber: app.student_uid,
         college: app.faculty_name,
         amount: app.total_income,
-        date: app.created_at ? new Date(app.created_at).toLocaleDateString() : "-",
+        date: app.created_at ? new Date(app.created_at as string).toLocaleDateString() : "-",
         status: app.req_status,
         fatherStatus: app.father_status,
         motherStatus: app.mother_status,
@@ -143,6 +143,7 @@ export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (ap
   // جلب البيانات لأول مرة بدون أي فلاتر
   useEffect(() => {
     fetchApplications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // فلترة البحث client-side تلقائي

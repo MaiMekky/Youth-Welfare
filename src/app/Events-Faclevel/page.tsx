@@ -21,13 +21,13 @@ type ApiEvent = {
   st_date: string;
   end_date: string;
   location: string;
-  status: any;
+  status: string;
   type: string;
   cost: string;
   s_limit: number;
   faculty_id: number | null;
   dept_id: number;
-  active?: any;
+  active?: boolean | string | number;
 };
 
 function getAccessToken(): string | null {
@@ -46,7 +46,7 @@ function getDepartmentsFromToken(): { dept_id: number; dept_name: string }[] {
   try {
     const departments = JSON.parse(stored);
     const excluded = ["التكافل الإجتماعي", "الأسر الطلابية"];
-    return departments.filter((d: any) => !excluded.includes(d.dept_name));
+    return departments.filter((d: Record<string, unknown>) => !excluded.includes(d.dept_name as string));
   } catch (err) {
     console.error("Departments parse error:", err);
     return [];
@@ -60,7 +60,7 @@ async function apiFetch<T>(
   const token = getAccessToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(opts.headers as any),
+    ...(opts.headers as Record<string, string>),
   };
   if (token) headers.Authorization = `Bearer ${token}`;
   try {
@@ -70,12 +70,12 @@ async function apiFetch<T>(
       return { ok: false, message: data?.detail || "فشل الطلب" };
     }
     return { ok: true, data };
-  } catch (e: any) {
-    return { ok: false, message: e?.message || "مشكلة في الاتصال" };
+  } catch (e: unknown) {
+    return { ok: false, message: e instanceof Error ? e.message : String(e) || "مشكلة في الاتصال" };
   }
 }
 
-function toBool(v: any): boolean | null {
+function toBool(v: unknown): boolean | null {
   if (typeof v === "boolean") return v;
   if (typeof v === "number") return v === 1;
   if (typeof v === "string") {
@@ -136,7 +136,7 @@ export default function Page() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<EventsTab>("faculty");
-  const [userDepartments, setUserDepartments] = useState<any[]>([]);
+  const [userDepartments, setUserDepartments] = useState<Record<string, unknown>[]>([]);
   const [deptFilter, setDeptFilter] = useState<number | "all">("all");
   const [search, setSearch] = useState("");
 
@@ -266,9 +266,9 @@ export default function Page() {
               }
             >
               <option value="all">كل الأقسام</option>
-              {userDepartments.map((d: any) => (
-                <option key={d.dept_id} value={d.dept_id}>
-                  {d.dept_name}
+              {userDepartments.map((d: Record<string, unknown>) => (
+                <option key={d.dept_id as number} value={d.dept_id as number}>
+                  {d.dept_name as string}
                 </option>
               ))}
             </select>

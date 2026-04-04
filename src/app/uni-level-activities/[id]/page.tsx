@@ -37,10 +37,10 @@ function getAccessToken(): string | null {
 async function apiFetch<T>(
   path: string,
   opts: RequestInit = {}
-): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number; raw?: any }> {
+): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number; raw?: Record<string, unknown> }> {
   const token = getAccessToken();
   const headers: Record<string, string> = {
-    ...(opts.headers as any),
+    ...(opts.headers as Record<string, string>),
   };
 
   // add content-type only if body exists AND not FormData
@@ -65,7 +65,7 @@ async function apiFetch<T>(
       const msg =
         (typeof maybeJson === "object" &&
           maybeJson &&
-          ((maybeJson as any).detail || (maybeJson as any).message || (maybeJson as any).error)) ||
+          ((maybeJson as Record<string, unknown>).detail || (maybeJson as Record<string, unknown>).message || (maybeJson as Record<string, unknown>).error)) ||
         (typeof maybeJson === "string" ? maybeJson : "") ||
         `طلب غير ناجح (${res.status})`;
 
@@ -73,8 +73,8 @@ async function apiFetch<T>(
     }
 
     return { ok: true, data: maybeJson as T };
-  } catch (e: any) {
-    return { ok: false, message: e?.message || "مشكلة في الاتصال" };
+  } catch (e: unknown) {
+    return { ok: false, message: (e as Error)?.message || "مشكلة في الاتصال" };
   }
 }
 
@@ -166,7 +166,7 @@ type ApiEventDetails = {
   family_name: string | null;
 
   participants?: ApiParticipant[];
-  images?: any[];
+  images?: Record<string, unknown>[];
 
   title: string;
   description: string;
@@ -218,26 +218,6 @@ function toRankNumber(v: string | undefined): number | null {
   return Math.trunc(n);
 }
 
-function formatFileSize(bytes: number) {
-  const n = Number(bytes);
-  if (!Number.isFinite(n) || n <= 0) return "—";
-  const kb = n / 1024;
-  if (kb < 1024) return `${kb.toFixed(1)} KB`;
-  const mb = kb / 1024;
-  if (mb < 1024) return `${mb.toFixed(1)} MB`;
-  const gb = mb / 1024;
-  return `${gb.toFixed(2)} GB`;
-}
-
-function formatDateAr(iso: string) {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleString("ar-EG");
-  } catch {
-    return iso;
-  }
-}
-
 function diffDays(start: string, end: string): number {
   const a = new Date(start);
   const b = new Date(end);
@@ -260,7 +240,7 @@ function pickFilenameFromDisposition(disposition: string | null, fallback: strin
 
 async function downloadPdf(path: string, opts: RequestInit = {}, fallbackName = "file.pdf") {
   const token = getAccessToken();
-  const headers: Record<string, string> = { ...(opts.headers as any) };
+  const headers: Record<string, string> = { ...(opts.headers as Record<string, string>) };
   if (!headers["Content-Type"] && opts.body) headers["Content-Type"] = "application/json";
   if (token) headers.Authorization = `Bearer ${token}`;
 
@@ -334,7 +314,7 @@ export default function EventDetailsPage() {
   const [loadingImages, setLoadingImages] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [deletingDocId, setDeletingDocId] = useState<number | null>(null);
-  const [docType, setDocType] = useState<string>("event_image");
+  const [docType] = useState<string>("event_image");
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   type ReportErrors = Partial<Record<keyof ReportFormState, string>>;
@@ -534,7 +514,7 @@ const uploadImages = async (files: FileList | null) => {
     if (!id || !docId) return;
 
     setDeletingDocId(docId);
-    const res = await apiFetch<any>(`/api/event/manage-events/${id}/images/${docId}/`, { method: "DELETE" });
+    const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-events/${id}/images/${docId}/`, { method: "DELETE" });
     setDeletingDocId(null);
 
     if (!res.ok) {
@@ -672,7 +652,7 @@ const uploadImages = async (files: FileList | null) => {
     if (!id) return;
     try {
       setBusy(true);
-      const res = await apiFetch<any>(`/api/event/manage-participants/${id}/approve-all-participants/`, {
+      const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-participants/${id}/approve-all-participants/`, {
         method: "PATCH",
       });
       setBusy(false);
@@ -694,7 +674,7 @@ const uploadImages = async (files: FileList | null) => {
     if (!id || !studentId) return;
     try {
       setBusy(true);
-      const res = await apiFetch<any>(`/api/event/manage-participants/${id}/participants/${studentId}/approve/`, {
+      const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-participants/${id}/participants/${studentId}/approve/`, {
         method: "PATCH",
       });
       setBusy(false);
@@ -716,7 +696,7 @@ const uploadImages = async (files: FileList | null) => {
     if (!id || !studentId) return;
     try {
       setBusy(true);
-      const res = await apiFetch<any>(`/api/event/manage-participants/${id}/participants/${studentId}/reject/`, {
+      const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-participants/${id}/participants/${studentId}/reject/`, {
         method: "PATCH",
       });
       setBusy(false);
@@ -739,7 +719,7 @@ const uploadImages = async (files: FileList | null) => {
 
     try {
       setBusy(true);
-      const res = await apiFetch<any>(`/api/event/manage-participants/${id}/participants/${studentId}/assign-result/`, {
+      const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-participants/${id}/participants/${studentId}/assign-result/`, {
         method: "PATCH",
         body: JSON.stringify({ rank, reward }),
       });
@@ -797,7 +777,7 @@ const uploadImages = async (files: FileList | null) => {
     const s = (ui.status || "").trim();
     if (s === "نشط") return styles.badgeSuccess;
     if (s === "منتظر") return styles.badgeBlue;
-    if (s === "غير نشط" || s === "ملغي" || s === "مرفوض") return (styles as any).badgeDanger || styles.badgeBlue;
+    if (s === "غير نشط" || s === "ملغي" || s === "مرفوض") return (styles as Record<string, string>).badgeDanger || styles.badgeBlue;
     return styles.badgeBlue;
   }, [ui.status]);
 
@@ -850,8 +830,8 @@ const uploadImages = async (files: FileList | null) => {
       );
       setReportOpen(false);
       showToast("✅ تم تنزيل تقرير الفعالية", "success");
-    } catch (e: any) {
-      showToast(e?.message || "حصل خطأ أثناء تصدير تقرير الفعالية", "error");
+    } catch (e: unknown) {
+      showToast((e as Error)?.message || "حصل خطأ أثناء تصدير تقرير الفعالية", "error");
     } finally {
       setExportBusy(null);
     }
@@ -868,8 +848,8 @@ const uploadImages = async (files: FileList | null) => {
         `event_${id}_summary.pdf`
       );
       showToast("✅ تم تنزيل ملخص الفعالية", "success");
-    } catch (e: any) {
-      showToast(e?.message || "حصل خطأ أثناء تصدير ملخص الفعالية", "error");
+    } catch (e: unknown) {
+      showToast((e as Error)?.message || "حصل خطأ أثناء تصدير ملخص الفعالية", "error");
     } finally {
       setExportBusy(null);
     }
@@ -1242,7 +1222,7 @@ const uploadImages = async (files: FileList | null) => {
                   <select
                   className={styles.modalInput}
                   value={reportForm.evaluation}
-                  onChange={(e)=>setReportField("evaluation",e.target.value as any)}
+                  onChange={(e)=>setReportField("evaluation",e.target.value as ReportFormState["evaluation"])}
                   >
 
                   <option value="excellent">ممتاز</option>

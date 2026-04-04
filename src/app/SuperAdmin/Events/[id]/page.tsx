@@ -34,7 +34,7 @@ async function apiFetch<T>(
   opts: RequestInit = {}
 ): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number }> {
   const token = getAccessToken();
-  const headers: Record<string, string> = { ...(opts.headers as any) };
+  const headers: Record<string, string> = { ...(opts.headers as Record<string, string>) };
   if (!headers["Content-Type"] && opts.body) headers["Content-Type"] = "application/json";
   if (token) headers.Authorization = `Bearer ${token}`;
 
@@ -48,15 +48,15 @@ async function apiFetch<T>(
     if (!res.ok) {
       const msg =
         (typeof maybeJson === "object" && maybeJson &&
-          ((maybeJson as any).detail || (maybeJson as any).message || (maybeJson as any).error)) ||
+          ((maybeJson as Record<string, unknown>).detail || (maybeJson as Record<string, unknown>).message || (maybeJson as Record<string, unknown>).error)) ||
         (typeof maybeJson === "string" ? maybeJson : "") ||
         `طلب غير ناجح (${res.status})`;
       return { ok: false, message: String(msg), status: res.status };
     }
 
     return { ok: true, data: maybeJson as T };
-  } catch (e: any) {
-    return { ok: false, message: e?.message || "مشكلة في الاتصال" };
+  } catch (e: unknown) {
+    return { ok: false, message: (e as Error)?.message || "مشكلة في الاتصال" };
   }
 }
 
@@ -174,7 +174,9 @@ export default function EventDetailsPage() {
     setImages(Array.isArray(res.data) ? res.data : []);
   };
 
-  useEffect(() => { loadEvent(); loadImages(); }, [id]);
+  useEffect(() => { loadEvent(); loadImages(); 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   /* Derived UI */
   const ui = useMemo(() => {

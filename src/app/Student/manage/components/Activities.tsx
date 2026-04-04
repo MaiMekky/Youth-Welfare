@@ -138,7 +138,6 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [departments, setDepartments] = useState<Department[]>([]);
   const [deptMap, setDeptMap] = useState<Record<number, string>>({});
   const [selectedFamilyId, setSelectedFamilyId] = useState<number | null>(null);
 
@@ -195,8 +194,8 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
           setError("لا توجد أسرة بدور 'أخ أكبر'");
           setLoading(false);
         }
-      } catch (err: any) {
-        setError(err.message || "حصل خطأ أثناء تحميل قائمة الأسر");
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "حصل خطأ أثناء تحميل قائمة الأسر");
         setLoading(false);
       }
     };
@@ -226,15 +225,14 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
             depts = data.results;
           }
 
-          setDepartments(depts);
-          
+          // Build department map
           const map: Record<number, string> = {};
           depts.forEach(dept => {
             map[dept.dept_id] = dept.name;
           });
           setDeptMap(map);
         }
-      } catch (err) {
+      } catch {
         // Silently handle errors
       }
     };

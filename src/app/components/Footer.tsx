@@ -1,13 +1,11 @@
 "use client";
 import React from "react";
 import Image from "next/image";
-import { Facebook, Instagram, Youtube, MapPin, Phone, Mail, ArrowUpLeft } from "react-feather";
+import { Facebook, Instagram, Youtube, MapPin, Phone, Mail } from "react-feather";
 import capitalLogo from "@/app/assets/capital-uni-logo.png";
 import styles from "../Styles/components/Footer.module.css";
 
 const Footer: React.FC = () => {
-  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
-
   return (
     <footer id="footer" className={styles.footer}>
       {/* Decorative top border */}

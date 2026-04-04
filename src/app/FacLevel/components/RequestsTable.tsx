@@ -6,9 +6,19 @@ import { FileText, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { authFetch } from "@/utils/globalFetch";
 
+interface RequestItem {
+  id: string | number;
+  name: string;
+  studentId: string | number;
+  reqNumber: string | number;
+  date: string;
+  amount: string;
+  status: string;
+}
+
 interface RequestsTableProps {
-  onDataFetched: (data: any[]) => void;
-  filteredRequests: any[];
+  onDataFetched: (data: RequestItem[]) => void;
+  filteredRequests: RequestItem[];
 }
 
 export const getAccessToken = () => localStorage.getItem("access");
@@ -72,17 +82,18 @@ export default function RequestsTable({ onDataFetched, filteredRequests }: Reque
       }
     };
     loadApplications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const formatData = (data: any[]) => {
-    const formatted = data.map((item) => ({
-      id: item.solidarity_id,
-      name: item.student_name,
-      studentId: item.student_uid,
-      reqNumber: item.solidarity_id,
-      date: new Date(item.created_at).toLocaleDateString("ar-EG"),
-      amount: item.total_discount,
-      status: item.req_status,
+  const formatData = (data: Record<string, unknown>[]) => {
+    const formatted: RequestItem[] = data.map((item) => ({
+      id: item.solidarity_id as number,
+      name: item.student_name as string,
+      studentId: item.student_uid as string,
+      reqNumber: item.solidarity_id as number,
+      date: new Date(item.created_at as string).toLocaleDateString("ar-EG"),
+      amount: item.total_discount as string,
+      status: item.req_status as string,
     }));
     onDataFetched(formatted);
   };
@@ -97,7 +108,7 @@ export default function RequestsTable({ onDataFetched, filteredRequests }: Reque
     }
   };
 
-  const handleDetailsClick = (id: string) => {
+  const handleDetailsClick = (id: string | number) => {
     router.push(`/requests/${id}`);
   };
 
@@ -172,7 +183,7 @@ export default function RequestsTable({ onDataFetched, filteredRequests }: Reque
                           : ""
                       }`}
                     >
-                      {translateStatus(req.status)}
+                      {translateStatus(req.status as string)}
                     </span>
                   </td>
                   <td>

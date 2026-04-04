@@ -51,7 +51,7 @@ const FamilyLeaders: React.FC = () => {
       });
       if (!res.ok) throw new Error("فشل جلب القادة");
       const data = await res.json();
-      const formatted = data.map((d: any) => ({
+      const formatted = data.map((d: Record<string, unknown>) => ({
         name: d.name || "",
         universityId: d.university_id || "",
         nationalId: d.national_id,
@@ -67,8 +67,8 @@ const FamilyLeaders: React.FC = () => {
         }),
       }));
       setLeaders(formatted);
-    } catch (err: any) {
-      showNotification(err.message || "حدث خطأ", "error");
+    } catch (err: unknown) {
+      showNotification((err as Error).message || "حدث خطأ", "error");
     } finally {
       setLoading(false);
     }
@@ -76,19 +76,13 @@ const FamilyLeaders: React.FC = () => {
 
   useEffect(() => {
     fetchLeaders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleOpenCreate = () => {
     setIsEditMode(false);
     setCurrentIndex(null);
     setFormData({ ...emptyLeader, role: "" });
-    setIsModalOpen(true);
-  };
-
-  const handleOpenEdit = (index: number) => {
-    setIsEditMode(true);
-    setCurrentIndex(index);
-    setFormData(leaders[index]);
     setIsModalOpen(true);
   };
 
@@ -141,16 +135,16 @@ const FamilyLeaders: React.FC = () => {
           }
         );
 
-        let data: any = null;
+        let data: Record<string, unknown> | null = null;
         try {
           data = await res.json();
         } catch {}
 
         if (!res.ok) {
           if (data?.detail) {
-            showNotification(data.detail, "error");
+            showNotification(data.detail as string, "error");
           } else if (data?.error) {
-            showNotification(data.error, "error");
+            showNotification(data.error as string, "error");
           } else {
             showNotification("فشل إضافة القائد", "error");
           }

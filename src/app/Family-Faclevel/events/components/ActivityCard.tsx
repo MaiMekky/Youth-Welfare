@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import styles from "../styles/Activities.module.css";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
-import { useRouter } from "next/navigation";
 import { authFetch } from "@/utils/globalFetch";
 
 interface ActivityCardProps {
@@ -43,7 +42,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 2500);
   };
-const router = useRouter();
+
   const handleAction = async (action: "approve" | "reject") => {
     setLoading(true);
     const token = localStorage.getItem("access");

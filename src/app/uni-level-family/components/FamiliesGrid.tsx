@@ -1,10 +1,11 @@
 "use client";
-import React, { useState } from "react";
+
+import React from "react";
 import FamilyCard from "./FamilyCard";
 import styles from "../Styles/FamilyCard.module.css"; // Adjust path as needed
 
 interface FamiliesGridProps {
-  families: any[];
+  families: Record<string, unknown>[];
   showActions: boolean;
   activeTab: string;
   onApprove?: (familyId: number) => void;
@@ -23,7 +24,7 @@ export default function FamiliesGrid({ families, showActions, activeTab, onAppro
     <div className={styles.familiesGrid}>
     {families.map((family) => (
   <FamilyCard
-    key={family.family_id}
+    key={String(family.family_id)}
     family={family}
     showActions={showActions}
     activeTab={activeTab}

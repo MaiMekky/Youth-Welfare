@@ -3,8 +3,8 @@ import React from "react";
 import styles from "../styles/FiltersBar.module.css"
 
 interface FiltersBarProps {
-  filters: any;
-  setFilters: (filters: any) => void;
+  filters: Record<string, string>;
+  setFilters: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   onApply: () => void;
   onSearchChange: (value: string) => void;
 }
@@ -19,7 +19,7 @@ export default function FiltersBar({ filters, setFilters, onApply, onSearchChang
   };
 
   const handleChange = (key: string, value: string) => {
-    setFilters((prev: any) => ({ ...prev, [key]: value }));
+    setFilters((prev: Record<string, string>) => ({ ...prev, [key]: value }));
     if (key === "search") {
       onSearchChange(value); // <--- تحديث البحث للجدول
     }

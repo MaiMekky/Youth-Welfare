@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import "@/app/Styles/Sidebar.css";
-import { X, FileText, BarChart3, Users ,User } from "lucide-react";
+import { X, Users ,User } from "lucide-react";
 import Image from "next/image";
 import logo from "../../assets/logo.png";
 
@@ -42,9 +42,9 @@ export default function Sidebar({ isOpen = false, setIsOpen = () => {} }: Sideba
       document.removeEventListener("mousedown", handleOutside);
       document.body.style.overflow = "unset";
     };
-  }, [isOpen]);
+  }, [isOpen, setIsOpen]);
 
-  useEffect(() => { setIsOpen(false); }, [pathname]);
+  useEffect(() => { setIsOpen(false); }, [pathname, setIsOpen]);
 
   const go = (path: string) => { router.push(path); setIsOpen(false); };
 

@@ -7,7 +7,7 @@ import styles from "../families-requests/styles/famRequests.module.css";
 import { authFetch } from "@/utils/globalFetch";
 
 export default function FamilyRequestsPage() {
-  const [requests, setRequests] = useState<any[]>([]);
+  const [requests, setRequests] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -61,7 +61,7 @@ export default function FamilyRequestsPage() {
   ) : (
     <div className={styles.requestsGrid}>
       {requests.map((request) => (
-        <FamRequests key={request.family_id} request={request} />
+        <FamRequests key={request.family_id as string} request={request} />
       ))}
     </div>
   )}

@@ -50,7 +50,7 @@ export default function Sidebar({
       document.removeEventListener("mousedown", handleOutside);
       document.body.style.overflow = "unset";
     };
-  }, [isOpen]);
+  }, [isOpen, setIsOpen]);
 
   const handleNavigate = (view: string) => {
     onNavigate?.(view);

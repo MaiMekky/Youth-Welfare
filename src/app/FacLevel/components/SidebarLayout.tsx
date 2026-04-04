@@ -18,7 +18,7 @@ export default function SidebarLayout({ sidebar, children }: SidebarLayoutProps)
 
   // Inject isOpen / setIsOpen into whatever sidebar is passed in
   const sidebarWithProps = React.isValidElement(sidebar)
-    ? React.cloneElement(sidebar as React.ReactElement<any>, {
+    ? React.cloneElement(sidebar as React.ReactElement<Record<string, unknown>>, {
         isOpen: sidebarOpen,
         setIsOpen: setSidebarOpen,
       })

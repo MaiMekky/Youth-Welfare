@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./styles/PlansPage.module.css";
 import PlansGrid from "./components/PlansGrid";
 import { useRouter } from "next/navigation";
@@ -96,23 +96,8 @@ export default function Page() {
     }
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchPlans(); }, []);
-
-  const onSubmitPlan = (payload: { title: string; year: string }) => {
-    const newPlan: PlanItem = {
-      id: Date.now(),
-      title: payload.title,
-      description: "خطة جديدة (مسودة)",
-      statusLabel: "مسودة",
-      facultyName: null,
-      term: 1,
-      eventsCount: 0,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    setPlans((prev) => [newPlan, ...prev]);
-    setOpenModal(false);
-  };
 
   return (
     <div className={styles.page}>

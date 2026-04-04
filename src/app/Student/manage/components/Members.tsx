@@ -89,8 +89,8 @@ const Members: React.FC = () => {
           setError("لا توجد أسرة بدور 'أخ أكبر'");
           setLoading(false);
         }
-      } catch (err: any) {
-        setError(err.message || "حصل خطأ أثناء تحميل قائمة الأسر");
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "حصل خطأ أثناء تحميل قائمة الأسر");
         setLoading(false);
       }
     };
@@ -124,8 +124,8 @@ const Members: React.FC = () => {
         } else {
           setMembers([]);
         }
-      } catch (err: any) {
-        setError(err.message || "حدث خطأ في الاتصال");
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "حدث خطأ في الاتصال");
       } finally {
         setLoading(false);
       }

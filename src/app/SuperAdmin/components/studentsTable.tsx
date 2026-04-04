@@ -6,6 +6,7 @@ import styles from "../Styles/studentsTable.module.css";
 import FiltersBar from "./FiltersBar";
 import SolidarityHeader from "./SolidarityHeader";
 import { authFetch } from "@/utils/globalFetch";
+
 interface Application {
   solidarity_id: number;
   student_name: string;
@@ -17,10 +18,37 @@ interface Application {
   created_at: string;
 }
 
+interface Filters {
+  search: string;
+  fatherStatus: string;
+  motherStatus: string;
+  housingStatus: string;
+  brothers: string;
+  totalIncome: string;
+  faculty: string;
+  grade: string;
+  disability: string;
+  status: string;
+  [key: string]: string;
+}
+
+const defaultFilters: Filters = {
+  search: "",
+  fatherStatus: "",
+  motherStatus: "",
+  housingStatus: "",
+  brothers: "",
+  totalIncome: "",
+  faculty: "",
+  grade: "",
+  disability: "",
+  status: "",
+};
+
 export default function StudentsTable() {
   const router = useRouter();
   const [applications, setApplications] = useState<Application[]>([]);
-  const [filters, setFilters] = useState<any>({});
+  const [filters, setFilters] = useState<Filters>(defaultFilters);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [searchTerm, setSearchTerm] = useState("");
@@ -33,13 +61,13 @@ export default function StudentsTable() {
     "كلية التربية": 5,
   };
 
-  const fetchApplications = async (appliedFilters: any = {}) => {
+  const fetchApplications = async (appliedFilters: Record<string, unknown> = {}) => {
     try {
       const token = localStorage.getItem("access");
       if (!token) return;
 
       const query = Object.entries(appliedFilters)
-  .filter(([_, value]) => value && value !== "none")
+  .filter(([, value]) => value && value !== "none")
   .map(([key, value]) => {
     let apiKey = key;
     let apiValue = value;
@@ -111,6 +139,7 @@ export default function StudentsTable() {
 
   useEffect(() => {
     fetchApplications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filteredApps = applications.filter((app) => {

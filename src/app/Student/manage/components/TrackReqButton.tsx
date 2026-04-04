@@ -1,14 +1,14 @@
 "use client";
 import React from "react";
 import styles from "../styles/TrackReqButton.module.css";
-import { Plus, FileSearch } from "lucide-react";
+import { FileSearch } from "lucide-react";
 
 interface TrackReqButtonProps {
   onCreateClick?: () => void;
   onReviewClick?: () => void;
 }
 
-const TrackReqButton: React.FC<TrackReqButtonProps> = ({ onCreateClick, onReviewClick }) => {
+const TrackReqButton: React.FC<TrackReqButtonProps> = ({ onReviewClick }) => {
   return (
     <div className={styles.heroCard}>
       {/* Background decoration */}

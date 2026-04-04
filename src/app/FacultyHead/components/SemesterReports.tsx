@@ -97,7 +97,6 @@ export default function SemesterReports() {
   };
 
   // ── Stats ──
-  const totalFaculties = new Set(plans.map(p => p.faculty)).size;
   const totalEvents    = plans.reduce((sum, p) => sum + (p.events_count ?? 0), 0);
 
   // ── Filter ──

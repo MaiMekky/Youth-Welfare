@@ -1,14 +1,12 @@
 "use client";
 
-export const dynamic = 'force-dynamic';
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from '@/app/CreateAdmins/access-privileges.module.css';
 import { useSearchParams } from 'next/navigation';
 import { authFetch } from "@/utils/globalFetch";
 
-export default function AddUser() {
+function AddUserContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const admin_id = searchParams.get("id");
@@ -82,13 +80,6 @@ export default function AddUser() {
       })
         .then(res => res.json())
         .then(data => {
-          let deptNames: string[] = [];
-          if (Array.isArray(data.dept_name)) {
-            deptNames = data.dept_name;
-          } else if (typeof data.dept_name === "string") {
-            deptNames = data.dept_name.replace(/[{}]/g, '').split(',').map((s: string) => s.trim());
-          }
-
           setFormData({
             name:        data.name,
             email:       data.email,
@@ -107,6 +98,7 @@ export default function AddUser() {
         })
         .catch(err => console.error('Error fetching admin data:', err));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [admin_id, faculties]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -417,5 +409,13 @@ export default function AddUser() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AddUser() {
+  return (
+    <Suspense fallback={<div className={styles.pageWrapper} dir="rtl"><div className={styles.addUserWrapper}><div className={styles.addUserCard}><p style={{ textAlign: 'center', color: '#6B8299', padding: '40px 0' }}>جاري التحميل…</p></div></div></div>}>
+      <AddUserContent />
+    </Suspense>
   );
 }

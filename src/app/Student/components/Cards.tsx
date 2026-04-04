@@ -1,10 +1,6 @@
 import React from "react";
 
-type Props = {
-  // static component
-};
-
-export default function Cards(_: Props) {
+export default function Cards() {
   return (
     <div dir="rtl" className="cards-root">
       <style>{`
@@ -551,7 +547,7 @@ export default function Cards(_: Props) {
 
             <p style={{ marginTop: 8, color: "#475569", fontSize: 13 }}>
                يمكنك ايجاد رقم الطلب من خلال قسم
-               "طلباتي".
+               &quot;طلباتي&quot;.
             </p>
           </div>
        

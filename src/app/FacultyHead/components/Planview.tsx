@@ -1,10 +1,10 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
 import {
-  FileText, BarChart3, Download, Calendar, Building2,
+  FileText, Download, Calendar, Building2,
   RefreshCw, AlertCircle, ChevronLeft, ChevronRight,
   Layers, Hash, BookOpen, Eye, X, MapPin, Users,
-  Tag, Clock, DollarSign, Star, User, Briefcase,
+  Tag, DollarSign, Star, User, Briefcase,
   ChevronDown, ChevronUp, CheckCircle, XCircle, AlertTriangle
 } from "lucide-react";
 import SemesterReports from "./SemesterReports";

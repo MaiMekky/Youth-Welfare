@@ -30,7 +30,6 @@ export default function MyRequests({ onStatusesLoaded, showAlert }: MyRequestsPr
   const [filteredRequests, setFilteredRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
-  const [notification, setNotification] = useState<{ message: string; type: string } | null>(null);
   const router = useRouter();
 
   const mapStatus = (status: string) => {
@@ -93,12 +92,12 @@ export default function MyRequests({ onStatusesLoaded, showAlert }: MyRequestsPr
 
       const data = await response.json();
 
-      const mapped: Request[] = data.map((item: any) => ({
+      const mapped: Request[] = data.map((item: Record<string, unknown>) => ({
         id: item.solidarity_id,
         requestNumber: item.solidarity_id,
         type: "طلب دعم مالي",
-        status: mapStatus(item.req_status),
-        submissionDate: new Date(item.created_at).toLocaleDateString("ar-EG", {
+        status: mapStatus(item.req_status as string),
+        submissionDate: new Date(item.created_at as string).toLocaleDateString("ar-EG", {
           day: "numeric",
           month: "long",
           year: "numeric",
@@ -106,10 +105,10 @@ export default function MyRequests({ onStatusesLoaded, showAlert }: MyRequestsPr
         familyMembers: item.family_numbers,
         familyIncome: item.total_income,
         reason: item.reason,
-        currentStep: statusToStep(item.req_status),
+        currentStep: statusToStep(item.req_status as string),
         totalSteps: 3,
         discountType: Array.isArray(item.discount_type)
-          ? item.discount_type.filter((d: string) => d && d.trim() !== "")
+          ? (item.discount_type as string[]).filter((d: string) => d && d.trim() !== "")
           : [],
       }));
 
@@ -123,6 +122,7 @@ export default function MyRequests({ onStatusesLoaded, showAlert }: MyRequestsPr
 
   useEffect(() => {
     fetchRequests();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -136,7 +136,7 @@ export default function MyRequests({ onStatusesLoaded, showAlert }: MyRequestsPr
   useEffect(() => {
     const statuses = requests.map((r) => r.status);
     onStatusesLoaded(statuses);
-  }, [requests]);
+  }, [requests, onStatusesLoaded]);
 
   const handleViewDetails = (id: string) => router.push(`/my-requests/${id}`);
 
@@ -314,10 +314,6 @@ export default function MyRequests({ onStatusesLoaded, showAlert }: MyRequestsPr
           ))
         )}
       </div>
-
-      {notification && (
-        <div className={`notification ${notification.type}`}>{notification.message}</div>
-      )}
     </div>
   );
 }

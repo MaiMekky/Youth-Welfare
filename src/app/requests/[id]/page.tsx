@@ -14,16 +14,6 @@ import { authFetch } from "@/utils/globalFetch";
   - POST /api/solidarity/faculty/{id}/reject/       -> handleReject()
 
 */
-const rejectionReasons = [
-  { id: 1, text: "إزعاج أو تكرار التقديم بشكل غير مبرر" },
-  { id: 2, text: "المستندات المرفوعة غير واضحة أو غير صحيحة" },
-  { id: 3, text: "وجود بيانات غير صحيحة في الطلب" },
-  { id: 4, text: "الدخل المسجل غير مطابق للمستندات" },
-  { id: 5, text: "الطلب لا يستوفي شروط الدعم" },
-  { id: 6, text: "المستندات لا تخص الطالب" },
-  { id: 7, text: "اشتباه في تزوير المستندات" },
-  { id: 8, text: "سبب آخر" }
-];
 type Application = {
   solidarity_id?: number;
   student_name?: string;
@@ -106,12 +96,10 @@ export default function RequestDetailsPage() {
 
   const baseAmount = 1500;
 
-  const [showRejectModal, setShowRejectModal] = useState(false);
-const [selectedReason, setSelectedReason] = useState<number | null>(null);
-
   useEffect(() => {
     if (!id) return;
     loadAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const showNotification = (message: string, type: "success" | "warning" | "error") => {
@@ -135,15 +123,15 @@ const [selectedReason, setSelectedReason] = useState<number | null>(null);
       const data = await res.json();
       let item: Application | null = null;
       if (Array.isArray(data)) {
-        const bySolidarity = data.find((it: any) => String(it.solidarity_id) === String(id));
+        const bySolidarity = data.find((it: Record<string, unknown>) => String(it.solidarity_id) === String(id));
         item = bySolidarity ?? (data.length > 0 ? data[0] : null);
       } else if (data && typeof data === "object") {
         item = data;
       }
       setApplication(item);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("fetchApplication error:", err);
-      if (err?.response?.status === 401) showNotification("Unauthorized — please log in.", "error");
+      if (((err as Record<string, unknown>)?.response as Record<string, unknown>)?.status === 401) showNotification("Unauthorized — please log in.", "error");
       else showNotification("فشل في تحميل بيانات الطلب", "error");
       setApplication(null);
     }
@@ -155,7 +143,7 @@ const [selectedReason, setSelectedReason] = useState<number | null>(null);
       if (!res.ok) throw new Error("DOCS_ERROR");
       const data = await res.json();
       setDocuments(Array.isArray(data) ? data : data ? [data] : []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("fetchDocuments error:", err);
       showNotification("فشل في تحميل المستندات", "error");
       setDocuments([]);
@@ -170,7 +158,7 @@ const [selectedReason, setSelectedReason] = useState<number | null>(null);
       setAvailableDiscounts(
         data.discounts || { bk_discount: [], reg_discount: [], aff_discount: [], full_discount: [] }
       );
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("fetchDiscountValues error:", err);
       showNotification("فشل في تحميل discounts", "error");
       setAvailableDiscounts({ bk_discount: [], reg_discount: [], aff_discount: [], full_discount: [] });
@@ -188,7 +176,6 @@ const [selectedReason, setSelectedReason] = useState<number | null>(null);
 
   const canPreApprove = (status?: string | null) => status === "منتظر";
   const canApprove = (status?: string | null) => status === "موافقة مبدئية";
-  const canReject = (status?: string | null) => status !== "مقبول" && status !== "مرفوض";
 
   const postAction = async (
     suffix: "pre_approve" | "approve" | "reject",
@@ -210,15 +197,15 @@ const [selectedReason, setSelectedReason] = useState<number | null>(null);
       await fetchDocuments();
       showNotification(successMsg, "success");
       return data;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(`${suffix} error:`, err);
       setApplication(prevApp);
-      const serverMsg = err?.response?.data
-        ? typeof err.response.data === "string"
-          ? err.response.data
-          : JSON.stringify(err.response.data)
+      const serverMsg = ((err as Record<string, unknown>)?.response as Record<string, unknown>)?.data
+        ? typeof ((err as Record<string, unknown>).response as Record<string, unknown>).data === "string"
+          ? ((err as Record<string, unknown>).response as Record<string, unknown>).data
+          : JSON.stringify(((err as Record<string, unknown>).response as Record<string, unknown>).data)
         : "فشل في تنفيذ الإجراء على الخادم";
-      showNotification(serverMsg, "error");
+      showNotification(serverMsg as string, "error");
       throw err;
     } finally {
       setActionLoading(false);
@@ -241,43 +228,6 @@ const [selectedReason, setSelectedReason] = useState<number | null>(null);
     window.location.reload();
   };
 
-const handleReject = async () => {
-  if (!selectedReason) {
-    showNotification("يرجى اختيار سبب الرفض", "warning");
-    return;
-  }
-
-  if (!id) return;
-
-  setActionLoading(true);
-
-  try {
-    const res = await authFetch(
-      `http://localhost:8000/api/solidarity/faculty/${id}/reject/`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          rejection_reason: selectedReason
-        })
-      }
-    );
-
-    if (!res.ok) throw new Error("REJECT_ERROR");
-
-    showNotification("تم رفض الطلب بنجاح", "success");
-    setShowRejectModal(false);
-
-    window.location.reload();
-
-  } catch (error) {
-    console.error(error);
-    showNotification("فشل في رفض الطلب", "error");
-  } finally {
-    setActionLoading(false);
-  }
-};
-
   const handleInitialApproval = async () => {
     if (!application?.solidarity_id || actionLoading) return;
     setActionLoading(true);
@@ -291,14 +241,14 @@ const handleReject = async () => {
       setApplication((prev) => ({ ...(prev ?? {}), ...data }));
       showNotification("تمت الموافقة مبدئية بنجاح", "success");
       await fetchDocuments();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Initial approval error:", err);
-      const serverMsg = err?.response?.data
-        ? typeof err.response.data === "string"
-          ? err.response.data
-          : JSON.stringify(err.response.data)
+      const serverMsg = ((err as Record<string, unknown>)?.response as Record<string, unknown>)?.data
+        ? typeof ((err as Record<string, unknown>).response as Record<string, unknown>).data === "string"
+          ? ((err as Record<string, unknown>).response as Record<string, unknown>).data
+          : JSON.stringify(((err as Record<string, unknown>).response as Record<string, unknown>).data)
         : "فشل في تنفيذ الموافقة مبدئية";
-      showNotification(serverMsg, "error");
+      showNotification(serverMsg as string, "error");
     } finally {
       setActionLoading(false);
       window.location.reload();
@@ -341,7 +291,7 @@ const handleReject = async () => {
   const assignDiscounts = async () => {
     if (!id || actionLoading) return;
 
-    const payloadDiscounts: any[] = [];
+    const payloadDiscounts: Record<string, unknown>[] = [];
     (Object.keys(selectedDiscounts) as Array<keyof SelectedDiscounts>).forEach((key) => {
       const val = selectedDiscounts[key];
       if (val && val !== "none") {
@@ -360,10 +310,10 @@ const handleReject = async () => {
     setActionLoading(true);
     const prevApp = application;
     const optimisticTotal = payloadDiscounts.reduce(
-      (sum: number, d: { discount_value: any }) => sum + Number(d.discount_value || 0),
+      (sum: number, d: Record<string, unknown>) => sum + Number((d.discount_value as string | number) || 0),
       0
     );
-    setApplication((prev) => ({ ...(prev ?? {}), total_discount: String(optimisticTotal) }));
+    setApplication((prev) => ({ ...(prev ?? {} as Record<string, unknown>), total_discount: String(optimisticTotal) }));
 
     try {
       const res = await authFetch(
@@ -380,15 +330,15 @@ const handleReject = async () => {
       showNotification("تم حفظ الخصومات بنجاح", "success");
       setDiscountsSaved(true);
       await fetchDocuments();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("assignDiscounts error:", err);
       setApplication(prevApp);
-      const serverMsg = err?.response?.data
-        ? typeof err.response.data === "string"
-          ? err.response.data
-          : JSON.stringify(err.response.data)
+      const serverMsg = ((err as Record<string, unknown>)?.response as Record<string, unknown>)?.data
+        ? typeof ((err as Record<string, unknown>).response as Record<string, unknown>).data === "string"
+          ? ((err as Record<string, unknown>).response as Record<string, unknown>).data
+          : JSON.stringify(((err as Record<string, unknown>).response as Record<string, unknown>).data)
         : "فشل حفظ الخصومات على الخادم";
-      showNotification(serverMsg, "error");
+      showNotification(serverMsg as string, "error");
     } finally {
       setActionLoading(false);
     }
@@ -598,12 +548,6 @@ const handleReject = async () => {
           {canApprove(application?.req_status) && (
             <button onClick={handleApprove} disabled={actionLoading} className={styles.btnApprove}>
               {actionLoading ? "جاري..." : "مقبول"}
-            </button>
-          )}
-
-          {canReject(application?.req_status) && (
-            <button onClick={() => setShowRejectModal(true)} disabled={actionLoading} className={styles.btnReject}>
-              {actionLoading ? "جاري..." : "رفض"}
             </button>
           )}
 

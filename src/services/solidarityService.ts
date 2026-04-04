@@ -12,7 +12,7 @@ export const getFacultyApplications = async () => {
       },
     });
     return response.data;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching applications:", error);
     throw error;
   }

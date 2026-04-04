@@ -17,8 +17,8 @@ export default function StudentDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
 
-  const [data, setData] = useState<any>(null);
-  const [docs, setDocs] = useState<any[]>([]);
+  const [data, setData] = useState<Record<string, unknown> | null>(null);
+  const [docs, setDocs] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [notification, setNotification] = useState<{ message: string; type: string } | null>(null);
@@ -120,10 +120,10 @@ const handleApprove = async () => {
 
     if (!response.ok) throw new Error("حدث خطأ أثناء قبول الطالب");
 
-    const result = await response.json();
+    await response.json();
 
     // تحديث الحالة في الواجهة بعد نجاح الطلب
-    setData((prev: any) => ({ ...prev, req_status: "مقبول" }));
+    setData((prev: Record<string, unknown> | null) => ({ ...prev, req_status: "مقبول" }));
     showNotification("✅ تم قبول الطالب بنجاح", "success");
   } catch (error) {
     console.error(error);
@@ -161,7 +161,7 @@ const handleReject = async () => {
 
     await response.json();
 
-    setData((prev: any) => ({ ...prev, req_status: "مرفوض" }));
+    setData((prev: Record<string, unknown> | null) => ({ ...prev, req_status: "مرفوض" }));
     setShowRejectModal(false);
     setSelectedReason(null);
 
@@ -202,13 +202,13 @@ console.log("docs: ", docs)
         <section className={styles.section}>
           <h3>المعلومات الأساسية</h3>
           <div className={styles.infoGrid}>
-            <p><strong>رقم التضامن:</strong> {data.solidarity_id}</p>
-            <p><strong>اسم الطالب:</strong> {data.student_name}</p>
-            <p><strong>الرقم الجامعي:</strong> {data.student_uid}</p>
-            <p><strong>الكلية:</strong> {data.faculty_name}</p>
-            <p><strong>الحالة الأكاديمية:</strong> {data.acd_status}</p>
-            <p><strong>التقدير:</strong> {data.grade}</p>
-            <p><strong>تاريخ الإنشاء:</strong> {data.created_at?.slice(0, 10)}</p>
+            <p><strong>رقم التضامن:</strong> {String(data.solidarity_id ?? '')}</p>
+            <p><strong>اسم الطالب:</strong> {String(data.student_name ?? '')}</p>
+            <p><strong>الرقم الجامعي:</strong> {String(data.student_uid ?? '')}</p>
+            <p><strong>الكلية:</strong> {String(data.faculty_name ?? '')}</p>
+            <p><strong>الحالة الأكاديمية:</strong> {String(data.acd_status ?? '')}</p>
+            <p><strong>التقدير:</strong> {String(data.grade ?? '')}</p>
+            <p><strong>تاريخ الإنشاء:</strong> {String(data.created_at ?? '').slice(0, 10)}</p>
           </div>
         </section>
 
@@ -216,9 +216,9 @@ console.log("docs: ", docs)
         <section className={styles.section}>
           <h3>معلومات الطلب</h3>
           <div className={styles.infoGrid}>
-            <p><strong>حالة الطلب:</strong> {data.req_status}</p>
-            <p><strong>المراجع:</strong> {data.approved_by ?? "—"}</p>
-            <p><strong>آخر تحديث:</strong> {data.updated_at?.slice(0, 10)}</p>
+            <p><strong>حالة الطلب:</strong> {String(data.req_status ?? '')}</p>
+            <p><strong>المراجع:</strong> {String(data.approved_by ?? "—")}</p>
+            <p><strong>آخر تحديث:</strong> {String(data.updated_at ?? '').slice(0, 10)}</p>
           </div>
         </section>
 
@@ -226,10 +226,10 @@ console.log("docs: ", docs)
         <section className={styles.section}>
           <h3>معلومات الأسرة</h3>
           <div className={styles.infoGrid}>
-            <p><strong>عدد أفراد الأسرة:</strong> {data.family_numbers}</p>
-            <p><strong>ترتيب الطالب:</strong> {data.arrange_of_brothers}</p>
-            <p><strong>حالة الأب:</strong> {data.father_status}</p>
-            <p><strong>حالة الأم:</strong> {data.mother_status}</p>
+            <p><strong>عدد أفراد الأسرة:</strong> {String(data.family_numbers ?? '')}</p>
+            <p><strong>ترتيب الطالب:</strong> {String(data.arrange_of_brothers ?? '')}</p>
+            <p><strong>حالة الأب:</strong> {String(data.father_status ?? '')}</p>
+            <p><strong>حالة الأم:</strong> {String(data.mother_status ?? '')}</p>
           </div>
         </section>
 
@@ -237,9 +237,9 @@ console.log("docs: ", docs)
         <section className={styles.section}>
           <h3>المعلومات المالية</h3>
           <div className={styles.infoGrid}>
-            <p><strong>دخل الأب:</strong> {data.father_income}</p>
-            <p><strong>دخل الأم:</strong> {data.mother_income}</p>
-            <p><strong>إجمالي الدخل:</strong> {data.total_income}</p>
+            <p><strong>دخل الأب:</strong> {String(data.father_income ?? '')}</p>
+            <p><strong>دخل الأم:</strong> {String(data.mother_income ?? '')}</p>
+            <p><strong>إجمالي الدخل:</strong> {String(data.total_income ?? '')}</p>
           </div>
         </section>
 
@@ -247,10 +247,10 @@ console.log("docs: ", docs)
         <section className={styles.section}>
           <h3>معلومات الاتصال والسكن</h3>
           <div className={styles.infoGrid}>
-            <p><strong>هاتف الأم:</strong> {data.m_phone_num}</p>
-            <p><strong>هاتف الأب:</strong> {data.f_phone_num}</p>
-            <p><strong>السكن:</strong> {data.housing_status}</p>
-            <p><strong>العنوان:</strong> {data.address}</p>
+            <p><strong>هاتف الأم:</strong> {String(data.m_phone_num ?? '')}</p>
+            <p><strong>هاتف الأب:</strong> {String(data.f_phone_num ?? '')}</p>
+            <p><strong>السكن:</strong> {String(data.housing_status ?? '')}</p>
+            <p><strong>العنوان:</strong> {String(data.address ?? '')}</p>
           </div>
         </section>
 
@@ -258,8 +258,8 @@ console.log("docs: ", docs)
         <section className={styles.section}>
           <h3>معلومات إضافية</h3>
           <div className={styles.infoGrid}>
-            <p><strong>ذوي الهمم:</strong> {data.disabilities}</p>
-            <p><strong>السبب:</strong> {data.reason}</p>
+            <p><strong>ذوي الهمم:</strong> {String(data.disabilities ?? '')}</p>
+            <p><strong>السبب:</strong> {String(data.reason ?? '')}</p>
           </div>
         </section>
 
@@ -272,19 +272,19 @@ console.log("docs: ", docs)
   ) : (
     <div className={styles.docsContainer}>
       {docs.map((doc) => (
-        <div key={doc.doc_id} className={styles.docCard}>
-          <p><strong>{doc.doc_type}</strong></p>
+        <div key={String(doc.doc_id)} className={styles.docCard}>
+          <p><strong>{String(doc.doc_type ?? '')}</strong></p>
 
          
             <button
-                onClick={() => openDocument(doc.doc_id)}
+                onClick={() => openDocument(Number(doc.doc_id))}
                   className={styles.docLinkButton}
                 >
                   افتح الملف
                 </button>
 
           <p className={styles.uploadDate}>
-            تم الرفع: {doc.uploaded_at.slice(0, 10)}
+            تم الرفع: {String(doc.uploaded_at ?? '').slice(0, 10)}
           </p>
         </div>
       ))}

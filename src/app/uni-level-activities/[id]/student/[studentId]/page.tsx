@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import styles from "./StudentDetails.module.css";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowRight, Mail, Phone, MapPin, User, GraduationCap, IdCard } from "lucide-react";
@@ -44,7 +44,7 @@ async function apiFetch<T>(
 ): Promise<{ ok: true; data: T } | { ok: false; message: string }> {
   const token = getAccessToken();
 
-  const headers: Record<string, string> = { ...(opts.headers as any) };
+  const headers: Record<string, string> = { ...(opts.headers as Record<string, string>) };
 
   if (!headers["Content-Type"] && opts.body) {
     headers["Content-Type"] = "application/json";
@@ -65,8 +65,8 @@ async function apiFetch<T>(
     }
 
     return { ok: true, data };
-  } catch (e: any) {
-    return { ok: false, message: e?.message || "مشكلة في الاتصال" };
+  } catch (e: unknown) {
+    return { ok: false, message: (e as Error)?.message || "مشكلة في الاتصال" };
   }
 }
 
@@ -80,7 +80,7 @@ export default function StudentDetailsPage() {
   const [loading, setLoading] = useState(false);
 
   /* ---------- load student ---------- */
-  const loadStudent = async () => {
+  const loadStudent = useCallback(async () => {
     if (!studentId) return;
 
     setLoading(true);
@@ -96,11 +96,11 @@ export default function StudentDetailsPage() {
     }
 
     setLoading(false);
-  };
+  }, [studentId]);
 
 useEffect(() => {
   loadStudent();
-}, [studentId]);
+}, [studentId, loadStudent]);
 
   const ui = useMemo(() => {
     if (!student) {

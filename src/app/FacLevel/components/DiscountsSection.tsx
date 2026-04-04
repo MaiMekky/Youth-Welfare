@@ -29,8 +29,8 @@ export default function DiscountsSection() {
     full: ["200", "300", "400", "500", "700"],
   });
 
-  const serverToLocal = (data: any): DiscountsState => {
-    const asArrayOfStrings = (v: any) =>
+  const serverToLocal = (data: Record<string, unknown>): DiscountsState => {
+    const asArrayOfStrings = (v: unknown) =>
       Array.isArray(v) ? v.map((x) => String(x)) : [];
 
     return {
@@ -83,9 +83,9 @@ export default function DiscountsSection() {
         regular: mapped.regular.length ? mapped.regular : [""],
         full: mapped.full.length ? mapped.full : [""],
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("GET error:", err);
-      setError(`فشل جلب البيانات — ${err?.message ?? "Unknown error"}`);
+      setError(`فشل جلب البيانات — ${err instanceof Error ? err.message : "Unknown error"}`);
     } finally {
       setLoading(false);
     }
@@ -93,6 +93,7 @@ export default function DiscountsSection() {
 
   useEffect(() => {
     fetchDiscounts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChange = (
@@ -149,9 +150,9 @@ const handleSave = async () => {
 
     await fetchDiscounts();
     setIsEditing(false);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Save error:", err);
-    setError(err?.message ?? "Unknown error");
+    setError(err instanceof Error ? err.message : "Unknown error");
   } finally {
     setSaving(false);
   }

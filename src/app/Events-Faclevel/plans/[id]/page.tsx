@@ -40,12 +40,12 @@ type ApiPlanEvent = {
   reward: string | null;
   status: string;
   type: string;
-  imgs: any;
+  imgs: Record<string, unknown>;
   st_date: string;
   end_date: string;
   s_limit: number | null;
-  resource: any;
-  selected_facs: any;
+  resource: Record<string, unknown>;
+  selected_facs: Record<string, unknown>;
   active: boolean;
   created_at: string;
   updated_at: string;
@@ -75,7 +75,7 @@ function statusLabel(ar: string) {
   return s || "—";
 }
 
-function statusClass(stylesObj: any, s: string) {
+function statusClass(stylesObj: Record<string, string>, s: string) {
   const x = statusLabel(s);
   if (x === "مقبول") return stylesObj.statusOk;
   if (x === "منتظر") return stylesObj.statusAmber;
@@ -86,7 +86,7 @@ function statusClass(stylesObj: any, s: string) {
   return stylesObj.statusNeutral;
 }
 
-function typeClass(stylesObj: any, t: string) {
+function typeClass(stylesObj: Record<string, string>, t: string) {
   const x = (t || "").trim();
   if (x.includes("ثقافي")) return stylesObj.typePurple;
   if (x.includes("رياضي")) return stylesObj.typeRed;
@@ -143,11 +143,11 @@ export default function PlanDetailsPage() {
   async function apiCall(
     path: string,
     opts: RequestInit = {}
-  ): Promise<{ ok: true; data: any } | { ok: false; message: string }> {
+  ): Promise<{ ok: true; data: Record<string, unknown> } | { ok: false; message: string }> {
     const token = getAccessToken();
     const headers: Record<string, string> = {
       Accept: "application/json",
-      ...(opts.headers as any),
+      ...(opts.headers as Record<string, string>),
     };
     if (!headers["Content-Type"] && opts.body) headers["Content-Type"] = "application/json";
     if (token) headers.Authorization = `Bearer ${token}`;
@@ -167,15 +167,15 @@ export default function PlanDetailsPage() {
 
       if (!res.ok) {
         const msg =
-          (typeof json === "object" && json && ((json as any).detail || (json as any).message || (json as any).error)) ||
+          (typeof json === "object" && json && ((json as Record<string, unknown>).detail || (json as Record<string, unknown>).message || (json as Record<string, unknown>).error)) ||
           (typeof json === "string" ? json : "") ||
           `طلب غير ناجح (${res.status})`;
         return { ok: false, message: String(msg) };
       }
 
       return { ok: true, data: json };
-    } catch (e: any) {
-      return { ok: false, message: e?.message || "مشكلة في الاتصال" };
+    } catch (e: unknown) {
+      return { ok: false, message: (e as Error)?.message || "مشكلة في الاتصال" };
     }
   }
 
@@ -229,7 +229,7 @@ export default function PlanDetailsPage() {
         return;
       }
 
-      let parsed: any = null;
+      let parsed: Record<string, unknown> | null = null;
       try {
         parsed = text ? JSON.parse(text) : null;
       } catch {

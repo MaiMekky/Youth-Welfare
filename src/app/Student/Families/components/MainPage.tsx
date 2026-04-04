@@ -16,7 +16,7 @@ interface ApiFamily {
   joined_at?: string;
 }
 
-interface ProgramFamily {
+export interface ProgramFamily {
   id: number;
   title: string;
   subtitle: string;
@@ -40,7 +40,7 @@ interface ToastNotification {
   type: 'success' | 'error' | 'info';
 }
 
-const extractArray = (data: any): any[] => {
+const extractArray = (data: Record<string, unknown>): Record<string, unknown>[] => {
   if (Array.isArray(data)) return data;
   if (data?.results && Array.isArray(data.results)) return data.results;
   if (data?.families && Array.isArray(data.families)) return data.families;
@@ -120,8 +120,8 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
     if (!res.ok) throw new Error('فشل تحميل الأسر الحالية');
     const data = await res.json();
     return extractArray(data)
-      .filter((f: ApiFamily) => !isElderBrother(f.role))
-      .map(mapToProgramFamily);
+      .filter((f: Record<string, unknown>) => !isElderBrother((f as unknown as ApiFamily).role))
+      .map((f: Record<string, unknown>) => mapToProgramFamily(f as unknown as ApiFamily));
   };
 
   const fetchAvailableFamilies = async () => {
@@ -138,7 +138,7 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
 
     if (!res.ok) throw new Error('فشل تحميل الأسر المتاحة');
     const data = await res.json();
-    return extractArray(data).map(mapToProgramFamily);
+    return extractArray(data).map((f: Record<string, unknown>) => mapToProgramFamily(f as unknown as ApiFamily));
   };
 
   /* ====== JOIN ====== */
@@ -185,8 +185,8 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
           setAvailableFamilies(available);
         } catch (err) { console.error('Error refreshing data:', err); }
       }, 500);
-    } catch (err: any) {
-      showToast(err.message || 'حدث خطأ أثناء الانضمام للأسرة', 'error');
+    } catch (err: unknown) {
+      showToast((err as Error).message || 'حدث خطأ أثناء الانضمام للأسرة', 'error');
     } finally {
       setJoiningId(null);
     }
@@ -209,14 +209,15 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
           f => isAccepted(f.memberStatus)
         );
         if (!hasAccepted && joined.length > 0) setActiveTab('pending');
-      } catch (err: any) {
-        setError(err.message);
-        showToast(err.message || 'فشل تحميل البيانات', 'error');
+      } catch (err: unknown) {
+        setError((err as Error).message);
+        showToast((err as Error).message || 'فشل تحميل البيانات', 'error');
       } finally {
         setLoading(false);
       }
     };
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /* ====== STATUS HELPERS ====== */

@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import {
   ArrowRight, Users, Calendar, FileText, UserRound,
   Clock, MapPin, CheckCircle, Hourglass, XCircle,
-  BookOpen, Tag, DollarSign, Award, AlertCircle, Info,
+  BookOpen, DollarSign, Award, AlertCircle, Info,
 } from "lucide-react";
 import "../styles/FamilyDetails.css";
 import { authFetch } from "@/utils/globalFetch";
@@ -17,9 +17,9 @@ interface FamilyDetailsProps {
     subtitle: string;
     place: string;
     views: string;
-    createdAt: string;
+    createdAt?: string;
     deadline?: string;
-    goals: string;
+    goals?: string;
     description?: string;
     image?: string;
   };
@@ -361,8 +361,8 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
       if (!res.ok) throw new Error("فشل تحميل المنشورات");
       const data = await res.json();
       setPosts(Array.isArray(data) ? data : data.results ?? data.posts ?? []);
-    } catch (err: any) {
-      showNotification(err.message, "error");
+    } catch (err: unknown) {
+      showNotification((err as Error).message, "error");
     } finally {
       setLoadingPosts(false);
     }
@@ -382,8 +382,8 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
       const data = await res.json();
       const raw: Activity[] = Array.isArray(data) ? data : data.results ?? data.events ?? [];
       setActivities(mergeWithPersisted(raw));
-    } catch (err: any) {
-      showNotification(err.message, "error");
+    } catch (err: unknown) {
+      showNotification((err as Error).message, "error");
     } finally {
       setLoadingActivities(false);
     }
@@ -446,18 +446,18 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
 
       // Re-fetch so any future status changes from the server are immediately reflected
       fetchActivities();
-    } catch (err: any) {
-      showNotification(err.message ?? "حصل خطأ أثناء التسجيل", "error");
+    } catch (err: unknown) {
+      showNotification((err as Error).message ?? "حصل خطأ أثناء التسجيل", "error");
     } finally {
       setRegisteringId(null);
     }
-  }, [family.id, showNotification]);
+  }, [family.id, showNotification, fetchActivities]);
 
   // ── Load data on tab switch ──
   useEffect(() => {
     if (activeTab === "posts" && posts.length === 0) fetchPosts();
     if (activeTab === "activities" && activities.length === 0) fetchActivities();
-  }, [activeTab]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeTab, fetchPosts, fetchActivities, posts.length, activities.length]);
 
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -523,8 +523,8 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
                   family.deadline ? { label: "الموعد النهائي", value: family.deadline } : null,
                 ].filter(Boolean).map((row, i) => (
                   <div key={i} className="det-row">
-                    <span className="det-label">{(row as any).label}</span>
-                    <span className="det-value">{(row as any).value}</span>
+                    <span className="det-label">{(row as Record<string, unknown>).label as string}</span>
+                    <span className="det-value">{(row as Record<string, unknown>).value as string}</span>
                   </div>
                 ))}
               </div>

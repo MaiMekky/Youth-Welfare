@@ -3,7 +3,7 @@ import React from "react";
 import styles from "../Styles/FamilyCard.module.css";
 import { useRouter } from "next/navigation";
 
-export default function FamilyCard({ family, showActions }: any) {
+export default function FamilyCard({ family, showActions }: { family: Record<string, unknown>; showActions: boolean }) {
   const router = useRouter();
 
   return (
@@ -11,17 +11,17 @@ export default function FamilyCard({ family, showActions }: any) {
       {/* Title + Description + Badges */}
       <div className={styles.cardHeader}>
         <div className={styles.titleDescContainer}>
-          <h3 className={styles.familyTitle}>{family.title}</h3>
-          <p className={styles.familyDescription}>{family.description}</p>
+          <h3 className={styles.familyTitle}>{String(family.title ?? '')}</h3>
+          <p className={styles.familyDescription}>{String(family.description ?? '')}</p>
         </div>
         <div className={styles.statusBadges}>
-          {family.badge && (
-            <span className={styles.badge} style={{ backgroundColor: family.badgeColor }}>
-              {family.badge}
+          {family.badge ? (
+            <span className={styles.badge} style={{ backgroundColor: String(family.badgeColor ?? '#ccc') }}>
+              {String(family.badge)}
             </span>
-          )}
-          <span className={styles.badge} style={{ backgroundColor: family.statusColor }}>
-            {family.status}
+          ) : null}
+          <span className={styles.badge} style={{ backgroundColor: String(family.statusColor ?? '#ccc') }}>
+            {String(family.status ?? '')}
           </span>
         </div>
       </div>
@@ -33,7 +33,7 @@ export default function FamilyCard({ family, showActions }: any) {
           <path d="M16 11c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM8 11c1.657 0 3-1.343 3-3S9.657 5 8 5 5 6.343 5 8s1.343 3 3 3z" />
           <path d="M8 13c-2.67 0-8 1.337-8 4v2h9.5c.634-.744 2.02-2 6.5-2 4.48 0 5.866 1.256 6.5 2H24v-2c0-2.663-5.33-4-8-4H8z" />
         </svg></span>
-          <span>{family.members} عضو</span>
+          <span>{String(family.members ?? 0)} عضو</span>
         </div>
       </div>
 
@@ -41,11 +41,11 @@ export default function FamilyCard({ family, showActions }: any) {
       <div className={styles.familyInfo}>
         <div className={styles.infoRow}>
           <span className={styles.infoLabel}>النطاق:</span>
-          <span className={styles.infoValue}>{family.scope}</span>
+          <span className={styles.infoValue}>{String(family.scope ?? '')}</span>
         </div>
         <div className={styles.infoRow}>
           <span className={styles.infoLabel}>أنشئت بواسطة:</span>
-          <span className={styles.infoValue}>{family.createdBy}</span>
+          <span className={styles.infoValue}>{String(family.createdBy ?? '')}</span>
         </div>
       </div>
 
@@ -59,7 +59,7 @@ export default function FamilyCard({ family, showActions }: any) {
       </div> */}
       <button
         className={`${styles.btn} ${styles.btnDetails}`}
-        onClick={() => router.push(`/SuperAdmin-family/details/${family.id}`)}
+        onClick={() => router.push(`/SuperAdmin-family/details/${String(family.id)}`)}
       >
         عرض التفاصيل
       </button>
@@ -67,7 +67,7 @@ export default function FamilyCard({ family, showActions }: any) {
   ) : (
     <button
       className={`${styles.btn} ${styles.btnDetails}`}
-      onClick={() => router.push(`/SuperAdmin-family/details/${family.id}`)}
+      onClick={() => router.push(`/SuperAdmin-family/details/${String(family.id)}`)}
     >
       عرض التفاصيل
     </button>

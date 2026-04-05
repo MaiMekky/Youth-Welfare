@@ -1,18 +1,6 @@
 "use client";
 import React, { useEffect, useRef } from "react";
 
-// ─────────────────────────────────────────────────────────────────
-//  HOW TO MAKE YOUR IMAGE WORK (Next.js / React)
-//  ---------------------------------------------------------------
-//  The path  D:\Git\Youth-Welfare\...  is a Windows local path —
-//  browsers can never load it directly.
-//
-//  Do this ONE time:
-//    1. Copy  IMG-20251014-WA0015.jpg
-//         →  <your-project>/public/about-students.jpg
-//    2. That's it. The src="/about-students.jpg" below will work.
-// ─────────────────────────────────────────────────────────────────
-
 const AboutSection: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -55,8 +43,8 @@ const AboutSection: React.FC = () => {
           to   { opacity:1; transform:translateX(0); }
         }
         @keyframes fadeSlideRight {
-          from { opacity:0; transform:translateX(80px) scale(1.03); }
-          to   { opacity:1; transform:translateX(0)    scale(1); }
+          from { opacity:0; transform:translateX(60px); }
+          to   { opacity:1; transform:translateX(0); }
         }
         @keyframes lineGrow {
           from { transform:scaleX(0); }
@@ -74,13 +62,13 @@ const AboutSection: React.FC = () => {
           from { stroke-dashoffset:220; opacity:0; }
           to   { stroke-dashoffset:0;   opacity:1; }
         }
-        @keyframes shimmerPass {
-          0%   { transform:translateX(-100%); }
-          100% { transform:translateX(250%); }
-        }
         @keyframes revealDown {
           from { clip-path: inset(0 0 100% 0); }
           to   { clip-path: inset(0 0 0%   0); }
+        }
+        @keyframes imgFadeIn {
+          from { opacity: 0; transform: scale(1.04); }
+          to   { opacity: 1; transform: scale(1); }
         }
 
         .anim { opacity:0; }
@@ -105,19 +93,24 @@ const AboutSection: React.FC = () => {
           background: var(--bg);
           direction: rtl;
           overflow: hidden;
-          padding: 0;
+          /* ✅ White space above the section */
+          padding-top: clamp(4rem, 8vw, 7rem);
+          padding-bottom: clamp(3rem, 6vw, 5rem);
         }
 
         .about-grid {
           display: grid;
           grid-template-columns: 54% 46%;
-          min-height: 640px;
-          align-items: stretch;
+          min-height: 560px;
+          align-items: center;
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 clamp(1.5rem, 4vw, 3rem);
+          gap: clamp(2rem, 4vw, 4rem);
         }
 
         /* ── Left text ── */
         .about-left {
-          padding: clamp(3.5rem,6vw,5.5rem) clamp(2.5rem,5vw,5rem) clamp(3.5rem,6vw,5.5rem) clamp(2rem,4vw,4rem);
           display: flex;
           flex-direction: column;
           justify-content: center;
@@ -204,20 +197,16 @@ const AboutSection: React.FC = () => {
           animation: dotPop 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
         }
 
-        /* ── Right image ── */
+        /* ── Right image: contained card ── */
         .about-right {
           position: relative;
+          /* ✅ Contained rounded card matching Image 2 */
+          border-radius: 18px;
           overflow: hidden;
-          /* warm neutral fallback */
-          background: linear-gradient(135deg, #d6cfc0 0%, #bfb89e 100%);
-        }
-
-        /* Diagonal cut on the left edge so image bleeds into text area slightly */
-        .about-img-mask {
-          position: absolute;
-          inset: 0;
-          overflow: hidden;
-          clip-path: polygon(6% 0%, 100% 0%, 100% 100%, 0% 100%);
+          /* Aspect ratio to keep card proportional */
+          aspect-ratio: 4 / 5;
+          max-height: 520px;
+          box-shadow: 0 12px 48px rgba(26, 35, 64, 0.13), 0 2px 8px rgba(26,35,64,0.07);
         }
 
         .about-img {
@@ -226,7 +215,14 @@ const AboutSection: React.FC = () => {
           object-fit: cover;
           object-position: center 18%;
           display: block;
+          /* ✅ Fade-in + gentle scale on load */
+          opacity: 0;
           transition: transform 7s ease;
+        }
+
+        /* Image animates in when parent enters view */
+        .about-right.in-view .about-img {
+          animation: imgFadeIn 0.9s cubic-bezier(0.22,1,0.36,1) 0.2s forwards;
         }
 
         /* Ken-Burns pan on hover */
@@ -234,43 +230,23 @@ const AboutSection: React.FC = () => {
           transform: scale(1.07) translateX(-1%);
         }
 
-        /* One-time shimmer sweep */
-        .about-img-shimmer {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(
-            105deg,
-            transparent 0%,
-            rgba(255,255,255,0.22) 45%,
-            rgba(255,255,255,0.22) 55%,
-            transparent 100%
-          );
-          width: 40%;
-          transform: translateX(-100%);
-          pointer-events: none;
-          z-index: 3;
-        }
-        .about-right.in-view .about-img-shimmer {
-          animation: shimmerPass 1s ease 0.7s forwards;
-        }
-
         /* Gold top-left corner bracket */
         .about-corner-tl {
           position: absolute;
-          top: 22px;
-          left: calc(6% + 16px);
-          width: 70px;
-          height: 70px;
+          top: 16px;
+          left: 16px;
+          width: 60px;
+          height: 60px;
           z-index: 4;
           pointer-events: none;
         }
         /* Gold bottom-right corner bracket */
         .about-corner-br {
           position: absolute;
-          bottom: 22px;
-          right: 22px;
-          width: 56px;
-          height: 56px;
+          bottom: 16px;
+          right: 16px;
+          width: 50px;
+          height: 50px;
           z-index: 4;
           pointer-events: none;
         }
@@ -288,11 +264,11 @@ const AboutSection: React.FC = () => {
           animation: cornerDraw 1s ease 0.55s forwards;
         }
 
-        /* Thin gold vertical line */
+        /* Thin gold vertical line on right edge */
         .about-vline {
           position: absolute;
           top: 10%;
-          right: 22px;
+          right: 14px;
           width: 3px;
           height: 80%;
           background: var(--gold);
@@ -309,18 +285,21 @@ const AboutSection: React.FC = () => {
           .about-grid { grid-template-columns: 1fr 1fr; }
           .about-h1      { font-size: clamp(30px,4vw,48px); }
           .about-h1-gold { font-size: clamp(26px,3.5vw,42px); }
+          .about-right   { aspect-ratio: 3 / 4; }
         }
 
         /* ── Mobile ── */
         @media (max-width: 768px) {
-          .about-grid { grid-template-columns: 1fr; }
+          .about-grid {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+          }
           .about-right {
             order: -1;
-            min-height: 310px;
-            max-height: 420px;
+            aspect-ratio: 16 / 9;
+            max-height: 320px;
+            border-radius: 14px;
           }
-          .about-img-mask { clip-path: polygon(0% 0%, 100% 0%, 100% 92%, 0% 100%); }
-          .about-left { padding: 2.5rem 1.5rem 3rem; }
           .about-h1      { font-size: clamp(28px,8vw,46px); }
           .about-h1-gold { font-size: clamp(24px,7vw,40px); }
           .about-para    { max-width: 100%; }
@@ -368,25 +347,15 @@ const AboutSection: React.FC = () => {
             </ul>
           </div>
 
-          {/* ── Right: Image ── */}
+          {/* ── Right: Contained Image Card ── */}
           <div className="anim slide-right d0 about-right">
 
-            {/* Diagonal-clipped image wrapper */}
-            <div className="about-img-mask">
-              {/*
-                ✅ Put your image in:  public/about-students.jpg
-                   Then this src will work in Next.js automatically.
-              */}
-              <img
-                className="about-img"
-                src="/about-students.png"
-                alt="طلاب جامعة العاصمة"
-                loading="lazy"
-              />
-            </div>
-
-            {/* Shimmer sweep */}
-            <div className="about-img-shimmer" />
+            <img
+              className="about-img"
+              src="/about-students.png"
+              alt="طلاب جامعة العاصمة"
+              loading="lazy"
+            />
 
             {/* Top-left gold corner */}
             <svg className="about-corner-tl" viewBox="0 0 70 70">

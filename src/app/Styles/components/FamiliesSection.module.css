@@ -1,0 +1,254 @@
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap');
+
+/* ===== ROOT VARIABLES ===== */
+:root {
+  --bg-deep:        #0a0f1e;
+  --bg-card:        #111827;
+  --accent-gold:    #c9a84c;
+  --accent-gold-light: #e2c57a;
+  --accent-blue:    #3b82f6;
+  --accent-green:   #22c55e;
+  --text-primary:   #f1f5f9;
+  --text-secondary: #94a3b8;
+  --border-subtle:  rgba(255, 255, 255, 0.07);
+  --border-gold:    rgba(201, 168, 76, 0.3);
+  --border-blue:    rgba(59, 130, 246, 0.3);
+  --border-green:   rgba(34, 197, 94, 0.3);
+  --radius-card:    20px;
+  --font-main:      'Tajawal', sans-serif;
+}
+
+/* ===== KEYFRAMES ===== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-15px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== SECTION ===== */
+.section {
+  direction: rtl;
+  font-family: var(--font-main);
+  background: var(--bg-deep);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 130, 246, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(201, 168, 76, 0.05) 0%, transparent 50%);
+  padding: 100px 24px 120px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+  opacity: 0.4;
+}
+
+/* ===== BADGE ===== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(201, 168, 76, 0.1);
+  border: 1px solid var(--border-gold);
+  border-radius: 100px;
+  padding: 8px 22px;
+  margin-bottom: 28px;
+  opacity: 0;
+  animation: fadeIn 0.3s ease 0.1s forwards;
+}
+
+.badgeDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-gold);
+  box-shadow: 0 0 8px var(--accent-gold);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.6; transform: scale(0.85); }
+}
+
+.badgeText {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent-gold-light);
+  letter-spacing: 0.5px;
+}
+
+/* ===== HEADING ===== */
+.heading {
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-weight: 900;
+  color: var(--text-primary);
+  text-align: center;
+  margin: 0 0 16px;
+  line-height: 1.2;
+  opacity: 0;
+  animation: fadeIn 0.3s ease 0.2s forwards;
+}
+
+.headingAccent {
+  color: var(--accent-gold);
+}
+
+.subheading {
+  font-size: clamp(1rem, 2vw, 1.15rem);
+  font-weight: 400;
+  color: var(--text-secondary);
+  text-align: center;
+  max-width: 540px;
+  line-height: 1.8;
+  margin: 0 0 70px;
+  opacity: 0;
+  animation: fadeIn 0.3s ease 0.3s forwards;
+}
+
+/* ===== GRID ===== */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+/* ===== CARD ===== */
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border-subtle);
+  padding: 40px 32px 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.card:nth-child(1) { animation: fadeIn 0.3s ease 0.4s forwards; }
+.card:nth-child(2) { animation: fadeIn 0.3s ease 0.5s forwards; }
+.card:nth-child(3) { animation: fadeIn 0.3s ease 0.6s forwards; }
+
+/* Top accent bar */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 30%;
+  right: 30%;
+  height: 2px;
+  border-radius: 0 0 4px 4px;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+}
+
+.card:hover::before {
+  opacity: 1;
+  left: 15%;
+  right: 15%;
+}
+
+/* ---- Gold card ---- */
+.cardGold { background: linear-gradient(145deg, #181408 0%, #1a1505 100%); }
+.cardGold::before { background: var(--accent-gold); }
+.cardGold:hover {
+  border-color: var(--border-gold);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+/* ---- Blue card ---- */
+.cardBlue { background: linear-gradient(145deg, #0d1728 0%, #0b1520 100%); }
+.cardBlue::before { background: var(--accent-blue); }
+.cardBlue:hover {
+  border-color: var(--border-blue);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+/* ---- Green card ---- */
+.cardGreen { background: linear-gradient(145deg, #0b1c12 0%, #091510 100%); }
+.cardGreen::before { background: var(--accent-green); }
+.cardGreen:hover {
+  border-color: var(--border-green);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+/* ===== ICON WRAPPER ===== */
+.iconWrap {
+  width: 68px;
+  height: 68px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  transition: all 0.3s ease;
+}
+
+.iconWrapGold  { background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.25); }
+.iconWrapBlue  { background: rgba(59,130,246,0.12);  border: 1px solid rgba(59,130,246,0.25); }
+.iconWrapGreen { background: rgba(34,197,94,0.12);   border: 1px solid rgba(34,197,94,0.25); }
+
+.card:hover .iconWrap { transform: translateY(-3px); }
+
+.iconSvg { width: 32px; height: 32px; }
+
+/* ===== CARD TEXT ===== */
+.cardTitle {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 14px;
+  transition: color 0.3s ease;
+}
+
+.cardGold:hover  .cardTitle { color: var(--accent-gold-light); }
+.cardBlue:hover  .cardTitle { color: #93c5fd; }
+.cardGreen:hover .cardTitle { color: #86efac; }
+
+.cardDesc {
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  line-height: 1.85;
+  margin: 0;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+  .card:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    max-width: 500px;
+    justify-self: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .section    { padding: 70px 16px 90px; }
+  .grid       { grid-template-columns: 1fr; }
+  .card:last-child:nth-child(odd) { grid-column: auto; max-width: 100%; justify-self: stretch; }
+  .heading    { font-size: 2.2rem; }
+  .subheading { margin-bottom: 48px; }
+  .card       { padding: 32px 24px 28px; }
+}

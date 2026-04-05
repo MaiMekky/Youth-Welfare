@@ -65,7 +65,7 @@ const HeroSection: React.FC = () => {
         /* ── Dark overlay — centered layout ── */
 
         .hero-overlay {
-          background: rgba(0, 0, 0, 0.55);
+          background: rgba(8, 13, 26, 0.70);
           flex: 1;
           min-height: 100dvh;
           width: 100%;

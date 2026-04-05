@@ -7,7 +7,7 @@ import StudentNavbar from "./components/StudentNavbar";
 import StudentFooter from "./components/StudentFooter";
 
 export const metadata = {
-  title: "التكافل الاجتماعي - صفحة الطلاب",
+  title: "جامعة العاصمة - صفحة الطلاب",
   description: "Student solidarity area",
 };
 

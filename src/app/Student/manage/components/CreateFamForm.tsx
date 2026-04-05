@@ -83,7 +83,22 @@ function parseApiError(err: unknown): string[] {
 /* ─── Types ─── */
 interface CreateFamFormProps { onBack?: () => void; onSubmitSuccess?: () => void; }
 interface Person { fullName: string; nationalId?: string; mobile?: string; studentId?: string; }
-interface Committee { name: string; secretary: Person; assistant: Person; plan?: string; executionDate?: string; fundingSources?: string; selectedDeptId?: string; }
+interface Activity {
+  title: string;
+  description: string;
+  st_date: string;
+  end_date?: string;
+  location?: string;
+  cost?: string;
+}
+
+interface Committee {
+  name: string;
+  secretary: Person;
+  assistant: Person;
+  activities: Activity[];
+  selectedDeptId?: string;
+}
 interface Department { dept_id: number; name: string; }
 interface FormErrors { [key: string]: string; }
 interface ToastNotification { id: number; message: string; type: 'success' | 'error' | 'info' | 'warning'; }
@@ -96,15 +111,23 @@ const STEPS = [
   { id: 2, label: 'اللجان',          icon: Users    },
   { id: 3, label: 'مراجعة وإرسال',   icon: Send     },
 ];
+const defaultActivity: Activity = {
+  title: '',
+  description: '',
+  st_date: '',
+  end_date: '',
+  location: '',
+  cost: '',
+};
 
 const defaultCommittees = {
-  cultural:   { name: 'اللجنة الثقافية',               secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
-  wall:       { name: 'لجنة صحف الحائط',               secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
-  social:     { name: 'اللجنة الاجتماعية والرحلات',    secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
-  technical:  { name: 'اللجنة الفنية',                 secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
-  scientific: { name: 'اللجنة العلمية',                secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
-  service:    { name: 'لجنة الخدمة العامة والمعسكرات', secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
-  sports:     { name: 'اللجنة الرياضية',               secretary: {...defaultPerson}, assistant: {...defaultPerson}, plan:'', executionDate:'', fundingSources:'', selectedDeptId:'' },
+  cultural:   { name: 'اللجنة الثقافية',               secretary: {...defaultPerson}, assistant: {...defaultPerson}, activities: [{ ...defaultActivity }], selectedDeptId:'' },
+  wall:       { name: 'لجنة صحف الحائط',               secretary: {...defaultPerson}, assistant: {...defaultPerson}, activities: [{ ...defaultActivity }], selectedDeptId:'' },
+  social:     { name: 'اللجنة الاجتماعية والرحلات',    secretary: {...defaultPerson}, assistant: {...defaultPerson}, activities: [{ ...defaultActivity }], selectedDeptId:'' },
+  technical:  { name: 'اللجنة الفنية',                 secretary: {...defaultPerson}, assistant: {...defaultPerson}, activities: [{ ...defaultActivity }], selectedDeptId:'' },
+  scientific: { name: 'اللجنة العلمية',                secretary: {...defaultPerson}, assistant: {...defaultPerson}, activities: [{ ...defaultActivity }], selectedDeptId:'' },
+  service:    { name: 'لجنة الخدمة العامة والمعسكرات', secretary: {...defaultPerson}, assistant: {...defaultPerson}, activities: [{ ...defaultActivity }], selectedDeptId:'' },
+  sports:     { name: 'اللجنة الرياضية',               secretary: {...defaultPerson}, assistant: {...defaultPerson}, activities: [{ ...defaultActivity }], selectedDeptId:'' },
 };
 
 const defaultBoard = {
@@ -140,7 +163,31 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
   const [toasts, setToasts]                       = useState<ToastNotification[]>([]);
 
   const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
+  const handleActivityChange = (ck: string, ai: number, field: keyof Activity, value: string) => {
+    setCommittees(prev => {
+      const updated = { ...prev };
+      updated[ck].activities[ai][field] = value;
+      return updated;
+    });
+  };
 
+const addActivity = (ck: string) => {
+  setCommittees(prev => ({
+    ...prev,
+    [ck]: {
+      ...prev[ck],
+      activities: [...prev[ck].activities, { ...defaultActivity }]
+    }
+  }));
+};
+
+  const removeActivity = (ck: string, ai: number) => {
+    setCommittees(prev => {
+      const updated = { ...prev };
+      updated[ck].activities.splice(ai, 1);
+      return updated;
+    });
+  };
   /* ── Cache load ── */
   useEffect(() => {
     try {
@@ -261,15 +308,14 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
 
       const committeesData = Object.entries(committees).map(([key, c]) => {
         const deptId = c.selectedDeptId ? parseInt(c.selectedDeptId) : (facultyId || 0);
-        const activities: Record<string, unknown>[] = [];
-        if (c.plan || c.executionDate || c.fundingSources) {
-          activities.push({
-            title: `نشاط ${c.name}`, description: c.plan || '',
-            st_date: c.executionDate || new Date().toISOString().split('T')[0],
-            end_date: c.executionDate || new Date().toISOString().split('T')[0],
-            location: '', cost: c.fundingSources || '0',
-          });
-        }
+       const activities = c.activities.map(a => ({
+        title: a.title,
+        description: a.description,
+        st_date: a.st_date,
+        end_date: a.end_date || a.st_date,
+        location: a.location || '',
+        cost: a.cost || '0',
+      }));
         return {
           committee_key: committeeKeys[key] || key,
           head:      { uid: parseInt(c.secretary.studentId||'0'), dept_id: deptId },
@@ -487,29 +533,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
               <ChevronLeft size={16} className="cf-committee-chevron" />
             </summary>
             <div className="cf-committee-body">
-              <div className="cf-grid-2">
-                <div className="cf-field">
-                  <label className="cf-label">القسم المسؤول</label>
-                  <select
-                    className="cf-input cf-select"
-                    value={c.selectedDeptId || ''}
-                    onChange={e => handleCommitteeFieldChange(key, 'selectedDeptId', e.target.value)}
-                  >
-                    <option value="">اختر القسم</option>
-                    {departments.map(d => <option key={d.dept_id} value={d.dept_id}>{d.name}</option>)}
-                  </select>
-                </div>
-                <div className="cf-field">
-                  <label className="cf-label">موعد التنفيذ <span className="cf-optional">(اختياري)</span></label>
-                  <input
-                    type="date"
-                    className="cf-input"
-                    value={c.executionDate || ''}
-                    onChange={e => handleCommitteeFieldChange(key, 'executionDate', e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="cf-grid-2">
+                      <div className="cf-grid-2">
                 <div className="cf-field">
                   <label className="cf-label">كود أمين اللجنة</label>
                   <input
@@ -529,25 +553,76 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
                   />
                 </div>
               </div>
+              <div className="cf-grid-2">
+                <div className="cf-field">
+                  <label className="cf-label">القسم المسؤول</label>
+                  <select
+                    className="cf-input cf-select"
+                    value={c.selectedDeptId || ''}
+                    onChange={e => handleCommitteeFieldChange(key, 'selectedDeptId', e.target.value)}
+                  >
+                    <option value="">اختر القسم</option>
+                    {departments.map(d => <option key={d.dept_id} value={d.dept_id}>{d.name}</option>)}
+                  </select>
+                </div>
+              </div>
+             {c.activities.map((a, ai) => (
+          <div key={ai} className="cf-activity-card">
+            
+            <div className="cf-activity-header">
+              <span>مشروع {ai + 1}</span>
+              <button
+                type="button"
+                onClick={() => removeActivity(key, ai)}
+                className="cf-delete-btn"
+              >
+                حذف
+              </button>
+            </div>
+
+            <div className="cf-grid-2">
               <div className="cf-field">
-                <label className="cf-label">الخطة <span className="cf-optional">(اختياري)</span></label>
-                <textarea
-                  className="cf-input cf-textarea"
-                  placeholder="أدخل خطة اللجنة"
-                  rows={2}
-                  value={c.plan || ''}
-                  onChange={e => handleCommitteeFieldChange(key, 'plan', e.target.value)}
+                <label className="cf-label">اسم المشروع</label>
+                <input
+                  className="cf-input"
+                  placeholder="اسم المشروع"
+                  value={a.title}
+                  onChange={(e) => handleActivityChange(key, ai, "title", e.target.value)}
                 />
               </div>
+
               <div className="cf-field">
-                <label className="cf-label">مصادر التمويل <span className="cf-optional">(اختياري)</span></label>
+                <label className="cf-label">موعد التنفيذ</label>
+                <input
+                  type="date"
+                  className="cf-input"
+                  placeholder="موعد التنفيذ"
+                  value={a.st_date}
+                  onChange={(e) => handleActivityChange(key, ai, "st_date", e.target.value)}
+                />
+              </div>
+
+              <div className="cf-field">
+                <label className="cf-label">مصادر التمويل</label>
                 <input
                   className="cf-input"
                   placeholder="مصادر التمويل"
-                  value={c.fundingSources || ''}
-                  onChange={e => handleCommitteeFieldChange(key, 'fundingSources', e.target.value)}
+                  value={a.description}
+                  onChange={(e) => handleActivityChange(key, ai, "description", e.target.value)}
                 />
               </div>
+            </div>
+
+          </div>
+        ))}
+
+        <button
+          type="button"
+          className="cf-btn-add"
+          onClick={() => addActivity(key)}
+        >
+          + إضافة مشروع جديد
+        </button>
             </div>
           </details>
         ))}

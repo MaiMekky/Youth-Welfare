@@ -261,12 +261,22 @@ const initialCommittees: Committee[] = [
   });
 };
 
-  const removeActivity = (ci: number, ai: number) => {
-    setCommittees(p => {
-      const c=[...p]; c[ci].activities.splice(ai,1); return c;
+const removeActivity = (ci: number, ai: number) => {
+  setCommittees(prev => {
+    const updated = prev.map((committee, index) => {
+      if (index !== ci) return committee;
+
+      return {
+        ...committee,
+        activities: committee.activities.filter((_, i) => i !== ai),
+      };
     });
-    clearByPrefix(`committees.${ci}.activities.`);
-  };
+
+    return updated;
+  });
+
+  clearByPrefix(`committees.${ci}.activities.`);
+};
 
   const buildBody = () => {
     const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;

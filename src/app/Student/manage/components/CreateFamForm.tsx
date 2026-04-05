@@ -181,13 +181,18 @@ const addActivity = (ck: string) => {
   }));
 };
 
-  const removeActivity = (ck: string, ai: number) => {
-    setCommittees(prev => {
-      const updated = { ...prev };
-      updated[ck].activities.splice(ai, 1);
-      return updated;
-    });
-  };
+const removeActivity = (ck: string, ai: number) => {
+  setCommittees(prev => {
+    const updated = { ...prev };
+
+    updated[ck] = {
+      ...updated[ck],
+      activities: updated[ck].activities.filter((_, i) => i !== ai),
+    };
+
+    return updated;
+  });
+};
   /* ── Cache load ── */
   useEffect(() => {
     try {

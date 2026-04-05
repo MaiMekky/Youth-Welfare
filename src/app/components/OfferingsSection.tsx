@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import styles from '../Styles/components/OfferingsSection.module.css';
 import heroStyles from '../Styles/components/HeroSection.module.css';
 import LoginPage from './LoginPage';
 import SignupPage from './SignUp';
+
 // ─── SVG Icons ────────────────────────────────────────────────────────────────
 
 const IconSkills = () => (
@@ -55,53 +56,80 @@ const IconInnovation = () => (
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 const cards = [
-  {
-    id: 'skills',
-    Icon: IconSkills,
-    title: 'تطوير المهارات',
-    desc: 'برامج تدريبية متقدمة لتطوير المهارات الشخصية والمهنية وتهيئتك لسوق العمل.',
-  },
-  {
-    id: 'leadership',
-    Icon: IconLeadership,
-    title: 'القيادة',
-    desc: 'فرص قيادية حقيقية لتطوير مهارات القيادة والإدارة وبناء شخصية قادرة على التأثير.',
-  },
-  {
-    id: 'teamwork',
-    Icon: IconTeamwork,
-    title: 'العمل الجماعي',
-    desc: 'مشاريع تعاونية تعزز روح الفريق والتعاون الفعال بين الطلاب من مختلف التخصصات.',
-  },
-  {
-    id: 'innovation',
-    Icon: IconInnovation,
-    title: 'الابتكار',
-    desc: 'بيئة محفزة للإبداع والابتكار وتطوير الأفكار الجديدة التي تحدث فرقاً حقيقياً.',
-  },
+  { id: 'skills',     Icon: IconSkills,     title: 'تطوير المهارات', desc: 'برامج تدريبية متقدمة لتطوير المهارات الشخصية والمهنية وتهيئتك لسوق العمل.' },
+  { id: 'leadership', Icon: IconLeadership, title: 'القيادة',         desc: 'فرص قيادية حقيقية لتطوير مهارات القيادة والإدارة وبناء شخصية قادرة على التأثير.' },
+  { id: 'teamwork',   Icon: IconTeamwork,   title: 'العمل الجماعي',   desc: 'مشاريع تعاونية تعزز روح الفريق والتعاون الفعال بين الطلاب من مختلف التخصصات.' },
+  { id: 'innovation', Icon: IconInnovation, title: 'الابتكار',         desc: 'بيئة محفزة للإبداع والابتكار وتطوير الأفكار الجديدة التي تحدث فرقاً حقيقياً.' },
 ];
+
+// ─── Custom hook for scroll-triggered visibility ───────────────────────────
+
+function useScrollVisible(threshold = 0.18) {
+  const ref = useRef<HTMLElement | null>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
+      { threshold }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [threshold]);
+
+  return { ref, visible };
+}
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function OfferingsSection() {
-    const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [activeScreen, setActiveScreen] = useState('signup');
- return (
-    <>
-      <section className={styles.section}>
 
+  // Section-level observer (for the ::before line)
+  const { ref: sectionRef, visible: sectionVisible } = useScrollVisible(0.05);
+  // Header elements
+  const { ref: eyebrowRef, visible: eyebrowVisible } = useScrollVisible(0.5);
+  const { ref: titleRef,   visible: titleVisible   } = useScrollVisible(0.5);
+  const { ref: subtitleRef,visible: subtitleVisible} = useScrollVisible(0.5);
+  // Grid
+  const { ref: gridRef,    visible: gridVisible    } = useScrollVisible(0.1);
+  // CTA
+  const { ref: ctaRef,     visible: ctaVisible     } = useScrollVisible(0.5);
+
+  return (
+    <>
+      <section
+        ref={sectionRef as React.RefObject<HTMLElement>}
+        className={`${styles.section} ${sectionVisible ? styles.sectionVisible : ''}`}
+      >
         <div className={styles.header}>
-          <h2 className={styles.title}>
+          <span
+            ref={eyebrowRef as React.RefObject<HTMLSpanElement>}
+            className={`${styles.eyebrow} ${eyebrowVisible ? styles.visible : ''}`}
+          />
+          <h2
+            ref={titleRef as React.RefObject<HTMLHeadingElement>}
+            className={`${styles.title} ${titleVisible ? styles.visible : ''}`}
+          >
             ما <span className={styles.titleAccent}>نقدمه</span> لك
           </h2>
-          <p className={styles.subtitle}>
+          <p
+            ref={subtitleRef as React.RefObject<HTMLParagraphElement>}
+            className={`${styles.subtitle} ${subtitleVisible ? styles.visible : ''}`}
+          >
             استثمر في نفسك واكتسب المهارات التي تحتاجها للنجاح
           </p>
         </div>
 
-        <div className={styles.grid}>
+        <div
+          ref={gridRef as React.RefObject<HTMLDivElement>}
+          className={styles.grid}
+        >
           {cards.map(({ id, Icon, title, desc }) => (
-            <div key={id} className={styles.card}>
+            <div key={id} className={`${styles.card} ${gridVisible ? styles.visible : ''}`}>
               <div className={styles.iconWrap}>
                 <Icon />
               </div>
@@ -111,7 +139,10 @@ export default function OfferingsSection() {
           ))}
         </div>
 
-        <div className={styles.ctaWrap}>
+        <div
+          ref={ctaRef as React.RefObject<HTMLDivElement>}
+          className={`${styles.ctaWrap} ${ctaVisible ? styles.visible : ''}`}
+        >
           <button
             className={styles.cta}
             onClick={() => { setActiveScreen('signup'); setShowModal(true); }}
@@ -120,10 +151,8 @@ export default function OfferingsSection() {
             <span className={styles.ctaArrow}>←</span>
           </button>
         </div>
-
       </section>
 
-      {/* Modal */}
       {showModal && (
         <div className={heroStyles.fullScreenOverlay}>
           <div className={heroStyles.modalCard}>

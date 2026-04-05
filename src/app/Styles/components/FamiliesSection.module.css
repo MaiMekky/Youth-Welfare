@@ -19,9 +19,45 @@
 }
 
 /* ===== KEYFRAMES ===== */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-15px); }
+@keyframes fadeSlideDown {
+  from { opacity: 0; transform: translateY(-22px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.88) translateY(36px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes badgePop {
+  0%   { opacity: 0; transform: scale(0.7) translateY(-10px); }
+  70%  { transform: scale(1.06) translateY(0); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes lineExpand {
+  from { transform: scaleX(0); opacity: 0; }
+  to   { transform: scaleX(1); opacity: 0.4; }
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 8px var(--accent-gold); }
+  50%       { opacity: 0.6; transform: scale(0.82); box-shadow: 0 0 4px var(--accent-gold); }
+}
+
+@keyframes iconFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-5px); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
 }
 
 /* ===== SECTION ===== */
@@ -50,7 +86,22 @@
   right: 10%;
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
-  opacity: 0.4;
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: center;
+}
+
+.section.sectionVisible::before {
+  animation: lineExpand 0.9s ease 0.05s forwards;
+}
+
+/* ===== BASE HIDDEN STATE ===== */
+.badge,
+.heading,
+.subheading,
+.card {
+  opacity: 0;
+  will-change: opacity, transform;
 }
 
 /* ===== BADGE ===== */
@@ -63,8 +114,11 @@
   border-radius: 100px;
   padding: 8px 22px;
   margin-bottom: 28px;
-  opacity: 0;
-  animation: fadeIn 0.3s ease 0.1s forwards;
+  transform: scale(0.7) translateY(-10px);
+}
+
+.badge.visible {
+  animation: badgePop 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .badgeDot {
@@ -73,12 +127,7 @@
   border-radius: 50%;
   background: var(--accent-gold);
   box-shadow: 0 0 8px var(--accent-gold);
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%       { opacity: 0.6; transform: scale(0.85); }
+  animation: dotPulse 2s ease-in-out infinite;
 }
 
 .badgeText {
@@ -96,14 +145,23 @@
   text-align: center;
   margin: 0 0 16px;
   line-height: 1.2;
-  opacity: 0;
-  animation: fadeIn 0.3s ease 0.2s forwards;
+  transform: translateY(-20px);
+}
+
+.heading.visible {
+  animation: fadeSlideDown 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.12s forwards;
 }
 
 .headingAccent {
-  color: var(--accent-gold);
+  color: transparent;
+  background: linear-gradient(90deg, var(--accent-gold), var(--accent-gold-light), var(--accent-gold));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shimmer 3.5s linear infinite;
 }
 
+/* ===== SUBHEADING ===== */
 .subheading {
   font-size: clamp(1rem, 2vw, 1.15rem);
   font-weight: 400;
@@ -112,8 +170,11 @@
   max-width: 540px;
   line-height: 1.8;
   margin: 0 0 70px;
-  opacity: 0;
-  animation: fadeIn 0.3s ease 0.3s forwards;
+  transform: translateY(20px);
+}
+
+.subheading.visible {
+  animation: fadeSlideUp 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.25s forwards;
 }
 
 /* ===== GRID ===== */
@@ -138,13 +199,36 @@
   position: relative;
   overflow: hidden;
   cursor: default;
+  /* start hidden for entrance */
   opacity: 0;
-  transition: all 0.3s ease;
+  transform: scale(0.88) translateY(36px);
 }
 
-.card:nth-child(1) { animation: fadeIn 0.3s ease 0.4s forwards; }
-.card:nth-child(2) { animation: fadeIn 0.3s ease 0.5s forwards; }
-.card:nth-child(3) { animation: fadeIn 0.3s ease 0.6s forwards; }
+/* Once visible, run entrance — then transition takes over for hover */
+.card.visible {
+  animation: scaleIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  /* After animation ends, these transitions handle hover smoothly */
+  transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.card.visible:nth-child(1) { animation-delay: 0.08s; }
+.card.visible:nth-child(2) { animation-delay: 0.22s; }
+.card.visible:nth-child(3) { animation-delay: 0.36s; }
+
+/* Once hovered, kill the entrance animation entirely so transform works freely */
+.card.visible:hover,
+.card.visible:active {
+  animation: none;
+  opacity: 1;
+}
+
+.card.visible:hover {
+  transform: translateY(-10px) scale(1.02);
+}
+
+.card.visible:active {
+  transform: translateY(-5px) scale(1.01);
+}
 
 /* Top accent bar */
 .card::before {
@@ -156,41 +240,50 @@
   height: 2px;
   border-radius: 0 0 4px 4px;
   opacity: 0;
-  transition: all 0.3s ease;
+  transition: opacity 0.35s ease, left 0.35s ease, right 0.35s ease;
 }
 
-.card:hover {
-  transform: translateY(-8px);
+/* Bottom sweep line */
+.card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.45s ease;
 }
 
-.card:hover::before {
-  opacity: 1;
-  left: 15%;
-  right: 15%;
-}
+.card:hover::before { opacity: 1; left: 12%; right: 12%; }
+.card:hover::after  { transform: scaleX(1); }
 
 /* ---- Gold card ---- */
 .cardGold { background: linear-gradient(145deg, #181408 0%, #1a1505 100%); }
 .cardGold::before { background: var(--accent-gold); }
+.cardGold::after  { background: linear-gradient(90deg, transparent, rgba(201,168,76,0.5), transparent); }
 .cardGold:hover {
   border-color: var(--border-gold);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  box-shadow: 0 24px 70px rgba(0,0,0,0.6), 0 0 20px 2px rgba(201,168,76,0.08);
 }
 
 /* ---- Blue card ---- */
 .cardBlue { background: linear-gradient(145deg, #0d1728 0%, #0b1520 100%); }
 .cardBlue::before { background: var(--accent-blue); }
+.cardBlue::after  { background: linear-gradient(90deg, transparent, rgba(59,130,246,0.5), transparent); }
 .cardBlue:hover {
   border-color: var(--border-blue);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  box-shadow: 0 24px 70px rgba(0,0,0,0.6), 0 0 20px 2px rgba(59,130,246,0.08);
 }
 
 /* ---- Green card ---- */
 .cardGreen { background: linear-gradient(145deg, #0b1c12 0%, #091510 100%); }
 .cardGreen::before { background: var(--accent-green); }
+.cardGreen::after  { background: linear-gradient(90deg, transparent, rgba(34,197,94,0.5), transparent); }
 .cardGreen:hover {
   border-color: var(--border-green);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  box-shadow: 0 24px 70px rgba(0,0,0,0.6), 0 0 20px 2px rgba(34,197,94,0.08);
 }
 
 /* ===== ICON WRAPPER ===== */
@@ -202,14 +295,20 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 24px;
-  transition: all 0.3s ease;
+  transition: background 0.35s ease, border-color 0.35s ease, transform 0.35s ease;
 }
 
 .iconWrapGold  { background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.25); }
 .iconWrapBlue  { background: rgba(59,130,246,0.12);  border: 1px solid rgba(59,130,246,0.25); }
 .iconWrapGreen { background: rgba(34,197,94,0.12);   border: 1px solid rgba(34,197,94,0.25); }
 
-.card:hover .iconWrap { transform: translateY(-3px); }
+.card:hover .iconWrap {
+  animation: iconFloat 1.8s ease-in-out infinite;
+}
+
+.cardGold:hover  .iconWrap { background: rgba(201,168,76,0.22); border-color: rgba(201,168,76,0.45); }
+.cardBlue:hover  .iconWrap { background: rgba(59,130,246,0.22);  border-color: rgba(59,130,246,0.45); }
+.cardGreen:hover .iconWrap { background: rgba(34,197,94,0.22);   border-color: rgba(34,197,94,0.45); }
 
 .iconSvg { width: 32px; height: 32px; }
 
@@ -232,7 +331,12 @@
   color: var(--text-secondary);
   line-height: 1.85;
   margin: 0;
+  transition: color 0.3s ease;
 }
+
+.cardGold:hover  .cardDesc { color: #c9a960; }
+.cardBlue:hover  .cardDesc { color: #aac4ee; }
+.cardGreen:hover .cardDesc { color: #a3d9b1; }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {

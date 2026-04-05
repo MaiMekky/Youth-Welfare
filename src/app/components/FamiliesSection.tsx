@@ -1,6 +1,6 @@
 "use client";
 
-import { use } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from '../Styles/components/FamiliesSection.module.css';
 
 // ─── SVG Icons ───────────────────────────────────────────────────────────────
@@ -37,8 +37,7 @@ const IconEco = () => (
   <svg className={styles.iconSvg} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
       d="M16 4 C22 4 28 10 28 18 C28 18 22 16 16 20 C10 24 8 28 8 28 C8 28 6 22 8 16 C10 10 10 4 16 4Z"
-      fill="#22c55e"
-      opacity="0.85"
+      fill="#22c55e" opacity="0.85"
     />
     <path d="M8 28 Q12 22 16 16" stroke="#22c55e" strokeWidth="1.6" strokeOpacity="0.5" strokeLinecap="round" />
     <path d="M16 4 Q18 12 16 20" stroke="white" strokeWidth="1" strokeOpacity="0.3" strokeLinecap="round" />
@@ -74,30 +73,70 @@ const cards = [
   },
 ];
 
+// ─── Scroll hook ──────────────────────────────────────────────────────────────
+
+function useScrollVisible(threshold = 0.18) {
+  const ref = useRef<HTMLElement | null>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
+      { threshold }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [threshold]);
+
+  return { ref, visible };
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function FamiliesSection() {
-  return (
-    <section className={styles.section}>
+  const { ref: sectionRef,   visible: sectionVisible  } = useScrollVisible(0.05);
+  const { ref: badgeRef,     visible: badgeVisible    } = useScrollVisible(0.5);
+  const { ref: headingRef,   visible: headingVisible  } = useScrollVisible(0.5);
+  const { ref: subRef,       visible: subVisible      } = useScrollVisible(0.5);
+  const { ref: gridRef,      visible: gridVisible     } = useScrollVisible(0.1);
 
-      <div className={styles.badge}>
+  return (
+    <section
+      ref={sectionRef as React.RefObject<HTMLElement>}
+      className={`${styles.section} ${sectionVisible ? styles.sectionVisible : ''}`}
+    >
+      <div
+        ref={badgeRef as React.RefObject<HTMLDivElement>}
+        className={`${styles.badge} ${badgeVisible ? styles.visible : ''}`}
+      >
         <span className={styles.badgeDot} />
         <span className={styles.badgeText}>الأسر الطلابية</span>
       </div>
 
-      <h2 className={styles.heading}>
+      <h2
+        ref={headingRef as React.RefObject<HTMLHeadingElement>}
+        className={`${styles.heading} ${headingVisible ? styles.visible : ''}`}
+      >
         انضم إلى{' '}
         <span className={styles.headingAccent}>أسرتك</span>{' '}
         الجامعية
       </h2>
 
-      <p className={styles.subheading}>
+      <p
+        ref={subRef as React.RefObject<HTMLParagraphElement>}
+        className={`${styles.subheading} ${subVisible ? styles.visible : ''}`}
+      >
         نظام الأسر الطلابية — مكان لتطوير مهاراتك والمشاركة في أنشطة متنوعة تجمعك بزملائك وتُثري تجربتك الجامعية
       </p>
 
-      <div className={styles.grid}>
+      <div
+        ref={gridRef as React.RefObject<HTMLDivElement>}
+        className={styles.grid}
+      >
         {cards.map(({ id, style, iconWrapStyle, Icon, title, desc }) => (
-          <div key={id} className={`${styles.card} ${style}`}>
+          <div key={id} className={`${styles.card} ${style} ${gridVisible ? styles.visible : ''}`}>
             <div className={`${styles.iconWrap} ${iconWrapStyle}`}>
               <Icon />
             </div>
@@ -106,7 +145,6 @@ export default function FamiliesSection() {
           </div>
         ))}
       </div>
-
     </section>
   );
 }

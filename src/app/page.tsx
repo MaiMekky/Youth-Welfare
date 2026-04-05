@@ -1,29 +1,25 @@
 import Navbar from "./components/Navbar";
 import HeroSection from "./components/HeroSection";
-import Paragraph from "./components/Paragraph";
-import VisionSection from "./components/VisionSection";
-import NewsSection from "./components/newsection";
+import AboutSection from "./components/AboutSection";
 import ActivitiesSection from "./components/ActivitiesSection";
-import ActivitiesGallery from "./components/ActivitiesGallery";
-import Statistics from "./components/Statistics";
-import Services from "./components/Services";
+
+
 import Footer from "./components/Footer";
 export default function HomePage() {
   return (
     <>
       <Navbar />
       <HeroSection />
-    
-      {/* <LoginPage /> */}
-      {/* <SignUp /> */}
-      <Paragraph />
-      <VisionSection />
-      <NewsSection />
-      <Statistics />
+
+      <AboutSection />
+
       <ActivitiesSection />
-      <Services />
-      <ActivitiesGallery />
+
+
+      
       <Footer />
+    
+   
     </>
   );
 }

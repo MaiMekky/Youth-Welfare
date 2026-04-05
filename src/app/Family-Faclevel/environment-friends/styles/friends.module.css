@@ -479,7 +479,123 @@
 .error {
   border-right: 5px solid var(--error);
 }
+/* ═══════════════════════════════════════════
+   STEPPER  —  add these to friends.module.css
+═══════════════════════════════════════════ */
 
+.stepperWrapper {
+  padding: 28px 24px 20px;
+  background: var(--card-bg, #fff);
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  overflow-x: auto;
+}
+
+.stepperTrack {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: max-content;
+  margin: 0 auto;
+  direction: rtl;        /* keeps RTL flow */
+}
+
+/* ── connector line between bubbles ── */
+.stepConnector {
+  flex: 1;
+  height: 2px;
+  min-width: 40px;
+  background: var(--border-color, #e5e7eb);
+  transition: background 0.3s;
+}
+
+.stepConnectorDone {
+  background: var(--primary, #16a34a);
+}
+
+/* ── numbered bubble ── */
+.stepBubble {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--border-color, #e5e7eb);
+  background: transparent;
+  color: var(--text-muted, #9ca3af);
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+  position: relative;
+  z-index: 1;
+}
+
+.stepBubble:hover {
+  border-color: var(--primary, #16a34a);
+  color: var(--primary, #16a34a);
+}
+
+.stepBubbleActive {
+  border-color: var(--primary, #16a34a);
+  background: var(--primary, #16a34a);
+  color: #fff;
+}
+
+.stepBubbleDone {
+  border-color: var(--primary, #16a34a);
+  background: var(--primary-light, #dcfce7);
+  color: var(--primary, #16a34a);
+}
+
+/* ── step label below bubble ── */
+.stepLabel {
+  position: absolute;
+  top: 48px;               /* below the bubble */
+  font-size: 11px;
+  color: var(--text-muted, #9ca3af);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Since bubbles are inline-flex inside a flex row, labels need a wrapper.
+   Use the pattern: bubble is position:relative, label is absolute.
+   OR simply show labels inline below — adjust to your design. */
+
+.stepLabelActive {
+  color: var(--primary, #16a34a);
+  font-weight: 600;
+}
+
+/* ── Navigation row ── */
+.stepNavButtons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 0 40px;
+  gap: 12px;
+}
+
+.stepNavPrev {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border-color, #e5e7eb);
+  background: transparent;
+  color: var(--text-secondary, #6b7280);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.stepNavPrev:hover {
+  border-color: var(--primary, #16a34a);
+  color: var(--primary, #16a34a);
+}
 /* ═══════════════════════════════════════════
    SUBMIT FOOTER
 ═══════════════════════════════════════════ */

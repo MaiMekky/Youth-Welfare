@@ -239,12 +239,27 @@ const initialCommittees: Committee[] = [
   };
 
   const addActivity = (ci: number) => {
-    setCommittees(p => {
-      const c=[...p];
-      c[ci].activities.push({ title:"",description:"",st_date:"",end_date:"",location:"",cost:"" });
-      return c;
-    });
-  };
+  setCommittees(prev => {
+    const updated = [...prev];
+
+    updated[ci] = {
+      ...updated[ci],
+      activities: [
+        ...updated[ci].activities,
+        {
+          title: "",
+          description: "",
+          st_date: "",
+          end_date: "",
+          location: "",
+          cost: ""
+        }
+      ]
+    };
+
+    return updated;
+  });
+};
 
   const removeActivity = (ci: number, ai: number) => {
     setCommittees(p => {

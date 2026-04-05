@@ -1,3 +1,8 @@
+/* =================================================
+   LoginPage.module.css
+   — Covers: Login page + Multi-step Signup page
+   ================================================= */
+
 /* ========== Overlay ========== */
 .modalOverlay {
   position: fixed;
@@ -37,6 +42,7 @@
   scrollbar-width: thin;
   scrollbar-color: #888 #f1f1f1;
   margin: auto;
+  direction: rtl;
 }
 
 /* Scrollbar Chrome */
@@ -57,7 +63,7 @@
 
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
 /* ========== Close Button ========== */
@@ -79,14 +85,8 @@
   transition: all 0.2s ease;
   z-index: 10;
 }
-
-.closeBtn:hover {
-  background: rgba(44, 58, 95, 0.1);
-}
-
-.closeBtn:active {
-  transform: scale(0.95);
-}
+.closeBtn:hover  { background: rgba(44, 58, 95, 0.1); }
+.closeBtn:active { transform: scale(0.95); }
 
 /* ========== Logo ========== */
 .logoContainer {
@@ -94,12 +94,12 @@
   justify-content: center;
   margin-bottom: 14px;
 }
-
 .logoContainer img {
   max-width: 100%;
   height: auto;
 }
 
+/* ========== Profile Image ========== */
 .profileImg {
   border-radius: 50%;
   border: 2px solid #ddd;
@@ -108,6 +108,7 @@
   transition: 0.3s;
   max-width: 100%;
   height: auto;
+  object-fit: cover;
 }
 .profileImg:hover {
   transform: scale(1.05);
@@ -143,14 +144,15 @@
   color: #2C3A5F;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
   box-sizing: border-box;
+  font-family: inherit;
+  background: #fff;
 }
-
 .loginForm input:focus {
   border-color: #2563eb;
   box-shadow: 0 0 3px rgba(37, 99, 235, 0.4);
 }
 
-/* ========== SELECT (same style as inputs) ========== */
+/* ========== SELECT ========== */
 .loginForm select {
   width: 100%;
   padding: 12px 15px;
@@ -167,30 +169,50 @@
   -moz-appearance: none;
   appearance: none;
   box-sizing: border-box;
-
-  background-image: url("data:image/svg+xml;utf8,\
-  <svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 20 20'>\
-    <polygon points='0,7 10,17 20,7' fill='%232C3A5F'/>\
-  </svg>");
+  font-family: inherit;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 20 20'><polygon points='0,7 10,17 20,7' fill='%232C3A5F'/></svg>");
   background-repeat: no-repeat;
   background-position: left 14px center;
   background-size: 14px;
 }
-
 .loginForm select:focus {
   border-color: #2563eb;
   box-shadow: 0 0 3px rgba(37, 99, 235, 0.4);
 }
+select::-ms-expand { display: none; }
 
-select::-ms-expand {
-  display: none;
+/* select used outside .loginForm (e.g. .selectField class) */
+.selectField {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  outline: none;
+  text-align: right;
+  color: #2C3A5F;
+  background-color: #fff;
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  font-family: inherit;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 20 20'><polygon points='0,7 10,17 20,7' fill='%232C3A5F'/></svg>");
+  background-repeat: no-repeat;
+  background-position: left 14px center;
+  background-size: 14px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.selectField:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 3px rgba(37, 99, 235, 0.4);
 }
 
 /* ========== Validation ========== */
 .invalid {
   border-color: #e74c3c !important;
 }
-
 .errorMsg,
 .error-msg {
   color: #e74c3c;
@@ -201,7 +223,8 @@ select::-ms-expand {
 }
 
 /* ========== Radio Buttons ========== */
-.radio-group {
+.radio-group,
+.radioGroup {
   display: flex;
   justify-content: center;
   gap: 20px;
@@ -209,16 +232,19 @@ select::-ms-expand {
   flex-wrap: wrap;
 }
 
-.radio-label {
+.radio-label,
+.radioLabel {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 0.9rem;
   color: #2C3A5F;
   cursor: pointer;
+  font-weight: 500;
 }
 
-.radio-label input[type="radio"] {
+.radio-label input[type="radio"],
+.radioLabel input[type="radio"] {
   appearance: none;
   width: 16px;
   height: 16px;
@@ -227,14 +253,16 @@ select::-ms-expand {
   position: relative;
   transition: 0.2s ease;
   flex-shrink: 0;
+  cursor: pointer;
 }
-
-.radio-label input[type="radio"]:checked {
+.radio-label input[type="radio"]:checked,
+.radioLabel input[type="radio"]:checked {
   background-color: #2C3A5F;
   border-color: #1d2d4a;
   box-shadow: 0 0 0 2px rgba(39, 40, 93, 0.3);
 }
 
+/* ========== Notification Toast ========== */
 .notification {
   position: fixed;
   top: 25px;
@@ -246,12 +274,12 @@ select::-ms-expand {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   font-weight: 600;
   color: #333;
-  z-index: 9999;
+  z-index: 99999;
   border-right: 6px solid transparent;
   overflow: hidden;
-  animation: fadeIn 0.3s ease forwards;
+  animation: toastSlideIn 0.3s ease forwards;
+  direction: rtl;
 }
-
 .success { border-right-color: #22c55e; }
 .warning { border-right-color: #f59e0b; }
 .error   { border-right-color: #dc2626; }
@@ -266,20 +294,19 @@ select::-ms-expand {
   animation: progress 3s linear forwards;
 }
 
-@keyframes fadeIn {
+@keyframes toastSlideIn {
   from { opacity: 0; transform: translateX(40px); }
   to   { opacity: 1; transform: translateX(0); }
 }
-
 @keyframes progress {
   from { width: 0%; }
   to   { width: 100%; }
 }
 
-/* ========== Buttons ========== */
+/* ========== Login Button ========== */
 .loginButton {
   width: 100%;
-  background-color: #2563eb;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: white;
   border: none;
   padding: 12px;
@@ -290,27 +317,17 @@ select::-ms-expand {
   margin-top: 10px;
   min-height: 44px;
   font-weight: 600;
+  font-family: inherit;
 }
-
-.loginButton:hover {
-  background-color: #1e2a4f;
-}
-
-.loginButton:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.loginButton:active:not(:disabled) {
-  transform: scale(0.98);
-}
+.loginButton:hover    { background: linear-gradient(135deg, #1d4ed8, #1e2a4f); }
+.loginButton:disabled { opacity: 0.6; cursor: not-allowed; }
+.loginButton:active:not(:disabled) { transform: scale(0.98); }
 
 /* ========== Forgot Password ========== */
 .forgotWrap {
   margin: -4px 0 0 0;
   text-align: left;
 }
-
 .forgotLink {
   background: none;
   border: none;
@@ -322,7 +339,6 @@ select::-ms-expand {
   text-decoration: none;
   transition: color 0.2s;
 }
-
 .forgotLink:hover {
   text-decoration: underline;
   color: #1d4ed8;
@@ -334,199 +350,14 @@ select::-ms-expand {
   font-size: 0.95rem;
   color: #475569;
 }
-
 .linkSwitch {
   color: #2563eb;
   cursor: pointer;
   font-weight: 600;
 }
+.linkSwitch:hover { text-decoration: underline; }
 
-.linkSwitch:hover {
-  text-decoration: underline;
-}
-
-/* ========== Tablet Screens ========== */
-@media (max-width: 768px) {
-  .modalOverlay {
-    padding: 16px;
-  }
-
-  .loginBox {
-    max-width: 440px;
-    padding: 28px 22px;
-    max-height: 85vh;
-    border-radius: 18px;
-  }
-
-  .loginTitle {
-    font-size: 1.5rem;
-    margin-bottom: 24px;
-  }
-
-  .closeBtn {
-    font-size: 22px;
-    width: 30px;
-    height: 30px;
-  }
-}
-
-/* ========== Mobile Screens ========== */
-@media (max-width: 480px) {
-  .modalOverlay {
-    padding: 12px;
-  }
-
-  .loginBox {
-    max-width: 100%;
-    width: calc(100% - 24px);
-    padding: 24px 18px;
-    border-radius: 16px;
-    max-height: 90vh;
-  }
-
-  .loginTitle {
-    font-size: 1.35rem;
-    margin-bottom: 20px;
-  }
-
-  .closeBtn {
-    top: 10px;
-    left: 10px;
-    font-size: 20px;
-    width: 28px;
-    height: 28px;
-  }
-
-  .logoContainer {
-    margin-bottom: 12px;
-  }
-
-  .loginForm {
-    gap: 8px;
-  }
-
-  .loginForm input[type="text"],
-  .loginForm input[type="password"],
-  .loginForm input[type="email"],
-  .loginForm input[type="file"],
-  .loginForm select {
-    padding: 11px 13px;
-    font-size: 0.9rem;
-  }
-
-  .loginButton {
-    padding: 11px;
-    font-size: 0.95rem;
-    min-height: 46px;
-  }
-
-  .radio-group {
-    gap: 16px;
-  }
-
-  .radio-label {
-    font-size: 0.85rem;
-  }
-
-  .signupText {
-    font-size: 0.9rem;
-    margin-top: 12px;
-  }
-}
-
-/* ========== Extra Small Screens ========== */
-@media (max-width: 360px) {
-  .modalOverlay {
-    padding: 8px;
-  }
-
-  .loginBox {
-    width: calc(100% - 16px);
-    padding: 20px 16px;
-    border-radius: 14px;
-  }
-
-  .loginTitle {
-    font-size: 1.25rem;
-    margin-bottom: 18px;
-  }
-
-  .closeBtn {
-    top: 8px;
-    left: 8px;
-    font-size: 18px;
-    width: 26px;
-    height: 26px;
-  }
-
-  .loginForm input[type="text"],
-  .loginForm input[type="password"],
-  .loginForm input[type="email"],
-  .loginForm input[type="file"],
-  .loginForm select {
-    padding: 10px 12px;
-    font-size: 0.875rem;
-  }
-
-  .loginButton {
-    padding: 10px;
-    font-size: 0.9rem;
-    min-height: 44px;
-  }
-
-  .radio-group {
-    gap: 12px;
-    flex-direction: column;
-    align-items: flex-start;
-    padding-right: 20px;
-  }
-
-  .errorMsg,
-  .error-msg {
-    font-size: 11px;
-  }
-}
-
-/* ========== Landscape Mobile Orientation ========== */
-@media (max-height: 600px) and (orientation: landscape) {
-  .loginBox {
-    max-height: 95vh;
-    padding: 20px 18px;
-  }
-
-  .loginTitle {
-    font-size: 1.3rem;
-    margin-bottom: 16px;
-  }
-
-  .logoContainer {
-    margin-bottom: 10px;
-  }
-
-  .loginForm {
-    gap: 6px;
-  }
-
-  .closeBtn {
-    top: 8px;
-    left: 8px;
-  }
-}
-
-/* ========== Touch Device Optimizations ========== */
-@media (hover: none) and (pointer: coarse) {
-  .closeBtn:hover {
-    background: none;
-  }
-
-  .loginButton:hover {
-    background-color: #2563eb;
-  }
-
-  .profileImg:hover {
-    transform: none;
-  }
-}
+/* ========== Google Button ========== */
 .googleButton {
   margin-top: 5px;
   width: 100%;
@@ -544,18 +375,314 @@ select::-ms-expand {
   direction: rtl;
   transition: 0.2s ease;
 }
-
-.googleButton:hover {
-  background: #f7f7f7;
-  border-color: #ccc;
-}
-
+.googleButton:hover  { background: #f7f7f7; border-color: #ccc; }
 .googleIcon {
   display: flex;
   align-items: center;
   justify-content: center;
 }
+.googleText { color: #444; }
 
-.googleText {
-  color: #444;
+/* =================================================
+   MULTI-STEP SIGNUP — additional classes
+   ================================================= */
+
+/* ── Progress Bar ── */
+.progressWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.stepItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.stepCircle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e5eeff;
+  color: #93aef7;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #c7d7fc;
+  transition: background 0.3s, border-color 0.3s, color 0.3s, box-shadow 0.3s;
+}
+.stepCircle.stepActive {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.18);
+}
+.stepCircle.stepCompleted {
+  background: #16a34a;
+  border-color: #16a34a;
+  color: #fff;
+}
+
+.stepLabel {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+.stepLabel.stepLabelActive {
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.stepLine {
+  flex: 1;
+  height: 3px;
+  background: #e2e8f7;
+  border-radius: 4px;
+  margin: 0 4px;
+  margin-bottom: 22px;
+  transition: background 0.4s;
+}
+.stepLine.stepLineActive {
+  background: linear-gradient(90deg, #16a34a, #2563eb);
+}
+
+/* ── Step Fields (animated on step change) ── */
+.stepFields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: fieldsFade 0.3s ease;
+}
+
+@keyframes fieldsFade {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Profile Upload (step 3) ── */
+.profileUploadWrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+.profileLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.profileHint {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+/* ── Navigation Buttons (Back / Next / Submit) ── */
+.navButtons {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+  direction: rtl;
+}
+
+.nextButton,
+.submitButton {
+  flex: 1;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border: none;
+  padding: 13px 20px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.25s, transform 0.15s, box-shadow 0.25s;
+  font-family: inherit;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
+  min-height: 44px;
+}
+.nextButton:hover,
+.submitButton:hover {
+  background: linear-gradient(135deg, #1d4ed8, #1e2a4f);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.36);
+}
+.nextButton:active,
+.submitButton:active { transform: scale(0.97); }
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.backButton {
+  flex: 0 0 auto;
+  min-width: 88px;
+  background: #f0f4ff;
+  color: #2563eb;
+  border: 1.5px solid #c7d7fc;
+  padding: 13px 16px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  font-family: inherit;
+  min-height: 44px;
+}
+.backButton:hover  { background: #dce7ff; border-color: #93aef7; }
+.backButton:active { transform: scale(0.97); }
+
+/* =================================================
+   RESPONSIVE
+   ================================================= */
+
+/* ── Tablet ── */
+@media (max-width: 768px) {
+  .modalOverlay { padding: 16px; }
+
+  .loginBox {
+    max-width: 440px;
+    padding: 28px 22px;
+    max-height: 85vh;
+    border-radius: 18px;
+  }
+
+  .loginTitle { font-size: 1.5rem; margin-bottom: 24px; }
+
+  .closeBtn { font-size: 22px; width: 30px; height: 30px; }
+
+  .stepLabel { font-size: 0.65rem; }
+}
+
+/* ── Mobile ── */
+@media (max-width: 480px) {
+  .modalOverlay { padding: 12px; }
+
+  .loginBox {
+    max-width: 100%;
+    width: calc(100% - 24px);
+    padding: 24px 18px;
+    border-radius: 16px;
+    max-height: 90vh;
+  }
+
+  .loginTitle { font-size: 1.35rem; margin-bottom: 20px; }
+
+  .closeBtn { top: 10px; left: 10px; font-size: 20px; width: 28px; height: 28px; }
+
+  .logoContainer { margin-bottom: 12px; }
+
+  .loginForm { gap: 8px; }
+
+  .loginForm input[type="text"],
+  .loginForm input[type="password"],
+  .loginForm input[type="email"],
+  .loginForm input[type="file"],
+  .loginForm select,
+  .selectField {
+    padding: 11px 13px;
+    font-size: 0.9rem;
+  }
+
+  .loginButton  { padding: 11px; font-size: 0.95rem; min-height: 46px; }
+
+  .radio-group,
+  .radioGroup   { gap: 16px; }
+
+  .radio-label,
+  .radioLabel   { font-size: 0.85rem; }
+
+  .signupText   { font-size: 0.9rem; margin-top: 12px; }
+
+  /* signup step progress */
+  .stepCircle   { width: 30px; height: 30px; font-size: 0.78rem; }
+  .stepLabel    { font-size: 0.6rem; }
+  .stepLine     { margin-bottom: 18px; }
+
+  /* nav buttons */
+  .nextButton, .submitButton, .backButton {
+    padding: 12px 14px;
+    font-size: 0.9rem;
+  }
+  .backButton   { min-width: 78px; }
+
+  /* toast on mobile */
+  .notification {
+    top: 12px;
+    right: 10px;
+    left: 10px;
+    width: auto;
+  }
+}
+
+/* ── Extra Small ── */
+@media (max-width: 360px) {
+  .modalOverlay { padding: 8px; }
+
+  .loginBox { width: calc(100% - 16px); padding: 20px 16px; border-radius: 14px; }
+
+  .loginTitle { font-size: 1.25rem; margin-bottom: 18px; }
+
+  .closeBtn { top: 8px; left: 8px; font-size: 18px; width: 26px; height: 26px; }
+
+  .loginForm input[type="text"],
+  .loginForm input[type="password"],
+  .loginForm input[type="email"],
+  .loginForm input[type="file"],
+  .loginForm select,
+  .selectField { padding: 10px 12px; font-size: 0.875rem; }
+
+  .loginButton  { padding: 10px; font-size: 0.9rem; min-height: 44px; }
+
+  .radio-group,
+  .radioGroup {
+    gap: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-right: 20px;
+  }
+
+  .errorMsg,
+  .error-msg  { font-size: 11px; }
+
+  /* hide step labels, keep circles */
+  .stepLabel  { display: none; }
+  .stepLine   { margin-bottom: 0; }
+}
+
+/* ── Landscape Mobile ── */
+@media (max-height: 600px) and (orientation: landscape) {
+  .loginBox {
+    max-height: 95vh;
+    padding: 20px 18px;
+  }
+  .loginTitle      { font-size: 1.3rem; margin-bottom: 16px; }
+  .logoContainer   { margin-bottom: 10px; }
+  .loginForm       { gap: 6px; }
+  .closeBtn        { top: 8px; left: 8px; }
+  .progressWrapper { margin-bottom: 14px; }
+  .stepFields      { gap: 8px; }
+  .navButtons      { margin-top: 12px; }
+}
+
+/* ── Touch Device Optimisations ── */
+@media (hover: none) and (pointer: coarse) {
+  .closeBtn:hover    { background: none; }
+  .loginButton:hover { background-color: #2563eb; }
+  .profileImg:hover  { transform: none; }
+  .nextButton:hover,
+  .submitButton:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
+  }
+  .backButton:hover  { background: #f0f4ff; border-color: #c7d7fc; }
 }

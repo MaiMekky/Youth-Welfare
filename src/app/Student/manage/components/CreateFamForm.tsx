@@ -313,14 +313,16 @@ const removeActivity = (ck: string, ai: number) => {
 
       const committeesData = Object.entries(committees).map(([key, c]) => {
         const deptId = c.selectedDeptId ? parseInt(c.selectedDeptId) : (facultyId || 0);
-       const activities = c.activities.map(a => ({
-        title: a.title,
-        description: a.description,
-        st_date: a.st_date,
-        end_date: a.end_date || a.st_date,
-        location: a.location || '',
-        cost: a.cost || '0',
-      }));
+     const activities = c.activities
+  .filter(a => a.title.trim() && a.st_date)  // skip blank/incomplete activities
+  .map(a => ({
+    title: a.title.trim(),
+    description: a.description || '',
+    st_date: a.st_date,                        // already YYYY-MM-DD from <input type="date">
+    end_date: a.end_date || a.st_date,         // fallback to st_date if end_date empty
+    location: a.location || '',
+    cost: a.cost || '0',
+  }));
         return {
           committee_key: committeeKeys[key] || key,
           head:      { uid: parseInt(c.secretary.studentId||'0'), dept_id: deptId },
@@ -596,16 +598,25 @@ const removeActivity = (ck: string, ai: number) => {
                 />
               </div>
 
-              <div className="cf-field">
-                <label className="cf-label">موعد التنفيذ</label>
-                <input
-                  type="date"
-                  className="cf-input"
-                  placeholder="موعد التنفيذ"
-                  value={a.st_date}
-                  onChange={(e) => handleActivityChange(key, ai, "st_date", e.target.value)}
-                />
-              </div>
+           <div className="cf-field">
+  <label className="cf-label">تاريخ البداية <span className="cf-req">*</span></label>
+  <input
+    type="date"
+    className="cf-input"
+    value={a.st_date}
+    onChange={(e) => handleActivityChange(key, ai, "st_date", e.target.value)}
+  />
+</div>
+
+<div className="cf-field">
+  <label className="cf-label">تاريخ النهاية <span className="cf-req">*</span></label>
+  <input
+    type="date"
+    className="cf-input"
+    value={a.end_date || ''}
+    onChange={(e) => handleActivityChange(key, ai, "end_date", e.target.value)}
+  />
+</div>
 
               <div className="cf-field">
                 <label className="cf-label">مصادر التمويل</label>

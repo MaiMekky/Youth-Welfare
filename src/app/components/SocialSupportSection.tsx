@@ -41,7 +41,7 @@ const SocialSupportSection: React.FC = () => {
 
   // Lock body scroll when modal open
   useEffect(() => {
-    document.body.style.overflow = showModal ? "hidden" : "";
+    document.body.style.overflow = showModal ? "" : "";
     return () => { document.body.style.overflow = ""; };
   }, [showModal]);
 

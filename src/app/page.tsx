@@ -8,6 +8,9 @@ import ActivitiesSection from "./components/ActivitiesSection";
 import Footer from "./components/Footer";
 import SocialSupportSection from "./components/SocialSupportSection";
 import ApplicationStepsSection from "./components/ApplicationStepsSection";
+import FamiliesSection from "./components/FamiliesSection";
+import OfferingsSection from "./components/OfferingsSection";
+import DepartmentsSection from "./components/DepartmentsSection";
 export default function HomePage() {
   return (
     <>
@@ -18,13 +21,20 @@ export default function HomePage() {
 
       <GoalsSection />
 
+      <OfferingsSection />
 
       <ActivitiesSection />
+
+      <FamiliesSection />
 
       <SocialSupportSection />
 
 
       <ApplicationStepsSection />
+
+
+
+      <DepartmentsSection />
 
       <Footer />
     

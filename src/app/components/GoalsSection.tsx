@@ -337,7 +337,7 @@ const GoalsSection: React.FC = () => {
           <div className="gs-anim gs-slide-left d0 gs-image-side">
             <img
               className="gs-img"
-              src="/goals-image.png"
+              src="/goal.png"
               alt="أهداف الإدارة العامة لرعاية الطلاب"
               loading="lazy"
             />

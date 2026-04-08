@@ -87,7 +87,7 @@ const Dashboard: React.FC = () => {
     if (!token) { setProfileLoading(false); return; }
     const fetchFamilyData = async () => {
       try {
-        const res = await authFetch(`http://127.0.0.1:8000/api/family/student/families/`, {
+        const res = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/families/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error(`فشل تحميل قائمة الأسر (Status: ${res.status})`);
@@ -109,7 +109,7 @@ const Dashboard: React.FC = () => {
     if (!token) return;
     const fetchDepts = async () => {
       try {
-        const res = await authFetch(`http://127.0.0.1:8000/api/family/departments/`, {
+        const res = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/family/departments/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) return;
@@ -153,7 +153,7 @@ const Dashboard: React.FC = () => {
     setIsSubmitting(true);
     try {
       const response = await authFetch(
-        `http://127.0.0.1:8000/api/family/student/${selectedFamilyId}/post/`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/${selectedFamilyId}/post/`,
         { method: "POST", headers: { Authorization: `Bearer ${tk}`, "Content-Type": "application/json" },
           body: JSON.stringify({ title: contentTitle || "منشور جديد", description: contentBody }) }
       );
@@ -178,7 +178,7 @@ const Dashboard: React.FC = () => {
     setIsSubmitting(true);
     try {
       const response = await authFetch(
-        `http://127.0.0.1:8000/api/family/student/${selectedFamilyId}/event_request/`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/${selectedFamilyId}/event_request/`,
         { method: "POST", headers: { Authorization: `Bearer ${tk}`, "Content-Type": "application/json" },
           body: JSON.stringify({
             title: activityData.title, description: activityData.description,

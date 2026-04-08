@@ -81,7 +81,7 @@ export default function MyRequests({ onStatusesLoaded, showAlert }: MyRequestsPr
       }
 
       const response = await authFetch(
-        "http://127.0.0.1:8000/api/solidarity/student/status/",
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/student/status/`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 

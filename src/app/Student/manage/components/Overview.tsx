@@ -120,7 +120,7 @@ const Overview: React.FC = () => {
         console.log("🔑 Token exists:", !!token);
         
         const res = await authFetch(
-          `http://127.0.0.1:8000/api/family/student/families/`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/families/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -209,7 +209,7 @@ const Overview: React.FC = () => {
         setLoading(true);
 
         const res = await authFetch(
-          `http://127.0.0.1:8000/api/family/student/${selectedFamilyId}/dashboard/`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/${selectedFamilyId}/dashboard/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

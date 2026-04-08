@@ -51,7 +51,7 @@ interface EventDetail {
 const getToken = () =>
   typeof window !== "undefined" ? localStorage.getItem("access") : null;
 
-const BASE = "http://127.0.0.1:8000";
+const BASE = process.env.NEXT_PUBLIC_BASE_URL;
 
 type TabKey = "pending" | "approved" | "rejected";
 

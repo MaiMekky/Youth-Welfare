@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { authFetch } from "@/utils/globalFetch";
 
-const API_URL = "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 type Mode = "create" | "convert";
 

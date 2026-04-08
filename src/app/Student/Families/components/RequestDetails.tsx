@@ -20,7 +20,7 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => 
           return;
         }
 
-        const res = await fetch("http://127.0.0.1:8000/api/auth/profile/", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/profile/`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

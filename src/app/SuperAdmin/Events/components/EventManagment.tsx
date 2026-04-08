@@ -189,8 +189,8 @@ export default function EventsPage() {
           "Content-Type": "application/json",
         };
         const [eventsRes, facultiesRes] = await Promise.all([
-          authFetch("http://127.0.0.1:8000/api/event/get-events/", { headers }),
-          authFetch("http://127.0.0.1:8000/api/family/faculties/", { headers }),
+          authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/event/get-events/`, { headers }),
+          authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculties/`, { headers }),
         ]);
         if (!eventsRes.ok) {
           const body = await eventsRes.json().catch(() => ({}));

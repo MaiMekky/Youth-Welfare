@@ -35,7 +35,7 @@ const TrackRequest: React.FC<TrackRequestProps> = ({ onBack }) => {
       try {
         const token = localStorage.getItem("access");
         const res = await authFetch(
-          "http://localhost:8000/api/family/student/family_creation_request/",
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/family_creation_request/`,
           { headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` } }
         );
         if (!res.ok) throw new Error("فشل تحميل طلبات الأسر");

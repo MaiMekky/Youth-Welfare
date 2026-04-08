@@ -219,7 +219,7 @@ export default function FamilyDetailsPage() {
       try {
         setLoading(true);
         const token = localStorage.getItem('access');
-        const url = `http://localhost:8000/api/family/super_dept/${familyId}/`;
+        const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/super_dept/${familyId}/`;
 
         console.log('🔍 Fetching Family Data from:', url);
         console.log('🔑 Token:', token ? 'exists' : 'missing');
@@ -263,7 +263,7 @@ export default function FamilyDetailsPage() {
     try {
       const token = localStorage.getItem('access');
       const response = await authFetch(
-        `http://localhost:8000/api/family/super_dept/${familyId}/members/${studentId}/approve/`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/super_dept/${familyId}/members/${studentId}/approve/`,
         {
           method: 'PATCH',
           headers: {
@@ -293,7 +293,7 @@ export default function FamilyDetailsPage() {
     try {
       const token = localStorage.getItem('access');
       const response = await authFetch(
-        `http://localhost:8000/api/family/super_dept/${familyId}/members/${studentId}/reject/`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/super_dept/${familyId}/members/${studentId}/reject/`,
         {
           method: 'PATCH',
           headers: {

@@ -228,7 +228,7 @@ const removeActivity = (ck: string, ai: number) => {
   /* ── Fetch deps & profile ── */
   useEffect(() => {
     if (!token) return;
-    authFetch('http://127.0.0.1:8000/api/family/departments/', { headers: { Authorization: `Bearer ${token}` } })
+    authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/family/departments/`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (!data) return; const d = Array.isArray(data) ? data : data.departments ?? data.results ?? []; setDepartments(d); })
       .catch(() => {});
@@ -237,7 +237,7 @@ const removeActivity = (ck: string, ai: number) => {
   useEffect(() => {
     if (!token) return;
     const decoded = decodeToken(token);
-    authFetch("http://127.0.0.1:8000/api/auth/profile/", { headers: { Authorization: `Bearer ${token}` } })
+    authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/profile/`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (!data) return;
@@ -348,7 +348,7 @@ const removeActivity = (ck: string, ai: number) => {
         committees: committeesData,
       };
 
-      const res = await authFetch('http://127.0.0.1:8000/api/family/student/create/', {
+      const res = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/create/`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

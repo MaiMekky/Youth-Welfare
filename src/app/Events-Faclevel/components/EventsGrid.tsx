@@ -5,7 +5,7 @@ import styles from "../styles/EventsGrid.module.css";
 import EventCard, { EventItem } from "./EventCard";
 import { authFetch } from "@/utils/globalFetch";
 
-const API_URL = "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 function getAccessToken(): string | null {
   return (

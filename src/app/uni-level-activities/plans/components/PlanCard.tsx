@@ -5,7 +5,7 @@ import styles from "../styles/PlanCard.module.css";
 import type { PlanItem } from "../page";
 import { Eye, CalendarDays, Building2, ClipboardList, Pencil, Download } from "lucide-react";
 import { authFetch } from "@/utils/globalFetch";
-const API_URL = "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 function fmt(iso: string) {
   if (!iso) return "—";

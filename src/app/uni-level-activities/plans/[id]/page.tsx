@@ -15,7 +15,7 @@ import {
   Layers,
 } from "lucide-react";
 import { authFetch } from "@/utils/globalFetch";
-const API_URL = "http://localhost:8000/api";
+const API_URL = `${process.env.NEXT_PUBLIC_BASE_URL}/api`;
 
 /* ================= Types ================= */
 
@@ -150,7 +150,7 @@ export default function PlanDetailsPage() {
     if (token) headers.Authorization = `Bearer ${token}`;
 
     try {
-      const res = await authFetch(`http://localhost:8000${path}`, { ...opts, headers });
+      const res = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}${path}`, { ...opts, headers });
       const text = await res.text();
       const json = text
         ? (() => {

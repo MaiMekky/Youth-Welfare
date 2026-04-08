@@ -33,7 +33,7 @@ export type PlanItem = {
   dept?: number;
 };
 
-const API_URL = "http://localhost:8000/api";
+const API_URL = `${process.env.NEXT_PUBLIC_BASE_URL}/api`;
 
 export default function Page() {
   const router = useRouter();

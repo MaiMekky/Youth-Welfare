@@ -32,7 +32,7 @@ export const refreshToken = async (): Promise<string | null> => {
   const refresh = getRefreshToken();
   if (!refresh) return null;
   try {
-    const res = await authFetch("http://127.0.0.1:8000/api/auth/refresh/", {
+    const res = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/refresh/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh }),
@@ -52,7 +52,7 @@ export const refreshToken = async (): Promise<string | null> => {
 
 const fetchApplications = async () => {
   const res = await authFetch(
-    "http://127.0.0.1:8000/api/solidarity/faculty/applications/",
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/applications/`,
     { method: "GET" }
   );
   if (!res.ok) throw new Error("API_ERROR");

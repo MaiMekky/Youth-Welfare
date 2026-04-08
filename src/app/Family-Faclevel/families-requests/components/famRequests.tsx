@@ -45,7 +45,7 @@ const FamRequests = ({ request }: { request: Record<string, unknown> }) => {
       const token = localStorage.getItem("access");
 
       const res = await authFetch(
-        `http://127.0.0.1:8000/api/family/faculty/${request.family_id}/pre-approve/`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculty/${request.family_id}/pre-approve/`,
         {
           method: "POST",
           headers: {
@@ -78,7 +78,7 @@ const FamRequests = ({ request }: { request: Record<string, unknown> }) => {
       const token = localStorage.getItem("access");
 
       const res = await authFetch(
-        `http://127.0.0.1:8000/api/family/faculty/${request.family_id}/reject/`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculty/${request.family_id}/reject/`,
         {
           method: "POST",
           headers: {

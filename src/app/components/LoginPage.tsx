@@ -140,7 +140,7 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
     setLoading(true);
 
     try {
-      const res  = await authFetch("http://localhost:8000/api/auth/login/", {
+      const res  = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/login/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

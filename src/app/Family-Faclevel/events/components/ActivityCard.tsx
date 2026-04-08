@@ -49,7 +49,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
 
     try {
       const res = await authFetch(
-        `http://127.0.0.1:8000/api/family/faculty_events/${eventId}/${action}/`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculty_events/${eventId}/${action}/`,
         {
           method: "POST",
           headers: {

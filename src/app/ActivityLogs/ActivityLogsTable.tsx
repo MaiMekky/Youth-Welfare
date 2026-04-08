@@ -32,7 +32,7 @@ export default function ActivityLogsTable() {
         const token = localStorage.getItem("access");
 
         const response = await authFetch(
-          "http://127.0.0.1:8000/api/solidarity/super_dept/system_logs/",
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/super_dept/system_logs/`,
           {
             method: "GET",
             headers: {

@@ -118,7 +118,7 @@ export default function RequestDetailsPage() {
 
   const fetchApplication = async () => {
     try {
-      const res = await authFetch(`http://127.0.0.1:8000/api/solidarity/faculty/${id}/applications/`);
+      const res = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/${id}/applications/`);
       if (!res.ok) throw new Error("API_ERROR");
       const data = await res.json();
       let item: Application | null = null;
@@ -139,7 +139,7 @@ export default function RequestDetailsPage() {
 
   const fetchDocuments = async () => {
     try {
-      const res = await authFetch(`http://127.0.0.1:8000/api/solidarity/faculty/${id}/documents/`);
+      const res = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/${id}/documents/`);
       if (!res.ok) throw new Error("DOCS_ERROR");
       const data = await res.json();
       setDocuments(Array.isArray(data) ? data : data ? [data] : []);
@@ -152,7 +152,7 @@ export default function RequestDetailsPage() {
 
   const fetchDiscountValues = async () => {
     try {
-      const res = await authFetch(`http://localhost:8000/api/solidarity/faculty/faculty/discounts/`);
+      const res = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/faculty/discounts/`);
       if (!res.ok) throw new Error("DISCOUNT_ERROR");
       const data = await res.json();
       setAvailableDiscounts(
@@ -188,7 +188,7 @@ export default function RequestDetailsPage() {
     setApplication((prev) => ({ ...(prev ?? {}), req_status: optimisticStatus }));
     try {
       const res = await authFetch(
-        `http://localhost:8000/api/solidarity/faculty/${id}/${suffix}/`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/${id}/${suffix}/`,
         { method: "POST" }
       );
       if (!res.ok) throw new Error("ACTION_ERROR");
@@ -233,7 +233,7 @@ export default function RequestDetailsPage() {
     setActionLoading(true);
     try {
       const response = await authFetch(
-        `http://localhost:8000/api/solidarity/faculty/${application.solidarity_id}/pre_approve/`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/${application.solidarity_id}/pre_approve/`,
         { method: "POST" }
       );
       if (!response.ok) throw new Error("PRE_APPROVE_ERROR");
@@ -317,7 +317,7 @@ export default function RequestDetailsPage() {
 
     try {
       const res = await authFetch(
-        `http://127.0.0.1:8000/api/solidarity/faculty/${application?.solidarity_id}/assign_discount/`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/${application?.solidarity_id}/assign_discount/`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -353,7 +353,7 @@ export default function RequestDetailsPage() {
 
   const openDocument = async (docId: number) => {
     try {
-      const res = await authFetch(`http://localhost:8000/api/files/solidarity/${docId}/download/`);
+      const res = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/files/solidarity/${docId}/download/`);
       if (!res.ok) throw new Error("FILE_ERROR");
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);

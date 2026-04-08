@@ -12,7 +12,7 @@ import { Plus, Search } from "lucide-react";
 import Footer from "@/app/FacLevel/components/Footer";
 import { authFetch } from "@/utils/globalFetch";
 
-const API_URL = "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 type ApiEvent = {
   event_id: number;

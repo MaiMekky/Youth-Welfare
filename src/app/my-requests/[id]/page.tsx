@@ -20,7 +20,7 @@ export default function RequestDetailsPage() {
       if (!token) return;
 
       const res = await authFetch(
-        "http://127.0.0.1:8000/api/family/faculties/",
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculties/`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -42,7 +42,7 @@ export default function RequestDetailsPage() {
       const token = localStorage.getItem("access");
 
       const response = await authFetch(
-        `http://127.0.0.1:8000/api/solidarity/student/${id}/detail/`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/student/${id}/detail/`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -70,7 +70,7 @@ export default function RequestDetailsPage() {
       if (!token) return;
 
       const response = await authFetch(
-        `http://127.0.0.1:8000/api/files/solidarity/${docId}/download/`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/files/solidarity/${docId}/download/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

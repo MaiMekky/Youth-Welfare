@@ -68,7 +68,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
   useEffect(() => {
     const fetchFaculties = async () => {
       try {
-        const response = await authFetch("http://localhost:8000/api/family/faculties/");
+        const response = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculties/`);
         if (response.ok) {
           const data = await response.json();
           setFaculties(data);
@@ -219,7 +219,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
 
     setLoading(true);
     try {
-      const response = await authFetch("http://127.0.0.1:8000/api/auth/signUp/", {
+      const response = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/signUp/`, {
         method: "POST",
         body: formDataToSend,
       });

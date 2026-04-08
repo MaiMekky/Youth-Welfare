@@ -125,7 +125,7 @@ export default function StudentsTable() {
   .join("&");
 
 
-      const url = `http://127.0.0.1:8000/api/solidarity/super_dept/all_applications/${query ? `?${query}` : ""}`;
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/super_dept/all_applications/${query ? `?${query}` : ""}`;
       const res = await authFetch(url, { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error("فشل في جلب البيانات");
 

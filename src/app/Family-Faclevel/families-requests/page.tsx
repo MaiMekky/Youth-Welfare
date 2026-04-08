@@ -16,7 +16,7 @@ export default function FamilyRequestsPage() {
         const token = localStorage.getItem("access");
 
         const res = await authFetch(
-          "http://127.0.0.1:8000/api/family/faculty/pending_requests/",
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculty/pending_requests/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

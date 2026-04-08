@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowRight, Mail, Phone, MapPin, User, GraduationCap, IdCard } from "lucide-react";
 import { authFetch } from "@/utils/globalFetch";
 
-const API_URL = "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 function getAccessToken(): string | null {
   return (

@@ -82,7 +82,7 @@ const StudentNavbar: React.FC = () => {
 
     const checkRole = async () => {
       try {
-        const res = await fetch('http://127.0.0.1:8000/api/family/student/families/', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/families/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) return;

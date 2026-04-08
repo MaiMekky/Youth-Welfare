@@ -6,7 +6,7 @@ import { useRouter, useParams } from "next/navigation";
 import { ArrowRight, Save } from "lucide-react";
 import { authFetch } from "@/utils/globalFetch";
 /** ================== API ================== */
-const API_URL = "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 type ApiFaculty = { faculty_id: number; name: string };
 

@@ -18,7 +18,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { authFetch } from "@/utils/globalFetch";
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 function getAccessToken(): string | null {
   return (

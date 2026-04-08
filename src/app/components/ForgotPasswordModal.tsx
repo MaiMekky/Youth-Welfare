@@ -5,7 +5,7 @@ import { X, Mail, Lock, ArrowRight } from "lucide-react";
 import styles from "../Styles/components/ForgotPasswordModal.module.css";
 import { authFetch } from "@/utils/globalFetch";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_BASE_URL;
 
 type Step = "email" | "confirm" | "success";
 

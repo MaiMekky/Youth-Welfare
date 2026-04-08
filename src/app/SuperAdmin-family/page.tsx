@@ -147,7 +147,7 @@ export default function Page() {
       try {
         const token = localStorage.getItem("access");
         const res = await authFetch(
-          "http://localhost:8000/api/family/faculties/",
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculties/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -182,7 +182,7 @@ export default function Page() {
         }
 
         const res = await authFetch(
-          `http://localhost:8000/api/family/super_dept/?${params.toString()}`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/super_dept/?${params.toString()}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

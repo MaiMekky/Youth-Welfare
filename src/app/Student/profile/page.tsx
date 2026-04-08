@@ -21,7 +21,7 @@ export default function ProfilePage() {
         if (!token) return;
         
         const response = await authFetch(
-          "http://127.0.0.1:8000/api/family/faculties/",
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculties/`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -52,7 +52,7 @@ export default function ProfilePage() {
         }
 
         const response = await authFetch(
-          "http://127.0.0.1:8000/api/auth/profile/",
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/profile/`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -66,10 +66,10 @@ export default function ProfilePage() {
           let profilePictureUrl = apiData.profile_photo_url || "/app/assets/profile.png";
           if (profilePictureUrl && !profilePictureUrl.startsWith('http') && !profilePictureUrl.startsWith('/')) {
             // If it's a relative URL, make it absolute
-            profilePictureUrl = `http://127.0.0.1:8000${profilePictureUrl.startsWith('/') ? '' : '/'}${profilePictureUrl}`;
+            profilePictureUrl = `${process.env.NEXT_PUBLIC_BASE_URL}${profilePictureUrl.startsWith('/') ? '' : '/'}${profilePictureUrl}`;
           } else if (profilePictureUrl && profilePictureUrl.startsWith('/media/')) {
             // If it starts with /media/, add the base URL
-            profilePictureUrl = `http://127.0.0.1:8000${profilePictureUrl}`;
+            profilePictureUrl = `${process.env.NEXT_PUBLIC_BASE_URL}${profilePictureUrl}`;
           }
           const imageUrl =
           (await fetchProfileImage(apiData.student_id)) ||
@@ -121,7 +121,7 @@ export default function ProfilePage() {
       if (!token) return null;
 
       const response = await authFetch(
-        `http://127.0.0.1:8000/api/files/students/${studentId}/image/`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/files/students/${studentId}/image/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -147,7 +147,7 @@ export default function ProfilePage() {
       formData.append("profile_photo", file);
 
       const response = await authFetch(
-        "http://127.0.0.1:8000/api/auth/profile/update_profile/",
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/profile/update_profile/`,
         {
           method: "PATCH",
           headers: {
@@ -236,7 +236,7 @@ export default function ProfilePage() {
       }
 
       const response = await authFetch(
-        "http://127.0.0.1:8000/api/auth/profile/update_profile/",
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/profile/update_profile/`,
         {
           method: "PATCH",
           headers: {
@@ -255,10 +255,10 @@ export default function ProfilePage() {
         let profilePictureUrl = apiData.profile_photo_url || "/app/assets/profile.png";
         if (profilePictureUrl && profilePictureUrl.startsWith('/media/')) {
           // If it starts with /media/, add the base URL
-          profilePictureUrl = `http://127.0.0.1:8000${profilePictureUrl}`;
+          profilePictureUrl = `${process.env.NEXT_PUBLIC_BASE_URL}${profilePictureUrl}`;
         } else if (profilePictureUrl && !profilePictureUrl.startsWith('http') && !profilePictureUrl.startsWith('/app/')) {
           // If it's a relative URL (not starting with /app/), make it absolute
-          profilePictureUrl = `http://127.0.0.1:8000${profilePictureUrl.startsWith('/') ? '' : '/'}${profilePictureUrl}`;
+          profilePictureUrl = `${process.env.NEXT_PUBLIC_BASE_URL}${profilePictureUrl.startsWith('/') ? '' : '/'}${profilePictureUrl}`;
         }
         
         const mappedData: StudentProfile = {

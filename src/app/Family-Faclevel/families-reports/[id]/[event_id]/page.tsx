@@ -80,7 +80,7 @@ const [eventData, setEventData] = useState<EventData>({
         const token = localStorage.getItem("access");
 
         const res = await authFetch(
-          `http://127.0.0.1:8000/api/family/faculty_events/${event_id}/`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculty_events/${event_id}/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -142,7 +142,7 @@ setStudentsData(
     const token = localStorage.getItem("access");
 
     const res = await authFetch(
-      `http://127.0.0.1:8000/api/family/faculty_events/${event_id}/participants/${studentId}/${action}/`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculty_events/${event_id}/participants/${studentId}/${action}/`,
       {
         method: "POST",
         headers: {
@@ -187,7 +187,7 @@ const handleApproveAll = async () => {
     for (const student of studentsData) {
       if (student.status !== "approved") {
         const res = await authFetch(
-          `http://127.0.0.1:8000/api/family/faculty_events/${event_id}/approve-all-participants/`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculty_events/${event_id}/approve-all-participants/`,
           {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },

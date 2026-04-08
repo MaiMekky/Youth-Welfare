@@ -47,7 +47,7 @@ export default function Page() {
       if (!token) return;
 
       const res = await authFetch(
-        "http://localhost:8000/api/family/faculties/",
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculties/`,
         {
           method: "GET",
           headers: {
@@ -91,7 +91,7 @@ export default function Page() {
       }
 
       const res = await authFetch(
-        "http://localhost:8000/api/event/get-events/faculty/",
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/event/get-events/faculty/`,
         {
           method: "GET",
           headers: {

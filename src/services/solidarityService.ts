@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://127.0.0.1:8000/api/solidarity/faculty/applications/";
+const API_URL = `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/applications/`;
 
 export const getFacultyApplications = async () => {
   try {

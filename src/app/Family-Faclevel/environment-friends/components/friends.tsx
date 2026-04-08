@@ -322,7 +322,7 @@ export default function FriendsForm() {
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
-        const res = await authFetch("http://localhost:8000/api/family/departments/");
+        const res = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/family/departments/`);
         const data = await res.json();
         setDepartments(data);
       } catch (err) {
@@ -338,7 +338,7 @@ export default function FriendsForm() {
     setIsSubmitting(true);
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
-      const res = await authFetch("http://localhost:8000/api/family/faculty/environment-family/", {
+      const res = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculty/environment-family/`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(buildBody()),

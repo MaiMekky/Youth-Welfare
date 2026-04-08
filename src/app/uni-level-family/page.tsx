@@ -9,7 +9,7 @@ import Tabs from "./components/Tabs";
 import FamiliesGrid from "./components/FamiliesGrid";
 import Filters from "./components/Filters";
 
-const API_URL = "http://localhost:8000/api";
+const API_URL = `${process.env.NEXT_PUBLIC_BASE_URL}/api`;
 const TAB_STORAGE_KEY = "families_active_tab";
 
 type TabType = "central" | "quality" | "eco";

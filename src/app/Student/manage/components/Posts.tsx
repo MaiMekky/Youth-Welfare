@@ -134,7 +134,7 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
     const fetchFamilyId = async () => {
       try {
         const res = await authFetch(
-          `http://127.0.0.1:8000/api/family/student/families/`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/families/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -192,7 +192,7 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
         setLoading(true);
         setError(null);
 
-        const endpoint = `http://127.0.0.1:8000/api/family/student/${selectedFamilyId}/posts/`;
+        const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/${selectedFamilyId}/posts/`;
 
         const response = await authFetch(endpoint, {
           headers: { Authorization: `Bearer ${token}` }

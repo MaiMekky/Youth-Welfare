@@ -36,7 +36,7 @@ export default function StudentDetailsPage() {
         const token = localStorage.getItem("access");
 
         const response = await authFetch(
-          `http://127.0.0.1:8000/api/solidarity/super_dept/${id}/applications/`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/super_dept/${id}/applications/`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -59,7 +59,7 @@ export default function StudentDetailsPage() {
         const token = localStorage.getItem("access");
 
         const response = await authFetch(
-          `http://127.0.0.1:8000/api/solidarity/super_dept/${id}/documents/`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/super_dept/${id}/documents/`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -86,7 +86,7 @@ export default function StudentDetailsPage() {
 const openDocument = async (docId: number) => {
   try {
     const res = await authFetch(
-      `http://localhost:8000/api/files/solidarity/${docId}/download/`
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/files/solidarity/${docId}/download/`
     );
 
     if (!res.ok) throw new Error("FILE_ERROR");
@@ -108,7 +108,7 @@ const handleApprove = async () => {
     if (!token) throw new Error("User not authenticated");
 
     const response = await authFetch(
-      `http://127.0.0.1:8000/api/solidarity/super_dept/${id}/change_to_approve/`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/super_dept/${id}/change_to_approve/`,
       {
         method: "POST",
         headers: {
@@ -144,7 +144,7 @@ const handleReject = async () => {
     if (!token) throw new Error("User not authenticated");
 
     const response = await authFetch(
-      `http://127.0.0.1:8000/api/solidarity/super_dept/${id}/change_to_reject/`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/super_dept/${id}/change_to_reject/`,
       {
         method: "POST",
         headers: {

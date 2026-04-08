@@ -12,9 +12,9 @@ type DiscountsState = {
 };
 
 const API_GET =
-  "http://127.0.0.1:8000/api/solidarity/faculty/faculty/discounts/";
+  `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/faculty/discounts/`;
 const API_PATCH =
-  "http://127.0.0.1:8000/api/solidarity/faculty/update_faculty_discounts/";
+  `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/update_faculty_discounts/`;
 
 export default function DiscountsSection() {
   const [isEditing, setIsEditing] = useState(false);

@@ -24,7 +24,7 @@ export default function Filters({
       setFacultiesLoading(true);
       try {
         const token = localStorage.getItem("access");
-        const response = await authFetch("http://localhost:8000/api/family/faculties/", {
+        const response = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculties/`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

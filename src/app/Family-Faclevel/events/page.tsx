@@ -25,7 +25,7 @@ export default function ActivitiesPage() {
       try {
         const token = localStorage.getItem("access");
         const res = await authFetch(
-          "http://127.0.0.1:8000/api/family/faculty_events/pending/",
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculty_events/pending/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

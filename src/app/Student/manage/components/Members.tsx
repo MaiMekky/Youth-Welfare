@@ -49,7 +49,7 @@ const Members: React.FC = () => {
     const fetchFamilyId = async () => {
       try {
         const res = await authFetch(
-          `http://127.0.0.1:8000/api/family/student/families/`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/families/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -107,7 +107,7 @@ const Members: React.FC = () => {
         setLoading(true);
 
         const response = await authFetch(
-          `http://127.0.0.1:8000/api/family/student/${selectedFamilyId}/members/`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/${selectedFamilyId}/members/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

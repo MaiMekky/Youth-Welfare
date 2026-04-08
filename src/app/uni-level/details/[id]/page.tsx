@@ -47,7 +47,7 @@ const fetchData = async () => {
   try {
     // ====== جلب بيانات الطلب ======
     const appRes = await authFetch(
-      `http://127.0.0.1:8000/api/solidarity/super_dept/${id}/applications/`
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/super_dept/${id}/applications/`
     );
 
     if (!appRes.ok) throw new Error("APPLICATION_ERROR");
@@ -57,7 +57,7 @@ const fetchData = async () => {
 
     // ====== جلب المستندات ======
     const docsRes = await authFetch(
-      `http://127.0.0.1:8000/api/solidarity/super_dept/${id}/documents/`
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/super_dept/${id}/documents/`
     );
 
     if (!docsRes.ok) throw new Error("DOCS_ERROR");
@@ -76,7 +76,7 @@ const fetchData = async () => {
   }, [id]);const openDocument = async (docId: number) => {
   try {
     const res = await authFetch(
-      `http://localhost:8000/api/files/solidarity/${docId}/download/`
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/files/solidarity/${docId}/download/`
     );
 
     if (!res.ok) throw new Error("FILE_ERROR");

@@ -35,7 +35,7 @@ useEffect(() => {
 const fetchData = async () => {
   try {
     const res = await authFetch(
-      "http://127.0.0.1:8000/api/solidarity/faculty/faculty_approved/"
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/faculty_approved/`
     );
 
     if (!res.ok) throw new Error("API_ERROR");
@@ -70,7 +70,7 @@ const fetchData = async () => {
 const handleExport = async () => {
   try {
 const res = await authFetch(
-  `http://127.0.0.1:8000/api/solidarity/faculty/export/?acd_year=${academicYear}`
+  `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/export/?acd_year=${academicYear}`
 );
 
 if (!res.ok) throw new Error("EXPORT_ERROR");

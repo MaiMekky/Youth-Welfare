@@ -109,7 +109,7 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
     if (!token) throw new Error('غير مصرح');
 
     const res = await authFetch(
-      'http://127.0.0.1:8000/api/family/student/families/',
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/families/`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -128,7 +128,7 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
     if (!token) throw new Error('غير مصرح');
 
     const res = await authFetch(
-      'http://127.0.0.1:8000/api/family/student/available/',
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/available/`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -148,7 +148,7 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
       setJoiningId(familyId);
 
       const res = await authFetch(
-        `http://127.0.0.1:8000/api/family/student/${familyId}/join/`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/${familyId}/join/`,
         {
           method: 'POST',
           headers: {

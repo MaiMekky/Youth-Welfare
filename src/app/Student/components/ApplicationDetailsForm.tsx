@@ -99,7 +99,7 @@ export default function ApplicationDetailsForm({ onSuccess, onNotify }: Applicat
 
     try {
       const token = localStorage.getItem("access");
-      const res = await authFetch("http://127.0.0.1:8000/api/solidarity/student/apply/", {
+      const res = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/student/apply/`, {
         method: "POST", body: payload,
         headers: { Authorization: `Bearer ${token}` },
       });

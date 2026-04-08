@@ -154,7 +154,7 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
     const fetchFamilyId = async () => {
       try {
         const res = await authFetch(
-          `http://127.0.0.1:8000/api/family/student/families/`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/families/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -209,7 +209,7 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
       try {
         if (!token) return;
 
-        const response = await authFetch('http://127.0.0.1:8000/api/family/departments/', {
+        const response = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/family/departments/`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -249,7 +249,7 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
         setLoading(true);
         setError(null);
 
-        const endpoint = `http://127.0.0.1:8000/api/family/student/${selectedFamilyId}/event_requests/`;
+        const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/${selectedFamilyId}/event_requests/`;
 
         const response = await authFetch(endpoint, {
           method: 'GET',

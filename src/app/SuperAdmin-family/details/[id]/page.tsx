@@ -126,7 +126,7 @@ export default function FamilyDetailsPage() {
         const token = localStorage.getItem('access');
 
         const res = await authFetch(
-          `http://localhost:8000/api/family/super_dept/${id}`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/super_dept/${id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

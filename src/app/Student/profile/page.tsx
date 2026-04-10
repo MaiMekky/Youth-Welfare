@@ -6,7 +6,7 @@ import ProfileSummaryCard from "./components/ProfileSummaryCard";
 import ProfileDetailsSection from "./components/ProfileDetailsSection";
 import type { StudentProfile, StudentProfileAPIResponse, UpdateProfileRequest } from "./types";
 import "../styles/profile.css";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 export default function ProfilePage() {
   const [profileData, setProfileData] = useState<StudentProfile | null>(null);
   const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[]>([]);
@@ -21,7 +21,7 @@ export default function ProfilePage() {
         if (!token) return;
         
         const response = await authFetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculties/`,
+          `${getBaseUrl()}/api/family/faculties/`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -52,7 +52,7 @@ export default function ProfilePage() {
         }
 
         const response = await authFetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/profile/`,
+          `${getBaseUrl()}/api/auth/profile/`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -66,10 +66,10 @@ export default function ProfilePage() {
           let profilePictureUrl = apiData.profile_photo_url || "/app/assets/profile.png";
           if (profilePictureUrl && !profilePictureUrl.startsWith('http') && !profilePictureUrl.startsWith('/')) {
             // If it's a relative URL, make it absolute
-            profilePictureUrl = `${process.env.NEXT_PUBLIC_BASE_URL}${profilePictureUrl.startsWith('/') ? '' : '/'}${profilePictureUrl}`;
+            profilePictureUrl = `${getBaseUrl()}${profilePictureUrl.startsWith('/') ? '' : '/'}${profilePictureUrl}`;
           } else if (profilePictureUrl && profilePictureUrl.startsWith('/media/')) {
             // If it starts with /media/, add the base URL
-            profilePictureUrl = `${process.env.NEXT_PUBLIC_BASE_URL}${profilePictureUrl}`;
+            profilePictureUrl = `${getBaseUrl()}${profilePictureUrl}`;
           }
           const imageUrl =
           (await fetchProfileImage(apiData.student_id)) ||
@@ -121,7 +121,7 @@ export default function ProfilePage() {
       if (!token) return null;
 
       const response = await authFetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/files/students/${studentId}/image/`,
+        `${getBaseUrl()}/api/files/students/${studentId}/image/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -147,7 +147,7 @@ export default function ProfilePage() {
       formData.append("profile_photo", file);
 
       const response = await authFetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/profile/update_profile/`,
+        `${getBaseUrl()}/api/auth/profile/update_profile/`,
         {
           method: "PATCH",
           headers: {
@@ -236,7 +236,7 @@ export default function ProfilePage() {
       }
 
       const response = await authFetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/profile/update_profile/`,
+        `${getBaseUrl()}/api/auth/profile/update_profile/`,
         {
           method: "PATCH",
           headers: {
@@ -255,10 +255,10 @@ export default function ProfilePage() {
         let profilePictureUrl = apiData.profile_photo_url || "/app/assets/profile.png";
         if (profilePictureUrl && profilePictureUrl.startsWith('/media/')) {
           // If it starts with /media/, add the base URL
-          profilePictureUrl = `${process.env.NEXT_PUBLIC_BASE_URL}${profilePictureUrl}`;
+          profilePictureUrl = `${getBaseUrl()}${profilePictureUrl}`;
         } else if (profilePictureUrl && !profilePictureUrl.startsWith('http') && !profilePictureUrl.startsWith('/app/')) {
           // If it's a relative URL (not starting with /app/), make it absolute
-          profilePictureUrl = `${process.env.NEXT_PUBLIC_BASE_URL}${profilePictureUrl.startsWith('/') ? '' : '/'}${profilePictureUrl}`;
+          profilePictureUrl = `${getBaseUrl()}${profilePictureUrl.startsWith('/') ? '' : '/'}${profilePictureUrl}`;
         }
         
         const mappedData: StudentProfile = {

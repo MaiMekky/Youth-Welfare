@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import "../styles/RequestDetails.css";
-
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 interface RequestDetailsProps {
   onBack?: () => void;
   onSubmit?: () => void;
@@ -20,7 +20,7 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => 
           return;
         }
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/profile/`, {
+        const res = await authFetch(`${getBaseUrl()}/api/auth/profile/`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

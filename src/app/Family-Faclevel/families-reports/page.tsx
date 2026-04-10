@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import Footer from "@/app/FacLevel/components/Footer";
 import ReportCard from "../families-reports/components/reports";
 import styles from "../families-reports/styles/report.module.css";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 interface Family {
   family_id: number;
@@ -28,7 +28,7 @@ export default function FamilyReportsPage() {
       try {
         const token = localStorage.getItem("access");
         const res = await authFetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculty/families/`,
+          `${getBaseUrl()}/api/family/faculty/families/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

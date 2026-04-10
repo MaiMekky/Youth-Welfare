@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import '../styles/CreateFam.css';
 import Toast from './Toast';
 import { ChevronRight, ChevronLeft, Check, User, Users, FileText, Send } from 'lucide-react';
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 const CACHE_KEY = 'createFamFormData';
 
 /* ─── Token decode ─── */
@@ -228,7 +228,8 @@ const removeActivity = (ck: string, ai: number) => {
   /* ── Fetch deps & profile ── */
   useEffect(() => {
     if (!token) return;
-    authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/family/departments/`, { headers: { Authorization: `Bearer ${token}` } })
+    const baseUrl = getBaseUrl();
+    authFetch(`${baseUrl}/api/family/departments/`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (!data) return; const d = Array.isArray(data) ? data : data.departments ?? data.results ?? []; setDepartments(d); })
       .catch(() => {});
@@ -237,7 +238,8 @@ const removeActivity = (ck: string, ai: number) => {
   useEffect(() => {
     if (!token) return;
     const decoded = decodeToken(token);
-    authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/profile/`, { headers: { Authorization: `Bearer ${token}` } })
+    const baseUrl = getBaseUrl();
+    authFetch(`${baseUrl}/api/auth/profile/`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (!data) return;
@@ -310,6 +312,7 @@ const removeActivity = (ck: string, ai: number) => {
     setIsSubmitting(true);
     try {
       if (!token) { showToast('يرجى تسجيل الدخول أولاً', 'error'); return; }
+      const baseUrl = getBaseUrl();
 
       const committeesData = Object.entries(committees).map(([key, c]) => {
         const deptId = c.selectedDeptId ? parseInt(c.selectedDeptId) : (facultyId || 0);
@@ -348,7 +351,7 @@ const removeActivity = (ck: string, ai: number) => {
         committees: committeesData,
       };
 
-      const res = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/create/`, {
+      const res = await authFetch(`${baseUrl}/api/family/student/create/`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

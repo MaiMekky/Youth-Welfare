@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "./ACtivityLogs.module.css";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 interface Log {
   log_id: number;
@@ -32,7 +32,7 @@ export default function ActivityLogsTable() {
         const token = localStorage.getItem("access");
 
         const response = await authFetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/super_dept/system_logs/`,
+          `${getBaseUrl()}/api/solidarity/super_dept/system_logs/`,
           {
             method: "GET",
             headers: {

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import "../styles/Posts.css";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 // ========= Types ==========
 export type PostType = "Post" | "Reminder";
 
@@ -133,8 +133,9 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
 
     const fetchFamilyId = async () => {
       try {
+        const baseUrl = getBaseUrl();
         const res = await authFetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/families/`,
+          `${baseUrl}/api/family/student/families/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -192,7 +193,8 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
         setLoading(true);
         setError(null);
 
-        const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/${selectedFamilyId}/posts/`;
+        const baseUrl = getBaseUrl();
+        const endpoint = `${baseUrl}/api/family/student/${selectedFamilyId}/posts/`;
 
         const response = await authFetch(endpoint, {
           headers: { Authorization: `Bearer ${token}` }

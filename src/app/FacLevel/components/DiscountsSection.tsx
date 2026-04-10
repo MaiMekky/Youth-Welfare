@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import styles from "../Styles/DiscountsSection.module.css";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 type DiscountsState = {
   books: string[];
@@ -12,9 +12,9 @@ type DiscountsState = {
 };
 
 const API_GET =
-  `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/faculty/discounts/`;
+  `${getBaseUrl()}/api/solidarity/faculty/faculty/discounts/`;
 const API_PATCH =
-  `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/update_faculty_discounts/`;
+  `${getBaseUrl()}/api/solidarity/faculty/update_faculty_discounts/`;
 
 export default function DiscountsSection() {
   const [isEditing, setIsEditing] = useState(false);

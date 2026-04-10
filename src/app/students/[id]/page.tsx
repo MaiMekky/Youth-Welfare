@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./studentDetails.module.css";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 const rejectionReasons = [
   { id: 1, text: "إزعاج أو تكرار التقديم بشكل غير مبرر" },
   { id: 2, text: "المستندات المرفوعة غير واضحة أو غير صحيحة" },
@@ -34,9 +34,10 @@ export default function StudentDetailsPage() {
     const fetchDetails = async () => {
       try {
         const token = localStorage.getItem("access");
+        const baseUrl = getBaseUrl();
 
         const response = await authFetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/super_dept/${id}/applications/`,
+          `${baseUrl}/api/solidarity/super_dept/${id}/applications/`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -59,7 +60,7 @@ export default function StudentDetailsPage() {
         const token = localStorage.getItem("access");
 
         const response = await authFetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/super_dept/${id}/documents/`,
+          `${getBaseUrl()}/api/solidarity/super_dept/${id}/documents/`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -86,7 +87,7 @@ export default function StudentDetailsPage() {
 const openDocument = async (docId: number) => {
   try {
     const res = await authFetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/files/solidarity/${docId}/download/`
+      `${getBaseUrl()}/api/files/solidarity/${docId}/download/`
     );
 
     if (!res.ok) throw new Error("FILE_ERROR");
@@ -108,7 +109,7 @@ const handleApprove = async () => {
     if (!token) throw new Error("User not authenticated");
 
     const response = await authFetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/super_dept/${id}/change_to_approve/`,
+      `${getBaseUrl()}/api/solidarity/super_dept/${id}/change_to_approve/`,
       {
         method: "POST",
         headers: {
@@ -144,7 +145,7 @@ const handleReject = async () => {
     if (!token) throw new Error("User not authenticated");
 
     const response = await authFetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/super_dept/${id}/change_to_reject/`,
+      `${getBaseUrl()}/api/solidarity/super_dept/${id}/change_to_reject/`,
       {
         method: "POST",
         headers: {

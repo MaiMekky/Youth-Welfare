@@ -3,8 +3,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import styles from "../styles/PlansPage.module.css";
 import { X, Save } from "lucide-react";
-import { authFetch } from "@/utils/globalFetch";
-const API_URL = `${process.env.NEXT_PUBLIC_BASE_URL}/api`;
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+const API_URL = `${getBaseUrl()}/api`;
 
 type InitialPlan = { id: number; name: string; term: number; dept_id?: number } | null;
 

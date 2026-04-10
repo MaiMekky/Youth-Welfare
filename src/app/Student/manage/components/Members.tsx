@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import "../styles/Members.css";
 import { UserRound } from "lucide-react";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 interface Member {
   student_id: number;
   student_name: string;
@@ -48,8 +48,9 @@ const Members: React.FC = () => {
 
     const fetchFamilyId = async () => {
       try {
+        const baseUrl = getBaseUrl();
         const res = await authFetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/families/`,
+          `${baseUrl}/api/family/student/families/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -105,9 +106,10 @@ const Members: React.FC = () => {
     const fetchMembers = async () => {
       try {
         setLoading(true);
+        const baseUrl = getBaseUrl();
 
         const response = await authFetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/${selectedFamilyId}/members/`,
+          `${baseUrl}/api/family/student/${selectedFamilyId}/members/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

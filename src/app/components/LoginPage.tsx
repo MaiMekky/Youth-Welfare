@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import logo from "../assets/logo.png";
 import styles from "../Styles/components/LoginPage.module.css";
 import ForgotPasswordModal from "./ForgotPasswordModal";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 interface LoginPageProps {
   onClose: () => void;
@@ -140,7 +140,8 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
     setLoading(true);
 
     try {
-      const res  = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/login/`, {
+      const baseUrl = getBaseUrl();
+      const res  = await authFetch(`${baseUrl}/api/auth/login/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -253,7 +254,7 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
     try {
       // Step 1: Get the Google authorization URL from your backend
       const initRes = await authFetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google/init/`,
+        `${getBaseUrl()}/api/auth/google/init/`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },

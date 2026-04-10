@@ -8,7 +8,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import "../styles/overview.css";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 interface Member {
   id: number;
   name: string;
@@ -119,8 +119,9 @@ const Overview: React.FC = () => {
         console.log("🔵 Starting to fetch families...");
         console.log("🔑 Token exists:", !!token);
         
+        const baseUrl = getBaseUrl();
         const res = await authFetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/families/`,
+          `${baseUrl}/api/family/student/families/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -207,9 +208,10 @@ const Overview: React.FC = () => {
     const fetchDashboard = async () => {
       try {
         setLoading(true);
+        const baseUrl = getBaseUrl();
 
         const res = await authFetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/${selectedFamilyId}/dashboard/`,
+          `${baseUrl}/api/family/student/${selectedFamilyId}/dashboard/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

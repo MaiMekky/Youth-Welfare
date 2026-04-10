@@ -4,7 +4,7 @@ import Image from "next/image";
 import logo from "@/app/assets/logo.png";
 import profilePlaceholder from "@/app/assets/profile.png";
 import styles from "../Styles/components/LoginPage.module.css";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 interface SignupProps {
   onClose: () => void;
@@ -68,7 +68,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
   useEffect(() => {
     const fetchFaculties = async () => {
       try {
-        const response = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculties/`);
+        const response = await authFetch(`${getBaseUrl()}/api/family/faculties/`);
         if (response.ok) {
           const data = await response.json();
           setFaculties(data);
@@ -219,7 +219,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
 
     setLoading(true);
     try {
-      const response = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/signUp/`, {
+      const response = await authFetch(`${getBaseUrl()}/api/auth/signUp/`, {
         method: "POST",
         body: formDataToSend,
       });

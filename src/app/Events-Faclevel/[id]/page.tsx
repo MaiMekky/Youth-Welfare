@@ -23,9 +23,9 @@ import {
   FileText,
 } from "lucide-react";
 import Footer from "@/app/FacLevel/components/Footer";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
-const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
+const API_URL = getBaseUrl();
 
 function getAccessToken(): string | null {
   return (

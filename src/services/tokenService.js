@@ -29,7 +29,9 @@ export const refreshToken = async () => {
   if (!refresh) return null;
 
   try {
-    const response = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/refresh/`, {
+    const { getBaseUrl } = await import("@/utils/globalFetch");
+    const baseUrl = getBaseUrl();
+    const response = await authFetch(`${baseUrl}/api/auth/refresh/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh }),

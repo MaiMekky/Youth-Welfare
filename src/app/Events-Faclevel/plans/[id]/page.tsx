@@ -15,10 +15,10 @@ import {
   Layers,
 } from "lucide-react";
 import Footer from "@/app/FacLevel/components/Footer";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 
-const API_URL = `${process.env.NEXT_PUBLIC_BASE_URL}/api`;
+const API_URL = `${getBaseUrl()}/api`;
 
 /* ================= Types ================= */
 
@@ -153,7 +153,8 @@ export default function PlanDetailsPage() {
     if (token) headers.Authorization = `Bearer ${token}`;
 
     try {
-      const res = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}${path}`, { ...opts, headers });
+      const baseUrl = getBaseUrl();
+      const res = await authFetch(`${baseUrl}${path}`, { ...opts, headers });
       const text = await res.text();
       const json = text
         ? (() => {

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Head from "next/head";
 import Layout from "../Layout";
 import "./Reports.css";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 interface CollegeReport {
   faculty_id: number;
   faculty_name: string;
@@ -34,7 +34,7 @@ export default function ReportsPage() {
       }
 
       const res = await authFetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/super_dept/faculty_summary/`,
+        `${getBaseUrl()}/api/solidarity/super_dept/faculty_summary/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

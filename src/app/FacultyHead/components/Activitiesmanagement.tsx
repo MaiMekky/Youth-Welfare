@@ -7,7 +7,7 @@ import {
   Layers, AlertCircle, RefreshCw, FileDown,
 } from "lucide-react";
 import styles from "../Styles/Activitiesmanagement.module.css";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 interface EventRow {
   event_id: number;
@@ -51,7 +51,7 @@ interface EventDetail {
 const getToken = () =>
   typeof window !== "undefined" ? localStorage.getItem("access") : null;
 
-const BASE = process.env.NEXT_PUBLIC_BASE_URL;
+const BASE = getBaseUrl();
 
 type TabKey = "pending" | "approved" | "rejected";
 

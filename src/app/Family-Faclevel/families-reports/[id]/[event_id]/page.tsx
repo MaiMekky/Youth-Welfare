@@ -5,7 +5,7 @@ import styles from "./detail.module.css";
 import { useParams, useRouter } from "next/navigation";
 
 import Footer from "@/app/FacLevel/components/Footer";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 /* ================= Interfaces ================= */
 
@@ -80,7 +80,7 @@ const [eventData, setEventData] = useState<EventData>({
         const token = localStorage.getItem("access");
 
         const res = await authFetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculty_events/${event_id}/`,
+          `${getBaseUrl()}/api/family/faculty_events/${event_id}/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -142,7 +142,7 @@ setStudentsData(
     const token = localStorage.getItem("access");
 
     const res = await authFetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculty_events/${event_id}/participants/${studentId}/${action}/`,
+      `${getBaseUrl()}/api/family/faculty_events/${event_id}/participants/${studentId}/${action}/`,
       {
         method: "POST",
         headers: {
@@ -187,7 +187,7 @@ const handleApproveAll = async () => {
     for (const student of studentsData) {
       if (student.status !== "approved") {
         const res = await authFetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculty_events/${event_id}/approve-all-participants/`,
+          `${getBaseUrl()}/api/family/faculty_events/${event_id}/approve-all-participants/`,
           {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },

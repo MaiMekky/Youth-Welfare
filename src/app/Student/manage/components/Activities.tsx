@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import "../styles/Activities.css";
 import { Calendar, Users, Briefcase, MapPin } from "lucide-react";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 interface Activity {
   id: number;
   title: string;
@@ -153,8 +153,9 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
 
     const fetchFamilyId = async () => {
       try {
+        const baseUrl = getBaseUrl();
         const res = await authFetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/families/`,
+          `${baseUrl}/api/family/student/families/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -209,7 +210,8 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
       try {
         if (!token) return;
 
-        const response = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/family/departments/`, {
+        const baseUrl = getBaseUrl();
+        const response = await authFetch(`${baseUrl}/api/family/departments/`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -249,7 +251,8 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
         setLoading(true);
         setError(null);
 
-        const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/${selectedFamilyId}/event_requests/`;
+        const baseUrl = getBaseUrl();
+        const endpoint = `${baseUrl}/api/family/student/${selectedFamilyId}/event_requests/`;
 
         const response = await authFetch(endpoint, {
           method: 'GET',

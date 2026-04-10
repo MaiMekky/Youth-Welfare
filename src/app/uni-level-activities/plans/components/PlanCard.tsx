@@ -4,8 +4,8 @@ import React, { useMemo, useState } from "react";
 import styles from "../styles/PlanCard.module.css";
 import type { PlanItem } from "../page";
 import { Eye, CalendarDays, Building2, ClipboardList, Pencil, Download } from "lucide-react";
-import { authFetch } from "@/utils/globalFetch";
-const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+const API_URL = getBaseUrl();
 
 function fmt(iso: string) {
   if (!iso) return "—";

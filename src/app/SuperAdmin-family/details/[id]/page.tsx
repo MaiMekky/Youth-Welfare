@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Tabs from './Tabs';
 import styles from './deatails.module.css';
 import { useRouter, useParams } from 'next/navigation';
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 interface FamilyMember {
   student_id: string | number;
@@ -126,7 +126,7 @@ export default function FamilyDetailsPage() {
         const token = localStorage.getItem('access');
 
         const res = await authFetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/super_dept/${id}`,
+          `${getBaseUrl()}/api/family/super_dept/${id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

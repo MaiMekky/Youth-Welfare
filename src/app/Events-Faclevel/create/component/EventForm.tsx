@@ -5,10 +5,10 @@ import styles from "../CreateEvent.module.css";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowRight, Save } from "lucide-react";
 import Footer from "@/app/FacLevel/components/Footer";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 /** ================== API ================== */
-const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
+const API_URL = getBaseUrl();
 
 
 type ApiEventDetails = {

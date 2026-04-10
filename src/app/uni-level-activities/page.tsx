@@ -8,8 +8,8 @@ import type { StatItem } from "./component/StatsGrid";
 import { EventItem, ChipVariant } from "./component/EventCard";
 import { useRouter } from "next/navigation";
 import { Plus, CalendarX } from "lucide-react";
-import { authFetch } from "@/utils/globalFetch";
-const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+const API_URL = getBaseUrl();
 
 type ApiEvent = {
   event_id: number;

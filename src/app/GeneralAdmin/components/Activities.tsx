@@ -8,7 +8,7 @@ import {
   ChevronDown, Activity,
 } from "lucide-react";
 import "../Styles/Activities.css";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 interface ActivityItem {
   event_id: number;
@@ -55,7 +55,7 @@ type StatusFilter = "pending" | "accepted" | "rejected";
 const getToken = () =>
   typeof window !== "undefined" ? localStorage.getItem("access") : null;
 
-const BASE = process.env.NEXT_PUBLIC_BASE_URL;
+const BASE = getBaseUrl();
 
 function isPending(raw: string) {
   const k = raw?.trim();

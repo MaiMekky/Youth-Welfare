@@ -4,7 +4,7 @@
 import { useMemo, useState, useEffect } from "react";
 import styles from "../styles/EventManagment.module.css";
 import { useRouter } from "next/navigation";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 /* ══════════════════════════════════════════
    API TYPES
 ══════════════════════════════════════════ */
@@ -188,9 +188,10 @@ export default function EventsPage() {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
           "Content-Type": "application/json",
         };
+        const baseUrl = getBaseUrl();
         const [eventsRes, facultiesRes] = await Promise.all([
-          authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/event/get-events/`, { headers }),
-          authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculties/`, { headers }),
+          authFetch(`${baseUrl}/api/event/get-events/`, { headers }),
+          authFetch(`${baseUrl}/api/family/faculties/`, { headers }),
         ]);
         if (!eventsRes.ok) {
           const body = await eventsRes.json().catch(() => ({}));

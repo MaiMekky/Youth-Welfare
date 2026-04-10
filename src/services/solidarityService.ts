@@ -1,6 +1,7 @@
 import axios from "axios";
+import { getBaseUrl } from "@/utils/globalFetch";
 
-const API_URL = `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/applications/`;
+const API_URL = `${getBaseUrl()}/api/solidarity/faculty/applications/`;
 
 export const getFacultyApplications = async () => {
   try {

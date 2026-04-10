@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 function GoogleCallbackContent() {
   const router = useRouter();
@@ -29,7 +29,7 @@ function GoogleCallbackContent() {
           return;
         }
 
-        const loginRes = await authFetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/google/login/`, {
+        const loginRes = await authFetch(`${getBaseUrl()}/api/auth/google/login/`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ code })

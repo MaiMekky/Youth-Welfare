@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import CreatePlanModal from "./components/CreatePlanModal";
 import Footer from "@/app/FacLevel/components/Footer";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 type ApiPlan = {
   plan_id: number;
@@ -34,7 +34,7 @@ export type PlanItem = {
   dept?: number;
 };
 
-const API_URL = `${process.env.NEXT_PUBLIC_BASE_URL}/api`;
+const API_URL = `${getBaseUrl()}/api`;
 
 export default function Page() {
   const router = useRouter();

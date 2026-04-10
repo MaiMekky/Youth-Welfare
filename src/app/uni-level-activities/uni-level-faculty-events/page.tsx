@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import styles from "./FacEvents.module.css";
 import { CalendarDays, Building2, ClipboardList, Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 type ApiEvent = {
   event_id: number;
   title: string;
@@ -46,8 +46,9 @@ export default function Page() {
       const token = localStorage.getItem("access");
       if (!token) return;
 
+      const baseUrl = getBaseUrl();
       const res = await authFetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculties/`,
+        `${baseUrl}/api/family/faculties/`,
         {
           method: "GET",
           headers: {
@@ -90,8 +91,9 @@ export default function Page() {
         return;
       }
 
+      const baseUrl = getBaseUrl();
       const res = await authFetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/event/get-events/faculty/`,
+        `${baseUrl}/api/event/get-events/faculty/`,
         {
           method: "GET",
           headers: {

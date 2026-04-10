@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./RequestDetails.module.css";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 /*
   What I implemented:
@@ -118,7 +118,8 @@ export default function RequestDetailsPage() {
 
   const fetchApplication = async () => {
     try {
-      const res = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/${id}/applications/`);
+      const baseUrl = getBaseUrl();
+      const res = await authFetch(`${baseUrl}/api/solidarity/faculty/${id}/applications/`);
       if (!res.ok) throw new Error("API_ERROR");
       const data = await res.json();
       let item: Application | null = null;
@@ -139,7 +140,8 @@ export default function RequestDetailsPage() {
 
   const fetchDocuments = async () => {
     try {
-      const res = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/${id}/documents/`);
+      const baseUrl = getBaseUrl();
+      const res = await authFetch(`${baseUrl}/api/solidarity/faculty/${id}/documents/`);
       if (!res.ok) throw new Error("DOCS_ERROR");
       const data = await res.json();
       setDocuments(Array.isArray(data) ? data : data ? [data] : []);
@@ -152,7 +154,8 @@ export default function RequestDetailsPage() {
 
   const fetchDiscountValues = async () => {
     try {
-      const res = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/faculty/discounts/`);
+      const baseUrl = getBaseUrl();
+      const res = await authFetch(`${baseUrl}/api/solidarity/faculty/faculty/discounts/`);
       if (!res.ok) throw new Error("DISCOUNT_ERROR");
       const data = await res.json();
       setAvailableDiscounts(
@@ -185,10 +188,11 @@ export default function RequestDetailsPage() {
     if (!id || actionLoading) return;
     setActionLoading(true);
     const prevApp = application;
+    const baseUrl = getBaseUrl();
     setApplication((prev) => ({ ...(prev ?? {}), req_status: optimisticStatus }));
     try {
       const res = await authFetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/${id}/${suffix}/`,
+        `${baseUrl}/api/solidarity/faculty/${id}/${suffix}/`,
         { method: "POST" }
       );
       if (!res.ok) throw new Error("ACTION_ERROR");
@@ -231,9 +235,10 @@ export default function RequestDetailsPage() {
   const handleInitialApproval = async () => {
     if (!application?.solidarity_id || actionLoading) return;
     setActionLoading(true);
+    const baseUrl = getBaseUrl();
     try {
       const response = await authFetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/${application.solidarity_id}/pre_approve/`,
+        `${baseUrl}/api/solidarity/faculty/${application.solidarity_id}/pre_approve/`,
         { method: "POST" }
       );
       if (!response.ok) throw new Error("PRE_APPROVE_ERROR");
@@ -309,6 +314,7 @@ export default function RequestDetailsPage() {
 
     setActionLoading(true);
     const prevApp = application;
+    const baseUrl = getBaseUrl();
     const optimisticTotal = payloadDiscounts.reduce(
       (sum: number, d: Record<string, unknown>) => sum + Number((d.discount_value as string | number) || 0),
       0
@@ -317,7 +323,7 @@ export default function RequestDetailsPage() {
 
     try {
       const res = await authFetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/${application?.solidarity_id}/assign_discount/`,
+        `${baseUrl}/api/solidarity/faculty/${application?.solidarity_id}/assign_discount/`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -353,7 +359,8 @@ export default function RequestDetailsPage() {
 
   const openDocument = async (docId: number) => {
     try {
-      const res = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/files/solidarity/${docId}/download/`);
+      const baseUrl = getBaseUrl();
+      const res = await authFetch(`${baseUrl}/api/files/solidarity/${docId}/download/`);
       if (!res.ok) throw new Error("FILE_ERROR");
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);

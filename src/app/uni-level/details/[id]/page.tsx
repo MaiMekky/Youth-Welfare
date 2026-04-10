@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import "./ApplicationDetails.css";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 interface StudentDetail {
   solidarity_id?: string | number;
@@ -46,8 +46,9 @@ const fetchData = async () => {
 
   try {
     // ====== جلب بيانات الطلب ======
+    const baseUrl = getBaseUrl();
     const appRes = await authFetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/super_dept/${id}/applications/`
+      `${baseUrl}/api/solidarity/super_dept/${id}/applications/`
     );
 
     if (!appRes.ok) throw new Error("APPLICATION_ERROR");
@@ -57,7 +58,7 @@ const fetchData = async () => {
 
     // ====== جلب المستندات ======
     const docsRes = await authFetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/super_dept/${id}/documents/`
+      `${baseUrl}/api/solidarity/super_dept/${id}/documents/`
     );
 
     if (!docsRes.ok) throw new Error("DOCS_ERROR");
@@ -75,8 +76,9 @@ const fetchData = async () => {
     fetchData();
   }, [id]);const openDocument = async (docId: number) => {
   try {
+    const baseUrl = getBaseUrl();
     const res = await authFetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/files/solidarity/${docId}/download/`
+      `${baseUrl}/api/files/solidarity/${docId}/download/`
     );
 
     if (!res.ok) throw new Error("FILE_ERROR");

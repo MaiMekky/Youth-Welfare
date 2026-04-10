@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import styles from "../Styles/RequestsTable.module.css";
 import { FileText, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 interface RequestItem {
   id: string | number;
@@ -32,7 +32,7 @@ export const refreshToken = async (): Promise<string | null> => {
   const refresh = getRefreshToken();
   if (!refresh) return null;
   try {
-    const res = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/refresh/`, {
+    const res = await authFetch(`${getBaseUrl()}/api/auth/refresh/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh }),
@@ -52,7 +52,7 @@ export const refreshToken = async (): Promise<string | null> => {
 
 const fetchApplications = async () => {
   const res = await authFetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/applications/`,
+    `${getBaseUrl()}/api/solidarity/faculty/applications/`,
     { method: "GET" }
   );
   if (!res.ok) throw new Error("API_ERROR");

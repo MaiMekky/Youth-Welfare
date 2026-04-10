@@ -1,8 +1,9 @@
 import axios from "axios";
 import { getAccessToken, refreshToken, clearTokens } from "./tokenService";
+import { getBaseUrl } from "@/utils/globalFetch";
 
 const api = axios.create({
-  baseURL: `${process.env.NEXT_PUBLIC_BASE_URL}/api`,
+  baseURL: `${getBaseUrl()}/api`,
   withCredentials: true,
 });
 
@@ -47,3 +48,4 @@ api.interceptors.response.use(
 );
 
 export default api;
+

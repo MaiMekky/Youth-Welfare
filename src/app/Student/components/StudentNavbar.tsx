@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import logo from "../../assets/capital-uni-logo.png";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 type NavItem = {
   key: string;
@@ -82,7 +83,9 @@ const StudentNavbar: React.FC = () => {
 
     const checkRole = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/families/`, {
+        const baseUrl = getBaseUrl();
+        const res = await authFetch(`${baseUrl}/api/family/student/families/`, {
+
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) return;

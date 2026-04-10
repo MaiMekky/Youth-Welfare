@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import styles from "../styles/Activities.module.css";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 interface ActivityCardProps {
   eventId: number;
@@ -49,7 +49,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
 
     try {
       const res = await authFetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculty_events/${eventId}/${action}/`,
+        `${getBaseUrl()}/api/family/faculty_events/${eventId}/${action}/`,
         {
           method: "POST",
           headers: {
@@ -213,3 +213,4 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
 };
 
 export default ActivityCard;
+

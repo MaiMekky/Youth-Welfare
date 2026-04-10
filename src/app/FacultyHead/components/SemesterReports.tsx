@@ -6,7 +6,7 @@ import {
   Layers, BookOpen, Hash,
 } from "lucide-react";
 import styles from "../Styles/SemesterReports.module.css";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -26,7 +26,7 @@ interface Plan {
 const getToken = () =>
   typeof window !== "undefined" ? localStorage.getItem("access") : null;
 
-const BASE = process.env.NEXT_PUBLIC_BASE_URL;
+const BASE = getBaseUrl();
 
 function fmt(d?: string) {
   if (!d) return "—";

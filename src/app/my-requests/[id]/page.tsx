@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import styles from "./requestDetails.module.css";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 export default function RequestDetailsPage() {
   const { id } = useParams();
@@ -20,7 +20,7 @@ export default function RequestDetailsPage() {
       if (!token) return;
 
       const res = await authFetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculties/`,
+        `${getBaseUrl()}/api/family/faculties/`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -42,7 +42,7 @@ export default function RequestDetailsPage() {
       const token = localStorage.getItem("access");
 
       const response = await authFetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/student/${id}/detail/`,
+        `${getBaseUrl()}/api/solidarity/student/${id}/detail/`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -70,7 +70,7 @@ export default function RequestDetailsPage() {
       if (!token) return;
 
       const response = await authFetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/files/solidarity/${docId}/download/`,
+        `${getBaseUrl()}/api/files/solidarity/${docId}/download/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from '@/app/CreateAdmins/access-privileges.module.css';
 import { useSearchParams } from 'next/navigation';
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 function AddUserContent() {
   const router = useRouter();
@@ -49,10 +49,10 @@ function AddUserContent() {
         const token = localStorage.getItem('access');
 
         const [facultiesRes, departmentsRes] = await Promise.all([
-          authFetch(`${process.env.NEXT_PUBLIC_API_URL}/api/family/faculties/`, {
+          authFetch(`${getBaseUrl()}/api/family/faculties/`, {
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
           }),
-          authFetch(`${process.env.NEXT_PUBLIC_API_URL}/api/family/departments/`, {
+          authFetch(`${getBaseUrl()}/api/family/departments/`, {
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
           }),
         ]);
@@ -75,7 +75,7 @@ function AddUserContent() {
   useEffect(() => {
     if (isEdit && faculties.length > 0) {
       const token = localStorage.getItem('access');
-      authFetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/admin_management/${admin_id}/`, {
+      authFetch(`${getBaseUrl()}/api/auth/admin_management/${admin_id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       })
         .then(res => res.json())
@@ -147,7 +147,7 @@ function AddUserContent() {
       const token = localStorage.getItem('access');
       if (!token) throw new Error('User not authenticated');
 
-      const url    = isEdit ? `${process.env.NEXT_PUBLIC_API_URL}/api/auth/admin_management/${admin_id}/` : `${process.env.NEXT_PUBLIC_API_URL}/api/auth/admin_management/`;
+      const url    = isEdit ? `${getBaseUrl()}/api/auth/admin_management/${admin_id}/` : `${getBaseUrl()}/api/auth/admin_management/`;
       const method = isEdit ? 'PATCH' : 'POST';
 
       const facultyId   = formData.faculty ? Number(formData.faculty) : null;

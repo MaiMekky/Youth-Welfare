@@ -3,9 +3,9 @@
 import React, { useMemo, useState } from "react";
 import styles from "../styles/EventsGrid.module.css";
 import EventCard, { EventItem } from "./EventCard";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
-const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
+const API_URL = getBaseUrl();
 
 function getAccessToken(): string | null {
   return (

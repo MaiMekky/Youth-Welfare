@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/mainpage.css';
 import Toast from './Toast';
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 interface ApiFamily {
   family_id: number;
   name: string;
@@ -109,7 +109,7 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
     if (!token) throw new Error('غير مصرح');
 
     const res = await authFetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/families/`,
+      `${getBaseUrl()}/api/family/student/families/`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -128,7 +128,7 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
     if (!token) throw new Error('غير مصرح');
 
     const res = await authFetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/available/`,
+      `${getBaseUrl()}/api/family/student/available/`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -148,7 +148,7 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
       setJoiningId(familyId);
 
       const res = await authFetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/${familyId}/join/`,
+        `${getBaseUrl()}/api/family/student/${familyId}/join/`,
         {
           method: 'POST',
           headers: {

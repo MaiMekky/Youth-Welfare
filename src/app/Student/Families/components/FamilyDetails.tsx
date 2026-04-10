@@ -6,7 +6,7 @@ import {
   BookOpen, DollarSign, Award, AlertCircle, Info,
 } from "lucide-react";
 import "../styles/FamilyDetails.css";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -60,7 +60,7 @@ type ActiveTab = "details" | "activities" | "posts";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const BASE = process.env.NEXT_PUBLIC_BASE_URL;
+const BASE = getBaseUrl();
 
 const getToken = () =>
   typeof window !== "undefined" ? localStorage.getItem("access") : null;
@@ -585,3 +585,4 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
 };
 
 export default FamilyDetails;
+

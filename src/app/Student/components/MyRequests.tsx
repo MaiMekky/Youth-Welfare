@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Eye, CheckCircle, X, AlertTriangle } from "lucide-react";
 import "../styles/myRequests.css";
 import { useRouter } from "next/navigation";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 interface Request {
   id: string;
@@ -81,7 +81,7 @@ export default function MyRequests({ onStatusesLoaded, showAlert }: MyRequestsPr
       }
 
       const response = await authFetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/student/status/`,
+        `${getBaseUrl()}/api/solidarity/student/status/`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 

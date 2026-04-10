@@ -4,7 +4,7 @@ import styles from "./FacultyReport.module.css";
 import { ChevronLeft, ChevronRight, Search, Wallet, Users, FileText } from "lucide-react";
 import Footer from "../FacLevel/components/Footer";
 
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 interface StudentType {
   name: string;
@@ -35,7 +35,7 @@ useEffect(() => {
 const fetchData = async () => {
   try {
     const res = await authFetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/faculty_approved/`
+      `${getBaseUrl()}/api/solidarity/faculty/faculty_approved/`
     );
 
     if (!res.ok) throw new Error("API_ERROR");
@@ -70,7 +70,7 @@ const fetchData = async () => {
 const handleExport = async () => {
   try {
 const res = await authFetch(
-  `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/faculty/export/?acd_year=${academicYear}`
+  `${getBaseUrl()}/api/solidarity/faculty/export/?acd_year=${academicYear}`
 );
 
 if (!res.ok) throw new Error("EXPORT_ERROR");

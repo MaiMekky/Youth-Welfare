@@ -13,9 +13,9 @@ import {
   Lightbulb,
   Briefcase,
 } from "lucide-react";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
-const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
+const API_URL = getBaseUrl();
 
 type Mode = "create" | "convert";
 

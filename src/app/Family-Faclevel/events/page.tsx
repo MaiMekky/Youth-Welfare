@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import Footer from "@/app/FacLevel/components/Footer";
 import ActivityCard from "./components/ActivityCard";
 import styles from "./styles/Activities.module.css";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 interface Event {
   event_id: number;
@@ -25,7 +25,7 @@ export default function ActivitiesPage() {
       try {
         const token = localStorage.getItem("access");
         const res = await authFetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculty_events/pending/`,
+          `${getBaseUrl()}/api/family/faculty_events/pending/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

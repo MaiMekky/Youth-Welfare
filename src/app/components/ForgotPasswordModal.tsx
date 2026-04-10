@@ -3,9 +3,9 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { X, Mail, Lock, ArrowRight } from "lucide-react";
 import styles from "../Styles/components/ForgotPasswordModal.module.css";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
-const API_BASE = process.env.NEXT_PUBLIC_BASE_URL;
+const API_BASE = getBaseUrl();
 
 type Step = "email" | "confirm" | "success";
 

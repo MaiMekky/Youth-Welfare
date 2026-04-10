@@ -6,7 +6,7 @@ import StatsGrid from "././components/StatsGrid";
 import Tabs from "././components/Tabs";
 import Filters from "././components/Filters";
 import FamiliesGrid from "././components/FamiliesGrid";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 export default function Page() {
   // ✅ Always start with "central" on SSR, then sync from localStorage after mount
@@ -146,8 +146,9 @@ export default function Page() {
     const fetchFaculties = async () => {
       try {
         const token = localStorage.getItem("access");
+        const baseUrl = getBaseUrl();
         const res = await authFetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculties/`,
+          `${baseUrl}/api/family/faculties/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -175,6 +176,7 @@ export default function Page() {
       setLoadingFamilies(true);
       try {
         const token = localStorage.getItem("access");
+        const baseUrl = getBaseUrl();
         const params = new URLSearchParams();
 
         if (!isNaN(selectedFaculty) && selectedFaculty !== -1) {
@@ -182,7 +184,7 @@ export default function Page() {
         }
 
         const res = await authFetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/super_dept/?${params.toString()}`,
+          `${baseUrl}/api/family/super_dept/?${params.toString()}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

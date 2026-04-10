@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import styles from './details.module.css';
 import { useParams, useRouter } from "next/navigation";
 import Footer from "@/app/FacLevel/components/Footer";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 interface FamilyData {
   name: string;
@@ -77,7 +77,7 @@ useEffect(() => {
 
       // Fetch family details
       const resFamily = await authFetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculty/${id}/details/`,
+        `${getBaseUrl()}/api/family/faculty/${id}/details/`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (!resFamily.ok) throw new Error("فشل جلب تفاصيل الأسرة");
@@ -104,7 +104,7 @@ useEffect(() => {
 
       // Fetch activities
       const resActivities = await authFetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculty_events/by-family/?family_id=${id}`,
+        `${getBaseUrl()}/api/family/faculty_events/by-family/?family_id=${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (!resActivities.ok) throw new Error("فشل جلب الأنشطة");
@@ -148,7 +148,7 @@ useEffect(() => {
     const token = localStorage.getItem("access");
 
     const res = await authFetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculty_members/families/${id}/members/${memberId}/`,
+      `${getBaseUrl()}/api/family/faculty_members/families/${id}/members/${memberId}/`,
       {
         method: "DELETE",
         headers: {
@@ -192,7 +192,7 @@ const handleAddMember = async () => {
     const token = localStorage.getItem("access");
 
     const res = await authFetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculty_members/families/${id}/add-member/${nid}/`,
+      `${getBaseUrl()}/api/family/faculty_members/families/${id}/add-member/${nid}/`,
       {
         method: "POST",
         headers: {
@@ -280,7 +280,7 @@ const handleExport = async () => {
     }
 
     const res = await authFetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculty/${id}/export/`,
+      `${getBaseUrl()}/api/family/faculty/${id}/export/`,
       {
         method: "GET",
         headers: {

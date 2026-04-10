@@ -6,7 +6,7 @@ import styles from './deatails.module.css';
 import { useRouter, useParams } from 'next/navigation';
 type TabId = 'members' | 'events';
 import { useSearchParams } from "next/navigation";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 interface Tab {
   id: TabId;
@@ -219,7 +219,8 @@ export default function FamilyDetailsPage() {
       try {
         setLoading(true);
         const token = localStorage.getItem('access');
-        const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/super_dept/${familyId}/`;
+        const baseUrl = getBaseUrl();
+        const url = `${baseUrl}/api/family/super_dept/${familyId}/`;
 
         console.log('🔍 Fetching Family Data from:', url);
         console.log('🔑 Token:', token ? 'exists' : 'missing');
@@ -262,8 +263,9 @@ export default function FamilyDetailsPage() {
   const handleApproveMember = async (studentId: number) => {
     try {
       const token = localStorage.getItem('access');
+      const baseUrl = getBaseUrl();
       const response = await authFetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/super_dept/${familyId}/members/${studentId}/approve/`,
+        `${baseUrl}/api/family/super_dept/${familyId}/members/${studentId}/approve/`,
         {
           method: 'PATCH',
           headers: {
@@ -292,8 +294,9 @@ export default function FamilyDetailsPage() {
   const handleRejectMember = async (studentId: number) => {
     try {
       const token = localStorage.getItem('access');
+      const baseUrl = getBaseUrl();
       const response = await authFetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/super_dept/${familyId}/members/${studentId}/reject/`,
+        `${baseUrl}/api/family/super_dept/${familyId}/members/${studentId}/reject/`,
         {
           method: 'PATCH',
           headers: {

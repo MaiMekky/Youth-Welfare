@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
 import './MyEvents.css';
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 /* ══════════════════════════════════════════
    TYPES
@@ -186,7 +186,8 @@ export default function MyEvents() {
     const load = async () => {
       try {
         setLoading(true);
-        const res = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/event/student-events/joined/`, {
+        const baseUrl = getBaseUrl();
+        const res = await authFetch(`${baseUrl}/api/event/student-events/joined/`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         if (!res.ok) throw new Error('فشل تحميل الفعاليات');
@@ -206,7 +207,8 @@ export default function MyEvents() {
   const fetchResult = useCallback(async (event: Event) => {
     setResultModal({ event, result: null, loading: true });
     try {
-      const res = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/event/student-events/${event.id}/my-result/`, {
+      const baseUrl = getBaseUrl();
+      const res = await authFetch(`${baseUrl}/api/event/student-events/${event.id}/my-result/`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!res.ok) throw new Error('فشل تحميل النتيجة');

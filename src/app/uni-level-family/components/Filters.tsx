@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import styles from "../Styles/Filters.module.css";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 interface FiltersProps {
   selectedFaculty: string; // Changed to string for faculty name
   setSelectedFaculty: (v: string) => void;
@@ -24,7 +24,8 @@ export default function Filters({
       setFacultiesLoading(true);
       try {
         const token = localStorage.getItem("access");
-        const response = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculties/`, {
+        const baseUrl = getBaseUrl();
+        const response = await authFetch(`${baseUrl}/api/family/faculties/`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import './Events.css';
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 /* ══════════════════════════════════════════
    TYPES
@@ -152,7 +152,7 @@ export default function Events() {
     const load = async () => {
       try {
         setLoading(true);
-        const res = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/event/student-events/available/`, {
+        const res = await authFetch(`${getBaseUrl()}/api/event/student-events/available/`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         if (!res.ok) throw new Error('فشل تحميل الفعاليات');
@@ -174,7 +174,7 @@ export default function Events() {
     if (!token) { showToast('يرجى تسجيل الدخول أولاً', false); return; }
     try {
       setJoiningId(id);
-      const res = await authFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/event/student-events/${id}/join/`, {
+      const res = await authFetch(`${getBaseUrl()}/api/event/student-events/${id}/join/`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       });

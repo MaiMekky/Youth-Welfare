@@ -22,8 +22,8 @@ import {
   Trash2,
   FileText,
 } from "lucide-react";
-import { authFetch } from "@/utils/globalFetch";
-const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+const API_URL = getBaseUrl();
 
 function getAccessToken(): string | null {
   return (

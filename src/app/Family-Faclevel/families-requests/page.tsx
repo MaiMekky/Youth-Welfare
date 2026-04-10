@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Footer from "@/app/FacLevel/components/Footer";
 import FamRequests from "../families-requests/components/famRequests";
 import styles from "../families-requests/styles/famRequests.module.css";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 export default function FamilyRequestsPage() {
   const [requests, setRequests] = useState<Record<string, unknown>[]>([]);
@@ -16,7 +16,7 @@ export default function FamilyRequestsPage() {
         const token = localStorage.getItem("access");
 
         const res = await authFetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/faculty/pending_requests/`,
+          `${getBaseUrl()}/api/family/faculty/pending_requests/`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -71,3 +71,4 @@ export default function FamilyRequestsPage() {
     </div>
   );
 }
+

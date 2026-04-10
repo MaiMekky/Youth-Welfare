@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "../styles/TrackRequest.module.css";
 import { ArrowRight, Building2, Users, Calendar, Clock, CheckCircle, XCircle, AlertCircle, FileSearch } from "lucide-react";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 interface FamilyRequest {
   family_id: number;
   name: string;
@@ -34,8 +34,9 @@ const TrackRequest: React.FC<TrackRequestProps> = ({ onBack }) => {
     const fetchRequests = async () => {
       try {
         const token = localStorage.getItem("access");
+        const baseUrl = getBaseUrl();
         const res = await authFetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/family/student/family_creation_request/`,
+          `${baseUrl}/api/family/student/family_creation_request/`,
           { headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` } }
         );
         if (!res.ok) throw new Error("فشل تحميل طلبات الأسر");

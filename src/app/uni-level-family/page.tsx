@@ -3,13 +3,13 @@
 import React, { useMemo, useState, useEffect, Suspense } from "react";
 import { Users, Leaf, Star } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import styles from "./Styles/page.module.css";
 import Tabs from "./components/Tabs";
 import FamiliesGrid from "./components/FamiliesGrid";
 import Filters from "./components/Filters";
 
-const API_URL = `${process.env.NEXT_PUBLIC_BASE_URL}/api`;
+const API_URL = `${getBaseUrl()}/api`;
 const TAB_STORAGE_KEY = "families_active_tab";
 
 type TabType = "central" | "quality" | "eco";

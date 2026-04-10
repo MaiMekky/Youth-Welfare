@@ -4,7 +4,7 @@ import "../styles/ApplicationsTable.css";
 import { useRouter } from "next/navigation";
 import FiltersBar from "./FiltersBar";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { authFetch } from "@/utils/globalFetch";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 interface Application {
   id: number;
   requestNumber: string;
@@ -103,7 +103,8 @@ export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (ap
   })
   .join("&");
 
-      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/solidarity/super_dept/all_applications/${query ? `?${query}` : ""}`;
+      const baseUrl = getBaseUrl();
+      const url = `${baseUrl}/api/solidarity/super_dept/all_applications/${query ? `?${query}` : ""}`;
 
       const res = await authFetch(url, { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error("فشل في جلب البيانات");

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Eye, CheckCircle, X, AlertTriangle } from "lucide-react";
 import "../styles/myRequests.css";
 import { useRouter } from "next/navigation";
@@ -32,23 +32,23 @@ export default function MyRequests({ onStatusesLoaded, showAlert }: MyRequestsPr
   const [activeTab, setActiveTab] = useState("all");
   const router = useRouter();
 
-  const mapStatus = (status: string) => {
+  const mapStatus = useCallback((status: string) => {
     const st = status.trim();
     if (["pending", "منتظر"].includes(st)) return "pending";
     if (["under-review", "موافقة مبدئية"].includes(st)) return "under-review";
     if (["approved", "مقبول"].includes(st)) return "approved";
     if (["rejected", "مرفوض"].includes(st)) return "rejected";
     return "pending";
-  };
+  }, []);
 
-  const statusToStep = (status: string) => {
+  const statusToStep = useCallback((status: string) => {
     const s = mapStatus(status);
     if (s === "pending") return 1;
     if (s === "under-review") return 2;
     if (s === "approved") return 3;
     if (s === "rejected") return 3;
     return 1;
-  };
+  }, [mapStatus]);
 
   const getStatusText = (status: string) => {
     const s = mapStatus(status);
@@ -70,7 +70,7 @@ export default function MyRequests({ onStatusesLoaded, showAlert }: MyRequestsPr
   const getProgressPercentage = (current: number, total: number) =>
     ((current - 1) / (total - 1)) * 100;
 
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -118,12 +118,11 @@ export default function MyRequests({ onStatusesLoaded, showAlert }: MyRequestsPr
     } finally {
       setLoading(false);
     }
-  };
+  }, [mapStatus, statusToStep]);
 
   useEffect(() => {
     fetchRequests();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchRequests]);
 
   useEffect(() => {
     if (activeTab === "all") {
@@ -131,11 +130,17 @@ export default function MyRequests({ onStatusesLoaded, showAlert }: MyRequestsPr
     } else {
       setFilteredRequests(requests.filter((r) => mapStatus(r.status) === activeTab));
     }
-  }, [activeTab, requests]);
+  }, [activeTab, requests, mapStatus]);
 
+  const lastStatusesRef = useRef<string>("");
   useEffect(() => {
     const statuses = requests.map((r) => r.status);
-    onStatusesLoaded(statuses);
+    const statusesString = JSON.stringify(statuses);
+
+    if (statusesString !== lastStatusesRef.current) {
+      onStatusesLoaded(statuses);
+      lastStatusesRef.current = statusesString;
+    }
   }, [requests, onStatusesLoaded]);
 
   const handleViewDetails = (id: string) => router.push(`/my-requests/${id}`);

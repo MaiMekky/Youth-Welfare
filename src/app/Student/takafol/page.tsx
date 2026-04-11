@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "../styles/applyForm.css";
 import HeaderCard from "../components/HeaderCard";
 import ApplyForm from "../components/ApplyForm";
@@ -19,6 +19,10 @@ export default function TakafolPage() {
     setShowAlert(hasUnderReview);
   }, [requestsStatus]);
 
+  const handleStatusesLoaded = useCallback((statuses: string[]) => {
+    setRequestsStatus(statuses);
+  }, []);
+
   const navigateToRequests = () => {
     setActiveTab("myRequests");
     setShowAlert(true);
@@ -37,7 +41,7 @@ export default function TakafolPage() {
         return (
           <MyRequests
             showAlert={showAlert}
-            onStatusesLoaded={(statuses: string[]) => setRequestsStatus(statuses)}
+            onStatusesLoaded={handleStatusesLoaded}
           />
         );
       default:

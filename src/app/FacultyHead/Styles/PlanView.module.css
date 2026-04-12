@@ -42,7 +42,7 @@
   border: none;
   border-radius: 8px;
   color: #6B7280;
-  font-family: 'Tajawal', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -139,7 +139,7 @@
   padding: 8px 13px;
   border: 1.5px solid #E5E7EB;
   border-radius: 9px;
-  font-family: 'Tajawal', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 13px;
   outline: none;
   width: 210px;
@@ -158,7 +158,7 @@
   border: 1.5px solid #E5E7EB;
   background: #fff;
   cursor: pointer;
-  font-family: 'Tajawal', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 13px; font-weight: 600;
   color: #374151;
   transition: all 0.2s;
@@ -258,7 +258,7 @@
   background: linear-gradient(135deg, #1E3A5F, #2D5F8A);
   border: none; border-radius: 8px;
   color: #fff;
-  font-family: 'Tajawal', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 12.5px; font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -279,7 +279,7 @@
   background: linear-gradient(135deg, #C49B3A, #A67F2C);
   border: none; border-radius: 8px;
   color: #fff;
-  font-family: 'Tajawal', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 12.5px; font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -334,7 +334,7 @@
   transform: translateX(-50%);
   background: #1E293B; color: #fff;
   padding: 11px 22px; border-radius: 9px;
-  font-family: 'Tajawal', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 13.5px; font-weight: 600;
   box-shadow: 0 8px 24px rgba(0,0,0,0.2);
   z-index: 2000;
@@ -406,14 +406,14 @@
 
 .modalTitle {
   margin: 0;
-  font-family: 'Tajawal', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 17px; font-weight: 800;
   color: #fff;
 }
 
 .modalSubtitle {
   margin: 3px 0 0;
-  font-family: 'Tajawal', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 12px; font-weight: 500;
   color: rgba(255,255,255,0.65);
 }
@@ -524,7 +524,7 @@
 
 .eventsSectionTitle {
   margin: 0;
-  font-family: 'Tajawal', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 15px; font-weight: 800;
   color: #1E3A5F;
   display: flex; align-items: center; gap: 10px;

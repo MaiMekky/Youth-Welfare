@@ -43,10 +43,24 @@ export async function authFetch(
   });
 
   if (res.status === 401) {
-    const tabOpenedAt      = Number(sessionStorage.getItem("tabOpenedAt") || 0);
+    let data: any = null;
+
+    try {
+      data = await res.clone().json();
+    } catch {
+      // ignore if no JSON
+    }
+
+    // ❌ Case 1: Wrong login (DO NOTHING here)
+    if (data?.detail === "Invalid credentials") {
+      return res; // let login page handle it
+    }
+
+    // ✅ Case 2: Real session expired
+    const tabOpenedAt = Number(sessionStorage.getItem("tabOpenedAt") || 0);
     const secondsSinceOpen = (Date.now() - tabOpenedAt) / 1000;
 
-    // Clear all auth data
+    // Clear auth
     localStorage.removeItem("access");
     localStorage.removeItem("refresh");
 

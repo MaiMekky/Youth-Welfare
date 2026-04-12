@@ -32,16 +32,27 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
   }, []);
 
   const router = useRouter();
-  const handleLogout = async () => {
-    // Clear localStorage
-    localStorage.clear();
+const handleLogout = async () => {
+  console.log("=== LOGOUT START ===");
+  console.log("Cookies BEFORE:", document.cookie);
+  
+  localStorage.clear();
+  console.log("localStorage cleared");
 
-    // Let the server clear the HttpOnly cookies
-    await fetch("/api/logout", { method: "POST" });
+  try {
+    const res = await fetch("/api/logout", { method: "POST" });
+    console.log("API response status:", res.status);
+    const data = await res.json();
+    console.log("API response data:", data);
+  } catch (err) {
+    console.error("API call failed:", err);
+  }
 
-    // Hard redirect — bypasses Next.js router cache
-    window.location.href = "/";
-  };
+  console.log("Cookies AFTER:", document.cookie);
+  console.log("=== REDIRECTING ===");
+  
+  window.location.href = "/";
+};
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node))

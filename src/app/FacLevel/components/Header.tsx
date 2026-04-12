@@ -52,13 +52,24 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
   }, []);
 
   const handleLogout = async () => {
-    // Clear localStorage
+    console.log("=== LOGOUT START ===");
+    console.log("Cookies BEFORE:", document.cookie);
+    
     localStorage.clear();
+    console.log("localStorage cleared");
 
-    // Let the server clear the HttpOnly cookies
-    await fetch("/api/logout", { method: "POST" });
+    try {
+      const res = await fetch("/api/logout", { method: "POST" });
+      console.log("API response status:", res.status);
+      const data = await res.json();
+      console.log("API response data:", data);
+    } catch (err) {
+      console.error("API call failed:", err);
+    }
 
-    // Hard redirect — bypasses Next.js router cache
+    console.log("Cookies AFTER:", document.cookie);
+    console.log("=== REDIRECTING ===");
+    
     window.location.href = "/";
   };
 

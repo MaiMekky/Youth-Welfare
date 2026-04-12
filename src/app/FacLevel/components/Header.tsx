@@ -51,14 +51,15 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
     setShowActivity(names.some((n) => ACTIVITY_NAMES.has(n)));
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // Clear localStorage
     localStorage.clear();
 
-    ["access","refresh","user_type","roleKey","role"].forEach((k) => {
-      document.cookie = `${k}=; path=/; max-age=0`;
-    });
+    // Let the server clear the HttpOnly cookies
+    await fetch("/api/logout", { method: "POST" });
 
-    router.replace("/");
+    // Hard redirect — bypasses Next.js router cache
+    window.location.href = "/";
   };
 
   const nav = (path: string) => { router.push(path); setIsMenuOpen(false); };

@@ -22,14 +22,15 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
   }, []);
 
   const router = useRouter();
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // Clear localStorage
     localStorage.clear();
 
-    ["access","refresh","user_type","roleKey","role"].forEach((k) => {
-      document.cookie = `${k}=; path=/; max-age=0`;
-    });
+    // Let the server clear the HttpOnly cookies
+    await fetch("/api/logout", { method: "POST" });
 
-    router.replace("/");
+    // Hard redirect — bypasses Next.js router cache
+    window.location.href = "/";
   };
 
   return (

@@ -125,27 +125,20 @@ const StudentNavbar: React.FC = () => {
     : baseNavItems;
 
 const handleLogout = async () => {
-  console.log("=== LOGOUT START ===");
-  console.log("Cookies BEFORE:", document.cookie);
-  
   localStorage.clear();
-  console.log("localStorage cleared");
 
   try {
-    const res = await fetch("/api/logout", { method: "POST" });
-    console.log("API response status:", res.status);
-    const data = await res.json();
-    console.log("API response data:", data);
+    await fetch("/api/logout", {
+      method: "POST",
+      credentials: "include", // ← ensures cookies are sent/received
+    });
   } catch (err) {
-    console.error("API call failed:", err);
+    console.error("Logout API failed:", err);
   }
 
-  console.log("Cookies AFTER:", document.cookie);
-  console.log("=== REDIRECTING ===");
-  
-  window.location.href = "/";
+  // Use ?logout=1 to bypass the middleware auto-redirect
+  window.location.replace("/?logout=1");
 };
-
   const isActive = (href: string) =>
     pathname === href || pathname?.startsWith(href + "/");
 

@@ -38,7 +38,9 @@ export default function AccessPrivileges() {
     R: styles.permissionR,
     C: styles.permissionC,
   };
-
+  useEffect(() => {
+  window.scrollTo(0, 0);
+}, []);
   useEffect(() => {
     const fetchUsers = async () => {
       try {

@@ -262,7 +262,7 @@ const HeroSection: React.FC = () => {
         /* ── Mobile ── */
         @media (max-width: 768px) {
           .hero-overlay {
-            padding-top: clamp(6rem, 18vw, 8rem);
+            padding-top: clamp(12rem, 22vw, 12rem);
             justify-content: flex-start;
           }
           .hero-uni-name  { font-size: clamp(44px, 13vw, 72px); }
@@ -286,7 +286,7 @@ const HeroSection: React.FC = () => {
       <section
         className="hero-section"
         style={{
-          backgroundImage: 'url("/bgImg.png")',
+          backgroundImage: 'url("/جامعة_حلوان.jpg")',
           backgroundRepeat: "no-repeat",
           backgroundAttachment: "fixed",
           backgroundSize: "cover",

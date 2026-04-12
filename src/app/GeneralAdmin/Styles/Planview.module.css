@@ -39,7 +39,7 @@
 ══════════════════════════════════════════════ */
 .root {
   direction: rtl;
-  font-family: 'Tajawal', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 16px;
   background: var(--surface);
   min-height: 100vh;
@@ -71,7 +71,7 @@
   border: none;
   border-radius: var(--radius-sm);
   color: var(--text-soft);
-  font-family: 'Tajawal', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
@@ -233,7 +233,7 @@
   padding: 10px 16px;
   border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
-  font-family: 'Tajawal', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 15px;
   outline: none;
   background: var(--card-bg);
@@ -258,7 +258,7 @@
   border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--card-bg);
-  font-family: 'Tajawal', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 15px;
   font-weight: 700;
   color: var(--text-mid);
@@ -448,7 +448,7 @@
   border: none;
   border-radius: var(--radius-sm);
   color: #fff;
-  font-family: 'Tajawal', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
@@ -473,7 +473,7 @@
   border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--text-mid);
-  font-family: 'Tajawal', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
@@ -528,7 +528,7 @@
   border: 1.5px solid #FECACA;
   border-radius: var(--radius-sm);
   background: var(--red-bg);
-  font-family: 'Tajawal', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 14px;
   font-weight: 700;
   color: var(--red);
@@ -575,7 +575,7 @@
   color: #fff;
   padding: 13px 28px;
   border-radius: var(--radius-md);
-  font-family: 'Tajawal', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 15px;
   font-weight: 700;
   box-shadow: 0 10px 30px rgba(0,0,0,0.25);

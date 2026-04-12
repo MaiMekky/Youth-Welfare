@@ -39,7 +39,7 @@
 * { box-sizing: border-box; }
 
 body, button, input, select, textarea {
-  font-family: 'Cairo', 'Tajawal', sans-serif;
+  font-family: 'Cairo', 'Cairo', sans-serif;
 }
 
 /* ====== LOADING STATES ====== */

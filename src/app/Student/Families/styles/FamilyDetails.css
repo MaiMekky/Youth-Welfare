@@ -42,7 +42,7 @@
   min-height: 100vh;
   background: var(--surface);
   padding: 24px 28px 48px;
-  font-family: 'Tajawal', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 16px;
   direction: rtl;
 }
@@ -66,7 +66,7 @@
   color: #fff;
   border: none;
   border-radius: var(--r-md);
-  font-family: 'Tajawal', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
@@ -138,7 +138,7 @@
   background: transparent;
   border: none;
   border-radius: var(--r-md);
-  font-family: 'Tajawal', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 15px;
   font-weight: 700;
   color: var(--text-3);
@@ -359,7 +359,7 @@
   padding: 13px 18px;
   border: none;
   border-radius: var(--r-md);
-  font-family: 'Tajawal', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;

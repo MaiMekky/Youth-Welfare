@@ -164,7 +164,7 @@ const ActivitiesSection: React.FC = () => {
         @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700;800;900&display=swap');
 
         .acts-root {
-          font-family: 'IBM Plex Sans Arabic', sans-serif;
+          font-family: 'Cairo', sans-serif;
           direction: rtl;
           background: #f5f6fa;
           padding: clamp(4rem, 8vw, 6.5rem) clamp(1.2rem, 5vw, 4.5rem);

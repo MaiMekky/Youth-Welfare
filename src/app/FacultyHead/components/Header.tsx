@@ -4,6 +4,7 @@ import "../Styles/Header.css";
 import logo from "../../assets/capital-uni-logo.png";
 import { useState, useRef, useEffect } from "react";
 import { LogOut, ChevronDown, Menu } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface HeaderProps {
   onSidebarOpen?: () => void;
@@ -30,14 +31,15 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
     } catch {}
   }, []);
 
+  const router = useRouter();
   const handleLogout = () => {
     localStorage.clear();
-    const isProd = process.env.NODE_ENV === "production";
-    const cookieEnd = `path=/; max-age=0; SameSite=Lax${isProd ? "; Secure" : ""}`;
-    ["access", "refresh", "user_type", "roleKey", "role"].forEach(k => {
-      document.cookie = `${k}=; ${cookieEnd}`;
+
+    ["access","refresh","user_type","roleKey","role"].forEach((k) => {
+      document.cookie = `${k}=; path=/; max-age=0`;
     });
-    window.location.replace("/");
+
+    router.replace("/");
   };
 
   useEffect(() => {

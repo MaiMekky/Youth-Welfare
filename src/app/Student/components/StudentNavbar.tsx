@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import logo from "../../assets/capital-uni-logo.png";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useRouter } from "next/navigation";
 
 type NavItem = {
   key: string;
@@ -124,14 +125,15 @@ const StudentNavbar: React.FC = () => {
       ]
     : baseNavItems;
 
+  const router = useRouter();
   const handleLogout = () => {
     localStorage.clear();
-    const isProd = process.env.NODE_ENV === "production";
-    const end    = `path=/; max-age=0; SameSite=Lax${isProd ? "; Secure" : ""}`;
-    ["access", "refresh", "user_type", "roleKey", "role"].forEach(k => {
-      document.cookie = `${k}=; ${end}`;
+
+    ["access","refresh","user_type","roleKey","role"].forEach((k) => {
+      document.cookie = `${k}=; path=/; max-age=0`;
     });
-    window.location.replace("/");
+
+    router.replace("/");
   };
 
   const isActive = (href: string) =>

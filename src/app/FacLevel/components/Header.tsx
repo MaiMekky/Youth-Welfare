@@ -6,6 +6,7 @@ import logo from "@/app/assets/capital-uni-logo.png";
 import { useRouter } from "next/navigation";
 import { Menu } from "lucide-react";
 
+
 interface HeaderProps {
   onSidebarOpen?: () => void;
 }
@@ -52,12 +53,12 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
 
   const handleLogout = () => {
     localStorage.clear();
-    const isProd = process.env.NODE_ENV === "production";
-    const cookieEnd = `path=/; max-age=0; SameSite=Lax${isProd ? "; Secure" : ""}`;
-    ["access","refresh","user_type","roleKey","role"].forEach(
-      (k) => (document.cookie = `${k}=; ${cookieEnd}`)
-    );
-    window.location.replace("/");
+
+    ["access","refresh","user_type","roleKey","role"].forEach((k) => {
+      document.cookie = `${k}=; path=/; max-age=0`;
+    });
+
+    router.replace("/");
   };
 
   const nav = (path: string) => { router.push(path); setIsMenuOpen(false); };

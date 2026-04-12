@@ -55,14 +55,14 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
     setShowActivity(names.some((n) => ACTIVITY_NAMES.has(n)));
   }, []);
 
-  const handleLogout = () => {
+    const handleLogout = () => {
     localStorage.clear();
-    const isProd = process.env.NODE_ENV === "production";
-    const cookieEnd = `path=/; max-age=0; SameSite=Lax${isProd ? "; Secure" : ""}`;
-    ["access", "refresh", "user_type", "roleKey", "role"].forEach(
-      (k) => (document.cookie = `${k}=; ${cookieEnd}`)
-    );
-    window.location.replace("/");
+
+    ["access","refresh","user_type","roleKey","role"].forEach((k) => {
+      document.cookie = `${k}=; path=/; max-age=0`;
+    });
+
+    router.replace("/");
   };
 
   const nav = (path: string) => { router.push(path); setOpen(false); };

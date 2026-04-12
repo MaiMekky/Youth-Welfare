@@ -43,7 +43,7 @@ export async function authFetch(
   });
 
   if (res.status === 401) {
-    let data: any = null;
+    let data: { detail?: string } | null = null;
 
     try {
       data = await res.clone().json();

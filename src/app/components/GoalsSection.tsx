@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useRef } from "react";
+import Image from "next/image";
 
 const GoalsSection: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -335,11 +336,12 @@ const GoalsSection: React.FC = () => {
 
           {/* ── Left: Image Card (inverted from AboutSection) ── */}
           <div className="gs-anim gs-slide-left d0 gs-image-side">
-            <img
+            <Image
+              fill
               className="gs-img"
               src="/goal.png"
               alt="أهداف الإدارة العامة لرعاية الطلاب"
-              loading="lazy"
+              style={{ objectFit: 'cover', objectPosition: 'center 20%' }}
             />
 
             {/* Top-left corner bracket */}

@@ -4,7 +4,6 @@ import "../Styles/Header.css";
 import logo from "../../assets/capital-uni-logo.png";
 import { useState, useRef, useEffect } from "react";
 import { LogOut, ChevronDown, Menu } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 interface HeaderProps {
   onSidebarOpen?: () => void;
@@ -31,7 +30,6 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
     } catch {}
   }, []);
 
-  const router = useRouter();
 const handleLogout = async () => {
   console.log("=== LOGOUT START ===");
   console.log("Cookies BEFORE:", document.cookie);

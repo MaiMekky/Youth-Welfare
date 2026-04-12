@@ -1,6 +1,8 @@
 "use client";
 import React, { useMemo } from "react";
 import styles from "../Styles/FiltersBar.module.css";
+import { useEffect, useState } from "react";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 interface FiltersBarProps {
   filters: {
@@ -47,14 +49,6 @@ const EMPTY_FILTERS = {
   search: "",
 };
 
-const facultyMap: Record<string, number> = {
-  "كلية الهندسة": 1,
-  "كلية العلوم":  2,
-  "كلية التجارة": 4,
-  "كلية الطب":    3,
-  "كلية التربية": 5,
-};
-
 export default function FiltersBar({
   filters,
   setFilters,
@@ -66,7 +60,7 @@ export default function FiltersBar({
     setFilters((prev) => ({ ...prev, [key]: value }));
     if (key === "search") onSearchChange(value);
   };
-
+const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[]>([]);
   const clearAllFilters = () => {
     setFilters(EMPTY_FILTERS);
     onSearchChange("");
@@ -77,6 +71,23 @@ export default function FiltersBar({
     const { ...rest } = filters;
     return Object.values(rest).filter((v) => v && v !== "").length;
   }, [filters]);
+
+  useEffect(() => {
+  const fetchFaculties = async () => {
+    try {
+      const res = await authFetch(
+        `${getBaseUrl()}/api/family/faculties/`
+      );
+
+      const data = await res.json();
+      setFaculties(data);
+    } catch (err) {
+      console.error("Error fetching faculties:", err);
+    }
+  };
+
+  fetchFaculties();
+}, []);
 
   return (
     <div className={styles.filtersContainer}>
@@ -170,8 +181,10 @@ export default function FiltersBar({
         >
           <option value="" disabled hidden>الكلية</option>
           <option value="none">غير محدد</option>
-          {Object.keys(facultyMap).map((fac) => (
-            <option key={fac} value={fac}>{fac}</option>
+          {faculties.map((fac) => (
+            <option key={fac.faculty_id} value={fac.name}>
+              {fac.name}
+            </option>
           ))}
         </select>
 

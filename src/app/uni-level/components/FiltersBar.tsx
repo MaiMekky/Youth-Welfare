@@ -1,6 +1,8 @@
 "use client";
 import React from "react";
 import styles from "../styles/FiltersBar.module.css"
+import { useEffect, useState } from "react";
+import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 interface FiltersBarProps {
   filters: Record<string, string>;
@@ -10,13 +12,6 @@ interface FiltersBarProps {
 }
 
 export default function FiltersBar({ filters, setFilters, onApply, onSearchChange }: FiltersBarProps) {
-  const facultyMap: { [key: string]: number } = {
-    "كلية الهندسة": 1,
-    "كلية العلوم": 2,
-    "كلية التجارة": 4,
-    "كلية الطب": 3,
-    "كلية التربية": 5,
-  };
 
   const handleChange = (key: string, value: string) => {
     setFilters((prev: Record<string, string>) => ({ ...prev, [key]: value }));
@@ -24,7 +19,7 @@ export default function FiltersBar({ filters, setFilters, onApply, onSearchChang
       onSearchChange(value); // <--- تحديث البحث للجدول
     }
   };
-
+  const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[]>([]);
   const clearAllFilters = () => {
     const cleared = {
       fatherStatus: "",
@@ -43,6 +38,22 @@ export default function FiltersBar({ filters, setFilters, onApply, onSearchChang
     onSearchChange(""); // مسح البحث أيضًا
   };
 
+    useEffect(() => {
+  const fetchFaculties = async () => {
+    try {
+      const res = await authFetch(
+        `${getBaseUrl()}/api/family/faculties/`
+      );
+
+      const data = await res.json();
+      setFaculties(data);
+    } catch (err) {
+      console.error("Error fetching faculties:", err);
+    }
+  };
+
+  fetchFaculties();
+}, []);
   return (
     <div className={styles.filtersContainer}>
       <h2 className={styles.sectionTitle}>البحث وفلترة الطلاب</h2>
@@ -116,8 +127,12 @@ export default function FiltersBar({ filters, setFilters, onApply, onSearchChang
           {/* Faculty */}
           <select value={filters.faculty || ""} onChange={(e) => handleChange("faculty", e.target.value)} className={styles.select}>
             <option value="" disabled hidden>الكلية</option>
-            <option value="none">لا يوجد</option>
-            {Object.keys(facultyMap).map((fac) => <option key={fac} value={fac}>{fac}</option>)}
+             <option value="none">غير محدد</option>
+             {faculties.map((fac) => (
+            <option key={fac.faculty_id} value={fac.name}>
+              {fac.name}
+            </option>
+          ))}
           </select>
 
           {/* Grade */}

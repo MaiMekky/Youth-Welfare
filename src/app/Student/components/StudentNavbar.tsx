@@ -6,7 +6,6 @@ import Link from "next/link";
 import Image from "next/image";
 import logo from "../../assets/capital-uni-logo.png";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
-import { useRouter } from "next/navigation";
 
 type NavItem = {
   key: string;
@@ -125,7 +124,6 @@ const StudentNavbar: React.FC = () => {
       ]
     : baseNavItems;
 
-  const router = useRouter();
 const handleLogout = async () => {
   console.log("=== LOGOUT START ===");
   console.log("Cookies BEFORE:", document.cookie);

@@ -4,6 +4,7 @@ import React, { useMemo, useState, useEffect, Suspense } from "react";
 import { Users, Leaf, Star } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 import styles from "./Styles/page.module.css";
 import Tabs from "./components/Tabs";
 import FamiliesGrid from "./components/FamiliesGrid";
@@ -16,6 +17,7 @@ type TabType = "central" | "quality" | "eco";
 
 function PageContent() {
   const searchParams = useSearchParams();
+  const { showToast } = useToast();
 
   /* ── Tab persistence: always start with searchParam or "central",
        then correct from localStorage after mount (avoids SSR mismatch) ── */
@@ -44,7 +46,6 @@ function PageContent() {
   const [selectedFamilyType, setSelectedFamilyType] = useState<string>("all");
   const [families, setFamilies] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "warning" } | null>(null);
 
   /* Reset filters when switching tabs */
   useEffect(() => {
@@ -85,11 +86,6 @@ function PageContent() {
     return filtered;
   }, [families, selectedFaculty, selectedFamilyType]);
 
-  /* ── Toast ── */
-  const showToast = (message: string, type: "success" | "error" | "warning") => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 4000);
-  };
 
   /* ── Approve / Reject ── */
   async function handleApproveFamily(familyId: number) {
@@ -130,14 +126,6 @@ function PageContent() {
 
   return (
     <div className={styles.container}>
-      {/* Toast */}
-      {toast && (
-        <div className={`${styles.toast} ${styles[toast.type]}`}>
-          <span>{toast.message}</span>
-          <button className={styles.toastClose} onClick={() => setToast(null)} />
-          <div className={styles.toastProgress} />
-        </div>
-      )}
 
       <header className={styles.headerCard}>
         <h1 className={styles.pageTitle}>إدارة الأسر الطلابية</h1>

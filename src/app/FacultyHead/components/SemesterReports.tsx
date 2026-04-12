@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import styles from "../Styles/SemesterReports.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -44,13 +45,8 @@ export default function SemesterReports() {
   const [search, setSearch]             = useState("");
   const [currentPage, setCurrentPage]   = useState(1);
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
-  const [toastMsg, setToastMsg]         = useState("");
+  const { showToast } = useToast();
   const rowsPerPage = 8;
-
-  const showToast = (msg: string) => {
-    setToastMsg(msg);
-    setTimeout(() => setToastMsg(""), 3500);
-  };
 
   // ── Fetch plans ──
   const fetchPlans = useCallback(async () => {
@@ -88,9 +84,9 @@ export default function SemesterReports() {
       a.download = `${plan.name}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
-      showToast("✅ تم تحميل الخطة بنجاح");
+      showToast("✅ تم تحميل الخطة بنجاح", "success");
     } catch {
-      showToast("⚠️ فشل تحميل الملف، حاول مجدداً");
+      showToast("⚠️ فشل تحميل الملف، حاول مجدداً", "error");
     } finally {
       setDownloadingId(null);
     }
@@ -303,8 +299,6 @@ export default function SemesterReports() {
         )}
       </div>
 
-      {/* ── Toast ── */}
-      {toastMsg && <div className={styles.toast}>{toastMsg}</div>}
     </div>
   );
 }

@@ -1,8 +1,8 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import '../styles/mainpage.css';
-import Toast from './Toast';
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 interface ApiFamily {
   family_id: number;
   name: string;
@@ -69,7 +69,7 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
   const [loading, setLoading]                     = useState(true);
   const [error, setError]                         = useState<string | null>(null);
   const [joiningId, setJoiningId]                 = useState<number | null>(null);
-  const [toasts, setToasts]                       = useState<ToastNotification[]>([]);
+  const { showToast } = useToast();
   const [activeTab, setActiveTab]                 = useState<'accepted' | 'pending'>('accepted');
 
   const token =
@@ -80,12 +80,6 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
   const acceptedFamilies = joinedFamilies.filter(f => isAccepted(f.memberStatus));
   const pendingFamilies  = joinedFamilies.filter(f => !isAccepted(f.memberStatus));
 
-  /* ====== TOAST ====== */
-  const showToast = (message: string, type: 'success' | 'error' | 'info') => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, message, type }]);
-  };
-  const removeToast = (id: number) => setToasts(prev => prev.filter(t => t.id !== id));
 
   /* ====== MAPPER ====== */
   const mapToProgramFamily = (family: ApiFamily): ProgramFamily => ({
@@ -240,11 +234,6 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
   /* ====== RENDER ====== */
   return (
     <>
-      <div className="toast-container">
-        {toasts.map(toast => (
-          <Toast key={toast.id} message={toast.message} type={toast.type} onClose={() => removeToast(toast.id)} />
-        ))}
-      </div>
 
       <div dir="rtl" className="container">
 

@@ -3,12 +3,14 @@ import React, { useState } from "react";
 import { Upload } from "lucide-react";
 import "../styles/applyForm.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 interface ApplicationDetailsFormProps {
   onSuccess?: () => void;
   onNotify?: (message: string, type: "success" | "warning" | "error") => void;
 }
 
 export default function ApplicationDetailsForm({ onSuccess, onNotify }: ApplicationDetailsFormProps) {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     gpa: "", AcademicStatus: "",
     fatherStatus: "", motherStatus: "", FatherIncome: "", MotherIncome: "",
@@ -19,14 +21,11 @@ export default function ApplicationDetailsForm({ onSuccess, onNotify }: Applicat
 
   const [documents, setDocuments] = useState<Record<string, File | null>>({});
   const [errors, setErrors]       = useState<Record<string, string>>({});
-  const [notification, setNotification] = useState<{ message: string; type: "success"|"warning"|"error" } | null>(null);
-
   const requiredDocs = ["socialResearch", "salaryProof", "fatherId", "studentId"];
 
-  const showNotification = (message: string, type: "success"|"warning"|"error") => {
+  const triggerToast = (message: string, type: "success"|"warning"|"error") => {
     if (onNotify) { onNotify(message, type); return; }
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3500);
+    showToast(message, type);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -104,13 +103,13 @@ export default function ApplicationDetailsForm({ onSuccess, onNotify }: Applicat
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
-        showNotification("تم إرسال الطلب بنجاح ✅", "success");
+        triggerToast("تم إرسال الطلب بنجاح ✅", "success");
         if (onSuccess) onSuccess();
       } else {
-        showNotification("❌ حدث خطأ أثناء الإرسال", "error");
+        triggerToast("❌ حدث خطأ أثناء الإرسال", "error");
       }
     } catch {
-      showNotification("⚠️ فشل الاتصال بالسيرفر", "error");
+      triggerToast("⚠️ فشل الاتصال بالسيرفر", "error");
     }
   };
 
@@ -312,13 +311,6 @@ export default function ApplicationDetailsForm({ onSuccess, onNotify }: Applicat
         </div>
       </form>
 
-      {notification && (
-        <div className={`notification ${notification.type}`} style={{
-          backgroundColor: notification.type === "success" ? "#22c55e" : notification.type === "error" ? "#ef4444" : "#f59e0b",
-        }}>
-          {notification.message}
-        </div>
-      )}
     </div>
   );
 }

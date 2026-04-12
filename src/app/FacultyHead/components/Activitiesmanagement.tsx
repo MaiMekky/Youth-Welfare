@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import styles from "../Styles/Activitiesmanagement.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 interface EventRow {
   event_id: number;
@@ -309,9 +310,7 @@ export default function ActivitiesManagement() {
   const [search, setSearch]               = useState("");
   const [filterType, setFilterType]       = useState("all");
   const [activeTab, setActiveTab]         = useState<TabKey>("pending");
-  const [toastMsg, setToastMsg]           = useState("");
-
-  const showToast = (msg: string) => { setToastMsg(msg); setTimeout(()=>setToastMsg(""),4000); };
+  const { showToast } = useToast();
 
   const fetchEvents = useCallback(async () => {
     try {
@@ -337,9 +336,9 @@ export default function ActivitiesManagement() {
         : `${BASE}/api/event/approve-events/${confirm.id}/reject/`;
       const res = await authFetch(endpoint,{method:"PATCH",headers:{Authorization:`Bearer ${getToken()}`}});
       if (!res.ok) throw new Error();
-      showToast(confirm.action==="approve"?"✅ تم اعتماد الفعالية بنجاح":"❌ تم رفض الفعالية");
+      showToast(confirm.action==="approve"?"✅ تم اعتماد الفعالية بنجاح":"❌ تم رفض الفعالية", confirm.action === "approve" ? "success" : "error");
       setConfirm(null); fetchEvents();
-    } catch { showToast("⚠️ حدث خطأ أثناء تنفيذ الإجراء"); }
+    } catch { showToast("⚠️ حدث خطأ أثناء تنفيذ الإجراء", "error"); }
     finally   { setActionLoading(false); }
   };
 
@@ -364,7 +363,7 @@ export default function ActivitiesManagement() {
           }
         } catch { /* ignore */ }
         setPdfErrors(prev => ({...prev, [eventId]: `فشل التصدير: ${serverMsg}`}));
-        showToast(`⚠️ فشل تصدير PDF — ${serverMsg}`);
+        showToast(`⚠️ فشل تصدير PDF — ${serverMsg}`, "error");
         return;
       }
       const blob = await res.blob();
@@ -373,10 +372,10 @@ export default function ActivitiesManagement() {
       a.href = url; a.download = `تقرير-${eventTitle}.pdf`;
       document.body.appendChild(a); a.click(); a.remove();
       window.URL.revokeObjectURL(url);
-      showToast("📄 تم تصدير التقرير بنجاح");
+      showToast("📄 تم تصدير التقرير بنجاح", "success");
     } catch {
       setPdfErrors(prev => ({...prev, [eventId]: "خطأ في الشبكة"}));
-      showToast("⚠️ خطأ في الشبكة أثناء تصدير PDF");
+      showToast("⚠️ خطأ في الشبكة أثناء تصدير PDF", "error");
     } finally { setExportingId(null); }
   };
 
@@ -522,7 +521,6 @@ export default function ActivitiesManagement() {
 
       {viewId!==null && <DetailModal id={viewId} onClose={()=>setViewId(null)}/>}
       {confirm && <ConfirmDialog action={confirm.action} eventTitle={confirm.title} onConfirm={handleAction} onCancel={()=>setConfirm(null)} loading={actionLoading}/>}
-      {toastMsg && <div className={styles.toast}>{toastMsg}</div>}
     </div>
   );
 }

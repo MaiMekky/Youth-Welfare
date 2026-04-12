@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import "../Styles/Activities.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 interface ActivityItem {
   event_id: number;
@@ -283,9 +284,6 @@ function DetailsModal({ detail, onClose }: { detail: ActivityDetail; onClose: ()
   );
 }
 
-function Toast({ msg }: { msg: string }) {
-  return <div className="act-toast">{msg}</div>;
-}
 
 function ActivityCard({
   activity, index, showActions, detailLoading,
@@ -407,7 +405,7 @@ export default function Activities() {
   const [error, setError]                     = useState("");
   const [confirm, setConfirm]                 = useState<{ id: number; action: "approve" | "reject"; title: string } | null>(null);
   const [actionLoading, setActionLoading]     = useState(false);
-  const [toastMsg, setToastMsg]               = useState("");
+  const { showToast } = useToast();
   const [detailData, setDetailData]           = useState<ActivityDetail | null>(null);
   const [loadingDetailId, setLoadingDetailId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter]       = useState<StatusFilter>("pending");
@@ -460,10 +458,6 @@ export default function Activities() {
     };
   }, [allActivities, deptFilter]);
 
-  const showToast = (msg: string) => {
-    setToastMsg(msg);
-    setTimeout(() => setToastMsg(""), 3500);
-  };
 
   const fetchActivities = useCallback(async () => {
     try {
@@ -496,7 +490,7 @@ export default function Activities() {
       const data: ActivityDetail = await res.json();
       setDetailData(data);
     } catch {
-      showToast("⚠️ فشل في جلب تفاصيل الفعالية");
+      showToast("⚠️ فشل في جلب تفاصيل الفعالية", "error");
     } finally {
       setLoadingDetailId(null);
     }
@@ -518,10 +512,10 @@ export default function Activities() {
       setAllActivities(prev =>
         prev.map(a => a.event_id === confirm.id ? { ...a, status: newStatus } : a)
       );
-      showToast(confirm.action === "approve" ? "✅ تم قبول الفعالية بنجاح" : "❌ تم رفض الفعالية");
+      showToast(confirm.action === "approve" ? "✅ تم قبول الفعالية بنجاح" : "❌ تم رفض الفعالية", confirm.action === "approve" ? "success" : "warning");
       setConfirm(null);
     } catch {
-      showToast("⚠️ فشل في تنفيذ العملية، يرجى المحاولة مجدداً");
+      showToast("⚠️ فشل في تنفيذ العملية، يرجى المحاولة مجدداً", "error");
     } finally {
       setActionLoading(false);
     }
@@ -671,7 +665,6 @@ export default function Activities() {
         <DetailsModal detail={detailData} onClose={() => setDetailData(null)} />
       )}
 
-      {toastMsg && <Toast msg={toastMsg} />}
     </>
   );
 }

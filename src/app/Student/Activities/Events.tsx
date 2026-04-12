@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import './Events.css';
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 /* ══════════════════════════════════════════
    TYPES
@@ -136,16 +137,11 @@ export default function Events() {
   const [error,       setError]       = useState<string | null>(null);
   const [joiningId,   setJoiningId]   = useState<number | null>(null);
   const [registered,  setRegistered]  = useState<Set<number>>(new Set());
-  const [toast,       setToast]       = useState<{ msg: string; ok: boolean } | null>(null);
+  const { showToast } = useToast();
   const [activeType,  setActiveType]  = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   const token = typeof window !== 'undefined' ? localStorage.getItem('access') : null;
-
-  const showToast = (msg: string, ok: boolean) => {
-    setToast({ msg, ok });
-    setTimeout(() => setToast(null), 4000);
-  };
 
   /* ── Fetch ── */
   useEffect(() => {
@@ -171,7 +167,7 @@ export default function Events() {
 
   /* ── Join ── */
   const joinEvent = async (id: number) => {
-    if (!token) { showToast('يرجى تسجيل الدخول أولاً', false); return; }
+    if (!token) { showToast('يرجى تسجيل الدخول أولاً', "warning"); return; }
     try {
       setJoiningId(id);
       const res = await authFetch(`${getBaseUrl()}/api/event/student-events/${id}/join/`, {
@@ -184,9 +180,9 @@ export default function Events() {
       }
       setRegistered(prev => new Set([...prev, id]));
       setEvents(prev => prev.map(e => e.id === id ? { ...e, takenSeats: e.takenSeats + 1 } : e));
-      showToast('تم إرسال الطلب بنجاح', true);
+      showToast('تم إرسال الطلب بنجاح', "success");
     } catch (e: unknown) {
-      showToast(e instanceof Error ? e.message : 'حدث خطأ', false);
+      showToast(e instanceof Error ? e.message : 'حدث خطأ', "error");
     } finally {
       setJoiningId(null);
     }
@@ -206,11 +202,6 @@ export default function Events() {
     <div className="events-page" dir="rtl">
 
       {/* ── Toast ── */}
-      {toast && (
-        <div className={`ev-toast ${toast.ok ? 'ev-toast-success' : 'ev-toast-error'}`}>
-          {toast.ok ? '✅' : '❌'} {toast.msg}
-        </div>
-      )}
 
       {/* ══ HERO ══ */}
       <div className="events-hero">

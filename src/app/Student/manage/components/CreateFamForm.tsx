@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
 import '../styles/CreateFam.css';
-import Toast from './Toast';
 import { ChevronRight, ChevronLeft, Check, User, Users, FileText, Send } from 'lucide-react';
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 const CACHE_KEY = 'createFamFormData';
 
 /* ─── Token decode ─── */
@@ -160,7 +160,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
   const [facultyId, setFacultyId]                 = useState<number|null>(null);
   const [departments, setDepartments]             = useState<Department[]>([]);
   const [isSubmitting, setIsSubmitting]           = useState(false);
-  const [toasts, setToasts]                       = useState<ToastNotification[]>([]);
+  const { showToast } = useToast();
 
   const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
   const handleActivityChange = (ck: string, ai: number, field: keyof Activity, value: string) => {
@@ -219,11 +219,6 @@ const removeActivity = (ck: string, ai: number) => {
   }, [familyType, familyName, familyGoals, familyDescription, boardMembers, committees]);
   useEffect(() => { saveCache(); }, [saveCache]);
 
-  /* ── Toast ── */
-  const showToast = (message: string, type: ToastNotification['type']) => {
-    setToasts(prev => [...prev, { id: Date.now(), message, type }]);
-  };
-  const removeToast = (id: number) => setToasts(prev => prev.filter(t => t.id !== id));
 
   /* ── Fetch deps & profile ── */
   useEffect(() => {
@@ -695,9 +690,6 @@ const removeActivity = (ck: string, ai: number) => {
 
   return (
     <div className="cf-page">
-      <div className="toast-container">
-        {toasts.map(t => <Toast key={t.id} message={t.message} type={t.type} onClose={() => removeToast(t.id)} />)}
-      </div>
 
       <div className="cf-wizard">
         {/* Progress Header */}

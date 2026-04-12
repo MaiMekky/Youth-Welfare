@@ -7,6 +7,7 @@ import { useRouter, useParams } from 'next/navigation';
 type TabId = 'members' | 'events';
 import { useSearchParams } from "next/navigation";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 interface Tab {
   id: TabId;
@@ -51,151 +52,13 @@ interface FamilyData {
   family_events: FamilyEvent[];
 }
 
-interface AlertProps {
-  message: string;
-  type: 'success' | 'error' | 'warning' | 'info';
-  onClose: () => void;
-}
-
-const CustomAlert = ({ message, type, onClose }: AlertProps) => {
-  const alertStyles = {
-    success: {
-      background: 'linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%)',
-      border: '2px solid #28a745',
-      color: '#155724',
-      icon: '✓'
-    },
-    error: {
-      background: 'linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%)',
-      border: '2px solid #dc3545',
-      color: '#721c24',
-      icon: '✕'
-    },
-    warning: {
-      background: 'linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%)',
-      border: '2px solid #ffc107',
-      color: '#856404',
-      icon: '⚠'
-    },
-    info: {
-      background: 'linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%)',
-      border: '2px solid #17a2b8',
-      color: '#0c5460',
-      icon: 'ℹ'
-    }
-  };
-
-  const currentStyle = alertStyles[type];
-
-  return (
-    <div style={{
-      position: 'fixed',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      zIndex: 9999,
-      minWidth: '400px',
-      maxWidth: '500px',
-      background: currentStyle.background,
-      border: currentStyle.border,
-      borderRadius: '16px',
-      padding: '30px',
-      boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
-      animation: 'slideIn 0.3s ease-out',
-      direction: 'rtl',
-      fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif"
-    }}>
-      {/* Backdrop */}
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0, 0, 0, 0.5)',
-        zIndex: -1
-      }} onClick={onClose} />
-
-      {/* Icon */}
-      <div style={{
-        width: '60px',
-        height: '60px',
-        borderRadius: '50%',
-        background: 'white',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '30px',
-        fontWeight: 'bold',
-        color: currentStyle.color,
-        margin: '0 auto 20px',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
-      }}>
-        {currentStyle.icon}
-      </div>
-
-      {/* Message */}
-      <p style={{
-        fontSize: '1.1rem',
-        fontWeight: 600,
-        color: currentStyle.color,
-        textAlign: 'center',
-        margin: '0 0 25px 0',
-        lineHeight: 1.6
-      }}>
-        {message}
-      </p>
-
-      {/* Button */}
-      <button
-        onClick={onClose}
-        style={{
-          width: '100%',
-          padding: '12px',
-          background: currentStyle.color,
-          color: 'white',
-          border: 'none',
-          borderRadius: '8px',
-          fontSize: '1rem',
-          fontWeight: 600,
-          cursor: 'pointer',
-          transition: 'all 0.3s ease',
-          fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif"
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-2px)';
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = 'none';
-        }}
-      >
-        حسناً
-      </button>
-
-      <style jsx>{`
-        @keyframes slideIn {
-          from {
-            opacity: 0;
-            transform: translate(-50%, -60%);
-          }
-          to {
-            opacity: 1;
-            transform: translate(-50%, -50%);
-          }
-        }
-      `}</style>
-    </div>
-  );
-};
 
 export default function FamilyDetailsPage() {
   const [activeTab, setActiveTab] = useState<'members' | 'events'>('members');
   const [familyData, setFamilyData] = useState<FamilyData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [alert, setAlert] = useState<{ message: string; type: 'success' | 'error' | 'warning' | 'info' } | null>(null);
+  const { showToast } = useToast();
   
   const router = useRouter();
   const params = useParams();
@@ -256,9 +119,6 @@ export default function FamilyDetailsPage() {
     fetchFamilyData();
   }, [familyId]);
 
-  const showAlert = (message: string, type: 'success' | 'error' | 'warning' | 'info') => {
-    setAlert({ message, type });
-  };
 
   const handleApproveMember = async (studentId: number) => {
     try {
@@ -280,13 +140,13 @@ export default function FamilyDetailsPage() {
         throw new Error(errorData.error || 'فشل في الموافقة على العضو');
       }
 
-      showAlert('تمت الموافقة على العضو بنجاح ✓', 'success');
+      showToast('تمت الموافقة على العضو بنجاح ✓', 'success');
       setTimeout(() => {
         window.location.reload();
       }, 2000);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'فشل في الموافقة على العضو';
-      showAlert(errorMessage, 'error');
+      showToast(errorMessage, 'error');
       console.error(err);
     }
   };
@@ -311,13 +171,13 @@ export default function FamilyDetailsPage() {
         throw new Error(errorData.error || 'فشل في رفض العضو');
       }
 
-      showAlert('تم رفض العضو بنجاح', 'warning');
+      showToast('تم رفض العضو بنجاح', 'warning');
       setTimeout(() => {
         window.location.reload();
       }, 2000);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'فشل في رفض العضو';
-      showAlert(errorMessage, 'error');
+      showToast(errorMessage, 'error');
       console.error(err);
     }
   };
@@ -410,14 +270,6 @@ const getFamilyStatusStyle = (status: string) => {
 
   return (
     <div className={styles.pageContainer}>
-      {/* Custom Alert */}
-      {alert && (
-        <CustomAlert
-          message={alert.message}
-          type={alert.type}
-          onClose={() => setAlert(null)}
-        />
-      )}
 
       {/* Header Section */}
       <div className={styles.header}>

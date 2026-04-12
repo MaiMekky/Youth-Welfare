@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import FiltersBar from "./FiltersBar";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 interface Application {
   id: number;
   requestNumber: string;
@@ -31,6 +32,7 @@ const facultyMap: { [key: string]: number } = {
 };
 
 export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (apps: Application[]) => void }) {
+  const { showToast } = useToast();
   const router = useRouter();
   const [applications, setApplications] = useState<Application[]>([]);
   const [filters, setFilters] = useState<Record<string, string>>({});
@@ -135,7 +137,7 @@ export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (ap
       setApplications(mappedApps);
     } catch (err) {
       console.error(err);
-      alert("حدث خطأ أثناء جلب البيانات");
+      showToast("حدث خطأ أثناء جلب البيانات", "error");
     } finally {
       setLoading(false);
     }

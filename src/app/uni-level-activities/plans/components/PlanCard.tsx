@@ -5,6 +5,7 @@ import styles from "../styles/PlanCard.module.css";
 import type { PlanItem } from "../page";
 import { Eye, CalendarDays, Building2, ClipboardList, Pencil, Download } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 const API_URL = getBaseUrl();
 
 function fmt(iso: string) {
@@ -30,6 +31,7 @@ export default function PlanCard({
   onView: (id: number) => void;
   onEdit: (p: PlanItem) => void;
 }) {
+  const { showToast } = useToast();
   const created = useMemo(() => fmt(item.createdAt), [item.createdAt]);
   const [exporting, setExporting] = useState(false);
 
@@ -67,7 +69,7 @@ export default function PlanCard({
       a.remove();
       window.URL.revokeObjectURL(url);
     } catch (e: unknown) {
-      window.alert(e instanceof Error ? e.message : String(e) || "حدث خطأ أثناء التصدير");
+      showToast(e instanceof Error ? e.message : String(e) || "حدث خطأ أثناء التصدير", "error");
     } finally {
       setExporting(false);
     }

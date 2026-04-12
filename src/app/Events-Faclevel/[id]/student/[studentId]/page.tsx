@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowRight, Mail, Phone, MapPin, User, GraduationCap, IdCard } from "lucide-react";
 import Footer from "@/app/FacLevel/components/Footer";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 const API_URL = getBaseUrl();
 
@@ -73,6 +74,7 @@ async function apiFetch<T>(
 }
 
 export default function StudentDetailsPage() {
+  const { showToast } = useToast();
   const router = useRouter();
   const params = useParams();
 
@@ -94,7 +96,7 @@ export default function StudentDetailsPage() {
     if (res.ok) {
       setStudent(res.data);
     } else {
-      window.alert(res.message);
+      showToast(res.message, "error");
     }
 
     setLoading(false);

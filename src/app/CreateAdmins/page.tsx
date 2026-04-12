@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import styles from './access-privileges.module.css';
 import { useRouter } from 'next/navigation';
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 interface User {
   id: string;
@@ -23,7 +24,7 @@ export default function AccessPrivileges() {
   const [selectedRole, setSelectedRole] = useState('جميع الأدوار');
   const [users, setUsers] = useState<User[]>([]);
   const router = useRouter();
-  const [toast, setToast] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   const permissionLabels: { [key: string]: string } = {
     D: 'حذف',
@@ -114,8 +115,7 @@ export default function AccessPrivileges() {
         prev.map(u => (u.id === id ? { ...u, status: updatedStatus } : u))
       );
 
-      setToast(`${user.name} أصبح ${updatedStatus ? 'نشطاً' : 'غير نشط'} الآن`);
-      setTimeout(() => setToast(null), 3000);
+      showToast(`${user.name} أصبح ${updatedStatus ? 'نشطاً' : 'غير نشط'} الآن`, "success");
     } catch (err) {
       console.error(err);
     }
@@ -124,9 +124,6 @@ export default function AccessPrivileges() {
   return (
     <>
       <div className={styles.pageWrapper} dir="rtl">
-
-        {/* ── Toast ── */}
-        {toast && <div className={styles.toast}>{toast}</div>}
 
         {/* ── Page Header ── */}
         <div className={styles.pageHeader}>

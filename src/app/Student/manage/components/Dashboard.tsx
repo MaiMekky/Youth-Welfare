@@ -6,9 +6,9 @@ import Activities from "./Activities";
 import Members from "./Members";
 import Posts from "./Posts";
 import Overview from "./Overview";
-import Toast from "./Toast";
 import { X, Upload, CalendarPlus } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 export interface Post {
   id: number;
   author: string;
@@ -59,7 +59,7 @@ const Dashboard: React.FC = () => {
   const [postRefreshTrigger, setPostRefreshTrigger] = useState(0);
   const [activityRefreshTrigger, setActivityRefreshTrigger] = useState(0);
 
-  const [toasts, setToasts] = useState<ToastNotification[]>([]);
+  const { showToast } = useToast();
 
   const [contentTitle, setContentTitle] = useState("");
   const [contentBody, setContentBody] = useState("");
@@ -74,14 +74,6 @@ const Dashboard: React.FC = () => {
 
   const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
 
-  const showToast = (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, message, type }]);
-  };
-
-  const removeToast = (id: number) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
-  };
 
   useEffect(() => {
     if (!token) { setProfileLoading(false); return; }
@@ -228,11 +220,6 @@ const Dashboard: React.FC = () => {
     <div className="dashboard-container">
 
       {/* TOASTS */}
-      <div className="toast-container">
-        {toasts.map(t => (
-          <Toast key={t.id} message={t.message} type={t.type} onClose={() => removeToast(t.id)} />
-        ))}
-      </div>
 
       {/* ── HEADER CARD ── */}
       <header className="dashboard-header">

@@ -7,11 +7,13 @@ import ProfileDetailsSection from "./components/ProfileDetailsSection";
 import type { StudentProfile, StudentProfileAPIResponse, UpdateProfileRequest } from "./types";
 import "../styles/profile.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 export default function ProfilePage() {
   const [profileData, setProfileData] = useState<StudentProfile | null>(null);
   const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const { showToast } = useToast();
 
   // Fetch faculties list
   useEffect(() => {
@@ -191,11 +193,11 @@ export default function ProfilePage() {
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.error("Error uploading image:", errorData);
-        alert("حدث خطأ في رفع الصورة");
+        showToast("حدث خطأ في رفع الصورة", "error");
       }
     } catch (error) {
       console.error("Error uploading image:", error);
-      alert("حدث خطأ في رفع الصورة");
+      showToast("حدث خطأ في رفع الصورة", "error");
     }
   };
 
@@ -279,14 +281,15 @@ export default function ProfilePage() {
         };
         setProfileData(mappedData);
         setIsEditing(false);
+        showToast("تم تحديث البيانات بنجاح", "success");
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.error("Error updating profile:", errorData);
-        alert("حدث خطأ في تحديث البيانات");
+        showToast("حدث خطأ في تحديث البيانات", "error");
       }
     } catch (error) {
       console.error("Error updating profile:", error);
-      alert("حدث خطأ في تحديث البيانات");
+      showToast("حدث خطأ في تحديث البيانات", "error");
     }
   };
 

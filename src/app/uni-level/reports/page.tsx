@@ -4,6 +4,7 @@ import Head from "next/head";
 import Layout from "../Layout";
 import "./Reports.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 interface CollegeReport {
   faculty_id: number;
   faculty_name: string;
@@ -13,6 +14,7 @@ interface CollegeReport {
 }
 
 export default function ReportsPage() {
+  const { showToast } = useToast();
   const [reports, setReports] = useState<CollegeReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState({
@@ -59,7 +61,7 @@ setSummary({
 
     } catch (error) {
       console.error(error);
-      alert("حدث خطأ أثناء جلب تقارير الكليات");
+      showToast("حدث خطأ أثناء جلب تقارير الكليات", "error");
     } finally {
       setLoading(false);
     }

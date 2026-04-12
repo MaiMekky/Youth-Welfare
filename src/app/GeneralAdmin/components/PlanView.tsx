@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import styles from "../Styles/Planview.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 interface Plan {
   plan_id: number;
@@ -447,13 +448,8 @@ export default function PlanView() {
   const [yearFilter, setYearFilter]       = useState("all");
   const [facultyFilter, setFacultyFilter] = useState("all");
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
-  const [toastMsg, setToastMsg]           = useState("");
+  const { showToast } = useToast();
   const [viewingPlan, setViewingPlan]     = useState<Plan | null>(null);
-
-  const showToast = (msg: string) => {
-    setToastMsg(msg);
-    setTimeout(() => setToastMsg(""), 3500);
-  };
 
   const fetchPlans = useCallback(async () => {
     try {
@@ -491,9 +487,9 @@ export default function PlanView() {
       a.download = `${plan.faculty_name ?? plan.name}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
-      showToast("✅ تم تحميل الخطة بنجاح");
+      showToast("✅ تم تحميل الخطة بنجاح", "success");
     } catch {
-      showToast("⚠️ فشل تحميل الملف، حاول مجدداً");
+      showToast("⚠️ فشل تحميل الملف، حاول مجدداً", "error");
     } finally {
       setDownloadingId(null);
     }
@@ -664,7 +660,6 @@ export default function PlanView() {
         />
       )}
 
-      {toastMsg && <div className={styles.toast}>{toastMsg}</div>}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useRef } from "react";
+import Image from "next/image";
 
 const AboutSection: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -350,11 +351,14 @@ const AboutSection: React.FC = () => {
           {/* ── Right: Contained Image Card ── */}
           <div className="anim slide-right d0 about-right">
 
-            <img
+            <Image
               className="about-img"
               src="/about-students.png"
               alt="طلاب جامعة العاصمة"
-              loading="lazy"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              style={{ objectFit: 'cover', objectPosition: 'center 18%' }}
+              priority
             />
 
             {/* Top-left gold corner */}

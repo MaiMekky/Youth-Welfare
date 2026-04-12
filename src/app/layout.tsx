@@ -1,5 +1,6 @@
 import "./globals.css";
 import { LanguageProvider } from "./context/LanguageContext";
+import { ToastProvider } from "./context/ToastContext";
 import AuthBackGuard from "./components/AuthBackGuard";
 import RouteTracker from "./components/RouteTracker";
 import SessionTracker from "./components/SessionTracker";
@@ -20,18 +21,20 @@ export default function RootLayout({
     <html lang="ar">
       <body className="app-body">
         <LanguageProvider>
+          <ToastProvider>
 
-          {/* Detect active session (used to decide if expired session message should appear) */}
-          <SessionTracker />
+            {/* Detect active session (used to decide if expired session message should appear) */}
+            <SessionTracker />
 
-          {/* Track last visited page */}
-          <RouteTracker />
+            {/* Track last visited page */}
+            <RouteTracker />
 
-          {/* Prevent navigating back after logout */}
-          <AuthBackGuard />
+            {/* Prevent navigating back after logout */}
+            <AuthBackGuard />
 
-          {children}
+            {children}
 
+          </ToastProvider>
         </LanguageProvider>
       </body>
     </html>

@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Footer from "@/app/FacLevel/components/Footer";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 
 const API_URL = `${getBaseUrl()}/api`;
@@ -113,23 +114,10 @@ export default function PlanDetailsPage() {
 
   const [plan, setPlan] = useState<ApiPlanDetails | null>(null);
   const [loading, setLoading] = useState(false);
+  const { showToast } = useToast();
 
   // هنخلي بدل error box = toast
   const [removingId, setRemovingId] = useState<number | null>(null);
-
-  /* ===================== Toast (same style) ===================== */
-  const [toast, setToast] = useState<{ show: boolean; message: string; type: ToastType }>({
-    show: false,
-    message: "",
-    type: "success",
-  });
-
-  const showToast = (message: string, type: ToastType) => {
-    setToast({ show: true, message, type });
-    window.setTimeout(() => {
-      setToast({ show: false, message: "", type: "success" });
-    }, 2500);
-  };
 
   function getAccessToken(): string | null {
     return (
@@ -301,12 +289,6 @@ export default function PlanDetailsPage() {
 
   return (
     <>
-      {/* ✅ Toast */}
-    {toast.show && (
-  <div className={`${styles.toast} ${styles[`toast_${toast.type}`]}`}>
-    {toast.message}
-  </div>
-)}
 
       <div className={styles.page}>
 

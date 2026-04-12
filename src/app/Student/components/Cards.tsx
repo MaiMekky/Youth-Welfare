@@ -1,6 +1,6 @@
-import React from "react";
+import React, { memo } from "react";
 
-export default function Cards() {
+const Cards = memo(function Cards() {
   return (
     <div dir="rtl" className="cards-root">
       <style>{`
@@ -554,6 +554,7 @@ export default function Cards() {
         </div>
         </div>
     </div>
-    
   );
-}
+});
+
+export default Cards;

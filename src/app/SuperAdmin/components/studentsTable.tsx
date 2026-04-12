@@ -6,6 +6,7 @@ import styles from "../Styles/studentsTable.module.css";
 import FiltersBar from "./FiltersBar";
 import SolidarityHeader from "./SolidarityHeader";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 interface Application {
   solidarity_id: number;
@@ -46,6 +47,7 @@ const defaultFilters: Filters = {
 };
 
 export default function StudentsTable() {
+  const { showToast } = useToast();
   const router = useRouter();
   const [applications, setApplications] = useState<Application[]>([]);
   const [filters, setFilters] = useState<Filters>(defaultFilters);
@@ -134,7 +136,7 @@ export default function StudentsTable() {
       setApplications(data);
     } catch (err) {
       console.error(err);
-      alert("حدث خطأ أثناء جلب البيانات");
+      showToast("حدث خطأ أثناء جلب البيانات", "error");
     }
   };
 

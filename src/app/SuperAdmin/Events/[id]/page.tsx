@@ -18,6 +18,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import Image from "next/image";
 const API_URL = getBaseUrl();
 
 function getAccessToken(): string | null {
@@ -361,8 +362,7 @@ export default function EventDetailsPage() {
                   {images.map((img) => (
                     <div key={img.doc_id} className={styles.imageCard}>
                       <div className={styles.imagePreview}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={img.file_url} alt={img.file_name} />
+                        <Image src={img.file_url} alt={img.file_name} width={300} height={200} style={{ objectFit: 'cover' }} />
                       </div>
                       <div className={styles.imageMeta}>
                         <div className={styles.imageName} title={img.file_name}>{img.file_name}</div>

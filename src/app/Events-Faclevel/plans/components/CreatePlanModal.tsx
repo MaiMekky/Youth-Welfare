@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import styles from "../styles/PlansPage.module.css";
 import { X, Save } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 const API_URL = `${getBaseUrl()}/api`;
 
@@ -32,6 +33,7 @@ export default function CreatePlanModal({
   const [saving, setSaving] = useState(false);
 
   const [departments, setDepartments] = useState<Record<string, unknown>[]>([]);
+  const { showToast } = useToast();
 
   function getFacultyIdFromToken() {
   try {
@@ -45,17 +47,6 @@ export default function CreatePlanModal({
   }
 }
 
-  /* ===================== Toast (same style) ===================== */
-  const [toast, setToast] = useState<{ show: boolean; message: string; type: ToastType }>({
-    show: false,
-    message: "",
-    type: "success",
-  });
-
-  const showToast = (message: string, type: ToastType) => {
-    setToast({ show: true, message, type });
-    window.setTimeout(() => setToast({ show: false, message: "", type: "success" }), 2500);
-  };
 
   const closeAndReset = useCallback(() => {
     setForm({ name: "", term: 1, dept: 0 });
@@ -195,12 +186,6 @@ export default function CreatePlanModal({
 
   return (
     <>
-      {toast.show && (
-        <div className={`toast ${toast.type === "success" ? "success" : toast.type === "error" ? "error" : "warning"}`}>
-          <div className="msg">{toast.message}</div>
-          <div className="bar" />
-        </div>
-      )}
 
       <div className={styles.modalOverlay} onMouseDown={closeAndReset}>
         <div className={styles.modal} onMouseDown={(e) => e.stopPropagation()}>

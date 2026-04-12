@@ -4,6 +4,7 @@ import Footer from "@/app/FacLevel/components/Footer";
 import ReportCard from "../families-reports/components/reports";
 import styles from "../families-reports/styles/report.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 interface Family {
   family_id: number;
@@ -20,6 +21,7 @@ interface Family {
 }
 
 export default function FamilyReportsPage() {
+  const { showToast } = useToast();
   const [families, setFamilies] = useState<Family[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,7 +43,7 @@ export default function FamilyReportsPage() {
         setFamilies(data);
       } catch (err) {
         console.error(err);
-        alert("حدث خطأ أثناء جلب الأسر");
+        showToast("حدث خطأ أثناء جلب الأسر", "error");
       } finally {
         setLoading(false);
       }

@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 import Footer from "@/app/FacLevel/components/Footer";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
+import Image from "next/image";
 
 const API_URL = getBaseUrl();
 
@@ -286,30 +288,7 @@ export default function EventDetailsPage() {
 
   const [rows, setRows] = useState<StudentRow[]>([]);
   const [busy, setBusy] = useState(false);
-
-  /* ===================== Toast Notification (same style) ===================== */
-  const [notification, setNotification] = useState<{
-    show: boolean;
-    message: string;
-    type: "success" | "error" | "warning";
-  }>({ show: false, message: "", type: "success" });
-
-  const toastTimerRef = useRef<number | null>(null);
-
-  const showToast = (message: string, type: "success" | "error" | "warning" = "success") => {
-    if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
-    setNotification({ show: true, message, type });
-    toastTimerRef.current = window.setTimeout(() => {
-      setNotification({ show: false, message: "", type: "success" });
-      toastTimerRef.current = null;
-    }, 2500);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
-    };
-  }, []);
+  const { showToast } = useToast();
 
   /* ===================== Images ===================== */
   const [images, setImages] = useState<ApiEventImage[]>([]);
@@ -865,20 +844,6 @@ const uploadImages = async (files: FileList | null) => {
 
   return (
     <div className={styles.page}>
-      {/* ✅ Toast notification (same style you gave me) */}
-      {notification.show && (
-        <div
-          className={`${styles.notification} ${
-            notification.type === "success"
-              ? styles.success
-              : notification.type === "error"
-              ? styles.error
-              : styles.warning
-          }`}
-        >
-          {notification.message}
-        </div>
-      )}
 
       <div className={styles.container}>
         <div className={styles.topBar}>
@@ -1080,7 +1045,7 @@ const uploadImages = async (files: FileList | null) => {
                 <div key={img.doc_id} className={styles.imageCard}>
                   <div className={styles.imagePreview}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img.file_url} alt={img.file_name} />
+                    <Image src={img.file_url} alt={img.file_name} width={300} height={200} style={{ objectFit: 'cover' }} />
                   </div>
 
                   <div className={styles.imageMeta}>

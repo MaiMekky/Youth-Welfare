@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Footer from "@/app/FacLevel/components/Footer";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 const API_URL = `${getBaseUrl()}`;
 
@@ -108,20 +109,7 @@ const [form, setForm] = useState<FormState>({
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Partial<Record<keyof FormState, boolean>>>({});
   const [submitting, setSubmitting] = useState(false);
-
-  /* ===================== Toast State ===================== */
-  const [toast, setToast] = useState<{ show: boolean; message: string; type: ToastType }>({
-    show: false,
-    message: "",
-    type: "success",
-  });
-
-  const showToast = (message: string, type: ToastType) => {
-    setToast({ show: true, message, type });
-    window.setTimeout(() => {
-      setToast({ show: false, message: "", type: "success" });
-    }, 2500);
-  };
+  const { showToast } = useToast();
 
   const setField = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((p) => ({ ...p, [key]: value }));
@@ -335,12 +323,6 @@ const [form, setForm] = useState<FormState>({
 
   return (
     <>
-      {/* ✅ Toast */}
-      {toast.show && (
-        <div className={`${styles.toast} ${styles[`toast_${toast.type}`]}`}>
-          {toast.message}
-        </div>
-      )}
 
       <div className={styles.page}>
         <div className={styles.container}>

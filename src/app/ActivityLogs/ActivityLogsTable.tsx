@@ -77,7 +77,11 @@ export default function ActivityLogsTable() {
     what: log.solidarity_id,
     status: log.action.includes("رفض") ? "فشل" : "نجاح",
     statusClass: log.action.includes("رفض") ? "failed" : "success",
-    activityType: log.target_type.includes("تكافل") ? "تكافل" : "أسر",
+    activityType: log.target_type.includes("تكافل")
+  ? "تكافل"
+  : log.target_type.includes("اسر") || log.target_type.includes("أسرة")
+  ? "اسر"
+  : "نشاط",
   }));
 
   // 🔍 الفلاتر
@@ -122,7 +126,8 @@ export default function ActivityLogsTable() {
         <select onChange={(e) => setActivityFilter(e.target.value)}>
           <option value="all">كل الأنشطة</option>
           <option value="تكافل">تكافل</option>
-          <option value="أسر">أسر</option>
+          <option value="اسر">اسر</option>
+          <option value="نشاط">نشاط</option>
         </select>
 
         <input

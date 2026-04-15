@@ -5,16 +5,18 @@ import { useRouter } from 'next/navigation';
 import styles from '@/app/CreateAdmins/access-privileges.module.css';
 import { useSearchParams } from 'next/navigation';
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from '@/app/context/ToastContext';
+import { handleBackendError } from '@/utils/errorHandler';
 
 function AddUserContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const admin_id = searchParams.get("id");
   const isEdit = Boolean(admin_id);
+  const { showToast } = useToast();
 
   const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
-  const [notification, setNotification] = useState<string | null>(null);
   const [departments, setDepartments] = useState<{ dept_id: number; name: string }[]>([]);
 
   const [formData, setFormData] = useState({
@@ -28,11 +30,6 @@ function AddUserContent() {
     departments: [] as string[],
   });
 
-  const showNotification = (message: string, type: "success" | "warning" | "error") => {
-    setNotification(`${type}:${message}`);
-    setTimeout(() => setNotification(null), 3500);
-  };
-
   const roleMap: { [key: string]: string } = {
     "faculty_admin":       "مسؤول كلية",
     "faculty_head":        "مدير كلية",
@@ -40,8 +37,6 @@ function AddUserContent() {
     "general_admin":       "مدير عام",
     "super_admin":         "مشرف النظام",
   };
-
-  const departmentsList = departments.map(d => d.name);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -60,11 +55,39 @@ function AddUserContent() {
         if (!facultiesRes.ok)   throw new Error('Failed to fetch faculties');
         if (!departmentsRes.ok) throw new Error('Failed to fetch departments');
 
+        const allDepartments = await departmentsRes.json();
+        
+        // Filter to show only specific departments
+        const allowedDepartments = [
+          'إدارة النشاط الثقافي و الفنى',
+          'إدارة النشاط الاجتماعي',
+          'إدارة النشاط الرياضي و الرحلات',
+          'إدارة الأسر الطلابية و الاتحادات',
+          'إدارة النشاط العلمى و التكنولوجي',
+          'إدارة التكافل الاجتماعي'
+        ];
+        
+        // Normalize function to handle spacing and special characters
+        const normalize = (str: string) => str.trim().replace(/\s+/g, ' ');
+        
+        const normalizedAllowed = allowedDepartments.map(normalize);
+        
+        const filteredDepartments = allDepartments.filter((dept: { name: string }) => {
+          const normalizedName = normalize(dept.name);
+          return normalizedAllowed.includes(normalizedName);
+        });
+
+        console.log('All departments:', allDepartments.map((d: any) => d.name));
+        console.log('Filtered departments:', filteredDepartments.map((d: any) => d.name));
+        console.log('Filtered count:', filteredDepartments.length);
+
         setFaculties(await facultiesRes.json());
-        setDepartments(await departmentsRes.json());
+        // If filtering results in empty array, show all departments (fallback)
+        setDepartments(filteredDepartments.length > 0 ? filteredDepartments : allDepartments);
       } catch (error) {
         console.error('Error fetching initial data:', error);
-        showNotification("حدث خطأ في تحميل البيانات", "error");
+        const errorMessage = await handleBackendError(error);
+        showToast(errorMessage, "error");
       } finally {
         setLoading(false);
       }
@@ -93,7 +116,11 @@ function AddUserContent() {
             ],
             status:      data.acc_status === 'active',
             faculty:     data.faculty ? data.faculty.toString() : '',
-            departments: data.dept_fac_ls,
+            departments: data.dept 
+              ? [data.dept.toString()] 
+              : data.dept_fac_ls 
+                ? data.dept_fac_ls.map((id: number) => id.toString()) 
+                : [],
           });
         })
         .catch(err => console.error('Error fetching admin data:', err));
@@ -164,7 +191,9 @@ function AddUserContent() {
         faculty:      facultyId,
         faculty_name: facultyName,
         dept:         formData.role === "department_manager" ? Number(formData.departments[0]) : null,
-        dept_fac_ls:  formData.role === "faculty_admin" ? formData.departments : [],
+        dept_fac_ls:  formData.role === "faculty_admin" 
+          ? formData.departments.filter(d => d && d !== '').map(Number) 
+          : [],
         acc_status:   formData.status ? "active" : "inactive",
         can_create:   formData.permissions.includes("C"),
         can_read:     formData.permissions.includes("R"),
@@ -179,16 +208,17 @@ function AddUserContent() {
       });
 
       if (!res.ok) {
-        const errorText = await res.text();
-        showNotification("حدث خطأ: " + errorText, "error");
+        const errorMessage = await handleBackendError(res);
+        showToast(errorMessage, "error");
         return;
       }
 
-      showNotification(isEdit ? "تم التحديث بنجاح 🎉" : "تم الإنشاء بنجاح 🎉", "success");
+      showToast(isEdit ? "تم التحديث بنجاح 🎉" : "تم الإنشاء بنجاح 🎉", "success");
       router.push('/CreateAdmins');
     } catch (err) {
       console.error(err);
-      showNotification("حدث خطأ ما.", "error");
+      const errorMessage = await handleBackendError(err);
+      showToast(errorMessage, "error");
     }
   };
 
@@ -208,15 +238,6 @@ function AddUserContent() {
 
   return (
     <div className={styles.pageWrapper} dir="rtl">
-
-      {notification && (
-        <div className={`${styles.notification} ${
-          notification.startsWith("success") ? styles.success :
-          notification.startsWith("warning") ? styles.warning : styles.error
-        }`}>
-          {notification.split(":")[1]}
-        </div>
-      )}
 
       <div className={styles.addUserWrapper}>
         <div className={styles.addUserCard}>
@@ -323,25 +344,24 @@ function AddUserContent() {
                     >
                       <option value="" hidden>اختر القسم</option>
                       {departments.map(dep => (
-                        <option key={dep.dept_id} value={dep.dept_id}>{dep.name}</option>
-                      ))}
+                      <option key={dep.dept_id} value={dep.dept_id.toString()}>{dep.name}</option>                      ))}
                     </select>
                   </div>
                 )}
               </div>
 
-              {(formData.role === "faculty_admin" || formData.role === "faculty_head") && (
+              {formData.role === "faculty_admin" && (
                 <div className={styles.formGroup} style={{ marginTop: 12 }}>
                   <label className={styles.fieldLabel}>الأقسام</label>
                   <div className={styles.checkboxGrid}>
-                    {departmentsList.map(dep => (
-                      <label key={dep} className={styles.checkboxCard}>
+                    {departments.map(dep => (
+                      <label key={dep.dept_id} className={styles.checkboxCard}>
                         <input
-                          type="checkbox" name="departments" value={dep}
-                          checked={formData.departments.includes(dep)}
+                          type="checkbox" name="departments" value={dep.dept_id.toString()}
+                          checked={formData.departments.includes(dep.dept_id.toString())}
                           onChange={handleChange}
                         />
-                        <span>{dep}</span>
+                        <span>{dep.name}</span>
                       </label>
                     ))}
                   </div>

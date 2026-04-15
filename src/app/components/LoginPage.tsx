@@ -16,25 +16,21 @@ interface Dept { dept_id: number; dept_name: string; }
 
 // ── Route maps per role level ─────────────────────────────────
 const FAC_ROUTE_MAP: Record<string, string> = {
-  "التكافل الإجتماعي":  "/FacLevel",
-  "التكافل الاجتماعي":  "/FacLevel",
-  "الأسر الطلابية":     "/Family-Faclevel/events",
-  "الأنشطة الرياضية":   "/Events-Faclevel",
-  "الأنشطة الثقافية":   "/Events-Faclevel",
-  "الأنشطة البيئية":    "/Events-Faclevel",
-  "الأنشطة الاجتماعية": "/Events-Faclevel",
-  "الأنشطة العلمية":    "/Events-Faclevel",
+  "إدارة التكافل الاجتماعي":  "/FacLevel",
+  "إدارة الأسر الطلابية و الاتحادات" :  "/Family-Faclevel/events",
+  "إدارة النشاط الثقافي و الفنى":   "/Events-Faclevel",
+  "إدارة النشاط الاجتماعي":   "/Events-Faclevel",
+  "إدارة النشاط الرياضي و الرحلات":    "/Events-Faclevel",
+  "إدارة النشاط العلمى و التكنولوجي": "/Events-Faclevel",
 };
 
 const UNI_ROUTE_MAP: Record<string, string> = {
-  "التكافل الإجتماعي":  "/uni-level",
-  "التكافل الاجتماعي":  "/uni-level",
-  "الأسر الطلابية":     "/uni-level-family",
-  "الأنشطة الرياضية":   "/uni-level-activities",
-  "الأنشطة الثقافية":   "/uni-level-activities",
-  "الأنشطة البيئية":    "/uni-level-activities",
-  "الأنشطة الاجتماعية": "/uni-level-activities",
-  "الأنشطة العلمية":    "/uni-level-activities",
+"إدارة التكافل الاجتماعي":  "/uni-level",
+  "إدارة الأسر الطلابية و الاتحادات" :     "/uni-level-family",
+  "إدارة النشاط الرياضي و الرحلات":   "/uni-level-activities",
+  "إدارة النشاط الثقافي و الفنى":   "/uni-level-activities",
+  "إدارة النشاط الاجتماعي": "/uni-level-activities",
+  "إدارة النشاط العلمى و التكنولوجي":  "/uni-level-activities",
 };
 
 function getFirstRoute(

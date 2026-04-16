@@ -1,4 +1,3 @@
-// File: components/Filters.tsx
 "use client";
 
 import React from "react";
@@ -11,6 +10,8 @@ interface Props {
   setSelectedFaculty: (v: number) => void;
   selectedFamilyType: string;
   setSelectedFamilyType: (v: string) => void;
+  selectedStatus: string;
+  setSelectedStatus: (v: string) => void;
 }
 
 export default function Filters({
@@ -20,8 +21,9 @@ export default function Filters({
   setSelectedFaculty,
   selectedFamilyType,
   setSelectedFamilyType,
+  selectedStatus,
+  setSelectedStatus,
 }: Props) {
-  // Map family type values to display labels
   const familyTypeLabels: Record<string, string> = {
     all: "الكل",
     "نوعية": "نوعية",
@@ -31,15 +33,13 @@ export default function Filters({
   return (
     <div className={styles.filtersContainer}>
       <div className={styles.filterGroup}>
-        <label className={styles.filterLabel}>الكلية:</label>
+        <label className={styles.filterLabel}>الكلية</label>
         <select
           className={styles.filterSelect}
           value={String(selectedFaculty)}
           onChange={(e) => {
             const val = Number(e.target.value);
-            if (!isNaN(val)) {
-              setSelectedFaculty(val);
-            }
+            if (!isNaN(val)) setSelectedFaculty(val);
           }}
         >
           {faculties.map((f, index) => (
@@ -51,7 +51,7 @@ export default function Filters({
       </div>
 
       <div className={styles.filterGroup}>
-        <label className={styles.filterLabel}>نوع الأسرة:</label>
+        <label className={styles.filterLabel}>نوع الأسرة</label>
         <select
           className={styles.filterSelect}
           value={selectedFamilyType}
@@ -62,6 +62,21 @@ export default function Filters({
               {familyTypeLabels[t] || t}
             </option>
           ))}
+        </select>
+      </div>
+
+      <div className={styles.filterGroup}>
+        <label className={styles.filterLabel}>حالة الأسرة</label>
+        <select
+          className={styles.filterSelect}
+          value={selectedStatus}
+          onChange={(e) => setSelectedStatus(e.target.value)}
+        >
+          <option value="all">الكل</option>
+          <option value="مقبول">مقبول</option>
+          <option value="مرفوض">مرفوض</option>
+          <option value="موافقة مبدئية">موافقة مبدئية</option>
+          <option value="منتظر">منتظر</option>
         </select>
       </div>
     </div>

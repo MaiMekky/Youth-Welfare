@@ -37,7 +37,45 @@ function AddUserContent() {
     "general_admin":       "مدير عام",
     "super_admin":         "مشرف النظام",
   };
+  
+  const validatePassword = (password: string) => {
+  const minLength = 8;
+  const hasUpper  = /[A-Z]/.test(password);
+  const hasLower  = /[a-z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
 
+  if (password.length < minLength) {
+    return "كلمة المرور يجب أن تكون 8 أحرف على الأقل";
+  }
+  if (!hasUpper) {
+    return "يجب أن تحتوي على حرف كبير واحد على الأقل";
+  }
+  if (!hasLower) {
+    return "يجب أن تحتوي على حرف صغير واحد على الأقل";
+  }
+  if (!hasNumber) {
+    return "يجب أن تحتوي على رقم واحد على الأقل";
+  }
+
+  return null; // valid
+};
+
+const validateEmail = (email: string) => {
+  const normalized = email.trim().toLowerCase();
+
+  // Strong but practical regex
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  if (!normalized) {
+    return "البريد الإلكتروني مطلوب";
+  }
+
+  if (!emailRegex.test(normalized)) {
+    return "يرجى إدخال بريد إلكتروني صحيح";
+  }
+
+  return null;
+};
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
@@ -64,7 +102,8 @@ function AddUserContent() {
           'إدارة النشاط الرياضي و الرحلات',
           'إدارة الأسر الطلابية و الاتحادات',
           'إدارة النشاط العلمى و التكنولوجي',
-          'إدارة التكافل الاجتماعي'
+          'إدارة التكافل الاجتماعي',
+          'إدارة الجوالة و الخدمة العامة و المعسكرات'
         ];
         
         // Normalize function to handle spacing and special characters
@@ -132,10 +171,10 @@ function AddUserContent() {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
 
-    if (name === 'email') {
-      setFormData(prev => ({ ...prev, email: value.toLowerCase() }));
-      return;
-    }
+   if (name === 'email') {
+    setFormData(prev => ({ ...prev, email: value.trimStart().toLowerCase() }));
+    return;
+  }
 
     if (formData.role === "department_manager" && name === "departments") {
       setFormData(prev => ({ ...prev, departments: [value] }));
@@ -168,60 +207,91 @@ function AddUserContent() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem('access');
-      if (!token) throw new Error('User not authenticated');
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-      const url    = isEdit ? `${getBaseUrl()}/api/auth/admin_management/${admin_id}/` : `${getBaseUrl()}/api/auth/admin_management/`;
-      const method = isEdit ? 'PATCH' : 'POST';
-
-      const facultyId   = formData.faculty ? Number(formData.faculty) : null;
-      const facultyName = faculties.find(f => f.faculty_id === facultyId)?.name || null;
-
-      const normalizedEmail = formData.email.trim().toLowerCase();
-
-      const payload = {
-        ...(isEdit ? {} : { admin_id: 0 }),
-        name:         formData.name,
-        email:        normalizedEmail,
-        ...(formData.password && { password: formData.password }),
-        role:         roleMap[formData.role] || formData.role,
-        faculty:      facultyId,
-        faculty_name: facultyName,
-        dept:         formData.role === "department_manager" ? Number(formData.departments[0]) : null,
-        dept_fac_ls:  formData.role === "faculty_admin" 
-          ? formData.departments.filter(d => d && d !== '').map(Number) 
-          : [],
-        acc_status:   formData.status ? "active" : "inactive",
-        can_create:   formData.permissions.includes("C"),
-        can_read:     formData.permissions.includes("R"),
-        can_update:   formData.permissions.includes("U"),
-        can_delete:   formData.permissions.includes("D"),
-      };
-
-      const res = await authFetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const errorMessage = await handleBackendError(res);
-        showToast(errorMessage, "error");
+  try {
+    const token = localStorage.getItem('access');
+    if (!token) throw new Error('User not authenticated');
+    // ✅ EMAIL VALIDATION
+    const emailError = validateEmail(formData.email);
+    if (emailError) {
+      showToast(emailError, "error");
+      return;
+    }
+    // ✅ PASSWORD VALIDATION LOGIC
+    if (!isEdit) {
+      // CREATE → required
+      const error = validatePassword(formData.password);
+      if (error) {
+        showToast(error, "error");
         return;
       }
-
-      showToast(isEdit ? "تم التحديث بنجاح 🎉" : "تم الإنشاء بنجاح 🎉", "success");
-      router.push('/CreateAdmins');
-    } catch (err) {
-      console.error(err);
-      const errorMessage = await handleBackendError(err);
-      showToast(errorMessage, "error");
+    } else if (isEdit && formData.password) {
+      // EDIT → only if user typed password
+      const error = validatePassword(formData.password);
+      if (error) {
+        showToast(error, "error");
+        return;
+      }
     }
-  };
 
+    const url    = isEdit
+      ? `${getBaseUrl()}/api/auth/admin_management/${admin_id}/`
+      : `${getBaseUrl()}/api/auth/admin_management/`;
+
+    const method = isEdit ? 'PATCH' : 'POST';
+
+    const facultyId   = formData.faculty ? Number(formData.faculty) : null;
+    const facultyName = faculties.find(f => f.faculty_id === facultyId)?.name || null;
+
+    const normalizedEmail = formData.email.trim().toLowerCase();
+
+    const payload = {
+      ...(isEdit ? {} : { admin_id: 0 }),
+      name:         formData.name,
+      email:        normalizedEmail,
+      ...(formData.password && { password: formData.password }), // ✅ already correct
+      role:         roleMap[formData.role] || formData.role,
+      faculty:      facultyId,
+      faculty_name: facultyName,
+      dept:         formData.role === "department_manager"
+        ? Number(formData.departments[0])
+        : null,
+      dept_fac_ls:  formData.role === "faculty_admin"
+        ? formData.departments.filter(d => d && d !== '').map(Number)
+        : [],
+      acc_status:   formData.status ? "active" : "inactive",
+      can_create:   formData.permissions.includes("C"),
+      can_read:     formData.permissions.includes("R"),
+      can_update:   formData.permissions.includes("U"),
+      can_delete:   formData.permissions.includes("D"),
+    };
+
+    const res = await authFetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errorMessage = await handleBackendError(res);
+      showToast(errorMessage, "error");
+      return;
+    }
+
+    showToast(isEdit ? "تم التحديث بنجاح 🎉" : "تم الإنشاء بنجاح 🎉", "success");
+    router.push('/CreateAdmins');
+
+  } catch (err) {
+    console.error(err);
+    const errorMessage = await handleBackendError(err);
+    showToast(errorMessage, "error");
+  }
+};
   if (loading) {
     return (
       <div className={styles.pageWrapper} dir="rtl">
@@ -280,12 +350,14 @@ function AddUserContent() {
                 <div className={styles.formGroup}>
                   <label className={styles.fieldLabel}>البريد الإلكتروني</label>
                   <input
-                    type="email" name="email"
+                    type="email"
+                    name="email"
                     className={styles.addUserInput}
                     placeholder="example@domain.com"
                     value={formData.email}
                     onChange={handleChange}
                     required
+                    pattern="[^\s@]+@[^\s@]+\.[^\s@]{2,}"
                   />
                 </div>
                 <div className={styles.formGroup}>

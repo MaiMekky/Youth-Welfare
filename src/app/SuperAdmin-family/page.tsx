@@ -15,6 +15,7 @@ export default function Page() {
 
   const [selectedFaculty, setSelectedFaculty] = useState<number>(-1);
   const [selectedFamilyType, setSelectedFamilyType] = useState<string>("all");
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
 
   const [families, setFamilies] = useState<Record<string, unknown>[]>([]);
   const [loadingFamilies, setLoadingFamilies] = useState(false);
@@ -231,8 +232,12 @@ export default function Page() {
       filtered = filtered.filter((f) => f.type === selectedFamilyType);
     }
 
+    if (selectedStatus !== "all") {
+      filtered = filtered.filter((f) => f.status === selectedStatus);
+    }
+
     return filtered;
-  }, [qualityFamilies, selectedFaculty, selectedFamilyType]);
+  }, [qualityFamilies, selectedFaculty, selectedFamilyType, selectedStatus]);
 
   const pendingCount = useMemo(
     () => filteredQualityFamilies.filter((f) => f.needsApproval).length,
@@ -250,11 +255,14 @@ export default function Page() {
       )}
 
       <header className={styles.headerCard}>
+        <div className={styles.titleWrapper}>
         <h1 className={styles.pageTitle}>إدارة الأسر الطلابية</h1>
         <p className={styles.pageSubtitle}>
           إدارة ومتابعة جميع الأسر الطلابية المركزية والنوعية وأصدقاء البيئة
         </p>
+        </div>
       </header>
+      
 
       <StatsGrid stats={stats} />
 
@@ -286,6 +294,8 @@ export default function Page() {
               setSelectedFaculty={setSelectedFaculty}
               selectedFamilyType={selectedFamilyType}
               setSelectedFamilyType={setSelectedFamilyType}
+              selectedStatus={selectedStatus}
+              setSelectedStatus={setSelectedStatus}
             />
             <FamiliesGrid
               families={filteredQualityFamilies}

@@ -34,6 +34,10 @@
 }
 
 .pageHeader {
+  background: linear-gradient(140deg, var(--navy) 0%, var(--navy-mid) 100%);
+  border-radius: 16px;
+  padding: 24px 30px;
+  box-shadow: 0 4px 18px rgba(30,58,95,.22);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -44,13 +48,13 @@
   margin: 0;
   font-size: 24px;
   font-weight: 900;
-  color: var(--navy);
+  color: #fff;
   letter-spacing: -0.3px;
 }
 .pageSubtitle {
-  margin: 4px 0 0;
+  margin: 5px 0 0;
   font-size: 14px;
-  color: var(--mute);
+  color: rgba(255,255,255,.65);
   font-weight: 500;
 }
 
@@ -402,7 +406,11 @@
 .checkboxCard input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--navy-mid); flex-shrink: 0; cursor: pointer; }
 
 /* ── Permissions Grid ── */
-.permissionsGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.permissionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
 
 .permCard {
   display: flex;
@@ -410,7 +418,7 @@
   align-items: center;
   justify-content: flex-start;
   gap: 16px;
-  padding: 22px 24px;
+  padding: clamp(12px, 2vw, 22px);
   border: 1.5px solid var(--border);
   border-radius: 12px;
   background: #fff;
@@ -435,7 +443,7 @@
 }
 
 .permCardIcon  { display: none; }
-.permCardLabel { font-size: 22px; font-weight: 900; color: var(--navy); }
+.permCardLabel { font-size: clamp(16px, 2vw, 22px); font-weight: 900; color: var(--navy); }
 
 .permCard[data-perm="C"].permCardActive { background: #FEF3C7 !important; border-color: #D97706 !important; box-shadow: 0 0 0 3px rgba(217,119,6,.1); }
 .permCard[data-perm="C"].permCardActive .permCardLabel { color: #92400E; }
@@ -501,4 +509,15 @@
   .permCardLabel { font-size: 18px; }
   .addUserBtns   { flex-direction: column-reverse; }
   .addUserBtnCancel, .addUserBtnSubmit { width: 100%; text-align: center; }
+}
+@media (max-width: 768px) {
+  .permissionsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .permissionsGrid {
+    grid-template-columns: 1fr;
+  }
 }

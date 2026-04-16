@@ -14,35 +14,33 @@ interface LoginPageProps {
 
 interface Dept { dept_id: number; dept_name: string; }
 
-// ── Route maps per role level ─────────────────────────────────
-const FAC_ROUTE_MAP: Record<string, string> = {
-  "التكافل الإجتماعي":  "/FacLevel",
-  "التكافل الاجتماعي":  "/FacLevel",
-  "الأسر الطلابية":     "/Family-Faclevel/events",
-  "الأنشطة الرياضية":   "/Events-Faclevel",
-  "الأنشطة الثقافية":   "/Events-Faclevel",
-  "الأنشطة البيئية":    "/Events-Faclevel",
-  "الأنشطة الاجتماعية": "/Events-Faclevel",
-  "الأنشطة العلمية":    "/Events-Faclevel",
+// ── Route maps per role level (keyed by dept_id) ─────────────────────────────────
+const FAC_ROUTE_MAP: Record<number, string> = {
+  6: "/FacLevel",                    // إدارة التكافل الاجتماعي
+  4: "/Family-Faclevel/events",      // إدارة الأسر الطلابية و الاتحادات
+  1: "/Events-Faclevel",             // إدارة النشاط الثقافي و الفنى
+  2: "/Events-Faclevel",             // إدارة النشاط الاجتماعي
+  3: "/Events-Faclevel",             // إدارة النشاط الرياضي و الرحلات
+  5: "/Events-Faclevel",             // إدارة النشاط العلمى و التكنولوجي
+  7:"/Events-Faclevel"                 // إدارة الجوالة و الرحلات و المعسكرات   
 };
 
-const UNI_ROUTE_MAP: Record<string, string> = {
-  "التكافل الإجتماعي":  "/uni-level",
-  "التكافل الاجتماعي":  "/uni-level",
-  "الأسر الطلابية":     "/uni-level-family",
-  "الأنشطة الرياضية":   "/uni-level-activities",
-  "الأنشطة الثقافية":   "/uni-level-activities",
-  "الأنشطة البيئية":    "/uni-level-activities",
-  "الأنشطة الاجتماعية": "/uni-level-activities",
-  "الأنشطة العلمية":    "/uni-level-activities",
+const UNI_ROUTE_MAP: Record<number, string> = {
+  6: "/uni-level",                   // إدارة التكافل الاجتماعي
+  4: "/uni-level-family",            // إدارة الأسر الطلابية و الاتحادات
+  3: "/uni-level-activities",        // إدارة النشاط الرياضي و الرحلات
+  1: "/uni-level-activities",        // إدارة النشاط الثقافي و الفنى
+  2: "/uni-level-activities",        // إدارة النشاط الاجتماعي
+  5: "/uni-level-activities",        // إدارة النشاط العلمى و التكنولوجي
+  7: "/uni-level-activities"         // إدارة الجوالة و الرحلات و المعسكرات
 };
 
 function getFirstRoute(
   departments: Dept[],
-  map: Record<string, string>
+  map: Record<number, string>
 ): string | null {
   for (const dept of departments) {
-    const route = map[dept.dept_name.trim()];
+    const route = map[dept.dept_id];
     if (route) return route;
   }
   return null;

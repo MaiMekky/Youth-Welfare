@@ -5,6 +5,7 @@ import { useMemo, useState, useEffect } from "react";
 import styles from "../styles/EventManagment.module.css";
 import { useRouter } from "next/navigation";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+
 /* ══════════════════════════════════════════
    API TYPES
 ══════════════════════════════════════════ */
@@ -56,13 +57,13 @@ const mapApiEvent = (e: ApiEvent, facultyMap: Map<number, string>): EventRow => 
     e.faculty_name ?? "—";
   return {
     event_id:    e.event_id,
-    title:       e.title,
-    description: e.description,
+    title:       e.title       ?? "",
+    description: e.description ?? "",
     startDate:   e.st_date  ? e.st_date.slice(0, 10)  : "—",
     endDate:     e.end_date ? e.end_date.slice(0, 10) : "—",
-    location:    e.location ?? "—",
+    location:    e.location ?? "",
     status:      e.status   ?? (e.active ? "active" : "pending"),
-    type:        e.type     ?? "—",
+    type:        e.type     ?? "",
     faculty:     facultyName,
     cost:        parseFloat(e.cost) || 0,
     capacity:    e.s_limit,
@@ -134,14 +135,6 @@ function BoltIcon({ className }: { className?: string }) {
     </svg>
   );
 }
-function SearchIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" fill="none" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M16.5 16.5 21 21" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-    </svg>
-  );
-}
 
 /* ══════════════════════════════════════════
    SKELETON
@@ -153,7 +146,7 @@ function SkeletonRow() {
         <td key={i} className={styles.td}>
           <div style={{
             height: 14, borderRadius: 6,
-            background: "linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%)",
+            background: "linear-gradient(90deg,#EBF3FB 25%,#dce9f4 50%,#EBF3FB 75%)",
             backgroundSize: "200% 100%", animation: "shimmer 1.4s infinite",
             width: i === 0 ? "130px" : i === 7 ? "60px" : "70px",
           }} />
@@ -215,11 +208,14 @@ export default function EventsPage() {
     load();
   }, []);
 
+  // ✅ FIX: null-safe toLowerCase with optional chaining + fallback
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
     return data.filter((e) => {
-      const mq = !query || e.title.toLowerCase().includes(query) ||
-        e.description.toLowerCase().includes(query) || e.location.toLowerCase().includes(query);
+      const mq = !query ||
+        (e.title       ?? "").toLowerCase().includes(query) ||
+        (e.description ?? "").toLowerCase().includes(query) ||
+        (e.location    ?? "").toLowerCase().includes(query);
       return mq &&
         (!statusFilter  || e.status  === statusFilter) &&
         (!typeFilter    || e.type    === typeFilter) &&
@@ -232,238 +228,243 @@ export default function EventsPage() {
   const activeCount    = useMemo(() => data.filter((e) => e.status === "active" || e.status === "نشطة" || e.status === "مقبول").length, [data]);
   const totalEvents    = data.length;
 
-  const types    = useMemo(() => Array.from(new Set(data.map((e) => e.type).filter(Boolean))),   [data]);
-  const statuses = useMemo(() => Array.from(new Set(data.map((e) => e.status).filter(Boolean))), [data]);
-
   const handleView = (id: number) => router.push(`/SuperAdmin/Events/${id}`);
 
   return (
-    <div className={styles.page} dir="rtl" lang="ar">
-      <style>{`
-        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-        @keyframes spin    { to{transform:rotate(360deg)} }
-        @keyframes fadeUp  { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
-      `}</style>
+    <div className={styles.activityLogsContainer} dir="rtl" lang="ar">
 
-      <div className={styles.container}>
-
-        {/* Heading */}
-        <div className={styles.pageHeading}>
+      {/* Page Header */}
+      <div className={styles.pageHeader}>
+        <div>
           <h1 className={styles.pageTitle}>إدارة الفعاليات</h1>
           <p className={styles.pageSubtitle}>عرض وتصفية جميع الفعاليات المسجلة في المنظومة</p>
         </div>
+      </div>
 
-        {/* Stats */}
-        <section className={styles.stats}>
-          <div className={`${styles.statCard} ${styles.statCardGold}`}>
-            <div className={styles.statIconWrap}><MoneyIcon className={styles.statIcon} /></div>
-            <div className={styles.statMeta}>
-              <div className={styles.statLabel}>التكلفة الإجمالية</div>
-              <div className={styles.statValue}>{loading ? "…" : `${totalCost.toLocaleString("EG")} ج`}</div>
-            </div>
+      {/* Stats Row */}
+      <div className={styles.statsRow}>
+        <div className={`${styles.statCard} ${styles.statTotal}`}>
+          {/* <div className={styles.statIconWrap}><CalendarIcon className={styles.statIcon} /></div> */}
+          <div className={styles.statMeta}>
+            <div className={styles.statNum}>{loading ? "…" : totalEvents}</div>
+            <div className={styles.statLabel}>إجمالي الفعاليات</div>
           </div>
-
-          <div className={`${styles.statCard} ${styles.statCardGreen}`}>
-            <div className={styles.statIconWrap}><CheckDocIcon className={styles.statIcon} /></div>
-            <div className={styles.statMeta}>
-              <div className={styles.statLabel}>الفعاليات المكتملة</div>
-              <div className={styles.statValue}>{loading ? "…" : completedCount}</div>
-            </div>
+        </div>
+        <div className={`${styles.statCard} ${styles.statSuccess}`}>
+          {/* <div className={styles.statIconWrap}><BoltIcon className={styles.statIcon} /></div> */}
+          <div className={styles.statMeta}>
+            <div className={styles.statNum}>{loading ? "…" : activeCount}</div>
+            <div className={styles.statLabel}>الفعاليات النشطة</div>
           </div>
-
-          <div className={`${styles.statCard} ${styles.statCardBlue}`}>
-            <div className={styles.statIconWrap}><BoltIcon className={styles.statIcon} /></div>
-            <div className={styles.statMeta}>
-              <div className={styles.statLabel}>الفعاليات النشطة</div>
-              <div className={styles.statValue}>{loading ? "…" : activeCount}</div>
-            </div>
+        </div>
+        <div className={`${styles.statCard} ${styles.statFailed}`}>
+          {/* <div className={styles.statIconWrap}><CheckDocIcon className={styles.statIcon} /></div> */}
+          <div className={styles.statMeta}>
+            <div className={styles.statNum}>{loading ? "…" : completedCount}</div>
+            <div className={styles.statLabel}>الفعاليات المكتملة</div>
           </div>
-
-          <div className={`${styles.statCard} ${styles.statCardPurple}`}>
-            <div className={styles.statIconWrap}><CalendarIcon className={styles.statIcon} /></div>
-            <div className={styles.statMeta}>
-              <div className={styles.statLabel}>إجمالي الفعاليات</div>
-              <div className={styles.statValue}>{loading ? "…" : totalEvents}</div>
-            </div>
+        </div>
+        <div className={`${styles.statCard} ${styles.statFiltered}`}>
+          {/* <div className={styles.statIconWrap}><MoneyIcon className={styles.statIcon} /></div> */}
+          <div className={styles.statMeta}>
+            <div className={styles.statNum}>{loading ? "…" : `${totalCost.toLocaleString("EG")}`}</div>
+            <div className={styles.statLabel}>التكلفة الإجمالية (ج)</div>
           </div>
-        </section>
+        </div>
+      </div>
 
-        {/* Panel */}
-        <section className={styles.panel}>
+      {/* Controls Bar */}
+      <div className={styles.controlsBar}>
+        <div className={styles.selectWrapper}>
+          <select
+            className={styles.roleSelect}
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="">كل الحالات</option>
+            <option value="مقبول">مقبول</option>
+            <option value="موافقة مبدئية">موافقة مبدئية</option>
+            <option value="منتظر">منتظر</option>
+          </select>
+        </div>
 
-          <div className={styles.panelHeader}>
-            <div className={styles.searchWrapFull}>
-              <SearchIcon className={styles.searchIcon} />
-              <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                className={styles.searchInput}
-                placeholder="ابحث باسم الفعالية، المكان، الوصف..."
-              />
-            </div>
-          </div>
+        <div className={styles.selectWrapper}>
+          <select
+            className={styles.roleSelect}
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+          >
+            <option value="">كل الأنواع</option>
+            <option value="داخلي">داخلي</option>
+            <option value="خارجي">خارجي</option>
+          </select>
+        </div>
 
-          <div className={styles.filters}>
-            <select className={styles.select} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-              <option value="">كل الحالات</option>
-              {statuses.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
-            <select className={styles.select} value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-              <option value="">كل الأنواع</option>
-              {types.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
-            <select className={styles.select} value={facultyFilter} onChange={(e) => setFacultyFilter(e.target.value)}>
-              <option value="">كل الكليات</option>
-              {facultyList.map((f) => <option key={f.faculty_id} value={f.name}>{f.name}</option>)}
-            </select>
-          </div>
+        <div className={styles.selectWrapper}>
+          <select
+            className={styles.roleSelect}
+            value={facultyFilter}
+            onChange={(e) => setFacultyFilter(e.target.value)}
+          >
+            <option value="">كل الكليات</option>
+            {facultyList.map((f) => (
+              <option key={f.faculty_id} value={f.name}>{f.name}</option>
+            ))}
+          </select>
+        </div>
 
-          {error && (
-            <div className={styles.errorBanner}>
-              ⚠️ {error}
-              <button onClick={() => window.location.reload()} className={styles.retryBtn}>إعادة المحاولة</button>
-            </div>
-          )}
+        <div className={styles.searchWrapper}>
+          <svg className={styles.searchIcon} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="text"
+            placeholder="ابحث باسم الفعالية، المكان، الوصف..."
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            className={styles.searchInput}
+          />
+        </div>
+      </div>
 
-          {/* {!loading && !error && (
-            <div className={styles.resultsBar}>
-              <span className={styles.resultsCount}>{filtered.length}</span> فعالية
-            </div>
-          )} */}
+      {/* Error Banner */}
+      {error && (
+        <div className={styles.errorBanner}>
+          {error}
+          <button onClick={() => window.location.reload()} className={styles.retryBtn}>إعادة المحاولة</button>
+        </div>
+      )}
 
-          {/* Desktop Table */}
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th className={styles.th}>الفعالية</th>
-                  <th className={styles.th}>الكلية</th>
-                  <th className={styles.th}>النوع</th>
-                  <th className={styles.th}>الحالة</th>
-                  <th className={styles.th}>التاريخ والمكان</th>
-                  <th className={styles.th}>السعة</th>
-                  <th className={styles.th}>التكلفة</th>
-                  <th className={styles.th}>إجراءات</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading && Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)}
+      {/* Table */}
+      <div className={styles.tableContainer}>
+        <table className={styles.logsTable}>
+          <thead>
+            <tr>
+              <th>الفعالية</th>
+              <th>الكلية</th>
+              <th>النوع</th>
+              <th>الحالة</th>
+              <th>التاريخ والمكان</th>
+              <th>السعة</th>
+              <th>التكلفة</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading && Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)}
 
-                {!loading && !error && filtered.length === 0 && (
-                  <tr>
-                    <td colSpan={8} className={styles.emptyCell}>
-                      <div className={styles.emptyState}>
-                        <div className={styles.emptyIcon}></div>
-                        <div className={styles.emptyText}>لا توجد فعاليات تطابق معايير البحث</div>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-
-                {!loading && filtered.map((e, idx) => (
-                  <tr key={e.event_id} className={styles.tr} style={{ animationDelay: `${idx * 25}ms` }}>
-
-                    <td className={styles.td}>
-                      <div className={styles.detailsCell}>
-                        <div className={styles.detailsTitle}>{e.title}</div>
-                        {e.createdBy && <div className={styles.detailsBy}>بواسطة: {e.createdBy}</div>}
-                      </div>
-                    </td>
-
-                    <td className={styles.td}>
-                      <span className={styles.facultyChip}>{e.faculty}</span>
-                    </td>
-
-                    <td className={styles.td}>
-                      <span className={styles.typeChip}>{e.type}</span>
-                    </td>
-
-                    <td className={styles.td}>
-                      <span className={`${styles.statusBadge} ${getStatusClass(e.status)}`}>
-                        <span className={styles.statusDot} />
-                        {e.status}
-                      </span>
-                    </td>
-
-                    <td className={styles.td}>
-                      <div className={styles.dateCell}>
-                        <div className={styles.dateRange}>{e.startDate} — {e.endDate}</div>
-                        <div className={styles.locationText}>{e.location}</div>
-                      </div>
-                    </td>
-
-                    <td className={styles.td}>
-                      <div className={styles.capacityCell}>
-                        <div className={styles.capacityValue}>{e.capacity}</div>
-                        <div className={styles.capacityHint}>طالب</div>
-                      </div>
-                    </td>
-
-                    <td className={styles.td}>
-                      <span className={e.cost > 0 ? styles.costValue : styles.costFree}>
-                        {e.cost > 0 ? `${e.cost.toLocaleString("EG")} ج` : "مجاني"}
-                      </span>
-                    </td>
-
-                    <td className={styles.td}>
-                      <button className={styles.viewBtn} onClick={() => handleView(e.event_id)} type="button">
-                      عرض التفاصيل 
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile Cards */}
-          <div className={styles.mobileList}>
-            {loading && (
-              <div style={{ textAlign: "center", padding: "40px 0", color: "#6b7280" }}>
-                <div style={{ width: 32, height: 32, border: "3px solid #e5e7eb", borderTopColor: "#bfa032", borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 12px" }} />
-                جاري التحميل...
-              </div>
+            {!loading && !error && filtered.length === 0 && (
+              <tr>
+                <td colSpan={8} className={styles.emptyState}>
+                  <div className={styles.emptyIcon}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                      <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/>
+                    </svg>
+                  </div>
+                  <p>لا توجد فعاليات تطابق معايير البحث</p>
+                </td>
+              </tr>
             )}
+
             {!loading && filtered.map((e) => (
-              <article key={e.event_id} className={styles.mobileCard}>
-                <div className={styles.mobileTop}>
-                  <div className={styles.mobileTitle}>{e.title}</div>
-                  <span className={`${styles.statusBadge} ${getStatusClass(e.status)}`}>
-                    <span className={styles.statusDot} />
+              <tr key={e.event_id} className={styles.tr}>
+                <td>
+                  <div className={styles.actorCell}>
+                    <div className={styles.actorAvatar}>{(e.title ?? "؟").charAt(0)}</div>
+                    <div>
+                      <div className={styles.actorName}>{e.title || "—"}</div>
+                      {e.createdBy && <div className={styles.actorSub}>بواسطة: {e.createdBy}</div>}
+                    </div>
+                  </div>
+                </td>
+                <td><span className={styles.roleBadge}>{e.faculty}</span></td>
+                <td><span className={styles.typeChip}>{e.type || "—"}</span></td>
+                <td>
+                  <span className={`${styles.statusTag} ${getStatusClass(e.status)}`}>
                     {e.status}
                   </span>
-                </div>
-                <div className={styles.mobileMeta}>
-                  <span className={styles.typeChip}>{e.type}</span>
-                  <span className={styles.facultyChip}>{e.faculty}</span>
-                </div>
-                <div className={styles.mobileRow}>
-                  <div className={styles.mobileLabel}>التاريخ</div>
-                  <div className={styles.mobileValue}>{e.startDate} — {e.endDate}</div>
-                </div>
-                <div className={styles.mobileRow}>
-                  <div className={styles.mobileLabel}>المكان</div>
-                  <div className={styles.mobileValue}>{e.location}</div>
-                </div>
-                <div className={styles.mobileRow}>
-                  <div className={styles.mobileLabel}>السعة</div>
-                  <div className={styles.mobileValue}>{e.capacity} طالب</div>
-                </div>
-                <div className={styles.mobileRow}>
-                  <div className={styles.mobileLabel}>التكلفة</div>
-                  <div className={styles.mobileValue}>
-                    {e.cost > 0 ? `${e.cost.toLocaleString("EG")} ج` : "مجاني"}
+                </td>
+                <td>
+                  <div className={styles.dateCell}>
+                    <span className={styles.dateText}>{e.startDate} — {e.endDate}</span>
+                    <span className={styles.locationText}>{e.location || "—"}</span>
                   </div>
-                </div>
-                <button className={styles.viewBtnMobile} onClick={() => handleView(e.event_id)} type="button">
-                  عرض التفاصيل
-                </button>
-              </article>
+                </td>
+                <td>
+                  <div className={styles.capacityCell}>
+                    <span className={styles.capacityValue}>{e.capacity}</span>
+                    <span className={styles.capacityHint}>طالب</span>
+                  </div>
+                </td>
+                <td>
+                  <span className={e.cost > 0 ? styles.costValue : styles.costFree}>
+                    {e.cost > 0 ? `${e.cost.toLocaleString("EG")} ج` : "مجاني"}
+                  </span>
+                </td>
+                <td>
+                  <button className={styles.viewBtn} onClick={() => handleView(e.event_id)} type="button">
+                    عرض التفاصيل
+                  </button>
+                </td>
+              </tr>
             ))}
-          </div>
-
-        </section>
+          </tbody>
+        </table>
       </div>
+
+      {/* Mobile Cards */}
+      <div className={styles.mobileList}>
+        {loading && (
+          <div style={{ textAlign: "center", padding: "40px 0", color: "#6B8299", fontFamily: "Cairo, sans-serif" }}>
+            <div style={{
+              width: 32, height: 32,
+              border: "3px solid #EBF3FB",
+              borderTopColor: "#2D5F8A",
+              borderRadius: "50%",
+              animation: "spin 0.8s linear infinite",
+              margin: "0 auto 12px"
+            }} />
+            جاري التحميل...
+          </div>
+        )}
+        {!loading && filtered.map((e) => (
+          <article key={e.event_id} className={styles.mobileCard}>
+            <div className={styles.mobileTop}>
+              <div className={styles.actorCell}>
+                <div className={styles.actorAvatar}>{(e.title ?? "؟").charAt(0)}</div>
+                <span className={styles.actorName}>{e.title || "—"}</span>
+              </div>
+              <span className={`${styles.statusTag} ${getStatusClass(e.status)}`}>{e.status}</span>
+            </div>
+            <div className={styles.mobileMeta}>
+              <span className={styles.typeChip}>{e.type || "—"}</span>
+              <span className={styles.roleBadge}>{e.faculty}</span>
+            </div>
+            <div className={styles.mobileRow}>
+              <div className={styles.mobileLabel}>التاريخ</div>
+              <div className={styles.mobileValue}>{e.startDate} — {e.endDate}</div>
+            </div>
+            <div className={styles.mobileRow}>
+              <div className={styles.mobileLabel}>المكان</div>
+              <div className={styles.mobileValue}>{e.location || "—"}</div>
+            </div>
+            <div className={styles.mobileRow}>
+              <div className={styles.mobileLabel}>السعة</div>
+              <div className={styles.mobileValue}>{e.capacity} طالب</div>
+            </div>
+            <div className={styles.mobileRow}>
+              <div className={styles.mobileLabel}>التكلفة</div>
+              <div className={styles.mobileValue}>
+                {e.cost > 0 ? `${e.cost.toLocaleString("EG")} ج` : "مجاني"}
+              </div>
+            </div>
+            <button className={styles.viewBtn} onClick={() => handleView(e.event_id)} type="button" style={{ width: "100%", justifyContent: "center" }}>
+              عرض التفاصيل
+            </button>
+          </article>
+        ))}
+      </div>
+
     </div>
   );
 }

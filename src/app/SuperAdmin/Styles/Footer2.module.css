@@ -1,6 +1,5 @@
 /* GeneralAdmin Footer — unified with Student theme */
 .pageWrapper {
-  min-height: 60vh;
   display: flex;
   flex-direction: column;
 }

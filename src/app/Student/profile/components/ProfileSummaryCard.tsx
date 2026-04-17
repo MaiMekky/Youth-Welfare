@@ -14,27 +14,41 @@ export default function ProfileSummaryCard({
   profileData,
   onImageUpload,
 }: ProfileSummaryCardProps) {
-  const [profileImage, setProfileImage] = useState(profileData.profilePicture);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Update image when profileData changes
+  // Preload image safely (no errors in console)
   useEffect(() => {
     if (profileData.profilePicture) {
-      console.log("Profile image URL:", profileData.profilePicture);
-      setProfileImage(profileData.profilePicture);
+      setIsLoading(true);
+
+      const img = new window.Image();
+      img.src = profileData.profilePicture;
+
+      img.onload = () => {
+        setProfileImage(profileData.profilePicture);
+        setIsLoading(false);
+      };
+
+      img.onerror = () => {
+        setProfileImage(null);
+        setIsLoading(false);
+      };
+    } else {
+      setProfileImage(null);
     }
   }, [profileData.profilePicture]);
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Preview the image immediately
+      // Preview instantly
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfileImage(reader.result as string);
       };
       reader.readAsDataURL(file);
-      
-      // Upload the image
+
       onImageUpload(file);
     }
   };
@@ -47,6 +61,7 @@ export default function ProfileSummaryCard({
             <h2 className="profile-name">{profileData.fullName}</h2>
             <p className="profile-email">{profileData.email}</p>
           </div>
+
           <div className="profile-academic-tags">
             <span className="profile-tag profile-tag-faculty">
               {profileData.facultyName || "-"}
@@ -59,34 +74,24 @@ export default function ProfileSummaryCard({
             </span>
           </div>
         </div>
+
         <div className="profile-image-section">
           <div className="profile-image-wrapper">
-            {profileImage && profileImage.trim() !== "" && profileImage !== "/app/assets/profile.png" ? (
+            {profileImage && !isLoading ? (
               <Image
                 src={profileImage}
                 alt="Profile"
                 width={120}
                 height={120}
                 className="profile-image"
-                crossOrigin="anonymous"
-                onError={(e) => {
-                  console.error("Image load error. URL:", profileImage);
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  // Show placeholder on error
-                  const placeholder = document.querySelector('.profile-image-placeholder') as HTMLElement;
-                  if (placeholder) placeholder.style.display = 'flex';
-                }}
-                onLoad={() => {
-                  console.log("Image loaded successfully:", profileImage);
-                }}
+                unoptimized
               />
-            ) : null}
-            {(!profileImage || profileImage.trim() === "" || profileImage === "/app/assets/profile.png") && (
+            ) : (
               <div className="profile-image-placeholder">
-                <span>صورة</span>
+                <span>{isLoading ? "Loading..." : "صورة"}</span>
               </div>
             )}
+
             <label className="profile-image-upload">
               <Camera size={28} />
               <input
@@ -102,4 +107,3 @@ export default function ProfileSummaryCard({
     </div>
   );
 }
-

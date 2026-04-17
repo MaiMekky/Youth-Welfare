@@ -40,3 +40,8 @@
   direction: rtl;
   font-family: 'Cairo', sans-serif;
 }
+
+.student-main-page {
+  width: 100%;
+  min-height: 100%;
+}

@@ -11,8 +11,6 @@ import SemesterReports from "./SemesterReports";
 import styles from "../Styles/PlanView.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
 interface Plan {
   plan_id: number;
   name: string;
@@ -401,7 +399,7 @@ export default function PlanView() {
 
       {/* ── Page Header ── */}
       <div className={styles.pageHeader}>
-        <h1>خطة الكلية والتقارير</h1>
+        {/* <h1>خطة الكلية والتقارير</h1> */}
       </div>
 
       {/* ── Tabs ── */}
@@ -450,7 +448,7 @@ export default function PlanView() {
             <div className={styles.toolbarControls}>
               <input
                 className={styles.searchInput}
-                placeholder="🔍 ابحث بالاسم أو الفصل…"
+                placeholder=" ابحث بالاسم أو الفصل…"
                 value={search}
                 onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
               />
@@ -467,96 +465,72 @@ export default function PlanView() {
             </div>
           )}
 
-          {/* Table */}
-          <div className={styles.tableWrap}>
-            {loading ? (
-              <div className={styles.stateBox}>
-                <RefreshCw size={34} className={styles.spinner} />
-                <p>جاري تحميل البيانات…</p>
-              </div>
-            ) : paginated.length === 0 ? (
-              <div className={styles.stateBox}>
-                <BookOpen size={42} />
-                <p>لا توجد خطط مطابقة</p>
-              </div>
-            ) : (
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>اسم الخطة</th>
-                    <th>الفصل الدراسي</th>
-                    <th>عدد الفعاليات</th>
-                    <th>تاريخ الإنشاء</th>
-                    <th>الإجراءات</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginated.map(plan => (
-                    <tr key={plan.plan_id}>
-                      <td>
-                        <div className={styles.fileNameCell}>
-                          <FileText size={14} />
-                          {plan.name || "—"}
-                        </div>
-                      </td>
+          {/* Cards */}
+          {loading ? (
+            <div className={styles.stateBox}>
+              <RefreshCw size={34} className={styles.spinner} />
+              <p>جاري تحميل البيانات…</p>
+            </div>
+          ) : paginated.length === 0 ? (
+            <div className={styles.stateBox}>
+              <BookOpen size={42} />
+              <p>لا توجد خطط مطابقة</p>
+            </div>
+          ) : (
+            <div className={styles.cardsGrid}>
+              {paginated.map(plan => (
+                <div key={plan.plan_id} className={styles.facultyCard}>
+                  <div className={styles.cardTop}>
+                    <h3 className={styles.facultyName}>{plan.name || "—"}</h3>
+                    <span className={styles.termBadge}>الفصل {plan.term ?? "—"}</span>
+                  </div>
 
-                      <td>
-                        <span className={styles.termBadge}>الفصل {plan.term ?? "—"}</span>
-                      </td>
+                  <div className={styles.cardCounts}>
+                    <div className={styles.countItem}>
+                      <div className={styles.countValue}>{plan.events_count ?? 0}</div>
+                      <div className={styles.countLabel}>الفعاليات المخططة</div>
+                    </div>
+                  </div>
 
-                      <td>
-                        <div className={styles.countCell}>
-                          <Hash size={13} />
-                          {plan.events_count ?? 0} فعالية
-                        </div>
-                      </td>
+                  <div className={styles.cardMeta}>
+                    <div className={styles.metaRow}>
+                      <span className={styles.metaLabel}>تاريخ الإنشاء</span>
+                      <span className={styles.metaValue}>{fmt(plan.created_at)}</span>
+                    </div>
+                  </div>
 
-                      <td>
-                        <div className={styles.dateCell}>
-                          <Calendar size={12} />
-                          {fmt(plan.created_at)}
-                        </div>
-                      </td>
+                  <div className={styles.cardDetailsBox}>
+                    <strong>تفاصيل الخطة</strong>
+                    <br />
+                    {plan.updated_at && <>آخر تحديث: {fmt(plan.updated_at)}</>}
+                  </div>
 
-                      <td>
-                        <div className={styles.actionBtns}>
-                          <button
-                            className={styles.detailBtn}
-                            onClick={() => setDetailPlan({ id: plan.plan_id, name: plan.name })}
-                            title={`عرض تفاصيل ${plan.name}`}
-                          >
-                            <Eye size={13} />
-                            عرض التفاصيل
-                          </button>
-                          <button
-                            className={styles.downloadBtn}
-                            onClick={() => handleDownload(plan)}
-                            disabled={downloadingId === plan.plan_id}
-                            title={`تحميل خطة ${plan.name}`}
-                          >
-                            {downloadingId === plan.plan_id ? (
-                              <>
-                                <RefreshCw size={12} style={{ animation: "spin 1s linear infinite" }} />
-                                جاري…
-                              </>
-                            ) : (
-                              <>
-                                <Download size={13} />
-                                تحميل PDF
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
+                  <div className={styles.cardActions}>
+                    <button
+                      className={styles.btnView}
+                      onClick={() => setDetailPlan({ id: plan.plan_id, name: plan.name })}
+                    >
+                      <Eye size={16} /> عرض التفاصيل
+                    </button>
+                    <button
+                      className={styles.btnDownload}
+                      onClick={() => handleDownload(plan)}
+                      disabled={downloadingId === plan.plan_id}
+                    >
+                      {downloadingId === plan.plan_id ? (
+                        <><RefreshCw size={15} style={{ animation: "spin 1s linear infinite" }} /> جاري…</>
+                      ) : (
+                        <><Download size={15} /> تحميل PDF</>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Pagination */}
-          {!loading && filtered.length > 0 && (
+          {/* {!loading && filtered.length > 0 && (
             <div className={styles.pagination}>
               <span className={styles.pgInfo}>
                 عرض{" "}
@@ -582,7 +556,7 @@ export default function PlanView() {
                 </button>
               </div>
             </div>
-          )}
+          )} */}
         </div>
       )}
 

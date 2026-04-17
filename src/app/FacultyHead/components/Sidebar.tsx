@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-// ✅ Own CSS file — does NOT conflict with shared Sidebar.css
-import "../Styles/Sidebar.css";
+import "@/app/Styles/Sidebar.css";
 import { X, User, Briefcase, Calendar } from "lucide-react";
 import Image from "next/image";
 import logo from "@/app/assets/logo.png";
@@ -15,7 +14,7 @@ interface SidebarProps {
 
 const NAV = [
   { id: "activities", label: "إدارة الفعاليات", Icon: Briefcase },
-  { id: "plan",       label: "خطة الكلية",      Icon: Calendar  },
+  { id: "plan",       label: "خطط الكلية",      Icon: Calendar  },
 ];
 
 export default function Sidebar({
@@ -27,7 +26,6 @@ export default function Sidebar({
   const sidebarRef = useRef<HTMLElement>(null);
   const [adminInfo, setAdminInfo] = useState({ name: "" });
 
-  // Load user
   useEffect(() => {
     try {
       const u = localStorage.getItem("user");
@@ -35,15 +33,12 @@ export default function Sidebar({
     } catch {}
   }, []);
 
-  // Outside-click — deferred to avoid race with toggle button
   useEffect(() => {
     if (!isOpen) return;
-
     const handleOutside = (e: MouseEvent) => {
       if (sidebarRef.current?.contains(e.target as Node)) return;
       setTimeout(() => setIsOpen(false), 0);
     };
-
     document.addEventListener("mousedown", handleOutside);
     document.body.style.overflow = "hidden";
     return () => {
@@ -61,17 +56,17 @@ export default function Sidebar({
     <>
       <aside
         ref={sidebarRef}
-        className={`fh-sidebar${isOpen ? " open" : ""}`}
+        className={`sidebar${isOpen ? " open" : ""}`}
         dir="rtl"
       >
-        <div className="fh-sidebar-header">
-          <div className="fh-logo-container">
-            <div className="fh-logo-wrapper">
-              <div className="fh-logo-circle">
+        <div className="sidebar-header">
+          <div className="logo-container">
+            <div className="logo-wrapper">
+              <div className="logo-circle">
                 <Image
                   src={logo}
                   alt="شعار الجامعة"
-                  className="fh-sidebar-logo"
+                  className="sidebar-logo"
                   width={110}
                   height={110}
                   priority
@@ -79,46 +74,45 @@ export default function Sidebar({
               </div>
             </div>
           </div>
-          <h2 className="fh-sidebar-title">جامعة العاصمة</h2>
-          <p className="fh-sidebar-subtitle">المشرف العام للكلية</p>
-
+          <h2 className="sidebar-title">جامعة العاصمة</h2>
+          <p className="sidebar-subtitle">مدير الكلية</p>
           <button
-            className="fh-sidebar-close-btn"
+            className="sidebar-close-btn"
             onClick={() => setIsOpen(false)}
             aria-label="إغلاق القائمة"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
-        <div className="fh-sidebar-divider" />
-
-        <div className="fh-profile-card">
-          <div className="fh-profile-icon"><User size={18} /></div>
-          <div className="fh-admin-info">
+        <div className="profile-card">
+          <div className="profile-icon"><User size={22} /></div>
+          <div className="admin-info">
             <h3>دكتور/ {adminInfo.name || "المشرف العام"}</h3>
           </div>
         </div>
 
-        <nav className="fh-nav">
+        <nav className="nav">
           {NAV.map(({ id, label, Icon }) => (
             <button
               key={id}
               className={currentView === id ? "active" : ""}
               onClick={() => handleNavigate(id)}
             >
-              <span className="fh-nav-icon-wrap"><Icon size={16} /></span>
+              <Icon size={18} />
               <span>{label}</span>
             </button>
           ))}
         </nav>
 
-        <div className="fh-sidebar-footer"><span>v1.0.9</span></div>
+        <div className="sidebar-footer">
+          <span>v1.0.9</span>
+        </div>
       </aside>
 
       {isOpen && (
         <div
-          className="fh-sidebar-overlay"
+          className="sidebar-overlay"
           onClick={() => setIsOpen(false)}
           aria-hidden="true"
         />

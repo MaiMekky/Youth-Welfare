@@ -1,17 +1,17 @@
 "use client";
-import "../Styles/Header.css";
-import { useState, useEffect, useRef } from "react";
-import { ChevronDown, LogOut, Menu } from "lucide-react";
 import Image from "next/image";
+import "../../FacultyHead/Styles/Header.css";
 import logo from "@/app/assets/capital-uni-logo.png";
+import { useState, useRef, useEffect } from "react";
+import { LogOut, ChevronDown, Menu } from "lucide-react";
 
 interface HeaderProps {
   onSidebarOpen?: () => void;
 }
 
 export default function Header({ onSidebarOpen }: HeaderProps) {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const [adminInfo, setAdminInfo] = useState({
     name: "المدير العام",
     email: "admin@university.edu",
@@ -32,98 +32,90 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
-      )
-        setDropdownOpen(false);
+      if (menuRef.current && !menuRef.current.contains(e.target as Node))
+        setMenuOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
-const handleLogout = async () => {
-  localStorage.clear();
 
-  try {
-    await fetch("/api/logout", {
-      method: "POST",
-      credentials: "include", // ← ensures cookies are sent/received
-    });
-  } catch (err) {
-    console.error("Logout API failed:", err);
-  }
+  const handleLogout = async () => {
+    localStorage.clear();
+    try {
+      await fetch("/api/logout", { method: "POST", credentials: "include" });
+    } catch (err) {
+      console.error("Logout API failed:", err);
+    }
+    window.location.replace("/?logout=1");
+  };
 
-  // Use ?logout=1 to bypass the middleware auto-redirect
-  window.location.replace("/?logout=1");
-};
-      
   return (
-    <header className="header">
-      {/* Subtle top accent line */}
-      <div className="headerAccentLine" />
+    <header className="hdr" dir="rtl">
+      <div className="hdr-accent-line" />
 
-      <div className="headerContent">
-        {/* RIGHT side in RTL: toggle + logo + title */}
-        <div className="headerBrand">
+      <div className="hdr-inner">
+
+        {/* Brand */}
+        <div className="hdr-brand">
           {onSidebarOpen && (
             <button
-              className="headerSidebarToggle"
+              className="hdr-sidebar-toggle"
               onClick={onSidebarOpen}
               aria-label="فتح القائمة الجانبية"
             >
               <Menu size={20} />
             </button>
           )}
-          <div className="headerLogoWrap">
+
+          <div className="hdr-logo-wrap">
             <Image
               src={logo}
               alt="شعار النظام"
               width={80}
               height={80}
-              className="headerLogoImg"
+              className="hdr-logo-img"
               style={{ objectFit: "contain", width: "100%", height: "100%" }}
               priority
+              draggable={false}
+              quality={100}
             />
           </div>
-          <div className="headerDivider" />
-          <div className="headerTitle">
-            <h1 className="headerTitleH1">نظام إدارة رعاية الطلاب</h1>
-            <p className="headerTitleP">لوحة تحكم المدير العام</p>
+
+          <div className="hdr-divider" />
+
+          <div className="hdr-brand-text">
+            <h1 className="hdr-title">نظام إدارة رعاية الطلاب</h1>
+            <p className="hdr-sub">لوحة تحكم المدير العام</p>
           </div>
         </div>
 
-        {/* LEFT side in RTL: user dropdown */}
-        <div className="headerActions">
-          <div className="userDropdownWrap" ref={dropdownRef}>
+        {/* Actions */}
+        <div className="hdr-actions">
+          <div className="hdr-user-wrap" ref={menuRef}>
             <button
-              className="userBtn"
-              onClick={() => setDropdownOpen((v) => !v)}
-              aria-expanded={dropdownOpen}
+              className={`hdr-user-btn${menuOpen ? " hdr-user-open" : ""}`}
+              onClick={() => setMenuOpen(o => !o)}
+              aria-expanded={menuOpen}
               aria-haspopup="true"
             >
-              
-              <div className="userInfo">
-                <span className="userName">دكتور/ {adminInfo.name}</span>
-                <span className="userRole">المدير العام</span>
+              <div className="hdr-user-info">
+                <span className="hdr-user-name">دكتور/ {adminInfo.name}</span>
+                <span className="hdr-user-role">المدير العام</span>
               </div>
-              <ChevronDown
-                size={14}
-                className={`chevron ${dropdownOpen ? "open" : ""}`}
-              />
+              <ChevronDown size={14} className="hdr-chevron" />
             </button>
 
-            {dropdownOpen && (
-              <div className="dropdown" role="menu">
-                <div className="dropdownHeader">
-                  {/* <div className="dropdownAvatar">{getInitials(adminInfo.name)}</div> */}
-                  <div className="dropdownHeaderInfo">
-                    <div className="dropdownName">{adminInfo.name}</div>
-                    <div className="dropdownEmail">{adminInfo.email}</div>
+            {menuOpen && (
+              <div className="hdr-dropdown" role="menu">
+                <div className="hdr-dropdown-header">
+                  <div className="hdr-dd-info">
+                    <p className="hdr-dd-name">{adminInfo.name}</p>
+                    <p className="hdr-dd-email">{adminInfo.email}</p>
                   </div>
                 </div>
-                <div className="dropdownDivider" />
+                <div className="hdr-dropdown-divider" />
                 <button
-                  className="dropdownItem logout"
+                  className="hdr-dd-item hdr-dd-logout"
                   onClick={handleLogout}
                   role="menuitem"
                 >
@@ -134,6 +126,7 @@ const handleLogout = async () => {
             )}
           </div>
         </div>
+
       </div>
     </header>
   );

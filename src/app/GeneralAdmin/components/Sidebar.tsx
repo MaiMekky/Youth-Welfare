@@ -1,10 +1,9 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-// ✅ Own CSS — never conflicts with shared Sidebar.css
-import "../Styles/Sidebar.css";
-import { X, Briefcase, Calendar } from "lucide-react";
+import "@/app/Styles/Sidebar.css";
+import { X, User, Briefcase, Calendar } from "lucide-react";
 import Image from "next/image";
-import logo from "@/utils/logo.png";
+import logo from "@/app/assets/logo.png";
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -15,12 +14,8 @@ interface SidebarProps {
 
 const NAV = [
   { id: "activities", label: "الفعاليات العامة", Icon: Briefcase },
-  { id: "plan",       label: "تقارير الكليات",   Icon: Calendar  },
+  { id: "plan",       label: "خطط الاقسام",      Icon: Calendar  },
 ];
-
-function getInitials(name: string) {
-  return name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
-}
 
 export default function Sidebar({
   isOpen = false,
@@ -29,31 +24,24 @@ export default function Sidebar({
   currentView,
 }: SidebarProps) {
   const sidebarRef = useRef<HTMLElement>(null);
-  const [adminInfo, setAdminInfo] = useState({ name: "المدير العام", role: "المدير العام للإدارة" });
+  const [adminInfo, setAdminInfo] = useState({ name: "المدير العام" });
 
-  // Load user info
   useEffect(() => {
     try {
       const raw = localStorage.getItem("user");
       if (raw) {
         const u = JSON.parse(raw);
-        setAdminInfo({
-          name: u.name || "المدير العام",
-          role: u.role || "المدير العام للإدارة",
-        });
+        setAdminInfo({ name: u.name || "المدير العام" });
       }
     } catch {}
   }, []);
 
-  // Outside-click — deferred to avoid race with toggle button
   useEffect(() => {
     if (!isOpen) return;
-
     const handleOutside = (e: MouseEvent) => {
       if (sidebarRef.current?.contains(e.target as Node)) return;
       setTimeout(() => setIsOpen(false), 0);
     };
-
     document.addEventListener("mousedown", handleOutside);
     document.body.style.overflow = "hidden";
     return () => {
@@ -71,34 +59,43 @@ export default function Sidebar({
     <>
       <aside
         ref={sidebarRef}
-        className={`ga-sidebar${isOpen ? " open" : ""}`}
+        className={`sidebar${isOpen ? " open" : ""}`}
         dir="rtl"
       >
-        <div className="ga-sidebar-header">
-          <div className="ga-logo-wrap">
-            <Image src={logo} alt="شعار الجامعة" className="ga-logo-img" width={44} height={44} priority />
+        <div className="sidebar-header">
+          <div className="logo-container">
+            <div className="logo-wrapper">
+              <div className="logo-circle">
+                <Image
+                  src={logo}
+                  alt="شعار الجامعة"
+                  className="sidebar-logo"
+                  width={110}
+                  height={110}
+                  priority
+                />
+              </div>
+            </div>
           </div>
-          <div className="ga-brand">
-            <span className="ga-brand-title">جامعة العاصمة</span>
-            <span className="ga-brand-sub">إدارة رعاية الطلاب</span>
-          </div>
-
-          <button className="ga-close-btn" onClick={() => setIsOpen(false)} aria-label="إغلاق القائمة">
-            <X size={18} />
+          <h2 className="sidebar-title">إدارة رعاية الطلاب</h2>
+          <p className="sidebar-subtitle">المدير العام</p>
+          <button
+            className="sidebar-close-btn"
+            onClick={() => setIsOpen(false)}
+            aria-label="إغلاق القائمة"
+          >
+            <X size={20} />
           </button>
         </div>
 
-        <div className="ga-divider" />
-
-        <div className="ga-profile-card">
-          <div className="ga-profile-avatar">{getInitials(adminInfo.name)}</div>
-          <div className="ga-profile-info">
-            <span className="ga-profile-name">{adminInfo.name}</span>
-            <span className="ga-profile-role">{adminInfo.role}</span>
+        <div className="profile-card">
+          <div className="profile-icon"><User size={22} /></div>
+          <div className="admin-info">
+            <h3>دكتور/ {adminInfo.name}</h3>
           </div>
         </div>
 
-        <nav className="ga-nav">
+        <nav className="nav">
           {NAV.map(({ id, label, Icon }) => (
             <button
               key={id}
@@ -111,11 +108,17 @@ export default function Sidebar({
           ))}
         </nav>
 
-        <div className="ga-sidebar-footer"><span>الإصدار 1.0.0 | النظام نشط</span></div>
+        <div className="sidebar-footer">
+          <span>الإصدار 1.0.0 | النظام نشط</span>
+        </div>
       </aside>
 
       {isOpen && (
-        <div className="ga-overlay" onClick={() => setIsOpen(false)} aria-hidden="true" />
+        <div
+          className="sidebar-overlay"
+          onClick={() => setIsOpen(false)}
+          aria-hidden="true"
+        />
       )}
     </>
   );

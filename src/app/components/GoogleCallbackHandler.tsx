@@ -20,7 +20,7 @@ export default function GoogleCallbackHandler({
     const code = searchParams.get("code");
     const error = searchParams.get("error");
 
-    console.log("🔍 Checking URL params...");
+    console.log(" Checking URL params...");
     console.log("Code:", code);
     console.log("Error:", error);
 

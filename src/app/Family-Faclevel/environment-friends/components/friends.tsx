@@ -57,13 +57,6 @@ type Department = {
 };
 
 const committeeNames: Record<string, string> = {
-  cultural:   "اللجنة الثقافية",
-  newspaper:  "لجنة صحف الحائط",
-  social:     "اللجنة الاجتماعية والرحلات",
-  arts:       "اللجنة الفنية",
-  scientific: "اللجنة العلمية",
-  service:    "لجنة الخدمة العامة والمعسكرات",
-  sports:     "اللجنة الرياضية",
   "public-service": "لجنة الخدمة العامة",
   "environmental-pollution": "لجنة التلوث البيئي وسلوكيات البيئة",
   "community-service": "لجنة خدمة المجتمع وتنمية البيئة",
@@ -101,7 +94,6 @@ export default function FriendsForm() {
   };
 
   const initialCommittees: Committee[] = [
-    "cultural","newspaper","social","arts","scientific","service","sports",
     "public-service","environmental-pollution","community-service","public-relations",
   ].map((key) => ({
     committee_key: key,

@@ -39,13 +39,13 @@ export default function FamilyCard({ family, showActions }: { family: Record<str
 
       {/* Family Info */}
       <div className={styles.familyInfo}>
-        <div className={styles.infoRow}>
+        {/* <div className={styles.infoRow}>
           <span className={styles.infoLabel}>النطاق:</span>
           <span className={styles.infoValue}>{String(family.scope ?? '')}</span>
-        </div>
+        </div> */}
         <div className={styles.infoRow}>
           <span className={styles.infoLabel}>أنشئت بواسطة:</span>
-          <span className={styles.infoValue}>{String(family.createdBy ?? '')}</span>
+          <span className={styles.infoValue}>{String(family.createdBy ?? '') || 'ادارة رعاية الطلاب'}</span>
         </div>
       </div>
 

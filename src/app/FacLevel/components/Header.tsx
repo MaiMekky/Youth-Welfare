@@ -12,17 +12,11 @@ interface HeaderProps {
 }
 
 // ── Department name groups ────────────────────────────────────
-const TKAFOL_NAMES  = new Set(["التكافل الإجتماعي", "التكافل الاجتماعي"]);
-const FAMILY_NAMES  = new Set(["الأسر الطلابية"]);
-const ACTIVITY_NAMES = new Set([
-  "الأنشطة الرياضية",
-  "الأنشطة الثقافية",
-  "الأنشطة البيئية",
-  "الأنشطة الاجتماعية",
-  "الأنشطة العلمية",
-]);
+const TKAFOL_IDS  = new Set([6]);
+const FAMILY_IDS  = new Set([4]);
+const ACTIVITY_IDS = new Set([1, 2, 3, 5, 7]);
 
-interface Dept { dept_id: number; dept_name: string; }
+interface Dept { dept_id: number; name: string; }
 
 function readDepts(): Dept[] {
   try {
@@ -44,11 +38,11 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
     const depts = readDepts();
     if (!depts.length) return; // no restriction — show all buttons (super_admin / fac_head etc.)
 
-    const names = depts.map((d) => d.dept_name.trim());
+    const ids = depts.map((d) => d.dept_id);
 
-    setShowTkafol(names.some((n) => TKAFOL_NAMES.has(n)));
-    setShowFamily(names.some((n) => FAMILY_NAMES.has(n)));
-    setShowActivity(names.some((n) => ACTIVITY_NAMES.has(n)));
+    setShowTkafol(ids.some((id) => TKAFOL_IDS.has(id)));
+    setShowFamily(ids.some((id) => FAMILY_IDS.has(id)));
+    setShowActivity(ids.some((id) => ACTIVITY_IDS.has(id)));
   }, []);
 
 const handleLogout = async () => {

@@ -96,25 +96,11 @@ const validateEmail = (email: string) => {
         const allDepartments = await departmentsRes.json();
         
         // Filter to show only specific departments
-        const allowedDepartments = [
-          'إدارة النشاط الثقافي و الفنى',
-          'إدارة النشاط الاجتماعي',
-          'إدارة النشاط الرياضي و الرحلات',
-          'إدارة الأسر الطلابية و الاتحادات',
-          'إدارة النشاط العلمى و التكنولوجي',
-          'إدارة التكافل الاجتماعي',
-          'إدارة الجوالة و الخدمة العامة و المعسكرات'
-        ];
-        
-        // Normalize function to handle spacing and special characters
-        const normalize = (str: string) => str.trim().replace(/\s+/g, ' ');
-        
-        const normalizedAllowed = allowedDepartments.map(normalize);
-        
-        const filteredDepartments = allDepartments.filter((dept: { name: string }) => {
-          const normalizedName = normalize(dept.name);
-          return normalizedAllowed.includes(normalizedName);
-        });
+        const allowedDeptIds = [1, 2, 3, 4, 5, 6, 7];
+    
+        const filteredDepartments = allDepartments.filter(
+          (dept: { dept_id: number }) => allowedDeptIds.includes(dept.dept_id)
+        );
 
         console.log('All departments:', allDepartments.map((d: any) => d.name));
         console.log('Filtered departments:', filteredDepartments.map((d: any) => d.name));

@@ -12,6 +12,8 @@ interface Props {
   setSelectedFamilyType: (v: string) => void;
   selectedStatus: string;
   setSelectedStatus: (v: string) => void;
+  readyOnly: "all" | "true" | "false";
+  setReadyOnly: (v: "all" | "true" | "false") => void;
 }
 
 export default function Filters({
@@ -23,6 +25,8 @@ export default function Filters({
   setSelectedFamilyType,
   selectedStatus,
   setSelectedStatus,
+  readyOnly,
+  setReadyOnly,
 }: Props) {
   const familyTypeLabels: Record<string, string> = {
     all: "الكل",
@@ -79,6 +83,22 @@ export default function Filters({
           <option value="منتظر">منتظر</option>
         </select>
       </div>
+
+     <div className={styles.filterGroup}>
+      <label className={styles.filterLabel}>
+        عرض الأسر الجاهزة للاعتماد النهائي (وصل عدد الاعضاء إلى الحد الأدنى)
+      </label>
+
+      <select
+        className={styles.filterSelect}
+        value={readyOnly}
+        onChange={(e) => setReadyOnly(e.target.value as "all" | "true" | "false")}
+      >
+        <option value="all">الكل</option>
+        <option value="true">نعم</option>
+        <option value="false">لا</option>
+      </select>
+    </div>
     </div>
   );
 }

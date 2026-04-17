@@ -407,8 +407,8 @@ function FacultyCard({ plan, onDownload, downloading, onView }: {
           <>
             <strong>تفاصيل الخطة</strong>
             <br />
-            {plan.submitted_at && <>تم الإرسال والموافقة عليها<br />آخر تحديث: {fmt(plan.submitted_at)}</>}
-            {!plan.submitted_at && plan.created_at && <>تم الإرسال والموافقة عليها<br />آخر تحديث: {fmt(plan.updated_at ?? plan.created_at)}</>}
+            {plan.submitted_at && <>آخر تحديث: {fmt(plan.submitted_at)}</>}
+            {!plan.submitted_at && plan.created_at && <>آخر تحديث: {fmt(plan.updated_at ?? plan.created_at)}</>}
           </>
         )}
       </div>
@@ -446,6 +446,7 @@ export default function PlanView() {
   const [error, setError]                 = useState("");
   const [yearFilter, setYearFilter]       = useState("all");
   const [facultyFilter, setFacultyFilter] = useState("all");
+  const [search, setSearch]               = useState("");
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
   const [toastMsg, setToastMsg]           = useState("");
   const [viewingPlan, setViewingPlan]     = useState<Plan | null>(null);
@@ -500,18 +501,24 @@ export default function PlanView() {
   };
 
   const totalPlans    = plans.length;
-  const completePlans = plans.filter(p => !p.status?.includes("مفقود") && p.status !== "missing").length;
-  const missingPlans  = plans.filter(p => p.status?.includes("مفقود") || p.status === "missing").length;
+  const completePlans = plans.filter(p => (p.events_count ?? 0) > 0).length;
+  const missingPlans  = plans.filter(p => (p.events_count ?? 0) === 0).length;
 
   const years = Array.from(new Set(plans.map(p => p.academic_year).filter(Boolean))) as string[];
 
   const filtered = plans.filter(p => {
     const matchYear    = yearFilter === "all" || p.academic_year === yearFilter;
     const matchFaculty = facultyFilter === "all" || p.faculty_name === facultyFilter;
-    return matchYear && matchFaculty;
+    const term = search.toLowerCase().trim();
+    const matchSearch = !term ||
+      p.faculty_name?.toLowerCase().includes(term) ||
+      p.name?.toLowerCase().includes(term);
+    return matchYear && matchFaculty && matchSearch;
   });
 
-  const currentYear = years[0] ?? "2026-2027";
+  const currentYear = years.length > 0
+    ? years.sort().reverse()[0]
+    : `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`;
 
   return (
     <div className={styles.root}>
@@ -554,7 +561,7 @@ export default function PlanView() {
               </div>
               <div className={styles.statContent}>
                 <div className={styles.statValue}>{completePlans}</div>
-                <div className={styles.statTitle}>خطط مكتملة</div>
+                <div className={styles.statTitle}>خطط نشطة</div>
               </div>
             </div>
             <div className={styles.statItem}>
@@ -563,18 +570,18 @@ export default function PlanView() {
               </div>
               <div className={styles.statContent}>
                 <div className={styles.statValue}>{missingPlans}</div>
-                <div className={styles.statTitle}>خطط مفقودة</div>
+                <div className={styles.statTitle}>خطط غير نشطة</div>
               </div>
             </div>
-            <div className={styles.statItem}>
+            {/* <div className={styles.statItem}>
               <div className={`${styles.statIconBox} ${styles.blue}`}>
                 <Calendar size={22} />
-              </div>
-              <div className={styles.statContent}>
+              </div> */}
+              {/* <div className={styles.statContent}>
                 <div className={`${styles.statValue} ${styles.yearValue}`}>{currentYear}</div>
                 <div className={styles.statTitle}>العام الدراسي</div>
-              </div>
-            </div>
+              </div> */}
+            {/* </div> */}
           </div>
 
           {/* Section header */}
@@ -584,6 +591,14 @@ export default function PlanView() {
               <p>مراجعة وتحميل الخطط السنوية للأنشطة الطلابية</p>
             </div>
             <div className={styles.sectionControls}>
+              <input
+                className={styles.filterSelect}
+                style={{ minWidth: 200 }}
+                placeholder="ابحث باسم الكلية أو الخطة…"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
+
               {years.length > 0 && (
                 <select
                   className={styles.filterSelect}
@@ -597,25 +612,21 @@ export default function PlanView() {
                 </select>
               )}
 
-              {(facultyFilter !== "all" || yearFilter !== "all") && (
+              {(facultyFilter !== "all" || yearFilter !== "all" || search) && (
                 <button
                   className={styles.resetBtn}
-                  onClick={() => {
-                    setFacultyFilter("all");
-                    setYearFilter("all");
-                  }}
+                  onClick={() => { setFacultyFilter("all"); setYearFilter("all"); setSearch(""); }}
                 >
                   <XCircle size={14} /> مسح
                 </button>
               )}
 
               <button className={styles.filterBtn} onClick={fetchPlans}>
-                <Filter size={14} /> تحديث
+                <RefreshCw size={15} /> تحديث
               </button>
-            </div>
-          </div>
+            </div>          </div>
 
-          {(facultyFilter !== "all" || yearFilter !== "all") && (
+          {(facultyFilter !== "all" || yearFilter !== "all" || search) && (
             <p className={styles.resultsCount}>
               {filtered.length} نتيجة من أصل {plans.length}
             </p>

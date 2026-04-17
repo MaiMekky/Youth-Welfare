@@ -19,6 +19,7 @@ export default function Page() {
 
   const [families, setFamilies] = useState<Record<string, unknown>[]>([]);
   const [loadingFamilies, setLoadingFamilies] = useState(false);
+  const [readyOnly, setReadyOnly] = useState<"all" | "true" | "false">("all");
 
   // Notification state
   const [notification, setNotification] = useState<{
@@ -184,6 +185,10 @@ export default function Page() {
           params.append("faculty_id", selectedFaculty.toString());
         }
 
+        if (readyOnly !== "all") {
+          params.append("ready", readyOnly);
+        }
+
         const res = await authFetch(
           `${baseUrl}/api/family/super_dept/?${params.toString()}`,
           {
@@ -208,7 +213,7 @@ export default function Page() {
     };
 
     fetchFamilies();
-  }, [selectedFaculty]);
+  }, [selectedFaculty, readyOnly]);
 
   /* ===================== Derived Lists ===================== */
   const centralFamilies = useMemo(
@@ -287,16 +292,18 @@ export default function Page() {
 
         {activeTab === "quality" && (
           <div className={styles.contentSection}>
-            <Filters
-              faculties={faculties}
-              familyTypes={["all", "نوعية", "اصدقاء البيئة"]}
-              selectedFaculty={selectedFaculty}
-              setSelectedFaculty={setSelectedFaculty}
-              selectedFamilyType={selectedFamilyType}
-              setSelectedFamilyType={setSelectedFamilyType}
-              selectedStatus={selectedStatus}
-              setSelectedStatus={setSelectedStatus}
-            />
+          <Filters
+            faculties={faculties}
+            familyTypes={["all", "نوعية", "اصدقاء البيئة"]}
+            selectedFaculty={selectedFaculty}
+            setSelectedFaculty={setSelectedFaculty}
+            selectedFamilyType={selectedFamilyType}
+            setSelectedFamilyType={setSelectedFamilyType}
+            selectedStatus={selectedStatus}
+            setSelectedStatus={setSelectedStatus}
+            readyOnly={readyOnly}
+            setReadyOnly={setReadyOnly}
+          />
             <FamiliesGrid
               families={filteredQualityFamilies}
               showActions={true}

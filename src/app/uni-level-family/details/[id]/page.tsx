@@ -222,7 +222,7 @@ export default function FamilyDetailsPage() {
         const baseUrl = getBaseUrl();
         const url = `${baseUrl}/api/family/super_dept/${familyId}/`;
 
-        console.log('🔍 Fetching Family Data from:', url);
+        console.log(' Fetching Family Data from:', url);
         console.log('🔑 Token:', token ? 'exists' : 'missing');
 
         const response = await authFetch(url, {

@@ -141,12 +141,12 @@ const Overview: React.FC = () => {
         const response = await res.json();
         
         console.log("✅ Families API Response:", response);
-        console.log("🔍 Response Type:", typeof response);
-        console.log("🔍 Is Array:", Array.isArray(response));
+        console.log(" Response Type:", typeof response);
+        console.log(" Is Array:", Array.isArray(response));
         
         // If it's an object, log all keys
         if (typeof response === 'object' && !Array.isArray(response)) {
-          console.log("🔍 Response Keys:", Object.keys(response));
+          console.log(" Response Keys:", Object.keys(response));
         }
         
         // Check different possible response structures
@@ -178,7 +178,7 @@ const Overview: React.FC = () => {
         }
         
         // Log all roles
-        console.log("🔍 All roles in families:", families.map(f => ({ id: f.family_id, name: f.name, role: f.role })));
+        console.log(" All roles in families:", families.map(f => ({ id: f.family_id, name: f.name, role: f.role })));
         
         // البحث عن أول أسرة بدور "أخ أكبر"
         const elderBrotherFamily = families.find(f => f.role === "أخ أكبر");

@@ -159,7 +159,7 @@ export default function SemesterReports() {
           <h2 className={styles.toolbarTitle}>قائمة خطط الفعاليات</h2>
           <input
             className={styles.searchInput}
-            placeholder="🔍 ابحث بالاسم، الكلية، الفصل…"
+            placeholder=" ابحث بالاسم، الكلية، الفصل…"
             value={search}
             onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
           />

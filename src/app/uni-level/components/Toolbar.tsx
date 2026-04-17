@@ -10,7 +10,7 @@ export default function Toolbar() {
 
         <div className="search-box">
           <input type="text" placeholder="البحث بواسطة الرقم أو الاسم أو رقم الطلب..." />
-          <span className="search-icon">🔍</span>
+          <span className="search-icon"></span>
         </div>
       </div>
 

@@ -4,6 +4,7 @@ import Head from "next/head";
 import Layout from "../Layout";
 import "./Reports.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+
 interface CollegeReport {
   faculty_id: number;
   faculty_name: string;
@@ -18,45 +19,34 @@ export default function ReportsPage() {
   const [summary, setSummary] = useState({
     totalRequests: 0,
     totalAmount: "0 جنيه",
+    totalApproved: 0,
+    totalPending: 0,
   });
 
-  // ======================
-  // 🔥 جلب البيانات من الـ API
-  // ======================
   const fetchReports = async () => {
     try {
       setLoading(true);
-
       const token = localStorage.getItem("access");
-      if (!token) {
-        console.error("لا يوجد توكن");
-        return;
-      }
+      if (!token) { console.error("لا يوجد توكن"); return; }
 
       const res = await authFetch(
         `${getBaseUrl()}/api/solidarity/super_dept/faculty_summary/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (!res.ok) throw new Error("فشل في جلب البيانات");
-
       const data = await res.json();
 
+      const totalApproved = data.totals.total_approved_count ?? 0;
+      const totalPending  = data.totals.total_pending_count  ?? 0;
+
       setReports(data.rows);
-setSummary({
-  totalRequests:
-    (data.totals.total_approved_count ?? 0) +
-    (data.totals.total_pending_count ?? 0),
-
-  totalAmount: `${parseFloat(
-    data.totals.total_approved_amount ?? 0
-  ).toLocaleString("en-US")} جنيه`,
-});
-
+      setSummary({
+        totalRequests: totalApproved + totalPending,
+        totalAmount: `${parseFloat(data.totals.total_approved_amount ?? 0).toLocaleString("en-US")} جنيه`,
+        totalApproved,
+        totalPending,
+      });
     } catch (error) {
       console.error(error);
       alert("حدث خطأ أثناء جلب تقارير الكليات");
@@ -65,20 +55,16 @@ setSummary({
     }
   };
 
-  useEffect(() => {
-    fetchReports();
-  }, []);
+  useEffect(() => { fetchReports(); }, []);
 
-  if (loading) return <Layout><p>جاري التحميل...</p></Layout>;
+  if (loading) return <Layout><p style={{ padding: "2rem", fontFamily: "Cairo, sans-serif" }}>جاري التحميل...</p></Layout>;
 
   return (
     <Layout>
-      <Head>
-        <title>تقارير الكليات</title>
-      </Head>
-
+      
       <div className="reports-container">
-        {/* Page Header */}
+
+        {/* ── Page Header ── */}
         <div className="reports-page-header">
           <h1 className="reports-page-title">تقارير الكليات</h1>
           <p className="reports-page-subtitle">
@@ -86,28 +72,34 @@ setSummary({
           </p>
         </div>
 
-        {/* Summary */}
-        <div className="reports-summary-card">
-          <div className="reports-summary-label">إحصائيات الجامعة</div>
-          <div className="reports-summary-stats">
-            <div className="reports-stat-item">
-              <span className="reports-stat-value">{summary.totalRequests}</span>
-              <span className="reports-stat-label">إجمالي الطلبات</span>
-            </div>
+        {/* ── Stats Grid ── */}
+        <div className="reports-stats-grid">
 
-            <div className="reports-stat-divider"></div>
-
-            <div className="reports-stat-item">
-              <span className="reports-stat-value reports-stat-value-amount">
-                {summary.totalAmount}
-              </span>
-              <span className="reports-stat-label">إجمالي الميزانية</span>
-            </div>
+          <div className="reports-stat-card reports-stat-total">
+            <div className="reports-stat-num">{summary.totalRequests}</div>
+            <div className="reports-stat-lbl">إجمالي الطلبات</div>
           </div>
+
+          <div className="reports-stat-card reports-stat-approved">
+            <div className="reports-stat-num">{summary.totalApproved}</div>
+            <div className="reports-stat-lbl">المعتمد</div>
+          </div>
+
+          <div className="reports-stat-card reports-stat-pending">
+            <div className="reports-stat-num">{summary.totalPending}</div>
+            <div className="reports-stat-lbl">في الانتظار</div>
+          </div>
+
+          <div className="reports-stat-card reports-stat-amount">
+            <div className="reports-stat-num">{summary.totalAmount}</div>
+            <div className="reports-stat-lbl">إجمالي الميزانية</div>
+          </div>
+
         </div>
 
-        {/* Reports Table */}
+        {/* ── Reports Table ── */}
         <div className="reports-table-section">
+
           <div className="reports-section-header">
             <h2 className="reports-section-title">ملخص تقارير الكليات</h2>
             <p className="reports-section-subtitle">
@@ -129,14 +121,28 @@ setSummary({
               <tbody>
                 {reports.map((row) => (
                   <tr key={row.faculty_id}>
-                    <td>{row.faculty_name}</td>
-                    <td>{row.approved_count}</td>
-                    <td>{row.pending_count}</td>
                     <td>
+                      <span className="reports-college-name">{row.faculty_name}</span>
+                    </td>
+                    <td>
+                      <span className="reports-approved-badge">{row.approved_count}</span>
+                    </td>
+                    <td>
+                      <span className="reports-pending-badge">{row.pending_count}</span>
+                    </td>
+                    <td className="reports-amount">
                       {parseFloat(row.total_approved_amount).toLocaleString("en-US")} جنيه
                     </td>
                   </tr>
                 ))}
+
+                {reports.length === 0 && (
+                  <tr>
+                    <td colSpan={4} style={{ textAlign: "center", padding: "24px", color: "#6B8299" }}>
+                      لا توجد بيانات
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

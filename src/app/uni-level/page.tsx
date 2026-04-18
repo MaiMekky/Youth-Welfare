@@ -7,52 +7,56 @@ import ApplicationsTable from "./components/ApplicationsTable";
 import Layout from "./Layout";
 import "./ApplicationsPage.css";
 
-export default function ApplicationsPage() {
-
-
- interface Application {
+interface Application {
   amount: string;
+  status: string;
 }
-const [summaryData, setSummaryData] = useState({
-  totalRequests: 0,
-  totalAmount: "0 ج.م",
-});
 
-const calculateSummary = (apps: Application[]) => {
-  const totalRequests = apps.length;
-  const totalAmount = apps.reduce((sum, app) => {
-    const cleaned = app.amount.replace(/[^\d.-]/g, "").replace(/,/g, "");
-    const value = parseFloat(cleaned) || 0;
-    return sum + value;
-  }, 0);
-  return {
-    totalRequests,
-    totalAmount: totalAmount.toLocaleString("en-US") + " ج.م",
+export default function ApplicationsPage() {
+  const [summaryData, setSummaryData] = useState({
+    totalRequests: 0,
+    totalAmount: "0 ج.م",
+    pending: 0,
+    accepted: 0,
+    rejected: 0,
+  });
+
+  const handleDataLoaded = (apps: Application[]) => {
+    const totalRequests = apps.length;
+
+    const totalAmount = apps.reduce((sum, app) => {
+      const cleaned = app.amount.replace(/[^\d.-]/g, "").replace(/,/g, "");
+      const value = parseFloat(cleaned) || 0;
+      return sum + value;
+    }, 0);
+
+    const pending  = apps.filter((a) => a.status === "منتظر").length;
+    const accepted = apps.filter((a) => a.status === "مقبول").length;
+    const rejected = apps.filter((a) => a.status === "مرفوض").length;
+
+    setSummaryData({
+      totalRequests,
+      totalAmount: totalAmount.toLocaleString("en-US") + " ج.م",
+      pending,
+      accepted,
+      rejected,
+    });
   };
-};
-
-const handleDataLoaded = (apps: Application[]) => {
-  setSummaryData(calculateSummary(apps)); // 🔹 نفس الدالة لحساب الملخص
-};
-
 
   return (
     <Layout>
-      <Head>
-        <title>الطلبات المعتمدة على مستوى الجامعة</title>
-      </Head>
-
       <div className="applications-container">
         <PageHeader />
-        {/* <Toolbar /> */}
-        
+
         <SummaryCard
           totalRequests={summaryData.totalRequests}
           totalAmount={summaryData.totalAmount}
+          pending={summaryData.pending}
+          accepted={summaryData.accepted}
+          rejected={summaryData.rejected}
         />
 
-        {/* 👇 ApplicationsTable هنا لا يحتاج أي props */}
-        <ApplicationsTable  onDataLoaded={handleDataLoaded}/>
+        <ApplicationsTable onDataLoaded={handleDataLoaded} />
       </div>
     </Layout>
   );

@@ -11,12 +11,8 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar">
-      <body className="app-body">
-        <SidebarLayout sidebar={<TakafulSidebar />}>
-          {children}
-        </SidebarLayout>
-      </body>
-    </html>
+    <SidebarLayout sidebar={<TakafulSidebar />}>
+      {children}
+    </SidebarLayout>
   );
 }

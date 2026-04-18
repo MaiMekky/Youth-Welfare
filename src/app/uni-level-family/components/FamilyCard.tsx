@@ -27,10 +27,14 @@ export default function FamilyCard({
 
   if (!family) return null;
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadgeClass = (status: string) => {
     switch (status) {
-      case "موافقة مبدئية": return "#F3F5FD";
-      default:              return "#E8EAF0";
+      case "مقبول":          return styles.badgeApproved;
+      case "منتظر":          return styles.badgePending;
+      case "في الانتظار":    return styles.badgePending;
+      case "مرفوض":          return styles.badgeRejected;
+      case "موافقة مبدئية": return styles.badgeProvisional;
+      default:               return styles.badgeDefault;
     }
   };
 
@@ -59,10 +63,7 @@ export default function FamilyCard({
           <p className={styles.familyDescription}>{String(family.description)}</p>
         </div>
         <div className={styles.statusBadges}>
-          <span
-            className={styles.badge}
-            style={{ backgroundColor: getStatusColor(String(family.status)), color: "#2C3A5F", fontWeight: 600 }}
-          >
+          <span className={`${styles.badge} ${getStatusBadgeClass(String(family.status))}`}>
             {String(family.status)}
           </span>
         </div>

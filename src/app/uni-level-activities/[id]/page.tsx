@@ -912,7 +912,7 @@ const uploadImages = async (files: FileList | null) => {
 
             <button
               className={styles.backBtn}
-              onClick={() => router.push("/uni-level-activities")}
+              onClick={() => router.back()}
               type="button"
               disabled={exportBusy !== null}
               style={{ opacity: exportBusy !== null ? 0.7 : 1 }}

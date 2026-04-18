@@ -1,23 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --navy:       #1E3A5F;
+  --navy-mid:   #2D5F8A;
+  --navy-light: #EBF3FB;
+  --gold:       #C49B3A;
+  --green:      #059669;
+  --green-bg:   #ECFDF5;
+  --green-bdr:  #6EE7B7;
+  --red:        #DC2626;
+  --red-bg:     #FEF2F2;
+  --red-bdr:    #FECACA;
+  --border:     #E2ECF5;
+  --text:       #1A2E42;
+  --mute:       #6B8299;
+  --radius:     10px;
+  --shadow:     0 2px 12px rgba(26,46,66,.08);
+}
+
+/* ── Grid ── */
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-  margin: 24px 0;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  width: 100%;
+  font-family: 'Cairo', sans-serif;
 }
 
+/* ── Base Card ── */
 .statCard {
-  background: white;
-  border-radius: var(--radius, 11px);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  padding: 20px;
-  transition: box-shadow 0.22s ease, transform 0.22s ease;
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition: transform .18s;
+  background: #fff;
 }
 
-.statCard:hover {
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
-}
+.statCard:hover { transform: translateY(-2px); }
 
+/* ── Content layout — number left, icon right (RTL) ── */
 .statContent {
   display: flex;
   align-items: center;
@@ -25,127 +48,74 @@
   gap: 12px;
 }
 
+/* ── Labels & Values ── */
 .statLabel {
-  font-size: 0.9rem;
-  color: #6B7280;
-  margin-bottom: 6px;
-  word-wrap: break-word;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mute);
+  margin-bottom: 4px;
+  font-family: 'Cairo', sans-serif;
 }
 
 .statValue {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #1a2744;
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -1px;
+  color: var(--text);
+  font-family: 'Cairo', sans-serif;
 }
 
+/* ── Icon box ── */
 .statIcon {
-  padding: 14px;
-  border-radius: var(--radius-sm, 8px);
+  padding: 12px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.statTotal { background: rgba(30, 64, 175, 0.1); color: #1E40AF; }
-.statPending { background: rgba(180, 83, 9, 0.1); color: #B45309; }
-.statReview { background: rgba(194, 65, 12, 0.1); color: #C2410C; }
-.statApproved { background: rgba(4, 120, 87, 0.1); color: #047857; }
-.statRejected {
-  background: rgba(220, 38, 38, 0.12);
-  color: #c0392b;
+/* ── Per-card color variants ── */
+
+/* Total — navy gradient card */
+.statCard:has(.statTotal) {
+  background: linear-gradient(140deg, var(--navy), var(--navy-mid));
+  box-shadow: 0 4px 18px rgba(30,58,95,.22);
 }
+.statCard:has(.statTotal) .statLabel { color: rgba(255,255,255,.7); }
+.statCard:has(.statTotal) .statValue { color: #fff; }
+.statTotal { background: rgba(255,255,255,.15); color: #fff; }
 
-/* Tablet (768px and below) */
-@media (max-width: 768px) {
-  .statsGrid {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
-    margin: 20px 0;
-  }
-
-  .statCard {
-    padding: 16px;
-  }
-
-  .statLabel {
-    font-size: 14px;
-    margin-bottom: 4px;
-  }
-
-  .statValue {
-    font-size: 24px;
-  }
-
-  .statIcon {
-    padding: 12px;
-  }
-  
-  .statIcon svg {
-    width: 20px;
-    height: 20px;
-  }
+/* Pending — amber */
+.statCard:has(.statPending) {
+  box-shadow: 0 0 0 2px #FDE68A, 0 4px 14px rgba(245,158,11,.06);
 }
+.statCard:has(.statPending) .statValue { color: #D97706; }
+.statPending { background: #FFFBEB; color: #D97706; }
 
-/* Mobile (480px and below) */
-@media (max-width: 480px) {
-  .statsGrid {
-    grid-template-columns: 1fr;
-    gap: 10px;
-    margin: 16px 0;
-  }
-
-  .statCard {
-    padding: 14px;
-  }
-
-  .statContent {
-    gap: 10px;
-  }
-
-  .statLabel {
-    font-size: 13px;
-  }
-
-  .statValue {
-    font-size: 22px;
-  }
-
-  .statIcon {
-    padding: 10px;
-  }
-  
-  .statIcon svg {
-    width: 18px;
-    height: 18px;
-  }
+/* Review — navy light */
+.statCard:has(.statReview) {
+  box-shadow: 0 0 0 2px #BFDBFE, 0 4px 14px rgba(45,95,138,.06);
 }
+.statCard:has(.statReview) .statValue { color: var(--navy-mid); }
+.statReview { background: var(--navy-light); color: var(--navy-mid); }
 
-/* Small mobile (360px and below) */
-@media (max-width: 360px) {
-  .statsGrid {
-    gap: 8px;
-    margin: 12px 0;
-  }
-
-  .statCard {
-    padding: 12px;
-  }
-
-  .statLabel {
-    font-size: 12px;
-  }
-
-  .statValue {
-    font-size: 20px;
-  }
-
-  .statIcon {
-    padding: 8px;
-  }
-  
-  .statIcon svg {
-    width: 16px;
-    height: 16px;
-  }
+/* Approved — green */
+.statCard:has(.statApproved) {
+  box-shadow: 0 0 0 2px var(--green-bdr), 0 4px 14px rgba(5,150,105,.06);
 }
+.statCard:has(.statApproved) .statValue { color: var(--green); }
+.statApproved { background: var(--green-bg); color: var(--green); }
+
+/* Rejected — red */
+.statCard:has(.statRejected) {
+  box-shadow: 0 0 0 2px var(--red-bdr), 0 4px 14px rgba(220,38,38,.06);
+}
+.statCard:has(.statRejected) .statValue { color: var(--red); }
+.statRejected { background: var(--red-bg); color: var(--red); }
+
+/* ── Responsive ── */
+@media (max-width: 1200px) { .statsGrid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 768px)  { .statsGrid { grid-template-columns: repeat(2, 1fr); gap: 10px; } .statValue { font-size: 26px; } }
+@media (max-width: 480px)  { .statsGrid { grid-template-columns: 1fr 1fr; } .statValue { font-size: 22px; } }

@@ -56,9 +56,14 @@ export default function FiltersBar({ filters, setFilters, onApply, onSearchChang
 }, []);
   return (
     <div className={styles.filtersContainer}>
-      <h2 className={styles.sectionTitle}>البحث وفلترة الطلاب</h2>
+      {/* <h2 className={styles.sectionTitle}>البحث وفلترة الطلاب</h2> */}
 
       <div className={styles.filtersRow}>
+           <div className={styles.searchWrapper}>
+          <svg className={styles.searchIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
         <input
           type="text"
           placeholder="ابحث بالاسم أو كود التكافل..."
@@ -66,6 +71,9 @@ export default function FiltersBar({ filters, setFilters, onApply, onSearchChang
           onChange={(e) => handleChange("search", e.target.value)}
           className={styles.searchField}
         />
+      </div>
+
+      <div className={styles.divider} />
 
         <div className={styles.filterSelects}>
           {/* Father's status */}

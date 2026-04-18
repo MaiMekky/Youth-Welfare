@@ -2,20 +2,19 @@
 import React from "react";
 import styles from "../Styles/Tabs.module.css";
 
-type TabType = "central" | "quality" | "eco";
+type TabType = "central" | "quality";
 
 interface Props {
   activeTab: TabType;
   setActiveTab: (t: TabType) => void;
-  qualityPendingCount?: number;
-  ecoPendingCount?: number;
+  pendingCount?: number;
 }
 
-export default function Tabs({ activeTab, setActiveTab, qualityPendingCount, ecoPendingCount }: Props) {
+export default function Tabs({ activeTab, setActiveTab, pendingCount }: Props) {
   return (
     <div className={styles.tabsContainer}>
       <div className={styles.tabsWrapper}>
-        
+
         <button
           className={`${styles.tab} ${activeTab === "central" ? styles.tabActive : ""}`}
           onClick={() => setActiveTab("central")}
@@ -27,20 +26,10 @@ export default function Tabs({ activeTab, setActiveTab, qualityPendingCount, eco
           className={`${styles.tab} ${activeTab === "quality" ? styles.tabActive : ""}`}
           onClick={() => setActiveTab("quality")}
         >
-          <span className={styles.tabText}>أسر نوعية</span>
-          {qualityPendingCount && qualityPendingCount > 0 && (
-            <span className={styles.pendingBadge}>{qualityPendingCount}</span>
-          )}
-        </button>
-
-        <button
-          className={`${styles.tab} ${activeTab === "eco" ? styles.tabActive : ""}`}
-          onClick={() => setActiveTab("eco")}
-        >
-          <span className={styles.tabText}>أصدقاء البيئة</span>
-          {ecoPendingCount && ecoPendingCount > 0 && (
-            <span className={styles.pendingBadge}>{ecoPendingCount}</span>
-          )}
+          <span className={styles.tabText}>أسر نوعية و أصدقاء البيئة</span>
+          {pendingCount && pendingCount > 0 ? (
+            <span className={styles.pendingBadge}>{pendingCount}</span>
+          ) : null}
         </button>
 
       </div>

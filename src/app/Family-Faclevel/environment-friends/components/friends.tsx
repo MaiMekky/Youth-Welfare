@@ -476,7 +476,7 @@ export default function FriendsForm() {
             <div className={styles["member-form-grid"]}>
               {members.map((m, i) => (
                 <div key={i} className={styles["member-form-group"]}>
-                  <label>عضو {i + 1}</label>
+                  <label>الرقم القومي لعضو {i + 1}</label>
                   <input
                     type="text"
                     placeholder="الرقم القومي (14 رقم)"

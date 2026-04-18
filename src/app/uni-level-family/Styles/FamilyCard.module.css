@@ -1,28 +1,25 @@
 .familyCard {
-  background-color: white;
-  border: 1px solid #E8EAF0;
-  border-radius: 12px;
-  padding: clamp(1rem, 2vw, 1.25rem);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  display: grid;
-  grid-template-rows: auto auto auto auto;
-  gap: clamp(0.75rem, 1.5vw, 0.75rem);
-  margin: clamp(0.75rem, 2vw, 1.25rem);
-  width: calc(100% - clamp(1.5rem, 4vw, 2.5rem));
-  box-sizing: border-box;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow);
+  transition: box-shadow .2s, transform .2s;
+  font-family: 'Cairo', sans-serif;
 }
 
 .familyCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  box-shadow: 0 6px 24px rgba(30,58,95,.12);
+  transform: translateY(-2px);
 }
 
 .familiesGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(350px, 100%), 1fr));
-  gap: clamp(1rem, 3vw, 1.5rem);
-  margin-top: clamp(1rem, 2vw, 1.25rem);
+  grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
+  gap: 16px;
   width: 100%;
 }
 
@@ -49,6 +46,7 @@
   flex: 1;
 }
 
+/* ── Status Badges ── */
 .statusBadges {
   display: flex;
   gap: 8px;
@@ -57,12 +55,21 @@
 }
 
 .badge {
-  padding: 6px 14px;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
   border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #2C3A5F;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
 }
+
+/* Status-specific badge colors matching SuperAdmin */
+.badgeApproved    { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+.badgePending     { background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; }
+.badgeRejected    { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+.badgeProvisional { background: #EBF3FB; color: #1E3A5F; border: 1px solid #BFDBFE; }
+.badgeDefault     { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
 
 .familyTitle {
   font-size: 18px;
@@ -85,6 +92,8 @@
   gap: 16px;
   font-size: 14px;
   color: #6C757D;
+  line-height: 1.5;
+  margin: 0;
 }
 
 .metaItem {
@@ -124,6 +133,7 @@
   display: grid;
   grid-template-rows: auto auto;
   gap: 8px;
+  margin-top: auto;
 }
 
 .actionRow {

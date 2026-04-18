@@ -1,73 +1,77 @@
-/* ===== BASE STYLES ===== */
-.container {
-  background: white;
-  border-radius: var(--radius, 11px);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  padding: 24px;
-  margin-bottom: 24px;
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
 
+:root {
+  --navy:       #1E3A5F;
+  --navy-mid:   #2D5F8A;
+  --navy-light: #EBF3FB;
+  --gold:       #C49B3A;
+  --green:      #059669;
+  --green-bg:   #ECFDF5;
+  --red:        #DC2626;
+  --red-bg:     #FEF2F2;
+  --red-bdr:    #FECACA;
+  --border:     #E2ECF5;
+  --text:       #1A2E42;
+  --mute:       #6B8299;
+  --radius:     10px;
+  --shadow:     0 2px 12px rgba(26,46,66,.08);
+}
+
+/* ── Container ── */
+.container {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid #E8EFF7;
+  padding: 24px;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-
-  overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  font-family: 'Cairo', sans-serif;
 }
 
+/* ── Cards Grid ── */
 .cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
+  gap: 14px;
   margin-bottom: 20px;
 }
 
+/* ── Individual Card ── */
 .card {
-  background: #f8fafc;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: var(--radius-sm, 8px);
+  background: #F7FAFD;
+  border: 1.5px solid #E2ECF5;
+  border-radius: 8px;
   padding: 16px;
   text-align: center;
-  transition: all 0.22s ease;
+  transition: transform .18s, box-shadow .18s;
 }
 
 .card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 14px rgba(30,58,95,.1);
   transform: translateY(-2px);
 }
 
 .card h4 {
-  color: #2c3a5f;
-  font-size: 16px;
-  margin-bottom: 12px;
-  font-weight: 600;
+  color: var(--navy);
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 12px;
   line-height: 1.4;
+  font-family: 'Cairo', sans-serif;
 }
 
 .card p {
-  font-size: 20px;
-  color: var(--gold, #c9972a);
-  font-weight: 700;
-  margin: 8px 0;
-  line-height: 1.5;
+  font-size: 22px;
+  color: var(--gold);
+  font-weight: 800;
+  margin: 6px 0;
+  line-height: 1.4;
+  font-family: 'Cairo', sans-serif;
 }
 
-.card input {
-  font-size: 18px;
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  text-align: center;
-  width: 80%;
-  transition: border-color 0.2s;
-}
-
-.card input:focus {
-  outline: none;
-  border-color: var(--gold, #c9972a);
-  box-shadow: 0 0 0 2px rgba(201, 151, 42, 0.15);
-}
-
-/* ===== INPUT WRAPPER ===== */
+/* ── Input Wrapper ── */
 .inputWrapper {
   display: flex;
   align-items: center;
@@ -76,31 +80,41 @@
   width: 100%;
 }
 
+.editableSection {
+  margin-bottom: 8px;
+  width: 100%;
+}
+
 .discountInput {
   flex: 1;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1.5px solid #E2ECF5;
+  border-radius: 8px;
+  background: #fff;
   font-size: 14px;
-  transition: all 0.2s;
+  color: var(--text);
+  font-family: 'Cairo', sans-serif;
+  font-weight: 600;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  text-align: center;
   min-width: 0;
 }
 
+.discountInput::placeholder { color: #B0BCC8; font-size: 13px; }
+
 .discountInput:focus {
-  outline: none;
-  border-color: #d4af37;
-  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+  border-color: #2D5F8A;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(45,95,138,.1);
 }
 
-.discountInput::placeholder {
-  color: #9ca3af;
-}
-
-/* ===== BUTTONS ===== */
+/* ── Remove Button ── */
 .removeBtn {
-  background: #ff4757;
-  color: white;
-  border: none;
+  background: var(--red-bg);
+  color: var(--red);
+  border: 1px solid var(--red-bdr);
   border-radius: 50%;
   width: 28px;
   height: 28px;
@@ -108,499 +122,138 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 16px;
+  font-weight: 700;
   flex-shrink: 0;
-  transition: all 0.2s;
+  transition: all .18s;
 }
 
 .removeBtn:hover {
-  background: #ff3742;
+  background: var(--red);
+  color: #fff;
+  border-color: var(--red);
   transform: scale(1.1);
 }
 
-.removeBtn:active {
-  transform: scale(0.95);
-}
-
+/* ── Add Button ── */
 .addBtn {
-  background: #2ed573;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 10px 14px;
-  cursor: pointer;
-  font-size: 14px;
-  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   width: 100%;
-  transition: all 0.2s;
-  font-weight: 500;
+  height: 38px;
+  background: var(--navy-light);
+  color: var(--navy-mid);
+  border: 1.5px solid #BFDBFE;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 8px;
+  transition: all .18s;
+  font-family: 'Cairo', sans-serif;
 }
 
 .addBtn:hover {
-  background: #27c965;
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
   transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(46, 213, 115, 0.3);
+  box-shadow: 0 4px 14px rgba(30,58,95,.25);
 }
 
-.addBtn:active {
-  transform: translateY(0);
-}
-
-.editableSection {
-  margin-bottom: 8px;
-  width: 100%;
-}
-
-/* ===== ACTIONS SECTION ===== */
+/* ── Actions ── */
 .actions {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 20px;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid #E2ECF5;
   flex-wrap: wrap;
 }
 
-.editBtn,
-.saveBtn {
-  background-color: #d4af37;
-  border: none;
-  color: #fff;
-  font-size: 15px;
-  padding: 12px 24px;
-  border-radius: 8px;
+/* ── Edit Button ── */
+.editBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 28px;
+  background: #fff;
+  border: 1.5px solid #E2ECF5;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mute);
   cursor: pointer;
-  transition: all 0.3s;
-  font-weight: 600;
-  white-space: nowrap;
+  transition: all .18s;
+  font-family: 'Cairo', sans-serif;
 }
 
-.editBtn:hover,
-.saveBtn:hover {
-  background-color: #b58f27;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(212, 175, 55, 0.3);
+.editBtn:hover {
+  background: var(--navy-light);
+  border-color: var(--navy-mid);
+  color: var(--navy);
 }
 
-.editBtn:active,
-.saveBtn:active {
-  transform: translateY(0);
+/* ── Save Button ── */
+.saveBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 28px;
+  background: linear-gradient(135deg, var(--navy), var(--navy-mid));
+  border: none;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff;
+  cursor: pointer;
+  transition: all .18s;
+  font-family: 'Cairo', sans-serif;
+  box-shadow: 0 4px 14px rgba(30,58,95,.3);
 }
+
+.saveBtn:hover  { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(30,58,95,.4); }
+.saveBtn:active { transform: scale(0.97); }
 
 .saveBtn:disabled {
-  background-color: #9ca3af;
+  background: #9CA3AF;
+  box-shadow: none;
   cursor: not-allowed;
   transform: none;
 }
 
+/* ── Error ── */
 .error {
-  color: #ff4757;
-  font-size: 14px;
-  background: #ffe5e9;
-  padding: 8px 12px;
-  border-radius: 6px;
-  border-right: 3px solid #ff4757;
+  color: var(--red);
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--red-bg);
+  padding: 8px 14px;
+  border-radius: 8px;
+  border-right: 3px solid var(--red);
   flex: 1;
   min-width: 200px;
+  font-family: 'Cairo', sans-serif;
 }
 
-/* ===== LOADING STATE ===== */
-.container > div:first-child {
-  text-align: center;
-  color: #6b7280;
-  font-size: 16px;
-  padding: 20px;
+/* ── Responsive ── */
+@media (max-width: 1024px) { .cards { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 768px)  { .container { padding: 16px; } .cards { gap: 10px; } }
+@media (max-width: 480px)  {
+  .cards { grid-template-columns: 1fr; }
+  .actions { flex-direction: column; align-items: stretch; }
+  .editBtn, .saveBtn { width: 100%; justify-content: center; }
+  .error { min-width: auto; width: 100%; }
 }
 
-/* ==================== TABLET BREAKPOINT (max-width: 1024px) ==================== */
-@media (max-width: 1024px) {
-  .container {
-    padding: 20px;
-    border-radius: 10px;
-  }
-
-  .cards {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-  }
-
-  .card {
-    padding: 14px;
-  }
-
-  .card h4 {
-    font-size: 15px;
-  }
-
-  .card p {
-    font-size: 18px;
-  }
-
-  .editBtn,
-  .saveBtn {
-    padding: 10px 20px;
-    font-size: 14px;
-  }
-}
-
-/* ==================== MOBILE BREAKPOINT (max-width: 768px) ==================== */
-@media (max-width: 768px) {
-  .container {
-    padding: 16px;
-    border-radius: 8px;
-    margin-bottom: 16px;
-  }
-
-  .cards {
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
-  }
-
-  .card {
-    padding: 12px;
-  }
-
-  .card h4 {
-    font-size: 14px;
-    margin-bottom: 10px;
-  }
-
-  .card p {
-    font-size: 16px;
-  }
-
-  .card input {
-    font-size: 16px;
-    padding: 6px 8px;
-    width: 85%;
-  }
-
-  .discountInput {
-    padding: 8px 10px;
-    font-size: 13px;
-  }
-
-  .removeBtn {
-    width: 26px;
-    height: 26px;
-    font-size: 16px;
-  }
-
-  .addBtn {
-    padding: 9px 12px;
-    font-size: 13px;
-  }
-
-  .actions {
-    gap: 10px;
-    margin-top: 16px;
-  }
-
-  .editBtn,
-  .saveBtn {
-    padding: 10px 18px;
-    font-size: 14px;
-  }
-
-  .error {
-    font-size: 13px;
-    padding: 8px 10px;
-    width: 100%;
-    min-width: auto;
-  }
-}
-
-/* ==================== SMALL MOBILE BREAKPOINT (max-width: 480px) ==================== */
-@media (max-width: 480px) {
-  .container {
-    padding: 12px;
-    border-radius: 8px;
-  }
-
-  .cards {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .card {
-    padding: 12px;
-  }
-
-  .card h4 {
-    font-size: 13px;
-    margin-bottom: 8px;
-  }
-
-  .card p {
-    font-size: 16px;
-  }
-
-  .card input {
-    font-size: 15px;
-    padding: 6px 8px;
-    width: 90%;
-  }
-
-  .inputWrapper {
-    gap: 6px;
-    margin-bottom: 6px;
-  }
-
-  .discountInput {
-    padding: 8px 10px;
-    font-size: 13px;
-  }
-
-  .removeBtn {
-    width: 24px;
-    height: 24px;
-    font-size: 14px;
-  }
-
-  .addBtn {
-    padding: 8px 12px;
-    font-size: 12px;
-    margin-top: 6px;
-  }
-
-  .editableSection {
-    margin-bottom: 6px;
-  }
-
-  .actions {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-    margin-top: 12px;
-  }
-
-  .editBtn,
-  .saveBtn {
-    width: 100%;
-    padding: 10px 16px;
-    font-size: 14px;
-  }
-
-  .error {
-    font-size: 12px;
-    padding: 8px 10px;
-  }
-}
-
-/* ==================== EXTRA SMALL MOBILE (max-width: 360px) ==================== */
-@media (max-width: 360px) {
-  .container {
-    padding: 10px;
-  }
-
-  .cards {
-    gap: 10px;
-  }
-
-  .card {
-    padding: 10px;
-  }
-
-  .card h4 {
-    font-size: 12px;
-    margin-bottom: 6px;
-  }
-
-  .card p {
-    font-size: 15px;
-  }
-
-  .card input {
-    font-size: 14px;
-    padding: 5px 6px;
-    width: 92%;
-  }
-
-  .discountInput {
-    padding: 7px 8px;
-    font-size: 12px;
-  }
-
-  .removeBtn {
-    width: 22px;
-    height: 22px;
-    font-size: 13px;
-  }
-
-  .addBtn {
-    padding: 7px 10px;
-    font-size: 11px;
-  }
-
-  .editBtn,
-  .saveBtn {
-    padding: 9px 14px;
-    font-size: 13px;
-  }
-
-  .error {
-    font-size: 11px;
-    padding: 6px 8px;
-  }
-}
-
-/* ==================== LANDSCAPE MODE FOR MOBILE ==================== */
-@media (max-height: 500px) and (orientation: landscape) {
-  .container {
-    padding: 12px;
-  }
-
-  .cards {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 10px;
-  }
-
-  .card {
-    padding: 10px;
-  }
-
-  .card h4 {
-    font-size: 13px;
-    margin-bottom: 6px;
-  }
-
-  .card p {
-    font-size: 15px;
-  }
-
-  .inputWrapper {
-    margin-bottom: 6px;
-  }
-
-  .discountInput {
-    padding: 6px 8px;
-    font-size: 12px;
-  }
-
-  .removeBtn {
-    width: 22px;
-    height: 22px;
-  }
-
-  .addBtn {
-    padding: 6px 10px;
-    font-size: 12px;
-    margin-top: 6px;
-  }
-
-  .actions {
-    margin-top: 10px;
-    gap: 8px;
-  }
-
-  .editBtn,
-  .saveBtn {
-    padding: 8px 16px;
-    font-size: 13px;
-  }
-}
-
-/* ==================== LARGE SCREENS (min-width: 1440px) ==================== */
-@media (min-width: 1440px) {
-  .container {
-    padding: 28px;
-    border-radius: 14px;
-  }
-
-  .cards {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 24px;
-  }
-
-  .card {
-    padding: 20px;
-  }
-
-  .card h4 {
-    font-size: 17px;
-    margin-bottom: 14px;
-  }
-
-  .card p {
-    font-size: 22px;
-  }
-
-  .card input {
-    font-size: 20px;
-    padding: 8px 12px;
-  }
-
-  .discountInput {
-    padding: 10px 14px;
-    font-size: 15px;
-  }
-
-  .removeBtn {
-    width: 30px;
-    height: 30px;
-    font-size: 20px;
-  }
-
-  .addBtn {
-    padding: 12px 16px;
-    font-size: 15px;
-  }
-
-  .editBtn,
-  .saveBtn {
-    padding: 13px 26px;
-    font-size: 16px;
-  }
-
-  .error {
-    font-size: 15px;
-    padding: 10px 14px;
-  }
-}
-
-/* ==================== ULTRA WIDE SCREENS (min-width: 1920px) ==================== */
-@media (min-width: 1920px) {
-  .cards {
-    grid-template-columns: repeat(4, 1fr);
-    max-width: 1600px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-}
-
-/* ==================== ACCESSIBILITY & STATES ==================== */
-@media (prefers-reduced-motion: reduce) {
-  .card,
-  .editBtn,
-  .saveBtn,
-  .addBtn,
-  .removeBtn,
-  .discountInput {
-    transition: none;
-  }
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  .card {
-    border-width: 2px;
-  }
-
-  .discountInput {
-    border-width: 2px;
-  }
-
-  .error {
-    border-right-width: 4px;
-  }
-}
-
-/* Focus visible for keyboard navigation */
-.editBtn:focus-visible,
-.saveBtn:focus-visible,
-.addBtn:focus-visible,
-.removeBtn:focus-visible,
-.discountInput:focus-visible {
-  outline: 3px solid #d4af37;
+@media (prefers-reduced-motion: reduce) { .card, .editBtn, .saveBtn, .addBtn, .removeBtn { transition: none; } }
+
+.editBtn:focus-visible, .saveBtn:focus-visible, .addBtn:focus-visible,
+.removeBtn:focus-visible, .discountInput:focus-visible {
+  outline: 2px solid var(--navy-mid);
   outline-offset: 2px;
 }

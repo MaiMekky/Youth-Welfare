@@ -1,22 +1,98 @@
 .card{
-  position: relative; 
-  background:#fff;
-  border:1px solid #e5e7eb;
-  border-radius:18px;
-  padding:20px 18px 16px;
-  box-shadow:0 10px 24px rgba(15,23,42,0.06);
-  display:flex;
-  flex-direction:column;
-  gap:16px;
-  will-change:transform;
-  transform:translateZ(0);
-  transition:transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  position: relative;
+  background: #fff;
+  border: 1.5px solid #E2ECF5;
+  border-radius: 14px;
+  padding: 20px 18px 16px;
+  box-shadow: 0 2px 12px rgba(26,46,66,.08);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  will-change: transform;
+  transform: translateZ(0);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 }
-
 .card:hover{
-  transform:translateY(-4px);
-  box-shadow:0 16px 34px rgba(15,23,42,0.12);
-  border-color:rgba(44,58,95,0.14);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(30,58,95,.12);
+  border-color: #BFDBFE;
+}
+.top{ text-align: right; }
+.title{ margin: 0; font-size: 22px; font-weight: 900; color: #1E3A5F; line-height: 1.4; }
+.desc{ margin: 8px 0 0; color: #6B8299; font-size: 15px; font-weight: 600; line-height: 1.6; }
+.badges{ display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.badge{ display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; line-height: 1; white-space: nowrap; border: 1px solid transparent; }
+.badgeActive { background: #ECFDF5; border-color: #A7F3D0; color: #065F46; }
+.badgeDraft  { background: #F1F5F9; border-color: #E2E8F0; color: #475569; }
+.badgeTerm   { background: #EBF3FB; border-color: #BFDBFE; color: #1E3A5F; }
+.badgeFaculty{ background: #FFFBEB; border-color: #FDE68A; color: #92400E; }
+.badgeDate   { background: #EFF6FF; border-color: #BFDBFE; color: #1D4ED8; }
+.statsRow{ display: flex; gap: 12px; }
+.statBox{ flex: 1; border: 1.5px solid #E2ECF5; background: #F7FAFD; border-radius: 12px; padding: 14px; text-align: right; }
+.statLabel{ color: #6B8299; font-weight: 700; font-size: 13px; }
+.statValue{ margin-top: 6px; color: #1E3A5F; font-weight: 900; font-size: 28px; }
+.statValueSm{ margin-top: 6px; color: #1E3A5F; font-weight: 700; font-size: 15px; }
+.actions{ margin-top: auto; display: flex; justify-content: flex-start; gap: 8px; }
+.viewBtn{
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #1E3A5F, #2D5F8A);
+  color: #fff;
+  border: none;
+  box-shadow: 0 3px 10px rgba(30,58,95,.25);
+  transition: all 160ms ease;
+  font-family: 'Cairo', sans-serif;
+}
+.viewBtn:hover{ transform: translateY(-2px); box-shadow: 0 6px 18px rgba(30,58,95,.35); }
+.viewBtn:active{ transform: translateY(0); }
+.editBtn{
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: #1E3A5F;
+  border: 1.5px solid #E2ECF5;
+  transition: all 160ms ease;
+  font-family: 'Cairo', sans-serif;
+}
+.editBtn:hover{ background: linear-gradient(135deg, #C49B3A, #A67F2C); color: #fff; border-color: transparent; transform: translateY(-2px); box-shadow: 0 6px 18px rgba(196,155,58,.35); }
+.editBtn:active{ transform: translateY(0); }
+.exportBtn{
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 20px;
+  padding: 8px 12px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  border: 1.5px solid #E2ECF5;
+  background: #F7FAFD;
+  color: #1E3A5F;
+  transition: all 160ms ease;
+  font-family: 'Cairo', sans-serif;
+}
+.exportBtn:hover{ background: #EBF3FB; border-color: #2D5F8A; transform: translateY(-2px); }
+.exportBtn:disabled{ opacity: .55; cursor: not-allowed; transform: none; }
+@media (max-width: 420px){
+  .card{ padding: 16px 14px 12px; }
+  .title{ font-size: 18px; }
+  .desc{ font-size: 14px; }
+  .exportBtn{ top: 12px; left: 12px; padding: 7px 10px; font-size: 11px; }
 }
 
 .top{ text-align:right; }

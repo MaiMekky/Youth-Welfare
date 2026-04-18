@@ -5,9 +5,13 @@
 }
 
 .container{
-  width:100%;
-  margin:0 auto;
-  padding:18px 0 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 5vw, 2.5rem);
+  font-family: 'Cairo', sans-serif;
 }
 
 .topBar{

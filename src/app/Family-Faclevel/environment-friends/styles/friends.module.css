@@ -1,9 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --navy:        #1a2744;
-  --navy-mid:    #243358;
-  --navy-light:  #2e4070;
+  --navy:        #1E3A5F;
+  --navy-mid:    #2D5F8A;
+  --navy-light:  #EBF3FB;
   --gold:        #c9972a;
   --gold-bright: #e0aa35;
   --gold-muted:  rgba(201,151,42,0.14);
@@ -31,7 +31,7 @@
 ═══════════════════════════════════════════ */
 .formContainer {
   min-height: 100vh;
-  background: var(--bg);
+  background: #EDF2F8;
   font-family: 'Cairo', sans-serif;
   direction: rtl;
   display: flex;
@@ -45,10 +45,12 @@
    HEADER
 ═══════════════════════════════════════════ */
 .formHeader {
-  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
-  padding: 28px 48px 24px;
+  background: linear-gradient(140deg, #1E3A5F 0%, #2D5F8A 100%);
+  padding: 24px 30px;
   position: relative;
-  margin-bottom: 0;
+  margin: 16px 16px 0;
+  box-shadow: 0 4px 18px rgba(30,58,95,.22);
+  border-radius: 16px 16px 0 0;
 }
 
 .formHeader::before {
@@ -56,7 +58,25 @@
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--gold), var(--gold-bright), var(--gold));
+  /* background: linear-gradient(90deg, #C49B3A, #e0aa35, #C49B3A); */
+  border-radius: 16px 16px 0 0;
+}
+
+.formHeaderContent { max-width: 100%; margin: 0 auto; }
+
+.formTitle {
+  font-size: 24px;
+  font-weight: 900;
+  color: #fff;
+  margin: 0 0 5px;
+  letter-spacing: -0.3px;
+}
+
+.formSubtitle {
+  font-size: 14px;
+  color: rgba(255,255,255,.65);
+  margin: 0;
+  font-weight: 500;
 }
 
 .formHeaderContent {
@@ -83,10 +103,10 @@
    MAIN BODY
 ═══════════════════════════════════════════ */
 .member-form-container {
-  max-width: 1200px;
+  max-width: 100%; 
   width: 100%;
-  margin: 0 auto;
-  padding: 36px 48px 60px;
+  margin: 0;  
+  padding: 36px 24px 60px; 
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -105,16 +125,18 @@
 }
 
 .member-section-title {
-  font-size: 1rem;
+  font-size: 15px;
   font-weight: 800;
   color: #fff;
-  background: linear-gradient(135deg, var(--navy), var(--navy-mid));
+  background: linear-gradient(140deg, #1E3A5F, #2D5F8A);
   margin: 0;
   padding: 14px 22px;
   display: flex;
   align-items: center;
   gap: 10px;
   position: relative;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .member-section-title::after {
@@ -122,12 +144,12 @@
   position: absolute;
   bottom: 0; right: 0;
   width: 56px; height: 3px;
-  background: var(--gold);
+  background: #C49B3A;
 }
 
 /* section inner padding */
 .member-section > *:not(.member-section-title) {
-  padding: 24px 22px;
+  padding: 20px 22px;
 }
 
 /* ═══════════════════════════════════════════
@@ -488,6 +510,10 @@
   background: var(--card-bg, #fff);
   border-bottom: 1px solid var(--border-color, #e5e7eb);
   overflow-x: auto;
+  margin: 0px 16px 0;
+  box-shadow: 0 4px 18px rgba(30,58,95,.22);
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
 }
 
 .stepperTrack {
@@ -558,10 +584,6 @@
   white-space: nowrap;
   pointer-events: none;
 }
-
-/* Since bubbles are inline-flex inside a flex row, labels need a wrapper.
-   Use the pattern: bubble is position:relative, label is absolute.
-   OR simply show labels inline below — adjust to your design. */
 
 .stepLabelActive {
   color: var(--primary, #16a34a);

@@ -194,7 +194,7 @@ export default function FamilyDetailsPage() {
       <div className={styles.infoCards}>
         <div className={styles.infoCard}>
           <span className={styles.infoLabel}>
-            {family.faculty_name ?? ''}
+            {family.faculty_name ?? 'علي مستوي الجامعة'}
           </span>
         </div>
 

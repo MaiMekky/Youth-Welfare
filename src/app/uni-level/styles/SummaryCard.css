@@ -1,62 +1,83 @@
-.summary-card {
-  background: white;
-  border-radius: 12px;
-  padding: clamp(1rem, 3vw, 1.5rem);
-  display: flex;
-  align-items: center;
-  gap: clamp(0.75rem, 2vw, 1.5rem);
-  margin-bottom: clamp(0.75rem, 2vw, 1.5rem);
-  flex-wrap: wrap;
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+
+/* ── Stats Grid ── */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
   width: 100%;
   box-sizing: border-box;
-  color: #2C3A5F;
+  margin-bottom: 14px;
+  font-family: 'Cairo', sans-serif;
 }
 
-.summary-icon {
-  background: #e8f5e9;
-  width: clamp(48px, 6vw, 60px);
-  height: clamp(48px, 6vw, 60px);
-  min-width: clamp(48px, 6vw, 60px);
-  min-height: clamp(48px, 6vw, 60px);
-  border-radius: 12px;
+/* ── Base Card ── */
+.summary-card {
+  border-radius: 10px;
+  padding: 14px 20px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  flex-direction: column;
+  gap: 3px;
+  transition: transform .18s;
+  background: #fff;
 }
 
-.summary-info, .summary-total {
-  flex: 1;
-  min-width: 0;
+.summary-card:hover { transform: translateY(-2px); }
+
+/* ── Card 1 — navy gradient (إجمالي) ── */
+.summary-total-card {
+  background: linear-gradient(140deg, #1E3A5F, #2D5F8A);
+  box-shadow: 0 4px 18px rgba(30,58,95,.22);
 }
 
-.label {
-  color: #666;
-  font-size: clamp(0.75rem, 1.5vw, 0.875rem);
+/* ── Card 2 — amber (منتظر) ── */
+.summary-pending-card {
+  box-shadow: 0 0 0 2px #FDE68A, 0 4px 14px rgba(245,158,11,.06);
 }
 
-.value {
-  font-size: clamp(1.125rem, 2.5vw, 1.5rem);
-  font-weight: 700;
-  word-wrap: break-word;
+/* ── Card 3 — green (مقبول) ── */
+.summary-accepted-card {
+  box-shadow: 0 0 0 2px #6EE7B7, 0 4px 14px rgba(5,150,105,.06);
 }
 
-.export-btn {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  width: clamp(40px, 5vw, 48px);
-  height: clamp(40px, 5vw, 48px);
-  min-width: clamp(40px, 5vw, 48px);
-  min-height: clamp(40px, 5vw, 48px);
-  flex-shrink: 0;
+/* ── Card 4 — red (مرفوض) ── */
+.summary-rejected-card {
+  box-shadow: 0 0 0 2px #FECACA, 0 4px 14px rgba(220,38,38,.06);
+}
+.summary-total{
+   box-shadow: 0 0 0 2px #2D5F8A, 0 4px 14px rgba(220,38,38,.06);
+}
+
+/* ── Numbers ── */
+.summary-num {
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -1px;
+  color: #1A2E42;
+}
+
+.summary-total-card   .summary-num { color: #fff; }
+.summary-pending-card .summary-num { color: #D97706; }
+.summary-accepted-card .summary-num { color: #059669; }
+.summary-rejected-card .summary-num { color: #DC2626; }
+
+/* ── Labels ── */
+.summary-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6B8299;
+}
+
+.summary-total-card .summary-label { color: rgba(255,255,255,.7); }
+
+.summary-total .summary-num{color:#2D5F8A ;}
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .summary-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 480px) {
-  .summary-card {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .export-btn {
-    align-self: flex-end;
-  }
+  .summary-grid { grid-template-columns: 1fr 1fr; }
+  .summary-num  { font-size: 26px; }
 }

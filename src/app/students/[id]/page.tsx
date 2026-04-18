@@ -3,16 +3,16 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./studentDetails.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
-const rejectionReasons = [
-  { id: 1, text: "إزعاج أو تكرار التقديم بشكل غير مبرر" },
-  { id: 2, text: "المستندات المرفوعة غير واضحة أو غير صحيحة" },
-  { id: 3, text: "وجود بيانات غير صحيحة في الطلب" },
-  { id: 4, text: "الدخل المسجل غير مطابق للمستندات" },
-  { id: 5, text: "الطلب لا يستوفي شروط الدعم" },
-  { id: 6, text: "المستندات لا تخص الطالب" },
-  { id: 7, text: "اشتباه في تزوير المستندات" },
-  { id: 8, text: "سبب آخر" }
-];
+// const rejectionReasons = [
+//   { id: 1, text: "إزعاج أو تكرار التقديم بشكل غير مبرر" },
+//   { id: 2, text: "المستندات المرفوعة غير واضحة أو غير صحيحة" },
+//   { id: 3, text: "وجود بيانات غير صحيحة في الطلب" },
+//   { id: 4, text: "الدخل المسجل غير مطابق للمستندات" },
+//   { id: 5, text: "الطلب لا يستوفي شروط الدعم" },
+//   { id: 6, text: "المستندات لا تخص الطالب" },
+//   { id: 7, text: "اشتباه في تزوير المستندات" },
+//   { id: 8, text: "سبب آخر" }
+// ];
 export default function StudentDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
@@ -23,7 +23,7 @@ export default function StudentDetailsPage() {
 
   const [notification, setNotification] = useState<{ message: string; type: string } | null>(null);
   const [showRejectModal, setShowRejectModal] = useState(false);
-  const [selectedReason, setSelectedReason] = useState<number | null>(null);
+  // const [selectedReason, setSelectedReason] = useState<number | null>(null);
   const showNotification = (message: string, type: string) => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 2500);
@@ -136,10 +136,10 @@ const handleApprove = async () => {
  // ====== رفض الطالب ======
 const handleReject = async () => {
   try {
-    if (!selectedReason) {
-      showNotification("يرجى اختيار سبب الرفض", "error");
-      return;
-    }
+    // if (!selectedReason) {
+    //   showNotification("يرجى اختيار سبب الرفض", "error");
+    //   return;
+    // }
 
     const token = localStorage.getItem("access");
     if (!token) throw new Error("User not authenticated");
@@ -152,9 +152,9 @@ const handleReject = async () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          rejection_reason: selectedReason
-        })
+        // body: JSON.stringify({
+        //   rejection_reason: selectedReason
+        // })
       }
     );
 
@@ -164,7 +164,7 @@ const handleReject = async () => {
 
     setData((prev: Record<string, unknown> | null) => ({ ...prev, req_status: "مرفوض" }));
     setShowRejectModal(false);
-    setSelectedReason(null);
+    // setSelectedReason(null);
 
     showNotification("❌ تم رفض الطالب بنجاح", "error");
 
@@ -297,7 +297,7 @@ console.log("docs: ", docs)
         {/* ====== الأزرار ====== */}
         <div className={styles.actions}>
           {data.req_status === "مقبول" ? (
-            <button className={styles.rejectBtn} onClick={() => setShowRejectModal(true)}>
+            <button className={styles.rejectBtn} onClick={handleReject}>
               رفض الطالب
             </button>
             
@@ -307,7 +307,7 @@ console.log("docs: ", docs)
                 قبول الطالب
               </button>
               <button
-                onClick={() => setShowRejectModal(true)}
+                onClick={handleReject}
                 className={styles.rejectBtn}
               >
                 رفض الطالب
@@ -316,7 +316,7 @@ console.log("docs: ", docs)
           )}
         </div>
       </div>
-      {showRejectModal && (
+      {/* {showRejectModal && (
   <div className={styles.modalOverlay}>
     <div className={styles.modalBox}>
 
@@ -358,7 +358,7 @@ console.log("docs: ", docs)
 
     </div>
   </div>
-)}
+)} */}
     </div>
   );
 }

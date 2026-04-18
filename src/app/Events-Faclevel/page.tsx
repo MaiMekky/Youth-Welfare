@@ -9,7 +9,6 @@ import Tabs from "./components/Tabs";
 import { EventItem, ChipVariant } from "./components/EventCard";
 import { useRouter } from "next/navigation";
 import { Plus, Search } from "lucide-react";
-import Footer from "@/app/FacLevel/components/Footer";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 const API_URL = getBaseUrl();
@@ -314,7 +313,7 @@ export default function Page() {
         </div>
       </div>
 
-      <Footer />
+     
     </div>
   );
 }

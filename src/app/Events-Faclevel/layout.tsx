@@ -3,6 +3,7 @@ import React from "react";
 import "./global.css";
 import EventsSidebar from "./components/sidebar";
 import SidebarLayout from "../FacLevel/components/SidebarLayout";
+import Footer from "../FacLevel/components/Footer";
 
 export const metadata = {
   title: "إدارة الأنشطة - جامعة العاصمة",
@@ -11,12 +12,11 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar">
-      <body className="app-body">
-        <SidebarLayout sidebar={<EventsSidebar />}>
-          {children}
-        </SidebarLayout>
-      </body>
-    </html>
+    <>
+    <SidebarLayout sidebar={<EventsSidebar />}>
+      {children}
+    </SidebarLayout>
+    <Footer />
+     </>
   );
 }

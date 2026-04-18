@@ -65,7 +65,7 @@ export default function Sidebar({ isOpen = false, setIsOpen = () => {} }: Sideba
             </div>
           </div>
           <h2 className="sidebar-title">إدارة رعاية الطلاب</h2>
-          <p className="sidebar-subtitle">نظام إدارة الفعاليات</p>
+          <p className="sidebar-subtitle">نظام إدارة رعاية الطلاب</p>
           <button
             className="sidebar-close-btn"
             onClick={() => setIsOpen(false)}
@@ -74,14 +74,14 @@ export default function Sidebar({ isOpen = false, setIsOpen = () => {} }: Sideba
             <X size={20} />
           </button>
         </div>
-
+{/* 
         <div className="profile-card">
           <div className="profile-icon"><User size={22} /></div>
           <div className="admin-info">
             <h3>مشرف النظام</h3>
             <p>نظام إدارة الفعاليات</p>
           </div>
-        </div>
+        </div> */}
 
         <nav className="nav sidebar-menu">
           {menuItems.map((item, index) => (

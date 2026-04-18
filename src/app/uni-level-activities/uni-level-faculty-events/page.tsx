@@ -29,10 +29,10 @@ export default function Page() {
   const router = useRouter();
 
   const [filters, setFilters] = useState({
-    year: "الكل",
+    startDate: "",
     status: "الكل",
     type: "الكل",
-    college: "الكل", // هنخزن فيها faculty_id كـ string
+    college: "الكل",
   });
 
   const [rows, setRows] = useState<ApiEvent[]>([]);
@@ -137,153 +137,46 @@ export default function Page() {
     fetchFacultyEvents();
   }, []);
 
-  /* ================= Dynamic filter options ================= */
-  const uniqueStatuses = useMemo(() => {
-    const s = Array.from(new Set(rows.map((r) => (r.status || "").trim()).filter(Boolean)));
-    return ["الكل", ...s];
-  }, [rows]);
-
-  const uniqueTypes = useMemo(() => {
-    const s = Array.from(new Set(rows.map((r) => (r.type || "").trim()).filter(Boolean)));
-    return ["الكل", ...s];
-  }, [rows]);
-
-  const uniqueYears = useMemo(() => {
-    const years = Array.from(
-      new Set(
-        rows
-          .map((r) => (r.st_date || "").slice(0, 4))
-          .filter((y) => y && /^\d{4}$/.test(y))
-      )
-    ).sort();
-    return ["الكل", ...years];
-  }, [rows]);
-
   /* ================= Filtering ================= */
   const filteredRows = useMemo(() => {
     return rows.filter((r) => {
-      const yearOk =
-        filters.year === "الكل" ? true : (r.st_date || "").startsWith(filters.year);
+      const startDateOk =
+        !filters.startDate ? true : (r.st_date || "") >= filters.startDate;
 
       const statusOk =
-        filters.status === "الكل" ? true : (r.status || "") === filters.status;
+        filters.status === "الكل" ? true : (r.status || "").trim() === filters.status;
 
       const typeOk =
-        filters.type === "الكل" ? true : (r.type || "") === filters.type;
+        filters.type === "الكل" ? true : (r.type || "").trim() === filters.type;
 
       const collegeOk =
         filters.college === "الكل"
           ? true
           : String(r.faculty_id) === filters.college;
 
-      return yearOk && statusOk && typeOk && collegeOk;
+      return startDateOk && statusOk && typeOk && collegeOk;
     });
   }, [rows, filters]);
 
-  /* ================= Elegant Status Badge ================= */
-  const statusStyle = (status: string): React.CSSProperties => {
-    const s = (status || "").trim().toLowerCase();
-
-    // Active / Accepted
-    if (s === "نشط" || s === "active" || s === "مقبول" || s === "approved") {
-      return {
-        background: "rgba(16,185,129,.14)",
-        color: "#0f766e",
-        border: "1px solid rgba(16,185,129,.28)",
-      };
-    }
-
-    // Upcoming / Pending-ish
-    if (s === "قريباً" || s === "upcoming" || s === "في الانتظار" || s === "pending") {
-      return {
-        background: "rgba(245,158,11,.16)",
-        color: "#92400e",
-        border: "1px solid rgba(245,158,11,.30)",
-      };
-    }
-
-    // Completed
-    if (s === "مكتمل" || s === "completed" || s === "done") {
-      return {
-        background: "rgba(59,130,246,.14)",
-        color: "#1d4ed8",
-        border: "1px solid rgba(59,130,246,.28)",
-      };
-    }
-
-    // Rejected / Cancelled / Other
-    if (s === "مرفوض" || s === "rejected" || s === "cancelled" || s === "canceled") {
-      return {
-        background: "rgba(239,68,68,.14)",
-        color: "#b91c1c",
-        border: "1px solid rgba(239,68,68,.28)",
-      };
-    }
-
-    // Default
-    return {
-      background: "rgba(100,116,139,.12)",
-      color: "#334155",
-      border: "1px solid rgba(100,116,139,.22)",
-    };
+  /* ================= Status Badge CSS class ================= */
+  const getStatusClass = (status: string) => {
+    const s = (status || "").trim();
+    if (s === "مقبول" || s === "approved" || s === "active" || s === "نشط") return styles.statusApproved;
+    if (s === "منتظر" || s === "pending" || s === "في الانتظار") return styles.statusPending;
+    if (s === "موافقة مبدئية") return styles.statusProvisional;
+    if (s === "مرفوض" || s === "rejected") return styles.statusRejected;
+    if (s === "مكتمل" || s === "completed" || s === "done") return styles.statusCompleted;
+    if (s === "ملغي" || s === "cancelled" || s === "canceled") return styles.statusCancelled;
+    return styles.statusDefault;
   };
 
-  const badgeBase: React.CSSProperties = {
-    display: "inline-flex",
-    alignItems: "center",
-    padding: "6px 10px",
-    borderRadius: 999,
-    fontWeight: 900,
-    fontSize: 12,
-    lineHeight: 1,
-    whiteSpace: "nowrap",
+  /* ================= Type Badge CSS class ================= */
+  const getTypeClass = (type: string) => {
+    const t = (type || "").trim();
+    if (t === "داخلي") return styles.typeInternal;
+    if (t === "خارجي") return styles.typeExternal;
+    return styles.typeDefault;
   };
-  /* ================= Elegant Type Badge ================= */
-const typeStyle = (type: string): React.CSSProperties => {
-  const t = (type || "").trim().toLowerCase();
-
-  // تقني
-  if (t === "تقني" || t === "technical") {
-    return {
-      background: "rgba(59,130,246,.14)",
-      color: "#1d4ed8",
-      border: "1px solid rgba(59,130,246,.28)",
-    };
-  }
-
-  // ثقافي
-  if (t === "ثقافي" || t === "cultural") {
-    return {
-      background: "rgba(168,85,247,.14)",
-      color: "#6d28d9",
-      border: "1px solid rgba(168,85,247,.28)",
-    };
-  }
-
-  // رياضي
-  if (t === "رياضي" || t === "sports") {
-    return {
-      background: "rgba(239,68,68,.14)",
-      color: "#b91c1c",
-      border: "1px solid rgba(239,68,68,.28)",
-    };
-  }
-
-  // فني
-  if (t === "فني" || t === "art") {
-    return {
-      background: "rgba(14,165,233,.14)",
-      color: "#0369a1",
-      border: "1px solid rgba(14,165,233,.28)",
-    };
-  }
-
-  return {
-    background: "rgba(100,116,139,.12)",
-    color: "#334155",
-    border: "1px solid rgba(100,116,139,.22)",
-  };
-};
   /* ================= Stats ================= */
   const stats = useMemo(() => {
     const totalColleges = new Set(rows.map((r) => r.faculty_id)).size;
@@ -351,7 +244,7 @@ const typeStyle = (type: string): React.CSSProperties => {
           </div>
         </div>
 
-        {/* Filters (شيلنا فلتر الخطة) */}
+        {/* Filters */}
         <section className={styles.filtersCard}>
           <div className={styles.filtersGrid}>
             <div className={styles.field}>
@@ -377,11 +270,9 @@ const typeStyle = (type: string): React.CSSProperties => {
                 value={filters.type}
                 onChange={(e) => setFilters((p) => ({ ...p, type: e.target.value }))}
               >
-                {uniqueTypes.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
+                <option value="الكل">الكل</option>
+                <option value="داخلي">داخلي</option>
+                <option value="خارجي">خارجي</option>
               </select>
             </div>
 
@@ -392,39 +283,38 @@ const typeStyle = (type: string): React.CSSProperties => {
                 value={filters.status}
                 onChange={(e) => setFilters((p) => ({ ...p, status: e.target.value }))}
               >
-                {uniqueStatuses.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
+                <option value="الكل">الكل</option>
+                <option value="موافقة مبدئية">موافقة مبدئية</option>
+                <option value="مقبول">مقبول</option>
+                <option value="منتظر">منتظر</option>
+                <option value="مرفوض">مرفوض</option>
+                <option value="مكتمل">مكتمل</option>
+                <option value="ملغي">ملغي</option>
               </select>
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>العام</label>
-              <select
+              <label className={styles.label}>تاريخ البداية من</label>
+              <input
+                type="date"
+                placeholder="التاريخ"
                 className={styles.select}
-                value={filters.year}
-                onChange={(e) => setFilters((p) => ({ ...p, year: e.target.value }))}
-              >
-                {uniqueYears.map((y) => (
-                  <option key={y} value={y}>
-                    {y}
-                  </option>
-                ))}
-              </select>
+                value={filters.startDate}
+                onChange={(e) => setFilters((p) => ({ ...p, startDate: e.target.value }))}
+              />
             </div>
           </div>
         </section>
 
         {loading && (
-          <div style={{ textAlign: "center", padding: 16 }}>جاري تحميل الفعاليات...</div>
+          <div className={styles.loadingWrap}>
+            <div className={styles.spinner} />
+            <p className={styles.loadingText}>جاري تحميل الفعاليات...</p>
+          </div>
         )}
 
         {error && (
-          <div style={{ textAlign: "center", padding: 16, color: "crimson" }}>
-            {error}
-          </div>
+          <div className={styles.errorBanner}>{error}</div>
         )}
 
         {/* Table */}
@@ -469,16 +359,16 @@ const typeStyle = (type: string): React.CSSProperties => {
                       <td>{r.location}</td>
 
                       <td>
-                        <span style={{ ...badgeBase, ...statusStyle(r.status) }}>
+                        <span className={`${styles.statusBadge} ${getStatusClass(r.status)}`}>
                           {r.status}
                         </span>
                       </td>
 
                       <td>
-                      <span style={{ ...badgeBase, ...typeStyle(r.type) }}>
-                        {r.type}
-                      </span>
-                    </td>
+                        <span className={`${styles.typeBadge} ${getTypeClass(r.type)}`}>
+                          {r.type}
+                        </span>
+                      </td>
 
                       <td className={styles.cellValue}>
                         {r.cost ? `${r.cost} جنيه` : "مجاني"}

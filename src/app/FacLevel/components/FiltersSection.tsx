@@ -17,10 +17,10 @@ export default function FiltersSection({
 }: FiltersSectionProps) {
   return (
     <div className={styles.filtersSection}>
-      <div className={styles.filtersHeader}>
+      {/* <div className={styles.filtersHeader}>
         <Filter size={20} />
         <h3>المرشحات والبحث</h3>
-      </div>
+      </div> */}
 
       <div className={styles.filtersContent}>
         <div className={styles.searchWrapper}>

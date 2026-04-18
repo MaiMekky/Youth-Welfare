@@ -89,7 +89,7 @@ export default function FacLevelSidebar({ isOpen = false, setIsOpen = () => {} }
             </div>
           </div>
           <h2 className="sidebar-title">إدارة الأسر الطلابية</h2>
-          <p className="sidebar-subtitle">جامعة حلوان - قسم خدمات الأسر الطلابية</p>
+          <p className="sidebar-subtitle">ادارة الأسر الطلابية لجامعة العاصمة</p>
           {isOpen && (
             <button
               className="sidebar-close-btn"

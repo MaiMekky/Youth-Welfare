@@ -6,7 +6,6 @@ import PlansGrid from "./components/PlansGrid";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import CreatePlanModal from "./components/CreatePlanModal";
-import Footer from "@/app/FacLevel/components/Footer";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 type ApiPlan = {
@@ -129,6 +128,10 @@ export default function Page() {
     <div className={styles.page}>
       <div className={styles.container}>
         <div className={styles.header}>
+          <div className={styles.headerText}>
+            <h1 className={styles.pageTitle}>إدارة الخطط</h1>
+            <p className={styles.pageSubtitle}>إنشاء وإدارة خطط الأنشطة والفعاليات</p>
+          </div>
           <button className={styles.createBtnTop} onClick={openCreate}>
             <Plus size={18} />
             إنشاء خطة جديدة
@@ -136,13 +139,14 @@ export default function Page() {
         </div>
 
         {loading && (
-          <div style={{ textAlign: "center", padding: "64px 0", color: "#9ca3af", fontSize: "1rem", fontWeight: 600 }}>
-            جاري تحميل الخطط...
+          <div className={styles.loadingWrap}>
+            <div className={styles.spinner} />
+            <p className={styles.loadingText}>جاري تحميل الخطط...</p>
           </div>
         )}
 
         {error && (
-          <div style={{ textAlign: "center", padding: 16, color: "crimson" }}>{error}</div>
+          <div className={styles.errorBanner}>{error}</div>
         )}
 
         {!loading && !error && plans.length === 0 ? (
@@ -162,7 +166,6 @@ export default function Page() {
           onSaved={fetchPlans}
         />
       </div>
-      <Footer />
     </div>
   );
 }

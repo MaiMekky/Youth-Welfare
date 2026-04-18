@@ -1,24 +1,22 @@
-/* FacLevel — uses global design tokens (Student theme)
-   Import root globals.css for :root vars, or use fallbacks below.
-*/
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-  --navy: #1a2744;
-  --navy-mid: #243358;
-  --navy-light: #2e4070;
-  --navy-deep: #111b33;
-  --gold: #c9972a;
+  /* ── Updated to match superadmin theme ── */
+  --navy:       #1E3A5F;
+  --navy-mid:   #2D5F8A;
+  --navy-light: #EBF3FB;
+  --navy-deep:  #111b33;
+  --gold:       #C49B3A;
   --gold-bright: #e0aa35;
-  --gold-pale: rgba(201, 151, 42, 0.13);
-  --gold-border: rgba(201, 151, 42, 0.28);
-  --bg-color: #f4f6fa;
+  --gold-pale:  rgba(196,155,58,.13);
+  --gold-border: rgba(196,155,58,.28);
+  --bg-color:   #EDF2F8;   /* superadmin page background */
   --content-max: 1280px;
-  --gutter: 24px;
-  --gutter-sm: 16px;
-  --gutter-xs: 12px;
-  --radius: 11px;
-  --radius-sm: 8px;
+  --gutter:     24px;
+  --gutter-sm:  16px;
+  --gutter-xs:  12px;
+  --radius:     10px;
+  --radius-sm:  8px;
   --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -28,20 +26,16 @@
   box-sizing: border-box;
 }
 
-html, body {
-  height: 100%;
-}
+html, body { height: 100%; }
 
-.app-body {
-  direction: rtl;
-}
+.app-body { direction: rtl; }
 
 body {
   font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: var(--bg-color);
-  color: #1a2744;
+  color: #1A2E42;
   overflow-x: hidden;
 }
 
@@ -53,9 +47,7 @@ body {
   overflow-x: hidden;
 }
 
-.app-container > *:first-child {
-  flex-shrink: 0;
-}
+.app-container > *:first-child { flex-shrink: 0; }
 
 .main-content {
   flex: 1;
@@ -88,18 +80,19 @@ body {
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;           /* spacing between components — matches superadmin */
 }
 
-@media (max-width: 768px) {
-  .page-wrapper main.main-content {
-    padding: var(--gutter-sm);
-  }
+@media (max-width: 1024px) { .page-content { padding: var(--gutter-sm); } }
+@media (max-width: 768px)  {
+  .page-wrapper main.main-content { padding: var(--gutter-sm); gap: 12px; }
+  .page-content { padding: var(--gutter-xs); }
 }
-
-@media (max-width: 480px) {
-  .page-wrapper main.main-content {
-    padding: var(--gutter-xs);
-  }
+@media (max-width: 480px)  {
+  .page-wrapper main.main-content { padding: var(--gutter-xs); gap: 10px; }
+  .page-content { padding: var(--gutter-xs); }
 }
 
 .table-section,
@@ -107,22 +100,4 @@ body {
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-}
-
-@media (max-width: 1024px) {
-  .page-content {
-    padding: var(--gutter-sm);
-  }
-}
-
-@media (max-width: 768px) {
-  .page-content {
-    padding: var(--gutter-xs);
-  }
-}
-
-@media (max-width: 480px) {
-  .page-content {
-    padding: var(--gutter-xs);
-  }
 }

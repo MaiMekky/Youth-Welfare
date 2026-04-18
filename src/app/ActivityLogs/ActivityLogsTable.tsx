@@ -132,11 +132,11 @@ export default function ActivityLogsTable() {
         </div>
         <div className={`${styles.statCard} ${styles.statSuccess}`}>
           <div className={styles.statNum}>{mappedLogs.filter(l => l.statusClass === "success").length}</div>
-          <div className={styles.statLabel}>ناجحة</div>
+          <div className={styles.statLabel}>عملية ناجحة</div>
         </div>
         <div className={`${styles.statCard} ${styles.statFailed}`}>
           <div className={styles.statNum}>{mappedLogs.filter(l => l.statusClass === "failed").length}</div>
-          <div className={styles.statLabel}>مرفوضة</div>
+          <div className={styles.statLabel}>عملية فاشلة</div>
         </div>
         <div className={`${styles.statCard} ${styles.statFiltered}`}>
           <div className={styles.statNum}>{filteredLogs.length}</div>

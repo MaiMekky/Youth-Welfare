@@ -1,24 +1,23 @@
 "use client";
 
-import React, { useMemo, useState, useEffect, Suspense } from "react";
-import { Users, Leaf, Star } from "lucide-react";
+import React, { useMemo, useState, useEffect, useCallback, Suspense } from "react";
+import { Users } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import styles from "./Styles/page.module.css";
 import Tabs from "./components/Tabs";
 import FamiliesGrid from "./components/FamiliesGrid";
 import Filters from "./components/Filters";
+import StatsGrid from "../SuperAdmin-family/components/StatsGrid";
 
 const API_URL = `${getBaseUrl()}/api`;
 const TAB_STORAGE_KEY = "families_active_tab";
 
-type TabType = "central" | "quality" | "eco";
+type TabType = "central" | "quality";
 
 function PageContent() {
   const searchParams = useSearchParams();
 
-  /* ── Tab persistence: always start with searchParam or "central",
-       then correct from localStorage after mount (avoids SSR mismatch) ── */
   const [activeTab, setActiveTab] = useState<TabType>(
     (searchParams.get("tab") as TabType) || "central"
   );
@@ -30,34 +29,43 @@ function PageContent() {
       setActiveTab(fromUrl);
     } else {
       const saved = localStorage.getItem(TAB_STORAGE_KEY) as TabType;
-      if (saved) setActiveTab(saved);
+      if (saved) setActiveTab(saved as TabType);
     }
   }, [searchParams]);
 
-  // Persist tab to localStorage whenever it changes
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
     localStorage.setItem(TAB_STORAGE_KEY, tab);
   };
 
-  const [selectedFaculty, setSelectedFaculty] = useState<string>("الكل");
+  const [selectedFaculty, setSelectedFaculty]       = useState<string>("الكل");
   const [selectedFamilyType, setSelectedFamilyType] = useState<string>("all");
-  const [families, setFamilies] = useState<Record<string, unknown>[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "warning" } | null>(null);
+  const [selectedStatus, setSelectedStatus]         = useState<string>("all");
+  const [readyOnly, setReadyOnly]                   = useState<"all" | "true" | "false">("all");
+  const [families, setFamilies]                     = useState<Record<string, unknown>[]>([]);
+  const [loading, setLoading]                       = useState<boolean>(false);
+  const [toast, setToast]                           = useState<{ message: string; type: "success" | "error" | "warning" } | null>(null);
 
-  /* Reset filters when switching tabs */
+  /* Reset filters when switching tabs — only reset readyOnly if it differs to avoid extra fetch */
   useEffect(() => {
     setSelectedFaculty("الكل");
     setSelectedFamilyType("all");
+    setSelectedStatus("all");
+    setReadyOnly((prev) => (prev === "all" ? prev : "all"));
   }, [activeTab]);
 
-  /* ── API ── */
-  async function fetchFamilies() {
+  /* ── Stable fetch function ── */
+  const fetchFamilies = useCallback(async (ready: "all" | "true" | "false" = "all") => {
     try {
       setLoading(true);
       const token = localStorage.getItem("access");
-      const response = await authFetch(`${API_URL}/family/super_dept/`, {
+
+      const params = new URLSearchParams();
+      if (ready === "true")  params.set("ready", "true");
+      if (ready === "false") params.set("ready", "false");
+      const query = params.toString() ? `?${params.toString()}` : "";
+
+      const response = await authFetch(`${API_URL}/family/super_dept/${query}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) throw new Error("Unauthorized");
@@ -69,21 +77,47 @@ function PageContent() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
-  useEffect(() => { fetchFamilies(); }, []);
+  /* ── Single source of truth: fetch whenever readyOnly changes ── */
+  useEffect(() => {
+    fetchFamilies(readyOnly);
+  }, [readyOnly, fetchFamilies]);
+
+  /* ── readyOnly handler — only updates state, effect handles fetch ── */
+  const handleReadyChange = (value: "all" | "true" | "false") => {
+    setReadyOnly(value);
+  };
 
   /* ── Derived data ── */
   const centralFamilies = useMemo(() => families.filter((f) => f.type === "مركزية"), [families]);
-  const qualityFamilies = useMemo(() => families.filter((f) => f.type === "نوعية"), [families]);
-  const ecoFamilies     = useMemo(() => families.filter((f) => f.type === "اصدقاء البيئة"), [families]);
+  const qualityFamilies = useMemo(() => families.filter((f) => f.type !== "مركزية"), [families]);
 
-  const filteredNonCentralFamilies = useMemo(() => {
-    let filtered = families.filter((f) => f.type !== "مركزية");
-    if (selectedFaculty !== "الكل") filtered = filtered.filter((f) => f.faculty_name === selectedFaculty);
+  /* Client-side filters (faculty, type, status) */
+  const filteredQualityFamilies = useMemo(() => {
+    let filtered = qualityFamilies;
+    if (selectedFaculty !== "الكل")   filtered = filtered.filter((f) => f.faculty_name === selectedFaculty);
     if (selectedFamilyType !== "all") filtered = filtered.filter((f) => f.type === selectedFamilyType);
+    if (selectedStatus !== "all")     filtered = filtered.filter((f) => f.status === selectedStatus);
     return filtered;
-  }, [families, selectedFaculty, selectedFamilyType]);
+  }, [qualityFamilies, selectedFaculty, selectedFamilyType, selectedStatus]);
+
+  /* ── Stats ── */
+  const stats = useMemo(() => {
+    const ecoCount     = families.filter((f) => f.type === "اصدقاء البيئة").length;
+    const qualityCount = families.filter((f) => f.type === "نوعية").length;
+    return [
+      { id: 1, label: "إجمالي الأسر",         value: families.length },
+      { id: 2, label: "الأسر المركزية",        value: centralFamilies.length },
+      { id: 3, label: "الأسر النوعية",         value: qualityCount },
+      { id: 4, label: "الأسر الصديقة للبيئة", value: ecoCount },
+    ];
+  }, [families, centralFamilies]);
+
+  const pendingCount = useMemo(
+    () => qualityFamilies.filter((f) => f.status === "منتظر" || f.status === "في الانتظار").length,
+    [qualityFamilies]
+  );
 
   /* ── Toast ── */
   const showToast = (message: string, type: "success" | "error" | "warning") => {
@@ -124,34 +158,32 @@ function PageContent() {
     }
   }
 
-  /* ── Stats ── */
-  const qualityPendingCount = qualityFamilies.filter((f) => f.status === "في الانتظار").length;
-  const ecoPendingCount     = ecoFamilies.filter((f) => f.status === "في الانتظار").length;
-
   return (
     <div className={styles.container}>
       {/* Toast */}
       {toast && (
         <div className={`${styles.toast} ${styles[toast.type]}`}>
           <span>{toast.message}</span>
-          <button className={styles.toastClose} onClick={() => setToast(null)} />
+          <button className={styles.toastClose} onClick={() => setToast(null)}>×</button>
           <div className={styles.toastProgress} />
         </div>
       )}
 
       <header className={styles.headerCard}>
-        <h1 className={styles.pageTitle}>إدارة الأسر الطلابية</h1>
-        <p className={styles.pageSubtitle}>إدارة ومتابعة جميع الأسر الطلابية</p>
+        <div>
+          <h1 className={styles.pageTitle}>إدارة الأسر الطلابية</h1>
+          <p className={styles.pageSubtitle}>إدارة ومتابعة جميع الأسر الطلابية المركزية والنوعية وأصدقاء البيئة</p>
+        </div>
       </header>
+
+      <StatsGrid stats={stats} />
 
       <Tabs
         activeTab={activeTab}
         setActiveTab={handleTabChange}
-        qualityPendingCount={qualityPendingCount}
-        ecoPendingCount={ecoPendingCount}
+        pendingCount={pendingCount}
       />
 
-      {/* Loading */}
       {loading && (
         <div className={styles.loadingWrap}>
           <div className={styles.spinner} />
@@ -162,7 +194,7 @@ function PageContent() {
       <main className={styles.tabContent}>
         {/* ── Central tab ── */}
         {!loading && activeTab === "central" && (
-          <>
+          <div className={styles.contentSection}>
             {centralFamilies.length === 0 ? (
               <EmptyState
                 icon={<Users size={52} strokeWidth={1.4} />}
@@ -172,67 +204,42 @@ function PageContent() {
             ) : (
               <FamiliesGrid families={centralFamilies} showActions={false} activeTab={activeTab} />
             )}
-          </>
+          </div>
         )}
 
-        {/* ── Quality tab ── */}
+        {/* ── Quality + Eco combined tab ── */}
         {!loading && activeTab === "quality" && (
-          <>
+          <div className={styles.contentSection}>
             <Filters
               selectedFaculty={selectedFaculty}
               setSelectedFaculty={setSelectedFaculty}
               selectedFamilyType={selectedFamilyType}
               setSelectedFamilyType={setSelectedFamilyType}
+              selectedStatus={selectedStatus}
+              setSelectedStatus={setSelectedStatus}
+              readyOnly={readyOnly}
+              setReadyOnly={handleReadyChange}
             />
-            {filteredNonCentralFamilies.length === 0 ? (
+            {filteredQualityFamilies.length === 0 ? (
               <EmptyState
-                icon={<Star size={52} strokeWidth={1.4} />}
-                title="لا توجد أسر نوعية"
+                icon={<Users size={52} strokeWidth={1.4} />}
+                title="لا توجد أسر"
                 desc={
-                  selectedFaculty !== "الكل" || selectedFamilyType !== "all"
+                  selectedFaculty !== "الكل" || selectedFamilyType !== "all" || selectedStatus !== "all"
                     ? "لا توجد نتائج تطابق الفلاتر المحددة"
-                    : "لم يتم تسجيل أي أسرة نوعية حتى الآن."
+                    : "لم يتم تسجيل أي أسرة حتى الآن."
                 }
               />
             ) : (
               <FamiliesGrid
-                families={filteredNonCentralFamilies}
+                families={filteredQualityFamilies}
                 showActions={true}
                 activeTab={activeTab}
                 onApprove={handleApproveFamily}
                 onReject={handleRejectFamily}
               />
             )}
-          </>
-        )}
-
-        {/* ── Eco tab ── */}
-        {!loading && activeTab === "eco" && (
-          <>
-            <Filters
-              selectedFaculty={selectedFaculty}
-              setSelectedFaculty={setSelectedFaculty}
-              selectedFamilyType={selectedFamilyType}
-              setSelectedFamilyType={setSelectedFamilyType}
-            />
-            {filteredNonCentralFamilies.length === 0 ? (
-              <EmptyState
-                icon={<Leaf size={52} strokeWidth={1.4} />}
-                title="لا توجد أسر أصدقاء البيئة"
-                desc={
-                  selectedFaculty !== "الكل" || selectedFamilyType !== "all"
-                    ? "لا توجد نتائج تطابق الفلاتر المحددة. جرّب تغيير الفلتر."
-                    : "لم يتم تسجيل أي أسرة بيئية حتى الآن."
-                }
-              />
-            ) : (
-              <FamiliesGrid
-                families={filteredNonCentralFamilies}
-                showActions={false}
-                activeTab={activeTab}
-              />
-            )}
-          </>
+          </div>
         )}
       </main>
     </div>
@@ -253,7 +260,6 @@ export default function Page() {
   );
 }
 
-/* ── Reusable empty state component ── */
 function EmptyState({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
   return (
     <div className={styles.emptyState}>

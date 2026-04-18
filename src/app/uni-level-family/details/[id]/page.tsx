@@ -450,8 +450,8 @@ const getFamilyStatusStyle = (status: string) => {
       <div className={styles.infoCards}>
         <div className={styles.infoCard}>
           <span className={styles.infoIcon}></span>
-          <span className={styles.infoLabel}>الكلية</span>
-          <span className={styles.infoValue}>{familyData.faculty_name}</span>
+          <span className={styles.infoLabel}></span>
+          <span className={styles.infoValue}>{familyData.faculty_name || "علي مستوي الجامعة"}</span>
         </div>
         
         <div className={styles.infoCard}>

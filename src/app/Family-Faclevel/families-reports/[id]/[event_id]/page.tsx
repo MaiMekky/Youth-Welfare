@@ -304,14 +304,14 @@ const handleApproveAll = async () => {
           <p className={styles.descriptionText}>{eventData.description}</p>
         </div>
 
-        {/* ===== Students Table (unchanged) ===== */}
+        {/* ===== Students Table ===== */}
         <div className={styles.studentsCard}>
-    <h2 className={styles.cardTitle}>المشاركون</h2>
-     <div className={styles.studentsHeader}>
-    <button className={styles.approveAllButton} onClick={handleApproveAll}>
-      اعتماد الجميع
-    </button>
-  </div>
+          <div className={styles.studentsHeader}>
+            <h2 className={styles.cardTitle}>المشاركون</h2>
+            <button className={styles.approveAllButton} onClick={handleApproveAll}>
+              اعتماد الجميع
+            </button>
+          </div>
 
           <div className={styles.tableContainer}>
            <table className={styles.studentsTable}>
@@ -321,8 +321,6 @@ const handleApproveAll = async () => {
       <th>الرقم القومي</th>
       <th>الرقم الجامعي</th>
       <th>الحالة</th>
-      {/* <th>الترتيب</th>
-      <th>المكافأة</th> */}
       <th>الإجراءات</th>
     </tr>
   </thead>

@@ -166,7 +166,7 @@ function UidField({
 }: UidFieldProps) {
   const [status, setStatus] = useState<UidStatus>("idle");
   const [studentName, setStudentName] = useState("");
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const checkUid = async (uid: string) => {
     if (!uid || !/^\d+$/.test(uid)) {

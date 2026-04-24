@@ -14,7 +14,7 @@ export default function Cards() {
         }
 
         .cards-root{
-          font-family: 'Noto Kufi Arabic', 'Noto Sans', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+          font-family: 'Cairo', sans-serif;
           background: var(--bg);
           padding: 24px;
           min-height: 100vh;

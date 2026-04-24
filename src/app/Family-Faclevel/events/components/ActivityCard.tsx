@@ -15,7 +15,9 @@ interface ActivityCardProps {
   location: string;
   participantsLimit: number;
   type: string;
+  familyName: string;
 }
+
 
 const ActivityCard: React.FC<ActivityCardProps> = ({
   eventId,
@@ -26,6 +28,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
   location,
   participantsLimit,
   type,
+  familyName,
 }) => {
   const [status, setStatus] = useState<"pending" | "approved" | "rejected">(
     "pending"
@@ -95,7 +98,12 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
         <div className={styles.eventTitleSection}>
           <h2 className={styles.eventTitle}>{title}</h2>
           
-          {/* Event type */}
+           {/* Family name badge */}
+          <span className={styles.badgeFamily}>
+          أسرة  {familyName} 
+          </span>
+
+          {/* Event type badge */}
           <span className={`${styles.eventType} ${styles[type]}`}>
             {type}
           </span>

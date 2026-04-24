@@ -5,7 +5,7 @@
   width: 100%;
   margin: 0 auto;
   direction: rtl;
-  font-family: 'Cairo', 'Noto Kufi Arabic', 'Noto Sans', system-ui, sans-serif;
+  font-family: 'Cairo', sans-serif;
   box-sizing: border-box;
 }
 

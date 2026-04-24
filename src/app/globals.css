@@ -84,7 +84,7 @@
 
   /* ─── Typography ─── */
   --font-size-base: 1rem;
-  --font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+  --font-family: 'Cairo', sans-serif;
 }
 
 /* ==========================================================================

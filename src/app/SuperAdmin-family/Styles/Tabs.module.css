@@ -19,6 +19,7 @@
   gap: 10px;
   flex: 1;
   width: 100%;
+  flex-wrap: wrap;
 }
 
 .tab {
@@ -36,7 +37,7 @@
   font-size: 15px;
   font-weight: 700;
   color: #6B8299;
-  white-space: nowrap;
+  white-space: normal;
   position: relative;
   min-height: 44px;
   text-align: center;

@@ -9,6 +9,7 @@ import Overview from "./Overview";
 import Toast from "./Toast";
 import { X, Upload, CalendarPlus } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+
 export interface Post {
   id: number;
   author: string;
@@ -41,28 +42,28 @@ interface Department {
 interface ToastNotification {
   id: number;
   message: string;
-  type: 'success' | 'error' | 'info' | 'warning';
+  type: "success" | "error" | "info" | "warning";
 }
 
 const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"overview" | "activities" | "members" | "posts">("overview");
 
-  const [showCreateContentForm, setShowCreateContentForm] = useState(false);
+  const [showCreateContentForm,  setShowCreateContentForm]  = useState(false);
   const [showCreateActivityForm, setShowCreateActivityForm] = useState(false);
 
   const [selectedFamilyId, setSelectedFamilyId] = useState<number | null>(null);
-  const [familyName, setFamilyName] = useState<string>("أسرة المهندسين المبدعين");
-  const [departments, setDepartments] = useState<Department[]>([]);
+  const [familyName, setFamilyName]             = useState<string>("أسرة المهندسين المبدعين");
+  const [departments, setDepartments]           = useState<Department[]>([]);
 
   const [profileLoading, setProfileLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [postRefreshTrigger, setPostRefreshTrigger] = useState(0);
+  const [isSubmitting,   setIsSubmitting]   = useState(false);
+  const [postRefreshTrigger,     setPostRefreshTrigger]     = useState(0);
   const [activityRefreshTrigger, setActivityRefreshTrigger] = useState(0);
 
   const [toasts, setToasts] = useState<ToastNotification[]>([]);
 
   const [contentTitle, setContentTitle] = useState("");
-  const [contentBody, setContentBody] = useState("");
+  const [contentBody,  setContentBody]  = useState("");
 
   const [activityData, setActivityData] = useState({
     title: "", type: "", description: "", date: "", endDate: "",
@@ -74,15 +75,14 @@ const Dashboard: React.FC = () => {
 
   const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
 
-  const showToast = (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
+  const showToast = (message: string, type: "success" | "error" | "info" | "warning") => {
     const id = Date.now();
-    setToasts(prev => [...prev, { id, message, type }]);
+    setToasts((prev) => [...prev, { id, message, type }]);
   };
 
-  const removeToast = (id: number) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
-  };
+  const removeToast = (id: number) => setToasts((prev) => prev.filter((t) => t.id !== id));
 
+  // Fetch family data
   useEffect(() => {
     if (!token) { setProfileLoading(false); return; }
     const fetchFamilyData = async () => {
@@ -93,19 +93,23 @@ const Dashboard: React.FC = () => {
         });
         if (!res.ok) throw new Error(`فشل تحميل قائمة الأسر (Status: ${res.status})`);
         const response = await res.json();
-        const families: Family[] = Array.isArray(response) ? response
+        const families: Family[] = Array.isArray(response)
+          ? response
           : response.data ?? response.results ?? response.families ?? [];
         if (!families.length) { showToast("لا توجد أسر متاحة", "warning"); return; }
-        const elderFamily = families.find(f => f.role === "أخ أكبر");
+        const elderFamily = families.find((f) => f.role === "أخ أكبر");
         if (elderFamily) { setSelectedFamilyId(elderFamily.family_id); setFamilyName(elderFamily.name); }
         else showToast("لا توجد أسرة بدور 'أخ أكبر'", "warning");
       } catch (err: unknown) {
         showToast(err instanceof Error ? err.message : "حصل خطأ أثناء تحميل قائمة الأسر", "error");
-      } finally { setProfileLoading(false); }
+      } finally {
+        setProfileLoading(false);
+      }
     };
     fetchFamilyData();
   }, [token]);
 
+  // Fetch departments
   useEffect(() => {
     if (!token) return;
     const fetchDepts = async () => {
@@ -116,7 +120,8 @@ const Dashboard: React.FC = () => {
         });
         if (!res.ok) return;
         const response = await res.json();
-        const depts: Department[] = Array.isArray(response) ? response
+        const depts: Department[] = Array.isArray(response)
+          ? response
           : response.departments ?? response.results ?? [];
         setDepartments(depts);
       } catch {}
@@ -135,8 +140,8 @@ const Dashboard: React.FC = () => {
     if (!activityData.dept_id)            errors.dept_id     = "اللجنة مطلوبة";
     if (activityData.date && activityData.endDate) {
       const start = new Date(activityData.date), end = new Date(activityData.endDate);
-      const today = new Date(); today.setHours(0,0,0,0);
-      if (start < today) errors.date = "تاريخ البداية يجب أن يكون في المستقبل";
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      if (start < today) errors.date   = "تاريخ البداية يجب أن يكون في المستقبل";
       if (end < start)   errors.endDate = "تاريخ النهاية يجب أن يكون بعد تاريخ البداية";
     }
     if (activityData.maxParticipants && parseInt(activityData.maxParticipants) < 1)
@@ -148,23 +153,26 @@ const Dashboard: React.FC = () => {
   };
 
   const handleCreateContent = async () => {
-    if (!contentBody.trim())   { showToast("محتوى المنشور مطلوب", "error"); return; }
-    if (!selectedFamilyId)     { showToast("لم يتم العثور على معرف الأسرة", "error"); return; }
+    if (!contentBody.trim())  { showToast("محتوى المنشور مطلوب", "error"); return; }
+    if (!selectedFamilyId)    { showToast("لم يتم العثور على معرف الأسرة", "error"); return; }
     const tk = localStorage.getItem("access");
-    if (!tk)                   { showToast("يرجى تسجيل الدخول أولاً", "error"); return; }
+    if (!tk)                  { showToast("يرجى تسجيل الدخول أولاً", "error"); return; }
     setIsSubmitting(true);
     try {
       const baseUrl = getBaseUrl();
       const response = await authFetch(
         `${baseUrl}/api/family/student/${selectedFamilyId}/post/`,
-        { method: "POST", headers: { Authorization: `Bearer ${tk}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ title: contentTitle || "منشور جديد", description: contentBody }) }
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${tk}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ title: contentTitle || "منشور جديد", description: contentBody }),
+        }
       );
       if (response.ok) {
         showToast("تم نشر المحتوى بنجاح 🎉", "success");
         setContentBody(""); setContentTitle(""); setShowCreateContentForm(false);
         setActiveTab("posts");
-        setTimeout(() => setPostRefreshTrigger(p => p + 1), 500);
+        setTimeout(() => setPostRefreshTrigger((p) => p + 1), 500);
       } else {
         const err = await response.json();
         showToast(err?.detail || err?.error || "حدث خطأ أثناء نشر المحتوى", "error");
@@ -183,7 +191,9 @@ const Dashboard: React.FC = () => {
       const baseUrl = getBaseUrl();
       const response = await authFetch(
         `${baseUrl}/api/family/student/${selectedFamilyId}/event_request/`,
-        { method: "POST", headers: { Authorization: `Bearer ${tk}`, "Content-Type": "application/json" },
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${tk}`, "Content-Type": "application/json" },
           body: JSON.stringify({
             title: activityData.title, description: activityData.description,
             type: activityData.type, st_date: activityData.date, end_date: activityData.endDate,
@@ -191,7 +201,8 @@ const Dashboard: React.FC = () => {
             s_limit: activityData.maxParticipants ? parseInt(activityData.maxParticipants) : 0,
             cost: activityData.cost || "0", restrictions: activityData.restrictions || "",
             reward: activityData.reward || "", dept_id: parseInt(activityData.dept_id),
-          }) }
+          }),
+        }
       );
       const resData = await response.json();
       if (response.ok) {
@@ -200,24 +211,28 @@ const Dashboard: React.FC = () => {
         setActivityData({ title:"",type:"",description:"",date:"",endDate:"",time:"",location:"",maxParticipants:"",cost:"",restrictions:"",reward:"",dept_id:"" });
         setActivityErrors({});
         setActiveTab("activities");
-        setTimeout(() => setActivityRefreshTrigger(p => p + 1), 500);
+        setTimeout(() => setActivityRefreshTrigger((p) => p + 1), 500);
       } else {
-        const msg = resData?.errors?.non_field_errors?.join(", ")
-          || (resData?.errors && String(Object.values(resData.errors)[0]))
-          || resData?.detail || resData?.error || "حدث خطأ أثناء إنشاء الفعالية";
+        const msg =
+          resData?.errors?.non_field_errors?.join(", ") ||
+          (resData?.errors && String(Object.values(resData.errors)[0])) ||
+          resData?.detail || resData?.error || "حدث خطأ أثناء إنشاء الفعالية";
         showToast(msg, "error");
       }
     } catch { showToast("فشل الاتصال بالسيرفر", "error"); }
     finally { setIsSubmitting(false); }
   };
 
-  const handleActivityChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleActivityChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setActivityData(prev => ({ ...prev, [name]: value }));
-    if (activityErrors[name]) setActivityErrors(prev => { const n = {...prev}; delete n[name]; return n; });
+    setActivityData((prev) => ({ ...prev, [name]: value }));
+    if (activityErrors[name])
+      setActivityErrors((prev) => { const n = { ...prev }; delete n[name]; return n; });
   };
 
-  const tabs: { key: "overview"|"activities"|"members"|"posts"; label: string }[] = [
+  const tabs: { key: "overview" | "activities" | "members" | "posts"; label: string }[] = [
     { key: "overview",   label: "نظرة عامة" },
     { key: "activities", label: "الفعاليات" },
     { key: "members",    label: "الأعضاء" },
@@ -229,12 +244,12 @@ const Dashboard: React.FC = () => {
 
       {/* TOASTS */}
       <div className="toast-container">
-        {toasts.map(t => (
+        {toasts.map((t) => (
           <Toast key={t.id} message={t.message} type={t.type} onClose={() => removeToast(t.id)} />
         ))}
       </div>
 
-      {/* ── HEADER CARD ── */}
+      {/* ── HEADER ── */}
       <header className="dashboard-header">
         <h1>إدارة الأسرة: {familyName}</h1>
         <p>لوحة تحكم خاصة بمؤسس الأسرة لإدارة الأعضاء والفعاليات</p>
@@ -244,7 +259,7 @@ const Dashboard: React.FC = () => {
             onClick={() => setShowCreateActivityForm(true)}
             disabled={!selectedFamilyId || profileLoading}
           >
-            <CalendarPlus size={16} style={{ display:'inline', marginLeft:6, verticalAlign:'middle' }} />
+            <CalendarPlus size={16} />
             إنشاء فعالية
           </button>
           <button
@@ -252,7 +267,7 @@ const Dashboard: React.FC = () => {
             onClick={() => setShowCreateContentForm(true)}
             disabled={!selectedFamilyId || profileLoading}
           >
-            <Upload size={16} style={{ display:'inline', marginLeft:6, verticalAlign:'middle' }} />
+            <Upload size={16} />
             نشر محتوى
           </button>
         </div>
@@ -260,7 +275,7 @@ const Dashboard: React.FC = () => {
 
       {/* ── TABS ── */}
       <div className="dashboard-tabs">
-        {tabs.map(t => (
+        {tabs.map((t) => (
           <button
             key={t.key}
             className={`tab${activeTab === t.key ? " active" : ""}`}
@@ -282,27 +297,44 @@ const Dashboard: React.FC = () => {
       {/* ── MODAL: CREATE CONTENT ── */}
       {showCreateContentForm && (
         <div className="modal-overlay" onClick={() => setShowCreateContentForm(false)}>
-          <div className="modal-box" onClick={e => e.stopPropagation()}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>نشر محتوى جديد</h2>
-              <button className="close-btn" onClick={() => setShowCreateContentForm(false)}><X size={18} /></button>
+              <button className="close-btn" onClick={() => setShowCreateContentForm(false)}>
+                <X size={18} />
+              </button>
             </div>
             <div className="form-content">
               <div className="form-group">
                 <label>عنوان المنشور <span className="optional">(اختياري)</span></label>
-                <input type="text" value={contentTitle} onChange={e => setContentTitle(e.target.value)}
-                  placeholder="مثلاً: إعلان مهم" className="form-input" />
+                <input
+                  type="text"
+                  value={contentTitle}
+                  onChange={(e) => setContentTitle(e.target.value)}
+                  placeholder="مثلاً: إعلان مهم"
+                  className="form-input"
+                />
               </div>
               <div className="form-group">
                 <label>محتوى المنشور <span className="required">*</span></label>
-                <textarea placeholder="اكتب محتوى المنشور..." value={contentBody}
-                  onChange={e => setContentBody(e.target.value)} className="form-textarea" rows={6} />
+                <textarea
+                  placeholder="اكتب محتوى المنشور..."
+                  value={contentBody}
+                  onChange={(e) => setContentBody(e.target.value)}
+                  className="form-textarea"
+                  rows={6}
+                />
               </div>
               <div className="form-actions">
-                <button className="btn-cancel" onClick={() => setShowCreateContentForm(false)}>إلغاء</button>
-                <button className="btn-submit" onClick={handleCreateContent}
-                  disabled={isSubmitting || profileLoading}>
-                  <Upload size={16} />
+                <button className="btn-cancel" onClick={() => setShowCreateContentForm(false)}>
+                  إلغاء
+                </button>
+                <button
+                  className="btn-submit"
+                  onClick={handleCreateContent}
+                  disabled={isSubmitting || profileLoading}
+                >
+                  <Upload size={15} />
                   {profileLoading ? "جاري التحميل..." : isSubmitting ? "جاري النشر..." : "نشر"}
                 </button>
               </div>
@@ -314,29 +346,35 @@ const Dashboard: React.FC = () => {
       {/* ── MODAL: CREATE ACTIVITY ── */}
       {showCreateActivityForm && (
         <div className="modal-overlay" onClick={() => setShowCreateActivityForm(false)}>
-          <div className="modal-box" onClick={e => e.stopPropagation()}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>إنشاء فعالية جديدة</h2>
-              <button className="close-btn" onClick={() => setShowCreateActivityForm(false)}><X size={18} /></button>
+              <button className="close-btn" onClick={() => setShowCreateActivityForm(false)}>
+                <X size={18} />
+              </button>
             </div>
             <div className="form-content">
 
               <div className="form-row">
                 <div className="form-group">
                   <label>عنوان الفعالية <span className="required">*</span></label>
-                  <input type="text" name="title" value={activityData.title} onChange={handleActivityChange}
-                    placeholder="مثلاً: اجتماع شهري"
-                    className={`form-input${activityErrors.title ? ' form-input-error' : ''}`} />
+                  <input
+                    type="text" name="title" value={activityData.title}
+                    onChange={handleActivityChange} placeholder="مثلاً: اجتماع شهري"
+                    className={`form-input${activityErrors.title ? " form-input-error" : ""}`}
+                  />
                   {activityErrors.title && <span className="error-message">{activityErrors.title}</span>}
                 </div>
                 <div className="form-group">
                   <label>نوع الفعالية <span className="required">*</span></label>
-                  <select name="type" value={activityData.type} onChange={handleActivityChange}
-                    className={`form-input${activityErrors.type ? ' form-input-error' : ''}`}>
+                  <select
+                    name="type" value={activityData.type} onChange={handleActivityChange}
+                    className={`form-input${activityErrors.type ? " form-input-error" : ""}`}
+                  >
                     <option value="">-- اختر النوع --</option>
                     {["داخلي","خارجي","نشاط رياضي","نشاط ثقافي","نشاط بيئي","نشاط اجتماعي",
                       "نشاط علمي","نشاط خدمة عامة","نشاط فني","نشاط معسكرات","اسر","اخر"]
-                      .map(v => <option key={v} value={v}>{v}</option>)}
+                      .map((v) => <option key={v} value={v}>{v}</option>)}
                   </select>
                   {activityErrors.type && <span className="error-message">{activityErrors.type}</span>}
                 </div>
@@ -344,58 +382,72 @@ const Dashboard: React.FC = () => {
 
               <div className="form-group">
                 <label>اللجنة <span className="required">*</span></label>
-                <select name="dept_id" value={activityData.dept_id} onChange={handleActivityChange}
-                  className={`form-input${activityErrors.dept_id ? ' form-input-error' : ''}`}>
+                <select
+                  name="dept_id" value={activityData.dept_id} onChange={handleActivityChange}
+                  className={`form-input${activityErrors.dept_id ? " form-input-error" : ""}`}
+                >
                   <option value="">اختر اللجنة</option>
-                  {departments.map(d => <option key={d.dept_id} value={d.dept_id}>{d.name}</option>)}
+                  {departments.map((d) => <option key={d.dept_id} value={d.dept_id}>{d.name}</option>)}
                 </select>
                 {activityErrors.dept_id && <span className="error-message">{activityErrors.dept_id}</span>}
               </div>
 
               <div className="form-group">
                 <label>وصف الفعالية <span className="required">*</span></label>
-                <textarea name="description" value={activityData.description} onChange={handleActivityChange}
+                <textarea
+                  name="description" value={activityData.description} onChange={handleActivityChange}
                   placeholder="اكتب وصفاً للفعالية..."
-                  className={`form-textarea${activityErrors.description ? ' form-input-error' : ''}`} />
+                  className={`form-textarea${activityErrors.description ? " form-input-error" : ""}`}
+                />
                 {activityErrors.description && <span className="error-message">{activityErrors.description}</span>}
               </div>
 
               <div className="form-row">
                 <div className="form-group">
                   <label>تاريخ البداية <span className="required">*</span></label>
-                  <input type="date" name="date" value={activityData.date} onChange={handleActivityChange}
-                    className={`form-input${activityErrors.date ? ' form-input-error' : ''}`} />
+                  <input
+                    type="date" name="date" value={activityData.date} onChange={handleActivityChange}
+                    className={`form-input${activityErrors.date ? " form-input-error" : ""}`}
+                  />
                   {activityErrors.date && <span className="error-message">{activityErrors.date}</span>}
                 </div>
                 <div className="form-group">
                   <label>تاريخ النهاية <span className="required">*</span></label>
-                  <input type="date" name="endDate" value={activityData.endDate} onChange={handleActivityChange}
-                    className={`form-input${activityErrors.endDate ? ' form-input-error' : ''}`} />
+                  <input
+                    type="date" name="endDate" value={activityData.endDate} onChange={handleActivityChange}
+                    className={`form-input${activityErrors.endDate ? " form-input-error" : ""}`}
+                  />
                   {activityErrors.endDate && <span className="error-message">{activityErrors.endDate}</span>}
                 </div>
                 <div className="form-group">
                   <label>الحد الأقصى للمشاركين <span className="optional">(اختياري)</span></label>
-                  <input type="number" name="maxParticipants" value={activityData.maxParticipants}
+                  <input
+                    type="number" name="maxParticipants" value={activityData.maxParticipants}
                     onChange={handleActivityChange} placeholder="∞"
-                    className={`form-input${activityErrors.maxParticipants ? ' form-input-error' : ''}`} />
+                    className={`form-input${activityErrors.maxParticipants ? " form-input-error" : ""}`}
+                  />
                   {activityErrors.maxParticipants && <span className="error-message">{activityErrors.maxParticipants}</span>}
                 </div>
               </div>
 
               <div className="form-group">
                 <label>المكان <span className="required">*</span></label>
-                <input type="text" name="location" value={activityData.location} onChange={handleActivityChange}
+                <input
+                  type="text" name="location" value={activityData.location} onChange={handleActivityChange}
                   placeholder="مثلاً: قاعة الاجتماعات – كلية الهندسة"
-                  className={`form-input${activityErrors.location ? ' form-input-error' : ''}`} />
+                  className={`form-input${activityErrors.location ? " form-input-error" : ""}`}
+                />
                 {activityErrors.location && <span className="error-message">{activityErrors.location}</span>}
               </div>
 
               <div className="form-row">
                 <div className="form-group">
                   <label>التكلفة <span className="optional">(اختياري)</span></label>
-                  <input type="number" step="0.01" name="cost" value={activityData.cost}
+                  <input
+                    type="number" step="0.01" name="cost" value={activityData.cost}
                     onChange={handleActivityChange} placeholder="0"
-                    className={`form-input${activityErrors.cost ? ' form-input-error' : ''}`} />
+                    className={`form-input${activityErrors.cost ? " form-input-error" : ""}`}
+                  />
                   {activityErrors.cost && <span className="error-message">{activityErrors.cost}</span>}
                 </div>
                 <div className="form-group">
@@ -411,14 +463,21 @@ const Dashboard: React.FC = () => {
               </div>
 
               <div className="form-actions">
-                <button className="btn-cancel" onClick={() => { setShowCreateActivityForm(false); setActivityErrors({}); }}>
+                <button
+                  className="btn-cancel"
+                  onClick={() => { setShowCreateActivityForm(false); setActivityErrors({}); }}
+                >
                   إلغاء
                 </button>
-                <button className="btn-submit-activity" onClick={handleCreateActivity}
-                  disabled={isSubmitting || profileLoading}>
+                <button
+                  className="btn-submit-activity"
+                  onClick={handleCreateActivity}
+                  disabled={isSubmitting || profileLoading}
+                >
                   {profileLoading ? "جاري التحميل..." : isSubmitting ? "جاري الإنشاء..." : "إنشاء الفعالية"}
                 </button>
               </div>
+
             </div>
           </div>
         </div>

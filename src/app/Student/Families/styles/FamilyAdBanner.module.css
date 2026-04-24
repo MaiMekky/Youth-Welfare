@@ -1,0 +1,204 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --navy: #1E3A5F;
+  --navy-mid: #2D5F8A;
+  --gold: #C49B3A;
+  --gold-dark: #A67F2C;
+  --white: #FFFFFF;
+  --border: #E2ECF5;
+  --radius: 12px;
+  --shadow-lg: 0 10px 36px rgba(30, 58, 95, 0.18);
+  --transition: 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bannerContainer {
+  width: 100%;
+  padding: 0 0 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Cairo', sans-serif;
+  direction: rtl;
+}
+
+.bannerCard {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.bannerCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-dark), var(--gold));
+}
+
+.bannerCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 48px rgba(30, 58, 95, 0.28);
+}
+
+.bannerGlow {
+  position: absolute;
+  top: -40px;
+  left: -40px;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(196, 155, 58, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.bannerIcon {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+  border-radius: 50%;
+  width: 72px;
+  height: 72px;
+  min-width: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 18px rgba(196, 155, 58, 0.4);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  transition: transform var(--transition);
+}
+
+.bannerCard:hover .bannerIcon {
+  transform: scale(1.05);
+}
+
+.bannerIcon svg {
+  width: 34px;
+  height: 34px;
+  color: var(--navy);
+  stroke-width: 2.2;
+}
+
+.bannerContent {
+  flex: 1;
+  text-align: right;
+  position: relative;
+  z-index: 1;
+}
+
+.bannerTitle {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--white);
+  margin: 0 0 8px;
+  line-height: 1.4;
+}
+
+.bannerDescription {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0;
+  line-height: 1.7;
+  font-weight: 500;
+}
+
+.bannerButton {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+  color: var(--navy);
+  border: none;
+  padding: 13px 26px;
+  border-radius: 10px;
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all var(--transition);
+  box-shadow: 0 4px 14px rgba(196, 155, 58, 0.38);
+  white-space: nowrap;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.bannerButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 22px rgba(196, 155, 58, 0.52);
+}
+
+.arrowIcon {
+  width: 17px;
+  height: 17px;
+  transition: transform var(--transition);
+}
+
+.bannerButton:hover .arrowIcon {
+  transform: translateX(-4px);
+}
+
+@media (max-width: 900px) {
+  .bannerCard {
+    gap: 18px;
+    padding: 24px;
+  }
+  .bannerIcon {
+    width: 62px;
+    height: 62px;
+    min-width: 62px;
+  }
+  .bannerIcon svg {
+    width: 29px;
+    height: 29px;
+  }
+  .bannerTitle {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 700px) {
+  .bannerCard {
+    flex-direction: column;
+    text-align: center;
+    padding: 28px 20px;
+  }
+  .bannerContent {
+    text-align: center;
+  }
+  .bannerButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .bannerCard {
+    padding: 22px 16px;
+  }
+  .bannerIcon {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+  }
+  .bannerIcon svg {
+    width: 26px;
+    height: 26px;
+  }
+  .bannerTitle {
+    font-size: 1.05rem;
+  }
+  .bannerDescription {
+    font-size: 0.84rem;
+  }
+}

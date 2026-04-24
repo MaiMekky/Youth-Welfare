@@ -54,7 +54,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
     const e: Record<string, string> = {};
     if (!email.trim()) e.email = "البريد الإلكتروني مطلوب";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
-      e.email = "أدخلي بريدًا إلكترونيًا صالحًا";
+      e.email = "أدخل بريدًا إلكترونيًا صالحًا";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -86,7 +86,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         showMessage(
-          data.detail || data.message || "فشل إرسال رابط إعادة التعيين. تأكدي من صحة البريد أو حاولي لاحقًا.",
+          data.detail || data.message || "فشل إرسال رابط إعادة التعيين. تأكد من صحة البريد أو حاول لاحقًا.",
           "error"
         );
         setLoading(false);
@@ -98,7 +98,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
       );
     } catch (err) {
       console.error(err);
-      showMessage("حدث خطأ في الاتصال. تأكدي من الاتصال بالإنترنت ثم حاولي مرة أخرى.", "error");
+      showMessage("حدث خطأ في الاتصال. تأكد من الاتصال بالإنترنت ثم حاول مرة أخرى.", "error");
     } finally {
       setLoading(false);
     }
@@ -129,7 +129,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         showMessage(
-          data.detail || data.message || "فشل تغيير كلمة المرور. قد يكون الرابط منتهي الصلاحية، حاولي طلب رابط جديد.",
+          data.detail || data.message || "فشل تغيير كلمة المرور. قد يكون الرابط منتهي الصلاحية، حاول طلب رابط جديد.",
           "error"
         );
         setLoading(false);
@@ -139,7 +139,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
       setTimeout(() => { onSuccess?.(); onClose(); }, 2500);
     } catch (err) {
       console.error(err);
-      showMessage("حدث خطأ في الاتصال. حاولي مرة أخرى.", "error");
+      showMessage("حدث خطأ في الاتصال. حاول مرة أخرى.", "error");
     } finally {
       setLoading(false);
     }
@@ -181,7 +181,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
         {step === "email" && (
           <>
             <p className={styles.subtitle}>
-              أدخلي بريدك الجامعي وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.
+              أدخل بريدك المسجل لدينا وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.
             </p>
             <form onSubmit={handleRequestEmail} className={styles.form}>
               <div className={styles.inputWrap}>
@@ -208,7 +208,7 @@ export default function ForgotPasswordModal({ onClose, onSuccess }: ForgotPasswo
         {/* ── Step 2: Set new password ── */}
         {step === "confirm" && (
           <>
-            <p className={styles.subtitle}>أدخلي كلمة المرور الجديدة لحسابك.</p>
+            <p className={styles.subtitle}>أدخل كلمة المرور الجديدة لحسابك.</p>
             <form onSubmit={handleResetPassword} className={styles.form}>
               <div className={styles.inputWrap}>
                 <Lock className={styles.inputIcon} size={18} />

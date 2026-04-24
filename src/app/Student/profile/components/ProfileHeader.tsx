@@ -1,37 +1,25 @@
 "use client";
-
 import React from "react";
-import { Edit } from "lucide-react";
 
 interface ProfileHeaderProps {
   onEditProfile: () => void;
 }
 
-export default function ProfileHeader({
-  onEditProfile,
-}: ProfileHeaderProps) {
+export default function ProfileHeader({ onEditProfile }: ProfileHeaderProps) {
   return (
-    <header className="profile-header header-card-container profile-hero">
-      <div className="header-card profile-hero-card">
-        <div className="profile-hero-main">
-          <div className="profile-hero-text">
-            <h1 className="header-title">ملفي الشخصي</h1>
-            <p className="header-subtitle">
-              بياناتك الجامعية وطرق التواصل في مكان واحد
-            </p>
-          </div>
-          <div className="profile-header-actions">
-            <button
-              className="profile-btn profile-btn-primary profile-hero-edit"
-              onClick={onEditProfile}
-            >
-              <Edit size={18} />
-              <span>تعديل الملف الشخصي</span>
-            </button>
-          </div>
-        </div>
+    <div className="profile-page-header" dir="rtl">
+      <div className="profile-page-header__text">
+        <h1 className="profile-page-header__title">ملفي الشخصي</h1>
+        <p className="profile-page-header__subtitle">
+          بياناتك الجامعية وطرق التواصل في مكان واحد
+        </p>
       </div>
-    </header>
+      <button className="profile-page-header__edit-btn" onClick={onEditProfile}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+          <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+        تعديل الملف الشخصي
+      </button>
+    </div>
   );
 }
-

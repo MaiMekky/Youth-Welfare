@@ -1,7 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import "../styles/RequestDetails.css";
+import styles from "../styles/RequestDetails.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+
 interface RequestDetailsProps {
   onBack?: () => void;
   onSubmit?: () => void;
@@ -53,10 +54,10 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => 
       icon: "📄",
       content: (
         <>
-          <p className="section-intro">
-            الأسرة الطلابية هي وحدة تنظيمية طلابية تهدف إلى تنمية مهارات الطلاب وتعزيز روح العمل الجماعي والمشاركة الفعالة في الأنشطة الطلابية المتنوعة. تساهم الأسرة في بناء شخصية الطالب وتطوير مهاراته القيادية والاجتماعية.
+          <p className={styles.sectionIntro}>
+            الأسرة الطلابية هي وحدة تنظيمية طلابية تهدف إلى تنمية مهارات الطلاب وتعزيز روح العمل الجماعي والمشاركة الفعالة في الأنشطة الطلابية المتنوعة.
           </p>
-          <ul className="checklist">
+          <ul className={styles.checklist}>
             <li>تنظيم الأنشطة والفعاليات الطلابية المتنوعة</li>
             <li>تنمية المهارات القيادية والإدارية للطلاب</li>
             <li>تعزيز الانتماء والمشاركة المجتمعية</li>
@@ -70,10 +71,8 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => 
       icon: "🏛️",
       content: (
         <>
-          <p className="section-intro">
-            الأسرة المركزية وحدة تنظيمية شاملة تهدف إلى تنمية مهارات الطلاب في جميع المجالات على مستوى الجامعة، وتساهم في بناء شخصية الطالب بشكل متكامل.
-          </p>
-          <ul className="checklist">
+          <p className={styles.sectionIntro}>الأسرة المركزية وحدة تنظيمية شاملة تهدف إلى تنمية مهارات الطلاب في جميع المجالات على مستوى الجامعة.</p>
+          <ul className={styles.checklist}>
             <li>تنظيم الأنشطة على مستوى الجامعة</li>
             <li>تنمية المهارات القيادية في جميع المجالات</li>
             <li>تعزيز الانتماء والمشاركة المجتمعية الشاملة</li>
@@ -87,10 +86,8 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => 
       icon: "🎯",
       content: (
         <>
-          <p className="section-intro">
-            الأسرة النوعية وحدة متخصصة تركز على مجال محدد (ثقافي، رياضي، فني، علمي، اجتماعي)، وتهدف إلى اكتشاف المواهب وتطويرها في المجال التخصصي.
-          </p>
-          <ul className="checklist">
+          <p className={styles.sectionIntro}>الأسرة النوعية وحدة متخصصة تركز على مجال محدد (ثقافي، رياضي، فني، علمي، اجتماعي).</p>
+          <ul className={styles.checklist}>
             <li>تنظيم أنشطة متخصصة في المجال المحدد</li>
             <li>اكتشاف وتنمية المواهب التخصصية</li>
             <li>تحقيق التميز والإبداع في مجال الأسرة</li>
@@ -103,9 +100,9 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => 
       title: "شروط ومتطلبات الإنشاء",
       icon: "✅",
       content: (
-        <div className="requirements-list">
-          <p className="section-subtitle">المتطلبات الأساسية:</p>
-          <ul className="bullet-list">
+        <div className={styles.requirementsList}>
+          <p className={styles.sectionSubtitle}>المتطلبات الأساسية:</p>
+          <ul className={styles.bulletList}>
             <li>تحديد اسم الأسرة وأهدافها بشكل واضح</li>
             <li>تشكيل مجلس إدارة كامل (9 أعضاء)</li>
             <li>تحديد اللجان النوعية وأعضائها (7 لجان)</li>
@@ -119,10 +116,10 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => 
       title: "هيكل مجلس الإدارة",
       icon: "👥",
       content: (
-        <div className="structure-layout">
-          <div className="role-column">
-            <p className="column-title">أعضاء مجلس الإدارة (9 أعضاء)</p>
-            <ul className="bullet-list">
+        <div className={styles.structureLayout}>
+          <div className={styles.roleColumn}>
+            <p className={styles.columnTitle}>أعضاء مجلس الإدارة (9 أعضاء)</p>
+            <ul className={styles.bulletList}>
               <li>قائد الأسرة</li>
               <li>نائب القائد</li>
               <li>مسؤول الأسرة</li>
@@ -134,9 +131,9 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => 
               <li>عضو منتخب (2)</li>
             </ul>
           </div>
-          <div className="committee-column">
-            <p className="column-title">اللجان النوعية (7 لجان)</p>
-            <ul className="bullet-list">
+          <div className={styles.committeeColumn}>
+            <p className={styles.columnTitle}>اللجان النوعية (7 لجان)</p>
+            <ul className={styles.bulletList}>
               <li>اللجنة الثقافية</li>
               <li>اللجنة الرياضية</li>
               <li>اللجنة الاجتماعية والرحلات</li>
@@ -154,25 +151,25 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => 
       title: "خطوات التقديم والمراجعة",
       icon: "✔️",
       content: (
-        <ol className="step-list">
-          <li className="step-item">
-            <span className="step-number">1</span>
-            <div className="step-content">
-              <span className="step-title">تعبئة طلب الإنشاء</span>
+        <ol className={styles.stepList}>
+          <li className={styles.stepItem}>
+            <span className={styles.stepNumber}>1</span>
+            <div className={styles.stepContent}>
+              <span className={styles.stepTitle}>تعبئة طلب الإنشاء</span>
               <p>تعبئة جميع البيانات والمستندات المطلوبة بدقة</p>
             </div>
           </li>
-          <li className="step-item">
-            <span className="step-number">2</span>
-            <div className="step-content">
-              <span className="step-title">مراجعة إدارة رعاية الطلاب</span>
+          <li className={styles.stepItem}>
+            <span className={styles.stepNumber}>2</span>
+            <div className={styles.stepContent}>
+              <span className={styles.stepTitle}>مراجعة إدارة رعاية الطلاب</span>
               <p>سيتم مراجعة الطلب والتحقق من استيفاء الشروط</p>
             </div>
           </li>
-          <li className="step-item">
-            <span className="step-number">3</span>
-            <div className="step-content">
-              <span className="step-title">الموافقة وتفعيل الأسرة</span>
+          <li className={styles.stepItem}>
+            <span className={styles.stepNumber}>3</span>
+            <div className={styles.stepContent}>
+              <span className={styles.stepTitle}>الموافقة وتفعيل الأسرة</span>
               <p>بعد الموافقة، سيتم تفعيل الأسرة وإتاحتها للطلاب</p>
             </div>
           </li>
@@ -182,56 +179,44 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => 
   ];
 
   return (
-    <div className="request-details-container">
-
-      {/* ── Full-width Hero Header ── */}
-      <div className="main-header-card">
-        <h1 className="main-header-title">طلب إنشاء أسرة طلابية</h1>
-        <div className="separator-line-gold" />
-        <p className="main-header-subtitle">
+    <div className={styles.container}>
+      {/* Hero Header */}
+      <div className={styles.heroHeader}>
+        <h1 className={styles.heroTitle}>طلب إنشاء أسرة طلابية</h1>
+        <div className={styles.heroSeparator} />
+        <p className={styles.heroSubtitle}>
           تعرف على خطوات ومتطلبات إنشاء أسرة طلابية جديدة
         </p>
       </div>
 
-      {/* ── 2-column cards grid ── */}
-      <div className="content-area">
+      {/* Content Grid */}
+      <div className={styles.contentGrid}>
         {sections.map((section) => (
-          <div key={section.id} className="section-card">
-            <div className="section-title-bar">
-              <span className="section-icon">{section.icon}</span>
-              <h2 className="section-heading">{section.title}</h2>
+          <div key={section.id} className={styles.sectionCard}>
+            <div className={styles.cardHeader}>
+              <span className={styles.cardIcon}>{section.icon}</span>
+              <h2 className={styles.cardTitle}>{section.title}</h2>
             </div>
-            <div className="section-body">{section.content}</div>
+            <div className={styles.cardBody}>{section.content}</div>
           </div>
         ))}
       </div>
 
-      {/* ── Sticky footer ── */}
-      <div className="action-footer">
-        <button
-          className="footer-button button-back"
-          onClick={onBack ?? (() => window.history.back())}
-        >
+      {/* Footer */}
+      <div className={styles.actionFooter}>
+        <button className={styles.btnBack} onClick={onBack ?? (() => window.history.back())}>
           العودة
         </button>
 
-        {/* Loading shimmer placeholder — keeps footer height stable */}
-        {loadingProfile && (
-          <div className="button-skeleton" aria-hidden="true" />
-        )}
+        {loadingProfile && <div className={styles.btnSkeleton} aria-hidden="true" />}
 
-        {/* Submit button — only rendered when permitted */}
         {!loadingProfile && canCreateFam && (
-          <button
-            className="footer-button button-submit"
-            onClick={onSubmit}
-          >
-            <span className="submit-icon">＋</span>
+          <button className={styles.btnSubmit} onClick={onSubmit}>
+            <span className={styles.submitIcon}>+</span>
             تقديم طلب الإنشاء
           </button>
         )}
       </div>
-
     </div>
   );
 };

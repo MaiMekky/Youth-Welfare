@@ -91,7 +91,7 @@ export default function Sidebar({
         <div className="profile-card">
           <div className="profile-icon"><User size={22} /></div>
           <div className="admin-info">
-            <h3>دكتور/ {adminInfo.name}</h3>
+            <h3>مسؤول/ {adminInfo.name}</h3>
           </div>
         </div>
 

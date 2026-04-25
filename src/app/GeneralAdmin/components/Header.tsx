@@ -109,7 +109,7 @@ const handleLogout = async () => {
               aria-haspopup="true"
             >
               <div className="hdr-user-info">
-                <span className="hdr-user-name">دكتور/ {adminInfo.name}</span>
+                <span className="hdr-user-name">مسؤول/ {adminInfo.name}</span>
                 <span className="hdr-user-role">المدير العام</span>
               </div>
               <ChevronDown size={14} className="hdr-chevron" />

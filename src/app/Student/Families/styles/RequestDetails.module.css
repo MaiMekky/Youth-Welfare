@@ -1,0 +1,431 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --navy: #1E3A5F;
+  --navy-mid: #2D5F8A;
+  --gold: #C49B3A;
+  --gold-dark: #A67F2C;
+  --gold-muted: rgba(196, 155, 58, 0.1);
+  --bg: #EDF2F8;
+  --white: #FFFFFF;
+  --surface: #F8FAFE;
+  --border: #E2ECF5;
+  --text: #1A2E42;
+  --text-muted: #6B8299;
+  --radius: 12px;
+  --radius-sm: 10px;
+  --shadow: 0 2px 12px rgba(26, 46, 66, 0.08);
+  --shadow-lg: 0 8px 32px rgba(26, 46, 66, 0.14);
+  --transition: 0.22s ease;
+}
+
+.container {
+  direction: rtl;
+  min-height: 100vh;
+  width: 100%;
+  background: var(--bg);
+  font-family: 'Cairo', sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hero Header */
+.heroHeader {
+  width: 100%;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+  padding: 36px 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.heroHeader::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-dark), var(--gold));
+}
+
+.heroHeader::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(196, 155, 58, 0.08) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.heroTitle {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--white);
+  margin: 0 0 4px;
+  position: relative;
+  z-index: 1;
+}
+
+.heroSeparator {
+  width: 52px;
+  height: 3px;
+  background: var(--gold);
+  border-radius: 3px;
+  margin: 14px auto;
+  position: relative;
+  z-index: 1;
+}
+
+.heroSubtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* Content Grid */
+.contentGrid {
+  width: 100%;
+  padding: 28px 40px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  flex: 1;
+}
+
+/* Section Cards */
+.sectionCard {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: all var(--transition);
+  position: relative;
+}
+
+.sectionCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--gold), var(--gold-dark));
+}
+
+.sectionCard:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(196, 155, 58, 0.3);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cardIcon {
+  font-size: 1.2rem;
+  background: var(--gold-muted);
+  border: 1px solid rgba(196, 155, 58, 0.25);
+  border-radius: 10px;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardTitle {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--navy);
+  margin: 0;
+  flex: 1;
+}
+
+.cardBody {
+  padding: 20px 24px;
+  line-height: 1.7;
+}
+
+/* Text Styles */
+.sectionIntro {
+  font-size: 0.9rem;
+  line-height: 1.8;
+  color: var(--text);
+  margin: 0 0 14px;
+}
+
+.sectionSubtitle {
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  color: var(--navy);
+  border-right: 3px solid var(--gold);
+  padding-right: 10px;
+}
+
+/* Checklists */
+.checklist,
+.bulletList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checklist li {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  padding-right: 28px;
+  position: relative;
+  color: var(--text);
+}
+
+.checklist li::before {
+  content: '✓';
+  color: var(--gold);
+  font-weight: 800;
+  font-size: 0.85rem;
+  position: absolute;
+  right: 0;
+  top: 1px;
+  background: var(--gold-muted);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bulletList li {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  padding-right: 18px;
+  position: relative;
+  color: var(--text);
+}
+
+.bulletList li::before {
+  content: '•';
+  color: var(--gold);
+  font-weight: 800;
+  font-size: 1.1rem;
+  position: absolute;
+  right: 0;
+  top: -1px;
+}
+
+/* Structure Layout */
+.structureLayout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.roleColumn,
+.committeeColumn {
+  background: var(--surface);
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.columnTitle {
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--navy);
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--gold);
+}
+
+/* Steps */
+.stepList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stepItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  border-right: 3px solid var(--gold);
+  transition: all var(--transition);
+}
+
+.stepItem:hover {
+  background: var(--white);
+  transform: translateX(-3px);
+  box-shadow: var(--shadow);
+}
+
+.stepNumber {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  color: var(--navy);
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(196, 155, 58, 0.3);
+}
+
+.stepContent {
+  flex: 1;
+}
+
+.stepTitle {
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: block;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+
+.stepContent p {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* Requirements */
+.requirementsList {
+  background: var(--surface);
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  border: 1.5px dashed rgba(196, 155, 58, 0.4);
+}
+
+/* Footer */
+.actionFooter {
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  padding: 16px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+  border-top: 3px solid var(--gold);
+  box-shadow: 0 -6px 24px rgba(30, 58, 95, 0.18);
+  margin-top: auto;
+}
+
+.btnBack,
+.btnSubmit {
+  padding: 11px 40px;
+  border-radius: var(--radius-sm);
+  font-family: 'Cairo', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.925rem;
+  min-width: 160px;
+  border: none;
+  transition: all var(--transition);
+}
+
+.btnBack {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--white);
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+}
+
+.btnBack:hover {
+  background: rgba(255, 255, 255, 0.16);
+  transform: translateY(-2px);
+}
+
+.btnSubmit {
+  background: var(--gold);
+  color: var(--navy);
+  box-shadow: 0 4px 14px rgba(196, 155, 58, 0.35);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btnSubmit:hover {
+  background: var(--gold-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(196, 155, 58, 0.5);
+}
+
+.submitIcon {
+  font-size: 1.1rem;
+  font-weight: 400;
+}
+
+.btnSkeleton {
+  min-width: 160px;
+  height: 42px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.06) 25%, rgba(255, 255, 255, 0.13) 50%, rgba(255, 255, 255, 0.06) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .contentGrid {
+    grid-template-columns: 1fr;
+    padding: 24px 20px;
+  }
+  .structureLayout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .heroHeader {
+    padding: 28px 20px;
+  }
+  .heroTitle {
+    font-size: 1.4rem;
+  }
+  .contentGrid {
+    padding: 16px 14px;
+    gap: 14px;
+  }
+  .cardHeader,
+  .cardBody {
+    padding: 16px;
+  }
+  .actionFooter {
+    padding: 14px 16px;
+  }
+  .btnBack,
+  .btnSubmit,
+  .btnSkeleton {
+    min-width: 120px;
+    padding: 10px 20px;
+    font-size: 0.875rem;
+  }
+}

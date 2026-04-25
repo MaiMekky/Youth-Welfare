@@ -488,7 +488,7 @@ useEffect(() => {
           <div className={styles.toolbarControls}>
             <input
               className={styles.searchInput}
-              placeholder="ابحث بالعنوان، الموقع، النوع…"
+              placeholder="ابحث عن الفعالية"
               value={search}
               onChange={e => setSearch(e.target.value)}
             />

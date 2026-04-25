@@ -174,7 +174,7 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
         setAvailableFamilies(prev => prev.filter(f => f.id !== familyId));
         setActiveTab('pending');
       }
-      showToast('تم إرسال طلب الانضمام للأسرة بنجاح! 🎉', 'success');
+      showToast('تم إرسال طلب الانضمام للأسرة بنجاح! ', 'success');
       setTimeout(async () => {
         try {
           const [joined, available] = await Promise.all([

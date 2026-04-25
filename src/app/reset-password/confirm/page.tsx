@@ -498,7 +498,7 @@ function ResetPasswordForm() {
           <div className="rp-alert rp-alert-success">
             <CheckCircleIcon size={52} />
             <p className="rp-alert-title rp-alert-title-success" style={{ marginTop: "0.75rem", fontSize: "1.1rem" }}>
-              تم بنجاح 🎉
+              تم بنجاح 
             </p>
             <p className="rp-alert-body">{statusMsg}</p>
           </div>

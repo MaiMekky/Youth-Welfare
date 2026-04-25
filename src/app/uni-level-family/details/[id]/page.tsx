@@ -57,6 +57,55 @@ interface AlertProps {
   onClose: () => void;
 }
 
+/* ── English → Arabic member error translations ── */
+const MEMBER_ERROR_TRANSLATIONS: Record<string, string> = {
+  "Cannot approve a previously rejected member":
+    "لا يمكن قبول عضو تم رفضه مسبقاً",
+  "Cannot reject a previously approved member":
+    "لا يمكن رفض عضو تم قبوله مسبقاً",
+  "Member not found":
+    "العضو غير موجود",
+  "Member is already approved":
+    "العضو مقبول بالفعل",
+  "Member is already rejected":
+    "العضو مرفوض بالفعل",
+  "Unauthorized":
+    "غير مصرح لك بهذا الإجراء",
+  "Permission denied":
+    "ليس لديك صلاحية لتنفيذ هذا الإجراء",
+  "Authentication credentials were not provided":
+    "لم يتم توفير بيانات المصادقة",
+};
+
+function translateMemberError(msg: string): string {
+  if (MEMBER_ERROR_TRANSLATIONS[msg]) return MEMBER_ERROR_TRANSLATIONS[msg];
+  const key = Object.keys(MEMBER_ERROR_TRANSLATIONS).find((k) =>
+    msg.toLowerCase().includes(k.toLowerCase())
+  );
+  return key ? MEMBER_ERROR_TRANSLATIONS[key] : msg;
+}
+
+async function parseMemberApiError(response: Response): Promise<string> {
+  try {
+    const data = await response.json();
+    let raw = "";
+    if (typeof data === "string") raw = data;
+    else if (data.detail)  raw = data.detail;
+    else if (data.message) raw = data.message;
+    else if (data.error)   raw = data.error;
+    else {
+      const messages = Object.values(data)
+        .flat()
+        .filter((v): v is string => typeof v === "string");
+      raw = messages.join(" | ");
+    }
+    return raw ? translateMemberError(raw) : `خطأ ${response.status}`;
+  } catch {
+    // fall through
+  }
+  return `خطأ ${response.status}`;
+}
+
 const CustomAlert = ({ message, type, onClose }: AlertProps) => {
   const alertStyles = {
     success: {
@@ -222,9 +271,6 @@ export default function FamilyDetailsPage() {
         const baseUrl = getBaseUrl();
         const url = `${baseUrl}/api/family/super_dept/${familyId}/`;
 
-        console.log(' Fetching Family Data from:', url);
-        console.log('🔑 Token:', token ? 'exists' : 'missing');
-
         const response = await authFetch(url, {
           method: 'GET',
           headers: {
@@ -233,21 +279,18 @@ export default function FamilyDetailsPage() {
           },
         });
 
-        console.log('📡 Response status:', response.status);
-
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           throw new Error(errorData.error || `خطأ: ${response.status}`);
         }
 
         const data: FamilyData = await response.json();
-        console.log('✅ Data received:', data);
         setFamilyData(data);
         setError(null);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'حدث خطأ غير متوقع';
         setError(errorMessage);
-        console.error('❌ Error fetching family data:', err);
+        console.error('Error fetching family data:', err);
       } finally {
         setLoading(false);
       }
@@ -258,6 +301,19 @@ export default function FamilyDetailsPage() {
 
   const showAlert = (message: string, type: 'success' | 'error' | 'warning' | 'info') => {
     setAlert({ message, type });
+  };
+
+  /* ── Update a single member's status in local state ── */
+  const updateMemberStatus = (studentId: number, newStatus: string) => {
+    setFamilyData((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        family_members: prev.family_members.map((m) =>
+          m.student_id === studentId ? { ...m, status: newStatus } : m
+        ),
+      };
+    });
   };
 
   const handleApproveMember = async (studentId: number) => {
@@ -276,17 +332,16 @@ export default function FamilyDetailsPage() {
       );
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'فشل في الموافقة على العضو');
+        const reason = await parseMemberApiError(response);
+        showAlert(reason, 'error');
+        return;
       }
 
-      showAlert('تمت الموافقة على العضو بنجاح ✓', 'success');
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
+      updateMemberStatus(studentId, 'مقبول');
+      showAlert('تمت الموافقة على العضو بنجاح', 'success');
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'فشل في الموافقة على العضو';
-      showAlert(errorMessage, 'error');
+      const msg = err instanceof Error ? translateMemberError(err.message) : 'تعذّر الاتصال بالخادم';
+      showAlert(msg, 'error');
       console.error(err);
     }
   };
@@ -307,17 +362,16 @@ export default function FamilyDetailsPage() {
       );
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'فشل في رفض العضو');
+        const reason = await parseMemberApiError(response);
+        showAlert(reason, 'error');
+        return;
       }
 
-      showAlert('تم رفض العضو بنجاح', 'warning');
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
+      updateMemberStatus(studentId, 'مرفوض');
+      showAlert('تم رفض العضو', 'warning');
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'فشل في رفض العضو';
-      showAlert(errorMessage, 'error');
+      const msg = err instanceof Error ? translateMemberError(err.message) : 'تعذّر الاتصال بالخادم';
+      showAlert(msg, 'error');
       console.error(err);
     }
   };
@@ -374,39 +428,41 @@ export default function FamilyDetailsPage() {
       </div>
     );
   }
-const normalizeMember = (m: FamilyMember) => ({
-  student_id: m.student_id,
-  student_name: m.student_name ?? '—',
-  u_id: m.u_id ?? '—',
-  national_id: m.national_id ?? '—',
-  dept_name: m.dept_name ?? '—',
-  role: m.role ?? '—',
-  status: m.status ?? '—',
-  joined_at: m.joined_at ?? null,
-});
 
-const normalizeEvent = (e: FamilyEvent) => ({
-  event_id: e.event_id,
-  title: e.title ?? '—',
-  st_date: e.st_date ?? '—',
-  cost: e.cost, // null => مجاني
-  status: e.status ?? '—',
-  type: e.type ?? '—',
-});
-const getFamilyStatusStyle = (status: string) => {
-  switch (status) {
-    case 'مقبول':
-      return { backgroundColor: '#D4F4DD', color: '#2E7D32' };
-    case 'منتظر':
-    case 'في الانتظار':
-    case 'موافقة مبدئية':
-      return { backgroundColor: '#FFF3E0', color: '#E65100' };
-    case 'مرفوض':
-      return { backgroundColor: '#FFE0E0', color: '#C62828' };
-    default:
-      return { backgroundColor: '#F5F5F5', color: '#666' };
-  }
-};
+  const normalizeMember = (m: FamilyMember) => ({
+    student_id: m.student_id,
+    student_name: m.student_name ?? '—',
+    u_id: m.u_id ?? '—',
+    national_id: m.national_id ?? '—',
+    dept_name: m.dept_name ?? '—',
+    role: m.role ?? '—',
+    status: m.status ?? '—',
+    joined_at: m.joined_at ?? null,
+  });
+
+  const normalizeEvent = (e: FamilyEvent) => ({
+    event_id: e.event_id,
+    title: e.title ?? '—',
+    st_date: e.st_date ?? '—',
+    cost: e.cost,
+    status: e.status ?? '—',
+    type: e.type ?? '—',
+  });
+
+  const getFamilyStatusStyle = (status: string) => {
+    switch (status) {
+      case 'مقبول':
+        return { backgroundColor: '#D4F4DD', color: '#2E7D32' };
+      case 'منتظر':
+      case 'في الانتظار':
+      case 'موافقة مبدئية':
+        return { backgroundColor: '#FFF3E0', color: '#E65100' };
+      case 'مرفوض':
+        return { backgroundColor: '#FFE0E0', color: '#C62828' };
+      default:
+        return { backgroundColor: '#F5F5F5', color: '#666' };
+    }
+  };
 
   return (
     <div className={styles.pageContainer}>
@@ -422,22 +478,21 @@ const getFamilyStatusStyle = (status: string) => {
       {/* Header Section */}
       <div className={styles.header}>
         <button
-        className={styles.closeButton}
-        onClick={() => router.push(`/uni-level-family?tab=${tab}`)}
-      >
-        ✕
-      </button>
+          className={styles.closeButton}
+          onClick={() => router.push(`/uni-level-family?tab=${tab}`)}
+        >
+          ✕
+        </button>
               
         <div className={styles.headerContent}>
           <div className={styles.titleSection}>
             <h1 className={styles.title}>{familyData.name}</h1>
-           <span
-            className={styles.statusBadge}
-            style={getFamilyStatusStyle(familyData.status)}
-          >
-            {familyData.status}
-          </span>
-
+            <span
+              className={styles.statusBadge}
+              style={getFamilyStatusStyle(familyData.status)}
+            >
+              {familyData.status}
+            </span>
           </div>
           
           <p className={styles.description}>
@@ -479,116 +534,114 @@ const getFamilyStatusStyle = (status: string) => {
       />
 
       {/* Tab Content */}
-      
-        {activeTab === 'members' && (
-  <div className={styles.contentArea}>
-    {familyData.family_members.length === 0 ? (
-      <div className={styles.emptyStateContainer}>
-        <p className={styles.emptyStateText}>لا توجد أعضاء حالياً</p>
-      </div>
-    ) : (
-      <div className={styles.tableContainer}>
-        <table className={styles.membersTable}>
-          <thead>
-            <tr>
-              <th>الاسم</th>
-              <th>الرقم الجامعي</th>
-              <th>الرقم القومي</th>
-              <th>اللجنة</th>
-              <th>المنصب</th>
-              <th>الحالة</th>
-              <th>تاريخ الانضمام</th>
-              <th>الإجراءات</th>
-            </tr>
-          </thead>
-          <tbody>
-            {familyData.family_members.map((raw) => {
-              const m = normalizeMember(raw);
-              return (
-                <tr key={m.student_id}>
-                  <td data-label="الاسم">{m.student_name}</td>
-                  <td data-label="الرقم الجامعي">{m.u_id}</td>
-                  <td data-label="الرقم القومي">{m.national_id}</td>
-                  <td data-label="اللجنة">{m.dept_name}</td>
-                  <td data-label="المنصب">{m.role}</td>
-                  <td data-label="الحالة">
-<span className={getStatusColor(m.status)}>{m.status}</span>
-                  </td>
-                  <td data-label="تاريخ الانضمام">
-                    {m.joined_at ? new Date(m.joined_at).toLocaleDateString('ar-EG') : '—'}
-                  </td>
-                  <td data-label="الإجراءات">
-                    <div className={styles.memberActions}>
-                      <button
-                        className={styles.btnApprove}
-                        onClick={() => handleApproveMember(m.student_id)}
-                        disabled={m.status === 'مقبول'}
-                      >
-                        قبول
-                      </button>
-                      <button
-                        className={styles.btnReject}
-                        onClick={() => handleRejectMember(m.student_id)}
-                        disabled={m.status === 'مرفوض'}
-                      >
-                        رفض
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    )}
-  </div>
-)}
+      {activeTab === 'members' && (
+        <div className={styles.contentArea}>
+          {familyData.family_members.length === 0 ? (
+            <div className={styles.emptyStateContainer}>
+              <p className={styles.emptyStateText}>لا توجد أعضاء حالياً</p>
+            </div>
+          ) : (
+            <div className={styles.tableContainer}>
+              <table className={styles.membersTable}>
+                <thead>
+                  <tr>
+                    <th>الاسم</th>
+                    <th>الرقم الجامعي</th>
+                    <th>الرقم القومي</th>
+                    <th>اللجنة</th>
+                    <th>المنصب</th>
+                    <th>الحالة</th>
+                    <th>تاريخ الانضمام</th>
+                    <th>الإجراءات</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {familyData.family_members.map((raw) => {
+                    const m = normalizeMember(raw);
+                    return (
+                      <tr key={m.student_id}>
+                        <td data-label="الاسم">{m.student_name}</td>
+                        <td data-label="الرقم الجامعي">{m.u_id}</td>
+                        <td data-label="الرقم القومي">{m.national_id}</td>
+                        <td data-label="اللجنة">{m.dept_name}</td>
+                        <td data-label="المنصب">{m.role}</td>
+                        <td data-label="الحالة">
+                          <span className={getStatusColor(m.status)}>{m.status}</span>
+                        </td>
+                        <td data-label="تاريخ الانضمام">
+                          {m.joined_at ? new Date(m.joined_at).toLocaleDateString('ar-EG') : '—'}
+                        </td>
+                        <td data-label="الإجراءات">
+                          <div className={styles.memberActions}>
+                            <button
+                              className={styles.btnApprove}
+                              onClick={() => handleApproveMember(m.student_id)}
+                              disabled={m.status === 'مقبول' || m.status === 'مرفوض'}
+                            >
+                              قبول
+                            </button>
+                            <button
+                              className={styles.btnReject}
+                              onClick={() => handleRejectMember(m.student_id)}
+                              disabled={m.status === 'مرفوض' || m.status === 'مقبول'}
+                            >
+                              رفض
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       {activeTab === 'events' && (
-  <div className={styles.contentArea}>
-    <h2 className={styles.sectionTitle}>فعاليات الأسرة</h2>
+        <div className={styles.contentArea}>
+          <h2 className={styles.sectionTitle}>فعاليات الأسرة</h2>
 
-    {familyData.family_events.length === 0 ? (
-      <div className={styles.emptyStateContainer}>
-        <p className={styles.emptyStateText}>لا توجد فعاليات حالياً</p>
-      </div>
-    ) : (
-      <div className={styles.eventsGrid}>
-        {familyData.family_events.map((raw) => {
-          const event = normalizeEvent(raw);
-          return (
-            <div key={event.event_id} className={styles.eventCard}>
-              <div className={styles.eventHeader}>
-                <h3 className={styles.eventTitle}>{event.title}</h3>
-                <span
-                  className={styles.eventStatusBadge}
-                  style={
-                    event.status === 'مقبول'
-                      ? { backgroundColor: '#D4F4DD', color: '#2E7D32' }
-                      : event.status === 'منتظر' || event.status === 'في الانتظار'
-                      ? { backgroundColor: '#FFF3E0', color: '#E65100' }
-                      : event.status === 'مرفوض'
-                      ? { backgroundColor: '#FFE0E0', color: '#C62828' }
-                      : { backgroundColor: '#F5F5F5', color: '#666' }
-                  }
-                >
-                  {event.status}
-                </span>
-              </div>
-
-              <div className={styles.eventMeta}>
-                <span>{event.st_date}</span>
-                <span>{event.cost ? `${event.cost} جنيه` : 'مجاني'}</span>
-              </div>
+          {familyData.family_events.length === 0 ? (
+            <div className={styles.emptyStateContainer}>
+              <p className={styles.emptyStateText}>لا توجد فعاليات حالياً</p>
             </div>
-          );
-        })}
-      </div>
-    )}
-  </div>
-)}
-      </div>
-  
+          ) : (
+            <div className={styles.eventsGrid}>
+              {familyData.family_events.map((raw) => {
+                const event = normalizeEvent(raw);
+                return (
+                  <div key={event.event_id} className={styles.eventCard}>
+                    <div className={styles.eventHeader}>
+                      <h3 className={styles.eventTitle}>{event.title}</h3>
+                      <span
+                        className={styles.eventStatusBadge}
+                        style={
+                          event.status === 'مقبول'
+                            ? { backgroundColor: '#D4F4DD', color: '#2E7D32' }
+                            : event.status === 'منتظر' || event.status === 'في الانتظار'
+                            ? { backgroundColor: '#FFF3E0', color: '#E65100' }
+                            : event.status === 'مرفوض'
+                            ? { backgroundColor: '#FFE0E0', color: '#C62828' }
+                            : { backgroundColor: '#F5F5F5', color: '#666' }
+                        }
+                      >
+                        {event.status}
+                      </span>
+                    </div>
+
+                    <div className={styles.eventMeta}>
+                      <span>{event.st_date}</span>
+                      <span>{event.cost ? `${event.cost} جنيه` : 'مجاني'}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

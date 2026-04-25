@@ -5,7 +5,7 @@ import {
   Clock, MapPin, CheckCircle, Hourglass, XCircle,
   BookOpen, DollarSign, Award, AlertCircle, Info,
 } from "lucide-react";
-import "../styles/FamilyDetails.css";
+import "./FamilyDetails.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -45,14 +45,14 @@ interface Activity {
   cost: string;
   restrictions: string;
   reward: string;
-  registration_status?: string | null; // "منتظر" | "مقبول" | "مرفوض" | null
+  registration_status?: string | null;
 }
 
 interface RegistrationRecord {
   status: string;
   event_id: number;
   event_title: string;
-  updatedAt: number;   // epoch ms — used to pick the fresher value
+  updatedAt: number;
 }
 
 type NotificationType = { show: boolean; message: string; type: "success" | "error" };
@@ -65,7 +65,6 @@ const BASE = getBaseUrl();
 const getToken = () =>
   typeof window !== "undefined" ? localStorage.getItem("access") : null;
 
-/** Unique storage key per family so records never bleed across families */
 const storageKey = (familyId: number) => `family_registrations_${familyId}`;
 
 function loadRegistrations(familyId: number): Record<number, RegistrationRecord> {
@@ -101,7 +100,51 @@ function formatTime(dateString: string) {
   } catch { return ""; }
 }
 
-// ─── Registration Status Config ──────────────────────────────────────────────
+// ─── Filter helpers ───────────────────────────────────────────────────────────
+
+/**
+ * Returns true if the event end date is in the past.
+ */
+function isPastEvent(activity: Activity): boolean {
+  try {
+    return new Date(activity.end_date) < new Date();
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Parses a Django ErrorDetail string array like:
+ *   "[ErrorDetail(string='...', code='invalid')]"
+ * and returns the inner message strings.
+ */
+function parseErrorDetails(raw: string): string[] {
+  const matches = raw.match(/string='([^']+)'/g) ?? [];
+  return matches.map(m => m.replace("string='", "").replace(/'\s*$/, ""));
+}
+
+/**
+ * Returns true if any error message indicates a faculty mismatch.
+ * Matches patterns like "This event is only for X faculty."
+ */
+function isFacultyMismatchError(messages: string[]): boolean {
+  return messages.some(m =>
+    /this event is only for .+ faculty/i.test(m) ||
+    /هذه الفعالية فقط لكلية/i.test(m)
+  );
+}
+
+/**
+ * Returns true if any error message indicates the event is in the past.
+ */
+function isPastEventError(messages: string[]): boolean {
+  return messages.some(m =>
+    /cannot register for past events/i.test(m) ||
+    /الفعالية انتهت/i.test(m)
+  );
+}
+
+// ─── Registration Status Config ───────────────────────────────────────────────
 
 type StatusConfig = {
   label: string;
@@ -143,7 +186,7 @@ function getStatusConfig(status: string | null | undefined): StatusConfig {
   }
 }
 
-// ─── Sub-components ──────────────────────────────────────────────────────────
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
 function Notification({ notification, onClose }: {
   notification: NotificationType;
@@ -326,15 +369,12 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
     setTimeout(() => setNotification({ show: false, message: "", type: "success" }), 4000);
   }, []);
 
-  // ── Merge: API always wins when it has a value; localStorage is offline-only fallback ──
+  // ── Merge API status with localStorage fallback ──
   const mergeWithPersisted = useCallback((raw: Activity[]): Activity[] => {
     const persisted = loadRegistrations(family.id);
     return raw.map(act => {
       const local = persisted[act.event_id] ?? null;
-
-      // API has a real status → it is always fresher than anything we cached
       if (act.registration_status) {
-        // Keep localStorage in sync so next offline load shows the right value
         saveRegistration(family.id, {
           status: act.registration_status,
           event_id: act.event_id,
@@ -342,11 +382,23 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
         });
         return act;
       }
-
-      // API returned null/undefined → use localStorage fallback
       return { ...act, registration_status: local?.status ?? null };
     });
   }, [family.id]);
+
+  /**
+   * Filters out activities the student cannot register for:
+   *  1. Events that have already ended (past events).
+   *  2. Events restricted to a different faculty — detected by probing the
+   *     register endpoint with a dry-run HEAD/OPTIONS, OR simply by checking
+   *     for the error on first attempt and removing from the list reactively.
+   *
+   * Strategy used here: filter by end_date on the client (no extra request),
+   * and reactively remove faculty-mismatch events when the 400 is returned.
+   */
+  const filterEligibleActivities = useCallback((raw: Activity[]): Activity[] => {
+    return raw.filter(act => !isPastEvent(act));
+  }, []);
 
   // ── Fetch Posts ──
   const fetchPosts = useCallback(async () => {
@@ -381,13 +433,17 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
       if (!res.ok) throw new Error("فشل تحميل الفعاليات");
       const data = await res.json();
       const raw: Activity[] = Array.isArray(data) ? data : data.results ?? data.events ?? [];
-      setActivities(mergeWithPersisted(raw));
+
+      // 1. Filter out ineligible activities (past events)
+      const eligible = filterEligibleActivities(raw);
+      // 2. Merge with persisted registration statuses
+      setActivities(mergeWithPersisted(eligible));
     } catch (err: unknown) {
       showNotification((err as Error).message, "error");
     } finally {
       setLoadingActivities(false);
     }
-  }, [family.id, mergeWithPersisted, showNotification]);
+  }, [family.id, mergeWithPersisted, filterEligibleActivities, showNotification]);
 
   // ── Register for Event ──
   const registerForEvent = useCallback(async (eventId: number) => {
@@ -405,11 +461,33 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
       );
 
       if (!res.ok) {
+        // Try to parse the error body — Django may return an array of ErrorDetail objects
         const errData = await res.json().catch(() => ({}));
-        const errMsg: string = errData.error ?? errData.message ?? errData.detail ?? "";
 
-        // 400 "already registered" → treat as success, persist "منتظر" as fallback status
-        if (res.status === 400 && errMsg.toLowerCase().includes("already registered")) {
+        // Normalise to a plain string so we can run regex on it
+        const rawErrString: string =
+          typeof errData === "string"
+            ? errData
+            : JSON.stringify(errData.error ?? errData.message ?? errData.detail ?? errData ?? "");
+
+        const errMessages = parseErrorDetails(rawErrString);
+
+        // ── Faculty mismatch → silently remove the card from the list ──
+        if (res.status === 400 && isFacultyMismatchError(errMessages)) {
+          setActivities(prev => prev.filter(act => act.event_id !== eventId));
+          // No error toast — the card just disappears; the student never needed to see it.
+          return;
+        }
+
+        // ── Past event → silently remove the card from the list ──
+        if (res.status === 400 && isPastEventError(errMessages)) {
+          setActivities(prev => prev.filter(act => act.event_id !== eventId));
+          return;
+        }
+
+        // ── Already registered → treat as success ──
+        const flatMsg = errMessages.join(" ").toLowerCase() || rawErrString.toLowerCase();
+        if (res.status === 400 && flatMsg.includes("already registered")) {
           const fallbackStatus = "منتظر";
           saveRegistration(family.id, { status: fallbackStatus, event_id: eventId, event_title: "" });
           setActivities(prev =>
@@ -421,21 +499,22 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
           return;
         }
 
-        throw new Error(errMsg || "فشل التسجيل في الفعالية");
+        // ── Generic error ──
+        const displayMsg =
+          errMessages[0] ||
+          (errData.error ?? errData.message ?? errData.detail ?? "فشل التسجيل في الفعالية");
+        throw new Error(displayMsg);
       }
 
       const data = await res.json();
-      // data shape: { message, event_id, event_title, event_location, event_start_date, event_end_date, registration_status }
       const status: string = data.registration_status ?? "منتظر";
 
-      // Persist so status survives logout / token expiry
       saveRegistration(family.id, {
         status,
         event_id: data.event_id ?? eventId,
         event_title: data.event_title ?? "",
       });
 
-      // Update UI immediately
       setActivities(prev =>
         prev.map(act =>
           act.event_id === eventId ? { ...act, registration_status: status } : act
@@ -443,8 +522,6 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
       );
 
       showNotification(`${data.message ?? "تم التسجيل بنجاح"} · الحالة: ${status}`, "success");
-
-      // Re-fetch so any future status changes from the server are immediately reflected
       fetchActivities();
     } catch (err: unknown) {
       showNotification((err as Error).message ?? "حصل خطأ أثناء التسجيل", "error");
@@ -546,7 +623,7 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
             {loadingActivities ? (
               <LoadingState message="جاري تحميل الفعاليات…" />
             ) : activities.length === 0 ? (
-              <EmptyState message="لا توجد فعاليات حالياً" />
+              <EmptyState message="لا توجد فعاليات متاحة حالياً" />
             ) : (
               <div className="act-grid">
                 {activities.map(activity => (
@@ -585,4 +662,3 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
 };
 
 export default FamilyDetails;
-

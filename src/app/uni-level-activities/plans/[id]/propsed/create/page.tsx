@@ -51,12 +51,10 @@ async function apiFetch<T>(
   path: string,
   opts: RequestInit = {}
 ): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number; raw?: Record<string, unknown> }> {
-  const token = getAccessToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(opts.headers as Record<string, string>),
   };
-  if (token) headers.Authorization = `Bearer ${token}`;
   try {
     const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
     const text = await res.text();
@@ -100,7 +98,7 @@ const [form, setForm] = useState<FormState>({
   end_date: "",
   cost: "",
   s_limit: "",
-  type: "",
+  type: "خارجي",
   // dept_id: "",   
   restrictions: "",
   reward: "",
@@ -159,7 +157,7 @@ const toggleAllFacs = () => {
       if (!data.st_date.trim()) next.st_date = "تاريخ البداية مطلوب";
       if (!data.end_date.trim()) next.end_date = "تاريخ النهاية مطلوب";
       if (!data.cost.trim()) next.cost = "التكلفة مطلوبة";
-      if (!data.type.trim()) next.type = "نوع النشاط مطلوب";
+      // if (!data.type.trim()) next.type = "نوع النشاط مطلوب";
       // if (isConvert && !data.dept_id) {
       //   next.dept_id = "الإدارة مطلوبة";
       // }
@@ -223,7 +221,7 @@ const toggleAllFacs = () => {
 
       const payload = {
         title: form.title.trim(),
-        type: form.type.trim(),
+        type: "خارجي",
         location: form.location.trim(),
         st_date: form.st_date,
         end_date: form.end_date,
@@ -263,7 +261,7 @@ const toggleAllFacs = () => {
         event_id: eventId,
         title: form.title.trim(),
         description: form.description.trim(),
-        type: form.type,
+        type: "خارجي",
         st_date: form.st_date,
         end_date: form.end_date,
         location: form.location.trim(),
@@ -322,7 +320,7 @@ const toggleAllFacs = () => {
       end_date: (fallbackRow?.end_date as string) ?? "",
       cost: String(fallbackRow?.cost ?? ""),
       s_limit: String(fallbackRow?.s_limit ?? ""),
-      type: (fallbackRow?.type as string) ?? "",
+      type: (fallbackRow?.type as string) ?? "خارجي",
       restrictions: (fallbackRow?.restrictions as string) ?? "",
       reward: (fallbackRow?.reward as string) ?? "",
       resource: (fallbackRow?.resource as string) ?? "",
@@ -355,7 +353,7 @@ const toggleAllFacs = () => {
         end_date: (e?.end_date as string) ?? "",
         cost: (e?.cost as string) ?? "",
         s_limit: String(e?.s_limit ?? ""),
-        type: (e?.type as string) ?? "",
+        type: (e?.type as string) ?? "خارجي",
         restrictions: (e?.restrictions as string) ?? "",
         reward: (e?.reward as string) ?? "",
         resource: (e?.resource as string) ?? "",
@@ -529,7 +527,7 @@ const toggleAllFacs = () => {
                 </div>
 
                 {/* ── نوع النشاط — from localStorage departments ── */}
-         <div className={styles.field}>
+         {/* <div className={styles.field}>
           <label className={styles.label}>نوع النشاط</label>
 
           <select
@@ -546,7 +544,7 @@ const toggleAllFacs = () => {
           {touched.type && errors.type && (
             <div className={styles.errorText}>{errors.type}</div>
           )}
-        </div>
+        </div> */}
 
         {/* {isConvert && (
           <div className={styles.field}>

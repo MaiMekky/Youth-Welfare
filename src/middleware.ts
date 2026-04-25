@@ -132,13 +132,15 @@ export function middleware(req: NextRequest) {
 
   // ── Root page ("/") ─────────────────────────────────────────
   // ONLY this block — the duplicate old blocks are removed
-if (path === "/") {
-  // If token exists but lastRoute doesn't, don't redirect — something is off
-  if (token && lastRoute && lastRoute !== "/") {
-    return redirectTo(lastRoute, req);
+  if (path === "/") {
+    const isLoggingOut = req.nextUrl.searchParams.get("logout") === "1";
+
+    if (!isLoggingOut && token && lastRoute) {
+      return redirectTo(lastRoute, req); // auto-redirect logged-in users
+    }
+
+    return NextResponse.next(); // logout or unauthenticated → show login page
   }
-  return NextResponse.next();
-}
 
   // ── Protected route checks ───────────────────────────────────
   const isProtected = protectedRoutes.some((route) =>

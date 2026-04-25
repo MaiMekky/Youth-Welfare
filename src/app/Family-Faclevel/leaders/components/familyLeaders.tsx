@@ -45,9 +45,8 @@ const FamilyLeaders: React.FC = () => {
   const fetchLeaders = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("access");
       const res = await authFetch(`${getBaseUrl()}/api/family/faculty/family-founders/`, {
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { "Content-Type": "application/json" },
       });
       if (!res.ok) throw new Error("فشل جلب القادة");
       const data = await res.json();
@@ -109,7 +108,6 @@ const FamilyLeaders: React.FC = () => {
     }
     setLoading(true);
 
-    const token = localStorage.getItem("access");
 
     try {
       if (isEditMode && currentIndex !== null) {
@@ -127,7 +125,6 @@ const FamilyLeaders: React.FC = () => {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
               national_id: formData.nationalId,
@@ -166,12 +163,11 @@ const FamilyLeaders: React.FC = () => {
     const leader = leaders[index];
 
     setLoading(true);
-    const token = localStorage.getItem("access");
 
     try {
       await authFetch(`${getBaseUrl()}/api/family/faculty/family-founder/${leader.nationalId}/remove/`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ national_id: leader.nationalId }),
       });
       setLeaders(prev => prev.filter((_, i) => i !== index));

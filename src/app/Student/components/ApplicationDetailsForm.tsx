@@ -98,10 +98,8 @@ export default function ApplicationDetailsForm({ onSuccess, onNotify }: Applicat
     });
 
     try {
-      const token = localStorage.getItem("access");
       const res = await authFetch(`${getBaseUrl()}/api/solidarity/student/apply/`, {
         method: "POST", body: payload,
-        headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
         showNotification("تم إرسال الطلب بنجاح ✅", "success");

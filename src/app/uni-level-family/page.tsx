@@ -117,16 +117,12 @@ function PageContent() {
   const fetchFamilies = useCallback(async (ready: "all" | "true" | "false" = "all") => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("access");
-
       const params = new URLSearchParams();
       if (ready === "true")  params.set("ready", "true");
       if (ready === "false") params.set("ready", "false");
       const query = params.toString() ? `?${params.toString()}` : "";
 
-      const response = await authFetch(`${API_URL}/family/super_dept/${query}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await authFetch(`${API_URL}/family/super_dept/${query}`);
       if (!response.ok) throw new Error("Unauthorized");
       const data = await response.json();
       setFamilies(data);
@@ -201,10 +197,9 @@ function PageContent() {
     }
 
     try {
-      const token = localStorage.getItem("access");
       const response = await authFetch(`${API_URL}/family/super_dept/${familyId}/final_approve/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { "Content-Type": "application/json"},
         body: JSON.stringify({}),
       });
 
@@ -227,10 +222,9 @@ function PageContent() {
   /* ── Reject ── */
   async function handleRejectFamily(familyId: number) {
     try {
-      const token = localStorage.getItem("access");
       const response = await authFetch(`${API_URL}/family/super_dept/${familyId}/reject/`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({}),
       });
 

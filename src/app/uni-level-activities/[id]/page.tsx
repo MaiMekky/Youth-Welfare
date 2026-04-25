@@ -25,20 +25,11 @@ import {
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 const API_URL = getBaseUrl();
 
-function getAccessToken(): string | null {
-  return (
-    localStorage.getItem("access") ||
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("token") ||
-    null
-  );
-}
 
 async function apiFetch<T>(
   path: string,
   opts: RequestInit = {}
 ): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number; raw?: Record<string, unknown> }> {
-  const token = getAccessToken();
   const headers: Record<string, string> = {
     ...(opts.headers as Record<string, string>),
   };
@@ -46,7 +37,6 @@ async function apiFetch<T>(
   // add content-type only if body exists AND not FormData
   const isFormData = typeof FormData !== "undefined" && opts.body instanceof FormData;
   if (!headers["Content-Type"] && opts.body && !isFormData) headers["Content-Type"] = "application/json";
-  if (token) headers.Authorization = `Bearer ${token}`;
 
   try {
     const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
@@ -239,10 +229,9 @@ function pickFilenameFromDisposition(disposition: string | null, fallback: strin
 }
 
 async function downloadPdf(path: string, opts: RequestInit = {}, fallbackName = "file.pdf") {
-  const token = getAccessToken();
   const headers: Record<string, string> = { ...(opts.headers as Record<string, string>) };
   if (!headers["Content-Type"] && opts.body) headers["Content-Type"] = "application/json";
-  if (token) headers.Authorization = `Bearer ${token}`;
+
 
   const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
 
@@ -435,11 +424,6 @@ export default function EventDetailsPage() {
 const uploadImages = async (files: FileList | null) => {
   if (!id || !files || files.length === 0) return;
 
-  const token = getAccessToken();
-  if (!token) {
-    showToast("❌ لا يوجد توكن (access).", "error");
-    return;
-  }
 
   setUploading(true);
 
@@ -452,9 +436,6 @@ const uploadImages = async (files: FileList | null) => {
       `${API_URL}/api/event/manage-events/${id}/upload-images/`,
       {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
         body: fd,
       }
     );

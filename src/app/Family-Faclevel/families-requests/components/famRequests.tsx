@@ -42,14 +42,12 @@ const FamRequests = ({ request }: { request: Record<string, unknown> }) => {
 
     try {
       setLoading(true);
-      const token = localStorage.getItem("access");
 
       const res = await authFetch(
         `${getBaseUrl()}/api/family/faculty/${request.family_id}/pre-approve/`,
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
@@ -75,15 +73,11 @@ const FamRequests = ({ request }: { request: Record<string, unknown> }) => {
   const handleReject = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("access");
 
       const res = await authFetch(
         `${getBaseUrl()}/api/family/faculty/${request.family_id}/reject/`,
         {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
 

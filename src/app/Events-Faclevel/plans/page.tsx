@@ -77,17 +77,16 @@ export default function Page() {
       setLoading(true);
       setError(null);
 
-      const token = localStorage.getItem("access");
-      if (!token) {
-        setPlans([]);
-        setError("مفيش access token. برجاء تسجيل الدخول مرة اخري.");
-        return;
-      }
+
+      // if (!token) {
+      //   setPlans([]);
+      //   setError("مفيش access token. برجاء تسجيل الدخول مرة اخري.");
+      //   return;
+      // }
 
       const res = await authFetch(`${API_URL}/events/plans/list/`, {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
           Accept: "application/json",
         },
       });

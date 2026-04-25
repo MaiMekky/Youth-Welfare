@@ -12,14 +12,6 @@ function fmt(iso: string) {
   return iso.slice(0, 10);
 }
 
-function getAccessToken(): string | null {
-  return (
-    localStorage.getItem("access") ||
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("token") ||
-    null
-  );
-}
 
 export default function PlanCard({
   item,
@@ -37,12 +29,8 @@ export default function PlanCard({
     try {
       setExporting(true);
 
-      const token = getAccessToken();
       const res = await authFetch(`${API_URL}/api/event/export-plan-pdf/${item.id}/`, {
         method: "GET",
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
       });
 
       if (!res.ok) {

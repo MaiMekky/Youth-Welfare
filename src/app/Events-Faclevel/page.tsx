@@ -28,16 +28,6 @@ type ApiEvent = {
   dept_id: number;
   active?: boolean | string | number;
 };
-
-function getAccessToken(): string | null {
-  return (
-    localStorage.getItem("access") ||
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("token") ||
-    null
-  );
-}
-
 function getDepartmentsFromToken(): { dept_id: number; dept_name: string }[] {
   if (typeof window === "undefined") return [];
   const stored = localStorage.getItem("departments");
@@ -56,12 +46,10 @@ async function apiFetch<T>(
   path: string,
   opts: RequestInit = {}
 ): Promise<{ ok: true; data: T } | { ok: false; message: string }> {
-  const token = getAccessToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(opts.headers as Record<string, string>),
   };
-  if (token) headers.Authorization = `Bearer ${token}`;
   try {
     const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
     const data = await res.json();

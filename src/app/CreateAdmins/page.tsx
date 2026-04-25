@@ -44,12 +44,10 @@ export default function AccessPrivileges() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const token = localStorage.getItem('access');
-        if (!token) throw new Error('Token not found');
+        // if (!token) throw new Error('Token not found');
 
         const res = await authFetch(`${getBaseUrl()}/api/auth/admin_management/`, {
           headers: {
-            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         });
@@ -96,15 +94,13 @@ export default function AccessPrivileges() {
     if (!user) return;
 
     try {
-      const token = localStorage.getItem('access');
-      if (!token) throw new Error('Token not found');
+      // if (!token) throw new Error('Token not found');
 
       const updatedStatus = !user.status;
 
       const res = await authFetch(`${getBaseUrl()}/api/auth/admin_management/${id}/`, {
         method: 'PATCH',
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ acc_status: updatedStatus ? 'active' : 'inactive' }),

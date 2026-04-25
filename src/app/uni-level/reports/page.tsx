@@ -26,12 +26,9 @@ export default function ReportsPage() {
   const fetchReports = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("access");
-      if (!token) { console.error("لا يوجد توكن"); return; }
 
       const res = await authFetch(
-        `${getBaseUrl()}/api/solidarity/super_dept/faculty_summary/`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${getBaseUrl()}/api/solidarity/super_dept/faculty_summary/`
       );
 
       if (!res.ok) throw new Error("فشل في جلب البيانات");

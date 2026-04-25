@@ -140,7 +140,6 @@ export default function Events() {
   const [activeType,  setActiveType]  = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const token = typeof window !== 'undefined' ? localStorage.getItem('access') : null;
 
   const showToast = (msg: string, ok: boolean) => {
     setToast({ msg, ok });
@@ -152,9 +151,7 @@ export default function Events() {
     const load = async () => {
       try {
         setLoading(true);
-        const res = await authFetch(`${getBaseUrl()}/api/event/student-events/available/`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+        const res = await authFetch(`${getBaseUrl()}/api/event/student-events/available/`);
         if (!res.ok) throw new Error('فشل تحميل الفعاليات');
         const raw = await res.json();
         const arr: ApiEvent[] = Array.isArray(raw) ? raw : (raw.results ?? raw.data ?? []);
@@ -171,12 +168,11 @@ export default function Events() {
 
   /* ── Join ── */
   const joinEvent = async (id: number) => {
-    if (!token) { showToast('يرجى تسجيل الدخول أولاً', false); return; }
     try {
       setJoiningId(id);
       const res = await authFetch(`${getBaseUrl()}/api/event/student-events/${id}/join/`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json' },
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));

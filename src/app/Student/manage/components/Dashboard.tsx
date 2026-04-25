@@ -88,9 +88,7 @@ const Dashboard: React.FC = () => {
     const fetchFamilyData = async () => {
       try {
         const baseUrl = getBaseUrl();
-        const res = await authFetch(`${baseUrl}/api/family/student/families/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await authFetch(`${baseUrl}/api/family/student/families/`);
         if (!res.ok) throw new Error(`فشل تحميل قائمة الأسر (Status: ${res.status})`);
         const response = await res.json();
         const families: Family[] = Array.isArray(response)
@@ -107,17 +105,14 @@ const Dashboard: React.FC = () => {
       }
     };
     fetchFamilyData();
-  }, [token]);
+  }, []);
 
   // Fetch departments
   useEffect(() => {
-    if (!token) return;
     const fetchDepts = async () => {
       try {
         const baseUrl = getBaseUrl();
-        const res = await authFetch(`${baseUrl}/api/family/departments/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await authFetch(`${baseUrl}/api/family/departments/`);
         if (!res.ok) return;
         const response = await res.json();
         const depts: Department[] = Array.isArray(response)
@@ -127,7 +122,7 @@ const Dashboard: React.FC = () => {
       } catch {}
     };
     fetchDepts();
-  }, [token]);
+  }, []);
 
   const validateActivityForm = (): boolean => {
     const errors: Record<string, string> = {};
@@ -155,8 +150,6 @@ const Dashboard: React.FC = () => {
   const handleCreateContent = async () => {
     if (!contentBody.trim())  { showToast("محتوى المنشور مطلوب", "error"); return; }
     if (!selectedFamilyId)    { showToast("لم يتم العثور على معرف الأسرة", "error"); return; }
-    const tk = localStorage.getItem("access");
-    if (!tk)                  { showToast("يرجى تسجيل الدخول أولاً", "error"); return; }
     setIsSubmitting(true);
     try {
       const baseUrl = getBaseUrl();
@@ -164,7 +157,7 @@ const Dashboard: React.FC = () => {
         `${baseUrl}/api/family/student/${selectedFamilyId}/post/`,
         {
           method: "POST",
-          headers: { Authorization: `Bearer ${tk}`, "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ title: contentTitle || "منشور جديد", description: contentBody }),
         }
       );
@@ -184,8 +177,6 @@ const Dashboard: React.FC = () => {
   const handleCreateActivity = async () => {
     if (!validateActivityForm()) { showToast("الرجاء ملء جميع الحقول المطلوبة بشكل صحيح", "error"); return; }
     if (!selectedFamilyId)       { showToast("لم يتم العثور على معرف الأسرة", "error"); return; }
-    const tk = localStorage.getItem("access");
-    if (!tk)                     { showToast("يرجى تسجيل الدخول أولاً", "error"); return; }
     setIsSubmitting(true);
     try {
       const baseUrl = getBaseUrl();
@@ -193,7 +184,7 @@ const Dashboard: React.FC = () => {
         `${baseUrl}/api/family/student/${selectedFamilyId}/event_request/`,
         {
           method: "POST",
-          headers: { Authorization: `Bearer ${tk}`, "Content-Type": "application/json" },
+          headers: {  "Content-Type": "application/json" },
           body: JSON.stringify({
             title: activityData.title, description: activityData.description,
             type: activityData.type, st_date: activityData.date, end_date: activityData.endDate,

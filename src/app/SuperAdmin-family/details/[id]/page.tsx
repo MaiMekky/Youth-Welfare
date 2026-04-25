@@ -123,13 +123,11 @@ export default function FamilyDetailsPage() {
 
     const fetchFamily = async () => {
       try {
-        const token = localStorage.getItem('access');
 
         const res = await authFetch(
           `${getBaseUrl()}/api/family/super_dept/${id}`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
               'Content-Type': 'application/json',
             },
           }

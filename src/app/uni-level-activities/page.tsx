@@ -28,25 +28,15 @@ type ApiEvent = {
   active?: Record<string, unknown>;
 };
 
-function getAccessToken(): string | null {
-  return (
-    localStorage.getItem("access") ||
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("token") ||
-    null
-  );
-}
 
 async function apiFetch<T>(
   path: string,
   opts: RequestInit = {}
 ): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number; raw?: unknown }> {
-  const token = getAccessToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(opts.headers as Record<string, string>),
   };
-  if (token) headers.Authorization = `Bearer ${token}`;
 
   try {
     const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });

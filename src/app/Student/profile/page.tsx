@@ -82,11 +82,7 @@ export default function ProfilePage() {
   /* ── fetch blob image ── */
   const fetchProfileImage = useCallback(async (studentId: number): Promise<string> => {
     try {
-      const token = localStorage.getItem("access");
-      if (!token) return "/app/assets/profile.png";
-      const res = await authFetch(`${getBaseUrl()}/api/files/students/${studentId}/image/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await authFetch(`${getBaseUrl()}/api/files/students/${studentId}/image/`);
       if (!res.ok) return "/app/assets/profile.png";
       const blob = await res.blob();
       return URL.createObjectURL(blob);
@@ -99,11 +95,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const run = async () => {
       try {
-        const token = localStorage.getItem("access");
-        if (!token) return;
-        const res = await authFetch(`${getBaseUrl()}/api/family/faculties/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await authFetch(`${getBaseUrl()}/api/family/faculties/`);
         if (res.ok) setFaculties(await res.json());
       } catch (e) {
         console.error("Faculties fetch error:", e);
@@ -118,11 +110,7 @@ export default function ProfilePage() {
     const run = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem("access");
-        if (!token) return;
-        const res = await authFetch(`${getBaseUrl()}/api/auth/profile/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await authFetch(`${getBaseUrl()}/api/auth/profile/`);
         if (res.ok) {
           const apiData: StudentProfileAPIResponse = await res.json();
           const imageUrl = await fetchProfileImage(apiData.student_id);
@@ -143,15 +131,12 @@ export default function ProfilePage() {
       setProfileData((prev) => (prev ? { ...prev, profilePicture: localPreview } : prev));
 
       try {
-        const token = localStorage.getItem("access");
-        if (!token) return;
 
         const formData = new FormData();
         formData.append("profile_photo", file);
 
         const res = await authFetch(`${getBaseUrl()}/api/auth/profile/update_profile/`, {
           method: "PATCH",
-          headers: { Authorization: `Bearer ${token}` },
           body: formData,
         });
 
@@ -177,8 +162,7 @@ export default function ProfilePage() {
   const handleSaveProfile = useCallback(
     async (updatedData: UpdateProfileRequest) => {
       try {
-        const token = localStorage.getItem("access");
-        if (!token || !profileData) return;
+        if (!profileData) return;
 
         const formData = new FormData();
 
@@ -214,7 +198,6 @@ export default function ProfilePage() {
 
         const res = await authFetch(`${getBaseUrl()}/api/auth/profile/update_profile/`, {
           method: "PATCH",
-          headers: { Authorization: `Bearer ${token}` },
           body: formData,
         });
 

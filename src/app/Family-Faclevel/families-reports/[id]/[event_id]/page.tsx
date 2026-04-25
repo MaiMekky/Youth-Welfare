@@ -77,13 +77,11 @@ const [eventData, setEventData] = useState<EventData>({
   useEffect(() => {
     const fetchEventDetails = async () => {
       try {
-        const token = localStorage.getItem("access");
 
         const res = await authFetch(
           `${getBaseUrl()}/api/family/faculty_events/${event_id}/`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
           }
@@ -139,15 +137,11 @@ setStudentsData(
   action: "approve" | "reject"
 ) => {
   try {
-    const token = localStorage.getItem("access");
 
     const res = await authFetch(
       `${getBaseUrl()}/api/family/faculty_events/${event_id}/participants/${studentId}/${action}/`,
       {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       }
     );
 
@@ -181,7 +175,6 @@ setStudentsData(
 };
 const handleApproveAll = async () => {
   try {
-    const token = localStorage.getItem("access");
 
     // Loop through students and approve each
     for (const student of studentsData) {
@@ -190,7 +183,6 @@ const handleApproveAll = async () => {
           `${getBaseUrl()}/api/family/faculty_events/${event_id}/approve-all-participants/`,
           {
             method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
           }
         );
 

@@ -43,8 +43,6 @@ export default function Page() {
   /* ================= API: Faculties ================= */
   async function fetchFaculties() {
     try {
-      const token = localStorage.getItem("access");
-      if (!token) return;
 
       const baseUrl = getBaseUrl();
       const res = await authFetch(
@@ -52,7 +50,6 @@ export default function Page() {
         {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`,
             Accept: "application/json",
           },
         }
@@ -84,12 +81,6 @@ export default function Page() {
       setLoading(true);
       setError(null);
 
-      const token = localStorage.getItem("access");
-      if (!token) {
-        setRows([]);
-        setError("مفيش access token. اعملي تسجيل دخول تاني.");
-        return;
-      }
 
       const baseUrl = getBaseUrl();
       const res = await authFetch(
@@ -97,7 +88,6 @@ export default function Page() {
         {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`,
             Accept: "application/json",
           },
         }

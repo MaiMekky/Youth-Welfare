@@ -267,7 +267,6 @@ export default function FamilyDetailsPage() {
 
       try {
         setLoading(true);
-        const token = localStorage.getItem('access');
         const baseUrl = getBaseUrl();
         const url = `${baseUrl}/api/family/super_dept/${familyId}/`;
 
@@ -275,7 +274,6 @@ export default function FamilyDetailsPage() {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            ...(token && { Authorization: `Bearer ${token}` }),
           },
         });
 
@@ -318,7 +316,6 @@ export default function FamilyDetailsPage() {
 
   const handleApproveMember = async (studentId: number) => {
     try {
-      const token = localStorage.getItem('access');
       const baseUrl = getBaseUrl();
       const response = await authFetch(
         `${baseUrl}/api/family/super_dept/${familyId}/members/${studentId}/approve/`,
@@ -326,7 +323,6 @@ export default function FamilyDetailsPage() {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            ...(token && { Authorization: `Bearer ${token}` }),
           },
         }
       );
@@ -348,7 +344,6 @@ export default function FamilyDetailsPage() {
 
   const handleRejectMember = async (studentId: number) => {
     try {
-      const token = localStorage.getItem('access');
       const baseUrl = getBaseUrl();
       const response = await authFetch(
         `${baseUrl}/api/family/super_dept/${familyId}/members/${studentId}/reject/`,
@@ -356,7 +351,6 @@ export default function FamilyDetailsPage() {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            ...(token && { Authorization: `Bearer ${token}` }),
           },
         }
       );

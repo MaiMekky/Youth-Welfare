@@ -48,9 +48,6 @@ interface EventDetail {
   selected_facs: number[];
 }
 
-const getToken = () =>
-  typeof window !== "undefined" ? localStorage.getItem("access") : null;
-
 const BASE = getBaseUrl();
 
 type TabKey = "pending" | "approved" | "rejected";
@@ -97,9 +94,7 @@ function DetailModal({ id, onClose }: { id: number; onClose: () => void }) {
   useEffect(() => {
     (async () => {
       try {
-        const res = await authFetch(`${BASE}/api/event/get-events/${id}/`, {
-          headers: { Authorization: `Bearer ${getToken()}` },
-        });
+        const res = await authFetch(`${BASE}/api/event/get-events/${id}/`);
         if (!res.ok) throw new Error();
         setDetail(await res.json());
       } catch { setErr("فشل في تحميل تفاصيل الفعالية"); }
@@ -316,9 +311,7 @@ export default function ActivitiesManagement() {
   const fetchEvents = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await authFetch(`${BASE}/api/event/get-events/`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
+      const res = await authFetch(`${BASE}/api/event/get-events/`);
       if (!res.ok) throw new Error();
       setEvents(await res.json());
       setError("");
@@ -335,7 +328,7 @@ export default function ActivitiesManagement() {
       const endpoint = confirm.action==="approve"
         ? `${BASE}/api/event/approve-events/${confirm.id}/approve/`
         : `${BASE}/api/event/approve-events/${confirm.id}/reject/`;
-      const res = await authFetch(endpoint,{method:"PATCH",headers:{Authorization:`Bearer ${getToken()}`}});
+      const res = await authFetch(endpoint,{method:"PATCH"});
       if (!res.ok) throw new Error();
       showToast(confirm.action==="approve"?"✅ تم اعتماد الفعالية بنجاح":"❌ تم رفض الفعالية");
       setConfirm(null); fetchEvents();
@@ -349,7 +342,7 @@ export default function ActivitiesManagement() {
     try {
       const res = await authFetch(
         `${BASE}/api/event/summary-reports/${eventId}/summary-pdf/`,
-        { method:"GET", headers:{ Authorization:`Bearer ${getToken()}`, Accept:"application/pdf" } }
+        { method:"GET", headers:{ Accept:"application/pdf" } }
       );
       if (!res.ok) {
         let serverMsg = `خطأ ${res.status}`;

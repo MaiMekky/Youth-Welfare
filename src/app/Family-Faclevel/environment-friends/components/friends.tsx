@@ -177,11 +177,8 @@ function UidField({
     setStatus("checking");
     setStudentName("");
     try {
-      const token =
-        typeof window !== "undefined" ? localStorage.getItem("access") : null;
       const res = await authFetch(
-        `${getBaseUrl()}/api/auth/student-lookup/?uid=${uid}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${getBaseUrl()}/api/auth/student-lookup/?uid=${uid}`
       );
       if (res.ok) {
         const data = await res.json();
@@ -721,15 +718,12 @@ export default function FriendsForm() {
     }
     setIsSubmitting(true);
     try {
-      const token =
-        typeof window !== "undefined" ? localStorage.getItem("access") : null;
       const res = await authFetch(
         `${getBaseUrl()}/api/family/faculty/environment-family/`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(buildBody()),
         }

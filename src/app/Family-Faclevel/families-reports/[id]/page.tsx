@@ -72,13 +72,10 @@ useEffect(() => {
   if (!id) return;
   const fetchFamilyInfo = async () => {
     try {
-      const token = localStorage.getItem("access");
-      if (!token) throw new Error("غير مصرح");
 
       // Fetch family details
       const resFamily = await authFetch(
-        `${getBaseUrl()}/api/family/faculty/${id}/details/`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${getBaseUrl()}/api/family/faculty/${id}/details/`
       );
       if (!resFamily.ok) throw new Error("فشل جلب تفاصيل الأسرة");
       const dataFamily = await resFamily.json();
@@ -104,8 +101,7 @@ useEffect(() => {
 
       // Fetch activities
       const resActivities = await authFetch(
-        `${getBaseUrl()}/api/family/faculty_events/by-family/?family_id=${id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${getBaseUrl()}/api/family/faculty_events/by-family/?family_id=${id}` 
       );
       if (!resActivities.ok) throw new Error("فشل جلب الأنشطة");
       const dataActivities = await resActivities.json();
@@ -145,15 +141,11 @@ useEffect(() => {
   const handleBack = () => router.push('/Family-Faclevel/families-reports');
   const handleRemoveMember = async (memberId: number) => {
   try {
-    const token = localStorage.getItem("access");
 
     const res = await authFetch(
       `${getBaseUrl()}/api/family/faculty_members/families/${id}/members/${memberId}/`,
       {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       }
     );
 
@@ -189,15 +181,11 @@ const handleAddMember = async () => {
   try {
     setAdding(true);
 
-    const token = localStorage.getItem("access");
 
     const res = await authFetch(
       `${getBaseUrl()}/api/family/faculty_members/families/${id}/add-member/${nid}/`,
       {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       }
     );
 
@@ -272,19 +260,11 @@ const handleAddMember = async () => {
   };
 const handleExport = async () => {
   try {
-    const token = localStorage.getItem("access");
-
-    if (!token) {
-      showNotification("❌ غير مصرح، يرجى تسجيل الدخول", "error");
-      return;
-    }
-
     const res = await authFetch(
       `${getBaseUrl()}/api/family/faculty/${id}/export/`,
       {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
           Accept: "*/*",
         },
       }

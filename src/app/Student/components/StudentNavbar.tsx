@@ -76,18 +76,12 @@ const StudentNavbar: React.FC = () => {
   const menuRef  = useRef<HTMLDivElement | null>(null);
   const pathname = usePathname();
 
-  const token = typeof window !== 'undefined' ? localStorage.getItem('access') : null;
 
   useEffect(() => {
-    if (!token) return;
-
     const checkRole = async () => {
       try {
         const baseUrl = getBaseUrl();
-        const res = await authFetch(`${baseUrl}/api/family/student/families/`, {
-
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await authFetch(`${baseUrl}/api/family/student/families/`);
         if (!res.ok) return;
 
         const response = await res.json();
@@ -106,7 +100,7 @@ const StudentNavbar: React.FC = () => {
     };
 
     checkRole();
-  }, [token]);
+  }, []);
 
   const baseNavItems: NavItem[] = [
     { key: "home",       label: "أنشطتي",            icon: <IconHome />,       href: "/Student/MainPage"   },

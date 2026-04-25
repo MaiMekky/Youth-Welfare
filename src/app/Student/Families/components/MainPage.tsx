@@ -72,9 +72,6 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
   const [toasts, setToasts]                       = useState<ToastNotification[]>([]);
   const [activeTab, setActiveTab]                 = useState<'accepted' | 'pending'>('accepted');
 
-  const token =
-    typeof window !== 'undefined' ? localStorage.getItem('access') : null;
-
   /* ====== DERIVED LISTS ====== */
   // Accepted = status is accepted AND role is NOT أخ أكبر
   const acceptedFamilies = joinedFamilies.filter(f => isAccepted(f.memberStatus));
@@ -106,15 +103,8 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
 
   /* ====== FETCH ====== */
   const fetchJoinedFamilies = async () => {
-    if (!token) throw new Error('غير مصرح');
-
     const res = await authFetch(
-      `${getBaseUrl()}/api/family/student/families/`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
+      `${getBaseUrl()}/api/family/student/families/`
     );
 
     if (!res.ok) throw new Error('فشل تحميل الأسر الحالية');
@@ -125,15 +115,10 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
   };
 
   const fetchAvailableFamilies = async () => {
-    if (!token) throw new Error('غير مصرح');
+
 
     const res = await authFetch(
-      `${getBaseUrl()}/api/family/student/available/`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
+      `${getBaseUrl()}/api/family/student/available/`
     );
 
     if (!res.ok) throw new Error('فشل تحميل الأسر المتاحة');
@@ -143,7 +128,7 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
 
   /* ====== JOIN ====== */
   const joinFamily = async (familyId: number) => {
-    if (!token) { showToast('غير مصرح. الرجاء تسجيل الدخول أولاً', 'error'); return; }
+
     try {
       setJoiningId(familyId);
 
@@ -152,7 +137,6 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
         {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         }
@@ -194,7 +178,6 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
 
   /* ====== LOAD ====== */
   useEffect(() => {
-    if (!token) { setError('غير مصرح'); setLoading(false); return; }
     const loadData = async () => {
       try {
         setLoading(true);

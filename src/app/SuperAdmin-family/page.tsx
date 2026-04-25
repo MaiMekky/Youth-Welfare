@@ -147,13 +147,11 @@ export default function Page() {
   useEffect(() => {
     const fetchFaculties = async () => {
       try {
-        const token = localStorage.getItem("access");
         const baseUrl = getBaseUrl();
         const res = await authFetch(
           `${baseUrl}/api/family/faculties/`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
           }
@@ -177,7 +175,6 @@ export default function Page() {
     const fetchFamilies = async () => {
       setLoadingFamilies(true);
       try {
-        const token = localStorage.getItem("access");
         const baseUrl = getBaseUrl();
         const params = new URLSearchParams();
 
@@ -193,7 +190,6 @@ export default function Page() {
           `${baseUrl}/api/family/super_dept/?${params.toString()}`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
           }

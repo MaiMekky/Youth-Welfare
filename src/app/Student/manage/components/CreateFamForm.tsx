@@ -331,7 +331,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
   /* ── Fetch departments & faculty ── */
   useEffect(() => {
     if (!token) return;
-    authFetch(`${getBaseUrl()}/api/family/departments/`, { headers: { Authorization: `Bearer ${token}` } })
+    authFetch(`${getBaseUrl()}/api/family/departments/`)
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (!data) return;
@@ -344,9 +344,7 @@ useEffect(() => {
 
   const decoded = decodeToken(token);
 
-  authFetch(`${getBaseUrl()}/api/auth/profile/`, {
-    headers: { Authorization: `Bearer ${token}` }
-  })
+  authFetch(`${getBaseUrl()}/api/auth/profile/`)
     .then(r => r.ok ? r.json() : null)
     .then(data => {
       console.log('profile data:', data);
@@ -559,7 +557,7 @@ useEffect(() => {
 
       const res = await authFetch(`${getBaseUrl()}/api/family/student/create/`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 

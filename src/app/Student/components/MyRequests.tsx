@@ -74,15 +74,8 @@ export default function MyRequests({ onStatusesLoaded, showAlert }: MyRequestsPr
     try {
       setLoading(true);
 
-      const token = localStorage.getItem("access");
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
       const response = await authFetch(
-        `${getBaseUrl()}/api/solidarity/student/status/`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${getBaseUrl()}/api/solidarity/student/status/`
       );
 
       if (!response.ok) {

@@ -16,12 +16,9 @@ export default function RequestDetailsPage() {
 
   useEffect(() => {
     const fetchFaculties = async () => {
-      const token = localStorage.getItem("access");
-      if (!token) return;
 
       const res = await authFetch(
-        `${getBaseUrl()}/api/family/faculties/`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${getBaseUrl()}/api/family/faculties/`
       );
 
       const d = await res.json();
@@ -39,11 +36,9 @@ export default function RequestDetailsPage() {
   const fetchDetails = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("access");
 
       const response = await authFetch(
-        `${getBaseUrl()}/api/solidarity/student/${id}/detail/`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${getBaseUrl()}/api/solidarity/student/${id}/detail/`
       );
 
       const res = await response.json();
@@ -66,16 +61,9 @@ export default function RequestDetailsPage() {
 
   const handleOpenDocument = async (docId: number) => {
     try {
-      const token = localStorage.getItem("access");
-      if (!token) return;
 
       const response = await authFetch(
-        `${getBaseUrl()}/api/files/solidarity/${docId}/download/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        `${getBaseUrl()}/api/files/solidarity/${docId}/download/`
       );
 
       if (!response.ok) {

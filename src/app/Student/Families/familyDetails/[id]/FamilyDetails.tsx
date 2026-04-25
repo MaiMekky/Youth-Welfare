@@ -62,8 +62,6 @@ type ActiveTab = "details" | "activities" | "posts";
 
 const BASE = getBaseUrl();
 
-const getToken = () =>
-  typeof window !== "undefined" ? localStorage.getItem("access") : null;
 
 const storageKey = (familyId: number) => `family_registrations_${familyId}`;
 
@@ -402,13 +400,11 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
 
   // ── Fetch Posts ──
   const fetchPosts = useCallback(async () => {
-    const token = getToken();
-    if (!token) return;
+
     try {
       setLoadingPosts(true);
       const res = await authFetch(
-        `${BASE}/api/family/student/${family.id}/posts/`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${BASE}/api/family/student/${family.id}/posts/`
       );
       if (!res.ok) throw new Error("فشل تحميل المنشورات");
       const data = await res.json();
@@ -422,13 +418,10 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
 
   // ── Fetch Activities ──
   const fetchActivities = useCallback(async () => {
-    const token = getToken();
-    if (!token) return;
     try {
       setLoadingActivities(true);
       const res = await authFetch(
-        `${BASE}/api/family/student/${family.id}/event_requests/`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${BASE}/api/family/student/${family.id}/event_requests/`
       );
       if (!res.ok) throw new Error("فشل تحميل الفعاليات");
       const data = await res.json();
@@ -447,8 +440,6 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
 
   // ── Register for Event ──
   const registerForEvent = useCallback(async (eventId: number) => {
-    const token = getToken();
-    if (!token) { showNotification("انتهت الجلسة، يرجى تسجيل الدخول مجدداً", "error"); return; }
 
     try {
       setRegisteringId(eventId);
@@ -456,7 +447,7 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
         `${BASE}/api/family/student/${family.id}/events/${eventId}/register/`,
         {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json" },
         }
       );
 

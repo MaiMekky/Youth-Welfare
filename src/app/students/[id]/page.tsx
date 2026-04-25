@@ -33,14 +33,10 @@ export default function StudentDetailsPage() {
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        const token = localStorage.getItem("access");
         const baseUrl = getBaseUrl();
 
         const response = await authFetch(
-          `${baseUrl}/api/solidarity/super_dept/${id}/applications/`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          `${baseUrl}/api/solidarity/super_dept/${id}/applications/`
         );
 
         const result = await response.json();
@@ -57,13 +53,9 @@ export default function StudentDetailsPage() {
   useEffect(() => {
     const fetchDocs = async () => {
       try {
-        const token = localStorage.getItem("access");
 
         const response = await authFetch(
-          `${getBaseUrl()}/api/solidarity/super_dept/${id}/documents/`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          `${getBaseUrl()}/api/solidarity/super_dept/${id}/documents/`
         );
 
         if (!response.ok) { 
@@ -105,8 +97,6 @@ const openDocument = async (docId: number) => {
 // ====== قبول الطالب ======
 const handleApprove = async () => {
   try {
-    const token = localStorage.getItem("access");
-    if (!token) throw new Error("User not authenticated");
 
     const response = await authFetch(
       `${getBaseUrl()}/api/solidarity/super_dept/${id}/change_to_approve/`,
@@ -114,7 +104,6 @@ const handleApprove = async () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
       }
     );
@@ -141,16 +130,12 @@ const handleReject = async () => {
     //   return;
     // }
 
-    const token = localStorage.getItem("access");
-    if (!token) throw new Error("User not authenticated");
-
     const response = await authFetch(
       `${getBaseUrl()}/api/solidarity/super_dept/${id}/change_to_reject/`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         // body: JSON.stringify({
         //   rejection_reason: selectedReason

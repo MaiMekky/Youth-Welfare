@@ -69,8 +69,6 @@ interface PlanDetails {
   updated_at: string;
 }
 
-const getToken = () =>
-  typeof window !== "undefined" ? localStorage.getItem("access") : null;
 
 const BASE = getBaseUrl();
 
@@ -111,9 +109,7 @@ function PlanDetailsModal({
     const fetchDetails = async () => {
       try {
         setLoading(true);
-        const res = await authFetch(`${BASE}/api/events/plans/${plan.plan_id}/details/`, {
-          headers: { Authorization: `Bearer ${getToken()}` },
-        });
+        const res = await authFetch(`${BASE}/api/events/plans/${plan.plan_id}/details/`);
         if (!res.ok) throw new Error();
         const data = await res.json();
         setDetails(data);
@@ -442,9 +438,7 @@ export default function PlanView() {
   const fetchPlans = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await authFetch(`${BASE}/api/events/plans/list/`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
+      const res = await authFetch(`${BASE}/api/events/plans/list/`);
       if (!res.ok) throw new Error();
       const data = await res.json();
       setPlans(Array.isArray(data) ? data : data.results ?? []);
@@ -464,9 +458,7 @@ export default function PlanView() {
     if (downloadingId !== null) return;
     setDownloadingId(plan.plan_id);
     try {
-      const res = await authFetch(`${BASE}/api/event/export-plan-pdf/${plan.plan_id}/`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
+      const res = await authFetch(`${BASE}/api/event/export-plan-pdf/${plan.plan_id}/`);
       if (!res.ok) throw new Error();
       const blob = await res.blob();
       const url  = URL.createObjectURL(blob);

@@ -13,15 +13,8 @@ export default function FamilyRequestsPage() {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const token = localStorage.getItem("access");
-
         const res = await authFetch(
-          `${getBaseUrl()}/api/family/faculty/pending_requests/`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          `${getBaseUrl()}/api/family/faculty/pending_requests/`
         );
 
         if (!res.ok) throw new Error("Failed to fetch requests");

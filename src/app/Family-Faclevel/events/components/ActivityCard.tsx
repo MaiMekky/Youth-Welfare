@@ -48,7 +48,6 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
 
   const handleAction = async (action: "approve" | "reject") => {
     setLoading(true);
-    const token = localStorage.getItem("access");
 
     try {
       const res = await authFetch(
@@ -57,7 +56,6 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
         }
       );

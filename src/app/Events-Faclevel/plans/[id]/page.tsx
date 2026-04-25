@@ -131,26 +131,15 @@ export default function PlanDetailsPage() {
     }, 2500);
   };
 
-  function getAccessToken(): string | null {
-    return (
-      localStorage.getItem("access") ||
-      localStorage.getItem("access_token") ||
-      localStorage.getItem("token") ||
-      null
-    );
-  }
-
   async function apiCall(
     path: string,
     opts: RequestInit = {}
   ): Promise<{ ok: true; data: Record<string, unknown> } | { ok: false; message: string }> {
-    const token = getAccessToken();
     const headers: Record<string, string> = {
       Accept: "application/json",
       ...(opts.headers as Record<string, string>),
     };
     if (!headers["Content-Type"] && opts.body) headers["Content-Type"] = "application/json";
-    if (token) headers.Authorization = `Bearer ${token}`;
 
     try {
       const baseUrl = getBaseUrl();
@@ -207,17 +196,15 @@ export default function PlanDetailsPage() {
     try {
       setLoading(true);
 
-      const token = localStorage.getItem("access");
-      if (!token) {
-        setPlan(null);
-        showToast("❌ مفيش access token. برجاء تسجيل دخول مرة اخري.", "error");
-        return;
-      }
+      // if (!token) {
+      //   setPlan(null);
+      //   showToast("❌ مفيش access token. برجاء تسجيل دخول مرة اخري.", "error");
+      //   return;
+      // }
 
       const res = await authFetch(`${API_URL}/events/plans/${id}/details/`, {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
           Accept: "application/json",
         },
       });

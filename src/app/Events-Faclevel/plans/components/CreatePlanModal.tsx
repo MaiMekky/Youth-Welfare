@@ -134,11 +134,10 @@ export default function CreatePlanModal({
     try {
       setSaving(true);
 
-      const token = localStorage.getItem("access");
-      if (!token) {
-        showToast("❌ مفيش access token. برجاء تسجيل الدخول مرة اخري.", "error");
-        return;
-      }
+      // if (!token) {
+      //   showToast("❌ مفيش access token. برجاء تسجيل الدخول مرة اخري.", "error");
+      //   return;
+      // }
    const facultyId = getFacultyIdFromToken();
       const payload = {
         name: form.name.trim(),
@@ -156,7 +155,6 @@ export default function CreatePlanModal({
       const res = await authFetch(url, {
         method,
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
           Accept: "application/json",
         },

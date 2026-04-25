@@ -64,9 +64,6 @@ const ICON_SAVE = (
 );
 
 /* ── Stable primitive components (OUTSIDE the main component) ── */
-/* Defining these inside the component causes React to treat them
-   as new component types on every render → inputs unmount/remount
-   → focus lost after every keystroke.                             */
 
 interface FieldProps {
   label: string;
@@ -88,17 +85,19 @@ function Field({ label, icon, children }: FieldProps) {
 interface PdsInputProps {
   type?: string;
   value: string;
-  onChange: React.ChangeEventHandler<HTMLInputElement>;
+  onChange?: React.ChangeEventHandler<HTMLInputElement>;
   placeholder?: string;
+  disabled?: boolean;
 }
-function PdsInput({ type = "text", value, onChange, placeholder }: PdsInputProps) {
+function PdsInput({ type = "text", value, onChange, placeholder, disabled = false }: PdsInputProps) {
   return (
     <input
       type={type}
       value={value}
       onChange={onChange}
-      className="pds-input"
+      className={`pds-input${disabled ? " pds-input--disabled" : ""}`}
       placeholder={placeholder}
+      disabled={disabled}
       dir="rtl"
     />
   );
@@ -108,10 +107,17 @@ interface PdsSelectProps {
   value: string | number;
   onChange: React.ChangeEventHandler<HTMLSelectElement>;
   children: React.ReactNode;
+  disabled?: boolean;
 }
-function PdsSelect({ value, onChange, children }: PdsSelectProps) {
+function PdsSelect({ value, onChange, children, disabled = false }: PdsSelectProps) {
   return (
-    <select value={value} onChange={onChange} className="pds-input" dir="rtl">
+    <select
+      value={value}
+      onChange={onChange}
+      className={`pds-input${disabled ? " pds-input--disabled" : ""}`}
+      disabled={disabled}
+      dir="rtl"
+    >
       {children}
     </select>
   );
@@ -126,19 +132,16 @@ export default function ProfileDetailsSection({
   onCancelEdit,
 }: ProfileDetailsSectionProps) {
 
+  // Only include fields accepted by the API PATCH endpoint:
+  // faculty, phone_number, address, acd_year, grade, major
+  // name, email, gender are NOT accepted by the API → always disabled
   const buildBlank = useCallback((): UpdateProfileRequest => ({
-    name: profileData.fullName || "",
-    email: profileData.email || "",
     phone_number: profileData.phoneNumber || "",
     address: profileData.address || "",
     acd_year: profileData.acd_year || "",
     grade: profileData.grade || "",
     major: profileData.major || "",
     faculty: profileData.faculty,
-    gender:
-      profileData.gender === "ذكر" ? "m"
-      : profileData.gender === "أنثى" ? "f"
-      : profileData.gender || "",
   }), [profileData]);
 
   const [form, setForm] = useState<UpdateProfileRequest>(buildBlank);
@@ -177,50 +180,60 @@ export default function ProfileDetailsSection({
         </div>
         <div className="pds-grid">
 
+          {/* الاسم — NOT in API spec → always disabled input when editing */}
           <Field label="الاسم الكامل" icon={ICON_USER}>
             {isEditing ? (
               <PdsInput
-                value={form.name || ""}
-                onChange={(e) => set("name", e.target.value)}
-                placeholder="أدخل الاسم الكامل"
+                value={profileData.fullName || ""}
+                disabled
+                placeholder="الاسم الكامل"
               />
             ) : (
               <p className="pds-field-value">{profileData.fullName || "—"}</p>
             )}
           </Field>
 
+          {/* كود الطالب — read-only always */}
           <Field label="كود الطالب" icon={ICON_SECTION}>
-            <p className="pds-field-value">{profileData.uid || "—"}</p>
+            {isEditing ? (
+              <PdsInput
+                value={profileData.uid || ""}
+                disabled
+                placeholder="كود الطالب"
+              />
+            ) : (
+              <p className="pds-field-value">{profileData.uid || "—"}</p>
+            )}
           </Field>
 
+          {/* النوع — NOT in API spec → always disabled input when editing */}
           <Field label="النوع" icon={ICON_USER}>
             {isEditing ? (
-              <PdsSelect
-                value={form.gender || ""}
-                onChange={(e) => set("gender", e.target.value)}
-              >
-                <option value="">اختر النوع</option>
-                <option value="m">ذكر</option>
-                <option value="f">أنثى</option>
-              </PdsSelect>
+              <PdsInput
+                value={profileData.gender || ""}
+                disabled
+                placeholder="النوع"
+              />
             ) : (
               <p className="pds-field-value">{profileData.gender || "—"}</p>
             )}
           </Field>
 
+          {/* البريد الإلكتروني — NOT in API spec → always disabled input when editing */}
           <Field label="البريد الإلكتروني" icon={ICON_MAIL}>
             {isEditing ? (
               <PdsInput
                 type="email"
-                value={form.email || ""}
-                onChange={(e) => set("email", e.target.value)}
-                placeholder="أدخل البريد الإلكتروني"
+                value={profileData.email || ""}
+                disabled
+                placeholder="البريد الإلكتروني"
               />
             ) : (
               <p className="pds-field-value">{profileData.email || "—"}</p>
             )}
           </Field>
 
+          {/* رقم الهاتف — editable */}
           <Field label="رقم الهاتف" icon={ICON_PHONE}>
             {isEditing ? (
               <PdsInput
@@ -234,6 +247,7 @@ export default function ProfileDetailsSection({
             )}
           </Field>
 
+          {/* العنوان — editable */}
           <Field label="العنوان" icon={ICON_LOCATION}>
             {isEditing ? (
               <PdsInput
@@ -257,6 +271,7 @@ export default function ProfileDetailsSection({
         </div>
         <div className="pds-grid">
 
+          {/* الكلية — editable */}
           <Field label="الكلية" icon={ICON_HOME}>
             {isEditing ? (
               <PdsSelect
@@ -275,6 +290,7 @@ export default function ProfileDetailsSection({
             )}
           </Field>
 
+          {/* التخصص — editable */}
           <Field label="التخصص" icon={ICON_BOOK}>
             {isEditing ? (
               <PdsInput
@@ -287,6 +303,7 @@ export default function ProfileDetailsSection({
             )}
           </Field>
 
+          {/* السنة الدراسية — editable */}
           <Field label="السنة الدراسية" icon={ICON_CALENDAR}>
             {isEditing ? (
               <PdsInput
@@ -299,6 +316,7 @@ export default function ProfileDetailsSection({
             )}
           </Field>
 
+          {/* المعدل التراكمي — editable */}
           <Field label="المعدل التراكمي" icon={ICON_STAR}>
             {isEditing ? (
               <PdsInput

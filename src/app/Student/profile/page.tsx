@@ -178,12 +178,13 @@ export default function ProfilePage() {
     async (updatedData: UpdateProfileRequest) => {
       try {
         const token = localStorage.getItem("access");
-        if (!token || !profileData) return;
+        if (!token) return;
 
         const formData = new FormData();
 
-        // Fields from swagger spec: faculty, phone_number, address, acd_year, grade, major, profile_photo
-        // Plus name, email, gender if supported by your backend
+        // Only append fields accepted by the API PATCH spec:
+        // faculty, phone_number, address, acd_year, grade, major
+        // name, email, gender are intentionally excluded
         if (updatedData.faculty !== undefined && updatedData.faculty !== null) {
           formData.append("faculty", String(updatedData.faculty));
         }
@@ -202,15 +203,6 @@ export default function ProfilePage() {
         if (updatedData.major !== undefined && updatedData.major !== "") {
           formData.append("major", updatedData.major);
         }
-        if (updatedData.name !== undefined && updatedData.name !== "") {
-          formData.append("name", updatedData.name);
-        }
-        if (updatedData.email !== undefined && updatedData.email !== "") {
-          formData.append("email", updatedData.email);
-        }
-        if (updatedData.gender !== undefined && updatedData.gender !== "") {
-          formData.append("gender", updatedData.gender);
-        }
 
         const res = await authFetch(`${getBaseUrl()}/api/auth/profile/update_profile/`, {
           method: "PATCH",
@@ -220,7 +212,6 @@ export default function ProfilePage() {
 
         if (res.ok) {
           const apiData: StudentProfileAPIResponse = await res.json();
-          // Use functional updater to avoid stale closure on profileData
           setProfileData((prev) => {
             const currentImage = prev?.profilePicture || "/app/assets/profile.png";
             return mapApiToProfile(apiData, faculties, currentImage);
@@ -239,7 +230,7 @@ export default function ProfilePage() {
         showToast("حدث خطأ في تحديث البيانات", "error");
       }
     },
-    [faculties, showToast]   // NOTE: removed profileData from deps — we use functional updater instead
+    [faculties, showToast]
   );
 
   /* ── render ── */

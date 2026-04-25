@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import type { StudentProfile, UpdateProfileRequest } from "../types";
 
 interface ProfileDetailsSectionProps {
@@ -11,7 +11,7 @@ interface ProfileDetailsSectionProps {
   onCancelEdit?: () => void;
 }
 
-/* ── field config ─────────────────────────────────── */
+/* ── Icons (stable references, defined outside component) ─── */
 const ICON_USER = (
   <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
@@ -57,7 +57,67 @@ const ICON_SECTION = (
     <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
   </svg>
 );
+const ICON_SAVE = (
+  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+    <polyline points="20 6 9 17 4 12"/>
+  </svg>
+);
 
+/* ── Stable primitive components (OUTSIDE the main component) ── */
+/* Defining these inside the component causes React to treat them
+   as new component types on every render → inputs unmount/remount
+   → focus lost after every keystroke.                             */
+
+interface FieldProps {
+  label: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}
+function Field({ label, icon, children }: FieldProps) {
+  return (
+    <div className="pds-field">
+      <label className="pds-field-label">
+        <span className="pds-field-label__icon">{icon}</span>
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
+interface PdsInputProps {
+  type?: string;
+  value: string;
+  onChange: React.ChangeEventHandler<HTMLInputElement>;
+  placeholder?: string;
+}
+function PdsInput({ type = "text", value, onChange, placeholder }: PdsInputProps) {
+  return (
+    <input
+      type={type}
+      value={value}
+      onChange={onChange}
+      className="pds-input"
+      placeholder={placeholder}
+      dir="rtl"
+    />
+  );
+}
+
+interface PdsSelectProps {
+  value: string | number;
+  onChange: React.ChangeEventHandler<HTMLSelectElement>;
+  children: React.ReactNode;
+}
+function PdsSelect({ value, onChange, children }: PdsSelectProps) {
+  return (
+    <select value={value} onChange={onChange} className="pds-input" dir="rtl">
+      {children}
+    </select>
+  );
+}
+
+/* ── Main Component ─────────────────────────────────────────── */
 export default function ProfileDetailsSection({
   profileData,
   faculties,
@@ -65,7 +125,8 @@ export default function ProfileDetailsSection({
   onUpdateProfile,
   onCancelEdit,
 }: ProfileDetailsSectionProps) {
-  const blank: UpdateProfileRequest = {
+
+  const buildBlank = useCallback((): UpdateProfileRequest => ({
     name: profileData.fullName || "",
     email: profileData.email || "",
     phone_number: profileData.phoneNumber || "",
@@ -77,88 +138,38 @@ export default function ProfileDetailsSection({
     gender:
       profileData.gender === "ذكر" ? "m"
       : profileData.gender === "أنثى" ? "f"
-      : profileData.gender,
-  };
+      : profileData.gender || "",
+  }), [profileData]);
 
-  const [editedData, setEditedData] = useState<UpdateProfileRequest>(blank);
+  const [form, setForm] = useState<UpdateProfileRequest>(buildBlank);
 
-  useEffect(() => { setEditedData(blank); }, [profileData]);
+  // Re-populate form whenever profileData changes (e.g. after a successful save)
+  useEffect(() => {
+    setForm(buildBlank());
+  }, [buildBlank]);
+
+  // Also reset form when edit mode is opened fresh
+  useEffect(() => {
+    if (isEditing) setForm(buildBlank());
+  }, [isEditing, buildBlank]);
 
   const set = (field: keyof UpdateProfileRequest, value: string | number) =>
-    setEditedData((p) => ({ ...p, [field]: value }));
+    setForm((prev) => ({ ...prev, [field]: value }));
 
   const handleCancel = () => {
-    setEditedData(blank);
+    setForm(buildBlank());
     onCancelEdit?.();
   };
 
-  /* ── small helpers ── */
-  const ReadValue = ({ v }: { v?: string | null }) => (
-    <p className="pds-field-value">{v || "—"}</p>
-  );
+  const handleSave = () => {
+    onUpdateProfile(form);
+  };
 
-  const Field = ({
-    label,
-    icon,
-    children,
-  }: {
-    label: string;
-    icon: React.ReactNode;
-    children: React.ReactNode;
-  }) => (
-    <div className="pds-field">
-      <label className="pds-field-label">
-        <span className="pds-field-label__icon">{icon}</span>
-        {label}
-      </label>
-      {children}
-    </div>
-  );
-
-  const Input = ({
-    type = "text",
-    value,
-    onChange,
-    placeholder,
-  }: {
-    type?: string;
-    value: string;
-    onChange: (v: string) => void;
-    placeholder?: string;
-  }) => (
-    <input
-      type={type}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="pds-input"
-      placeholder={placeholder}
-      dir="rtl"
-    />
-  );
-
-  const Select = ({
-    value,
-    onChange,
-    children,
-  }: {
-    value: string | number;
-    onChange: (v: string) => void;
-    children: React.ReactNode;
-  }) => (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="pds-input"
-      dir="rtl"
-    >
-      {children}
-    </select>
-  );
-
+  /* ── render ── */
   return (
     <div className="pds-wrapper" dir="rtl">
 
-      {/* ── Section: Personal ── */}
+      {/* ── Personal ── */}
       <div className="pds-section">
         <div className="pds-section__header">
           <span className="pds-section__header-icon">{ICON_USER}</span>
@@ -167,49 +178,78 @@ export default function ProfileDetailsSection({
         <div className="pds-grid">
 
           <Field label="الاسم الكامل" icon={ICON_USER}>
-            {isEditing
-              ? <Input value={editedData.name || ""} onChange={(v) => set("name", v)} placeholder="أدخل الاسم الكامل" />
-              : <ReadValue v={profileData.fullName} />}
+            {isEditing ? (
+              <PdsInput
+                value={form.name || ""}
+                onChange={(e) => set("name", e.target.value)}
+                placeholder="أدخل الاسم الكامل"
+              />
+            ) : (
+              <p className="pds-field-value">{profileData.fullName || "—"}</p>
+            )}
           </Field>
 
           <Field label="كود الطالب" icon={ICON_SECTION}>
-            <ReadValue v={profileData.uid} />
+            <p className="pds-field-value">{profileData.uid || "—"}</p>
           </Field>
 
           <Field label="النوع" icon={ICON_USER}>
             {isEditing ? (
-              <Select value={editedData.gender || ""} onChange={(v) => set("gender", v)}>
+              <PdsSelect
+                value={form.gender || ""}
+                onChange={(e) => set("gender", e.target.value)}
+              >
                 <option value="">اختر النوع</option>
                 <option value="m">ذكر</option>
                 <option value="f">أنثى</option>
-              </Select>
+              </PdsSelect>
             ) : (
-              <ReadValue v={profileData.gender} />
+              <p className="pds-field-value">{profileData.gender || "—"}</p>
             )}
           </Field>
 
           <Field label="البريد الإلكتروني" icon={ICON_MAIL}>
-            {isEditing
-              ? <Input type="email" value={editedData.email || ""} onChange={(v) => set("email", v)} placeholder="أدخل البريد الإلكتروني" />
-              : <ReadValue v={profileData.email} />}
+            {isEditing ? (
+              <PdsInput
+                type="email"
+                value={form.email || ""}
+                onChange={(e) => set("email", e.target.value)}
+                placeholder="أدخل البريد الإلكتروني"
+              />
+            ) : (
+              <p className="pds-field-value">{profileData.email || "—"}</p>
+            )}
           </Field>
 
           <Field label="رقم الهاتف" icon={ICON_PHONE}>
-            {isEditing
-              ? <Input type="tel" value={editedData.phone_number || ""} onChange={(v) => set("phone_number", v)} placeholder="أدخل رقم الهاتف" />
-              : <ReadValue v={profileData.phoneNumber} />}
+            {isEditing ? (
+              <PdsInput
+                type="tel"
+                value={form.phone_number || ""}
+                onChange={(e) => set("phone_number", e.target.value)}
+                placeholder="أدخل رقم الهاتف"
+              />
+            ) : (
+              <p className="pds-field-value">{profileData.phoneNumber || "—"}</p>
+            )}
           </Field>
 
           <Field label="العنوان" icon={ICON_LOCATION}>
-            {isEditing
-              ? <Input value={editedData.address || ""} onChange={(v) => set("address", v)} placeholder="أدخل العنوان" />
-              : <ReadValue v={profileData.address} />}
+            {isEditing ? (
+              <PdsInput
+                value={form.address || ""}
+                onChange={(e) => set("address", e.target.value)}
+                placeholder="أدخل العنوان"
+              />
+            ) : (
+              <p className="pds-field-value">{profileData.address || "—"}</p>
+            )}
           </Field>
 
         </div>
       </div>
 
-      {/* ── Section: Academic ── */}
+      {/* ── Academic ── */}
       <div className="pds-section">
         <div className="pds-section__header">
           <span className="pds-section__header-icon">{ICON_BOOK}</span>
@@ -219,36 +259,56 @@ export default function ProfileDetailsSection({
 
           <Field label="الكلية" icon={ICON_HOME}>
             {isEditing ? (
-              <Select
-                value={editedData.faculty || ""}
-                onChange={(v) => set("faculty", parseInt(v))}
+              <PdsSelect
+                value={form.faculty ?? ""}
+                onChange={(e) => set("faculty", parseInt(e.target.value, 10))}
               >
                 <option value="">اختر الكلية</option>
                 {faculties.map((f) => (
-                  <option key={f.faculty_id} value={f.faculty_id}>{f.name}</option>
+                  <option key={f.faculty_id} value={f.faculty_id}>
+                    {f.name}
+                  </option>
                 ))}
-              </Select>
+              </PdsSelect>
             ) : (
-              <ReadValue v={profileData.facultyName} />
+              <p className="pds-field-value">{profileData.facultyName || "—"}</p>
             )}
           </Field>
 
           <Field label="التخصص" icon={ICON_BOOK}>
-            {isEditing
-              ? <Input value={editedData.major || ""} onChange={(v) => set("major", v)} placeholder="أدخل التخصص" />
-              : <ReadValue v={profileData.major} />}
+            {isEditing ? (
+              <PdsInput
+                value={form.major || ""}
+                onChange={(e) => set("major", e.target.value)}
+                placeholder="أدخل التخصص"
+              />
+            ) : (
+              <p className="pds-field-value">{profileData.major || "—"}</p>
+            )}
           </Field>
 
           <Field label="السنة الدراسية" icon={ICON_CALENDAR}>
-            {isEditing
-              ? <Input value={editedData.acd_year || ""} onChange={(v) => set("acd_year", v)} placeholder="أدخل السنة الدراسية" />
-              : <ReadValue v={profileData.acd_year} />}
+            {isEditing ? (
+              <PdsInput
+                value={form.acd_year || ""}
+                onChange={(e) => set("acd_year", e.target.value)}
+                placeholder="أدخل السنة الدراسية"
+              />
+            ) : (
+              <p className="pds-field-value">{profileData.acd_year || "—"}</p>
+            )}
           </Field>
 
           <Field label="المعدل التراكمي" icon={ICON_STAR}>
-            {isEditing
-              ? <Input value={editedData.grade || ""} onChange={(v) => set("grade", v)} placeholder="أدخل المعدل التراكمي" />
-              : <ReadValue v={profileData.grade} />}
+            {isEditing ? (
+              <PdsInput
+                value={form.grade || ""}
+                onChange={(e) => set("grade", e.target.value)}
+                placeholder="أدخل المعدل التراكمي"
+              />
+            ) : (
+              <p className="pds-field-value">{profileData.grade || "—"}</p>
+            )}
           </Field>
 
         </div>
@@ -257,11 +317,11 @@ export default function ProfileDetailsSection({
       {/* ── Actions ── */}
       {isEditing && (
         <div className="pds-actions">
-          <button className="pds-btn pds-btn--cancel" onClick={handleCancel}>إلغاء</button>
-          <button className="pds-btn pds-btn--save" onClick={() => onUpdateProfile(editedData)}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
+          <button className="pds-btn pds-btn--cancel" onClick={handleCancel}>
+            إلغاء
+          </button>
+          <button className="pds-btn pds-btn--save" onClick={handleSave}>
+            {ICON_SAVE}
             حفظ التغييرات
           </button>
         </div>

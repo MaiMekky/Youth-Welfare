@@ -5,7 +5,7 @@ import type { StudentProfile } from "../types";
 
 interface ProfileSummaryCardProps {
   profileData: StudentProfile;
-  onImageUpload: (file: File) => void;
+  onImageUpload: (file: File, localPreview: string) => void;
 }
 
 export default function ProfileSummaryCard({
@@ -14,10 +14,9 @@ export default function ProfileSummaryCard({
 }: ProfileSummaryCardProps) {
   const [profileImage, setProfileImage] = useState(profileData.profilePicture);
 
+  // Keep in sync when parent updates profileData (e.g. after API confirms upload)
   useEffect(() => {
-    if (profileData.profilePicture) {
-      setProfileImage(profileData.profilePicture);
-    }
+    if (profileData.profilePicture) setProfileImage(profileData.profilePicture);
   }, [profileData.profilePicture]);
 
   const hasValidImage =
@@ -25,18 +24,22 @@ export default function ProfileSummaryCard({
     profileImage.trim() !== "" &&
     profileImage !== "/app/assets/profile.png";
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     const reader = new FileReader();
-    reader.onloadend = () => setProfileImage(reader.result as string);
+    reader.onloadend = () => {
+      const preview = reader.result as string;
+      // Show instantly in local state
+      setProfileImage(preview);
+      // Pass both file and preview up so parent can optimistically update profileData too
+      onImageUpload(file, preview);
+    };
     reader.readAsDataURL(file);
-    onImageUpload(file);
   };
 
-  const initials = profileData.fullName
-    ? profileData.fullName.charAt(0)
-    : "ط";
+  const initials = profileData.fullName ? profileData.fullName.charAt(0) : "ط";
 
   return (
     <div className="profile-summary-card" dir="rtl">
@@ -50,9 +53,7 @@ export default function ProfileSummaryCard({
             height={96}
             className="profile-summary-card__avatar-img"
             crossOrigin="anonymous"
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = "none";
-            }}
+            onError={() => setProfileImage("")}
           />
         ) : (
           <div className="profile-summary-card__avatar-placeholder">
@@ -77,7 +78,7 @@ export default function ProfileSummaryCard({
       {/* Divider */}
       <div className="profile-summary-card__divider" />
 
-      {/* Academic tags row */}
+      {/* Academic tags */}
       <div className="profile-summary-card__tags">
         {profileData.facultyName && (
           <span className="profile-tag profile-tag--faculty">

@@ -223,7 +223,7 @@ export default function EventForm({
     if (!costStr) next.cost = "التكلفة مطلوبة";
     else if (Number.isNaN(costNum) || costNum < 0) next.cost = "التكلفة لازم تكون رقم أكبر أو يساوي 0";
     if (!form.description.trim()) next.description = "الوصف مطلوب";
-    if (!form.type.trim()) next.type = "نوع النشاط مطلوب";
+    // if (!form.type.trim()) next.type = "نوع النشاط مطلوب";
     if (!form.dept) next.dept = "القسم مطلوب";
     if (selectedFacultyIds.length === 0) next.selected_facs = "اختاري كلية واحدة على الأقل";
     return next;
@@ -259,7 +259,7 @@ export default function EventForm({
         s_limit: Number(e?.s_limit ?? 100),
         cost: String(e?.cost ?? ""),
         description: e?.description ?? "",
-        type: e?.type ?? "",
+        type: "خارجي",
         restrictions: e?.restrictions ?? "",
         reward: e?.reward ?? "",
         resource: e?.resource ?? "",
@@ -296,7 +296,7 @@ export default function EventForm({
       end_date: form.end_date,
       s_limit: Number(form.s_limit),
 
-      type: form.type,   
+      type: "خارجي",   
 
       resource: form.resource.trim(),
       selected_facs: selectedFacultyIds,
@@ -359,7 +359,7 @@ export default function EventForm({
             </div>
 
             {/* ── نوع النشاط — from localStorage departments (like CreatePlanModal) ── */}
-            <div className={styles.field}>
+            {/* <div className={styles.field}>
               <label className={styles.label}>نوع النشاط</label>
               <select
                 className={`${styles.input} ${errors.type ? styles.inputError : ""}`}
@@ -370,7 +370,7 @@ export default function EventForm({
                 <option value="خارجي">خارجي</option>
               </select>
               {errors.type && <div className={styles.errorText}>{errors.type}</div>}
-            </div>
+            </div> */}
 
             
             <div className={styles.field}>

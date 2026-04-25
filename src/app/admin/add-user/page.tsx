@@ -269,7 +269,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       return;
     }
 
-    showToast(isEdit ? "تم التحديث بنجاح 🎉" : "تم الإنشاء بنجاح 🎉", "success");
+    showToast(isEdit ? "تم التحديث بنجاح " : "تم الإنشاء بنجاح ", "success");
     router.push('/CreateAdmins');
 
   } catch (err) {

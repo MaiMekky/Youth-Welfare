@@ -359,7 +359,7 @@ const removeActivity = (ck: string, ai: number) => {
 
       if (res.ok) {
         localStorage.removeItem(CACHE_KEY);
-        showToast('تم إرسال طلبك بنجاح! 🎉 يرجى انتظار مراجعته', 'success');
+        showToast('تم إرسال طلبك بنجاح!  يرجى انتظار مراجعته', 'success');
         setTimeout(() => { if (onSubmitSuccess) onSubmitSuccess(); }, 2000);
       } else {
         let errData: Record<string, unknown> = {};

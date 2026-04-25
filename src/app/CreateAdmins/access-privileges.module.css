@@ -344,10 +344,10 @@
 
 .addUserWrapper {
   display: flex; justify-content: center;
-  align-items: flex-start; padding: 28px 0 56px; width: 100%;
+  align-items: flex-start; padding: 0px 0 0px; width: 100%;
 }
 .addUserCard {
-  width: 100%; max-width: 1100px; background: #fff;
+  width: 100%; max-width: 100%; background: #fff;
   border-radius: 22px;
   box-shadow: 0 6px 32px rgba(26,46,66,.13), 0 0 0 1px rgba(26,46,66,.05);
   overflow: hidden;
@@ -378,7 +378,7 @@
 }
 .formSectionLabel svg { color: var(--navy-mid); flex-shrink: 0; }
 
-.formRow { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
+.formRow { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 18px; }
 .formGroup { display: flex; flex-direction: column; gap: 7px; }
 .fieldLabel { font-size: 14px; font-weight: 700; color: var(--navy); }
 

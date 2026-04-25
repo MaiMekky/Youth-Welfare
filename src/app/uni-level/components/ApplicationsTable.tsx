@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import FiltersBar from "./FiltersBar";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+
 interface Application {
   id: number;
   requestNumber: string;
@@ -30,6 +31,54 @@ const facultyMap: { [key: string]: number } = {
   "كلية التربية": 5,
 };
 
+const fetchApplications = async (appliedFilters: Record<string, string> = {}): Promise<Application[]> => {
+  const query = Object.entries(appliedFilters)
+    .filter(([, value]) => value && value !== "none")
+    .map(([key, value]) => {
+      let apiKey = key;
+      let apiValue = value;
+      switch (key) {
+        case "disability":    apiKey = "disabilities";                                          break;
+        case "faculty":       apiKey = "faculty"; apiValue = String(facultyMap[value] ?? "");  break;
+        case "brothers":      apiKey = "family_numbers";                                        break;
+        case "fatherStatus":  apiKey = "father_status";                                         break;
+        case "motherStatus":  apiKey = "mother_status";                                         break;
+        case "housingStatus": apiKey = "housing_status";                                        break;
+        case "grade":         apiKey = "grade";                                                 break;
+        case "status":        apiKey = "status";                                                break;
+        case "totalIncome":   apiKey = "total_income";                                          break;
+        case "search":        apiKey = "student_id";                                            break;
+      }
+      return `${apiKey}=${encodeURIComponent(apiValue)}`;
+    })
+    .join("&");
+
+  const url = `${getBaseUrl()}/api/solidarity/super_dept/all_applications/${query ? `?${query}` : ""}`;
+
+  // authFetch attaches the token and silently refreshes on 401 automatically
+  const res = await authFetch(url, { method: "GET" });
+  if (!res.ok) throw new Error("فشل في جلب البيانات");
+
+  const data = await res.json();
+
+  return data.map((app: Record<string, unknown>) => ({
+    id: app.solidarity_id,
+    studentName: app.student_name,
+    requestNumber: app.student_uid,
+    college: app.faculty_name,
+    amount: app.total_income,
+    date: app.created_at ? new Date(app.created_at as string).toLocaleDateString() : "-",
+    status: app.req_status,
+    fatherStatus: app.father_status,
+    motherStatus: app.mother_status,
+    housingStatus: app.housing_status,
+    brothers: app.family_numbers,
+    totalIncome: app.total_income_level,
+    grade: app.grade,
+    disability: app.disabilities,
+  }));
+};
+
 export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (apps: Application[]) => void }) {
   const router = useRouter();
   const [applications, setApplications] = useState<Application[]>([]);
@@ -38,116 +87,26 @@ export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (ap
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  
-  // fetch البيانات مع الفلاتر فقط عند الضغط على زر "تطبيق الفلاتر"
-  const fetchApplications = async (appliedFilters: Record<string, string> = {}) => {
+
+  const loadApplications = async (appliedFilters: Record<string, string> = {}) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("access");
-      if (!token) return;
-
-      const query = Object.entries(appliedFilters)
-  .filter(([, value]) => value && value !== "none")
-  .map(([key, value]) => {
-    let apiKey = key;
-    let apiValue = value;
-
-    switch (key) {
-      case "disability":
-        apiKey = "disabilities";
-        apiValue = value; 
-        break;
-
-      case "faculty":
-        apiKey = "faculty";
-        apiValue = String(facultyMap[value as string] ?? "");
-        break;
-
-      case "brothers":
-        apiKey = "family_numbers"; 
-        apiValue = value; 
-        break;
-
-      case "fatherStatus":
-        apiKey = "father_status";
-        break;
-
-      case "motherStatus":
-        apiKey = "mother_status";
-        break;
-
-      case "housingStatus":
-        apiKey = "housing_status";
-        apiValue = value; 
-        break;
-
-      case "grade":
-        apiKey = "grade";
-        apiValue = value;
-        break;
-
-      case "status":
-        apiKey = "status";
-        break;
-
-      case "totalIncome":
-        apiKey = "total_income";
-        break;
-
-      case "search":
-        apiKey = "student_id";
-        break;
-    }
-
-    return `${apiKey}=${encodeURIComponent(apiValue as string)}`;
-  })
-  .join("&");
-
-      const baseUrl = getBaseUrl();
-      const url = `${baseUrl}/api/solidarity/super_dept/all_applications/${query ? `?${query}` : ""}`;
-
-      const res = await authFetch(url, { headers: { Authorization: `Bearer ${token}` } });
-      if (!res.ok) throw new Error("فشل في جلب البيانات");
-
-      const data = await res.json();
-
-      const mappedApps: Application[] = data.map((app: Record<string, unknown>) => ({
-        id: app.solidarity_id,
-        studentName: app.student_name,
-        requestNumber: app.student_uid,
-        college: app.faculty_name,
-        amount: app.total_income,
-        date: app.created_at ? new Date(app.created_at as string).toLocaleDateString() : "-",
-        status: app.req_status,
-        fatherStatus: app.father_status,
-        motherStatus: app.mother_status,
-        housingStatus: app.housing_status,
-        brothers: app.family_numbers,
-        totalIncome: app.total_income_level,
-        grade: app.grade,
-        disability: app.disabilities,
-      }));
-
-     if (onDataLoaded) {
-  onDataLoaded(mappedApps);
-}
-
-      setApplications(mappedApps);
+      const data = await fetchApplications(appliedFilters);
+      if (onDataLoaded) onDataLoaded(data);
+      setApplications(data);
     } catch (err) {
       console.error(err);
-      alert("حدث خطأ أثناء جلب البيانات");
+      throw err; // let authFetch's silent refresh / logout propagate
     } finally {
       setLoading(false);
     }
   };
 
-  // جلب البيانات لأول مرة بدون أي فلاتر
   useEffect(() => {
-    fetchApplications();
+    loadApplications();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // فلترة البحث client-side تلقائي
   const filteredApps = applications.filter((app) => {
     if (!searchTerm) return true;
     const term = searchTerm.toLowerCase();
@@ -157,10 +116,10 @@ export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (ap
       app.id.toString().includes(term)
     );
   });
-  
-  const totalPages = Math.ceil(filteredApps.length / rowsPerPage);
-  const startIndex = (currentPage - 1) * rowsPerPage + 1;
-  const endIndex = Math.min(currentPage * rowsPerPage, filteredApps.length);
+
+  const totalPages  = Math.ceil(filteredApps.length / rowsPerPage);
+  const startIndex  = (currentPage - 1) * rowsPerPage + 1;
+  const endIndex    = Math.min(currentPage * rowsPerPage, filteredApps.length);
   const paginatedApps = filteredApps.slice(startIndex - 1, endIndex);
 
   const handleNavigate = (app: Application) => {
@@ -175,124 +134,93 @@ export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (ap
       <FiltersBar
         filters={filters}
         setFilters={setFilters}
-        onApply={() => fetchApplications(filters)} // تنفيذ الفلاتر عند الضغط فقط
-        onSearchChange={setSearchTerm} // البحث التلقائي
+        onApply={() => loadApplications(filters)}
+        onSearchChange={setSearchTerm}
       />
 
-    
-
-        {/* Table container with scrollable wrapper */}
-        <div className="table-container">
-          {/* Only the table scrolls, not the footer */}
-          <div className="table-scroll-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>رقم الطلب</th>
-                  <th>بيانات الطالب</th>
-                  <th>الكلية</th>
-                  <th>المبلغ</th>
-                  <th>تاريخ الاعتماد</th>
-                  <th>حالة الطلب</th>
-                  <th>الإجراءات</th>
+      <div className="table-container">
+        <div className="table-scroll-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>رقم الطلب</th>
+                <th>بيانات الطالب</th>
+                <th>الكلية</th>
+                <th>المبلغ</th>
+                <th>تاريخ الاعتماد</th>
+                <th>حالة الطلب</th>
+                <th>الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedApps.map((app) => (
+                <tr key={app.id}>
+                  <td>{app.id}</td>
+                  <td>
+                    <div className="student-info">
+                      <div>{app.studentName}</div>
+                      <div className="secondary">الرقم: {app.requestNumber}</div>
+                    </div>
+                  </td>
+                  <td>{app.college}</td>
+                  <td className="amount">{app.amount}</td>
+                  <td>{app.date}</td>
+                  <td>
+                    <span
+                      className={`statusBadge ${
+                        app.status === "منتظر"          ? "statusPending"  :
+                        app.status === "موافقة مبدئية" ? "statusInitial"  :
+                        app.status === "مقبول"          ? "statusFinal"    :
+                        app.status === "مرفوض"          ? "statusRejected" :
+                        app.status === "تم الاستلام"   ? "statusReceived" : ""
+                      }`}
+                    >
+                      {app.status}
+                    </span>
+                  </td>
+                  <td>
+                    <button className="details" onClick={() => handleNavigate(app)}>
+                      التفاصيل
+                    </button>
+                  </td>
                 </tr>
-              </thead>
+              ))}
+              {paginatedApps.length === 0 && (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: "center", padding: "20px" }}>
+                    لا توجد بيانات مطابقة
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-              <tbody>
-                {paginatedApps.map((app) => (
-                  <tr key={app.id}>
-                    <td>{app.id}</td>
-
-                    <td>
-                      <div className="student-info">
-                        <div>{app.studentName}</div>
-                        <div className="secondary">الرقم: {app.requestNumber}</div>
-                      </div>
-                    </td>
-
-                    <td>{app.college}</td>
-                    <td className="amount">{app.amount}</td>
-                    <td>{app.date}</td>
-
-                    <td>
-                      <span
-                        className={`statusBadge ${
-                          app.status === "منتظر"
-                            ? "statusPending"
-                            : app.status === "موافقة مبدئية"
-                            ? "statusInitial"
-                            : app.status === "مقبول"
-                            ? "statusFinal"
-                            : app.status === "مرفوض"
-                            ? "statusRejected"
-                            : app.status === "تم الاستلام"
-                            ? "statusReceived"
-                            : ""
-                        }`}
-                      >
-                        {app.status}
-                      </span>
-                    </td>
-
-                    <td>
-                      <button className="details" onClick={() => handleNavigate(app)}>
-                        التفاصيل
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-
-                {paginatedApps.length === 0 && (
-                  <tr>
-                    <td colSpan={7} style={{ textAlign: "center", padding: "20px" }}>
-                      لا توجد بيانات مطابقة
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+        <div className="tableFooter">
+          <div className="footerLeft">
+            <strong>عرض</strong> {startIndex}–{endIndex} <strong>من</strong> {filteredApps.length}
           </div>
-
-          {/* Footer is OUTSIDE the scrollable wrapper */}
-          <div className="tableFooter">
-            <div className="footerLeft">
-              <strong>عرض</strong> {startIndex}–{endIndex} <strong>من</strong> {filteredApps.length}
-            </div>
-
-            <div className="footerRight">
-              <label>عدد العناصر في الصفحة:</label>
-
-              <select
-                value={rowsPerPage}
-                onChange={(e) => {
-                  setRowsPerPage(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-              >
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-              </select>
-
-              <div className="paginationButtons">
-                <button
-                  onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                  disabled={currentPage === 1}
-                >
-                  <ChevronRight size={18} />
-                </button>
-
-                <button
-                  onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                >
-                  <ChevronLeft size={18} />
-                </button>
-              </div>
+          <div className="footerRight">
+            <label>عدد العناصر في الصفحة:</label>
+            <select
+              value={rowsPerPage}
+              onChange={(e) => { setRowsPerPage(Number(e.target.value)); setCurrentPage(1); }}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+            </select>
+            <div className="paginationButtons">
+              <button onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1}>
+                <ChevronRight size={18} />
+              </button>
+              <button onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages}>
+                <ChevronLeft size={18} />
+              </button>
             </div>
           </div>
         </div>
       </div>
-    
+    </div>
   );
 }

@@ -27,9 +27,9 @@ export default function Tabs({ activeTab, setActiveTab, pendingCount }: Props) {
           onClick={() => setActiveTab("quality")}
         >
           <span className={styles.tabText}>أسر نوعية و أصدقاء البيئة</span>
-          {pendingCount && pendingCount > 0 ? (
+          {/* {pendingCount && pendingCount > 0 ? (
             <span className={styles.pendingBadge}>{pendingCount}</span>
-          ) : null}
+          ) : null} */}
         </button>
 
       </div>

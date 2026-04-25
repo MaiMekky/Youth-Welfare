@@ -59,16 +59,20 @@ const handleLogout = async () => {
   localStorage.clear();
 
   try {
-    await fetch("/api/logout", {
+    const res = await fetch("/api/logout", {
       method: "POST",
-      credentials: "include", // ← ensures cookies are sent/received
+      credentials: "include",
     });
+
+    if (!res.ok) throw new Error("Logout failed");
   } catch (err) {
     console.error("Logout API failed:", err);
+  } finally {
+    // Small delay to ensure Set-Cookie headers are processed by the browser
+    // before the navigation happens
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    window.location.replace("/");
   }
-
-  // Use ?logout=1 to bypass the middleware auto-redirect
-  window.location.replace("/?logout=1");
 };
   const nav = (path: string) => { router.push(path); setOpen(false); };
 

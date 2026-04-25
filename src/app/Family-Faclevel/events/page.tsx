@@ -14,6 +14,7 @@ interface Event {
   location: string;
   s_limit: number;
   type: string;
+  family_name: string;
 }
 
 export default function ActivitiesPage() {
@@ -82,6 +83,7 @@ export default function ActivitiesPage() {
                 location={event.location}
                 participantsLimit={event.s_limit}
                 type={event.type}
+                familyName={event.family_name}
               />
             ))}
           </div>

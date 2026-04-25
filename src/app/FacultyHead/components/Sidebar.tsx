@@ -29,7 +29,7 @@ export default function Sidebar({
   useEffect(() => {
     try {
       const u = localStorage.getItem("user");
-      if (u) setAdminInfo({ name: JSON.parse(u).name || "مدير النظام" });
+      if (u) setAdminInfo({ name: JSON.parse(u).name || "مدير الكلية" });
     } catch {}
   }, []);
 
@@ -75,7 +75,7 @@ export default function Sidebar({
             </div>
           </div>
           <h2 className="sidebar-title">جامعة العاصمة</h2>
-          <p className="sidebar-subtitle">مدير الكلية</p>
+         
           <button
             className="sidebar-close-btn"
             onClick={() => setIsOpen(false)}
@@ -88,7 +88,7 @@ export default function Sidebar({
         <div className="profile-card">
           <div className="profile-icon"><User size={22} /></div>
           <div className="admin-info">
-            <h3>دكتور/ {adminInfo.name || "المشرف العام"}</h3>
+            <h3>مدير الكلية/ {adminInfo.name || "المشرف العام"}</h3>
           </div>
         </div>
 

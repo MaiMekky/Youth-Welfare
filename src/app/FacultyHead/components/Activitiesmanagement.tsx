@@ -462,15 +462,11 @@ export default function ActivitiesManagement() {
           <div className={styles.toolbarControls}>
             <input
               className={styles.searchInput}
-              placeholder=" ابحث بالعنوان، الموقع، النوع…"
+              placeholder=" ابحث عن فعالية"
               value={search}
               onChange={e=>setSearch(e.target.value)}
             />
-            <select className={styles.filterSelect} value={filterType} onChange={e=>setFilterType(e.target.value)}>
-              <option value="all">كل الأنشطة</option>
-              <option value="داخلي">داخلي</option>
-              <option value="خارجي">خارجي</option>
-            </select>
+           
           </div>
         </div>
 

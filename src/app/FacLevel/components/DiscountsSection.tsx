@@ -23,10 +23,10 @@ export default function DiscountsSection() {
   const [error, setError] = useState<string | null>(null);
 
   const [discounts, setDiscounts] = useState<DiscountsState>({
-    books: ["200", "300", "400", "500", "700"],
-    distant: ["200", "300", "400", "500", "700"],
-    regular: ["200", "300", "400", "500", "700"],
-    full: ["200", "300", "400", "500", "700"],
+    books: [],
+    distant: [],
+    regular: [],
+    full: [],
   });
 
   const serverToLocal = (data: Record<string, unknown>): DiscountsState => {
@@ -78,10 +78,10 @@ export default function DiscountsSection() {
       const mapped = serverToLocal(serverDiscounts);
 
       setDiscounts({
-        books: mapped.books.length ? mapped.books : [""],
-        distant: mapped.distant.length ? mapped.distant : [""],
-        regular: mapped.regular.length ? mapped.regular : [""],
-        full: mapped.full.length ? mapped.full : [""],
+        books: mapped.books.length ? mapped.books : [],
+        distant: mapped.distant.length ? mapped.distant : [],
+        regular: mapped.regular.length ? mapped.regular : [],
+        full: mapped.full.length ? mapped.full : [],
       });
     } catch (err: unknown) {
       console.error("GET error:", err);
@@ -227,7 +227,7 @@ const handleSave = async () => {
             className={styles.editBtn}
             onClick={() => setIsEditing(true)}
           >
-            تعديل
+          {Object.values(discounts).every(arr => arr.length === 0 || arr.every(v => v === "")) ? "اضافة" : "تعديل"}
           </button>
         )}
 

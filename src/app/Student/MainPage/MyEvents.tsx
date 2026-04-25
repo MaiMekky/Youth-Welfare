@@ -399,7 +399,7 @@ export default function MyEvents() {
               ) : (
                 <div className="modal-result-content">
                   <div className="modal-icon-wrap modal-icon-trophy"><TrophyIcon /></div>
-                  <p className="modal-congrats">مبروك على مشاركتك! 🎉</p>
+                  <p className="modal-congrats">مبروك على مشاركتك! </p>
 
                   {resultModal.result?.rank && (
                     <div className="result-big-rank">

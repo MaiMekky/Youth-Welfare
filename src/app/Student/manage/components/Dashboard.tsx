@@ -169,7 +169,7 @@ const Dashboard: React.FC = () => {
         }
       );
       if (response.ok) {
-        showToast("تم نشر المحتوى بنجاح 🎉", "success");
+        showToast("تم نشر المحتوى بنجاح ", "success");
         setContentBody(""); setContentTitle(""); setShowCreateContentForm(false);
         setActiveTab("posts");
         setTimeout(() => setPostRefreshTrigger((p) => p + 1), 500);
@@ -206,7 +206,7 @@ const Dashboard: React.FC = () => {
       );
       const resData = await response.json();
       if (response.ok) {
-        showToast("تم إنشاء الفعالية بنجاح 🎉", "success");
+        showToast("تم إنشاء الفعالية بنجاح ", "success");
         setShowCreateActivityForm(false);
         setActivityData({ title:"",type:"",description:"",date:"",endDate:"",time:"",location:"",maxParticipants:"",cost:"",restrictions:"",reward:"",dept_id:"" });
         setActivityErrors({});

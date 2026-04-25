@@ -234,7 +234,7 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
       const data = await response.json();
       if (data.access) localStorage.setItem("access", data.access);
 
-      showNotification("تم إنشاء الحساب بنجاح 🎉", "success");
+      showNotification("تم إنشاء الحساب بنجاح ", "success");
       setTimeout(() => { onClose(); }, 1500);
     } catch (err) {
       console.error(err);

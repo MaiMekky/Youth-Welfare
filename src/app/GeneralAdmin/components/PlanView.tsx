@@ -1,10 +1,11 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
 import {
-  FileText, Download, Calendar, Building2,
-  RefreshCw, AlertCircle, Eye, Filter, CheckCircle,
+  FileText, Download,
+  RefreshCw, AlertCircle, Eye,
+  CheckCircle,
   XCircle, Clock, Layers, X, MapPin, Users, Tag,
-  DollarSign, BookOpen, ChevronRight, Info,
+  DollarSign, BookOpen, ChevronRight, Info, Building2,
 } from "lucide-react";
 import styles from "../Styles/Planview.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
@@ -78,21 +79,6 @@ function fmt(d?: string) {
   return new Date(d).toLocaleDateString("ar-EG", {
     year: "numeric", month: "2-digit", day: "2-digit",
   });
-}
-
-function statusBadgeClass(status?: string) {
-  const s = status?.trim() ?? "";
-  if (s === "مكتملة" || s === "مكتمل" || s === "complete") return styles.badgeComplete;
-  if (s === "مفقودة" || s === "مفقود" || s === "missing")  return styles.badgeMissing;
-  return styles.badgePending;
-}
-
-function statusLabel(status?: string) {
-  const s = status?.trim() ?? "";
-  if (s === "مكتملة" || s === "complete") return "مكتملة";
-  if (s === "مفقودة" || s === "missing")  return "مفقودة";
-  if (s) return s;
-  return "قيد المراجعة";
 }
 
 function planStatusBadgeClass(ps?: string) {
@@ -177,7 +163,7 @@ function PlanDetailsModal({
         ) : details ? (
           <div className={styles.modalBody}>
 
-            {/* Plan Meta Info — الكلية removed */}
+            {/* Plan Meta Info */}
             <div className={styles.planMetaGrid}>
               <div className={styles.planMetaItem}>
                 <span className={styles.planMetaLabel}>القسم</span>
@@ -356,14 +342,11 @@ function FacultyCard({ plan, onDownload, downloading, onView }: {
   onView: (plan: Plan) => void;
 }) {
   const isMissing = plan.status?.includes("مفقود") || plan.status === "missing";
-  const badgeCls  = statusBadgeClass(plan.status);
-  const label     = statusLabel(plan.status);
 
   return (
     <div className={styles.facultyCard}>
       <div className={styles.cardTop}>
         <h3 className={styles.facultyName}>{plan.faculty_name || plan.name}</h3>
-        <span className={`${styles.badge} ${badgeCls}`}>{label}</span>
       </div>
 
       <div className={styles.cardCounts}>
@@ -516,10 +499,6 @@ export default function PlanView() {
     return matchYear && matchFaculty && matchSearch;
   });
 
-  const currentYear = years.length > 0
-    ? years.sort().reverse()[0]
-    : `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`;
-
   return (
     <div className={styles.root}>
 
@@ -546,43 +525,21 @@ export default function PlanView() {
 
           {/* Stats row */}
           <div className={styles.statsRow}>
+
+            {/* إجمالي الخطط */}
             <div className={styles.statItem}>
               <div className={`${styles.statIconBox} ${styles.navy}`}>
                 <Layers size={22} />
               </div>
               <div className={styles.statContent}>
                 <div className={styles.statValue}>{totalPlans}</div>
-                <div className={styles.statTitle}>إجمالي الأقسام</div>
+                <div className={styles.statTitle}>إجمالي الخطط</div>
               </div>
             </div>
-            <div className={styles.statItem}>
-              <div className={`${styles.statIconBox} ${styles.green}`}>
-                <CheckCircle size={22} />
-              </div>
-              <div className={styles.statContent}>
-                <div className={styles.statValue}>{completePlans}</div>
-                <div className={styles.statTitle}>خطط نشطة</div>
-              </div>
-            </div>
-            <div className={styles.statItem}>
-              <div className={`${styles.statIconBox} ${styles.amber}`}>
-                <Clock size={22} />
-              </div>
-              <div className={styles.statContent}>
-                <div className={styles.statValue}>{missingPlans}</div>
-                <div className={styles.statTitle}>خطط غير نشطة</div>
-              </div>
-            </div>
-            {/* <div className={styles.statItem}>
-              <div className={`${styles.statIconBox} ${styles.blue}`}>
-                <Calendar size={22} />
-              </div> */}
-              {/* <div className={styles.statContent}>
-                <div className={`${styles.statValue} ${styles.yearValue}`}>{currentYear}</div>
-                <div className={styles.statTitle}>العام الدراسي</div>
-              </div> */}
-            {/* </div> */}
-          </div>
+
+           
+
+          </div>{/* ← statsRow closes here */}
 
           {/* Section header */}
           <div className={styles.sectionHeader}>
@@ -594,7 +551,7 @@ export default function PlanView() {
               <input
                 className={styles.filterSelect}
                 style={{ minWidth: 200 }}
-                placeholder="ابحث باسم الكلية أو الخطة…"
+                placeholder="ابحث باسم الخطة…"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
@@ -624,7 +581,8 @@ export default function PlanView() {
               <button className={styles.filterBtn} onClick={fetchPlans}>
                 <RefreshCw size={15} /> تحديث
               </button>
-            </div>          </div>
+            </div>
+          </div>
 
           {(facultyFilter !== "all" || yearFilter !== "all" || search) && (
             <p className={styles.resultsCount}>

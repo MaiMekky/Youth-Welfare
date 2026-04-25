@@ -303,3 +303,24 @@
 .sidebar-close-btn {
   display: flex !important;
 }
+.hdr-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(185,28,28,0.12);
+  border: 1px solid rgba(185,28,28,0.35);
+  color: #fca5a5;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.hdr-logout-btn:hover {
+  background: rgba(185,28,28,0.25);
+  border-color: rgba(185,28,28,0.6);
+  transform: translateY(-1px);
+}

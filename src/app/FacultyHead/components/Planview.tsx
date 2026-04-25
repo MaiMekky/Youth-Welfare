@@ -369,9 +369,9 @@ export default function PlanView() {
       a.download = `${plan.name}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
-      showToast("✅ تم تحميل الخطة بنجاح");
+      showToast(" تم تحميل الخطة بنجاح");
     } catch {
-      showToast("⚠️ فشل تحميل الملف، حاول مجدداً");
+      showToast(" فشل تحميل الملف، حاول مجدداً");
     } finally {
       setDownloadingId(null);
     }
@@ -417,30 +417,24 @@ export default function PlanView() {
       {activeTab === "plans" && (
         <div className={styles.sectionCard}>
 
-          {/* Stat cards */}
-          <div className={styles.statsRow}>
-            <div className={`${styles.statCard} ${styles.blue}`}>
-              <div className={styles.statIcon}><Layers size={20} /></div>
-              <div className={styles.statBody}>
-                <div className={styles.statNum}>{plans.length}</div>
-                <div className={styles.statLabel}>إجمالي الخطط</div>
-              </div>
-            </div>
-            <div className={`${styles.statCard} ${styles.gold}`}>
-              <div className={styles.statIcon}><Building2 size={20} /></div>
-              <div className={styles.statBody}>
-                <div className={styles.statNum}>{totalFaculties}</div>
-                <div className={styles.statLabel}>الكليات المشاركة</div>
-              </div>
-            </div>
-            <div className={`${styles.statCard} ${styles.teal}`}>
-              <div className={styles.statIcon}><Hash size={20} /></div>
-              <div className={styles.statBody}>
-                <div className={styles.statNum}>{totalEvents}</div>
-                <div className={styles.statLabel}>إجمالي الفعاليات</div>
-              </div>
-            </div>
-          </div>
+       {/* Stat cards */}
+<div className={styles.statsRow}>
+  <div className={`${styles.statCard} ${styles.blue}`}>
+    <div className={styles.statIcon}><Layers size={20} /></div>
+    <div className={styles.statBody}>
+      <div className={styles.statNum}>{plans.length}</div>
+      <div className={styles.statLabel}>إجمالي الخطط</div>
+    </div>
+  </div>
+
+  <div className={`${styles.statCard} ${styles.teal}`}>
+    <div className={styles.statIcon}><Hash size={20} /></div>
+    <div className={styles.statBody}>
+      <div className={styles.statNum}>{totalEvents}</div>
+      <div className={styles.statLabel}>إجمالي الفعاليات</div>
+    </div>
+  </div>
+</div>
 
           {/* Toolbar */}
           <div className={styles.toolbar}>

@@ -157,12 +157,7 @@ export default function DepartmentsSection() {
   return (
     <section className={styles.section}>
 
-      {/* Badge */}
-      <div className={styles.badge}>
-        <span className={styles.badgeDot} />
-        <span className={styles.badgeText}>الإدارات الفرعية</span>
-      </div>
-
+    
       {/* Title */}
       <h2 className={styles.title}>
         الإدارات <span className={styles.titleAccent}>الحالية</span>

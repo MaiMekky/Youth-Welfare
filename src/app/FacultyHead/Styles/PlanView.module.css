@@ -73,7 +73,7 @@
 /* ── Stat Cards ── */
 .statsRow {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 14px;
   padding: 18px 18px 0;
 }
@@ -102,7 +102,6 @@
 }
 
 .statCard.blue  .statIcon { background: rgba(255,255,255,0.15); color: #fff; }
-.statCard.gold  .statIcon { background: #fff; color: #D97706; box-shadow: 0 0 0 2px #FDE68A; }
 .statCard.teal  .statIcon { background: #fff; color: #0D9488; box-shadow: 0 0 0 2px #99F6E4; }
 
 .statBody { text-align: right; }

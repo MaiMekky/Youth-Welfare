@@ -99,42 +99,15 @@ const handleLogout = async () => {
           </div>
         </div>
 
-        {/* Actions */}
+        {/* ── Actions ── */}
         <div className="hdr-actions">
-          <div className="hdr-user-wrap" ref={menuRef}>
-            <button
-              className={`hdr-user-btn${menuOpen ? " hdr-user-open" : ""}`}
-              onClick={() => setMenuOpen(o => !o)}
-              aria-expanded={menuOpen}
-              aria-haspopup="true"
-            >
-              <div className="hdr-user-info">
-                <span className="hdr-user-name">مسؤول/ {adminInfo.name}</span>
-                <span className="hdr-user-role">المدير العام</span>
-              </div>
-              <ChevronDown size={14} className="hdr-chevron" />
-            </button>
-
-            {menuOpen && (
-              <div className="hdr-dropdown" role="menu">
-                <div className="hdr-dropdown-header">
-                  <div className="hdr-dd-info">
-                    <p className="hdr-dd-name">{adminInfo.name}</p>
-                    <p className="hdr-dd-email">{adminInfo.email}</p>
-                  </div>
-                </div>
-                <div className="hdr-dropdown-divider" />
-                <button
-                  className="hdr-dd-item hdr-dd-logout"
-                  onClick={handleLogout}
-                  role="menuitem"
-                >
-                  <LogOut size={14} />
-                  <span>تسجيل الخروج</span>
-                </button>
-              </div>
-            )}
-          </div>
+          <button
+            className="hdr-logout-btn"
+            onClick={handleLogout}
+          >
+            <LogOut size={16} />
+            <span>تسجيل الخروج</span>
+          </button>
         </div>
 
       </div>

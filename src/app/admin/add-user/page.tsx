@@ -38,27 +38,27 @@ function AddUserContent() {
     "super_admin":         "مشرف النظام",
   };
   
-  const validatePassword = (password: string) => {
-  const minLength = 8;
-  const hasUpper  = /[A-Z]/.test(password);
-  const hasLower  = /[a-z]/.test(password);
-  const hasNumber = /[0-9]/.test(password);
+//   const validatePassword = (password: string) => {
+//   const minLength = 8;
+//   const hasUpper  = /[A-Z]/.test(password);
+//   const hasLower  = /[a-z]/.test(password);
+//   const hasNumber = /[0-9]/.test(password);
 
-  if (password.length < minLength) {
-    return "كلمة المرور يجب أن تكون 8 أحرف على الأقل";
-  }
-  if (!hasUpper) {
-    return "يجب أن تحتوي على حرف كبير واحد على الأقل";
-  }
-  if (!hasLower) {
-    return "يجب أن تحتوي على حرف صغير واحد على الأقل";
-  }
-  if (!hasNumber) {
-    return "يجب أن تحتوي على رقم واحد على الأقل";
-  }
+//   if (password.length < minLength) {
+//     return "كلمة المرور يجب أن تكون 8 أحرف على الأقل";
+//   }
+//   if (!hasUpper) {
+//     return "يجب أن تحتوي على حرف كبير واحد على الأقل";
+//   }
+//   if (!hasLower) {
+//     return "يجب أن تحتوي على حرف صغير واحد على الأقل";
+//   }
+//   if (!hasNumber) {
+//     return "يجب أن تحتوي على رقم واحد على الأقل";
+//   }
 
-  return null; // valid
-};
+//   return null; // valid
+// };
 
 const validateEmail = (email: string) => {
   const normalized = email.trim().toLowerCase();
@@ -205,22 +205,22 @@ const handleSubmit = async (e: React.FormEvent) => {
       showToast(emailError, "error");
       return;
     }
-    // ✅ PASSWORD VALIDATION LOGIC
-    if (!isEdit) {
-      // CREATE → required
-      const error = validatePassword(formData.password);
-      if (error) {
-        showToast(error, "error");
-        return;
-      }
-    } else if (isEdit && formData.password) {
-      // EDIT → only if user typed password
-      const error = validatePassword(formData.password);
-      if (error) {
-        showToast(error, "error");
-        return;
-      }
-    }
+    // // ✅ PASSWORD VALIDATION LOGIC
+    // if (!isEdit) {
+    //   // CREATE → required
+    //   const error = validatePassword(formData.password);
+    //   if (error) {
+    //     showToast(error, "error");
+    //     return;
+    //   }
+    // } else if (isEdit && formData.password) {
+    //   // EDIT → only if user typed password
+    //   const error = validatePassword(formData.password);
+    //   if (error) {
+    //     showToast(error, "error");
+    //     return;
+    //   }
+   // }
 
     const url    = isEdit
       ? `${getBaseUrl()}/api/auth/admin_management/${admin_id}/`

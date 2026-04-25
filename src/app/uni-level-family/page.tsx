@@ -15,6 +15,65 @@ const TAB_STORAGE_KEY = "families_active_tab";
 
 type TabType = "central" | "quality";
 
+/* ── English → Arabic error translations ── */
+const ERROR_TRANSLATIONS: Record<string, string> = {
+  "Cannot activate. There are members still pending review":
+    "لا يمكن تفعيل الأسرة — يوجد أعضاء لا يزالون قيد المراجعة",
+  "Family does not meet minimum member requirement":
+    "الأسرة لا تستوفي الحد الأدنى لعدد الأعضاء",
+  "Not enough members":
+    "عدد الأعضاء غير كافٍ",
+  "Insufficient number of accepted members to activate the family":
+    "عدد الأعضاء المقبولين غير كافٍ لتفعيل الأسرة",
+  "Family is already approved":
+    "الأسرة مقبولة بالفعل",
+  "Family is already rejected":
+    "الأسرة مرفوضة بالفعل",
+  "Family not found":
+    "الأسرة غير موجودة",
+  "Unauthorized":
+    "غير مصرح لك بهذا الإجراء",
+  "Permission denied":
+    "ليس لديك صلاحية لتنفيذ هذا الإجراء",
+  "Authentication credentials were not provided":
+    "لم يتم توفير بيانات المصادقة",
+  "Invalid token":
+    "جلسة العمل غير صالحة، يرجى تسجيل الدخول مجدداً",
+};
+
+function translateError(msg: string): string {
+  // Exact match first
+  if (ERROR_TRANSLATIONS[msg]) return ERROR_TRANSLATIONS[msg];
+  // Partial / case-insensitive match fallback
+  const key = Object.keys(ERROR_TRANSLATIONS).find((k) =>
+    msg.toLowerCase().includes(k.toLowerCase())
+  );
+  return key ? ERROR_TRANSLATIONS[key] : msg;
+}
+
+/* ── Parse API error body into a human-readable string, then translate ── */
+async function parseApiError(response: Response): Promise<string> {
+  try {
+    const data = await response.json();
+    let raw = "";
+    if (typeof data === "string") raw = data;
+    else if (data.detail)  raw = data.detail;
+    else if (data.message) raw = data.message;
+    else if (data.error)   raw = data.error;
+    else {
+      // Flatten Django field-level errors: { field: ["msg1", "msg2"] }
+      const messages = Object.values(data)
+        .flat()
+        .filter((v): v is string => typeof v === "string");
+      raw = messages.join(" | ");
+    }
+    return raw ? translateError(raw) : `خطأ ${response.status}`;
+  } catch {
+    // body wasn't JSON — fall through
+  }
+  return `خطأ ${response.status}${response.statusText ? `: ${response.statusText}` : ""}`;
+}
+
 function PageContent() {
   const searchParams = useSearchParams();
 
@@ -46,7 +105,7 @@ function PageContent() {
   const [loading, setLoading]                       = useState<boolean>(false);
   const [toast, setToast]                           = useState<{ message: string; type: "success" | "error" | "warning" } | null>(null);
 
-  /* Reset filters when switching tabs — only reset readyOnly if it differs to avoid extra fetch */
+  /* Reset filters when switching tabs */
   useEffect(() => {
     setSelectedFaculty("الكل");
     setSelectedFamilyType("all");
@@ -84,7 +143,7 @@ function PageContent() {
     fetchFamilies(readyOnly);
   }, [readyOnly, fetchFamilies]);
 
-  /* ── readyOnly handler — only updates state, effect handles fetch ── */
+  /* ── readyOnly handler ── */
   const handleReadyChange = (value: "all" | "true" | "false") => {
     setReadyOnly(value);
   };
@@ -93,7 +152,7 @@ function PageContent() {
   const centralFamilies = useMemo(() => families.filter((f) => f.type === "مركزية"), [families]);
   const qualityFamilies = useMemo(() => families.filter((f) => f.type !== "مركزية"), [families]);
 
-  /* Client-side filters (faculty, type, status) */
+  /* Client-side filters */
   const filteredQualityFamilies = useMemo(() => {
     let filtered = qualityFamilies;
     if (selectedFaculty !== "الكل")   filtered = filtered.filter((f) => f.faculty_name === selectedFaculty);
@@ -122,11 +181,25 @@ function PageContent() {
   /* ── Toast ── */
   const showToast = (message: string, type: "success" | "error" | "warning") => {
     setToast({ message, type });
-    setTimeout(() => setToast(null), 4000);
+    setTimeout(() => setToast(null), 5000);
   };
 
-  /* ── Approve / Reject ── */
+  /* ── Approve ── */
   async function handleApproveFamily(familyId: number) {
+    // Pre-flight: check member count against min_limit before hitting the API
+    const family = families.find((f) => f.family_id === familyId);
+    if (family) {
+      const memberCount = parseInt(String(family.member_count), 10);
+      const minLimit    = Number(family.min_limit);
+      if (!isNaN(memberCount) && !isNaN(minLimit) && memberCount < minLimit) {
+        showToast(
+          `لا يمكن قبول الأسرة — عدد الأعضاء الحالي (${memberCount}) أقل من الحد الأدنى المطلوب (${minLimit} أعضاء)`,
+          "error"
+        );
+        return;
+      }
+    }
+
     try {
       const token = localStorage.getItem("access");
       const response = await authFetch(`${API_URL}/family/super_dept/${familyId}/final_approve/`, {
@@ -134,14 +207,24 @@ function PageContent() {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({}),
       });
-      if (!response.ok) throw new Error("فشل الموافقة");
-      setFamilies((prev) => prev.map((f) => f.family_id === familyId ? { ...f, status: "مقبول" } : f));
+
+      if (!response.ok) {
+        const reason = await parseApiError(response);
+        showToast(`فشل قبول الأسرة — ${reason}`, "error");
+        return;
+      }
+
+      setFamilies((prev) =>
+        prev.map((f) => (f.family_id === familyId ? { ...f, status: "مقبول" } : f))
+      );
       showToast("تم قبول الأسرة بنجاح", "success");
-    } catch {
-      showToast("فشل قبول الأسرة", "error");
+    } catch (err) {
+      const msg = err instanceof Error ? translateError(err.message) : "تعذّر الاتصال بالخادم";
+      showToast(`فشل قبول الأسرة — ${msg}`, "error");
     }
   }
 
+  /* ── Reject ── */
   async function handleRejectFamily(familyId: number) {
     try {
       const token = localStorage.getItem("access");
@@ -150,11 +233,20 @@ function PageContent() {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({}),
       });
-      if (!response.ok) throw new Error("فشل الرفض");
-      setFamilies((prev) => prev.filter((f) => f.family_id !== familyId));
+
+      if (!response.ok) {
+        const reason = await parseApiError(response);
+        showToast(`فشل رفض الأسرة — ${reason}`, "error");
+        return;
+      }
+
+      setFamilies((prev) =>
+        prev.map((f) => (f.family_id === familyId ? { ...f, status: "مرفوض" } : f))
+      );
       showToast("تم رفض الأسرة", "warning");
-    } catch {
-      showToast("فشل رفض الأسرة", "error");
+    } catch (err) {
+      const msg = err instanceof Error ? translateError(err.message) : "تعذّر الاتصال بالخادم";
+      showToast(`فشل رفض الأسرة — ${msg}`, "error");
     }
   }
 

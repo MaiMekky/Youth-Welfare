@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import Footer from "@/app/FacLevel/components/Footer";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 const API_URL = getBaseUrl();
 
@@ -268,36 +269,13 @@ export default function EventDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const id = String(params?.id ?? ""); // eventId
-
+  const { showToast } = useToast();   
   const [event, setEvent] = useState<ApiEventDetails | null>(null);
   const [loadingEvent, setLoadingEvent] = useState(false);
 
   const [rows, setRows] = useState<StudentRow[]>([]);
   const [busy, setBusy] = useState(false);
 
-  /* ===================== Toast Notification (same style) ===================== */
-  const [notification, setNotification] = useState<{
-    show: boolean;
-    message: string;
-    type: "success" | "error" | "warning";
-  }>({ show: false, message: "", type: "success" });
-
-  const toastTimerRef = useRef<number | null>(null);
-
-  const showToast = (message: string, type: "success" | "error" | "warning" = "success") => {
-    if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
-    setNotification({ show: true, message, type });
-    toastTimerRef.current = window.setTimeout(() => {
-      setNotification({ show: false, message: "", type: "success" });
-      toastTimerRef.current = null;
-    }, 2500);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
-    };
-  }, []);
 
   /* ===================== Images ===================== */
   const [images, setImages] = useState<ApiEventImage[]>([]);
@@ -850,21 +828,6 @@ const uploadImages = async (files: FileList | null) => {
 
   return (
     <div className={styles.page}>
-      {/* ✅ Toast notification (same style you gave me) */}
-      {notification.show && (
-        <div
-          className={`${styles.notification} ${
-            notification.type === "success"
-              ? styles.success
-              : notification.type === "error"
-              ? styles.error
-              : styles.warning
-          }`}
-        >
-          {notification.message}
-        </div>
-      )}
-
       <div className={styles.container}>
         <div className={styles.topBar}>
           <div className={styles.headText}>

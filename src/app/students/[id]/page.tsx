@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./studentDetails.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 // const rejectionReasons = [
 //   { id: 1, text: "إزعاج أو تكرار التقديم بشكل غير مبرر" },
 //   { id: 2, text: "المستندات المرفوعة غير واضحة أو غير صحيحة" },
@@ -16,18 +17,12 @@ import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 export default function StudentDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
+  const { showToast } = useToast();
 
   const [data, setData] = useState<Record<string, unknown> | null>(null);
   const [docs, setDocs] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const [notification, setNotification] = useState<{ message: string; type: string } | null>(null);
   const [showRejectModal, setShowRejectModal] = useState(false);
-  // const [selectedReason, setSelectedReason] = useState<number | null>(null);
-  const showNotification = (message: string, type: string) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 2500);
-  };
 
   // ====== جلب بيانات الطلب ======
   useEffect(() => {
@@ -114,10 +109,10 @@ const handleApprove = async () => {
 
     // تحديث الحالة في الواجهة بعد نجاح الطلب
     setData((prev: Record<string, unknown> | null) => ({ ...prev, req_status: "مقبول" }));
-    showNotification("✅ تم قبول الطالب بنجاح", "success");
+    showToast("✅ تم قبول الطالب بنجاح", "success");
   } catch (error) {
     console.error(error);
-    showNotification("❌ فشل قبول الطالب", "error");
+    showToast("❌ فشل قبول الطالب", "error");
   }
 };
 
@@ -151,11 +146,11 @@ const handleReject = async () => {
     setShowRejectModal(false);
     // setSelectedReason(null);
 
-    showNotification("❌ تم رفض الطالب بنجاح", "error");
+    showToast("❌ تم رفض الطالب بنجاح", "error");
 
   } catch (error) {
     console.error(error);
-    showNotification("❌ فشل رفض الطالب", "error");
+    showToast("❌ فشل رفض الطالب", "error");
   }
 };
 
@@ -166,16 +161,6 @@ console.log("docs: ", docs)
 
   return (
     <div className={styles.container}>
-      {/* الإشعار */}
-      {notification && (
-        <div
-          className={`${styles.notification} ${
-            notification.type === "success" ? styles.success : styles.error
-          }`}
-        >
-          {notification.message}
-        </div>
-      )}
 
       <div className={styles.contentCard}>
         <button className={styles.backBtn} onClick={() => router.push('/SuperAdmin')}>

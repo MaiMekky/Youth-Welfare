@@ -5,6 +5,7 @@ import styles from './details.module.css';
 import { useParams, useRouter } from "next/navigation";
 import Footer from "@/app/FacLevel/components/Footer";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 interface FamilyData {
   name: string;
@@ -40,6 +41,7 @@ export default function FamilyDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
+  const { showToast } = useToast();
 
   const [familyData, setFamilyData] = useState<FamilyData>({
     name: '',
@@ -56,17 +58,8 @@ export default function FamilyDetailsPage() {
 
   const [activitiesData, setActivitiesData] = useState<Activity[]>([]);
   const [studentsData, setStudentsData] = useState<Student[]>([]);
-  const [notification, setNotification] = useState<{
-    message: string;
-    type: "success" | "error";
-  } | null>(null);
   const [nid, setNid] = useState("");
   const [adding, setAdding] = useState(false);
-
-const showNotification = (message: string, type: "success" | "error") => {
-  setNotification({ message, type });
-  setTimeout(() => setNotification(null), 2500);
-};
 
 useEffect(() => {
   if (!id) return;
@@ -130,7 +123,7 @@ useEffect(() => {
       });
     } catch (err) {
       console.error(err);
-      showNotification("❌ حدث خطأ أثناء جلب البيانات", "error");
+      showToast("❌ حدث خطأ أثناء جلب البيانات", "error");
     }
   };
 
@@ -163,18 +156,18 @@ useEffect(() => {
     }));
 
     
-    showNotification("✅ تم حذف الطالب بنجاح", "success");
+    showToast("✅ تم حذف الطالب بنجاح", "success");
 
   } catch (err) {
     console.error(err);
 
    
-    showNotification("❌ فشل حذف الطالب", "error");
+    showToast("❌ فشل حذف الطالب", "error");
   }
 };
 const handleAddMember = async () => {
   if (!nid.trim()) {
-    showNotification("❌ أدخل الرقم القومي أولاً", "error");
+    showToast("❌ أدخل الرقم القومي أولاً", "error");
     return;
   }
 
@@ -217,10 +210,10 @@ const handleAddMember = async () => {
 
     setNid("");
 
-    showNotification("✅ تم إضافة الطالب بنجاح", "success");
+    showToast("✅ تم إضافة الطالب بنجاح", "success");
   } catch (err) {
     console.error(err);
-    showNotification("❌ فشل إضافة الطالب", "error");
+    showToast("❌ فشل إضافة الطالب", "error");
   } finally {
     setAdding(false);
   }
@@ -286,27 +279,15 @@ const handleExport = async () => {
     link.remove();
     window.URL.revokeObjectURL(url);
 
-    showNotification("✅ تم تصدير ملف PDF بنجاح", "success");
+    showToast("✅ تم تصدير ملف PDF بنجاح", "success");
   } catch (error) {
     console.error(error);
-    showNotification("❌ فشل تصدير ملف PDF", "error");
+    showToast("❌ فشل تصدير ملف PDF", "error");
   }
 };
 
   return (
     <>
-        {notification && (
-        <div
-          className={`${styles.notification} ${
-            notification.type === "success"
-              ? styles.success
-              : styles.error
-          }`}
-        >
-          {notification.message}
-        </div>
-      )}
-
       <div className={styles.detailsPage}>
         <header className={styles.detailsHeader}>
           <h1 className={styles.detailsTitle}>تفاصيل الأسرة: {familyData.name}</h1>

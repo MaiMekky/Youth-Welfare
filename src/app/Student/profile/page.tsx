@@ -7,37 +7,7 @@ import ProfileDetailsSection from "./components/ProfileDetailsSection";
 import type { StudentProfile, StudentProfileAPIResponse, UpdateProfileRequest } from "./types";
 import "../styles/profile.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
-
-/* ── Toast ──────────────────────────────────────────────────── */
-function Toast({
-  message,
-  type,
-  onDone,
-}: {
-  message: string;
-  type: "success" | "error";
-  onDone: () => void;
-}) {
-  useEffect(() => {
-    const t = setTimeout(onDone, 3200);
-    return () => clearTimeout(t);
-  }, [onDone]);
-
-  return (
-    <div className={`profile-toast profile-toast--${type}`} dir="rtl">
-      {type === "success" ? (
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-      ) : (
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
-        </svg>
-      )}
-      <span>{message}</span>
-    </div>
-  );
-}
+import { useToast } from "@/app/context/ToastContext";
 
 /* ── API → UI mapper ────────────────────────────────────────── */
 function mapApiToProfile(
@@ -72,12 +42,7 @@ export default function ProfilePage() {
   const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
-
-  const showToast = useCallback(
-    (message: string, type: "success" | "error") => setToast({ message, type }),
-    []
-  );
+  const { showToast } = useToast();
 
   /* ── fetch blob image ── */
   const fetchProfileImage = useCallback(async (studentId: number): Promise<string> => {
@@ -245,13 +210,6 @@ export default function ProfilePage() {
 
   return (
     <div className="profile-page">
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onDone={() => setToast(null)}
-        />
-      )}
       <ProfileHeader onEditProfile={() => setIsEditing(true)} />
       <ProfileSummaryCard
         profileData={profileData}

@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import styles from "../Styles/Planview.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 interface Plan {
   plan_id: number;
@@ -419,6 +420,7 @@ function FacultyCard({ plan, onDownload, downloading, onView }: {
 }
 
 export default function PlanView() {
+  const { showToast } = useToast();
   const [activeTab, setActiveTab]         = useState<"plans" | "reports">("plans");
   const [plans, setPlans]                 = useState<Plan[]>([]);
   const [loading, setLoading]             = useState(true);
@@ -427,13 +429,7 @@ export default function PlanView() {
   const [facultyFilter, setFacultyFilter] = useState("all");
   const [search, setSearch]               = useState("");
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
-  const [toastMsg, setToastMsg]           = useState("");
   const [viewingPlan, setViewingPlan]     = useState<Plan | null>(null);
-
-  const showToast = (msg: string) => {
-    setToastMsg(msg);
-    setTimeout(() => setToastMsg(""), 3500);
-  };
 
   const fetchPlans = useCallback(async () => {
     try {
@@ -624,8 +620,6 @@ export default function PlanView() {
           onClose={() => setViewingPlan(null)}
         />
       )}
-
-      {toastMsg && <div className={styles.toast}>{toastMsg}</div>}
     </div>
   );
 }

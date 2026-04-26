@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Tabs from './Tabs';
 import styles from './deatails.module.css';
 import { useRouter, useParams } from 'next/navigation';
+import { useToast } from '@/app/context/ToastContext';
 type TabId = 'members' | 'events';
 import { useSearchParams } from "next/navigation";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
@@ -244,7 +245,7 @@ export default function FamilyDetailsPage() {
   const [familyData, setFamilyData] = useState<FamilyData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [alert, setAlert] = useState<{ message: string; type: 'success' | 'error' | 'warning' | 'info' } | null>(null);
+  const { showToast } = useToast();
   
   const router = useRouter();
   const params = useParams();
@@ -298,7 +299,7 @@ export default function FamilyDetailsPage() {
   }, [familyId]);
 
   const showAlert = (message: string, type: 'success' | 'error' | 'warning' | 'info') => {
-    setAlert({ message, type });
+    showToast(message, type);
   };
 
   /* ── Update a single member's status in local state ── */
@@ -460,15 +461,6 @@ export default function FamilyDetailsPage() {
 
   return (
     <div className={styles.pageContainer}>
-      {/* Custom Alert */}
-      {alert && (
-        <CustomAlert
-          message={alert.message}
-          type={alert.type}
-          onClose={() => setAlert(null)}
-        />
-      )}
-
       {/* Header Section */}
       <div className={styles.header}>
         <button

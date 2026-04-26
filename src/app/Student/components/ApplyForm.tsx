@@ -3,14 +3,14 @@
 import React, { useState } from "react";
 import "../styles/applyForm.css";
 import ApplicationDetailsForm from "./ApplicationDetailsForm";
+import { useToast } from "@/app/context/ToastContext";
 
 export default function ApplyForm({ onNavigateToRequests }: { onNavigateToRequests: () => void }) {
   const [showForm, setShowForm] = useState(false);
-   const [notification, setNotification] = useState<{ message: string; type: string } | null>(null);
+  const { showToast } = useToast();
 
   const handleNotify = (message: string, type: "success" | "warning" | "error") => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3500);
+    showToast(message, type);
   };
   const handleSuccess = () => {
     onNavigateToRequests();
@@ -51,29 +51,6 @@ export default function ApplyForm({ onNavigateToRequests }: { onNavigateToReques
   />
   
 )}
-{notification && (
-  <div
-    className={`notification ${notification.type}`}
-    style={{
-      position: "fixed",
-      top: "20px",
-      right: "20px",
-      padding: "12px 20px",
-      borderRadius: "8px",
-      color: "#fff",
-      backgroundColor:
-        notification.type === "success"
-          ? "#22c55e"
-          : notification.type === "error"
-          ? "#ef4444"
-          : "#facc15",
-      zIndex: 9999,
-    }}
-  >
-    {notification.message}
-  </div>
-)}
-
 
     </div>
   );

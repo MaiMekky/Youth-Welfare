@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import styles from "./requestDetails.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 export default function RequestDetailsPage() {
   const { id } = useParams();

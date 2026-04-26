@@ -10,6 +10,7 @@ import {
 import SemesterReports from "./SemesterReports";
 import styles from "../Styles/PlanView.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 interface Plan {
   plan_id: number;
@@ -305,6 +306,7 @@ function PlanDetailsModal({ planId, planName, onClose }: {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function PlanView() {
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<"plans" | "reports">("plans");
 
   // ── Plans state ──
@@ -314,17 +316,11 @@ export default function PlanView() {
   const [search, setSearch]               = useState("");
   const [currentPage, setCurrentPage]     = useState(1);
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
-  const [toastMsg, setToastMsg]           = useState("");
 
   // ── Detail Modal state ──
   const [detailPlan, setDetailPlan] = useState<{ id: number; name: string } | null>(null);
 
   const rowsPerPage = 8;
-
-  const showToast = (msg: string) => {
-    setToastMsg(msg);
-    setTimeout(() => setToastMsg(""), 3500);
-  };
 
   // ── Fetch plans ──
   const fetchPlans = useCallback(async () => {
@@ -360,9 +356,9 @@ export default function PlanView() {
       a.download = `${plan.name}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
-      showToast(" تم تحميل الخطة بنجاح");
+      showToast(" تم تحميل الخطة بنجاح", "success");
     } catch {
-      showToast(" فشل تحميل الملف، حاول مجدداً");
+      showToast(" فشل تحميل الملف، حاول مجدداً", "error");
     } finally {
       setDownloadingId(null);
     }
@@ -560,9 +556,6 @@ export default function PlanView() {
           onClose={() => setDetailPlan(null)}
         />
       )}
-
-      {/* ── Toast ── */}
-      {toastMsg && <div className={styles.toast}>{toastMsg}</div>}
     </div>
   );
 }

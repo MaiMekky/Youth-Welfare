@@ -9,6 +9,7 @@ import { EventItem, ChipVariant } from "./component/EventCard";
 import { useRouter } from "next/navigation";
 import { Plus, CalendarX } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 const API_URL = getBaseUrl();
 
 type ApiEvent = {
@@ -123,26 +124,20 @@ function toEventItem(e: ApiEvent): EventItem {
   };
 }
 
-type NotifType = "success" | "error" | "warning";
 type Faculty = { faculty_id: number; name: string };
 
 export default function Page() {
   const router = useRouter();
+  const { showToast } = useToast();
   const goCreate = () => router.push("/uni-level-activities/create");
 
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [faculties, setFaculties] = useState<Faculty[]>([]);
-  const [notification, setNotification] = useState<{ message: string; type: NotifType } | null>(null);
-
-  const showNotification = (message: string, type: NotifType) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 2500);
-  };
 
   const fetchFaculties = async () => {
     const res = await apiFetch<Faculty[]>("/api/family/faculties/", { method: "GET" });
-    if (!res.ok) { showNotification("فشل تحميل الكليات", "error"); return; }
+    if (!res.ok) { showToast("فشل تحميل الكليات", "error"); return; }
     setFaculties(res.data);
   };
 
@@ -150,7 +145,7 @@ export default function Page() {
     setLoading(true);
     const res = await apiFetch<ApiEvent[]>("/api/event/get-events/", { method: "GET" });
     setLoading(false);
-    if (!res.ok) { showNotification(res.message || "فشل تحميل الفعاليات", "error"); return; }
+    if (!res.ok) { showToast(res.message || "فشل تحميل الفعاليات", "error"); return; }
     const list = Array.isArray(res.data) ? res.data : [];
     setEvents(list.map((e) => toEventItem(e)));
   };
@@ -176,18 +171,13 @@ export default function Page() {
   const onDelete = async (id: number) => {
     const prev = events;
     const res = await apiFetch<Record<string, unknown>>(`/api/event/get-events/${id}/`, { method: "DELETE" });
-    if (!res.ok) { setEvents(prev); showNotification(res.message || "فشل الغاء الفعالية", "error"); return; }
-    showNotification("✅ تم الغاء الفعالية بنجاح", "success");
+    if (!res.ok) { setEvents(prev); showToast(res.message || "فشل الغاء الفعالية", "error"); return; }
+    showToast("✅ تم الغاء الفعالية بنجاح", "success");
     await fetchEvents();
   };
 
   return (
     <div className={styles.page}>
-      {notification && (
-        <div className={`${styles.notification} ${styles[notification.type]}`}>
-          {notification.message}
-        </div>
-      )}
 
       <div className={styles.container}>
         <div className={styles.header}>

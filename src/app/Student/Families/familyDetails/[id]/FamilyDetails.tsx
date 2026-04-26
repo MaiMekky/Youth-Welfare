@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import "./FamilyDetails.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -186,24 +187,6 @@ function getStatusConfig(status: string | null | undefined): StatusConfig {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function Notification({ notification, onClose }: {
-  notification: NotificationType;
-  onClose: () => void;
-}) {
-  if (!notification.show) return null;
-  return (
-    <div className={`notif notif-${notification.type}`}>
-      <div className="notif-inner">
-        <span className="notif-icon">
-          {notification.type === "success" ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
-        </span>
-        <span className="notif-msg">{notification.message}</span>
-      </div>
-      <button className="notif-close" onClick={onClose}>×</button>
-    </div>
-  );
-}
-
 function RegisterButton({
   activity,
   registering,
@@ -357,15 +340,7 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
   const [loadingPosts, setLoadingPosts] = useState(false);
   const [loadingActivities, setLoadingActivities] = useState(false);
   const [registeringId, setRegisteringId] = useState<number | null>(null);
-  const [notification, setNotification] = useState<NotificationType>({
-    show: false, message: "", type: "success",
-  });
-
-  // ── Notification helper ──
-  const showNotification = useCallback((message: string, type: "success" | "error" = "success") => {
-    setNotification({ show: true, message, type });
-    setTimeout(() => setNotification({ show: false, message: "", type: "success" }), 4000);
-  }, []);
+  const { showToast } = useToast();
 
   // ── Merge API status with localStorage fallback ──
   const mergeWithPersisted = useCallback((raw: Activity[]): Activity[] => {
@@ -410,11 +385,11 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
       const data = await res.json();
       setPosts(Array.isArray(data) ? data : data.results ?? data.posts ?? []);
     } catch (err: unknown) {
-      showNotification((err as Error).message, "error");
+      showToast((err as Error).message, "error");
     } finally {
       setLoadingPosts(false);
     }
-  }, [family.id, showNotification]);
+  }, [family.id, showToast]);
 
   // ── Fetch Activities ──
   const fetchActivities = useCallback(async () => {
@@ -432,11 +407,11 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
       // 2. Merge with persisted registration statuses
       setActivities(mergeWithPersisted(eligible));
     } catch (err: unknown) {
-      showNotification((err as Error).message, "error");
+      showToast((err as Error).message, "error");
     } finally {
       setLoadingActivities(false);
     }
-  }, [family.id, mergeWithPersisted, filterEligibleActivities, showNotification]);
+  }, [family.id, mergeWithPersisted, filterEligibleActivities, showToast]);
 
   // ── Register for Event ──
   const registerForEvent = useCallback(async (eventId: number) => {
@@ -486,7 +461,7 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
               act.event_id === eventId ? { ...act, registration_status: fallbackStatus } : act
             )
           );
-          showNotification("أنت مسجل بالفعل في هذه الفعالية · الحالة: قيد المراجعة", "success");
+          showToast("أنت مسجل بالفعل في هذه الفعالية · الحالة: قيد المراجعة", "success");
           return;
         }
 
@@ -512,14 +487,14 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
         )
       );
 
-      showNotification(`${data.message ?? "تم التسجيل بنجاح"} · الحالة: ${status}`, "success");
+      showToast(`${data.message ?? "تم التسجيل بنجاح"} · الحالة: ${status}`, "success");
       fetchActivities();
     } catch (err: unknown) {
-      showNotification((err as Error).message ?? "حصل خطأ أثناء التسجيل", "error");
+      showToast((err as Error).message ?? "حصل خطأ أثناء التسجيل", "error");
     } finally {
       setRegisteringId(null);
     }
-  }, [family.id, showNotification, fetchActivities]);
+  }, [family.id, showToast, fetchActivities]);
 
   // ── Load data on tab switch ──
   useEffect(() => {
@@ -531,11 +506,6 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
 
   return (
     <div className="fd-page" dir="rtl">
-
-      <Notification
-        notification={notification}
-        onClose={() => setNotification({ ...notification, show: false })}
-      />
 
       {/* Header */}
       <div className="fd-header-row">

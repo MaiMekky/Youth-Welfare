@@ -4,14 +4,13 @@ import React, { useEffect, useState, useCallback } from "react";
 import styles from "../styles/PlansPage.module.css";
 import { X, Save } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 const API_URL = `${getBaseUrl()}/api`;
 
 type InitialPlan = { id: number; name: string; term: number; dept_id?: number } | null;
 
 type FormState = { name: string; term: number; dept_id: number };
 type FormErrors = Partial<Record<keyof FormState, string>>;
-
-type ToastType = "success" | "error" | "warning";
 
 export default function CreatePlanModal({
   open,
@@ -24,6 +23,7 @@ export default function CreatePlanModal({
   initialPlan: InitialPlan;
   onSaved: () => void;
 }) {
+  const { showToast } = useToast();
   const isEdit = !!initialPlan;
 
   const [form, setForm] = useState<FormState>({ name: "", term: 1, dept_id: 0 });
@@ -31,18 +31,6 @@ export default function CreatePlanModal({
   const [saving, setSaving] = useState(false);
 
   const [departments, setDepartments] = useState<Record<string, unknown>[]>([]);
-
-  /* ===================== Toast (same style) ===================== */
-  const [toast, setToast] = useState<{ show: boolean; message: string; type: ToastType }>({
-    show: false,
-    message: "",
-    type: "success",
-  });
-
-  const showToast = (message: string, type: ToastType) => {
-    setToast({ show: true, message, type });
-    window.setTimeout(() => setToast({ show: false, message: "", type: "success" }), 2500);
-  };
 
   const closeAndReset = useCallback(() => {
     setForm({ name: "", term: 1, dept_id: 0 });
@@ -174,15 +162,7 @@ export default function CreatePlanModal({
   if (!open) return null;
 
   return (
-    <>
-      {toast.show && (
-        <div className={`toast ${toast.type === "success" ? "success" : toast.type === "error" ? "error" : "warning"}`}>
-          <div className="msg">{toast.message}</div>
-          <div className="bar" />
-        </div>
-      )}
-
-      <div className={styles.modalOverlay} onMouseDown={closeAndReset}>
+    <div className={styles.modalOverlay} onMouseDown={closeAndReset}>
         <div className={styles.modal} onMouseDown={(e) => e.stopPropagation()}>
           <div className={styles.modalHeader}>
             <div className={styles.modalHeadText}>
@@ -254,65 +234,6 @@ export default function CreatePlanModal({
           </form>
         </div>
       </div>
-
-      <style jsx>{`
-        .toast {
-          position: fixed;
-          top: 20px;
-          right: 25px;
-          width: 280px;
-          background: #fff;
-          padding: 14px 16px;
-          border-radius: 10px;
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-          font-weight: 700;
-          color: #333;
-          z-index: 100000;
-          animation: fadeIn 0.4s ease forwards;
-          overflow: hidden;
-        }
-        .toast.success {
-          border-right: 6px solid #4caf50;
-        }
-        .toast.error {
-          border-right: 6px solid #f44336;
-        }
-        .toast.warning {
-          border-right: 6px solid #f59e0b;
-        }
-        .msg {
-          text-align: right;
-          line-height: 1.35;
-        }
-        .bar {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          height: 4px;
-          width: 0%;
-          background-color: #d4a017;
-          animation: progress 2.5s linear forwards;
-          transform-origin: left;
-        }
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateX(40px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        @keyframes progress {
-          from {
-            width: 0%;
-          }
-          to {
-            width: 100%;
-          }
-        }
-      `}</style>
-    </>
+  
   );
 }

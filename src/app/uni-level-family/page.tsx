@@ -4,11 +4,14 @@ import React, { useMemo, useState, useEffect, useCallback, Suspense } from "reac
 import { Users } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 import styles from "./Styles/page.module.css";
 import Tabs from "./components/Tabs";
 import FamiliesGrid from "./components/FamiliesGrid";
 import Filters from "./components/Filters";
 import StatsGrid from "../SuperAdmin-family/components/StatsGrid";
+
+// ✅ Already using global useToast hook - no local implementation needed
 
 const API_URL = `${getBaseUrl()}/api`;
 const TAB_STORAGE_KEY = "families_active_tab";
@@ -103,7 +106,6 @@ function PageContent() {
   const [readyOnly, setReadyOnly]                   = useState<"all" | "true" | "false">("all");
   const [families, setFamilies]                     = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading]                       = useState<boolean>(false);
-  const [toast, setToast]                           = useState<{ message: string; type: "success" | "error" | "warning" } | null>(null);
 
   /* Reset filters when switching tabs */
   useEffect(() => {
@@ -175,10 +177,7 @@ function PageContent() {
   );
 
   /* ── Toast ── */
-  const showToast = (message: string, type: "success" | "error" | "warning") => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 5000);
-  };
+  const { showToast } = useToast();
 
   /* ── Approve ── */
   async function handleApproveFamily(familyId: number) {
@@ -246,15 +245,6 @@ function PageContent() {
 
   return (
     <div className={styles.container}>
-      {/* Toast */}
-      {toast && (
-        <div className={`${styles.toast} ${styles[toast.type]}`}>
-          <span>{toast.message}</span>
-          <button className={styles.toastClose} onClick={() => setToast(null)}>×</button>
-          <div className={styles.toastProgress} />
-        </div>
-      )}
-
       <header className={styles.headerCard}>
         <div>
           <h1 className={styles.pageTitle}>إدارة الأسر الطلابية</h1>

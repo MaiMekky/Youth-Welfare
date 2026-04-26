@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import styles from "../../FacultyHead/Styles/Activitiesmanagement.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 interface ActivityItem {
   event_id: number;
@@ -305,12 +306,12 @@ function ActivityCard({
 
 /* ── Main ── */
 export default function Activities() {
+  const { showToast } = useToast();
   const [allActivities, setAllActivities]     = useState<ActivityItem[]>([]);
   const [loading, setLoading]                 = useState(false);
   const [error, setError]                     = useState("");
   const [confirm, setConfirm]                 = useState<{ id: number; action: "approve" | "reject"; title: string } | null>(null);
   const [actionLoading, setActionLoading]     = useState(false);
-  const [toastMsg, setToastMsg]               = useState("");
   const [detailData, setDetailData]           = useState<ActivityDetail | null>(null);
   const [loadingDetailId, setLoadingDetailId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter]       = useState<StatusFilter>("pending");
@@ -366,11 +367,6 @@ export default function Activities() {
       rejected: base.filter(a => isRejected(a.status)).length,
     };
   }, [allActivities, deptFilter]);
-
-  const showToast = (msg: string) => {
-    setToastMsg(msg);
-    setTimeout(() => setToastMsg(""), 3500);
-  };
 
   const fetchActivities = useCallback(async () => {
     try {
@@ -566,8 +562,6 @@ useEffect(() => {
       {detailData && (
         <DetailsModal detail={detailData} onClose={() => setDetailData(null)} />
       )}
-
-      {toastMsg && <div className={styles.toast}>{toastMsg}</div>}
     </div>
   );
 }

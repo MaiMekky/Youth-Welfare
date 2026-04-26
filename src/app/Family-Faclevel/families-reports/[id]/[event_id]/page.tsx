@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 
 import Footer from "@/app/FacLevel/components/Footer";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 /* ================= Interfaces ================= */
 
@@ -42,6 +43,7 @@ export default function EventDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const event_id = params.event_id as string;
+  const { showToast } = useToast();
 
 const [eventData, setEventData] = useState<EventData>({
   title: "",
@@ -61,16 +63,6 @@ const [eventData, setEventData] = useState<EventData>({
 });
 
   const [studentsData, setStudentsData] = useState<Student[]>([]);
-
-  const [notification, setNotification] = useState<{
-    message: string;
-    type: "success" | "error";
-  } | null>(null);
-
-  const showNotification = (message: string, type: "success" | "error") => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 2500);
-  };
 
   /* ================= Fetch Event ================= */
 
@@ -121,7 +113,7 @@ setStudentsData(
 
       } catch (err) {
         console.error(err);
-        showNotification("❌ فشل تحميل تفاصيل الفعالية", "error");
+        showToast("❌ فشل تحميل تفاصيل الفعالية", "error");
       }
     };
 
@@ -162,7 +154,7 @@ setStudentsData(
       )
     );
 
-    showNotification(
+    showToast(
       action === "approve"
         ? "✅ تم اعتماد الطالب"
         : "❌ تم رفض الطالب",
@@ -170,7 +162,7 @@ setStudentsData(
     );
   } catch (err) {
     console.error(err);
-    showNotification("❌ فشل تنفيذ العملية", "error");
+    showToast("❌ فشل تنفيذ العملية", "error");
   }
 };
 const handleApproveAll = async () => {
@@ -195,10 +187,10 @@ const handleApproveAll = async () => {
       prev.map((s) => ({ ...s, status: "مقبول" }))
     );
 
-    showNotification("✅ تم اعتماد جميع الطلاب", "success");
+    showToast("✅ تم اعتماد جميع الطلاب", "success");
   } catch (err) {
     console.error(err);
-    showNotification("❌ فشل اعتماد الجميع", "error");
+    showToast("❌ فشل اعتماد الجميع", "error");
   }
 };
 
@@ -207,20 +199,6 @@ const handleApproveAll = async () => {
 
   return (
     <>
-
-
-      {notification && (
-        <div
-          className={`${styles.notification} ${
-            notification.type === "success"
-              ? styles.success
-              : styles.error
-          }`}
-        >
-          {notification.message}
-        </div>
-      )}
-
       <div className={styles.detailsPage}>
         <header className={styles.detailsHeader}>
           <h1 className={styles.detailsTitle}>

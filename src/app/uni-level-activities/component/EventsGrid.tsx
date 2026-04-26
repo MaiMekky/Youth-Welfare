@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import styles from "../styles/EventsGrid.module.css";
 import EventCard, { EventItem } from "./EventCard";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 const API_URL = getBaseUrl();
 
 
@@ -58,18 +59,9 @@ export default function EventsGrid({
   onDelete: (id: number) => void;
   onItemsChange: (next: EventItem[]) => void;
 }) {
+  const { showToast } = useToast();
   const safeItems = useMemo(() => items.filter(Boolean), [items]);
   const [busyId, setBusyId] = useState<number | null>(null);
-
-  const [notification, setNotification] = useState<{
-    message: string;
-    type: "success" | "error" | "warning";
-  } | null>(null);
-
-  const showNotification = (message: string, type: "success" | "error" | "warning") => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 2500);
-  };
 
   const onActiveChange = async (id: number, nextActive: boolean) => {
     const current = safeItems.find((x) => x.id === id);
@@ -91,23 +83,16 @@ export default function EventsGrid({
 
     if (!res.ok) {
       onItemsChange(prev);
-      showNotification(res.message, "error");
+      showToast(res.message, "error");
       return;
     }
 
     onItemsChange(prev.map((e) => (e.id === id ? { ...e, isActive: res.data.active } : e)));
-    showNotification("تم تحديث حالة الفعالية بنجاح", "success");
+    showToast("تم تحديث حالة الفعالية بنجاح", "success");
   };
 
   return (
-    <>
-      {notification && (
-        <div className={`${styles.notification} ${notification.type === "success" ? styles.success : styles.error}`}>
-          {notification.message}
-        </div>
-      )}
-
-      <div className={styles.grid}>
+    <div className={styles.grid}>
         {safeItems.map((e) => (
           <EventCard
             key={e.id}
@@ -121,6 +106,5 @@ export default function EventsGrid({
           />
         ))}
       </div>
-    </>
-  );
+    );
 }

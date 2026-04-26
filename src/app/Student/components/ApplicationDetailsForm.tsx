@@ -3,12 +3,15 @@ import React, { useState } from "react";
 import { Upload } from "lucide-react";
 import "../styles/applyForm.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
+
 interface ApplicationDetailsFormProps {
   onSuccess?: () => void;
   onNotify?: (message: string, type: "success" | "warning" | "error") => void;
 }
 
 export default function ApplicationDetailsForm({ onSuccess, onNotify }: ApplicationDetailsFormProps) {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     gpa: "", AcademicStatus: "",
     fatherStatus: "", motherStatus: "", FatherIncome: "", MotherIncome: "",
@@ -19,15 +22,8 @@ export default function ApplicationDetailsForm({ onSuccess, onNotify }: Applicat
 
   const [documents, setDocuments] = useState<Record<string, File | null>>({});
   const [errors, setErrors]       = useState<Record<string, string>>({});
-  const [notification, setNotification] = useState<{ message: string; type: "success"|"warning"|"error" } | null>(null);
 
   const requiredDocs = ["socialResearch", "salaryProof", "fatherId", "studentId"];
-
-  const showNotification = (message: string, type: "success"|"warning"|"error") => {
-    if (onNotify) { onNotify(message, type); return; }
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3500);
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -35,33 +31,33 @@ export default function ApplicationDetailsForm({ onSuccess, onNotify }: Applicat
     if (errors[name]) setErrors(prev => { const n = {...prev}; delete n[name]; return n; });
   };
 
-  const validate = () => {
-    const e: Record<string, string> = {};
-    if (!formData.gpa)              e.gpa            = "التقدير مطلوب";
-    if (!formData.address.trim())   e.address        = "العنوان مطلوب";
-    if (!formData.fatherStatus)     e.fatherStatus   = "حالة الأب مطلوبة";
-    if (!formData.motherStatus)     e.motherStatus   = "حالة الأم مطلوبة";
-    if (formData.fatherStatus !== "متوفى"  && !formData.FatherIncome.trim()) e.FatherIncome = "دخل الأب مطلوب";
-    if (formData.motherStatus !== "متوفاة" && !formData.MotherIncome.trim()) e.MotherIncome = "دخل الأم مطلوب";
-    if (!formData.familyMembers.trim()) e.familyMembers = "عدد أفراد الأسرة مطلوب";
-    if (!formData.siblingOrder.trim())  e.siblingOrder  = "الترتيب بين الإخوات مطلوب";
-    // const egyptMobilePattern = /^(010|011|012|015)\d{8}$/;
+ const validate = () => {
+  const e: Record<string, string> = {};
+  if (!formData.gpa)            e.gpa          = "التقدير مطلوب";
+  if (!formData.address.trim()) e.address       = "العنوان مطلوب";
+  else if (formData.address.trim().length < 5)  e.address = "العنوان يجب أن يكون 5 أحرف على الأقل";
+  if (!formData.fatherStatus)   e.fatherStatus  = "حالة الأب مطلوبة";
+  if (!formData.motherStatus)   e.motherStatus  = "حالة الأم مطلوبة";
+  if (formData.fatherStatus !== "متوفى"  && !formData.FatherIncome.trim()) e.FatherIncome = "دخل الأب مطلوب";
+  if (formData.motherStatus !== "متوفاة" && !formData.MotherIncome.trim()) e.MotherIncome = "دخل الأم مطلوب";
+  if (!formData.familyMembers.trim()) e.familyMembers = "عدد أفراد الأسرة مطلوب";
+  if (!formData.siblingOrder.trim())  e.siblingOrder  = "الترتيب بين الإخوات مطلوب";
 
-    // if (!egyptMobilePattern.test(formData.fatherPhone?.trim() || "")) {
-    //   e.fatherPhone = "صيغة صحيحة: 010XXXXXXXX أو 011XXXXXXXX أو 012XXXXXXXX أو 015XXXXXXXX";
-    // }
+  const egyptMobilePattern = /^(010|011|012|015)\d{8}$/;
+  if (formData.fatherPhone.trim() && !egyptMobilePattern.test(formData.fatherPhone.trim())) {
+    e.fatherPhone = "رقم غير صحيح، يجب أن يبدأ بـ 010 أو 011 أو 012 أو 015";
+  }
+  if (formData.motherPhone.trim() && !egyptMobilePattern.test(formData.motherPhone.trim())) {
+    e.motherPhone = "رقم غير صحيح، يجب أن يبدأ بـ 010 أو 011 أو 012 أو 015";
+  }
 
-    // if (!egyptMobilePattern.test(formData.motherPhone?.trim() || "")) {
-    //   e.motherPhone = "صيغة صحيحة: 010XXXXXXXX أو 011XXXXXXXX أو 012XXXXXXXX أو 015XXXXXXXX";
-    // }
-
-    if (!formData.disability)      e.disability      = "يرجى تحديد حالة الإعاقة";
-    if (!formData.housingStatus)   e.housingStatus   = "يرجى تحديد حالة المسكن";
-    if (!formData.supportReason.trim()) e.supportReason = "يرجى إدخال سبب طلب الدعم";
-    requiredDocs.forEach(k => { if (!documents[k]) e[k] = "هذا المستند مطلوب"; });
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
+  if (!formData.disability)    e.disability    = "يرجى تحديد حالة الإعاقة";
+  if (!formData.housingStatus) e.housingStatus = "يرجى تحديد حالة المسكن";
+  if (!formData.supportReason.trim()) e.supportReason = "يرجى إدخال سبب طلب الدعم";
+  requiredDocs.forEach(k => { if (!documents[k]) e[k] = "هذا المستند مطلوب"; });
+  setErrors(e);
+  return Object.keys(e).length === 0;
+};
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,20 +93,22 @@ export default function ApplicationDetailsForm({ onSuccess, onNotify }: Applicat
       if (f && fileKeyMap[k]) payload.append(fileKeyMap[k], f);
     });
 
-    try {
-      const res = await authFetch(`${getBaseUrl()}/api/solidarity/student/apply/`, {
-        method: "POST", body: payload,
-      });
-      if (res.ok) {
-        showNotification("تم إرسال الطلب بنجاح ✅", "success");
-        if (onSuccess) onSuccess();
-      } else {
-        showNotification("❌ حدث خطأ أثناء الإرسال", "error");
-      }
-    } catch {
-      showNotification("⚠️ فشل الاتصال بالسيرفر", "error");
+     try {
+    const res = await authFetch(`${getBaseUrl()}/api/solidarity/student/apply/`, {
+      method: "POST", body: payload,
+    });
+    if (res.ok) {
+      showToast("تم إرسال الطلب بنجاح ✅", "success");
+      if (onSuccess) onSuccess();
+    } else if (res.status === 400) {
+      showToast("لديك طلب معلق بالفعل. يرجى الانتظار للمراجعة ⚠️", "warning");
+    } else {
+      showToast("حدث خطأ أثناء الإرسال ❌", "error");
     }
-  };
+  } catch {
+    showToast("حدث خطأ أثناء الإرسال ❌", "error");
+  }
+};
 
   const documentsList = [
     { id: "socialResearch", title: "بحث اجتماعي من وحدة التضامن الاجتماعي", desc: "بحث اجتماعي معتمد من الوحدة.", required: true },
@@ -309,14 +307,6 @@ export default function ApplicationDetailsForm({ onSuccess, onNotify }: Applicat
           <button type="submit" className="submit-btn">إرسال الطلب</button>
         </div>
       </form>
-
-      {notification && (
-        <div className={`notification ${notification.type}`} style={{
-          backgroundColor: notification.type === "success" ? "#22c55e" : notification.type === "error" ? "#ef4444" : "#f59e0b",
-        }}>
-          {notification.message}
-        </div>
-      )}
     </div>
   );
 }

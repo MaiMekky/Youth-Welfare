@@ -23,6 +23,7 @@ import {
   FileText,
 } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 const API_URL = getBaseUrl();
 
 
@@ -274,29 +275,8 @@ export default function EventDetailsPage() {
   const [rows, setRows] = useState<StudentRow[]>([]);
   const [busy, setBusy] = useState(false);
 
-  /* ===================== Toast Notification (same style) ===================== */
-  const [notification, setNotification] = useState<{
-    show: boolean;
-    message: string;
-    type: "success" | "error" | "warning";
-  }>({ show: false, message: "", type: "success" });
-
-  const toastTimerRef = useRef<number | null>(null);
-
-  const showToast = (message: string, type: "success" | "error" | "warning" = "success") => {
-    if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
-    setNotification({ show: true, message, type });
-    toastTimerRef.current = window.setTimeout(() => {
-      setNotification({ show: false, message: "", type: "success" });
-      toastTimerRef.current = null;
-    }, 2500);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
-    };
-  }, []);
+  /* ===================== Toast Notification ===================== */
+  const { showToast } = useToast();
 
   /* ===================== Images ===================== */
   const [images, setImages] = useState<ApiEventImage[]>([]);
@@ -844,21 +824,6 @@ const uploadImages = async (files: FileList | null) => {
 
   return (
     <div className={styles.page}>
-      {/* ✅ Toast notification (same style you gave me) */}
-      {notification.show && (
-        <div
-          className={`${styles.notification} ${
-            notification.type === "success"
-              ? styles.success
-              : notification.type === "error"
-              ? styles.error
-              : styles.warning
-          }`}
-        >
-          {notification.message}
-        </div>
-      )}
-
       <div className={styles.container}>
         <div className={styles.topBar}>
           <div className={styles.headText}>

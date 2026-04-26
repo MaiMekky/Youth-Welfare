@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "../styles/familyLeaders.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 interface Leader {
   name: string;
@@ -34,13 +35,8 @@ const FamilyLeaders: React.FC = () => {
   const [formData, setFormData] = useState<Leader>(emptyLeader);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
-  const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [nationalIdError, setNationalIdError] = useState(false);
-
-  const showNotification = (message: string, type: "success" | "error") => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 2500);
-  };
+  const { showToast } = useToast();
 
   const fetchLeaders = async () => {
     try {
@@ -67,7 +63,7 @@ const FamilyLeaders: React.FC = () => {
       }));
       setLeaders(formatted);
     } catch (err: unknown) {
-      showNotification((err as Error).message || "حدث خطأ", "error");
+      showToast((err as Error).message || "حدث خطأ", "error");
     } finally {
       setLoading(false);
     }
@@ -97,11 +93,11 @@ const FamilyLeaders: React.FC = () => {
     if (!isEditMode) {
       if (!formData.nationalId.trim()) {
         setNationalIdError(true);
-        showNotification("الرجاء إدخال الرقم القومي", "error");
+        showToast("الرجاء إدخال الرقم القومي", "error");
         return;
       }
       if (formData.nationalId.length !== 14) {
-        showNotification("الرقم القومي يجب أن يكون 14 رقم", "error");
+        showToast("الرقم القومي يجب أن يكون 14 رقم", "error");
         return;
       }
       setNationalIdError(false);
@@ -117,7 +113,7 @@ const FamilyLeaders: React.FC = () => {
           role: formData.gender === "F" ? "أخت كبرى / مساعد" : "أخ أكبر / قائد",
         };
         setLeaders(updated);
-        showNotification("تم تحديث بيانات القائد", "success");
+        showToast("تم تحديث بيانات القائد", "success");
       } else {
         const res = await authFetch(
           `${getBaseUrl()}/api/family/faculty/family-founder/${formData.nationalId}/add/`,
@@ -139,21 +135,21 @@ const FamilyLeaders: React.FC = () => {
 
         if (!res.ok) {
           if (data?.detail) {
-            showNotification(data.detail as string, "error");
+            showToast(data.detail as string, "error");
           } else if (data?.error) {
-            showNotification(data.error as string, "error");
+            showToast(data.error as string, "error");
           } else {
-            showNotification("فشل إضافة القائد", "error");
+            showToast("فشل إضافة القائد", "error");
           }
           return;
         }
 
-        showNotification("تم إضافة القائد بنجاح", "success");
+        showToast("تم إضافة القائد بنجاح", "success");
         await fetchLeaders();
       }
       setIsModalOpen(false);
     } catch {
-      showNotification("حدث خطأ أثناء حفظ البيانات", "error");
+      showToast("حدث خطأ أثناء حفظ البيانات", "error");
     } finally {
       setLoading(false);
     }
@@ -171,9 +167,9 @@ const FamilyLeaders: React.FC = () => {
         body: JSON.stringify({ national_id: leader.nationalId }),
       });
       setLeaders(prev => prev.filter((_, i) => i !== index));
-      showNotification("تم حذف القائد بنجاح", "success");
+      showToast("تم حذف القائد بنجاح", "success");
     } catch {
-      showNotification("حدث خطأ أثناء حذف القائد", "error");
+      showToast("حدث خطأ أثناء حذف القائد", "error");
     } finally {
       setLoading(false);
     }
@@ -194,16 +190,10 @@ const FamilyLeaders: React.FC = () => {
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.container}>
-        {notification && (
-          <div className={`${styles.notification} ${notification.type === "success" ? styles.success : styles.error}`}>
-            {notification.message}
-          </div>
-        )}
-
         <div className={styles.pageHeaderFamily}>
           <div className={styles.headerContentFamily}>
             <h1 className={styles.pageTitle}>قادة الأسر</h1>
-            <p className={styles.pageSubtitle}>إنشاء وإدارة قادة الأسر الذين يمكنهم طلب إنشاء أسر</p>
+            <p className={styles.pageSubtitle}>إضافة وإدارة قادة الأسر الذين يمكنهم طلب إنشاء أسر</p>
           </div>
         </div>
 
@@ -217,7 +207,7 @@ const FamilyLeaders: React.FC = () => {
             />
           </div>
           <button className={styles.addButton} onClick={handleOpenCreate} disabled={loading}>
-            إنشاء قائد جديد
+            إضافة قائد جديد
           </button>
         </div>
 
@@ -296,7 +286,7 @@ const FamilyLeaders: React.FC = () => {
           <div className={styles.overlay}>
             <div className={styles.modal} dir="rtl">
               <div className={styles.modalHeader}>
-                <h2>{isEditMode ? "تعديل قائد أسرة" : "إنشاء قائد جديد"}</h2>
+                <h2>{isEditMode ? "تعديل قائد أسرة" : "إضافة قائد جديد"}</h2>
                 <button className={styles.closeBtn} onClick={handleCloseModal} aria-label="إغلاق">
                   ×
                 </button>

@@ -463,9 +463,9 @@ export default function PlanView() {
       a.download = `${plan.faculty_name ?? plan.name}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
-      showToast("✅ تم تحميل الخطة بنجاح");
+      showToast("✅ تم تحميل الخطة بنجاح", "success");
     } catch {
-      showToast("⚠️ فشل تحميل الملف، حاول مجدداً");
+      showToast("⚠️ فشل تحميل الملف، حاول مجدداً", "error");
     } finally {
       setDownloadingId(null);
     }

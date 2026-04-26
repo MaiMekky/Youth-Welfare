@@ -354,7 +354,7 @@ export default function Activities() {
     const data = await res.json();
     setDepartments(data);
   } catch {
-    showToast("فشل في جلب الأقسام");
+    showToast("فشل في جلب الأقسام", "error");
   }
 }, []);
     
@@ -398,7 +398,7 @@ useEffect(() => {
       const data: ActivityDetail = await res.json();
       setDetailData(data);
     } catch {
-      showToast("فشل في جلب تفاصيل الفعالية");
+      showToast("فشل في جلب تفاصيل الفعالية", "error");
     } finally {
       setLoadingDetailId(null);
     }
@@ -419,10 +419,10 @@ useEffect(() => {
       setAllActivities(prev =>
         prev.map(a => a.event_id === confirm.id ? { ...a, status: newStatus } : a)
       );
-      showToast(confirm.action === "approve" ? "تم قبول الفعالية بنجاح" : "تم رفض الفعالية");
+      showToast(confirm.action === "approve" ? "تم قبول الفعالية بنجاح" : "تم رفض الفعالية", confirm.action === "approve" ? "success" : "warning");
       setConfirm(null);
     } catch {
-      showToast("فشل في تنفيذ العملية، يرجى المحاولة مجدداً");
+      showToast("فشل في تنفيذ العملية، يرجى المحاولة مجدداً", "error");
     } finally {
       setActionLoading(false);
     }

@@ -5,6 +5,7 @@ import styles from "../styles/Activities.module.css";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 interface ActivityCardProps {
   eventId: number;
@@ -34,21 +35,10 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
     "pending"
   );
   const [loading, setLoading] = useState(false);
-
-  /* 🔔 notification state */
-  const [notification, setNotification] = useState<{
-    message: string;
-    type: "success" | "error";
-  } | null>(null);
-
-  const showNotification = (message: string, type: "success" | "error") => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 2500);
-  };
+  const { showToast } = useToast();
 
   const handleAction = async (action: "approve" | "reject") => {
     setLoading(true);
-    const token = localStorage.getItem("access");
 
     try {
       const res = await authFetch(
@@ -57,7 +47,6 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -66,14 +55,14 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
 
       if (action === "approve") {
         setStatus("approved");
-        showNotification("✅ تم اعتماد الفعالية بنجاح", "success");
+        showToast("✅ تم اعتماد الفعالية بنجاح", "success");
       } else {
         setStatus("rejected");
-        showNotification("❌ تم رفض الفعالية", "error");
+        showToast("❌ تم رفض الفعالية", "error");
       }
     } catch (err) {
       console.error(err);
-      showNotification("❌ حدث خطأ أثناء تحديث الفعالية", "error");
+      showToast("❌ حدث خطأ أثناء تحديث الفعالية", "error");
     } finally {
       setLoading(false);
     }
@@ -81,18 +70,6 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
 
   return (
     <>
-      {/* 🔔 Notification */}
-      {notification && (
-        <div
-          className={`${styles.notification} ${
-            notification.type === "success"
-              ? styles.success
-              : styles.error
-          }`}
-        >
-          {notification.message}
-        </div>
-      )}
     <div className={styles.eventCard}>
       <div className={styles.eventHeader}>
         <div className={styles.eventTitleSection}>

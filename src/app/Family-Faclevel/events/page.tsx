@@ -24,12 +24,10 @@ export default function ActivitiesPage() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const token = localStorage.getItem("access");
         const res = await authFetch(
           `${getBaseUrl()}/api/family/faculty_events/pending/`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
           }

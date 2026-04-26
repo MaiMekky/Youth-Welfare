@@ -7,37 +7,7 @@ import ProfileDetailsSection from "./components/ProfileDetailsSection";
 import type { StudentProfile, StudentProfileAPIResponse, UpdateProfileRequest } from "./types";
 import "../styles/profile.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
-
-/* ── Toast ──────────────────────────────────────────────────── */
-function Toast({
-  message,
-  type,
-  onDone,
-}: {
-  message: string;
-  type: "success" | "error";
-  onDone: () => void;
-}) {
-  useEffect(() => {
-    const t = setTimeout(onDone, 3200);
-    return () => clearTimeout(t);
-  }, [onDone]);
-
-  return (
-    <div className={`profile-toast profile-toast--${type}`} dir="rtl">
-      {type === "success" ? (
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-      ) : (
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
-        </svg>
-      )}
-      <span>{message}</span>
-    </div>
-  );
-}
+import { useToast } from "@/app/context/ToastContext";
 
 /* ── API → UI mapper ────────────────────────────────────────── */
 function mapApiToProfile(
@@ -72,21 +42,12 @@ export default function ProfilePage() {
   const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
-
-  const showToast = useCallback(
-    (message: string, type: "success" | "error") => setToast({ message, type }),
-    []
-  );
+  const { showToast } = useToast();
 
   /* ── fetch blob image ── */
   const fetchProfileImage = useCallback(async (studentId: number): Promise<string> => {
     try {
-      const token = localStorage.getItem("access");
-      if (!token) return "/app/assets/profile.png";
-      const res = await authFetch(`${getBaseUrl()}/api/files/students/${studentId}/image/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await authFetch(`${getBaseUrl()}/api/files/students/${studentId}/image/`);
       if (!res.ok) return "/app/assets/profile.png";
       const blob = await res.blob();
       return URL.createObjectURL(blob);
@@ -99,11 +60,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const run = async () => {
       try {
-        const token = localStorage.getItem("access");
-        if (!token) return;
-        const res = await authFetch(`${getBaseUrl()}/api/family/faculties/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await authFetch(`${getBaseUrl()}/api/family/faculties/`);
         if (res.ok) setFaculties(await res.json());
       } catch (e) {
         console.error("Faculties fetch error:", e);
@@ -118,11 +75,7 @@ export default function ProfilePage() {
     const run = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem("access");
-        if (!token) return;
-        const res = await authFetch(`${getBaseUrl()}/api/auth/profile/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await authFetch(`${getBaseUrl()}/api/auth/profile/`);
         if (res.ok) {
           const apiData: StudentProfileAPIResponse = await res.json();
           const imageUrl = await fetchProfileImage(apiData.student_id);
@@ -143,15 +96,12 @@ export default function ProfilePage() {
       setProfileData((prev) => (prev ? { ...prev, profilePicture: localPreview } : prev));
 
       try {
-        const token = localStorage.getItem("access");
-        if (!token) return;
 
         const formData = new FormData();
         formData.append("profile_photo", file);
 
         const res = await authFetch(`${getBaseUrl()}/api/auth/profile/update_profile/`, {
           method: "PATCH",
-          headers: { Authorization: `Bearer ${token}` },
           body: formData,
         });
 
@@ -177,8 +127,7 @@ export default function ProfilePage() {
   const handleSaveProfile = useCallback(
     async (updatedData: UpdateProfileRequest) => {
       try {
-        const token = localStorage.getItem("access");
-        if (!token) return;
+        if (!profileData) return;
 
         const formData = new FormData();
 
@@ -206,7 +155,6 @@ export default function ProfilePage() {
 
         const res = await authFetch(`${getBaseUrl()}/api/auth/profile/update_profile/`, {
           method: "PATCH",
-          headers: { Authorization: `Bearer ${token}` },
           body: formData,
         });
 
@@ -253,13 +201,6 @@ export default function ProfilePage() {
 
   return (
     <div className="profile-page">
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onDone={() => setToast(null)}
-        />
-      )}
       <ProfileHeader onEditProfile={() => setIsEditing(true)} />
       <ProfileSummaryCard
         profileData={profileData}

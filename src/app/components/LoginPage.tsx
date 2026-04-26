@@ -6,6 +6,7 @@ import logo from "../assets/logo.png";
 import styles from "../Styles/components/LoginPage.module.css";
 import ForgotPasswordModal from "./ForgotPasswordModal";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 interface LoginPageProps {
   onClose: () => void;
@@ -48,12 +49,12 @@ function getFirstRoute(
 
 export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps) {
   const router = useRouter();
+  const { showToast } = useToast();
 
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors]     = useState<Record<string, string>>({});
   const [loading, setLoading]   = useState(false);
-  const [notification, setNotification] = useState<string | null>(null);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   useEffect(() => {
@@ -117,11 +118,6 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
   // eslint-disable-next-line react-hooks/exhaustive-deps
 }, []);
 
-  const showNotification = (message: string, type: "success" | "warning" | "error") => {
-    setNotification(`${type}:${message}`);
-    setTimeout(() => setNotification(null), 3500);
-  };
-
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!email.trim()) newErrors.email = "البريد مطلوب";
@@ -147,7 +143,7 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
       const data = await res.json();
 
       if (!res.ok) {
-        showNotification("بريد إلكتروني خاطئ أو كلمة مرور خاطئة ❌", "error");
+        showToast("بريد إلكتروني خاطئ أو كلمة مرور خاطئة ❌", "error");
         setLoading(false);
         return;
       }
@@ -233,7 +229,7 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
 
         } else {
           console.warn("Unknown roleKey:", roleKey, "| raw role:", data.role);
-          showNotification("دور المستخدم غير معروف، تواصل مع الدعم", "error");
+          showToast("دور المستخدم غير معروف، تواصل مع الدعم", "error");
         }
 
       } else if (data.user_type === "student") {
@@ -242,7 +238,7 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
 
     } catch (error) {
       console.error(error);
-      showNotification("حدث خطأ أثناء تسجيل الدخول ❌", "error");
+      showToast("حدث خطأ أثناء تسجيل الدخول ❌", "error");
     } finally {
       setLoading(false);
     }
@@ -262,7 +258,7 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
       const initData = await initRes.json();
       
       if (!initRes.ok) {
-        showNotification("فشل في الاتصال بـ Google ❌", "error");
+        showToast("فشل في الاتصال بـ Google ❌", "error");
         return;
       }
 
@@ -271,7 +267,7 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
 
     } catch (error) {
       console.error(error);
-      showNotification("خطأ في عملية تسجيل الدخول بـ Google ❌", "error");
+      showToast("خطأ في عملية تسجيل الدخول بـ Google ❌", "error");
     }
   };
 
@@ -284,15 +280,6 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
       </div>
 
       <h2 className={styles.loginTitle}>تسجيل الدخول</h2>
-
-      {notification && (
-        <div className={`${styles.notification} ${
-          notification.startsWith("success") ? styles.success :
-          notification.startsWith("warning") ? styles.warning : styles.error
-        }`}>
-          {notification.split(":")[1]}
-        </div>
-      )}
 
       <form onSubmit={handleLogin} className={styles.loginForm}>
         <input
@@ -350,7 +337,7 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
       {showForgotPassword && (
         <ForgotPasswordModal
           onClose={() => setShowForgotPassword(false)}
-          onSuccess={() => showNotification("تم تغيير كلمة المرور. سجّل الدخول بالكلمة الجديدة.", "success")}
+          onSuccess={() => showToast("تم تغيير كلمة المرور. سجّل الدخول بالكلمة الجديدة.", "success")}
         />
       )}
     </div>

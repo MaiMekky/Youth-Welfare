@@ -24,23 +24,15 @@ import {
 } from "lucide-react";
 import Footer from "@/app/FacLevel/components/Footer";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 const API_URL = getBaseUrl();
 
-function getAccessToken(): string | null {
-  return (
-    localStorage.getItem("access") ||
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("token") ||
-    null
-  );
-}
 
 async function apiFetch<T>(
   path: string,
   opts: RequestInit = {}
 ): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number; raw?: Record<string, unknown> }> {
-  const token = getAccessToken();
   const headers: Record<string, string> = {
     ...(opts.headers as Record<string, string>),
   };
@@ -48,7 +40,6 @@ async function apiFetch<T>(
   // add content-type only if body exists AND not FormData
   const isFormData = typeof FormData !== "undefined" && opts.body instanceof FormData;
   if (!headers["Content-Type"] && opts.body && !isFormData) headers["Content-Type"] = "application/json";
-  if (token) headers.Authorization = `Bearer ${token}`;
 
   try {
     const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
@@ -241,10 +232,8 @@ function pickFilenameFromDisposition(disposition: string | null, fallback: strin
 }
 
 async function downloadPdf(path: string, opts: RequestInit = {}, fallbackName = "file.pdf") {
-  const token = getAccessToken();
   const headers: Record<string, string> = { ...(opts.headers as Record<string, string>) };
   if (!headers["Content-Type"] && opts.body) headers["Content-Type"] = "application/json";
-  if (token) headers.Authorization = `Bearer ${token}`;
 
   const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
 
@@ -280,36 +269,13 @@ export default function EventDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const id = String(params?.id ?? ""); // eventId
-
+  const { showToast } = useToast();   
   const [event, setEvent] = useState<ApiEventDetails | null>(null);
   const [loadingEvent, setLoadingEvent] = useState(false);
 
   const [rows, setRows] = useState<StudentRow[]>([]);
   const [busy, setBusy] = useState(false);
 
-  /* ===================== Toast Notification (same style) ===================== */
-  const [notification, setNotification] = useState<{
-    show: boolean;
-    message: string;
-    type: "success" | "error" | "warning";
-  }>({ show: false, message: "", type: "success" });
-
-  const toastTimerRef = useRef<number | null>(null);
-
-  const showToast = (message: string, type: "success" | "error" | "warning" = "success") => {
-    if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
-    setNotification({ show: true, message, type });
-    toastTimerRef.current = window.setTimeout(() => {
-      setNotification({ show: false, message: "", type: "success" });
-      toastTimerRef.current = null;
-    }, 2500);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
-    };
-  }, []);
 
   /* ===================== Images ===================== */
   const [images, setImages] = useState<ApiEventImage[]>([]);
@@ -437,11 +403,11 @@ export default function EventDetailsPage() {
 const uploadImages = async (files: FileList | null) => {
   if (!id || !files || files.length === 0) return;
 
-  const token = getAccessToken();
-  if (!token) {
-    showToast("❌ لا يوجد توكن (access).", "error");
-    return;
-  }
+
+  // if (!token) {
+  //   showToast("❌ لا يوجد توكن (access).", "error");
+  //   return;
+  // }
 
   setUploading(true);
 
@@ -454,9 +420,6 @@ const uploadImages = async (files: FileList | null) => {
       `${API_URL}/api/event/manage-events/${id}/upload-images/`,
       {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
         body: fd,
       }
     );
@@ -865,21 +828,6 @@ const uploadImages = async (files: FileList | null) => {
 
   return (
     <div className={styles.page}>
-      {/* ✅ Toast notification (same style you gave me) */}
-      {notification.show && (
-        <div
-          className={`${styles.notification} ${
-            notification.type === "success"
-              ? styles.success
-              : notification.type === "error"
-              ? styles.error
-              : styles.warning
-          }`}
-        >
-          {notification.message}
-        </div>
-      )}
-
       <div className={styles.container}>
         <div className={styles.topBar}>
           <div className={styles.headText}>

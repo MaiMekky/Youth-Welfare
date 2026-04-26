@@ -5,6 +5,7 @@ import Tabs from './Tabs';
 import styles from './deatails.module.css';
 import { useRouter, useParams } from 'next/navigation';
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 interface FamilyMember {
   student_id: string | number;
@@ -41,25 +42,11 @@ interface FamilyDetail {
 export default function FamilyDetailsPage() {
   const router = useRouter();
   const { id } = useParams();
+  const { showToast } = useToast();
 
   const [activeTab, setActiveTab] = useState('members');
   const [family, setFamily] = useState<FamilyDetail | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // Notification state
-  const [notification, setNotification] = useState<{
-    show: boolean;
-    message: string;
-    type: "success" | "error";
-  }>({ show: false, message: "", type: "success" });
-
-  // Show notification helper
-  const showNotification = (message: string, type: "success" | "error") => {
-    setNotification({ show: true, message, type });
-    setTimeout(() => {
-      setNotification({ show: false, message: "", type: "success" });
-    }, 2500);
-  };
 
   const tabs = [
     { id: 'members', label: 'الأعضاء' },
@@ -123,13 +110,11 @@ export default function FamilyDetailsPage() {
 
     const fetchFamily = async () => {
       try {
-        const token = localStorage.getItem('access');
 
         const res = await authFetch(
           `${getBaseUrl()}/api/family/super_dept/${id}`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
               'Content-Type': 'application/json',
             },
           }
@@ -143,7 +128,7 @@ export default function FamilyDetailsPage() {
         setFamily(data as FamilyDetail);
       } catch (error) {
         console.error('Error fetching family:', error);
-        showNotification('فشل في تحميل بيانات الأسرة', 'error');
+        showToast('فشل في تحميل بيانات الأسرة', 'error');
       } finally {
         setLoading(false);
       }
@@ -157,13 +142,6 @@ export default function FamilyDetailsPage() {
 
   return (
     <div className={styles.pageContainer}>
-      {/* Notification */}
-      {notification.show && (
-        <div className={`${styles.notification} ${styles[notification.type]}`}>
-          {notification.message}
-        </div>
-      )}
-
       {/* Header */}
       <div className={styles.header}>
         <button

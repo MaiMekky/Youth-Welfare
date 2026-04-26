@@ -180,16 +180,14 @@ export default function MyEvents() {
     loading: boolean;
   } | null>(null);
 
-  const token = typeof window !== 'undefined' ? localStorage.getItem('access') : null;
+ 
 
   useEffect(() => {
     const load = async () => {
       try {
         setLoading(true);
         const baseUrl = getBaseUrl();
-        const res = await authFetch(`${baseUrl}/api/event/student-events/joined/`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+        const res = await authFetch(`${baseUrl}/api/event/student-events/joined/`);
         if (!res.ok) throw new Error('فشل تحميل الفعاليات');
         const raw = await res.json();
         const arr: ApiJoinedEvent[] = raw.data ?? raw.results ?? (Array.isArray(raw) ? raw : []);
@@ -208,9 +206,7 @@ export default function MyEvents() {
     setResultModal({ event, result: null, loading: true });
     try {
       const baseUrl = getBaseUrl();
-      const res = await authFetch(`${baseUrl}/api/event/student-events/${event.id}/my-result/`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      const res = await authFetch(`${baseUrl}/api/event/student-events/${event.id}/my-result/`);
       if (!res.ok) throw new Error('فشل تحميل النتيجة');
       const raw = await res.json();
       const d   = raw.data ?? raw;
@@ -220,7 +216,7 @@ export default function MyEvents() {
         prev ? { ...prev, loading: false, result: { rank: null, reward: null, message: 'تعذّر تحميل النتيجة' } } : null
       );
     }
-  }, [token]);
+  }, []);
 
   const counts = {
     all:             events.length,

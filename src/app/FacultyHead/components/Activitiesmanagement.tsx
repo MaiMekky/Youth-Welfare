@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import styles from "../Styles/Activitiesmanagement.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 interface EventRow {
   event_id: number;
@@ -47,9 +48,6 @@ interface EventDetail {
   resource: string;
   selected_facs: number[];
 }
-
-const getToken = () =>
-  typeof window !== "undefined" ? localStorage.getItem("access") : null;
 
 const BASE = getBaseUrl();
 
@@ -97,9 +95,7 @@ function DetailModal({ id, onClose }: { id: number; onClose: () => void }) {
   useEffect(() => {
     (async () => {
       try {
-        const res = await authFetch(`${BASE}/api/event/get-events/${id}/`, {
-          headers: { Authorization: `Bearer ${getToken()}` },
-        });
+        const res = await authFetch(`${BASE}/api/event/get-events/${id}/`);
         if (!res.ok) throw new Error();
         setDetail(await res.json());
       } catch { setErr("فشل في تحميل تفاصيل الفعالية"); }
@@ -298,6 +294,7 @@ function EventCard({ ev, onView, onExport, onApprove, onReject, isExporting, pdf
 
 /* ─── Main Page ─── */
 export default function ActivitiesManagement() {
+  const { showToast } = useToast();
   const [events, setEvents]               = useState<EventRow[]>([]);
   const [loading, setLoading]             = useState(true);
   const [error, setError]                 = useState("");
@@ -305,20 +302,16 @@ export default function ActivitiesManagement() {
   const [confirm, setConfirm]             = useState<{id:number;action:"approve"|"reject";title:string}|null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [exportingId, setExportingId]     = useState<number|null>(null);
-  const [pdfErrors, setPdfErrors]         = useState<Record<number,string>>({});
-  const [search, setSearch]               = useState("");
+  const [pdfErrors, setPdfErrors]         = useState<Record<number,string>>({});  const [search, setSearch]               = useState("");
   const [filterType, setFilterType]       = useState("all");
   const [activeTab, setActiveTab]         = useState<TabKey>("pending");
   const [toastMsg, setToastMsg]           = useState("");
 
-  const showToast = (msg: string) => { setToastMsg(msg); setTimeout(()=>setToastMsg(""),4000); };
 
   const fetchEvents = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await authFetch(`${BASE}/api/event/get-events/`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
+      const res = await authFetch(`${BASE}/api/event/get-events/`);
       if (!res.ok) throw new Error();
       setEvents(await res.json());
       setError("");
@@ -335,11 +328,11 @@ export default function ActivitiesManagement() {
       const endpoint = confirm.action==="approve"
         ? `${BASE}/api/event/approve-events/${confirm.id}/approve/`
         : `${BASE}/api/event/approve-events/${confirm.id}/reject/`;
-      const res = await authFetch(endpoint,{method:"PATCH",headers:{Authorization:`Bearer ${getToken()}`}});
+      const res = await authFetch(endpoint,{method:"PATCH"});
       if (!res.ok) throw new Error();
-      showToast(confirm.action==="approve"?"✅ تم اعتماد الفعالية بنجاح":"❌ تم رفض الفعالية");
+      showToast(confirm.action==="approve"?"✅ تم اعتماد الفعالية بنجاح":"❌ تم رفض الفعالية", "success");
       setConfirm(null); fetchEvents();
-    } catch { showToast("⚠️ حدث خطأ أثناء تنفيذ الإجراء"); }
+    } catch { showToast("⚠️ حدث خطأ أثناء تنفيذ الإجراء", "error"); }
     finally   { setActionLoading(false); }
   };
 
@@ -349,7 +342,7 @@ export default function ActivitiesManagement() {
     try {
       const res = await authFetch(
         `${BASE}/api/event/summary-reports/${eventId}/summary-pdf/`,
-        { method:"GET", headers:{ Authorization:`Bearer ${getToken()}`, Accept:"application/pdf" } }
+        { method:"GET", headers:{ Accept:"application/pdf" } }
       );
       if (!res.ok) {
         let serverMsg = `خطأ ${res.status}`;
@@ -364,7 +357,7 @@ export default function ActivitiesManagement() {
           }
         } catch { /* ignore */ }
         setPdfErrors(prev => ({...prev, [eventId]: `فشل التصدير: ${serverMsg}`}));
-        showToast(`⚠️ فشل تصدير PDF — ${serverMsg}`);
+        showToast(`⚠️ فشل تصدير PDF — ${serverMsg}`, "error");
         return;
       }
       const blob = await res.blob();
@@ -373,10 +366,10 @@ export default function ActivitiesManagement() {
       a.href = url; a.download = `تقرير-${eventTitle}.pdf`;
       document.body.appendChild(a); a.click(); a.remove();
       window.URL.revokeObjectURL(url);
-      showToast("📄 تم تصدير التقرير بنجاح");
+      showToast("📄 تم تصدير التقرير بنجاح", "success");
     } catch {
       setPdfErrors(prev => ({...prev, [eventId]: "خطأ في الشبكة"}));
-      showToast("⚠️ خطأ في الشبكة أثناء تصدير PDF");
+      showToast("⚠️ خطأ في الشبكة أثناء تصدير PDF", "error");
     } finally { setExportingId(null); }
   };
 
@@ -519,7 +512,6 @@ export default function ActivitiesManagement() {
 
       {viewId!==null && <DetailModal id={viewId} onClose={()=>setViewId(null)}/>}
       {confirm && <ConfirmDialog action={confirm.action} eventTitle={confirm.title} onConfirm={handleAction} onCancel={()=>setConfirm(null)} loading={actionLoading}/>}
-      {toastMsg && <div className={styles.toast}>{toastMsg}</div>}
     </div>
   );
 }

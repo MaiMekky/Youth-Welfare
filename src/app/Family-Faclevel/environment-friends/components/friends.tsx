@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import styles from "../styles/friends.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 import {
   User,
   Users,
@@ -177,11 +178,8 @@ function UidField({
     setStatus("checking");
     setStudentName("");
     try {
-      const token =
-        typeof window !== "undefined" ? localStorage.getItem("access") : null;
       const res = await authFetch(
-        `${getBaseUrl()}/api/auth/student-lookup/?uid=${uid}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${getBaseUrl()}/api/auth/student-lookup/?uid=${uid}`
       );
       if (res.ok) {
         const data = await res.json();
@@ -365,13 +363,10 @@ export default function FriendsForm() {
     useState<Committee[]>(initialCommittees);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [openComm, setOpenComm] = useState<Record<number, boolean>>({});
-  const [notification, setNotification] = useState<{
-    message: string;
-    type: NotificationType;
-  } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const { showToast } = useToast();
 
   /* ── Duplicate UID detection ── */
   const getDuplicateUidMap = (): Record<string, string> => {
@@ -429,8 +424,7 @@ export default function FriendsForm() {
     });
 
   const showNotif = (message: string, type: NotificationType) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3500);
+    showToast(message, type);
   };
 
   const parseJWT = (token: string) => {
@@ -721,15 +715,12 @@ export default function FriendsForm() {
     }
     setIsSubmitting(true);
     try {
-      const token =
-        typeof window !== "undefined" ? localStorage.getItem("access") : null;
       const res = await authFetch(
         `${getBaseUrl()}/api/family/faculty/environment-family/`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(buildBody()),
         }
@@ -762,15 +753,6 @@ export default function FriendsForm() {
   ════════════════════════════════════════════ */
   return (
     <div className={styles.formContainer}>
-
-      {/* Notification */}
-      {notification && (
-        <div
-          className={`${styles.notification} ${styles[notification.type]}`}
-        >
-          {notification.message}
-        </div>
-      )}
 
       {/* ══════════════════════════════════════
           WIZARD HEADER  (matches CreateFamForm)

@@ -77,9 +77,7 @@ const Overview: React.FC = () => {
     const fetchFamilyId = async () => {
       try {
         const baseUrl = getBaseUrl();
-        const res = await authFetch(`${baseUrl}/api/family/student/families/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await authFetch(`${baseUrl}/api/family/student/families/`);
         if (!res.ok) throw new Error(`فشل تحميل قائمة الأسر (Status: ${res.status})`);
         const response = await res.json();
         let families: Family[] = [];
@@ -101,7 +99,7 @@ const Overview: React.FC = () => {
       }
     };
     fetchFamilyId();
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     if (!selectedFamilyId || !token) return;
@@ -110,8 +108,7 @@ const Overview: React.FC = () => {
         setLoading(true);
         const baseUrl = getBaseUrl();
         const res = await authFetch(
-          `${baseUrl}/api/family/student/${selectedFamilyId}/dashboard/`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          `${baseUrl}/api/family/student/${selectedFamilyId}/dashboard/`
         );
         if (!res.ok) throw new Error("فشل تحميل بيانات الأسرة");
         const data: DashboardResponse = await res.json();
@@ -140,7 +137,7 @@ const Overview: React.FC = () => {
       }
     };
     fetchDashboard();
-  }, [selectedFamilyId, token]);
+  }, [selectedFamilyId]);
 
   const recentMembers = useMemo(() => members.slice(0, 5), [members]);
   const recentPosts   = useMemo(() => posts.slice(0, 5), [posts]);

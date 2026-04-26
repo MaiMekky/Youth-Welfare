@@ -4,29 +4,18 @@ import React, { useMemo, useState } from "react";
 import styles from "../styles/EventsGrid.module.css";
 import EventCard, { EventItem } from "./EventCard";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 const API_URL = getBaseUrl();
-
-function getAccessToken(): string | null {
-  return (
-    localStorage.getItem("access") ||
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("token") ||
-    null
-  );
-}
 
 async function apiFetch<T>(
   path: string,
   opts: RequestInit = {}
 ): Promise<{ ok: true; data: T } | { ok: false; message: string }> {
-  const token = getAccessToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(opts.headers as Record<string, string>),
   };
-  if (token) headers.Authorization = `Bearer ${token}`;
-
   try {
     const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
     const text = await res.text();
@@ -71,16 +60,7 @@ export default function EventsGrid({
 }) {
   const safeItems = useMemo(() => items.filter(Boolean), [items]);
   const [busyId, setBusyId] = useState<number | null>(null);
-
-  const [notification, setNotification] = useState<{
-    message: string;
-    type: "success" | "error" | "warning";
-  } | null>(null);
-
-  const showNotification = (message: string, type: "success" | "error" | "warning") => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 2500);
-  };
+  const { showToast } = useToast();
 
   const onActiveChange = async (id: number, nextActive: boolean) => {
     const current = safeItems.find((x) => x.id === id);
@@ -102,22 +82,16 @@ export default function EventsGrid({
 
     if (!res.ok) {
       onItemsChange(prev);
-      showNotification(res.message, "error");
+      showToast(res.message, "error");
       return;
     }
 
     onItemsChange(prev.map((e) => (e.id === id ? { ...e, isActive: res.data.active } : e)));
-    showNotification("تم تحديث حالة الفعالية بنجاح", "success");
+    showToast("تم تحديث حالة الفعالية بنجاح", "success");
   };
 
   return (
     <>
-      {notification && (
-        <div className={`${styles.notification} ${notification.type === "success" ? styles.success : styles.error}`}>
-          {notification.message}
-        </div>
-      )}
-
       <div className={styles.grid}>
         {safeItems.map((e) => (
           <EventCard

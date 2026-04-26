@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import './Events.css';
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 /* ══════════════════════════════════════════
    TYPES
@@ -131,30 +132,21 @@ const seatsPercent  = (taken: number, total: number) =>
    COMPONENT
 ══════════════════════════════════════════ */
 export default function Events() {
+  const { showToast } = useToast();
   const [events,      setEvents]      = useState<Event[]>([]);
   const [loading,     setLoading]     = useState(true);
   const [error,       setError]       = useState<string | null>(null);
   const [joiningId,   setJoiningId]   = useState<number | null>(null);
   const [registered,  setRegistered]  = useState<Set<number>>(new Set());
-  const [toast,       setToast]       = useState<{ msg: string; ok: boolean } | null>(null);
   const [activeType,  setActiveType]  = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-
-  const token = typeof window !== 'undefined' ? localStorage.getItem('access') : null;
-
-  const showToast = (msg: string, ok: boolean) => {
-    setToast({ msg, ok });
-    setTimeout(() => setToast(null), 4000);
-  };
 
   /* ── Fetch ── */
   useEffect(() => {
     const load = async () => {
       try {
         setLoading(true);
-        const res = await authFetch(`${getBaseUrl()}/api/event/student-events/available/`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+        const res = await authFetch(`${getBaseUrl()}/api/event/student-events/available/`);
         if (!res.ok) throw new Error('فشل تحميل الفعاليات');
         const raw = await res.json();
         const arr: ApiEvent[] = Array.isArray(raw) ? raw : (raw.results ?? raw.data ?? []);
@@ -171,12 +163,11 @@ export default function Events() {
 
   /* ── Join ── */
   const joinEvent = async (id: number) => {
-    if (!token) { showToast('يرجى تسجيل الدخول أولاً', false); return; }
     try {
       setJoiningId(id);
       const res = await authFetch(`${getBaseUrl()}/api/event/student-events/${id}/join/`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json' },
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -184,9 +175,9 @@ export default function Events() {
       }
       setRegistered(prev => new Set([...prev, id]));
       setEvents(prev => prev.map(e => e.id === id ? { ...e, takenSeats: e.takenSeats + 1 } : e));
-      showToast('تم إرسال الطلب بنجاح', true);
+      showToast('تم إرسال الطلب بنجاح', 'success');
     } catch (e: unknown) {
-      showToast(e instanceof Error ? e.message : 'حدث خطأ', false);
+      showToast(e instanceof Error ? e.message : 'حدث خطأ', 'error');
     } finally {
       setJoiningId(null);
     }
@@ -204,13 +195,6 @@ export default function Events() {
   ══════════════════════════════════════════ */
   return (
     <div className="events-page" dir="rtl">
-
-      {/* ── Toast ── */}
-      {toast && (
-        <div className={`ev-toast ${toast.ok ? 'ev-toast-success' : 'ev-toast-error'}`}>
-          {toast.ok ? '✅' : '❌'} {toast.msg}
-        </div>
-      )}
 
       {/* ══ HERO ══ */}
       <div className="events-hero">

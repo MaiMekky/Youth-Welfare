@@ -14,6 +14,7 @@ import {
   Briefcase,
 } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 const API_URL = getBaseUrl();
 
@@ -35,8 +36,6 @@ type FormState = {
 };
 
 type FormErrors = Partial<Record<keyof FormState | "selected_facs", string>>;
-/* ===================== Toast (same style) ===================== */
-type ToastType = "success" | "error" | "warning";
 
 function getAccessToken(): string | null {
   return (
@@ -77,6 +76,7 @@ export default function CreateProposedEventPage() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
+  const { showToast } = useToast();
 
   const planId = String(params?.id ?? "");
   const mode = (searchParams.get("mode") ?? "create") as Mode;
@@ -116,19 +116,6 @@ const [form, setForm] = useState<FormState>({
 
   const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [selectedFacultyIds, setSelectedFacultyIds] = useState<number[]>([]);
-  /* ===================== Toast State ===================== */
-  const [toast, setToast] = useState<{ show: boolean; message: string; type: ToastType }>({
-    show: false,
-    message: "",
-    type: "success",
-  });
-
-  const showToast = (message: string, type: ToastType) => {
-    setToast({ show: true, message, type });
-    window.setTimeout(() => {
-      setToast({ show: false, message: "", type: "success" });
-    }, 2500);
-  };
 
   const setField = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((p) => ({ ...p, [key]: value }));
@@ -394,13 +381,6 @@ const toggleAllFacs = () => {
   }, []);
   return (
     <>
-      {/* ✅ Toast */}
-      {toast.show && (
-        <div className={`${styles.toast} ${styles[`toast_${toast.type}`]}`}>
-          {toast.message}
-        </div>
-      )}
-
       <div className={styles.page}>
         <div className={styles.container}>
           <div className={styles.topBar}>

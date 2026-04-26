@@ -5,6 +5,7 @@ import logo from "@/app/assets/logo.png";
 import profilePlaceholder from "@/app/assets/profile.png";
 import styles from "../Styles/components/LoginPage.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 interface SignupProps {
   onClose: () => void;
@@ -35,6 +36,7 @@ interface Faculty {
 const TOTAL_STEPS = 3;
 
 export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
+  const { showToast } = useToast();
   const toEnglishDigits = (str: string) =>
     str
       .replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x0660))
@@ -63,7 +65,6 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
   const [loading, setLoading] = useState(false);
   const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [facultiesLoading, setFacultiesLoading] = useState(true);
-  const [notification, setNotification] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchFaculties = async () => {
@@ -81,11 +82,6 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
     };
     fetchFaculties();
   }, []);
-
-  const showNotification = (message: string, type: "success" | "warning" | "error") => {
-    setNotification(`${type}:${message}`);
-    setTimeout(() => setNotification(null), 3500);
-  };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const target = e.target as HTMLInputElement | HTMLSelectElement;
@@ -227,18 +223,18 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
       if (!response.ok) {
         const errorData = await response.json();
         console.error("API Error:", errorData);
-        showNotification("حدث خطأ أثناء إنشاء الحساب ❌", "error");
+        showToast("حدث خطأ أثناء إنشاء الحساب ❌", "error");
         return;
       }
 
       const data = await response.json();
       if (data.access) localStorage.setItem("access", data.access);
 
-      showNotification("تم إنشاء الحساب بنجاح ", "success");
+      showToast("تم إنشاء الحساب بنجاح ", "success");
       setTimeout(() => { onClose(); }, 1500);
     } catch (err) {
       console.error(err);
-      showNotification("حدث خطأ، حاول مرة أخرى", "error");
+      showToast("حدث خطأ، حاول مرة أخرى", "error");
     } finally {
       setLoading(false);
     }
@@ -255,16 +251,6 @@ export default function SignupPage({ onClose, onSwitchToLogin }: SignupProps) {
       </div>
 
       <h2 className={styles.loginTitle}>إنشاء حساب جديد</h2>
-
-      {/* ── Notification ── */}
-      {notification && (
-        <div className={`${styles.notification} ${
-          notification.startsWith("success") ? styles.success :
-          notification.startsWith("warning") ? styles.warning : styles.error
-        }`}>
-          {notification.split(":")[1]}
-        </div>
-      )}
 
       {/* ── Step Progress Bar ── */}
       <div className={styles.progressWrapper}>

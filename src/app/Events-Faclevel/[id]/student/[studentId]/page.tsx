@@ -9,16 +9,6 @@ import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 const API_URL = getBaseUrl();
 
-function getAccessToken(): string | null {
-  return (
-    localStorage.getItem("access") ||
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("token") ||
-    null
-  );
-}
-
-
 type ApiStudentDetails = {
   student_id: number;
   name: string;
@@ -44,15 +34,12 @@ async function apiFetch<T>(
   path: string,
   opts: RequestInit = {}
 ): Promise<{ ok: true; data: T } | { ok: false; message: string }> {
-  const token = getAccessToken();
 
   const headers: Record<string, string> = { ...(opts.headers as Record<string, string>) };
 
   if (!headers["Content-Type"] && opts.body) {
     headers["Content-Type"] = "application/json";
   }
-
-  if (token) headers.Authorization = `Bearer ${token}`;
 
   try {
     const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });

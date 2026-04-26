@@ -33,11 +33,10 @@ const TrackRequest: React.FC<TrackRequestProps> = ({ onBack }) => {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const token = localStorage.getItem("access");
         const baseUrl = getBaseUrl();
         const res = await authFetch(
           `${baseUrl}/api/family/student/family_creation_request/`,
-          { headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` } }
+          { headers: { "Content-Type": "application/json" } }
         );
         if (!res.ok) throw new Error("فشل تحميل طلبات الأسر");
         const data = await res.json();

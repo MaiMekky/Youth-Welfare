@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Tabs from './Tabs';
 import styles from './deatails.module.css';
 import { useRouter, useParams } from 'next/navigation';
+import { useToast } from '@/app/context/ToastContext';
 type TabId = 'members' | 'events';
 import { useSearchParams } from "next/navigation";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
@@ -244,7 +245,7 @@ export default function FamilyDetailsPage() {
   const [familyData, setFamilyData] = useState<FamilyData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [alert, setAlert] = useState<{ message: string; type: 'success' | 'error' | 'warning' | 'info' } | null>(null);
+  const { showToast } = useToast();
   
   const router = useRouter();
   const params = useParams();
@@ -267,7 +268,6 @@ export default function FamilyDetailsPage() {
 
       try {
         setLoading(true);
-        const token = localStorage.getItem('access');
         const baseUrl = getBaseUrl();
         const url = `${baseUrl}/api/family/super_dept/${familyId}/`;
 
@@ -275,7 +275,6 @@ export default function FamilyDetailsPage() {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            ...(token && { Authorization: `Bearer ${token}` }),
           },
         });
 
@@ -300,7 +299,7 @@ export default function FamilyDetailsPage() {
   }, [familyId]);
 
   const showAlert = (message: string, type: 'success' | 'error' | 'warning' | 'info') => {
-    setAlert({ message, type });
+    showToast(message, type);
   };
 
   /* ── Update a single member's status in local state ── */
@@ -318,7 +317,6 @@ export default function FamilyDetailsPage() {
 
   const handleApproveMember = async (studentId: number) => {
     try {
-      const token = localStorage.getItem('access');
       const baseUrl = getBaseUrl();
       const response = await authFetch(
         `${baseUrl}/api/family/super_dept/${familyId}/members/${studentId}/approve/`,
@@ -326,7 +324,6 @@ export default function FamilyDetailsPage() {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            ...(token && { Authorization: `Bearer ${token}` }),
           },
         }
       );
@@ -348,7 +345,6 @@ export default function FamilyDetailsPage() {
 
   const handleRejectMember = async (studentId: number) => {
     try {
-      const token = localStorage.getItem('access');
       const baseUrl = getBaseUrl();
       const response = await authFetch(
         `${baseUrl}/api/family/super_dept/${familyId}/members/${studentId}/reject/`,
@@ -356,7 +352,6 @@ export default function FamilyDetailsPage() {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            ...(token && { Authorization: `Bearer ${token}` }),
           },
         }
       );
@@ -466,15 +461,6 @@ export default function FamilyDetailsPage() {
 
   return (
     <div className={styles.pageContainer}>
-      {/* Custom Alert */}
-      {alert && (
-        <CustomAlert
-          message={alert.message}
-          type={alert.type}
-          onClose={() => setAlert(null)}
-        />
-      )}
-
       {/* Header Section */}
       <div className={styles.header}>
         <button

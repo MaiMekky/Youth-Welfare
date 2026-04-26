@@ -26,12 +26,10 @@ export default function FamilyReportsPage() {
   useEffect(() => {
     const fetchFamilies = async () => {
       try {
-        const token = localStorage.getItem("access");
         const res = await authFetch(
           `${getBaseUrl()}/api/family/faculty/families/`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
           }

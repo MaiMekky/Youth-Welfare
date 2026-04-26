@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import '../styles/CreateFam.css';
-import Toast from './Toast';
 import { ChevronRight, ChevronLeft, Check, User, Users, FileText, Send } from 'lucide-react';
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 const CACHE_KEY = 'createFamFormData';
 
@@ -283,7 +283,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
   const [facultyId, setFacultyId]                 = useState<number | null>(null);
   const [departments, setDepartments]             = useState<Department[]>([]);
   const [isSubmitting, setIsSubmitting]           = useState(false);
-  const [toasts, setToasts]                       = useState<ToastNotification[]>([]);
+  const { showToast } = useToast();
 
   const token = typeof window !== 'undefined' ? localStorage.getItem('access') : null;
   const dupeMap = buildDuplicateMap(boardMembers, committees);
@@ -323,15 +323,10 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
   }, [familyType, familyName, familyGoals, familyDescription, boardMembers, committees]);
   useEffect(() => { saveCache(); }, [saveCache]);
 
-  /* ── Toast ── */
-  const showToast = (message: string, type: ToastNotification['type']) =>
-    setToasts(p => [...p, { id: Date.now(), message, type }]);
-  const removeToast = (id: number) => setToasts(p => p.filter(t => t.id !== id));
-
   /* ── Fetch departments & faculty ── */
   useEffect(() => {
     if (!token) return;
-    authFetch(`${getBaseUrl()}/api/family/departments/`, { headers: { Authorization: `Bearer ${token}` } })
+    authFetch(`${getBaseUrl()}/api/family/departments/`)
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (!data) return;
@@ -344,9 +339,7 @@ useEffect(() => {
 
   const decoded = decodeToken(token);
 
-  authFetch(`${getBaseUrl()}/api/auth/profile/`, {
-    headers: { Authorization: `Bearer ${token}` }
-  })
+  authFetch(`${getBaseUrl()}/api/auth/profile/`)
     .then(r => r.ok ? r.json() : null)
     .then(data => {
       console.log('profile data:', data);
@@ -559,7 +552,7 @@ useEffect(() => {
 
       const res = await authFetch(`${getBaseUrl()}/api/family/student/create/`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
@@ -925,10 +918,6 @@ useEffect(() => {
 
   return (
     <div className="cf-page">
-      <div className="toast-container">
-        {toasts.map(t => <Toast key={t.id} message={t.message} type={t.type} onClose={() => removeToast(t.id)} />)}
-      </div>
-
       <div className="cf-wizard">
 
         <div className="cf-progress-header">

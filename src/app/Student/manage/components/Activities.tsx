@@ -155,12 +155,7 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
       try {
         const baseUrl = getBaseUrl();
         const res = await authFetch(
-          `${baseUrl}/api/family/student/families/`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          `${baseUrl}/api/family/student/families/`
         );
 
         if (!res.ok) throw new Error("فشل تحميل قائمة الأسر");
@@ -211,9 +206,7 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
         if (!token) return;
 
         const baseUrl = getBaseUrl();
-        const response = await authFetch(`${baseUrl}/api/family/departments/`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await authFetch(`${baseUrl}/api/family/departments/`);
 
         if (response.ok) {
           const data = await response.json();
@@ -257,7 +250,6 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
         const response = await authFetch(endpoint, {
           method: 'GET',
           headers: { 
-            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         });

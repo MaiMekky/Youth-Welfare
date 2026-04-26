@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./studentDetails.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 // const rejectionReasons = [
 //   { id: 1, text: "إزعاج أو تكرار التقديم بشكل غير مبرر" },
 //   { id: 2, text: "المستندات المرفوعة غير واضحة أو غير صحيحة" },
@@ -16,31 +17,21 @@ import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 export default function StudentDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
+  const { showToast } = useToast();
 
   const [data, setData] = useState<Record<string, unknown> | null>(null);
   const [docs, setDocs] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const [notification, setNotification] = useState<{ message: string; type: string } | null>(null);
   const [showRejectModal, setShowRejectModal] = useState(false);
-  // const [selectedReason, setSelectedReason] = useState<number | null>(null);
-  const showNotification = (message: string, type: string) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 2500);
-  };
 
   // ====== جلب بيانات الطلب ======
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        const token = localStorage.getItem("access");
         const baseUrl = getBaseUrl();
 
         const response = await authFetch(
-          `${baseUrl}/api/solidarity/super_dept/${id}/applications/`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          `${baseUrl}/api/solidarity/super_dept/${id}/applications/`
         );
 
         const result = await response.json();
@@ -57,13 +48,9 @@ export default function StudentDetailsPage() {
   useEffect(() => {
     const fetchDocs = async () => {
       try {
-        const token = localStorage.getItem("access");
 
         const response = await authFetch(
-          `${getBaseUrl()}/api/solidarity/super_dept/${id}/documents/`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          `${getBaseUrl()}/api/solidarity/super_dept/${id}/documents/`
         );
 
         if (!response.ok) { 
@@ -105,8 +92,6 @@ const openDocument = async (docId: number) => {
 // ====== قبول الطالب ======
 const handleApprove = async () => {
   try {
-    const token = localStorage.getItem("access");
-    if (!token) throw new Error("User not authenticated");
 
     const response = await authFetch(
       `${getBaseUrl()}/api/solidarity/super_dept/${id}/change_to_approve/`,
@@ -114,7 +99,6 @@ const handleApprove = async () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
       }
     );
@@ -125,10 +109,10 @@ const handleApprove = async () => {
 
     // تحديث الحالة في الواجهة بعد نجاح الطلب
     setData((prev: Record<string, unknown> | null) => ({ ...prev, req_status: "مقبول" }));
-    showNotification("✅ تم قبول الطالب بنجاح", "success");
+    showToast("✅ تم قبول الطالب بنجاح", "success");
   } catch (error) {
     console.error(error);
-    showNotification("❌ فشل قبول الطالب", "error");
+    showToast("❌ فشل قبول الطالب", "error");
   }
 };
 
@@ -141,16 +125,12 @@ const handleReject = async () => {
     //   return;
     // }
 
-    const token = localStorage.getItem("access");
-    if (!token) throw new Error("User not authenticated");
-
     const response = await authFetch(
       `${getBaseUrl()}/api/solidarity/super_dept/${id}/change_to_reject/`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         // body: JSON.stringify({
         //   rejection_reason: selectedReason
@@ -166,11 +146,11 @@ const handleReject = async () => {
     setShowRejectModal(false);
     // setSelectedReason(null);
 
-    showNotification("❌ تم رفض الطالب بنجاح", "error");
+    showToast("❌ تم رفض الطالب بنجاح", "error");
 
   } catch (error) {
     console.error(error);
-    showNotification("❌ فشل رفض الطالب", "error");
+    showToast("❌ فشل رفض الطالب", "error");
   }
 };
 
@@ -181,16 +161,6 @@ console.log("docs: ", docs)
 
   return (
     <div className={styles.container}>
-      {/* الإشعار */}
-      {notification && (
-        <div
-          className={`${styles.notification} ${
-            notification.type === "success" ? styles.success : styles.error
-          }`}
-        >
-          {notification.message}
-        </div>
-      )}
 
       <div className={styles.contentCard}>
         <button className={styles.backBtn} onClick={() => router.push('/SuperAdmin')}>

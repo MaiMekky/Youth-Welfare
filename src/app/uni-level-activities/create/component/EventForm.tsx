@@ -5,6 +5,7 @@ import styles from "../CreateEvent.module.css";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowRight, Save } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 /** ================== API ================== */
 const API_URL = getBaseUrl();
 
@@ -90,10 +91,8 @@ async function apiFetch<T>(
   path: string,
   opts: RequestInit = {}
 ): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number; raw?: unknown }> {
-  const token = getAccessToken();
   const headers: Record<string, string> = { ...(opts.headers as Record<string, string>) };
   if (!headers["Content-Type"] && opts.body) headers["Content-Type"] = "application/json";
-  if (token) headers.Authorization = `Bearer ${token}`;
   try {
     const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
     const text = await res.text();
@@ -134,7 +133,6 @@ type FormState = {
 };
 
 type FormErrors = Partial<Record<keyof FormState | "selected_facs", string>>;
-type NotifType = "success" | "error" | "warning";
 
 export default function EventForm({
   mode,
@@ -145,16 +143,10 @@ export default function EventForm({
 }) {
   const router = useRouter();
   const params = useParams();
+  const { showToast } = useToast();
   const routeId = params?.id as string | undefined;
   const eventId = id ?? routeId;
   const isEditMode = mode === "edit" && !!eventId;
-
-  /** ✅ Notification */
-  const [notification, setNotification] = useState<{ message: string; type: NotifType } | null>(null);
-  const showNotification = (message: string, type: NotifType) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 2500);
-  };
 
   // ── Departments from localStorage (exactly like CreatePlanModal) ──
   const [departments, setDepartments] = useState<{ dept_id: number; dept_name: string }[]>([]);
@@ -235,7 +227,7 @@ export default function EventForm({
       setLoadingFacs(true);
       const res = await apiFetch<ApiFaculty[]>("/api/family/faculties/", { method: "GET" });
       setLoadingFacs(false);
-      if (!res.ok) { showNotification(res.message || "فشل تحميل الكليات", "error"); return; }
+      if (!res.ok) { showToast(res.message || "فشل تحميل الكليات", "error"); return; }
       const list = Array.isArray(res.data) ? res.data : [];
       setFaculties(list.map((f) => ({ id: f.faculty_id, name: f.name })));
     })();
@@ -248,7 +240,7 @@ export default function EventForm({
       setLoadingEvent(true);
       const res = await apiFetch<ApiEventDetails>(`/api/event/get-events/${eventId}/`, { method: "GET" });
       setLoadingEvent(false);
-      if (!res.ok) { showNotification(res.message || "فشل تحميل بيانات الفعالية", "error"); return; }
+      if (!res.ok) { showToast(res.message || "فشل تحميل بيانات الفعالية", "error"); return; }
       const e = res.data;
       setForm((p) => ({
         ...p,
@@ -276,11 +268,11 @@ export default function EventForm({
     const nextErrors = validate();
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) {
-      showNotification("⚠️   برجاء استكمال البيانات المطلوبة", "warning");
+      showToast("⚠️   برجاء استكمال البيانات المطلوبة", "warning");
       return;
     }
     const dept = getDeptFromToken();
-    if (!dept) { showNotification("❌ لا يوجد رقم قسم في التوكن", "error"); return; }
+    if (!dept) { showToast("❌ لا يوجد رقم قسم في التوكن", "error"); return; }
 
     const payload: ManageEventPayload = {
       title: form.title.trim(),
@@ -306,29 +298,19 @@ export default function EventForm({
     if (isEditMode) {
       const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-events/${eventId}/`, { method: "PATCH", body: JSON.stringify(payload) });
       setSubmitting(false);
-      if (!res.ok) { showNotification(res.message || "❌ حصل خطأ أثناء تعديل الفعالية", "error"); return; }
-      showNotification("✅ تم تعديل الفعالية بنجاح", "success");
+      if (!res.ok) { showToast(res.message || "❌ حصل خطأ أثناء تعديل الفعالية", "error"); return; }
+      showToast("✅ تم تعديل الفعالية بنجاح", "success");
     } else {
       const res = await apiFetch<Record<string, unknown>>("/api/event/manage-events/", { method: "POST", body: JSON.stringify(payload) });
       setSubmitting(false);
-      if (!res.ok) { showNotification(res.message || "❌ حصل خطأ أثناء إنشاء الفعالية", "error"); return; }
-      showNotification("✅ تم إنشاء الفعالية بنجاح", "success");
+      if (!res.ok) { showToast(res.message || "❌ حصل خطأ أثناء إنشاء الفعالية", "error"); return; }
+      showToast("✅ تم إنشاء الفعالية بنجاح", "success");
     }
     router.push("/uni-level-activities");
   };
 
   return (
     <div className={styles.page}>
-      {/* ✅ Notification */}
-      {notification && (
-        <div className={`${styles.notification} ${
-          notification.type === "success" ? styles.success :
-          notification.type === "warning" ? styles.warning : styles.error
-        }`}>
-          {notification.message}
-        </div>
-      )}
-
       <div className={styles.container}>
         <header className={styles.header}>
           <div className={styles.headerText}>

@@ -31,10 +31,7 @@ export default function Filters({
     const fetchFaculties = async () => {
       setFacultiesLoading(true);
       try {
-        const token = localStorage.getItem("access");
-        const response = await authFetch(`${getBaseUrl()}/api/family/faculties/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await authFetch(`${getBaseUrl()}/api/family/faculties/`);
         if (response.ok) {
           const data = await response.json();
           setFaculties(data);

@@ -63,9 +63,6 @@ export default function DiscountsSection() {
     try {
       const res = await authFetch(API_GET, {
         method: "GET",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access")}`,
-        },
       });
 
       if (!res.ok) {
@@ -135,7 +132,6 @@ const handleSave = async () => {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("access")}`,
       },
       body: JSON.stringify(payload),
     });

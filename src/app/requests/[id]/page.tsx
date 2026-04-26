@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./RequestDetails.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 /*
   What I implemented:
@@ -78,12 +79,12 @@ const EMPTY_DISCOUNTS: SelectedDiscounts = {
 export default function RequestDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
+  const { showToast } = useToast();
 
   const [application, setApplication] = useState<Application | null>(null);
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [actionLoading, setActionLoading] = useState<boolean>(false);
-  const [notification, setNotification] = useState<string | null>(null);
 
   const [availableDiscounts, setAvailableDiscounts] = useState<Discounts>({
     bk_discount: [],
@@ -101,11 +102,6 @@ export default function RequestDetailsPage() {
     loadAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
-
-  const showNotification = (message: string, type: "success" | "warning" | "error") => {
-    setNotification(`${type}:${message}`);
-    setTimeout(() => setNotification(null), 3500);
-  };
 
   const loadAll = async () => {
     setLoading(true);
@@ -132,8 +128,8 @@ export default function RequestDetailsPage() {
       setApplication(item);
     } catch (err: unknown) {
       console.error("fetchApplication error:", err);
-      if (((err as Record<string, unknown>)?.response as Record<string, unknown>)?.status === 401) showNotification("Unauthorized — please log in.", "error");
-      else showNotification("فشل في تحميل بيانات الطلب", "error");
+      if (((err as Record<string, unknown>)?.response as Record<string, unknown>)?.status === 401) showToast("Unauthorized — please log in.", "error");
+      else showToast("فشل في تحميل بيانات الطلب", "error");
       setApplication(null);
     }
   };
@@ -147,7 +143,7 @@ export default function RequestDetailsPage() {
       setDocuments(Array.isArray(data) ? data : data ? [data] : []);
     } catch (err: unknown) {
       console.error("fetchDocuments error:", err);
-      showNotification("فشل في تحميل المستندات", "error");
+      showToast("فشل في تحميل المستندات", "error");
       setDocuments([]);
     }
   };
@@ -163,7 +159,7 @@ export default function RequestDetailsPage() {
       );
     } catch (err: unknown) {
       console.error("fetchDiscountValues error:", err);
-      showNotification("فشل في تحميل discounts", "error");
+      showToast("فشل في تحميل discounts", "error");
       setAvailableDiscounts({ bk_discount: [], reg_discount: [], aff_discount: [], full_discount: [] });
     }
   };
@@ -199,7 +195,7 @@ export default function RequestDetailsPage() {
       const data = await res.json();
       setApplication((prev) => ({ ...(prev ?? {}), ...(data ?? {}) }));
       await fetchDocuments();
-      showNotification(successMsg, "success");
+      showToast(successMsg, "success");
       return data;
     } catch (err: unknown) {
       console.error(`${suffix} error:`, err);
@@ -209,7 +205,7 @@ export default function RequestDetailsPage() {
           ? ((err as Record<string, unknown>).response as Record<string, unknown>).data
           : JSON.stringify(((err as Record<string, unknown>).response as Record<string, unknown>).data)
         : "فشل في تنفيذ الإجراء على الخادم";
-      showNotification(serverMsg as string, "error");
+      showToast(serverMsg as string, "error");
       throw err;
     } finally {
       setActionLoading(false);
@@ -225,7 +221,7 @@ export default function RequestDetailsPage() {
       (application?.total_discount && Number(application.total_discount) > 0);
 
     if (!hasDiscount) {
-      showNotification("يجب اختيار نوع خصم أو تطبيق خصم قبل الموافقة النهائية", "warning");
+      showToast("يجب اختيار نوع خصم أو تطبيق خصم قبل الموافقة النهائية", "warning");
       return;
     }
     await postAction("approve", "مقبول", "تمت الموافقة النهائية بنجاح");
@@ -244,7 +240,7 @@ export default function RequestDetailsPage() {
       if (!response.ok) throw new Error("PRE_APPROVE_ERROR");
       const data = await response.json();
       setApplication((prev) => ({ ...(prev ?? {}), ...data }));
-      showNotification("تمت الموافقة مبدئية بنجاح", "success");
+      showToast("تمت الموافقة مبدئية بنجاح", "success");
       await fetchDocuments();
     } catch (err: unknown) {
       console.error("Initial approval error:", err);
@@ -253,7 +249,7 @@ export default function RequestDetailsPage() {
           ? ((err as Record<string, unknown>).response as Record<string, unknown>).data
           : JSON.stringify(((err as Record<string, unknown>).response as Record<string, unknown>).data)
         : "فشل في تنفيذ الموافقة مبدئية";
-      showNotification(serverMsg as string, "error");
+      showToast(serverMsg as string, "error");
     } finally {
       setActionLoading(false);
       window.location.reload();
@@ -308,7 +304,7 @@ export default function RequestDetailsPage() {
     });
 
     if (payloadDiscounts.length === 0) {
-      showNotification("لم يتم اختيار أي خصم لإرساله", "warning");
+      showToast("لم يتم اختيار أي خصم لإرساله", "warning");
       return;
     }
 
@@ -333,7 +329,7 @@ export default function RequestDetailsPage() {
       if (!res.ok) throw new Error("DISCOUNT_ASSIGN_ERROR");
       const data = await res.json();
       setApplication((prev) => ({ ...(prev ?? {}), ...(data ?? {}) }));
-      showNotification("تم حفظ الخصومات بنجاح", "success");
+      showToast("تم حفظ الخصومات بنجاح", "success");
       setDiscountsSaved(true);
       await fetchDocuments();
     } catch (err: unknown) {
@@ -344,7 +340,7 @@ export default function RequestDetailsPage() {
           ? ((err as Record<string, unknown>).response as Record<string, unknown>).data
           : JSON.stringify(((err as Record<string, unknown>).response as Record<string, unknown>).data)
         : "فشل حفظ الخصومات على الخادم";
-      showNotification(serverMsg as string, "error");
+      showToast(serverMsg as string, "error");
     } finally {
       setActionLoading(false);
     }
@@ -354,7 +350,7 @@ export default function RequestDetailsPage() {
     setSelectedDiscounts(EMPTY_DISCOUNTS);
     setDiscountsSaved(false);
     fetchApplication();
-    showNotification("تم إعادة تعيين الاختيارات", "warning");
+    showToast("تم إعادة تعيين الاختيارات", "warning");
   };
 
   const openDocument = async (docId: number) => {
@@ -373,20 +369,6 @@ export default function RequestDetailsPage() {
   return (
     <div className={styles.container}>
       <div className={styles.contentCard}>
-
-        {notification && (
-          <div
-            className={`${styles.notification} ${
-              notification.startsWith("success")
-                ? styles.success
-                : notification.startsWith("warning")
-                ? styles.warning
-                : styles.error
-            }`}
-          >
-            {notification.split(":")[1]}
-          </div>
-        )}
 
         <button onClick={() => router.push("/FacLevel")} className={styles.backBtn}>
           العودة ←

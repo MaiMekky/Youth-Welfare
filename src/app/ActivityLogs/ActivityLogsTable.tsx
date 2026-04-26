@@ -30,14 +30,12 @@ export default function ActivityLogsTable() {
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const token = localStorage.getItem("access");
 
         const response = await authFetch(
           `${getBaseUrl()}/api/solidarity/super_dept/system_logs/`,
           {
             method: "GET",
             headers: {
-              Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
           }

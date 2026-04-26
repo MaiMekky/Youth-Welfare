@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import styles from "../../FacultyHead/Styles/Activitiesmanagement.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 interface ActivityItem {
   event_id: number;
@@ -50,9 +51,6 @@ interface ActivityDetail {
 }
 
 type StatusFilter = "pending" | "accepted" | "rejected";
-
-const getToken = () =>
-  typeof window !== "undefined" ? localStorage.getItem("access") : null;
 
 const BASE = getBaseUrl();
 
@@ -99,9 +97,7 @@ const deptCache = new Map<number, string>();
 async function fetchDeptName(deptId: number): Promise<string> {
   if (deptCache.has(deptId)) return deptCache.get(deptId)!;
   try {
-    const res = await authFetch(`${BASE}/api/family/departments/${deptId}/`, {
-      headers: { Authorization: `Bearer ${getToken()}` },
-    });
+    const res = await authFetch(`${BASE}/api/family/departments/${deptId}/`);
     if (!res.ok) return `قسم ${deptId}`;
     const data = await res.json();
     const name = data.name || data.dept_name || data.department_name || `قسم ${deptId}`;
@@ -310,12 +306,12 @@ function ActivityCard({
 
 /* ── Main ── */
 export default function Activities() {
+  const { showToast } = useToast();
   const [allActivities, setAllActivities]     = useState<ActivityItem[]>([]);
   const [loading, setLoading]                 = useState(false);
   const [error, setError]                     = useState("");
   const [confirm, setConfirm]                 = useState<{ id: number; action: "approve" | "reject"; title: string } | null>(null);
   const [actionLoading, setActionLoading]     = useState(false);
-  const [toastMsg, setToastMsg]               = useState("");
   const [detailData, setDetailData]           = useState<ActivityDetail | null>(null);
   const [loadingDetailId, setLoadingDetailId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter]       = useState<StatusFilter>("pending");
@@ -351,9 +347,7 @@ export default function Activities() {
 
   const fetchDepartments = useCallback(async () => {
   try {
-    const res = await authFetch(`${BASE}/api/family/departments/`, {
-      headers: { Authorization: `Bearer ${getToken()}` },
-    });
+    const res = await authFetch(`${BASE}/api/family/departments/`);
 
     if (!res.ok) throw new Error();
 
@@ -374,18 +368,11 @@ export default function Activities() {
     };
   }, [allActivities, deptFilter]);
 
-  const showToast = (msg: string) => {
-    setToastMsg(msg);
-    setTimeout(() => setToastMsg(""), 3500);
-  };
-
   const fetchActivities = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
-      const res = await authFetch(`${BASE}/api/event/get-events/`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
+      const res = await authFetch(`${BASE}/api/event/get-events/`);
       if (!res.ok) throw new Error("فشل في جلب البيانات");
       const data: ActivityItem[] = await res.json();
       const enriched = await enrichWithDeptNames(data);
@@ -406,9 +393,7 @@ useEffect(() => {
   const openDetail = async (id: number) => {
     setLoadingDetailId(id);
     try {
-      const res = await authFetch(`${BASE}/api/event/get-events/${id}/`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
+      const res = await authFetch(`${BASE}/api/event/get-events/${id}/`);
       if (!res.ok) throw new Error();
       const data: ActivityDetail = await res.json();
       setDetailData(data);
@@ -428,7 +413,6 @@ useEffect(() => {
         : `${BASE}/api/event/approve-events/${confirm.id}/reject/`;
       const res = await authFetch(endpoint, {
         method: "PATCH",
-        headers: { Authorization: `Bearer ${getToken()}` },
       });
       if (!res.ok) throw new Error();
       const newStatus = confirm.action === "approve" ? "مقبول" : "مرفوض";
@@ -578,8 +562,6 @@ useEffect(() => {
       {detailData && (
         <DetailsModal detail={detailData} onClose={() => setDetailData(null)} />
       )}
-
-      {toastMsg && <div className={styles.toast}>{toastMsg}</div>}
     </div>
   );
 }

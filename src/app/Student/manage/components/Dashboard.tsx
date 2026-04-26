@@ -249,11 +249,12 @@ const Dashboard: React.FC = () => {
         ))}
       </div>
 
-      {/* ── HEADER ── */}
+      {/* ── HEADER — navy gradient card (pattern #1) ── */}
       <header className="dashboard-header">
         <h1>إدارة الأسرة: {familyName}</h1>
         <p>لوحة تحكم خاصة بمؤسس الأسرة لإدارة الأعضاء والفعاليات</p>
         <div className="dashboard-buttons">
+          {/* Ghost button (pattern #3) — on dark bg */}
           <button
             className="btn create-activity"
             onClick={() => setShowCreateActivityForm(true)}
@@ -262,6 +263,7 @@ const Dashboard: React.FC = () => {
             <CalendarPlus size={16} />
             إنشاء فعالية
           </button>
+          {/* Primary CTA (pattern #2) */}
           <button
             className="btn publish-content"
             onClick={() => setShowCreateContentForm(true)}
@@ -298,8 +300,10 @@ const Dashboard: React.FC = () => {
       {showCreateContentForm && (
         <div className="modal-overlay" onClick={() => setShowCreateContentForm(false)}>
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            {/* Modal header — navy gradient (pattern #1) */}
             <div className="modal-header">
               <h2>نشر محتوى جديد</h2>
+              {/* Ghost close (pattern #3) */}
               <button className="close-btn" onClick={() => setShowCreateContentForm(false)}>
                 <X size={18} />
               </button>
@@ -307,6 +311,7 @@ const Dashboard: React.FC = () => {
             <div className="form-content">
               <div className="form-group">
                 <label>عنوان المنشور <span className="optional">(اختياري)</span></label>
+                {/* Form input — pattern #5 */}
                 <input
                   type="text"
                   value={contentTitle}
@@ -329,6 +334,7 @@ const Dashboard: React.FC = () => {
                 <button className="btn-cancel" onClick={() => setShowCreateContentForm(false)}>
                   إلغاء
                 </button>
+                {/* Primary gold submit (pattern #2) */}
                 <button
                   className="btn-submit"
                   onClick={handleCreateContent}
@@ -469,6 +475,7 @@ const Dashboard: React.FC = () => {
                 >
                   إلغاء
                 </button>
+                {/* Navy activity submit */}
                 <button
                   className="btn-submit-activity"
                   onClick={handleCreateActivity}

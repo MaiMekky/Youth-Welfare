@@ -1,24 +1,156 @@
-/* Families hero tweaks that sit on top of the shared header-card styles */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
 
-.families-hero {
-  margin: 0;
+/* ═══════════════════════════════════════════
+   TOKENS — exact copy from the admin page CSS
+═══════════════════════════════════════════ */
+:root {
+  --navy:        #1E3A5F;
+  --navy-mid:    #2D5F8A;
+  --navy-light:  #EBF3FB;
+  --gold:        #C49B3A;
+  --gold-dark:   #A67F2C;
+  --border:      #E2ECF5;
+  --bg:          #EDF2F8;
+  --text:        #1A2E42;
+  --mute:        #6B8299;
+  --radius:      10px;
+  --shadow:      0 2px 12px rgba(26,46,66,.08);
 }
 
-.families-banner-wrap {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 16px 24px 0;
+/* ═══════════════════════════════════════════
+   PAGE HEADER  — mirrors .pageHeader in doc 6
+═══════════════════════════════════════════ */
+.fam-page-header {
+  background: linear-gradient(140deg, var(--navy) 0%, var(--navy-mid) 100%);
+  border-radius: 16px;
+  padding: 24px 30px;
+  box-shadow: 0 4px 18px rgba(30,58,95,.22);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-family: 'Cairo', sans-serif;
+  direction: rtl;
+}
+
+.fam-page-header__text {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* mirrors .pageTitle */
+.fam-page-header__title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+}
+
+/* mirrors .pageSubtitle */
+.fam-page-header__subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255,255,255,.65);
+  font-weight: 500;
+}
+
+/* ── Buttons row ── */
+.fam-page-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Primary — mirrors .btnAddUser exactly */
+.fam-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+  color: #fff;
+  padding: 13px 28px;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: 'Cairo', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  box-shadow: 0 4px 16px rgba(196,155,58,.4);
+  transition: all .2s;
+  white-space: nowrap;
+}
+.fam-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(196,155,58,.52);
+}
+
+/* Secondary — ghost on dark header */
+.fam-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,.12);
+  color: #fff;
+  padding: 13px 28px;
+  border: 1.5px solid rgba(255,255,255,.28);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: 'Cairo', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  transition: all .2s;
+  white-space: nowrap;
+}
+.fam-btn-secondary:hover {
+  background: rgba(255,255,255,.22);
+  transform: translateY(-2px);
+}
+
+/* ═══════════════════════════════════════════
+   BANNER WRAPPER
+═══════════════════════════════════════════ */
+.fam-banner-wrap {
+  width: 100%;
   box-sizing: border-box;
 }
 
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
 @media (max-width: 768px) {
-  .families-banner-wrap {
-    padding: 12px 16px 0;
+  .fam-page-header {
+    padding: 20px 22px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .fam-page-header__title  { font-size: 20px; }
+  .fam-page-header__subtitle { font-size: 13px; }
+
+  .fam-page-header__actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .fam-btn-primary,
+  .fam-btn-secondary {
+    width: 100%;
+    justify-content: center;
+    font-size: 15px;
   }
 }
 
 @media (max-width: 480px) {
-  .families-banner-wrap {
-    padding: 12px;
+  .fam-page-header {
+    padding: 16px 16px;
+    border-radius: 12px;
   }
+
+  .fam-page-header__title { font-size: 18px; }
 }

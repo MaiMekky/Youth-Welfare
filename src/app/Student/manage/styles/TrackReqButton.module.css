@@ -1,27 +1,49 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --navy:       #1E3A5F;
+  --navy-mid:   #2D5F8A;
+  --navy-light: #EBF3FB;
+  --gold:       #C49B3A;
+  --gold-dark:  #A67F2C;
+  --gold-pale:  #FDF6E3;
+  --green:      #059669;
+  --green-bg:   #ECFDF5;
+  --green-bdr:  #6EE7B7;
+  --red:        #DC2626;
+  --red-bg:     #FEF2F2;
+  --red-bdr:    #FECACA;
+  --warning:    #D97706;
+  --border:     #E2ECF5;
+  --bg:         #EDF2F8;
+  --text:       #1A2E42;
+  --mute:       #6B8299;
+  --radius:     10px;
+  --shadow:     0 2px 12px rgba(26,46,66,.08);
+}
 
 /* ═══════════════════════════════════════════
-   HERO CARD — full-width, matches navy theme
+   HERO CARD — navy gradient header block
 ═══════════════════════════════════════════ */
 .heroCard {
   width: 100%;
-  background: linear-gradient(135deg, #1a2744 0%, #243358 60%, #1d2e52 100%);
-  border-radius: 14px;
+  background: linear-gradient(140deg, #1E3A5F 0%, #2D5F8A 100%);
+  border-radius: 16px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(26, 39, 68, 0.18);
+  box-shadow: 0 4px 18px rgba(30, 58, 95, 0.22);
   margin-bottom: 24px;
   font-family: 'Cairo', sans-serif;
   direction: rtl;
 }
 
-/* Gold accent line on top */
+/* Gold accent stripe on top */
 .heroCard::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #c9972a 0%, #e0aa35 50%, #c9972a 100%);
+  background: linear-gradient(90deg, var(--gold) 0%, var(--gold-dark) 50%, var(--gold) 100%);
   z-index: 2;
 }
 
@@ -30,8 +52,8 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at 10% 50%, rgba(201,151,42,0.09) 0%, transparent 55%),
-    radial-gradient(ellipse at 90% 20%, rgba(255,255,255,0.03) 0%, transparent 45%);
+    radial-gradient(ellipse at 10% 50%, rgba(196, 155, 58, 0.09) 0%, transparent 55%),
+    radial-gradient(ellipse at 90% 20%, rgba(255, 255, 255, 0.03) 0%, transparent 45%);
   pointer-events: none;
   z-index: 0;
 }
@@ -44,7 +66,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 32px;
-  padding: 32px 40px;
+  padding: 24px 30px;
 }
 
 /* ── Text block ── */
@@ -54,8 +76,8 @@
 }
 
 .heroTitle {
-  font-size: 1.65rem;
-  font-weight: 800;
+  font-size: 24px;
+  font-weight: 900;
   color: #ffffff;
   margin: 0 0 6px 0;
   line-height: 1.2;
@@ -68,14 +90,15 @@
   display: block;
   width: 44px;
   height: 3px;
-  background: #c9972a;
+  background: var(--gold);
   border-radius: 3px;
   margin-top: 10px;
 }
 
 .heroSub {
-  font-size: 0.9rem;
-  color: rgba(255,255,255,0.58);
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.65);
   margin: 14px 0 0 0;
   line-height: 1.6;
 }
@@ -94,12 +117,12 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 11px 24px;
+  padding: 13px 28px;
   border: none;
-  border-radius: 9px;
+  border-radius: var(--radius);
   font-family: 'Cairo', sans-serif;
-  font-size: 0.925rem;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 800;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
@@ -110,26 +133,26 @@
 .btnPrimary:active,
 .btnSecondary:active { transform: translateY(0); }
 
-/* Gold — primary action */
+/* Gold gradient — primary action */
 .btnPrimary {
-  background: #c9972a;
-  color: #1a2744;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(196, 155, 58, 0.4);
 }
 .btnPrimary:hover {
-  background: #e0aa35;
-  box-shadow: 0 5px 18px rgba(201,151,42,0.42);
+  box-shadow: 0 6px 22px rgba(196, 155, 58, 0.55);
 }
 
-/* Ghost — secondary action */
+/* Ghost — secondary action (only on dark bg) */
 .btnSecondary {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
-  border: 1.5px solid rgba(255,255,255,0.2);
+  border: 1.5px solid rgba(255, 255, 255, 0.28);
 }
 .btnSecondary:hover {
-  background: rgba(255,255,255,0.18);
-  border-color: rgba(255,255,255,0.35);
-  box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
 }
 
 /* ═══════════════════════════════════════════
@@ -140,35 +163,28 @@
     flex-direction: column;
     align-items: flex-end;
     gap: 20px;
-    padding: 28px 24px;
+    padding: 15px 18px;
   }
 
   .heroText { width: 100%; }
 
-  .heroTitle { font-size: 1.35rem; }
+  .heroTitle { font-size: 17px; }
 
   .heroActions {
     width: 100%;
-    flex-direction: row;
-    justify-content: stretch;
+    flex-direction: column;
+    gap: 10px;
   }
 
   .btnPrimary,
   .btnSecondary {
-    flex: 1;
+    width: 100%;
     justify-content: center;
-    padding: 12px 16px;
   }
 }
 
 @media (max-width: 480px) {
-  .heroInner { padding: 22px 18px; }
-
-  .heroTitle  { font-size: 1.15rem; }
-  .heroSub    { font-size: 0.82rem; margin-top: 12px; }
-
-  .heroActions { flex-direction: column; gap: 10px; }
-
-  .btnPrimary,
-  .btnSecondary { width: 100%; font-size: 0.9rem; }
+  .heroInner { padding: 15px 18px; }
+  .heroTitle  { font-size: 17px; }
+  .heroSub    { font-size: 13px; margin-top: 10px; }
 }

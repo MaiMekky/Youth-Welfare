@@ -212,7 +212,7 @@ export default function Events() {
         </div>
       )}
 
-      {/* ══ HERO ══ */}
+      {/* ══ HERO — navy gradient header card ══ */}
       <div className="events-hero">
         <div className="hero-inner">
           <div className="hero-text">

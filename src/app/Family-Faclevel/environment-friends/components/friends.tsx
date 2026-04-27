@@ -754,99 +754,78 @@ export default function FriendsForm() {
   return (
     <div className={styles.formContainer}>
 
-      {/* ══════════════════════════════════════
-          WIZARD HEADER  (matches CreateFamForm)
-      ══════════════════════════════════════ */}
-      <div className={styles["cf-progress-header"]}>
-        {/* top row: back | title | step counter */}
-        <div className={styles["cf-progress-top"]}>
-          <button className={styles["cf-back-page"]} type="button">
-            <ChevronRight size={15} /> العودة للقائمة
-          </button>
-          <h1 className={styles["cf-wizard-title"]}>
-            إنشاء أسرة أصدقاء البيئة
-          </h1>
-          <span className={styles["cf-step-count"]}>
-            {currentStep + 1} / {STEPS.length}
-          </span>
-        </div>
+     <div className={styles["cf-page-banner"]}>
+      <h1 className={styles["cf-page-banner-title"]}>إنشاء أسرة أصدقاء البيئة</h1>
+      <p className={styles["cf-page-banner-breadcrumb"]}>
+        إدارة الأسرة الطلابية / طلبات / إنشاء أسرة أصدقاء البيئة
+      </p>
+        <span className={styles["cf-step-count"]}>
+          {currentStep + 1} / {STEPS.length}
+        </span>
+    </div>
 
-        {/* step indicators */}
-        <div className={styles["cf-steps"]}>
-          {STEPS.map((step, idx) => {
-            const isDone = completedSteps.has(idx);
-            const isActive = idx === currentStep;
-            const isPast = idx < currentStep;
-            const Icon = step.icon;
-            return (
-              <React.Fragment key={idx}>
-                <div
-                  className={[
-                    styles["cf-step-indicator"],
-                    isActive
-                      ? styles["cf-step-active"]
-                      : isDone || isPast
-                      ? styles["cf-step-done"]
-                      : styles["cf-step-pending"],
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                >
-                  <button
-                    type="button"
-                    className={styles["cf-step-circle"]}
-                    onClick={() => {
-                      if (idx < currentStep) {
-                        setCurrentStep(idx);
-                        return;
-                      }
-                      if (idx > currentStep) {
-                        let ok = true;
-                        for (let s = currentStep; s < idx; s++) {
-                          const errs = validateStep(s);
-                          if (Object.keys(errs).length) {
-                            setFieldErrors((p) => ({ ...p, ...errs }));
-                            showNotif(
-                              `❌ ${errs[Object.keys(errs)[0]]}`,
-                              "error"
-                            );
-                            ok = false;
-                            break;
-                          }
-                          setCompletedSteps((p) => new Set(p).add(s));
-                        }
-                        if (ok) setCurrentStep(idx);
-                      }
-                    }}
-                  >
-                    {isDone || isPast ? (
-                      <CheckCircle size={14} />
-                    ) : (
-                      <Icon size={13} />
-                    )}
-                  </button>
-                  <span className={styles["cf-step-label"]}>{step.label}</span>
-                </div>
-                {idx < STEPS.length - 1 && (
-                  <div
-                    className={`${styles["cf-step-line"]} ${
-                      isPast || isDone ? styles["cf-line-done"] : ""
-                    }`}
-                  />
-                )}
-              </React.Fragment>
-            );
-          })}
-        </div>
-
-        {/* progress bar */}
-        <div className={styles["cf-progress-bar"]}>
-          <div
-            className={styles["cf-progress-fill"]}
-            style={{ width: `${progressPct}%` }}
-          />
-        </div>
+    {/* ══ Wizard Progress Header ══ */}
+    <div className={styles["cf-progress-header"]}>
+      {/* cf-progress-top is hidden via CSS, keep it for step count ref */}
+      <div className={styles["cf-progress-top"]}>
+        <span />
+        <span />
       </div>
+
+      <div className={styles["cf-steps"]}>
+        {STEPS.map((step, idx) => {
+          const isDone = completedSteps.has(idx);
+          const isActive = idx === currentStep;
+          const isPast = idx < currentStep;
+          const Icon = step.icon;
+          return (
+            <React.Fragment key={idx}>
+              <div
+                className={[
+                  styles["cf-step-indicator"],
+                  isActive ? styles["cf-step-active"]
+                  : isDone || isPast ? styles["cf-step-done"]
+                  : styles["cf-step-pending"],
+                ].filter(Boolean).join(" ")}
+              >
+                <button
+                  type="button"
+                  className={styles["cf-step-circle"]}
+                  onClick={() => {
+                    if (idx < currentStep) { setCurrentStep(idx); return; }
+                    if (idx > currentStep) {
+                      let ok = true;
+                      for (let s = currentStep; s < idx; s++) {
+                        const errs = validateStep(s);
+                        if (Object.keys(errs).length) {
+                          setFieldErrors((p) => ({ ...p, ...errs }));
+                          showNotif(`❌ ${errs[Object.keys(errs)[0]]}`, "error");
+                          ok = false; break;
+                        }
+                        setCompletedSteps((p) => new Set(p).add(s));
+                      }
+                      if (ok) setCurrentStep(idx);
+                    }
+                  }}
+                >
+                  {/* Show number instead of icon to match image */}
+                  {isDone || isPast ? <CheckCircle size={14} /> : idx + 1}
+                </button>
+                <span className={styles["cf-step-label"]}>{step.label}</span>
+              </div>
+              {idx < STEPS.length - 1 && (
+                <div
+                  className={`${styles["cf-step-line"]} ${
+                    isPast || isDone ? styles["cf-line-done"] : ""
+                  }`}
+                />
+              )}
+            </React.Fragment>
+          );
+        })}
+      </div>
+    </div>
+
 
       {/* ── Body ── */}
       <div className={styles["member-form-container"]}>

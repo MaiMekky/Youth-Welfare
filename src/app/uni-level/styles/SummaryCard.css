@@ -3,7 +3,7 @@
 /* ── Stats Grid ── */
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(260px, 1fr));
   gap: 14px;
   width: 100%;
   box-sizing: border-box;

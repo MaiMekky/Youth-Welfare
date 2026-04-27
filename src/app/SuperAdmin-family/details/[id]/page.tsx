@@ -254,39 +254,41 @@ export default function FamilyDetailsPage() {
       {/* ================= Events ================= */}
       {activeTab === 'events' && (
         <div className={styles.contentArea}>
-          <h2 className={styles.sectionTitle}>
-            فعاليات الأسرة
-          </h2>
-
           {family.family_events.length === 0 ? (
             <div className={styles.emptyStateContainer}>
               <p className={styles.emptyStateText}>لا توجد فعاليات حالياً</p>
             </div>
           ) : (
-            <div className={styles.eventsGrid}>
-              {family.family_events.map((event) => (
-                <div
-                  key={event.event_id}
-                  className={styles.eventCard}
-                >
-                  <div className={styles.eventHeader}>
-                    <h3 className={styles.eventTitle}>
-                      {event.title}
-                    </h3>
-                    <span 
-                      className={styles.eventStatusBadge}
-                      style={getEventStatusStyle(event.status)}
-                    >
-                      {event.status}
-                    </span>
-                  </div>
-
-                  <div className={styles.eventMeta}>
-                    <span>{event.st_date}</span>
-                    <span>{event.cost} جنيه</span>
-                  </div>
-                </div>
-              ))}
+            <div className={styles.tableContainer}>
+              <table className={styles.membersTable}>
+                <thead>
+                  <tr>
+                    <th>اسم الفعالية</th>
+                    <th>تاريخ البدء</th>
+                    <th>التكلفة</th>
+                    <th>الحالة</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {family.family_events.map((event) => (
+                    <tr key={event.event_id}>
+                      <td data-label="اسم الفعالية">{event.title}</td>
+                      <td data-label="تاريخ البدء">{event.st_date}</td>
+                      <td data-label="التكلفة">
+                        {event.cost ? `${event.cost} جنيه` : 'مجاني'}
+                      </td>
+                      <td data-label="الحالة">
+                        <span
+                          className={styles.eventStatusBadge}
+                          style={getEventStatusStyle(event.status)}
+                        >
+                          {event.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>

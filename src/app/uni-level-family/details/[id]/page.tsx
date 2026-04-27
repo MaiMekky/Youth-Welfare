@@ -559,17 +559,17 @@ export default function FamilyDetailsPage() {
                         </td>
                         <td data-label="الإجراءات">
                           <div className={styles.memberActions}>
-                            <button
+                           <button
                               className={styles.btnApprove}
                               onClick={() => handleApproveMember(m.student_id)}
-                              disabled={m.status === 'مقبول' || m.status === 'مرفوض'}
+                              disabled={m.status === 'مقبول' || m.status === 'مرفوض' || familyData.status === 'مرفوض'}
                             >
                               قبول
                             </button>
                             <button
                               className={styles.btnReject}
                               onClick={() => handleRejectMember(m.student_id)}
-                              disabled={m.status === 'مرفوض' || m.status === 'مقبول'}
+                              disabled={m.status === 'مرفوض' || m.status === 'مقبول' || familyData.status === 'مرفوض'}
                             >
                               رفض
                             </button>
@@ -587,43 +587,39 @@ export default function FamilyDetailsPage() {
 
       {activeTab === 'events' && (
         <div className={styles.contentArea}>
-          <h2 className={styles.sectionTitle}>فعاليات الأسرة</h2>
-
           {familyData.family_events.length === 0 ? (
             <div className={styles.emptyStateContainer}>
               <p className={styles.emptyStateText}>لا توجد فعاليات حالياً</p>
             </div>
           ) : (
-            <div className={styles.eventsGrid}>
-              {familyData.family_events.map((raw) => {
-                const event = normalizeEvent(raw);
-                return (
-                  <div key={event.event_id} className={styles.eventCard}>
-                    <div className={styles.eventHeader}>
-                      <h3 className={styles.eventTitle}>{event.title}</h3>
-                      <span
-                        className={styles.eventStatusBadge}
-                        style={
-                          event.status === 'مقبول'
-                            ? { backgroundColor: '#D4F4DD', color: '#2E7D32' }
-                            : event.status === 'منتظر' || event.status === 'في الانتظار'
-                            ? { backgroundColor: '#FFF3E0', color: '#E65100' }
-                            : event.status === 'مرفوض'
-                            ? { backgroundColor: '#FFE0E0', color: '#C62828' }
-                            : { backgroundColor: '#F5F5F5', color: '#666' }
-                        }
-                      >
-                        {event.status}
-                      </span>
-                    </div>
-
-                    <div className={styles.eventMeta}>
-                      <span>{event.st_date}</span>
-                      <span>{event.cost ? `${event.cost} جنيه` : 'مجاني'}</span>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className={styles.tableContainer}>
+              <table className={styles.membersTable}>
+                <thead>
+                  <tr>
+                    <th>اسم الفعالية</th>
+                    <th>النوع</th>
+                    <th>تاريخ البدء</th>
+                    <th>التكلفة</th>
+                    <th>الحالة</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {familyData.family_events.map((raw) => {
+                    const event = normalizeEvent(raw);
+                    return (
+                      <tr key={event.event_id}>
+                        <td data-label="اسم الفعالية">{event.title}</td>
+                        <td data-label="النوع">{event.type}</td>
+                        <td data-label="تاريخ البدء">{event.st_date}</td>
+                        <td data-label="التكلفة">{event.cost ? `${event.cost} جنيه` : 'مجاني'}</td>
+                        <td data-label="الحالة">
+                          <span className={getStatusColor(event.status)}>{event.status}</span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
         </div>

@@ -137,13 +137,22 @@ export default function PlanDetailsPage() {
           })()
         : null;
 
-      if (!res.ok) {
-        const msg =
-          (typeof json === "object" && json && ((json as Record<string, unknown>).detail || (json as Record<string, unknown>).message || (json as Record<string, unknown>).error)) ||
-          (typeof json === "string" ? json : "") ||
-          `طلب غير ناجح (${res.status})`;
-        return { ok: false, message: String(msg) };
+     if (!res.ok) {
+      if (res.status === 403) {
+        return { ok: false, message: "ليس لديك صلاحية لتنفيذ هذا الإجراء" };
       }
+      if (res.status === 500) {
+        return { ok: false, message: "حدث خطأ في السيرفر، برجاء المحاولة لاحقاً" };
+      }
+      const msg =
+        (typeof json === "object" && json &&
+          ((json as Record<string, unknown>).detail ||
+          (json as Record<string, unknown>).message ||
+          (json as Record<string, unknown>).error)) ||
+        (typeof json === "string" ? json : "") ||
+        `طلب غير ناجح (${res.status})`;
+      return { ok: false, message: String(msg) };
+    }
 
       return { ok: true, data: json };
     } catch (e: unknown) {
@@ -187,11 +196,17 @@ export default function PlanDetailsPage() {
 
       const text = await res.text();
 
-      if (!res.ok) {
-        setPlan(null);
+     if (!res.ok) {
+      setPlan(null);
+      if (res.status === 403) {
+        showToast("❌ ليس لديك صلاحية لعرض هذه الخطة", "error");
+      } else if (res.status === 500) {
+        showToast("❌ حدث خطأ في السيرفر، برجاء المحاولة لاحقاً", "error");
+      } else {
         showToast(`❌ فشل تحميل تفاصيل الخطة (Status ${res.status})`, "error");
-        return;
       }
+      return;
+    }
 
       let parsed: Record<string, unknown> | null = null;
       try {
@@ -252,9 +267,10 @@ export default function PlanDetailsPage() {
     router.push(`/uni-level-activities/plans/${id}/propsed/create?mode=convert`);
   };
 
-  const onViewLinkedEvent = (eventId: number) => {
-    router.push(`/uni-level-activities/${eventId}`);
-  };
+ const onViewLinkedEvent = (eventId: number) => {
+  sessionStorage.setItem("eventDetails_from", `/uni-level-activities/plans/${id}`);
+  router.push(`/uni-level-activities/${eventId}`);
+};
 
   // UI safe fallbacks
   const planTitle = plan?.name ?? "—";

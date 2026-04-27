@@ -187,6 +187,7 @@ export default function Page() {
   }, [rows]);
 
   const onView = (eventId: number) => {
+    sessionStorage.setItem("eventDetails_from", `/uni-level-activities\/uni-level-faculty-events`);
     router.push(`/uni-level-activities/${eventId}`);
   };
 

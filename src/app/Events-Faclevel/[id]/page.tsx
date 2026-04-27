@@ -55,13 +55,20 @@ async function apiFetch<T>(
       : null;
 
     if (!res.ok) {
+      if (res.status === 403) {
+        return { ok: false, message: "ليس لديك صلاحية للوصول لهذه الفعالية", status: 403 };
+      }
+      if (res.status === 500) {
+        return { ok: false, message: "حدث خطأ في الخادم، برجاء المحاولة لاحقاً", status: 500 };
+      }
       const msg =
         (typeof maybeJson === "object" &&
           maybeJson &&
-          ((maybeJson as Record<string, unknown>).detail || (maybeJson as Record<string, unknown>).message || (maybeJson as Record<string, unknown>).error)) ||
+          ((maybeJson as Record<string, unknown>).detail ||
+          (maybeJson as Record<string, unknown>).message ||
+          (maybeJson as Record<string, unknown>).error)) ||
         (typeof maybeJson === "string" ? maybeJson : "") ||
         `طلب غير ناجح (${res.status})`;
-
       return { ok: false, message: String(msg), status: res.status, raw: maybeJson };
     }
 
@@ -275,6 +282,7 @@ export default function EventDetailsPage() {
 
   const [rows, setRows] = useState<StudentRow[]>([]);
   const [busy, setBusy] = useState(false);
+  const [backPath, setBackPath] = useState("/Events-Faclevel");
 
 
   /* ===================== Images ===================== */
@@ -365,10 +373,16 @@ export default function EventDetailsPage() {
     const res = await apiFetch<ApiEventDetails>(`/api/event/get-events/${id}/`, { method: "GET" });
     setLoadingEvent(false);
 
-    if (!res.ok) {
+     if (!res.ok) {
+    if (res.status === 403) {
+      showToast("❌ ليس لديك صلاحية لعرض هذه الفعالية", "error");
+    } else if (res.status === 500) {
+      showToast("❌ حدث خطأ في السيرفر، برجاء المحاولة لاحقاً", "error");
+    } else {
       showToast(res.message, "error");
-      return;
     }
+    return;
+  }
 
     setEvent(res.data);
 
@@ -496,6 +510,11 @@ const uploadImages = async (files: FileList | null) => {
     loadImages();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  useEffect(() => {
+  const from = sessionStorage.getItem("eventDetails_from");
+  if (from) setBackPath(from);
+}, []);
 
   const [reportOpen, setReportOpen] = useState(false);
   const [reportForm, setReportForm] = useState<ReportFormState>(emptyReportForm);
@@ -862,7 +881,10 @@ const uploadImages = async (files: FileList | null) => {
 
             <button
               className={styles.backBtn}
-              onClick={() => router.back()}
+              onClick={() => {
+                sessionStorage.removeItem("eventDetails_from"); 
+                router.push(backPath);
+              }}
               type="button"
               disabled={exportBusy !== null}
               style={{ opacity: exportBusy !== null ? 0.7 : 1 }}

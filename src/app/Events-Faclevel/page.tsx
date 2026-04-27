@@ -127,6 +127,10 @@ export default function Page() {
   const [deptFilter, setDeptFilter] = useState<number | "all">("all");
   const [search, setSearch] = useState("");
 
+useEffect(() => {
+  window.scrollTo(0, 0);
+}, []);
+
   const showFilters = userDepartments.length > 1;
 
   useEffect(() => {

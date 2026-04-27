@@ -162,7 +162,9 @@ export default function EventForm({
   const [selectedFacultyIds, setSelectedFacultyIds] = useState<number[]>([]);
   const allSelected = faculties.length > 0 && selectedFacultyIds.length === faculties.length;
   const someSelected = selectedFacultyIds.length > 0 && !allSelected;
-
+   // Add this state near the other useState declarations
+  const [originalForm, setOriginalForm] = useState<FormState | null>(null);
+  const [originalFacultyIds, setOriginalFacultyIds] = useState<number[]>([]);
   /** ===== Form ===== */
   const [form, setForm] = useState<FormState>({
     title: "",
@@ -234,43 +236,59 @@ export default function EventForm({
   }, []);
 
   /** ===== Load event details for edit ===== */
-  useEffect(() => {
-    if (!isEditMode || !eventId) return;
-    (async () => {
-      setLoadingEvent(true);
-      const res = await apiFetch<ApiEventDetails>(`/api/event/get-events/${eventId}/`, { method: "GET" });
-      setLoadingEvent(false);
-      if (!res.ok) { showToast(res.message || "فشل تحميل بيانات الفعالية", "error"); return; }
-      const e = res.data;
-      setForm((p) => ({
-        ...p,
-        title: e?.title ?? "",
-        st_date: e?.st_date ?? "",
-        end_date: e?.end_date ?? "",
-        location: e?.location ?? "",
-        s_limit: Number(e?.s_limit ?? 100),
-        cost: String(e?.cost ?? ""),
-        description: e?.description ?? "",
-        type: "خارجي",
-        restrictions: e?.restrictions ?? "",
-        reward: e?.reward ?? "",
-        resource: e?.resource ?? "",
-        imgs: e?.imgs ?? "",
-        dept: e?.dept ?? "",
-      }));
-      setSelectedFacultyIds(Array.isArray(e?.selected_facs) ? e.selected_facs : []);
-    })();
-  }, [isEditMode, eventId]);
+ useEffect(() => {
+  if (!isEditMode || !eventId) return;
+  (async () => {
+    setLoadingEvent(true);
+    const res = await apiFetch<ApiEventDetails>(`/api/event/get-events/${eventId}/`, { method: "GET" });
+    setLoadingEvent(false);
+    if (!res.ok) { showToast(res.message || "فشل تحميل بيانات الفعالية", "error"); return; }
+    const e = res.data;
 
+    const loaded: FormState = {
+      title: e?.title ?? "",
+      st_date: e?.st_date ?? "",
+      end_date: e?.end_date ?? "",
+      location: e?.location ?? "",
+      s_limit: Number(e?.s_limit ?? 100),
+      cost: String(e?.cost ?? ""),
+      description: e?.description ?? "",
+      type: "خارجي",
+      restrictions: e?.restrictions ?? "",
+      reward: e?.reward ?? "",
+      resource: e?.resource ?? "",
+      imgs: e?.imgs ?? "",
+      dept: e?.dept ?? "",
+    };
+
+    setForm(loaded);                    // ← populate the form fields
+    setOriginalForm(loaded);            // ← save original for comparison
+    setOriginalFacultyIds(Array.isArray(e?.selected_facs) ? e.selected_facs : []);
+    setSelectedFacultyIds(Array.isArray(e?.selected_facs) ? e.selected_facs : []);  // ← also populate checkboxes
+  })();
+}, [isEditMode, eventId]);
   /** ===== Submit ===== */
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const nextErrors = validate();
     setErrors(nextErrors);
+
+        // Add after validate() check, before getDeptFromToken()
+    if (isEditMode && originalForm) {
+      const formUnchanged =
+        JSON.stringify(form) === JSON.stringify(originalForm) &&
+        JSON.stringify([...selectedFacultyIds].sort()) === JSON.stringify([...originalFacultyIds].sort());
+
+      if (formUnchanged) {
+        showToast("برجاء التعديل أو إلغاء التعديل", "warning");
+        return;
+      }
+    }
     if (Object.keys(nextErrors).length) {
       showToast("⚠️   برجاء استكمال البيانات المطلوبة", "warning");
       return;
     }
+
     const dept = getDeptFromToken();
     if (!dept) { showToast("❌ لا يوجد رقم قسم في التوكن", "error"); return; }
 
@@ -353,30 +371,6 @@ export default function EventForm({
               </select>
               {errors.type && <div className={styles.errorText}>{errors.type}</div>}
             </div> */}
-
-            
-            <div className={styles.field}>
-              <label className={styles.label}>تاريخ البداية</label>
-              <input
-                className={`${styles.input} ${errors.st_date ? styles.inputError : ""}`}
-                type="date"
-                value={form.st_date}
-                onChange={(ev) => setField("st_date", ev.target.value)}
-              />
-              {errors.st_date && <div className={styles.errorText}>{errors.st_date}</div>}
-            </div>
-
-            <div className={styles.field}>
-              <label className={styles.label}>تاريخ النهاية</label>
-              <input
-                className={`${styles.input} ${errors.end_date ? styles.inputError : ""}`}
-                type="date"
-                value={form.end_date}
-                onChange={(ev) => setField("end_date", ev.target.value)}
-              />
-              {errors.end_date && <div className={styles.errorText}>{errors.end_date}</div>}
-            </div>
-
               <div className={styles.field}>
               <label className={styles.label}>القسم</label>
 
@@ -395,6 +389,30 @@ export default function EventForm({
               </select>
 
               {errors.dept && <div className={styles.errorText}>{errors.dept}</div>}
+            </div>
+            
+            <div className={styles.field}>
+              <label className={styles.label}>تاريخ البداية</label>
+              <input
+                className={`${styles.input} ${errors.st_date ? styles.inputError : ""}`}
+                type="date"
+                min={new Date().toISOString().split("T")[0]}
+                value={form.st_date}
+                onChange={(ev) => setField("st_date", ev.target.value)}
+              />
+              {errors.st_date && <div className={styles.errorText}>{errors.st_date}</div>}
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>تاريخ النهاية</label>
+              <input
+                className={`${styles.input} ${errors.end_date ? styles.inputError : ""}`}
+                type="date"
+                min={form.st_date || new Date().toISOString().split("T")[0]} 
+                value={form.end_date}
+                onChange={(ev) => setField("end_date", ev.target.value)}
+              />
+              {errors.end_date && <div className={styles.errorText}>{errors.end_date}</div>}
             </div>
             
             <div className={styles.field}>

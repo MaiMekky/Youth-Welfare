@@ -139,6 +139,11 @@ export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (ap
       />
 
       <div className="table-container">
+        {loading && (
+        <div className="table-loading-overlay">
+          <div className="table-spinner" />
+        </div>
+      )}
         <div className="table-scroll-wrapper">
           <table>
             <thead>

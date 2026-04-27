@@ -31,7 +31,8 @@ export default function CreatePlanModal({
   const [saving, setSaving] = useState(false);
 
   const [departments, setDepartments] = useState<Record<string, unknown>[]>([]);
-
+// Add near other useState declarations
+  const [originalForm, setOriginalForm] = useState<FormState | null>(null);
   const closeAndReset = useCallback(() => {
     setForm({ name: "", term: 1, dept_id: 0 });
     setErrors({});
@@ -50,19 +51,22 @@ export default function CreatePlanModal({
   }, []);
 
   useEffect(() => {
-    if (!open) return;
+  if (!open) return;
 
-    if (initialPlan) {
-      setForm({
-        name: initialPlan.name ?? "",
-        term: initialPlan.term ?? 1,
-        dept_id: initialPlan.dept_id ?? 0,
-      });
-    } else {
-      setForm({ name: "", term: 1, dept_id: 0 });
-    }
-    setErrors({});
-  }, [open, initialPlan]);
+  if (initialPlan) {
+    const loaded: FormState = {
+      name: initialPlan.name ?? "",
+      term: initialPlan.term ?? 1,
+      dept_id: initialPlan.dept_id ?? 0,
+    };
+    setForm(loaded);
+    setOriginalForm(loaded);   // ← save original
+  } else {
+    setForm({ name: "", term: 1, dept_id: 0 });
+    setOriginalForm(null);
+  }
+  setErrors({});
+}, [open, initialPlan]);
 
   // ESC
   useEffect(() => {
@@ -102,10 +106,17 @@ export default function CreatePlanModal({
     const nextErrors = validate();
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
-      showToast("❌ مراجعة الحقول المطلوبة", "error");
+    showToast("❌ برجاء استكمال الحقول المطلوبة", "error");
       return;
     }
-
+    
+      if (isEdit && originalForm) {
+    const unchanged = JSON.stringify(form) === JSON.stringify(originalForm);
+    if (unchanged) {
+      showToast("برجاء التعديل أو إلغاء التعديل", "warning");
+      return;
+    }
+  }
     try {
       setSaving(true);
 

@@ -86,8 +86,33 @@
   overflow: hidden;
   background: #fff;
   font-family: 'Cairo', sans-serif;
+  position: relative; /* needed for overlay positioning */
 }
 
+.table-loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: inherit;
+  backdrop-filter: blur(1px);
+}
+
+.table-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e0e7ef;
+  border-top-color: #1E3A5F;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 .table-scroll-wrapper {
   width: 100%;
   overflow-x: auto;

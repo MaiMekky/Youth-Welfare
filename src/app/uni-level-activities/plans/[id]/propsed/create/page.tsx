@@ -139,10 +139,13 @@ const toggleAllFacs = () => {
   const validate = useMemo(
     () => (data: FormState): FormErrors => {
       const next: FormErrors = {};
+      const today = new Date().toISOString().split("T")[0]
       if (!data.title.trim()) next.title = "العنوان مطلوب";
       if (!data.location.trim()) next.location = "المكان مطلوب";
       if (!data.st_date.trim()) next.st_date = "تاريخ البداية مطلوب";
+      else if (data.st_date < today) next.st_date = "تاريخ البداية لا يمكن أن يكون في الماضي";
       if (!data.end_date.trim()) next.end_date = "تاريخ النهاية مطلوب";
+      else if (data.end_date < today) next.end_date = "تاريخ النهاية لا يمكن أن يكون في الماضي";
       if (!data.cost.trim()) next.cost = "التكلفة مطلوبة";
       // if (!data.type.trim()) next.type = "نوع النشاط مطلوب";
       // if (isConvert && !data.dept_id) {
@@ -197,10 +200,10 @@ const toggleAllFacs = () => {
         const nextErrors = validate(form);
         setErrors(nextErrors);
         touchAll();
-        // if (Object.keys(nextErrors).length) {
-        //   showToast("⚠️ برجاء ملء الحقول المطلوبة", "warning");
-        //   return;
-        // }
+        if (Object.keys(nextErrors).length) {
+        showToast("برجاء استكمال البيانات المطلوبة ⚠️", "warning"); 
+        return;
+      }
 
         setSubmitting(true);
 
@@ -227,10 +230,14 @@ const toggleAllFacs = () => {
 
       setSubmitting(false);
 
-      if (!res.ok) {
-        showToast(`❌ ${res.message}`, "error");
-        return;
-      }
+     if (!res.ok) {
+    if (res.status === 500) {                          
+      showToast("حدث خطأ غير متوقع ❌", "error");    
+    } else {                                           
+      showToast(`❌ ${res.message}`, "error");
+    }                                                  
+    return;
+  }
 
       showToast("✅ تم إنشاء فعالية مقترحة بنجاح", "success");
 

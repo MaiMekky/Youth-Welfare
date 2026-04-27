@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import "../styles/Posts.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+
 // ========= Types ==========
 export type PostType = "Post" | "Reminder";
 
@@ -58,6 +59,20 @@ const UserIcon: React.FC = () => (
   >
     <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
     <circle cx="12" cy="7" r="4" />
+  </svg>
+);
+
+// ========= Empty state icon ==========
+const EmptyIcon: React.FC = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.5}
+    className="empty-icon"
+  >
+    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z" />
   </svg>
 );
 
@@ -146,10 +161,9 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
         if (!res.ok) throw new Error("فشل تحميل قائمة الأسر");
 
         const response = await res.json();
-        
-        // Check different possible response structures
+
         let families: Family[] = [];
-        
+
         if (Array.isArray(response)) {
           families = response;
         } else if (response.data && Array.isArray(response.data)) {
@@ -159,16 +173,15 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
         } else if (response.families && Array.isArray(response.families)) {
           families = response.families;
         }
-        
+
         if (families.length === 0) {
           setError("لا توجد أسر متاحة");
           setLoading(false);
           return;
         }
-        
-        // البحث عن أول أسرة بدور "أخ أكبر"
+
         const elderBrotherFamily = families.find(f => f.role === "أخ أكبر");
-        
+
         if (elderBrotherFamily) {
           setSelectedFamilyId(elderBrotherFamily.family_id);
         } else {
@@ -205,14 +218,14 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
         }
 
         const data = await response.json();
-        
+
         let postsArray: ApiPost[] = [];
         if (Array.isArray(data)) {
           postsArray = data;
         } else if (data.posts && Array.isArray(data.posts)) {
           postsArray = data.posts;
         }
-        
+
         const mappedPosts = postsArray.map(mapApiPostToPost);
         setPosts(mappedPosts);
       } catch {
@@ -230,8 +243,16 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
     return (
       <div className="posts-page" dir="rtl">
         <div className="posts-container">
-          <h1 className="page-title">آخر الأخبار والإعلانات</h1>
-          <p style={{ textAlign: 'center', padding: '40px' }}>جاري تحميل المنشورات...</p>
+          <div className="page-header-block">
+            <h1 className="page-title">آخر الأخبار والإعلانات</h1>
+            <p className="page-subtitle">تابع أحدث الأخبار والمستجدات</p>
+          </div>
+          <div className="section-body">
+            <div className="loading-state">
+              <div className="spinner" />
+              <span className="loading-text">جاري تحميل المنشورات...</span>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -240,14 +261,23 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
   return (
     <div className="posts-page" dir="rtl">
       <div className="posts-container">
-        <h1 className="page-title">آخر الأخبار والإعلانات</h1>
-        {error && <p style={{ color: 'red', textAlign: 'center', padding: '20px' }}>{error}</p>}
-        {posts.length === 0 && !error && (
-          <p style={{ textAlign: 'center', padding: '40px' }}>لا توجد منشورات حالياً</p>
-        )}
-        {posts.map((post) => (
-          <PostCard key={post.id} post={post} />
-        ))}
+        <div className="page-header-block">
+          <h1 className="page-title">آخر الأخبار والإعلانات</h1>
+          <p className="page-subtitle">تابع أحدث الأخبار والمستجدات</p>
+        </div>
+        <div className="section-body">
+          {error && <p className="error-msg">{error}</p>}
+          {posts.length === 0 && !error ? (
+            <div className="empty-state">
+              <EmptyIcon />
+              <p className="empty-text">لا توجد منشورات حالياً</p>
+            </div>
+          ) : (
+            posts.map((post) => (
+              <PostCard key={post.id} post={post} />
+            ))
+          )}
+        </div>
       </div>
     </div>
   );

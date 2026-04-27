@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import styles from "../styles/TrackRequest.module.css";
 import { ArrowRight, Building2, Users, Calendar, Clock, CheckCircle, XCircle, AlertCircle, FileSearch } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+
 interface FamilyRequest {
   family_id: number;
   name: string;
@@ -19,10 +20,10 @@ interface TrackRequestProps {
 }
 
 const statusConfig: Record<string, { icon: React.ReactNode; label: string; cls: string }> = {
-  "مقبول":       { icon: <CheckCircle size={15} />, label: "مقبول",        cls: "accepted"  },
-  "مرفوض":       { icon: <XCircle     size={15} />, label: "مرفوض",        cls: "rejected"  },
-  "قيد المراجعة":{ icon: <Clock       size={15} />, label: "قيد المراجعة", cls: "pending"   },
-  "معلق":        { icon: <AlertCircle size={15} />, label: "معلق",         cls: "pending"   },
+  "مقبول":        { icon: <CheckCircle size={15} />, label: "مقبول",        cls: "accepted" },
+  "مرفوض":        { icon: <XCircle     size={15} />, label: "مرفوض",        cls: "rejected" },
+  "قيد المراجعة": { icon: <Clock       size={15} />, label: "قيد المراجعة", cls: "pending"  },
+  "معلق":         { icon: <AlertCircle size={15} />, label: "معلق",         cls: "pending"  },
 };
 
 const TrackRequest: React.FC<TrackRequestProps> = ({ onBack }) => {
@@ -54,14 +55,17 @@ const TrackRequest: React.FC<TrackRequestProps> = ({ onBack }) => {
   return (
     <div className={styles.page}>
 
-      {/* ── Hero Header ── */}
+      {/* ── Pattern #1: Navy gradient hero header ── */}
       <div className={styles.hero}>
         <div className={styles.heroBg} aria-hidden />
         <div className={styles.heroInner}>
           <div className={styles.heroText}>
+            {/* Pattern #1 — page title 24px/900 white */}
             <h1 className={styles.heroTitle}>متابعة طلبات إنشاء الأسرة</h1>
+            {/* Pattern #1 — subtitle rgba(255,255,255,.65) 14px/500 */}
             <p className={styles.heroSub}>تابع حالة طلباتك المقدمة ونتائج المراجعة</p>
           </div>
+          {/* Pattern #3 — ghost button on dark background */}
           <button className={styles.backBtn} onClick={onBack}>
             <ArrowRight size={16} />
             العودة للقائمة
@@ -74,6 +78,7 @@ const TrackRequest: React.FC<TrackRequestProps> = ({ onBack }) => {
 
         {loading && (
           <div className={styles.stateBox}>
+            {/* Pattern #9 — spinner */}
             <div className={styles.spinner} />
             <p>جاري تحميل الطلبات...</p>
           </div>
@@ -88,6 +93,7 @@ const TrackRequest: React.FC<TrackRequestProps> = ({ onBack }) => {
 
         {!loading && !error && requests.length === 0 && (
           <div className={styles.stateBox}>
+            {/* Pattern #8 — empty state icon */}
             <FileSearch size={44} className={styles.stateIconEmpty} />
             <h3 className={styles.stateTitle}>لا توجد طلبات</h3>
             <p className={styles.stateMsg}>لم تقم بتقديم أي طلب إنشاء أسرة حتى الآن</p>
@@ -99,12 +105,14 @@ const TrackRequest: React.FC<TrackRequestProps> = ({ onBack }) => {
             {requests.map((req) => {
               const st = statusConfig[req.status] ?? { icon: <AlertCircle size={15}/>, label: req.status, cls: "pending" };
               return (
+                // Pattern #4 — content card with right gold stripe
                 <div key={req.family_id} className={styles.card}>
 
                   {/* Card top */}
                   <div className={styles.cardTop}>
                     <div className={styles.cardTitleRow}>
                       <h2 className={styles.cardTitle}>{req.name}</h2>
+                      {/* Pattern #6 — status badge pill */}
                       <span className={`${styles.badge} ${styles[st.cls]}`}>
                         {st.icon}
                         {st.label}
@@ -132,7 +140,7 @@ const TrackRequest: React.FC<TrackRequestProps> = ({ onBack }) => {
                       <Calendar size={15} className={styles.metaIcon} />
                       <span className={styles.metaLabel}>تاريخ التقديم</span>
                       <span className={styles.metaVal}>
-                        {new Date(req.created_at).toLocaleDateString("ar-EG", { year:"numeric", month:"long", day:"numeric" })}
+                        {new Date(req.created_at).toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric" })}
                       </span>
                     </div>
                   </div>

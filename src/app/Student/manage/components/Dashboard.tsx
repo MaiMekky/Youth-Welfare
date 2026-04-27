@@ -242,19 +242,19 @@ const Dashboard: React.FC = () => {
   return (
     <div className="dashboard-container">
 
-      {/* TOASTS */}
+      {/* ── TOASTS ── */}
       <div className="toast-container">
         {toasts.map((t) => (
           <Toast key={t.id} message={t.message} type={t.type} onClose={() => removeToast(t.id)} />
         ))}
       </div>
 
-      {/* ── HEADER — navy gradient card (pattern #1) ── */}
+      {/* ── PATTERN #1 — Navy gradient header card ── */}
       <header className="dashboard-header">
         <h1>إدارة الأسرة: {familyName}</h1>
         <p>لوحة تحكم خاصة بمؤسس الأسرة لإدارة الأعضاء والفعاليات</p>
         <div className="dashboard-buttons">
-          {/* Ghost button (pattern #3) — on dark bg */}
+          {/* PATTERN #3 — Ghost button (on dark bg) */}
           <button
             className="btn create-activity"
             onClick={() => setShowCreateActivityForm(true)}
@@ -263,7 +263,7 @@ const Dashboard: React.FC = () => {
             <CalendarPlus size={16} />
             إنشاء فعالية
           </button>
-          {/* Primary CTA (pattern #2) */}
+          {/* PATTERN #2 — Primary CTA (gold gradient) */}
           <button
             className="btn publish-content"
             onClick={() => setShowCreateContentForm(true)}
@@ -275,7 +275,7 @@ const Dashboard: React.FC = () => {
         </div>
       </header>
 
-      {/* ── TABS ── */}
+      {/* ── PATTERN #4 — Content card tabs ── */}
       <div className="dashboard-tabs">
         {tabs.map((t) => (
           <button
@@ -288,7 +288,7 @@ const Dashboard: React.FC = () => {
         ))}
       </div>
 
-      {/* ── TAB CONTENT ── */}
+      {/* ── PATTERN #4 — Content card tab body ── */}
       <div className="dashboard-tabs-content">
         {activeTab === "overview"    && <Overview />}
         {activeTab === "activities"  && <Activities refreshTrigger={activityRefreshTrigger} />}
@@ -296,22 +296,29 @@ const Dashboard: React.FC = () => {
         {activeTab === "posts"       && <Posts refreshTrigger={postRefreshTrigger} />}
       </div>
 
-      {/* ── MODAL: CREATE CONTENT ── */}
+      {/* ══════════════════════════════════════
+          MODAL: CREATE CONTENT
+          Pattern #1 header + white form body
+      ══════════════════════════════════════ */}
       {showCreateContentForm && (
         <div className="modal-overlay" onClick={() => setShowCreateContentForm(false)}>
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            {/* Modal header — navy gradient (pattern #1) */}
+
+            {/* PATTERN #1 — Modal header (navy gradient) */}
             <div className="modal-header">
               <h2>نشر محتوى جديد</h2>
-              {/* Ghost close (pattern #3) */}
+              {/* PATTERN #3 — Ghost close button */}
               <button className="close-btn" onClick={() => setShowCreateContentForm(false)}>
                 <X size={18} />
               </button>
             </div>
+
             <div className="form-content">
               <div className="form-group">
-                <label>عنوان المنشور <span className="optional">(اختياري)</span></label>
-                {/* Form input — pattern #5 */}
+                <label>
+                  عنوان المنشور <span className="optional">(اختياري)</span>
+                </label>
+                {/* PATTERN #5 — Form input */}
                 <input
                   type="text"
                   value={contentTitle}
@@ -320,8 +327,12 @@ const Dashboard: React.FC = () => {
                   className="form-input"
                 />
               </div>
+
               <div className="form-group">
-                <label>محتوى المنشور <span className="required">*</span></label>
+                <label>
+                  محتوى المنشور <span className="required">*</span>
+                </label>
+                {/* PATTERN #5 — Textarea */}
                 <textarea
                   placeholder="اكتب محتوى المنشور..."
                   value={contentBody}
@@ -330,11 +341,12 @@ const Dashboard: React.FC = () => {
                   rows={6}
                 />
               </div>
+
               <div className="form-actions">
                 <button className="btn-cancel" onClick={() => setShowCreateContentForm(false)}>
                   إلغاء
                 </button>
-                {/* Primary gold submit (pattern #2) */}
+                {/* PATTERN #2 — Gold gradient submit */}
                 <button
                   className="btn-submit"
                   onClick={handleCreateContent}
@@ -345,126 +357,230 @@ const Dashboard: React.FC = () => {
                 </button>
               </div>
             </div>
+
           </div>
         </div>
       )}
 
-      {/* ── MODAL: CREATE ACTIVITY ── */}
+      {/* ══════════════════════════════════════
+          MODAL: CREATE ACTIVITY
+          Pattern #1 header + white form body
+      ══════════════════════════════════════ */}
       {showCreateActivityForm && (
         <div className="modal-overlay" onClick={() => setShowCreateActivityForm(false)}>
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+
+            {/* PATTERN #1 — Modal header (navy gradient) */}
             <div className="modal-header">
               <h2>إنشاء فعالية جديدة</h2>
+              {/* PATTERN #3 — Ghost close button */}
               <button className="close-btn" onClick={() => setShowCreateActivityForm(false)}>
                 <X size={18} />
               </button>
             </div>
+
             <div className="form-content">
 
+              {/* Row: title + type */}
               <div className="form-row">
                 <div className="form-group">
-                  <label>عنوان الفعالية <span className="required">*</span></label>
+                  <label>
+                    عنوان الفعالية <span className="required">*</span>
+                  </label>
+                  {/* PATTERN #5 */}
                   <input
-                    type="text" name="title" value={activityData.title}
-                    onChange={handleActivityChange} placeholder="مثلاً: اجتماع شهري"
+                    type="text"
+                    name="title"
+                    value={activityData.title}
+                    onChange={handleActivityChange}
+                    placeholder="مثلاً: اجتماع شهري"
                     className={`form-input${activityErrors.title ? " form-input-error" : ""}`}
                   />
-                  {activityErrors.title && <span className="error-message">{activityErrors.title}</span>}
+                  {activityErrors.title && (
+                    <span className="error-message">{activityErrors.title}</span>
+                  )}
                 </div>
+
                 <div className="form-group">
-                  <label>نوع الفعالية <span className="required">*</span></label>
+                  <label>
+                    نوع الفعالية <span className="required">*</span>
+                  </label>
+                  {/* PATTERN #5 — Select */}
                   <select
-                    name="type" value={activityData.type} onChange={handleActivityChange}
+                    name="type"
+                    value={activityData.type}
+                    onChange={handleActivityChange}
                     className={`form-input${activityErrors.type ? " form-input-error" : ""}`}
                   >
                     <option value="">-- اختر النوع --</option>
-                    {["داخلي","خارجي","نشاط رياضي","نشاط ثقافي","نشاط بيئي","نشاط اجتماعي",
-                      "نشاط علمي","نشاط خدمة عامة","نشاط فني","نشاط معسكرات","اسر","اخر"]
-                      .map((v) => <option key={v} value={v}>{v}</option>)}
+                    {[
+                      "داخلي","خارجي","نشاط رياضي","نشاط ثقافي","نشاط بيئي",
+                      "نشاط اجتماعي","نشاط علمي","نشاط خدمة عامة","نشاط فني",
+                      "نشاط معسكرات","اسر","اخر",
+                    ].map((v) => (
+                      <option key={v} value={v}>{v}</option>
+                    ))}
                   </select>
-                  {activityErrors.type && <span className="error-message">{activityErrors.type}</span>}
+                  {activityErrors.type && (
+                    <span className="error-message">{activityErrors.type}</span>
+                  )}
                 </div>
               </div>
 
+              {/* Committee */}
               <div className="form-group">
-                <label>اللجنة <span className="required">*</span></label>
+                <label>
+                  اللجنة <span className="required">*</span>
+                </label>
                 <select
-                  name="dept_id" value={activityData.dept_id} onChange={handleActivityChange}
+                  name="dept_id"
+                  value={activityData.dept_id}
+                  onChange={handleActivityChange}
                   className={`form-input${activityErrors.dept_id ? " form-input-error" : ""}`}
                 >
                   <option value="">اختر اللجنة</option>
-                  {departments.map((d) => <option key={d.dept_id} value={d.dept_id}>{d.name}</option>)}
+                  {departments.map((d) => (
+                    <option key={d.dept_id} value={d.dept_id}>{d.name}</option>
+                  ))}
                 </select>
-                {activityErrors.dept_id && <span className="error-message">{activityErrors.dept_id}</span>}
+                {activityErrors.dept_id && (
+                  <span className="error-message">{activityErrors.dept_id}</span>
+                )}
               </div>
 
+              {/* Description */}
               <div className="form-group">
-                <label>وصف الفعالية <span className="required">*</span></label>
+                <label>
+                  وصف الفعالية <span className="required">*</span>
+                </label>
                 <textarea
-                  name="description" value={activityData.description} onChange={handleActivityChange}
+                  name="description"
+                  value={activityData.description}
+                  onChange={handleActivityChange}
                   placeholder="اكتب وصفاً للفعالية..."
                   className={`form-textarea${activityErrors.description ? " form-input-error" : ""}`}
                 />
-                {activityErrors.description && <span className="error-message">{activityErrors.description}</span>}
+                {activityErrors.description && (
+                  <span className="error-message">{activityErrors.description}</span>
+                )}
               </div>
 
+              {/* Row: dates + max participants */}
               <div className="form-row">
                 <div className="form-group">
-                  <label>تاريخ البداية <span className="required">*</span></label>
+                  <label>
+                    تاريخ البداية <span className="required">*</span>
+                  </label>
                   <input
-                    type="date" name="date" value={activityData.date} onChange={handleActivityChange}
+                    type="date"
+                    name="date"
+                    value={activityData.date}
+                    onChange={handleActivityChange}
                     className={`form-input${activityErrors.date ? " form-input-error" : ""}`}
                   />
-                  {activityErrors.date && <span className="error-message">{activityErrors.date}</span>}
+                  {activityErrors.date && (
+                    <span className="error-message">{activityErrors.date}</span>
+                  )}
                 </div>
+
                 <div className="form-group">
-                  <label>تاريخ النهاية <span className="required">*</span></label>
+                  <label>
+                    تاريخ النهاية <span className="required">*</span>
+                  </label>
                   <input
-                    type="date" name="endDate" value={activityData.endDate} onChange={handleActivityChange}
+                    type="date"
+                    name="endDate"
+                    value={activityData.endDate}
+                    onChange={handleActivityChange}
                     className={`form-input${activityErrors.endDate ? " form-input-error" : ""}`}
                   />
-                  {activityErrors.endDate && <span className="error-message">{activityErrors.endDate}</span>}
+                  {activityErrors.endDate && (
+                    <span className="error-message">{activityErrors.endDate}</span>
+                  )}
                 </div>
+
                 <div className="form-group">
-                  <label>الحد الأقصى للمشاركين <span className="optional">(اختياري)</span></label>
+                  <label>
+                    الحد الأقصى للمشاركين <span className="optional">(اختياري)</span>
+                  </label>
                   <input
-                    type="number" name="maxParticipants" value={activityData.maxParticipants}
-                    onChange={handleActivityChange} placeholder="∞"
+                    type="number"
+                    name="maxParticipants"
+                    value={activityData.maxParticipants}
+                    onChange={handleActivityChange}
+                    placeholder="∞"
                     className={`form-input${activityErrors.maxParticipants ? " form-input-error" : ""}`}
                   />
-                  {activityErrors.maxParticipants && <span className="error-message">{activityErrors.maxParticipants}</span>}
+                  {activityErrors.maxParticipants && (
+                    <span className="error-message">{activityErrors.maxParticipants}</span>
+                  )}
                 </div>
               </div>
 
+              {/* Location */}
               <div className="form-group">
-                <label>المكان <span className="required">*</span></label>
+                <label>
+                  المكان <span className="required">*</span>
+                </label>
                 <input
-                  type="text" name="location" value={activityData.location} onChange={handleActivityChange}
+                  type="text"
+                  name="location"
+                  value={activityData.location}
+                  onChange={handleActivityChange}
                   placeholder="مثلاً: قاعة الاجتماعات – كلية الهندسة"
                   className={`form-input${activityErrors.location ? " form-input-error" : ""}`}
                 />
-                {activityErrors.location && <span className="error-message">{activityErrors.location}</span>}
+                {activityErrors.location && (
+                  <span className="error-message">{activityErrors.location}</span>
+                )}
               </div>
 
+              {/* Row: cost + restrictions + reward */}
               <div className="form-row">
                 <div className="form-group">
-                  <label>التكلفة <span className="optional">(اختياري)</span></label>
+                  <label>
+                    التكلفة <span className="optional">(اختياري)</span>
+                  </label>
                   <input
-                    type="number" step="0.01" name="cost" value={activityData.cost}
-                    onChange={handleActivityChange} placeholder="0"
+                    type="number"
+                    step="0.01"
+                    name="cost"
+                    value={activityData.cost}
+                    onChange={handleActivityChange}
+                    placeholder="0"
                     className={`form-input${activityErrors.cost ? " form-input-error" : ""}`}
                   />
-                  {activityErrors.cost && <span className="error-message">{activityErrors.cost}</span>}
+                  {activityErrors.cost && (
+                    <span className="error-message">{activityErrors.cost}</span>
+                  )}
                 </div>
+
                 <div className="form-group">
-                  <label>القيود <span className="optional">(اختياري)</span></label>
-                  <input type="text" name="restrictions" value={activityData.restrictions}
-                    onChange={handleActivityChange} placeholder="—" className="form-input" />
+                  <label>
+                    القيود <span className="optional">(اختياري)</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="restrictions"
+                    value={activityData.restrictions}
+                    onChange={handleActivityChange}
+                    placeholder="—"
+                    className="form-input"
+                  />
                 </div>
+
                 <div className="form-group">
-                  <label>المكافأة <span className="optional">(اختياري)</span></label>
-                  <input type="text" name="reward" value={activityData.reward}
-                    onChange={handleActivityChange} placeholder="—" className="form-input" />
+                  <label>
+                    المكافأة <span className="optional">(اختياري)</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="reward"
+                    value={activityData.reward}
+                    onChange={handleActivityChange}
+                    placeholder="—"
+                    className="form-input"
+                  />
                 </div>
               </div>
 
@@ -475,13 +591,17 @@ const Dashboard: React.FC = () => {
                 >
                   إلغاء
                 </button>
-                {/* Navy activity submit */}
+                {/* Navy gradient activity submit */}
                 <button
                   className="btn-submit-activity"
                   onClick={handleCreateActivity}
                   disabled={isSubmitting || profileLoading}
                 >
-                  {profileLoading ? "جاري التحميل..." : isSubmitting ? "جاري الإنشاء..." : "إنشاء الفعالية"}
+                  {profileLoading
+                    ? "جاري التحميل..."
+                    : isSubmitting
+                    ? "جاري الإنشاء..."
+                    : "إنشاء الفعالية"}
                 </button>
               </div>
 

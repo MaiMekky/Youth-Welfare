@@ -158,13 +158,14 @@ const Overview: React.FC = () => {
   return (
     <div className="overview-wrapper">
 
-      {/* ── Statistics — pattern #7: navy header + white body ── */}
+      {/* ── Statistics — Pattern #7: navy gradient header + white body ── */}
       <div className="statistics-section">
         <div className="statistics-header">
           <h2 className="statistics-title">الإحصائيات</h2>
         </div>
         <div className="statistics-body">
           <div className="statistics-grid">
+            {/* Pattern #4 — navy top border */}
             <div className="stat-card">
               <div className="stat-icon members-icon"><Users size={24} /></div>
               <div className="stat-content">
@@ -172,6 +173,7 @@ const Overview: React.FC = () => {
                 <div className="stat-label">إجمالي الأعضاء</div>
               </div>
             </div>
+            {/* Pattern #4 — gold top border */}
             <div className="stat-card gold-top">
               <div className="stat-icon upcoming-icon"><Clock size={24} /></div>
               <div className="stat-content">
@@ -179,6 +181,7 @@ const Overview: React.FC = () => {
                 <div className="stat-label">المنشورات</div>
               </div>
             </div>
+            {/* Pattern #4 — green top border */}
             <div className="stat-card green-top">
               <div className="stat-icon completed-icon"><CheckCircle size={24} /></div>
               <div className="stat-content">
@@ -193,7 +196,7 @@ const Overview: React.FC = () => {
       {/* ── Overview grid ── */}
       <div className="overview-container">
 
-        {/* Leadership members */}
+        {/* Pattern #4 — card with right gold stripe */}
         <div className="overview-card members-card">
           <div className="section-header">
             <Users size={18} />
@@ -216,6 +219,7 @@ const Overview: React.FC = () => {
                 </div>
               ))
             ) : (
+              /* Pattern #8 — empty state */
               <div className="empty-state">
                 <Users size={40} />
                 <p>لا يوجد أعضاء</p>
@@ -224,7 +228,7 @@ const Overview: React.FC = () => {
           </div>
         </div>
 
-        {/* Recent posts */}
+        {/* Pattern #4 — card with right gold stripe */}
         <div className="overview-card activities-card">
           <div className="section-header">
             <BookOpen size={18} />
@@ -240,6 +244,7 @@ const Overview: React.FC = () => {
                   <div key={post.id} className="activity-item">
                     <div className="activity-title-row">
                       <p className="activity-title">{post.title}</p>
+                      {/* Pattern #6 — status badge pill */}
                       <span className="status-badge upcoming">منشور</span>
                     </div>
                     <p className="activity-desc">
@@ -250,6 +255,7 @@ const Overview: React.FC = () => {
                 );
               })
             ) : (
+              /* Pattern #8 — empty state */
               <div className="empty-state">
                 <BookOpen size={40} />
                 <p>لا توجد منشورات</p>

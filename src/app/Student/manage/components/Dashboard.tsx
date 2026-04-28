@@ -71,12 +71,10 @@ const Dashboard: React.FC = () => {
 
   const [activityErrors, setActivityErrors] = useState<Record<string, string>>({});
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
   const { showToast } = useToast();
 
   // Fetch family data
   useEffect(() => {
-    if (!token) { setProfileLoading(false); return; }
     const fetchFamilyData = async () => {
       try {
         const baseUrl = getBaseUrl();

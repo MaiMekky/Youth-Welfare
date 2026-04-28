@@ -5,6 +5,7 @@ import styles from "../styles/PlansPage.module.css";
 import { X, Save } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 const API_URL = `${getBaseUrl()}/api`;
 
 type InitialPlan = { id: number; name: string; term: number; dept_id?: number } | null;
@@ -40,14 +41,10 @@ export default function CreatePlanModal({
     onClose();
   }, [onClose]);
 
-  /* ===================== GET DEPARTMENTS FROM TOKEN ===================== */
+  /* ===================== GET DEPARTMENTS FROM COOKIE ===================== */
   useEffect(() => {
-    const stored = localStorage.getItem("departments");
-    if (stored) {
-      try {
-        setDepartments(JSON.parse(stored));
-      } catch {}
-    }
+    const meta = getSessionMeta();
+    if (meta?.departments?.length) setDepartments(meta.departments as Record<string, unknown>[]);
   }, []);
 
   useEffect(() => {

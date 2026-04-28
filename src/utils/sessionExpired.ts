@@ -1,20 +1,8 @@
 export function handleSessionExpired() {
-  // Clear storage
-  localStorage.removeItem("access");
-  localStorage.removeItem("refresh");
-  localStorage.removeItem("role");
-  localStorage.removeItem("name");
-  localStorage.removeItem("user");
-  localStorage.removeItem("departments");
-  localStorage.removeItem("dept_ids");
-  localStorage.removeItem("admin_id");
-  localStorage.removeItem("student_id");
-
   // Clear cookies
-  document.cookie = "access=; path=/; max-age=0";
-  document.cookie = "refresh=; path=/; max-age=0";
   document.cookie = "roleKey=; path=/; max-age=0";
   document.cookie = "user_type=; path=/; max-age=0";
+  document.cookie = "session_meta=; path=/; max-age=0";
 
   // Overlay
   const overlay = document.createElement("div");

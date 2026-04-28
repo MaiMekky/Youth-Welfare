@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 
 const API_URL = getBaseUrl();
 
@@ -37,13 +38,9 @@ type FormState = {
 
 type FormErrors = Partial<Record<keyof FormState | "selected_facs", string>>;
 
-function getAccessToken(): string | null {
-  return (
-    localStorage.getItem("access") ||
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("token") ||
-    null
-  );
+function getDeptFromCookie(): number | null {
+  const meta = getSessionMeta();
+  return meta?.dept_ids?.[0] ?? null;
 }
 
 async function apiFetch<T>(
@@ -82,12 +79,9 @@ export default function CreateProposedEventPage() {
   const mode = (searchParams.get("mode") ?? "create") as Mode;
   const isConvert = mode === "convert";
 
-  // ── Departments from localStorage (exactly like CreatePlanModal) ──
+  // ── Departments from cookie session ──
   useEffect(() => {
-    const stored = localStorage.getItem("departments");
-    if (stored) {
-      try { JSON.parse(stored); } catch {}
-    }
+    // departments available via getSessionMeta().departments if needed
   }, []);
 
 const [form, setForm] = useState<FormState>({

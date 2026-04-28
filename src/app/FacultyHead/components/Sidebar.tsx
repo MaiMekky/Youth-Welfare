@@ -4,6 +4,7 @@ import "@/app/Styles/Sidebar.css";
 import { X, User, Briefcase, Calendar } from "lucide-react";
 import Image from "next/image";
 import logo from "@/app/assets/logo.png";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -27,10 +28,8 @@ export default function Sidebar({
   const [adminInfo, setAdminInfo] = useState({ name: "" });
 
   useEffect(() => {
-    try {
-      const u = localStorage.getItem("user");
-      if (u) setAdminInfo({ name: JSON.parse(u).name || "مدير الكلية" });
-    } catch {}
+    const meta = getSessionMeta();
+    if (meta) setAdminInfo({ name: meta.name || "مدير الكلية" });
   }, []);
 
   useEffect(() => {

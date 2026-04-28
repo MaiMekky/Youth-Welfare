@@ -121,16 +121,8 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
   const [error, setError] = useState<string | null>(null);
   const [selectedFamilyId, setSelectedFamilyId] = useState<number | null>(null);
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
-
   // First useEffect: Fetch family ID from families API
   useEffect(() => {
-    if (!token) {
-      setError("غير مصرح");
-      setLoading(false);
-      return;
-    }
-
     const fetchFamilyId = async () => {
       try {
         const baseUrl = getBaseUrl();
@@ -181,7 +173,7 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
 
   // Second useEffect: Fetch posts using the selected family ID
   useEffect(() => {
-    if (!selectedFamilyId || !token) return;
+    if (!selectedFamilyId) return;
 
     const fetchPosts = async () => {
       try {

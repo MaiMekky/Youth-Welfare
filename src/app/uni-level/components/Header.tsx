@@ -5,6 +5,8 @@ import logo from "../../assets/capital-uni-logo.png";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Menu } from "lucide-react";
+import { getBaseUrl } from "@/utils/globalFetch";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 
 interface HeaderProps {
   onSidebarOpen?: () => void;
@@ -23,12 +25,9 @@ const ACTIVITY_NAMES = new Set([
 interface Dept { dept_id: number; dept_name: string; }
 
 function readDepts(): Dept[] | null {
-  try {
-    const raw = localStorage.getItem("departments");
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : null;
-  } catch { return null; }
+  const meta = getSessionMeta();
+  if (!meta?.departments?.length) return null;
+  return meta.departments;
 }
 
 export default function Header({ onSidebarOpen }: HeaderProps) {
@@ -54,21 +53,26 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
     setShowFamily(names.some((n) => FAMILY_NAMES.has(n)));
     setShowActivity(names.some((n) => ACTIVITY_NAMES.has(n)));
   }, []);
-const handleLogout = async () => {
-  localStorage.clear();
+    const handleLogout = async () => {
+      try {
+        await fetch(`${getBaseUrl()}/api/auth/logout/`, {
+          method: "POST",
+          credentials: "include",
+        });
+      } catch (err) {
+        console.error("Logout failed:", err);
+      }
 
-  try {
-    await fetch("/api/logout", {
-      method: "POST",
-      credentials: "include", // ← ensures cookies are sent/received
-    });
-  } catch (err) {
-    console.error("Logout API failed:", err);
-  }
+      const wipe = "path=/; max-age=0";
+      document.cookie = `user_type=; ${wipe}`;
+      document.cookie = `roleKey=; ${wipe}`;
+      document.cookie = `session_meta=; ${wipe}`;
 
-  // Use ?logout=1 to bypass the middleware auto-redirect
-  window.location.replace("/?logout=1");
-};
+      // Set a short-lived cookie so middleware knows this is a logout
+      document.cookie = `logging_out=1; path=/; max-age=5`;
+
+      window.location.replace("/");
+    };
   const nav = (path: string) => { router.push(path); setOpen(false); };
 
   return (

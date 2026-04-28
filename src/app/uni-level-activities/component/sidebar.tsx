@@ -6,6 +6,7 @@ import "@/app/Styles/Sidebar.css";
 import { X, User, Users, CalendarDays, Bell } from "lucide-react";
 import Image from "next/image";
 import logo from "../../assets/logo.png";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -18,13 +19,8 @@ export default function Sidebar({ isOpen = false, setIsOpen = () => {} }: Sideba
   const [adminInfo, setAdminInfo] = useState({ name: "", role: "" });
 
   useEffect(() => {
-    const raw = localStorage.getItem("user");
-    if (raw) {
-      try {
-        const u = JSON.parse(raw);
-        setAdminInfo({ name: u.name || "مدير النظام", role: u.role || "" });
-      } catch {}
-    }
+    const meta = getSessionMeta();
+    if (meta) setAdminInfo({ name: meta.name || "مدير النظام", role: meta.role || "" });
   }, []);
 
   useEffect(() => {

@@ -10,6 +10,7 @@ import { EventItem, ChipVariant } from "./components/EventCard";
 import { useRouter } from "next/navigation";
 import { Plus, Search } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 
 const API_URL = getBaseUrl();
 
@@ -29,17 +30,10 @@ type ApiEvent = {
   active?: boolean | string | number;
 };
 function getDepartmentsFromToken(): { dept_id: number; dept_name: string }[] {
-  if (typeof window === "undefined") return [];
-  const stored = localStorage.getItem("departments");
-  if (!stored) return [];
-  try {
-    const departments = JSON.parse(stored);
-    const excluded = ["التكافل الإجتماعي", "الأسر الطلابية"];
-    return departments.filter((d: Record<string, unknown>) => !excluded.includes(d.dept_name as string));
-  } catch (err) {
-    console.error("Departments parse error:", err);
-    return [];
-  }
+  const meta = getSessionMeta();
+  if (!meta?.departments?.length) return [];
+  const excluded = ["التكافل الإجتماعي", "الأسر الطلابية"];
+  return meta.departments.filter((d) => !excluded.includes(d.dept_name));
 }
 
 async function apiFetch<T>(

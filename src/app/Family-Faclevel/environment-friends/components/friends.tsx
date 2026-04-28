@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import styles from "../styles/friends.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 import {
   User,
   Users,
@@ -656,13 +657,8 @@ export default function FriendsForm() {
 
   /* ── build body ── */
   const buildBody = () => {
-    const token =
-      typeof window !== "undefined" ? localStorage.getItem("access") : null;
-    let faculty_id = 0;
-    if (token) {
-      const d = parseJWT(token);
-      if (d?.faculty_id) faculty_id = d.faculty_id;
-    }
+    const meta = getSessionMeta();
+    const faculty_id = meta?.admin_id ?? 0;
     return {
       name: general.name,
       description: general.description,

@@ -4,6 +4,8 @@ import "../Styles/Header.css";
 import logo from "../../assets/capital-uni-logo.png";
 import { useState, useEffect } from "react";
 import { LogOut, Menu } from "lucide-react";
+import { getBaseUrl } from "@/utils/globalFetch";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 
 interface HeaderProps {
   onSidebarOpen?: () => void;
@@ -16,33 +18,30 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
   });
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("user");
-      if (raw) {
-        const u = JSON.parse(raw);
-        setAdminInfo({
-          name: u.name || "المشرف العام",
-          email: u.email || "admin@university.edu",
-        });
-      }
-    } catch {}
+    const meta = getSessionMeta();
+    if (meta) setAdminInfo({ name: meta.name || "مدير الكلية", email: "admin@university.edu" });
   }, []);
 
-const handleLogout = async () => {
-  localStorage.clear();
+    const handleLogout = async () => {
+      try {
+        await fetch(`${getBaseUrl()}/api/auth/logout/`, {
+          method: "POST",
+          credentials: "include",
+        });
+      } catch (err) {
+        console.error("Logout failed:", err);
+      }
 
-  try {
-    await fetch("/api/logout", {
-      method: "POST",
-      credentials: "include", // ← ensures cookies are sent/received
-    });
-  } catch (err) {
-    console.error("Logout API failed:", err);
-  }
+      const wipe = "path=/; max-age=0";
+      document.cookie = `user_type=; ${wipe}`;
+      document.cookie = `roleKey=; ${wipe}`;
+      document.cookie = `session_meta=; ${wipe}`;
 
-  // Use ?logout=1 to bypass the middleware auto-redirect
-  window.location.replace("/?logout=1");
-};
+      // Set a short-lived cookie so middleware knows this is a logout
+      document.cookie = `logging_out=1; path=/; max-age=5`;
+
+      window.location.replace("/");
+    };
   return (
     <header className="hdr" dir="rtl">
       <div className="hdr-accent-line" />

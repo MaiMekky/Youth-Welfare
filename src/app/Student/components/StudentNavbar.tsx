@@ -117,21 +117,26 @@ const StudentNavbar: React.FC = () => {
         ...baseNavItems.slice(3),
       ]
     : baseNavItems;
-const handleLogout = async () => {
-  localStorage.clear();
+  const handleLogout = async () => {
+    try {
+      await fetch(`${getBaseUrl()}/api/auth/logout/`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
 
-  try {
-    await fetch("/api/logout", {
-      method: "POST",
-      credentials: "include", // ← ensures cookies are sent/received
-    });
-  } catch (err) {
-    console.error("Logout API failed:", err);
-  }
+    const wipe = "path=/; max-age=0";
+    document.cookie = `user_type=; ${wipe}`;
+    document.cookie = `roleKey=; ${wipe}`;
+    document.cookie = `session_meta=; ${wipe}`;
 
-  // Use ?logout=1 to bypass the middleware auto-redirect
-  window.location.replace("/?logout=1");
-};
+    // Set a short-lived cookie so middleware knows this is a logout
+    document.cookie = `logging_out=1; path=/; max-age=5`;
+
+    window.location.replace("/");
+  };
   const isActive = (href: string) =>
     pathname === href || pathname?.startsWith(href + "/");
 

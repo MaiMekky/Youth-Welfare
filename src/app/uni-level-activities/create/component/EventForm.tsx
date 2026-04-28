@@ -6,6 +6,7 @@ import { useRouter, useParams } from "next/navigation";
 import { ArrowRight, Save } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 /** ================== API ================== */
 const API_URL = getBaseUrl();
 
@@ -47,45 +48,14 @@ type ManageEventPayload = {
   selected_facs: number[];
 };
 
-function getAccessToken(): string | null {
-  return (
-    localStorage.getItem("access") ||
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("token") ||
-    null
-  );
-}
-
-function getDeptFromToken(): number | null {
-  const token = getAccessToken();
-  if (!token) return null;
-  try {
-    const parts = token.split(".");
-    if (parts.length < 2) return null;
-    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
-    const payload = JSON.parse(atob(padded));
-    const departments = payload?.departments;
-    const deptId1 = Array.isArray(departments) ? departments?.[0]?.dept_id : undefined;
-    const deptIds = payload?.dept_ids;
-    const deptId2 = Array.isArray(deptIds) ? deptIds?.[0] : undefined;
-    const deptId3 = payload?.dept_id;
-    const deptId4 = payload?.dept;
-    const candidate = deptId1 ?? deptId2 ?? deptId3 ?? deptId4;
-    if (typeof candidate === "number") return candidate;
-    if (typeof candidate === "string") { const n = Number(candidate); return Number.isFinite(n) ? n : null; }
-    return null;
-  } catch { return null; }
+function getDeptFromCookie(): number | null {
+  const meta = getSessionMeta();
+  if (!meta?.dept_ids?.length) return null;
+  return meta.dept_ids[0] ?? null;
 }
 
 function getDepartments(): { dept_id: number; dept_name: string }[] {
-  try {
-    const raw = localStorage.getItem("departments");
-    if (!raw) return [];
-    return JSON.parse(raw);
-  } catch {
-    return [];
-  }
+  return getSessionMeta()?.departments ?? [];
 }
 async function apiFetch<T>(
   path: string,
@@ -289,8 +259,8 @@ export default function EventForm({
       return;
     }
 
-    const dept = getDeptFromToken();
-    if (!dept) { showToast("❌ لا يوجد رقم قسم في التوكن", "error"); return; }
+    const dept = getDeptFromCookie();
+    if (!dept) { showToast("❌ لا يوجد رقم قسم في بيانات الجلسة", "error"); return; }
 
     const payload: ManageEventPayload = {
       title: form.title.trim(),

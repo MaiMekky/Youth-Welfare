@@ -4,16 +4,9 @@ import '../styles/CreateFam.css';
 import { ChevronRight, ChevronLeft, Check, User, Users, FileText, Send } from 'lucide-react';
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 
 const CACHE_KEY = 'createFamFormData';
-
-/* ─── Token decode ─── */
-const decodeToken = (token: string) => {
-  try {
-    const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-    return JSON.parse(decodeURIComponent(atob(b64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
-  } catch { return null; }
-};
 
 /* ─── Arabic error map ─── */
 const AR_CODES: Record<string, string> = {
@@ -285,7 +278,6 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
   const [isSubmitting, setIsSubmitting]           = useState(false);
   const { showToast } = useToast();
 
-  const token = typeof window !== 'undefined' ? localStorage.getItem('access') : null;
   const dupeMap = buildDuplicateMap(boardMembers, committees);
 
   /* ── Activity helpers ── */
@@ -325,38 +317,28 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
 
   /* ── Fetch departments & faculty ── */
   useEffect(() => {
-    if (!token) return;
     authFetch(`${getBaseUrl()}/api/family/departments/`)
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (!data) return;
         setDepartments(Array.isArray(data) ? data : data.departments ?? data.results ?? []);
       }).catch(() => {});
-  }, [token]);
+  }, []);
 
-useEffect(() => {
-  if (!token) return;
-
-  const decoded = decodeToken(token);
-
-  authFetch(`${getBaseUrl()}/api/auth/profile/`)
-    .then(r => r.ok ? r.json() : null)
-    .then(data => {
-      console.log('profile data:', data);
-      console.log('decoded token:', decoded);
-
-      if (!data) return;
-
-      const fid = (data.faculty && data.faculty !== 0)
-        ? data.faculty
-        : decoded?.faculty_id ?? null;
-
-      console.log('resolved facultyId:', fid);
-
-      if (fid) setFacultyId(fid);
-    })
-    .catch(() => {});
-}, [token]);
+  useEffect(() => {
+    const meta = getSessionMeta();
+    if (meta?.student_id) {
+      // Try to get faculty_id from profile API
+      authFetch(`${getBaseUrl()}/api/auth/profile/`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (!data) return;
+          const fid = data.faculty && data.faculty !== 0 ? data.faculty : null;
+          if (fid) setFacultyId(fid);
+        })
+        .catch(() => {});
+    }
+  }, []);
 
   /* ════════════════════════════════════════════
      VALIDATION — per step
@@ -514,7 +496,8 @@ useEffect(() => {
 
     setIsSubmitting(true);
     try {
-      if (!token) { showToast('يرجى تسجيل الدخول أولاً', 'error'); return; }
+      const meta = getSessionMeta();
+      if (!meta) { showToast('يرجى تسجيل الدخول أولاً', 'error'); return; }
 
       const committeesData = Object.entries(committees).map(([key, c]) => {
         const deptId = c.selectedDeptId ? parseInt(c.selectedDeptId) : (facultyId || 0);

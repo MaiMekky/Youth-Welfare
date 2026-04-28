@@ -37,11 +37,7 @@ const Members: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedFamilyId, setSelectedFamilyId] = useState<number | null>(null);
 
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("access") : null;
-
   useEffect(() => {
-    if (!token) { setError("غير مصرح"); setLoading(false); return; }
     const fetchFamilyId = async () => {
       try {
         const baseUrl = getBaseUrl();
@@ -70,7 +66,7 @@ const Members: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!selectedFamilyId || !token) return;
+    if (!selectedFamilyId) return;
     const fetchMembers = async () => {
       try {
         setLoading(true);

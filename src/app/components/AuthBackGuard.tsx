@@ -14,10 +14,12 @@ const PROTECTED = [
 
   "/uni-level",
   "/uni-level-family",
+  "/uni-level-activities",
 
   "/FacLevel",
   "/Family-Faclevel",
   "/FacultyReport",
+  "/Events-Faclevel",
 
   "/GeneralAdmin",
   "/FacultyHead",
@@ -29,32 +31,63 @@ const PROTECTED = [
   "/requests",
   "/my-requests",
 ];
+function getCookie(name: string): string {
+  return document.cookie
+    .split("; ")
+    .find((c) => c.startsWith(`${name}=`))
+    ?.split("=")[1] ?? "";
+}
 
 function hasAccess() {
-  return document.cookie.split("; ").some((c) => c.startsWith("access="));
+  return !!getCookie("user_type");
+}
+
+function isLoggingOut(): boolean {
+  return getCookie("logging_out") === "1";
+}
+
+function getDashboard(): string {
+  const userType = getCookie("user_type");
+  const roleKey  = getCookie("roleKey");
+  if (userType === "student") return "/Student";
+  if (userType === "admin") {
+    if (roleKey === "super_admin")   return "/CreateAdmins";
+    if (roleKey === "uni_manager")   return "/uni-level";
+    if (roleKey === "fac_manager")   return "/FacLevel";
+    if (roleKey === "fac_head")      return "/FacultyHead";
+    if (roleKey === "General_admin") return "/GeneralAdmin";
+  }
+  return "/";
+}
+
+function runCheck(pathname: string) {
+  const isProtected = PROTECTED.some((p) => pathname.startsWith(p));
+  const isRoot = pathname === "/";
+
+  if (isProtected && !hasAccess()) {
+    window.location.replace("/");
+    return;
+  }
+
+  if (isRoot && hasAccess() && !isLoggingOut()) {
+    window.location.replace(getDashboard());
+  }
 }
 
 export default function AuthBackGuard() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const isProtected = PROTECTED.some((p) => pathname.startsWith(p));
+    runCheck(pathname);
+  }, [pathname]);
 
-    const check = () => {
-      if (isProtected && !hasAccess()) {
-        window.location.replace("/");
-      }
-    };
-
-    check();
-
+  useEffect(() => {
     const onPageShow = (e: PageTransitionEvent) => {
-      if (e.persisted) check();
+      if (e.persisted) runCheck(window.location.pathname);
     };
-
     window.addEventListener("pageshow", onPageShow);
     return () => window.removeEventListener("pageshow", onPageShow);
-  }, [pathname]);
+  }, []);
 
   return null;
 }

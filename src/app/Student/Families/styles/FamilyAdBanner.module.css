@@ -3,14 +3,15 @@
 /* ═══════════════════════════════════════════
    TOKENS — identical to admin page (doc 6)
 ═══════════════════════════════════════════ */
+/* AFTER — prefixed, safe from collisions */
 :root {
-  --navy:       #1E3A5F;
-  --navy-mid:   #2D5F8A;
-  --gold:       #C49B3A;
-  --gold-dark:  #A67F2C;
-  --white:      #FFFFFF;
-  --border:     #E2ECF5;
-  --radius:     10px;
+  --banner-navy:       #1E3A5F;
+  --banner-navy-mid:   #2D5F8A;
+  --banner-gold:       #C49B3A;
+  --banner-gold-dark:  #A67F2C;
+  --banner-white:      #FFFFFF;
+  --banner-border:     #E2ECF5;
+  --banner-radius:     10px;
 }
 
 /* ═══════════════════════════════════════════
@@ -195,4 +196,16 @@
   .bannerTitle   { font-size: 16px; }
   .bannerDescription { font-size: 13px; }
   .bannerButton  { font-size: 15px; padding: 12px 20px; }
+}
+/* ═══════════════════════════════════════════
+   WRAPPER
+═══════════════════════════════════════════ */
+.bannerContainer {
+  width: 100%;
+  max-width: 900px;        /* ← constrains width so it doesn't span the full page */
+  margin: 28px auto;       /* ← centers it horizontally + adds vertical breathing room */
+  padding: 0 16px;         /* ← side padding so it doesn't touch viewport edges on mobile */
+  font-family: 'Cairo', sans-serif;
+  direction: rtl;
+  box-sizing: border-box;
 }

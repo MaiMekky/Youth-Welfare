@@ -24,6 +24,23 @@ function clearAuthAndRedirect(): void {
   }
 }
 
+// Prevent concurrent refresh attempts — if one is already in flight, wait for it
+let refreshPromise: Promise<boolean> | null = null;
+
+async function tryRefresh(): Promise<boolean> {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = fetch(`${getBaseUrl()}/api/auth/token/refresh/`, {
+    method: "POST",
+    credentials: "include",
+  })
+    .then((r) => r.ok)
+    .catch(() => false)
+    .finally(() => { refreshPromise = null; });
+
+  return refreshPromise;
+}
+
 export async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const isFormData = options.body instanceof FormData;
 
@@ -44,32 +61,28 @@ export async function authFetch(url: string, options: RequestInit = {}): Promise
     credentials: "include",
   });
 
-  if (res.status === 401 || res.status === 500) {
-    let body: { detail?: string } | null = null;
-    try { body = await res.clone().json(); } catch { /* ignore */ }
+  // Only attempt refresh on 401 (expired token), not on 403 (permission denied) or 500 (server error)
+  if (res.status !== 401 && res.status !== 403 && res.status !== 500) return res;
 
-    // Hard auth failure — wrong credentials, not an expired session
-    if (body?.detail === "Invalid credentials") return res;
+  let body: { detail?: string; code?: string } | null = null;
+  try { body = await res.clone().json(); } catch { /* ignore */ }
 
-    // Try to refresh the token
-    const refreshRes = await fetch(`${getBaseUrl()}/api/auth/token/refresh/`, {
-      method: "POST",
+  // Wrong credentials — not an expired session, return as-is
+  if (body?.detail === "Invalid credentials") return res;
+
+  // Token is invalid/expired — try to refresh
+  const refreshed = await tryRefresh();
+
+  if (refreshed) {
+    // Retry the original request with the new access_token cookie
+    return fetch(url, {
+      ...options,
+      headers: buildHeaders(),
       credentials: "include",
     });
-
-    if (refreshRes.ok) {
-      const retry = await fetch(url, {
-        ...options,
-        headers: buildHeaders(),
-        credentials: "include",
-      });
-      if (retry.ok || retry.status !== 401) return retry;
-    }
-
-    // Refresh also failed — session is truly expired
-    clearAuthAndRedirect();
-    throw new Error("Session expired");
   }
 
-  return res;
+  // Refresh failed — session is truly expired
+  clearAuthAndRedirect();
+  throw new Error("Session expired");
 }

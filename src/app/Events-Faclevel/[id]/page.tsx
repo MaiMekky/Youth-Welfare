@@ -22,7 +22,6 @@ import {
   Trash2,
   FileText,
 } from "lucide-react";
-import Footer from "@/app/FacLevel/components/Footer";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
 
@@ -59,7 +58,7 @@ async function apiFetch<T>(
         return { ok: false, message: "ليس لديك صلاحية للوصول لهذه الفعالية", status: 403 };
       }
       if (res.status === 500) {
-        return { ok: false, message: "حدث خطأ في الخادم، برجاء المحاولة لاحقاً", status: 500 };
+        return { ok: false, message: "حدث خطأ في السيرفر، برجاء المحاولة لاحقاً", status: 500 };
       }
       const msg =
         (typeof maybeJson === "object" &&
@@ -192,6 +191,7 @@ type ApiEventDetails = {
   faculty: number | null;
   created_by: number;
   family: number | null;
+  rejection_reason?: string | null;
 };
 
 type StudentRow = {
@@ -574,6 +574,7 @@ const uploadImages = async (files: FileList | null) => {
         constraints: "",
         description: "",
         max: 0,
+        rejectionReason: "",
       };
     }
 
@@ -596,6 +597,7 @@ const uploadImages = async (files: FileList | null) => {
       constraints: (event.restrictions ?? "").trim() || "—",
       description: (event.description ?? "").trim() || "—",
       max: Number(event.s_limit ?? 0),
+      rejectionReason: (event.rejection_reason ?? "").trim(),
     };
   }, [event]);
 
@@ -989,6 +991,48 @@ const uploadImages = async (files: FileList | null) => {
             </div>
           </div>
         </section>
+
+              {ui.rejectionReason && (
+        <section
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "14px",
+            background: "linear-gradient(135deg, #FFF1F1, #FFE4E4)",
+            border: "1.5px solid #FCA5A5",
+            borderRight: "5px solid #EF4444",
+            borderRadius: "14px",
+            padding: "18px 20px",
+            direction: "rtl",
+            marginTop: "22px",
+          }}
+        >
+          <ShieldAlert size={22} color="#EF4444" style={{ flexShrink: 0, marginTop: 2 }} />
+          <div>
+            <div
+              style={{
+                fontSize: "0.85rem",
+                fontWeight: 700,
+                color: "#EF4444",
+                marginBottom: "6px",
+                letterSpacing: "0.02em",
+              }}
+            >
+              سبب الرفض
+            </div>
+            <div
+              style={{
+                fontSize: "0.95rem",
+                color: "#7F1D1D",
+                lineHeight: 1.7,
+                fontWeight: 500,
+              }}
+            >
+              {ui.rejectionReason}
+            </div>
+          </div>
+        </section>
+      )}
 
         <section className={styles.twoCols}>
           <div className={styles.block}>
@@ -1455,7 +1499,7 @@ const uploadImages = async (files: FileList | null) => {
               <span className={styles.miniChip}>
                 <Award size={14} /> {rewardsCount}
               </span>
-             {isFacultyEvent && (
+              
               <button
                 className={`${styles.actionBtn} ${styles.acceptBtn}`}
                 type="button"
@@ -1466,7 +1510,7 @@ const uploadImages = async (files: FileList | null) => {
                 <Check size={16} />
                 قبول الجميع ({pendingCount})
               </button>
-              )}
+
             </div>            
           </div>
 
@@ -1488,113 +1532,99 @@ const uploadImages = async (files: FileList | null) => {
                   <tr key={r.id}>
                     <td>{r.name}</td>
                     <td dir="ltr">{r.studentId}</td>
-
+ 
                     <td>
                       <span className={participantBadgeClass(r.status)}>{r.status}</span>
                     </td>
-
+ 
                     <td>
                       <span className={styles.cellValue}>{(r.rank ?? "").trim() ? r.rank : "-"}</span>
                     </td>
-
+ 
                     <td>
                       <span className={styles.cellValue}>{(r.reward ?? "").trim() ? r.reward : "-"}</span>
                     </td>
-
+ 
                     <td>
-                     <div className={styles.rowActions}>
-  {/* ✅ لو Faculty Event: عرض التفاصيل فقط */}
-                  {!isFacultyEvent ? (
-                    <button
-                      className={styles.actionBtn}
-                      type="button"
-                      onClick={() => router.push(`/Events-Faclevel/${id}/student/${r.studentId}`)}
-                    >
-                      <Eye size={16} />
-                      عرض التفاصيل
-                    </button>
-                  ) : (
-                    <>
-                      {r.status === "منتظر" && (
-                        <>
-                          <button
-                            className={`${styles.actionBtn} ${styles.acceptBtn}`}
-                            type="button"
-                            disabled={busy}
-                            onClick={() => approveParticipant(r.studentId)}
-                          >
-                            <Check size={16} />
-                            قبول
+                      <div className={styles.rowActions}>
+                        {r.status === "منتظر" && (
+                          <>
+                            <button
+                              className={`${styles.actionBtn} ${styles.acceptBtn}`}
+                              type="button"
+                              disabled={busy}
+                              onClick={() => approveParticipant(r.studentId)}
+                            >
+                              <Check size={16} />
+                              قبول
+                            </button>
+ 
+                            <button
+                              className={`${styles.actionBtn} ${styles.rejectBtn}`}
+                              type="button"
+                              disabled={busy}
+                              onClick={() => rejectParticipant(r.studentId)}
+                            >
+                              <X size={16} />
+                              رفض
+                            </button>
+                          </>
+                        )}
+ 
+                        {editingRewardId === r.id ? (
+                          <div className={styles.inlineEdit}>
+                            <input
+                              className={styles.inlineInput}
+                              value={draftReward}
+                              onChange={(e) => setDraftReward(e.target.value)}
+                              placeholder="المكافأة"
+                            />
+                            <button className={styles.iconBtn} type="button" disabled={busy} onClick={() => saveReward(r.id)}>
+                              <Check size={18} />
+                            </button>
+                            <button className={styles.iconBtn} type="button" disabled={busy} onClick={cancelReward}>
+                              <X size={18} />
+                            </button>
+                          </div>
+                        ) : (
+                          <button className={styles.actionBtn} type="button" disabled={busy} onClick={() => startEditReward(r)}>
+                            <Award size={16} />
+                            مكافأة
                           </button>
-
-                          <button
-                            className={`${styles.actionBtn} ${styles.rejectBtn}`}
-                            type="button"
-                            disabled={busy}
-                            onClick={() => rejectParticipant(r.studentId)}
-                          >
-                            <X size={16} />
-                            رفض
+                        )}
+ 
+                        {editingRankId === r.id ? (
+                          <div className={styles.inlineEdit}>
+                            <input
+                              className={styles.inlineInput}
+                              type="number"
+                              min={1}
+                              value={draftRank}
+                              onChange={(e) => setDraftRank(e.target.value)}
+                              placeholder="المركز"
+                            />
+                            <button className={styles.iconBtn} type="button" disabled={busy} onClick={() => saveRank(r.id)}>
+                              <Check size={18} />
+                            </button>
+                            <button className={styles.iconBtn} type="button" disabled={busy} onClick={cancelRank}>
+                              <X size={18} />
+                            </button>
+                          </div>
+                        ) : (
+                          <button className={styles.actionBtn} type="button" disabled={busy} onClick={() => startEditRank(r)}>
+                            <Medal size={16} />
+                            ترتيب
                           </button>
-                        </>
-                      )}
-
-                      {editingRewardId === r.id ? (
-                        <div className={styles.inlineEdit}>
-                          <input
-                            className={styles.inlineInput}
-                            value={draftReward}
-                            onChange={(e) => setDraftReward(e.target.value)}
-                            placeholder="المكافأة"
-                          />
-                          <button className={styles.iconBtn} type="button" disabled={busy} onClick={() => saveReward(r.id)}>
-                            <Check size={18} />
-                          </button>
-                          <button className={styles.iconBtn} type="button" disabled={busy} onClick={cancelReward}>
-                            <X size={18} />
-                          </button>
-                        </div>
-                      ) : (
-                        <button className={styles.actionBtn} type="button" disabled={busy} onClick={() => startEditReward(r)}>
-                          <Award size={16} />
-                          مكافأة
+                        )}
+ 
+                        <button
+                          className={styles.actionBtn}
+                          type="button"
+                          onClick={() => router.push(`/Events-Faclevel/${id}/student/${r.studentId}`)}
+                        >
+                          <Eye size={16} />
+                          عرض التفاصيل
                         </button>
-                      )}
-
-                      {editingRankId === r.id ? (
-                        <div className={styles.inlineEdit}>
-                         <input
-                            className={styles.inlineInput}
-                            type="number"
-                            min={1}
-                            value={draftRank}
-                            onChange={(e) => setDraftRank(e.target.value)}
-                            placeholder="المركز"
-                          />
-                          <button className={styles.iconBtn} type="button" disabled={busy} onClick={() => saveRank(r.id)}>
-                            <Check size={18} />
-                          </button>
-                          <button className={styles.iconBtn} type="button" disabled={busy} onClick={cancelRank}>
-                            <X size={18} />
-                          </button>
-                        </div>
-                      ) : (
-                        <button className={styles.actionBtn} type="button" disabled={busy} onClick={() => startEditRank(r)}>
-                          <Medal size={16} />
-                          ترتيب
-                        </button>
-                      )}
-
-                      <button
-                        className={styles.actionBtn}
-                        type="button"
-                        onClick={() => router.push(`/Events-Faclevel/${id}/student/${r.studentId}`)}
-                      >
-                        <Eye size={16} />
-                        عرض التفاصيل
-                      </button>
-                    </>
-                  )}
                       </div>
                     </td>
                   </tr>
@@ -1611,7 +1641,6 @@ const uploadImages = async (files: FileList | null) => {
           </div>
         </section>
       </div>
-      <Footer />
     </div>
   );
 }

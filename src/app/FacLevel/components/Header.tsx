@@ -109,7 +109,7 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
             </button>
           )}
           {showActivity && (
-            <button className={styles.navBtn} onClick={() => nav("/Events-Faclevel")}>
+            <button className={styles.navBtn} onClick={() => nav("/Events-Faclevel/Home")}>
               الأنشطة
             </button>
           )}
@@ -144,7 +144,7 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
             </button>
           )}
           {showActivity && (
-            <button className={styles.dropdownBtn} onClick={() => nav("/Events-Faclevel")}>
+            <button className={styles.dropdownBtn} onClick={() => nav("/Events-Faclevel/Home")}>
               الأنشطة
             </button>
           )}

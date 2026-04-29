@@ -337,7 +337,7 @@ export default function FamilyDetailsPage() {
       updateMemberStatus(studentId, 'مقبول');
       showAlert('تمت الموافقة على العضو بنجاح', 'success');
     } catch (err) {
-      const msg = err instanceof Error ? translateMemberError(err.message) : 'تعذّر الاتصال بالخادم';
+      const msg = err instanceof Error ? translateMemberError(err.message) : 'تعذّر الاتصال بالسيرفر';
       showAlert(msg, 'error');
       console.error(err);
     }
@@ -365,7 +365,7 @@ export default function FamilyDetailsPage() {
       updateMemberStatus(studentId, 'مرفوض');
       showAlert('تم رفض العضو', 'warning');
     } catch (err) {
-      const msg = err instanceof Error ? translateMemberError(err.message) : 'تعذّر الاتصال بالخادم';
+      const msg = err instanceof Error ? translateMemberError(err.message) : 'تعذّر الاتصال بالسيرفر';
       showAlert(msg, 'error');
       console.error(err);
     }

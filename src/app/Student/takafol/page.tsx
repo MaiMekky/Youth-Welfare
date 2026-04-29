@@ -5,9 +5,23 @@ import HeaderCard from "../components/HeaderCard";
 import ApplyForm from "../components/ApplyForm";
 import MyRequests from "../components/MyRequests";
 import Cards from "../components/Cards";
+import { useSearchParams, useRouter } from "next/navigation";
 
 export default function TakafolPage() {
-  const [activeTab, setActiveTab] = useState<string>("info");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  
+  const activeTab = searchParams.get("tab") ?? "info";
+
+  const handleTabChange = (tab: string) => {
+    router.push(`/Student/takafol?tab=${tab}`);
+  };
+
+  const navigateToRequests = () => {
+    router.push(`/Student/takafol?tab=myRequests`);
+    setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }));
+  };
+
   const [showAlert, setShowAlert] = useState(false);
   const [requestsStatus, setRequestsStatus] = useState<string[]>([]);
 
@@ -22,14 +36,6 @@ export default function TakafolPage() {
   const handleStatusesLoaded = useCallback((statuses: string[]) => {
     setRequestsStatus(statuses);
   }, []);
-
-  const navigateToRequests = () => {
-    setActiveTab("myRequests");
-    setShowAlert(true);
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -51,7 +57,7 @@ export default function TakafolPage() {
 
   return (
     <div className="student-takafol-page">
-      <HeaderCard activeTab={activeTab} onTabChange={setActiveTab} />
+      <HeaderCard activeTab={activeTab} onTabChange={handleTabChange} />
       <div className="student-page-wrap">{renderContent()}</div>
     </div>
   );

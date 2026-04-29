@@ -1,4 +1,5 @@
 import "./globals.css";
+import { Cairo } from "next/font/google";
 import { LanguageProvider } from "./context/LanguageContext";
 import { ToastProvider } from "./context/ToastContext";
 import AuthBackGuard from "./components/AuthBackGuard";
@@ -6,6 +7,13 @@ import RouteTracker from "./components/RouteTracker";
 import SessionTracker from "./components/SessionTracker";
 
 import type { Metadata } from "next";
+
+const cairo = Cairo({
+  subsets: ["arabic", "latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  display: "swap",
+  variable: "--font-cairo",
+});
 
 export const metadata: Metadata = {
   title: "بوابة رعاية الطلاب - جامعة العاصمة",
@@ -18,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ar">
+    <html lang="ar" className={cairo.variable}>
       <body className="app-body">
         <ToastProvider>
           <LanguageProvider>

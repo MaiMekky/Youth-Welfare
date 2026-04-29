@@ -453,7 +453,7 @@ export default function EventForm({
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label}>الوصف</label>
+            <label className={styles.label}>الوصف(اكتب قيمة الاشتراك ان وجد)</label>
             <textarea
               className={`${styles.textarea} ${errors.description ? styles.inputError : ""}`}
               placeholder="الوصف"

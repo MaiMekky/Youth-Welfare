@@ -14,7 +14,6 @@ import {
   Building2,
   Layers,
 } from "lucide-react";
-import Footer from "@/app/FacLevel/components/Footer";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
 
@@ -511,7 +510,6 @@ const onViewLinkedEvent = (eventId: number) => {
             </div>
           </section>
         </div>
-        <Footer />
       </div>
     </>
   );

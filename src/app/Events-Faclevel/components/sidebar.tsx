@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import "@/app/Styles/Sidebar.css";
-import { CalendarDays, Users, X, User } from "lucide-react";
+import { CalendarDays, Users, X, User, Home } from "lucide-react";
 import Image from "next/image";
 import logo from "@/app/assets/logo.png";
 import { getSessionMeta } from "@/utils/cookieHelpers";
@@ -91,6 +91,12 @@ export default function Sidebar({ isOpen = false, setIsOpen = () => {} }: Sideba
         </div>
 
         <nav className="nav">
+           <button
+            onClick={() => go("/Events-Faclevel/Home")}
+            className={pathname === "/Events-Faclevel/Home" ? "active" : ""}
+          >
+            <Home size={18} /><span>الرئيسية</span>
+          </button>
           <button
             onClick={() => go("/Events-Faclevel")}
             className={pathname === "/Events-Faclevel" ? "active" : ""}

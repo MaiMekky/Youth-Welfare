@@ -552,7 +552,7 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
         );
       }
     } catch {
-      showToast('فشل الاتصال بالخادم — تحقق من الاتصال بالإنترنت', 'error');
+      showToast('فشل الاتصال بالسيرفر — تحقق من الاتصال بالإنترنت', 'error');
     } finally {
       setIsSubmitting(false);
     }

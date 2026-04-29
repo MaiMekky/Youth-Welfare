@@ -213,7 +213,7 @@ function PageContent() {
       );
       showToast("تم قبول الأسرة بنجاح", "success");
     } catch (err) {
-      const msg = err instanceof Error ? translateError(err.message) : "تعذّر الاتصال بالخادم";
+      const msg = err instanceof Error ? translateError(err.message) : "تعذّر الاتصال بالسيرفر";
       showToast(`فشل قبول الأسرة — ${msg}`, "error");
     }
   }
@@ -238,7 +238,7 @@ function PageContent() {
       );
       showToast("تم رفض الأسرة", "warning");
     } catch (err) {
-      const msg = err instanceof Error ? translateError(err.message) : "تعذّر الاتصال بالخادم";
+      const msg = err instanceof Error ? translateError(err.message) : "تعذّر الاتصال بالسيرفر";
       showToast(`فشل رفض الأسرة — ${msg}`, "error");
     }
   }

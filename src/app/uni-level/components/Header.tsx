@@ -122,7 +122,7 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
             </button>
           )}
           {showActivity && (
-            <button className={styles.navBtn} hidden onClick={() => nav("/uni-level-activities")}>
+            <button className={styles.navBtn} hidden onClick={() => nav("/uni-level-activities/Home")}>
               الأنشطة
             </button>
           )}
@@ -157,7 +157,7 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
             </button>
           )}
           {showActivity && (
-            <button className={styles.dropdownBtn} hidden onClick={() => nav("/uni-level-activities")}>
+            <button className={styles.dropdownBtn} hidden onClick={() => nav("/uni-level-activities/Home")}>
               الأنشطة
             </button>
           )}

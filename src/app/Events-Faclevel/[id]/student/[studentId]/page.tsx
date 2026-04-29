@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import styles from "./StudentDetails.module.css";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowRight, Mail, Phone, MapPin, User, GraduationCap, IdCard } from "lucide-react";
-import Footer from "@/app/FacLevel/components/Footer";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 const API_URL = getBaseUrl();
@@ -254,8 +253,6 @@ const facultyName = student.faculty_name ?? "—";
           </div>
         </section>
       </div>
-
-      <Footer />
     </div>
   );
 }

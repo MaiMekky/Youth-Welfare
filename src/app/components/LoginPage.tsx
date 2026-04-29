@@ -18,21 +18,21 @@ interface Dept { dept_id: number; dept_name: string; }
 const FAC_ROUTE_MAP: Record<number, string> = {
   6: "/FacLevel",                    // إدارة التكافل الاجتماعي
   4: "/Family-Faclevel/events",      // إدارة الأسر الطلابية و الاتحادات
-  1: "/Events-Faclevel",             // إدارة النشاط الثقافي و الفنى
-  2: "/Events-Faclevel",             // إدارة النشاط الاجتماعي
-  3: "/Events-Faclevel",             // إدارة النشاط الرياضي و الرحلات
-  5: "/Events-Faclevel",             // إدارة النشاط العلمى و التكنولوجي
-  7:"/Events-Faclevel"                 // إدارة الجوالة و الرحلات و المعسكرات   
+  1: "/Events-Faclevel/Home",             // إدارة النشاط الثقافي و الفنى
+  2: "/Events-Faclevel/Home",             // إدارة النشاط الاجتماعي
+  3: "/Events-Faclevel/Home",             // إدارة النشاط الرياضي و الرحلات
+  5: "/Events-Faclevel/Home",             // إدارة النشاط العلمى و التكنولوجي
+  7:"/Events-Faclevel/Home"                 // إدارة الجوالة و الرحلات و المعسكرات   
 };
 
 const UNI_ROUTE_MAP: Record<number, string> = {
   6: "/uni-level",                   // إدارة التكافل الاجتماعي
   4: "/uni-level-family",            // إدارة الأسر الطلابية و الاتحادات
-  3: "/uni-level-activities",        // إدارة النشاط الرياضي و الرحلات
-  1: "/uni-level-activities",        // إدارة النشاط الثقافي و الفنى
-  2: "/uni-level-activities",        // إدارة النشاط الاجتماعي
-  5: "/uni-level-activities",        // إدارة النشاط العلمى و التكنولوجي
-  7: "/uni-level-activities"         // إدارة الجوالة و الرحلات و المعسكرات
+  3: "/uni-level-activities/Home",        // إدارة النشاط الرياضي و الرحلات
+  1: "/uni-level-activities/Home",        // إدارة النشاط الثقافي و الفنى
+  2: "/uni-level-activities/Home",        // إدارة النشاط الاجتماعي
+  5: "/uni-level-activities/Home",        // إدارة النشاط العلمى و التكنولوجي
+  7: "/uni-level-activities/Home"         // إدارة الجوالة و الرحلات و المعسكرات
 };
 
 function getFirstRoute(

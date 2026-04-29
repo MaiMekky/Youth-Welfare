@@ -57,7 +57,7 @@ async function apiFetch<T>(
         return { ok: false, message: "ليس لديك صلاحية للوصول لهذه الفعالية", status: 403 };
       }
       if (res.status === 500) {
-        return { ok: false, message: "حدث خطأ في الخادم، برجاء المحاولة لاحقاً", status: 500 };
+        return { ok: false, message: "حدث خطأ في السيرفر، برجاء المحاولة لاحقاً", status: 500 };
       }
       const msg =
         (typeof maybeJson === "object" &&
@@ -191,6 +191,7 @@ type ApiEventDetails = {
   faculty: number | null;
   created_by: number;
   family: number | null;
+  rejection_reason?: string | null;
 };
 
 type StudentRow = {
@@ -571,6 +572,7 @@ const uploadImages = async (files: FileList | null) => {
         constraints: "",
         description: "",
         max: 0,
+        rejectionReason: "",
       };
     }
 
@@ -593,6 +595,7 @@ const uploadImages = async (files: FileList | null) => {
       constraints: (event.restrictions ?? "").trim() || "—",
       description: (event.description ?? "").trim() || "—",
       max: Number(event.s_limit ?? 0),
+      rejectionReason: (event.rejection_reason ?? "").trim(), 
     };
   }, [event]);
 
@@ -986,6 +989,48 @@ const uploadImages = async (files: FileList | null) => {
             </div>
           </div>
         </section>
+
+                {ui.rejectionReason && (
+        <section
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "14px",
+            background: "linear-gradient(135deg, #FFF1F1, #FFE4E4)",
+            border: "1.5px solid #FCA5A5",
+            borderRight: "5px solid #EF4444",
+            borderRadius: "14px",
+            padding: "18px 20px",
+            direction: "rtl",
+            marginTop: "8px",
+          }}
+        >
+          <ShieldAlert size={22} color="#EF4444" style={{ flexShrink: 0, marginTop: 2 }} />
+          <div>
+            <div
+              style={{
+                fontSize: "0.85rem",
+                fontWeight: 700,
+                color: "#EF4444",
+                marginBottom: "6px",
+                letterSpacing: "0.02em",
+              }}
+            >
+              سبب الرفض
+            </div>
+            <div
+              style={{
+                fontSize: "0.95rem",
+                color: "#7F1D1D",
+                lineHeight: 1.7,
+                fontWeight: 500,
+              }}
+            >
+              {ui.rejectionReason}
+            </div>
+          </div>
+        </section>
+      )}
 
         <section className={styles.twoCols}>
           <div className={styles.block}>

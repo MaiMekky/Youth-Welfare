@@ -586,7 +586,7 @@ const toggleAllFacs = () => {
 
              {isConvert &&  (
                 <div className={styles.field} style={{ gridColumn: "1 / -1" }}>
-                  <label className={styles.label}>الوصف</label>
+                  <label className={styles.label}>الوصف(اكتب قيمة الاشتراك ان وجد)</label>
                   <textarea
                     className={styles.input}
                     placeholder="اكتب وصف مختصر"

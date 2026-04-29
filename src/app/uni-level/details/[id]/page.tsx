@@ -5,6 +5,19 @@ import { useParams, useRouter } from "next/navigation";
 import "./ApplicationDetails.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
+const rejectionReasons = [
+  { id: 1, text: "إزعاج أو تكرار التقديم بشكل غير مبرر" },
+  { id: 2, text: "المستندات المرفوعة غير واضحة أو غير صحيحة" },
+  { id: 3, text: "وجود بيانات غير صحيحة في الطلب" },
+  { id: 4, text: "الدخل المسجل غير مطابق للمستندات" },
+  { id: 5, text: "الطلب لا يستوفي شروط الدعم" },
+  { id: 6, text: "المستندات لا تخص الطالب" },
+  { id: 7, text: "اشتباه في تزوير المستندات" },
+  { id: 8, text: "سبب آخر" }
+];
+const rejectionReasonMap: Record<number, string> = Object.fromEntries(
+  rejectionReasons.map(r => [r.id, r.text])
+);
 interface StudentDetail {
   solidarity_id?: string | number;
   student_name?: string;
@@ -24,11 +37,27 @@ interface StudentDetail {
   arrange_of_brothers?: string | number;
   approved_by?: string;
   updated_at?: string;
+  req_status?: string;
+  rejection_reason?: string | null;
   [key: string]: unknown;
 }
 
+// ====== Colored status badge helper ======
+function StatusBadge({ status }: { status?: string }) {
+  if (!status) return <span>—</span>;
+
+  let cls = "status-badge ";
+  if (status === "مقبول") cls += "status-approved";
+  else if (status === "مرفوض") cls += "status-rejected";
+  else if (status === "منتظر") cls += "status-pending";
+  else if (status === "موافقة مبدئية") cls += "status-initial";
+  else cls += "status-default";
+
+  return <span className={cls}>{status}</span>;
+}
+
 export default function ApplicationDetailsPage() {
-  const { id } = useParams(); // solidarity_id من URL
+  const { id } = useParams();
   const router = useRouter();
 
   const [data, setData] = useState<StudentDetail | null>(null);
@@ -37,61 +66,59 @@ export default function ApplicationDetailsPage() {
   const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-const fetchData = async () => {
-  if (!id) {
-    setErrorMsg("لا يوجد معرف للطلب في الرابط");
-    setLoading(false);
-    return;
-  }
+    const fetchData = async () => {
+      if (!id) {
+        setErrorMsg("لا يوجد معرف للطلب في الرابط");
+        setLoading(false);
+        return;
+      }
 
-  try {
-    // ====== جلب بيانات الطلب ======
-    const baseUrl = getBaseUrl();
-    const appRes = await authFetch(
-      `${baseUrl}/api/solidarity/super_dept/${id}/applications/`
-    );
+      try {
+        const baseUrl = getBaseUrl();
+        const appRes = await authFetch(
+          `${baseUrl}/api/solidarity/super_dept/${id}/applications/`
+        );
 
-    if (!appRes.ok) throw new Error("APPLICATION_ERROR");
+        if (!appRes.ok) throw new Error("APPLICATION_ERROR");
 
-    const appData = await appRes.json();
-    setData(appData as StudentDetail);
+        const appData = await appRes.json();
+        setData(appData as StudentDetail);
 
-    // ====== جلب المستندات ======
-    const docsRes = await authFetch(
-      `${baseUrl}/api/solidarity/super_dept/${id}/documents/`
-    );
+        const docsRes = await authFetch(
+          `${baseUrl}/api/solidarity/super_dept/${id}/documents/`
+        );
 
-    if (!docsRes.ok) throw new Error("DOCS_ERROR");
+        if (!docsRes.ok) throw new Error("DOCS_ERROR");
 
-    const docsData = await docsRes.json();
-    setDocs(docsData);
+        const docsData = await docsRes.json();
+        setDocs(docsData);
 
-  } catch (err) {
-    console.error(err);
-    setErrorMsg("حدث خطأ أثناء تحميل البيانات");
-  } finally {
-    setLoading(false);
-  }
-};
+      } catch (err) {
+        console.error(err);
+        setErrorMsg("حدث خطأ أثناء تحميل البيانات");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchData();
-  }, [id]);const openDocument = async (docId: number) => {
-  try {
-    const baseUrl = getBaseUrl();
-    const res = await authFetch(
-      `${baseUrl}/api/files/solidarity/${docId}/download/`
-    );
+  }, [id]);
 
-    if (!res.ok) throw new Error("FILE_ERROR");
+  const openDocument = async (docId: number) => {
+    try {
+      const baseUrl = getBaseUrl();
+      const res = await authFetch(
+        `${baseUrl}/api/files/solidarity/${docId}/download/`
+      );
+      if (!res.ok) throw new Error("FILE_ERROR");
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    } catch (error) {
+      console.error("Error opening document:", error);
+    }
+  };
 
-    const blob = await res.blob();
-
-    const url = window.URL.createObjectURL(blob);
-    window.open(url, "_blank");
-
-  } catch (error) {
-    console.error("Error opening document:", error);
-  }
-};
   if (loading) return <p className="loading">جاري التحميل...</p>;
   if (errorMsg) return <p style={{ color: "red", textAlign: "center", padding: "2rem" }}>{errorMsg}</p>;
   if (!data) return <p style={{ textAlign: "center", padding: "2rem" }}>لا توجد بيانات للطلب</p>;
@@ -114,6 +141,10 @@ const fetchData = async () => {
           <li><strong>الكلية:</strong> {data?.faculty_name}</li>
           <li><strong>الحالة الدراسية:</strong> {data?.acd_status}</li>
           <li><strong>عدد أفراد الأسرة:</strong> {String(data?.family_numbers ?? '')}</li>
+          <li>
+            <strong>حالة الطلب:</strong>{" "}
+            <StatusBadge status={data?.req_status} />
+          </li>
         </ul>
       </section>
 
@@ -160,14 +191,12 @@ const fetchData = async () => {
             {docs.map((doc) => (
               <div key={String(doc.doc_id ?? '')} className="docCard">
                 <p><strong>{String(doc.doc_type ?? '')}</strong></p>
-                
                 <button
-                onClick={() => openDocument(Number(doc.doc_id))}
+                  onClick={() => openDocument(Number(doc.doc_id))}
                   className="docLinkButton"
                 >
                   افتح الملف
                 </button>
-                
                 <p className="uploadDate">
                   تم الرفع: {doc.uploaded_at ? String(doc.uploaded_at).slice(0, 10) : "-"}
                 </p>
@@ -176,6 +205,20 @@ const fetchData = async () => {
           </div>
         )}
       </section>
+
+      {/* سبب الرفض — highlighted when rejected */}
+      {data?.req_status === "مرفوض" && (
+        <section className="section info">
+          <div className="rejection-highlight">
+            <div>
+              <div className="rejection-label">سبب الرفض</div>
+              <div className="rejection-text">
+                {rejectionReasonMap[Number(data?.rejection_reason)] ?? data?.rejection_reason ?? "لم يُحدد"}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

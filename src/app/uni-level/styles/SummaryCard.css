@@ -15,8 +15,8 @@
 .summary-card {
   border-radius: 10px;
   padding: 14px 20px;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto 1fr;
   gap: 3px;
   transition: transform .18s;
   background: #fff;
@@ -78,6 +78,5 @@
 }
 
 @media (max-width: 480px) {
-  .summary-grid { grid-template-columns: 1fr 1fr; }
-  .summary-num  { font-size: 26px; }
+  .summary-num { font-size: 26px; }
 }

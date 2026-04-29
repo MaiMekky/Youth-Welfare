@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from "react";
 import styles from "../CreateEvent.module.css";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowRight, Save } from "lucide-react";
-import Footer from "@/app/FacLevel/components/Footer";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
 import { getSessionMeta } from "@/utils/cookieHelpers";
@@ -170,7 +169,7 @@ export default function EventForm({
     if (!costStr) next.cost = "التكلفة مطلوبة";
     else if (Number.isNaN(costNum) || costNum < 0) next.cost = "التكلفة لازم تكون رقم أكبر أو يساوي 0";
     if (!form.description.trim()) next.description = "الوصف مطلوب";
-    if (!form.type.trim()) next.type = "نوع النشاط مطلوب";
+    // if (!form.type.trim()) next.type = "نوع النشاط مطلوب";
     if (!form.dept) next.dept = "القسم مطلوب";
     return next;
   };
@@ -191,7 +190,7 @@ export default function EventForm({
         s_limit: Number(e?.s_limit ?? 100),
         cost: String(e?.cost ?? ""),
         description: e?.description ?? "",
-        type: e?.type ?? "",
+        type: e?.type ?? "داخلي",
         restrictions: e?.restrictions ?? "",
         reward: e?.reward ?? "",
         resource: e?.resource ?? "",
@@ -240,7 +239,7 @@ export default function EventForm({
       end_date: form.end_date,
       s_limit: Number(form.s_limit),
 
-      type: form.type,   
+      type: "داخلي",   
 
       resource: form.resource.trim(),
     };
@@ -292,7 +291,7 @@ export default function EventForm({
             </div>
 
             {/* ── نوع النشاط — from localStorage departments (like CreatePlanModal) ── */}
-            <div className={styles.field}>
+            {/* <div className={styles.field}>
               <label className={styles.label}>نوع النشاط</label>
               <select
                 className={`${styles.input} ${errors.type ? styles.inputError : ""}`}
@@ -304,8 +303,26 @@ export default function EventForm({
                 <option value="خارجي">خارجي</option>
               </select>
               {errors.type && <div className={styles.errorText}>{errors.type}</div>}
-            </div>
+            </div> */}
+              <div className={styles.field}>
+              <label className={styles.label}>القسم</label>
 
+              <select
+                className={`${styles.input} ${errors.dept ? styles.inputError : ""}`}
+                value={form.dept}
+                onChange={(e) => setField("dept", Number(e.target.value))}
+              >
+                <option value="" hidden>اختار القسم</option>
+
+                {departments.map((d) => (
+                  <option key={d.dept_id} value={d.dept_id}>
+                    {d.dept_name}
+                  </option>
+                ))}
+              </select>
+
+              {errors.dept && <div className={styles.errorText}>{errors.dept}</div>}
+            </div>
             
             <div className={styles.field}>
               <label className={styles.label}>تاريخ البداية</label>
@@ -327,26 +344,6 @@ export default function EventForm({
                 onChange={(ev) => setField("end_date", ev.target.value)}
               />
               {errors.end_date && <div className={styles.errorText}>{errors.end_date}</div>}
-            </div>
-
-              <div className={styles.field}>
-              <label className={styles.label}>القسم</label>
-
-              <select
-                className={`${styles.input} ${errors.dept ? styles.inputError : ""}`}
-                value={form.dept}
-                onChange={(e) => setField("dept", Number(e.target.value))}
-              >
-                <option value="" hidden>اختار القسم</option>
-
-                {departments.map((d) => (
-                  <option key={d.dept_id} value={d.dept_id}>
-                    {d.dept_name}
-                  </option>
-                ))}
-              </select>
-
-              {errors.dept && <div className={styles.errorText}>{errors.dept}</div>}
             </div>
             
             <div className={styles.field}>
@@ -417,7 +414,7 @@ export default function EventForm({
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label}>الوصف</label>
+            <label className={styles.label}>الوصف(اكتب قيمة الاشتراك ان وجد)</label>
             <textarea
               className={`${styles.textarea} ${errors.description ? styles.inputError : ""}`}
               placeholder="الوصف"
@@ -439,7 +436,6 @@ export default function EventForm({
           </div>
         </form>
       </div>
-      <Footer />
     </div>
   );
 }

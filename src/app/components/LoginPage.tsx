@@ -32,7 +32,7 @@ const UNI_ROUTE_MAP: Record<number, string> = {
   1: "/uni-level-activities/Home",        // إدارة النشاط الثقافي و الفنى
   2: "/uni-level-activities/Home",        // إدارة النشاط الاجتماعي
   5: "/uni-level-activities/Home",        // إدارة النشاط العلمى و التكنولوجي
-  7: "/uni-level-scouts/Home"         // إدارة الجوالة و الرحلات و المعسكرات
+  7: "/uni-level-activities/Home"         // إدارة الجوالة و الرحلات و المعسكرات
 };
 
 function getFirstRoute(
@@ -112,7 +112,6 @@ const handleLogin = async (e: React.FormEvent) => {
       student_id:   data.student_id ?? null,
       departments:  data.departments ?? [],
       dept_ids:     data.dept_ids ?? [],
-      faculty_id:   data.faculty_id ?? null,
     };
 
     // Middleware needs these as separate cookies (can't parse JSON in edge middleware easily)

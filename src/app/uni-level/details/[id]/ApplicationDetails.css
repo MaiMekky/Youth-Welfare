@@ -290,8 +290,8 @@
   margin-top: 12px;
 }
 
-/* Summary grid for details page only */
-.details-summary-grid {
+/* Summary grid */
+.summary-grid {
   display: flex;
   gap: 20px;
   flex-wrap: wrap;

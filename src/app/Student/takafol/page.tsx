@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback, Suspense } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "../styles/applyForm.css";
 import HeaderCard from "../components/HeaderCard";
 import ApplyForm from "../components/ApplyForm";
@@ -7,7 +7,7 @@ import MyRequests from "../components/MyRequests";
 import Cards from "../components/Cards";
 import { useSearchParams, useRouter } from "next/navigation";
 
-function TakafolContent() {
+export default function TakafolPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
@@ -60,13 +60,5 @@ function TakafolContent() {
       <HeaderCard activeTab={activeTab} onTabChange={handleTabChange} />
       <div className="student-page-wrap">{renderContent()}</div>
     </div>
-  );
-}
-
-export default function TakafolPage() {
-  return (
-    <Suspense fallback={<div className="student-takafol-page"><div className="student-page-wrap">Loading...</div></div>}>
-      <TakafolContent />
-    </Suspense>
   );
 }

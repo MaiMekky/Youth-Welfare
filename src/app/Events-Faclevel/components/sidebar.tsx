@@ -1,38 +1,28 @@
+
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import "@/app/Styles/Sidebar.css";
-import { CalendarDays, Users, X, User, Home, Tent , FolderTree, GitBranch  } from "lucide-react";
+import { CalendarDays, Users, X, User, Home } from "lucide-react";
 import Image from "next/image";
 import logo from "@/app/assets/logo.png";
 import { getSessionMeta } from "@/utils/cookieHelpers";
 
+// ✅ Add this interface
 interface SidebarProps {
   isOpen?: boolean;
   setIsOpen?: (v: boolean) => void;
 }
 
-interface Dept {
-  dept_id: number;
-  dept_name: string;
-}
-
+// ✅ Destructure props instead of useState
 export default function Sidebar({ isOpen = false, setIsOpen = () => {} }: SidebarProps) {
   const pathname = usePathname();
   const router   = useRouter();
-
-  const [userData, setUserData] = useState<{ name?: string; faculty_name?: string } | null>(null);
-  const [isScout, setIsScout]   = useState(false);
+  const [userData, setUserData] = React.useState<{ name?: string; faculty_name?: string } | null>(null);
 
   useEffect(() => {
     const meta = getSessionMeta();
-    if (!meta) return;
-
-    setUserData({ name: meta.name, faculty_name: meta.faculty_name });
-
-    // Check if dept_id 7 exists in the departments array from session_meta
-    const depts: Dept[] = meta.departments ?? [];
-    setIsScout(depts.some((d) => d.dept_id === 7));
+    if (meta) setUserData({ name: meta.name, faculty_name: meta.faculty_name });
   }, []);
 
   // Close on outside click
@@ -60,6 +50,8 @@ export default function Sidebar({ isOpen = false, setIsOpen = () => {} }: Sideba
 
   const go = (path: string) => { router.push(path); setIsOpen(false); };
 
+  // ✅ NO <button className="mobileMenuBtn"> here — it's now in Header
+
   return (
     <>
       <aside id="sidebar" className={`sidebar ${isOpen ? "open" : ""}`}>
@@ -80,6 +72,7 @@ export default function Sidebar({ isOpen = false, setIsOpen = () => {} }: Sideba
           </div>
           <h2 className="sidebar-title">إدارة الفعاليات</h2>
           <p className="sidebar-subtitle">نظام إدارة الفعاليات لجامعة العاصمة</p>
+          {/* Close button stays inside sidebar so user can dismiss it */}
           <button
             className="sidebar-close-btn"
             onClick={() => setIsOpen(false)}
@@ -98,62 +91,24 @@ export default function Sidebar({ isOpen = false, setIsOpen = () => {} }: Sideba
         </div>
 
         <nav className="nav">
-
-          {/* ── Always visible ───────────────────────────────────── */}
-          <button
+           <button
             onClick={() => go("/Events-Faclevel/Home")}
             className={pathname === "/Events-Faclevel/Home" ? "active" : ""}
           >
-            <Home size={18} /><span>الرئيسية</span>
+            <Home size={18} /><span>الرئيسية</span>
           </button>
-
           <button
             onClick={() => go("/Events-Faclevel")}
             className={pathname === "/Events-Faclevel" ? "active" : ""}
           >
             <CalendarDays size={18} /><span>إدارة الفعاليات</span>
           </button>
-
           <button
             onClick={() => go("/Events-Faclevel/plans")}
             className={pathname === "/Events-Faclevel/plans" ? "active" : ""}
           >
             <Users size={18} /><span>خطط الكلية</span>
           </button>
-
-          {/* ── Scout dept (dept_id === 7) only ─────────────────── */}
-          {isScout && (
-            <>
-              <button
-                onClick={() => go("/Events-Faclevel/scout")}
-                className={pathname === "/Events-Faclevel/scout" ? "active" : ""}
-              >
-                <Tent size={18} /><span>الجوالة</span>
-              </button>
-
-              <button
-                onClick={() => go("/Events-Faclevel/members")}
-                className={pathname === "/Events-Faclevel/members" ? "active" : ""}
-              >
-                <Users size={18} /><span>الاعضاء</span>
-              </button>
-
-              <button
-                onClick={() => go("/Events-Faclevel/groups")}
-                className={pathname === "/Events-Faclevel/groups" ? "active" : ""}
-              >
-                <FolderTree size={18} /><span>الرهوط</span>
-              </button>
-
-              <button
-                onClick={() => go("/Events-Faclevel/structure")}
-                className={pathname === "/Events-Faclevel/structure" ? "active" : ""}
-              >
-                <GitBranch size={18} /><span>الهيكل التنظيمي</span>
-              </button>
-            </>
-          )}
-
         </nav>
 
         <div className="sidebar-footer">

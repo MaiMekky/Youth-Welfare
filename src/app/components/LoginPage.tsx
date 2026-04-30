@@ -112,6 +112,7 @@ const handleLogin = async (e: React.FormEvent) => {
       student_id:   data.student_id ?? null,
       departments:  data.departments ?? [],
       dept_ids:     data.dept_ids ?? [],
+      faculty_id:   data.faculty_id ?? null,
     };
 
     // Middleware needs these as separate cookies (can't parse JSON in edge middleware easily)

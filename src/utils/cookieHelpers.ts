@@ -14,6 +14,7 @@ export interface SessionMeta {
   student_id:   number | null;
   departments:  { dept_id: number; dept_name: string }[];
   dept_ids:     number[];
+  faculty_id:   number | null;
 }
 
 export function getSessionMeta(): SessionMeta | null {

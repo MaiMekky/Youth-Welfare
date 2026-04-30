@@ -1,0 +1,384 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 20px 24px 36px;
+  font-family: 'Cairo', sans-serif;
+  background: #EDF2F8;
+  min-height: 100vh;
+  direction: rtl;
+  color: #1A2E42;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  flex: 1;
+}
+
+/* ── Header ── */
+.header {
+  background: linear-gradient(140deg, #1E3A5F 0%, #2D5F8A 100%);
+  border-radius: 16px;
+  padding: 24px 30px;
+  box-shadow: 0 4px 18px rgba(30, 58, 95, .22);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.headerIcon {
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, .12);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #C49B3A;
+  flex-shrink: 0;
+  border: 1px solid rgba(196, 155, 58, .3);
+}
+
+.pageTitle {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.3px;
+}
+
+.pageSubtitle {
+  margin: 5px 0 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, .65);
+  font-weight: 500;
+}
+
+/* ── Create Button ── */
+.createBtn {
+  background: linear-gradient(135deg, #C49B3A, #A67F2C);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 11px 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+  font-size: 15px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(196, 155, 58, .4);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+  flex-shrink: 0;
+  font-family: 'Cairo', sans-serif;
+}
+.createBtn:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(196, 155, 58, .52); }
+.createBtn:active { transform: translateY(0); }
+
+/* ── Loading ── */
+.loadingWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  gap: 16px;
+}
+
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(30, 58, 95, .12);
+  border-top-color: #C49B3A;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loadingText {
+  font-size: 15px;
+  font-weight: 700;
+  color: #6B8299;
+  margin: 0;
+}
+
+/* ── Empty State ── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 80px 24px;
+  background: #fff;
+  border: 1.5px dashed rgba(30, 58, 95, .2);
+  border-radius: 20px;
+  gap: 16px;
+}
+
+.emptyIconWrap {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: linear-gradient(140deg, #EBF3FB, #D6E8F5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2D5F8A;
+  border: 2px solid #BFDBFE;
+  margin-bottom: 4px;
+}
+
+.emptyTitle {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 900;
+  color: #1E3A5F;
+}
+
+.emptyDesc {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #6B8299;
+  max-width: 380px;
+  line-height: 1.7;
+}
+
+.emptyBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #C49B3A, #A67F2C);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(196, 155, 58, .4);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+  font-family: 'Cairo', sans-serif;
+}
+.emptyBtn:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(196, 155, 58, .52); }
+
+/* ─────────────────────────────────────────────
+   Append these to ScoutPage.module.css
+   (skip any class that already exists)
+───────────────────────────────────────────── */
+
+/* Overlay */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+/* Modal card */
+.modal {
+  background: var(--card-bg, #fff);
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  animation: modalIn 0.22s ease;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+/* Header */
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+}
+
+.modalTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary, #111827);
+  margin: 0;
+}
+
+.closeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted, #6b7280);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.closeBtn:hover {
+  background: var(--hover-bg, #f3f4f6);
+  color: var(--text-primary, #111827);
+}
+
+/* Body */
+.modalBody {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Form groups */
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  position: relative;
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary, #111827);
+}
+
+.required {
+  color: #ef4444;
+  margin-right: 2px;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 0.65rem 0.875rem;
+  border: 1.5px solid var(--border, #d1d5db);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  color: var(--text-primary, #111827);
+  background: var(--input-bg, #f9fafb);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+  resize: none;
+  font-family: inherit;
+  direction: rtl;
+  box-sizing: border-box;
+}
+
+.input:focus,
+.textarea:focus {
+  border-color: var(--primary, #3b82f6);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+  background: #fff;
+}
+
+.inputError {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+.fieldError {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: #ef4444;
+  margin-top: 2px;
+}
+
+.charCount {
+  font-size: 0.72rem;
+  color: var(--text-muted, #9ca3af);
+  text-align: left;
+  direction: ltr;
+}
+
+/* Footer */
+.modalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid var(--border, #e5e7eb);
+}
+
+
+.cancelBtn {
+  padding: 11px 22px;
+  background: #F7FAFD;
+  border: 1.5px solid #E2ECF5;
+  color: #6B8299;
+  border-radius: 11px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 160ms ease;
+  font-family: 'Cairo', sans-serif;
+}
+.cancelBtn:hover:not(:disabled) { background: #FEF2F2; border-color: #FECACA; color: #DC2626; }
+.cancelBtn:disabled { opacity: .5; cursor: not-allowed; }
+
+.submitBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 24px;
+  background: linear-gradient(135deg, #C49B3A, #A67F2C);
+  color: #fff;
+  border: none;
+  border-radius: 11px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(196,155,58,.4);
+  transition: all 160ms ease;
+  font-family: 'Cairo', sans-serif;
+}
+.submitBtn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(196,155,58,.52); }
+.submitBtn:active:not(:disabled) { transform: translateY(0); }
+.submitBtn:disabled { opacity: .65; cursor: not-allowed; }
+
+
+/* Spin animation for loader icon */
+.spinIcon {
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .page { padding: 14px 14px 28px; }
+  .header { flex-direction: column; align-items: stretch; gap: 12px; }
+  .createBtn { width: 100%; justify-content: center; }
+  .pageTitle { font-size: 20px; }
+  .emptyState { padding: 48px 16px; }
+}

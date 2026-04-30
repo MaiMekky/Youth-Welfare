@@ -91,6 +91,7 @@ export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (ap
   const loadApplications = async (appliedFilters: Record<string, string> = {}) => {
     try {
       setLoading(true);
+      setCurrentPage(1);
       const data = await fetchApplications(appliedFilters);
       if (onDataLoaded) onDataLoaded(data);
       setApplications(data);
@@ -126,8 +127,7 @@ export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (ap
     localStorage.setItem("selectedApplication", JSON.stringify(app));
     router.push(`/uni-level/details/${app.id}`);
   };
-
-  if (loading) return <p>جاري التحميل...</p>;
+ 
 
   return (
     <div>
@@ -139,6 +139,11 @@ export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (ap
       />
 
       <div className="table-container">
+        {loading && (
+        <div className="table-loading-overlay">
+          <div className="table-spinner" />
+        </div>
+      )}
         <div className="table-scroll-wrapper">
           <table>
             <thead>

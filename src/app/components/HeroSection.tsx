@@ -3,6 +3,7 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import styles from "../Styles/components/HeroSection.module.css";
 import LoginPage from "./LoginPage";
 import SignupPage from "./SignUp";
+import { authFetch , getBaseUrl } from "@/utils/globalFetch";
 
 const images = [
   "/جامعة_حلوان.jpg",
@@ -24,7 +25,20 @@ const HeroSection: React.FC = () => {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const dragStart   = useRef<number | null>(null);
   const isDragging  = useRef(false);
-
+  
+  const handleLoginClick = async () => {
+  try {
+    const res = await authFetch(`${getBaseUrl()}/api/auth/csrf/`, { method: "GET" });
+    const data = await res.json();
+    console.log("CSRF token:", data); // inspect the response shape
+    setActiveScreen("login");
+    setShowModal(true);
+  } catch (err) {
+    console.error("Failed to fetch CSRF token:", err);
+    setActiveScreen("login");
+    setShowModal(true); // still open modal even if it fails
+  }
+};
   const goTo = useCallback((targetIndex: number, dir: "left" | "right") => {
     if (turning) return;
     const target = (targetIndex + images.length) % images.length;
@@ -378,7 +392,7 @@ const onPointerUp = (e: React.PointerEvent) => {
               </button>
               <button
                 className="hero-btn-outline"
-                onClick={() => { setActiveScreen("login"); setShowModal(true); }}
+                onClick={() => { setActiveScreen("login"); handleLoginClick(); }}
               >
                 تسجيل الدخول
               </button>

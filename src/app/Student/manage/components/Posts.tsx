@@ -136,26 +136,13 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
   const [error, setError] = useState<string | null>(null);
   const [selectedFamilyId, setSelectedFamilyId] = useState<number | null>(null);
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
-
   // First useEffect: Fetch family ID from families API
   useEffect(() => {
-    if (!token) {
-      setError("غير مصرح");
-      setLoading(false);
-      return;
-    }
-
     const fetchFamilyId = async () => {
       try {
         const baseUrl = getBaseUrl();
         const res = await authFetch(
-          `${baseUrl}/api/family/student/families/`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          `${baseUrl}/api/family/student/families/`
         );
 
         if (!res.ok) throw new Error("فشل تحميل قائمة الأسر");
@@ -195,11 +182,11 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
     };
 
     fetchFamilyId();
-  }, [token]);
+  }, []);
 
   // Second useEffect: Fetch posts using the selected family ID
   useEffect(() => {
-    if (!selectedFamilyId || !token) return;
+    if (!selectedFamilyId) return;
 
     const fetchPosts = async () => {
       try {
@@ -209,9 +196,7 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
         const baseUrl = getBaseUrl();
         const endpoint = `${baseUrl}/api/family/student/${selectedFamilyId}/posts/`;
 
-        const response = await authFetch(endpoint, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await authFetch(endpoint);
 
         if (!response.ok) {
           throw new Error(`Failed to fetch posts: ${response.statusText}`);
@@ -237,7 +222,7 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
     };
 
     fetchPosts();
-  }, [selectedFamilyId, token, refreshTrigger]);
+  }, [selectedFamilyId, refreshTrigger]);
 
   if (loading) {
     return (

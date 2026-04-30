@@ -3,16 +3,17 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import styles from './Toast.module.css';
 
-type ToastType = 'success' | 'error' | 'warning';
+type ToastType = 'success' | 'error' | 'warning' | 'info';
 
 interface Toast {
   id: number;
   message: string;
   type: ToastType;
+  duration?: number;
 }
 
 interface ToastContextType {
-  showToast: (message: string, type: ToastType) => void;
+  showToast: (message: string, type: ToastType, duration?: number) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -28,13 +29,13 @@ export const useToast = () => {
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const showToast = useCallback((message: string, type: ToastType) => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, message, type }]);
+  const showToast = useCallback((message: string, type: ToastType, duration: number = 3500) => {
+    const id = Date.now() + Math.random();
+    setToasts(prev => [...prev, { id, message, type, duration }]);
 
     setTimeout(() => {
       setToasts(prev => prev.filter(toast => toast.id !== id));
-    }, 3500);
+    }, duration);
   }, []);
 
   return (
@@ -64,6 +65,13 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                   <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
                   <line x1="12" y1="9" x2="12" y2="13"/>
                   <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+              )}
+              {toast.type === 'info' && (
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="16" x2="12" y2="12"/>
+                  <line x1="12" y1="8" x2="12.01" y2="8"/>
                 </svg>
               )}
             </div>

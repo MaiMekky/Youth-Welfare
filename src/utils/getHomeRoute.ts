@@ -10,12 +10,12 @@ export function getHomeRoute(path: string): string {
 
   // University manager
   if (path.startsWith("/uni-level-family")) return "/uni-level-family";
-  if (path.startsWith("/uni-level-activities")) return "/uni-level-activities";
+  if (path.startsWith("/uni-level-activities/Home")) return "/uni-level-activities/Home";
   if (path.startsWith("/uni-level")) return "/uni-level";
 
   // Faculty manager
   if (path.startsWith("/Family-Faclevel")) return "/Family-Faclevel";
-  if (path.startsWith("/Events-Faclevel")) return "/Events-Faclevel";
+  if (path.startsWith("/Events-Faclevel/Home")) return "/Events-Faclevel/Home";
   if (path.startsWith("/FacultyReport")) return "/FacLevel";
   if (path.startsWith("/requests")) return "/FacLevel";
   if (path.startsWith("/FacLevel")) return "/FacLevel";

@@ -5,6 +5,7 @@ import Tabs from './Tabs';
 import styles from './deatails.module.css';
 import { useRouter, useParams } from 'next/navigation';
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 interface FamilyMember {
   student_id: string | number;
@@ -41,25 +42,11 @@ interface FamilyDetail {
 export default function FamilyDetailsPage() {
   const router = useRouter();
   const { id } = useParams();
+  const { showToast } = useToast();
 
   const [activeTab, setActiveTab] = useState('members');
   const [family, setFamily] = useState<FamilyDetail | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // Notification state
-  const [notification, setNotification] = useState<{
-    show: boolean;
-    message: string;
-    type: "success" | "error";
-  }>({ show: false, message: "", type: "success" });
-
-  // Show notification helper
-  const showNotification = (message: string, type: "success" | "error") => {
-    setNotification({ show: true, message, type });
-    setTimeout(() => {
-      setNotification({ show: false, message: "", type: "success" });
-    }, 2500);
-  };
 
   const tabs = [
     { id: 'members', label: 'الأعضاء' },
@@ -123,13 +110,11 @@ export default function FamilyDetailsPage() {
 
     const fetchFamily = async () => {
       try {
-        const token = localStorage.getItem('access');
 
         const res = await authFetch(
           `${getBaseUrl()}/api/family/super_dept/${id}`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
               'Content-Type': 'application/json',
             },
           }
@@ -143,7 +128,7 @@ export default function FamilyDetailsPage() {
         setFamily(data as FamilyDetail);
       } catch (error) {
         console.error('Error fetching family:', error);
-        showNotification('فشل في تحميل بيانات الأسرة', 'error');
+        showToast('فشل في تحميل بيانات الأسرة', 'error');
       } finally {
         setLoading(false);
       }
@@ -157,13 +142,6 @@ export default function FamilyDetailsPage() {
 
   return (
     <div className={styles.pageContainer}>
-      {/* Notification */}
-      {notification.show && (
-        <div className={`${styles.notification} ${styles[notification.type]}`}>
-          {notification.message}
-        </div>
-      )}
-
       {/* Header */}
       <div className={styles.header}>
         <button
@@ -276,39 +254,41 @@ export default function FamilyDetailsPage() {
       {/* ================= Events ================= */}
       {activeTab === 'events' && (
         <div className={styles.contentArea}>
-          <h2 className={styles.sectionTitle}>
-            فعاليات الأسرة
-          </h2>
-
           {family.family_events.length === 0 ? (
             <div className={styles.emptyStateContainer}>
               <p className={styles.emptyStateText}>لا توجد فعاليات حالياً</p>
             </div>
           ) : (
-            <div className={styles.eventsGrid}>
-              {family.family_events.map((event) => (
-                <div
-                  key={event.event_id}
-                  className={styles.eventCard}
-                >
-                  <div className={styles.eventHeader}>
-                    <h3 className={styles.eventTitle}>
-                      {event.title}
-                    </h3>
-                    <span 
-                      className={styles.eventStatusBadge}
-                      style={getEventStatusStyle(event.status)}
-                    >
-                      {event.status}
-                    </span>
-                  </div>
-
-                  <div className={styles.eventMeta}>
-                    <span>{event.st_date}</span>
-                    <span>{event.cost} جنيه</span>
-                  </div>
-                </div>
-              ))}
+            <div className={styles.tableContainer}>
+              <table className={styles.membersTable}>
+                <thead>
+                  <tr>
+                    <th>اسم الفعالية</th>
+                    <th>تاريخ البدء</th>
+                    <th>التكلفة</th>
+                    <th>الحالة</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {family.family_events.map((event) => (
+                    <tr key={event.event_id}>
+                      <td data-label="اسم الفعالية">{event.title}</td>
+                      <td data-label="تاريخ البدء">{event.st_date}</td>
+                      <td data-label="التكلفة">
+                        {event.cost ? `${event.cost} جنيه` : 'مجاني'}
+                      </td>
+                      <td data-label="الحالة">
+                        <span
+                          className={styles.eventStatusBadge}
+                          style={getEventStatusStyle(event.status)}
+                        >
+                          {event.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>

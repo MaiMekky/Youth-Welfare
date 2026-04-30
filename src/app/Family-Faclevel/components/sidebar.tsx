@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import logo from "@/app/assets/logo.png";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 
 // ✅ Add this interface
 interface SidebarProps {
@@ -25,12 +26,8 @@ export default function FacLevelSidebar({ isOpen = false, setIsOpen = () => {} }
   const [userData, setUserData] = useState<{ name?: string; faculty_name?: string } | null>(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      try {
-        setUserData(JSON.parse(storedUser));
-      } catch {}
-    }
+    const meta = getSessionMeta();
+    if (meta) setUserData({ name: meta.name, faculty_name: meta.faculty_name });
   }, []);
 
   useEffect(() => {

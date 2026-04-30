@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Tabs from './Tabs';
 import styles from './deatails.module.css';
 import { useRouter, useParams } from 'next/navigation';
+import { useToast } from '@/app/context/ToastContext';
 type TabId = 'members' | 'events';
 import { useSearchParams } from "next/navigation";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
@@ -244,7 +245,7 @@ export default function FamilyDetailsPage() {
   const [familyData, setFamilyData] = useState<FamilyData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [alert, setAlert] = useState<{ message: string; type: 'success' | 'error' | 'warning' | 'info' } | null>(null);
+  const { showToast } = useToast();
   
   const router = useRouter();
   const params = useParams();
@@ -267,7 +268,6 @@ export default function FamilyDetailsPage() {
 
       try {
         setLoading(true);
-        const token = localStorage.getItem('access');
         const baseUrl = getBaseUrl();
         const url = `${baseUrl}/api/family/super_dept/${familyId}/`;
 
@@ -275,7 +275,6 @@ export default function FamilyDetailsPage() {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            ...(token && { Authorization: `Bearer ${token}` }),
           },
         });
 
@@ -300,7 +299,7 @@ export default function FamilyDetailsPage() {
   }, [familyId]);
 
   const showAlert = (message: string, type: 'success' | 'error' | 'warning' | 'info') => {
-    setAlert({ message, type });
+    showToast(message, type);
   };
 
   /* ── Update a single member's status in local state ── */
@@ -318,7 +317,6 @@ export default function FamilyDetailsPage() {
 
   const handleApproveMember = async (studentId: number) => {
     try {
-      const token = localStorage.getItem('access');
       const baseUrl = getBaseUrl();
       const response = await authFetch(
         `${baseUrl}/api/family/super_dept/${familyId}/members/${studentId}/approve/`,
@@ -326,7 +324,6 @@ export default function FamilyDetailsPage() {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            ...(token && { Authorization: `Bearer ${token}` }),
           },
         }
       );
@@ -340,7 +337,7 @@ export default function FamilyDetailsPage() {
       updateMemberStatus(studentId, 'مقبول');
       showAlert('تمت الموافقة على العضو بنجاح', 'success');
     } catch (err) {
-      const msg = err instanceof Error ? translateMemberError(err.message) : 'تعذّر الاتصال بالخادم';
+      const msg = err instanceof Error ? translateMemberError(err.message) : 'تعذّر الاتصال بالسيرفر';
       showAlert(msg, 'error');
       console.error(err);
     }
@@ -348,7 +345,6 @@ export default function FamilyDetailsPage() {
 
   const handleRejectMember = async (studentId: number) => {
     try {
-      const token = localStorage.getItem('access');
       const baseUrl = getBaseUrl();
       const response = await authFetch(
         `${baseUrl}/api/family/super_dept/${familyId}/members/${studentId}/reject/`,
@@ -356,7 +352,6 @@ export default function FamilyDetailsPage() {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            ...(token && { Authorization: `Bearer ${token}` }),
           },
         }
       );
@@ -370,7 +365,7 @@ export default function FamilyDetailsPage() {
       updateMemberStatus(studentId, 'مرفوض');
       showAlert('تم رفض العضو', 'warning');
     } catch (err) {
-      const msg = err instanceof Error ? translateMemberError(err.message) : 'تعذّر الاتصال بالخادم';
+      const msg = err instanceof Error ? translateMemberError(err.message) : 'تعذّر الاتصال بالسيرفر';
       showAlert(msg, 'error');
       console.error(err);
     }
@@ -466,15 +461,6 @@ export default function FamilyDetailsPage() {
 
   return (
     <div className={styles.pageContainer}>
-      {/* Custom Alert */}
-      {alert && (
-        <CustomAlert
-          message={alert.message}
-          type={alert.type}
-          onClose={() => setAlert(null)}
-        />
-      )}
-
       {/* Header Section */}
       <div className={styles.header}>
         <button
@@ -573,17 +559,17 @@ export default function FamilyDetailsPage() {
                         </td>
                         <td data-label="الإجراءات">
                           <div className={styles.memberActions}>
-                            <button
+                           <button
                               className={styles.btnApprove}
                               onClick={() => handleApproveMember(m.student_id)}
-                              disabled={m.status === 'مقبول' || m.status === 'مرفوض'}
+                              disabled={m.status === 'مقبول' || m.status === 'مرفوض' || familyData.status === 'مرفوض'}
                             >
                               قبول
                             </button>
                             <button
                               className={styles.btnReject}
                               onClick={() => handleRejectMember(m.student_id)}
-                              disabled={m.status === 'مرفوض' || m.status === 'مقبول'}
+                              disabled={m.status === 'مرفوض' || m.status === 'مقبول' || familyData.status === 'مرفوض'}
                             >
                               رفض
                             </button>
@@ -601,43 +587,39 @@ export default function FamilyDetailsPage() {
 
       {activeTab === 'events' && (
         <div className={styles.contentArea}>
-          <h2 className={styles.sectionTitle}>فعاليات الأسرة</h2>
-
           {familyData.family_events.length === 0 ? (
             <div className={styles.emptyStateContainer}>
               <p className={styles.emptyStateText}>لا توجد فعاليات حالياً</p>
             </div>
           ) : (
-            <div className={styles.eventsGrid}>
-              {familyData.family_events.map((raw) => {
-                const event = normalizeEvent(raw);
-                return (
-                  <div key={event.event_id} className={styles.eventCard}>
-                    <div className={styles.eventHeader}>
-                      <h3 className={styles.eventTitle}>{event.title}</h3>
-                      <span
-                        className={styles.eventStatusBadge}
-                        style={
-                          event.status === 'مقبول'
-                            ? { backgroundColor: '#D4F4DD', color: '#2E7D32' }
-                            : event.status === 'منتظر' || event.status === 'في الانتظار'
-                            ? { backgroundColor: '#FFF3E0', color: '#E65100' }
-                            : event.status === 'مرفوض'
-                            ? { backgroundColor: '#FFE0E0', color: '#C62828' }
-                            : { backgroundColor: '#F5F5F5', color: '#666' }
-                        }
-                      >
-                        {event.status}
-                      </span>
-                    </div>
-
-                    <div className={styles.eventMeta}>
-                      <span>{event.st_date}</span>
-                      <span>{event.cost ? `${event.cost} جنيه` : 'مجاني'}</span>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className={styles.tableContainer}>
+              <table className={styles.membersTable}>
+                <thead>
+                  <tr>
+                    <th>اسم الفعالية</th>
+                    <th>النوع</th>
+                    <th>تاريخ البدء</th>
+                    <th>التكلفة</th>
+                    <th>الحالة</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {familyData.family_events.map((raw) => {
+                    const event = normalizeEvent(raw);
+                    return (
+                      <tr key={event.event_id}>
+                        <td data-label="اسم الفعالية">{event.title}</td>
+                        <td data-label="النوع">{event.type}</td>
+                        <td data-label="تاريخ البدء">{event.st_date}</td>
+                        <td data-label="التكلفة">{event.cost ? `${event.cost} جنيه` : 'مجاني'}</td>
+                        <td data-label="الحالة">
+                          <span className={getStatusColor(event.status)}>{event.status}</span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
         </div>

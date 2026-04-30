@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import styles from "../styles/friends.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 import {
   User,
   Users,
@@ -177,11 +179,8 @@ function UidField({
     setStatus("checking");
     setStudentName("");
     try {
-      const token =
-        typeof window !== "undefined" ? localStorage.getItem("access") : null;
       const res = await authFetch(
-        `${getBaseUrl()}/api/auth/student-lookup/?uid=${uid}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${getBaseUrl()}/api/auth/student-lookup/?uid=${uid}`
       );
       if (res.ok) {
         const data = await res.json();
@@ -365,13 +364,10 @@ export default function FriendsForm() {
     useState<Committee[]>(initialCommittees);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [openComm, setOpenComm] = useState<Record<number, boolean>>({});
-  const [notification, setNotification] = useState<{
-    message: string;
-    type: NotificationType;
-  } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const { showToast } = useToast();
 
   /* ── Duplicate UID detection ── */
   const getDuplicateUidMap = (): Record<string, string> => {
@@ -429,8 +425,7 @@ export default function FriendsForm() {
     });
 
   const showNotif = (message: string, type: NotificationType) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3500);
+    showToast(message, type);
   };
 
   const parseJWT = (token: string) => {
@@ -662,13 +657,8 @@ export default function FriendsForm() {
 
   /* ── build body ── */
   const buildBody = () => {
-    const token =
-      typeof window !== "undefined" ? localStorage.getItem("access") : null;
-    let faculty_id = 0;
-    if (token) {
-      const d = parseJWT(token);
-      if (d?.faculty_id) faculty_id = d.faculty_id;
-    }
+    const meta = getSessionMeta();
+    const faculty_id = meta?.admin_id ?? 0;
     return {
       name: general.name,
       description: general.description,
@@ -721,15 +711,12 @@ export default function FriendsForm() {
     }
     setIsSubmitting(true);
     try {
-      const token =
-        typeof window !== "undefined" ? localStorage.getItem("access") : null;
       const res = await authFetch(
         `${getBaseUrl()}/api/family/faculty/environment-family/`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(buildBody()),
         }
@@ -763,108 +750,78 @@ export default function FriendsForm() {
   return (
     <div className={styles.formContainer}>
 
-      {/* Notification */}
-      {notification && (
-        <div
-          className={`${styles.notification} ${styles[notification.type]}`}
-        >
-          {notification.message}
-        </div>
-      )}
+     <div className={styles["cf-page-banner"]}>
+      <h1 className={styles["cf-page-banner-title"]}>إنشاء أسرة أصدقاء البيئة</h1>
+      <p className={styles["cf-page-banner-breadcrumb"]}>
+        إدارة الأسرة الطلابية / طلبات / إنشاء أسرة أصدقاء البيئة
+      </p>
+        <span className={styles["cf-step-count"]}>
+          {currentStep + 1} / {STEPS.length}
+        </span>
+    </div>
 
-      {/* ══════════════════════════════════════
-          WIZARD HEADER  (matches CreateFamForm)
-      ══════════════════════════════════════ */}
-      <div className={styles["cf-progress-header"]}>
-        {/* top row: back | title | step counter */}
-        <div className={styles["cf-progress-top"]}>
-          <button className={styles["cf-back-page"]} type="button">
-            <ChevronRight size={15} /> العودة للقائمة
-          </button>
-          <h1 className={styles["cf-wizard-title"]}>
-            إنشاء أسرة أصدقاء البيئة
-          </h1>
-          <span className={styles["cf-step-count"]}>
-            {currentStep + 1} / {STEPS.length}
-          </span>
-        </div>
-
-        {/* step indicators */}
-        <div className={styles["cf-steps"]}>
-          {STEPS.map((step, idx) => {
-            const isDone = completedSteps.has(idx);
-            const isActive = idx === currentStep;
-            const isPast = idx < currentStep;
-            const Icon = step.icon;
-            return (
-              <React.Fragment key={idx}>
-                <div
-                  className={[
-                    styles["cf-step-indicator"],
-                    isActive
-                      ? styles["cf-step-active"]
-                      : isDone || isPast
-                      ? styles["cf-step-done"]
-                      : styles["cf-step-pending"],
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                >
-                  <button
-                    type="button"
-                    className={styles["cf-step-circle"]}
-                    onClick={() => {
-                      if (idx < currentStep) {
-                        setCurrentStep(idx);
-                        return;
-                      }
-                      if (idx > currentStep) {
-                        let ok = true;
-                        for (let s = currentStep; s < idx; s++) {
-                          const errs = validateStep(s);
-                          if (Object.keys(errs).length) {
-                            setFieldErrors((p) => ({ ...p, ...errs }));
-                            showNotif(
-                              `❌ ${errs[Object.keys(errs)[0]]}`,
-                              "error"
-                            );
-                            ok = false;
-                            break;
-                          }
-                          setCompletedSteps((p) => new Set(p).add(s));
-                        }
-                        if (ok) setCurrentStep(idx);
-                      }
-                    }}
-                  >
-                    {isDone || isPast ? (
-                      <CheckCircle size={14} />
-                    ) : (
-                      <Icon size={13} />
-                    )}
-                  </button>
-                  <span className={styles["cf-step-label"]}>{step.label}</span>
-                </div>
-                {idx < STEPS.length - 1 && (
-                  <div
-                    className={`${styles["cf-step-line"]} ${
-                      isPast || isDone ? styles["cf-line-done"] : ""
-                    }`}
-                  />
-                )}
-              </React.Fragment>
-            );
-          })}
-        </div>
-
-        {/* progress bar */}
-        <div className={styles["cf-progress-bar"]}>
-          <div
-            className={styles["cf-progress-fill"]}
-            style={{ width: `${progressPct}%` }}
-          />
-        </div>
+    {/* ══ Wizard Progress Header ══ */}
+    <div className={styles["cf-progress-header"]}>
+      {/* cf-progress-top is hidden via CSS, keep it for step count ref */}
+      <div className={styles["cf-progress-top"]}>
+        <span />
+        <span />
       </div>
+
+      <div className={styles["cf-steps"]}>
+        {STEPS.map((step, idx) => {
+          const isDone = completedSteps.has(idx);
+          const isActive = idx === currentStep;
+          const isPast = idx < currentStep;
+          const Icon = step.icon;
+          return (
+            <React.Fragment key={idx}>
+              <div
+                className={[
+                  styles["cf-step-indicator"],
+                  isActive ? styles["cf-step-active"]
+                  : isDone || isPast ? styles["cf-step-done"]
+                  : styles["cf-step-pending"],
+                ].filter(Boolean).join(" ")}
+              >
+                <button
+                  type="button"
+                  className={styles["cf-step-circle"]}
+                  onClick={() => {
+                    if (idx < currentStep) { setCurrentStep(idx); return; }
+                    if (idx > currentStep) {
+                      let ok = true;
+                      for (let s = currentStep; s < idx; s++) {
+                        const errs = validateStep(s);
+                        if (Object.keys(errs).length) {
+                          setFieldErrors((p) => ({ ...p, ...errs }));
+                          showNotif(`❌ ${errs[Object.keys(errs)[0]]}`, "error");
+                          ok = false; break;
+                        }
+                        setCompletedSteps((p) => new Set(p).add(s));
+                      }
+                      if (ok) setCurrentStep(idx);
+                    }
+                  }}
+                >
+                  {/* Show number instead of icon to match image */}
+                  {isDone || isPast ? <CheckCircle size={14} /> : idx + 1}
+                </button>
+                <span className={styles["cf-step-label"]}>{step.label}</span>
+              </div>
+              {idx < STEPS.length - 1 && (
+                <div
+                  className={`${styles["cf-step-line"]} ${
+                    isPast || isDone ? styles["cf-line-done"] : ""
+                  }`}
+                />
+              )}
+            </React.Fragment>
+          );
+        })}
+      </div>
+    </div>
+
 
       {/* ── Body ── */}
       <div className={styles["member-form-container"]}>

@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import styles from "../Styles/Planview.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 interface Plan {
   plan_id: number;
@@ -69,8 +70,6 @@ interface PlanDetails {
   updated_at: string;
 }
 
-const getToken = () =>
-  typeof window !== "undefined" ? localStorage.getItem("access") : null;
 
 const BASE = getBaseUrl();
 
@@ -111,9 +110,7 @@ function PlanDetailsModal({
     const fetchDetails = async () => {
       try {
         setLoading(true);
-        const res = await authFetch(`${BASE}/api/events/plans/${plan.plan_id}/details/`, {
-          headers: { Authorization: `Bearer ${getToken()}` },
-        });
+        const res = await authFetch(`${BASE}/api/events/plans/${plan.plan_id}/details/`);
         if (!res.ok) throw new Error();
         const data = await res.json();
         setDetails(data);
@@ -423,6 +420,7 @@ function FacultyCard({ plan, onDownload, downloading, onView }: {
 }
 
 export default function PlanView() {
+  const { showToast } = useToast();
   const [activeTab, setActiveTab]         = useState<"plans" | "reports">("plans");
   const [plans, setPlans]                 = useState<Plan[]>([]);
   const [loading, setLoading]             = useState(true);
@@ -431,20 +429,12 @@ export default function PlanView() {
   const [facultyFilter, setFacultyFilter] = useState("all");
   const [search, setSearch]               = useState("");
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
-  const [toastMsg, setToastMsg]           = useState("");
   const [viewingPlan, setViewingPlan]     = useState<Plan | null>(null);
-
-  const showToast = (msg: string) => {
-    setToastMsg(msg);
-    setTimeout(() => setToastMsg(""), 3500);
-  };
 
   const fetchPlans = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await authFetch(`${BASE}/api/events/plans/list/`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
+      const res = await authFetch(`${BASE}/api/events/plans/list/`);
       if (!res.ok) throw new Error();
       const data = await res.json();
       setPlans(Array.isArray(data) ? data : data.results ?? []);
@@ -464,9 +454,7 @@ export default function PlanView() {
     if (downloadingId !== null) return;
     setDownloadingId(plan.plan_id);
     try {
-      const res = await authFetch(`${BASE}/api/event/export-plan-pdf/${plan.plan_id}/`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
+      const res = await authFetch(`${BASE}/api/event/export-plan-pdf/${plan.plan_id}/`);
       if (!res.ok) throw new Error();
       const blob = await res.blob();
       const url  = URL.createObjectURL(blob);
@@ -475,9 +463,9 @@ export default function PlanView() {
       a.download = `${plan.faculty_name ?? plan.name}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
-      showToast("✅ تم تحميل الخطة بنجاح");
+      showToast("✅ تم تحميل الخطة بنجاح", "success");
     } catch {
-      showToast("⚠️ فشل تحميل الملف، حاول مجدداً");
+      showToast("⚠️ فشل تحميل الملف، حاول مجدداً", "error");
     } finally {
       setDownloadingId(null);
     }
@@ -632,8 +620,6 @@ export default function PlanView() {
           onClose={() => setViewingPlan(null)}
         />
       )}
-
-      {toastMsg && <div className={styles.toast}>{toastMsg}</div>}
     </div>
   );
 }

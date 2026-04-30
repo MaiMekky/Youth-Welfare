@@ -10,6 +10,7 @@ import {
 import SemesterReports from "./SemesterReports";
 import styles from "../Styles/PlanView.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 interface Plan {
   plan_id: number;
@@ -63,9 +64,6 @@ interface PlanDetail {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const getToken = () =>
-  typeof window !== "undefined" ? localStorage.getItem("access") : null;
-
 const BASE = getBaseUrl();
 
 function fmt(d?: string) {
@@ -100,9 +98,7 @@ function PlanDetailsModal({ planId, planName, onClose }: {
     const fetchDetail = async () => {
       try {
         setLoading(true);
-        const res = await authFetch(`${BASE}/api/events/plans/${planId}/details/`, {
-          headers: { Authorization: `Bearer ${getToken()}` },
-        });
+        const res = await authFetch(`${BASE}/api/events/plans/${planId}/details/`);
         if (!res.ok) throw new Error();
         const data = await res.json();
         setDetail(data);
@@ -310,6 +306,7 @@ function PlanDetailsModal({ planId, planName, onClose }: {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function PlanView() {
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<"plans" | "reports">("plans");
 
   // ── Plans state ──
@@ -319,25 +316,17 @@ export default function PlanView() {
   const [search, setSearch]               = useState("");
   const [currentPage, setCurrentPage]     = useState(1);
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
-  const [toastMsg, setToastMsg]           = useState("");
 
   // ── Detail Modal state ──
   const [detailPlan, setDetailPlan] = useState<{ id: number; name: string } | null>(null);
 
   const rowsPerPage = 8;
 
-  const showToast = (msg: string) => {
-    setToastMsg(msg);
-    setTimeout(() => setToastMsg(""), 3500);
-  };
-
   // ── Fetch plans ──
   const fetchPlans = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await authFetch(`${BASE}/api/events/plans/list/`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
+      const res = await authFetch(`${BASE}/api/events/plans/list/`);
       if (!res.ok) throw new Error();
       const data = await res.json();
       setPlans(Array.isArray(data) ? data : data.results ?? []);
@@ -358,9 +347,7 @@ export default function PlanView() {
     if (downloadingId !== null) return;
     setDownloadingId(plan.plan_id);
     try {
-      const res = await authFetch(`${BASE}/api/event/export-plan-pdf/${plan.plan_id}/`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
+      const res = await authFetch(`${BASE}/api/event/export-plan-pdf/${plan.plan_id}/`);
       if (!res.ok) throw new Error();
       const blob = await res.blob();
       const url  = URL.createObjectURL(blob);
@@ -369,9 +356,9 @@ export default function PlanView() {
       a.download = `${plan.name}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
-      showToast(" تم تحميل الخطة بنجاح");
+      showToast(" تم تحميل الخطة بنجاح", "success");
     } catch {
-      showToast(" فشل تحميل الملف، حاول مجدداً");
+      showToast(" فشل تحميل الملف، حاول مجدداً", "error");
     } finally {
       setDownloadingId(null);
     }
@@ -569,9 +556,6 @@ export default function PlanView() {
           onClose={() => setDetailPlan(null)}
         />
       )}
-
-      {/* ── Toast ── */}
-      {toastMsg && <div className={styles.toast}>{toastMsg}</div>}
     </div>
   );
 }

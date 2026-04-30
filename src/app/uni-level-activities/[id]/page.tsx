@@ -23,22 +23,14 @@ import {
   FileText,
 } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 const API_URL = getBaseUrl();
 
-function getAccessToken(): string | null {
-  return (
-    localStorage.getItem("access") ||
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("token") ||
-    null
-  );
-}
 
 async function apiFetch<T>(
   path: string,
   opts: RequestInit = {}
 ): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number; raw?: Record<string, unknown> }> {
-  const token = getAccessToken();
   const headers: Record<string, string> = {
     ...(opts.headers as Record<string, string>),
   };
@@ -46,7 +38,6 @@ async function apiFetch<T>(
   // add content-type only if body exists AND not FormData
   const isFormData = typeof FormData !== "undefined" && opts.body instanceof FormData;
   if (!headers["Content-Type"] && opts.body && !isFormData) headers["Content-Type"] = "application/json";
-  if (token) headers.Authorization = `Bearer ${token}`;
 
   try {
     const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
@@ -61,16 +52,24 @@ async function apiFetch<T>(
         })()
       : null;
 
-    if (!res.ok) {
+     if (!res.ok) {
+      if (res.status === 403) {
+        return { ok: false, message: "ليس لديك صلاحية للوصول لهذه الفعالية", status: 403 };
+      }
+      if (res.status === 500) {
+        return { ok: false, message: "حدث خطأ في السيرفر، برجاء المحاولة لاحقاً", status: 500 };
+      }
       const msg =
         (typeof maybeJson === "object" &&
           maybeJson &&
-          ((maybeJson as Record<string, unknown>).detail || (maybeJson as Record<string, unknown>).message || (maybeJson as Record<string, unknown>).error)) ||
+          ((maybeJson as Record<string, unknown>).detail ||
+          (maybeJson as Record<string, unknown>).message ||
+          (maybeJson as Record<string, unknown>).error)) ||
         (typeof maybeJson === "string" ? maybeJson : "") ||
         `طلب غير ناجح (${res.status})`;
-
       return { ok: false, message: String(msg), status: res.status, raw: maybeJson };
     }
+
 
     return { ok: true, data: maybeJson as T };
   } catch (e: unknown) {
@@ -192,6 +191,7 @@ type ApiEventDetails = {
   faculty: number | null;
   created_by: number;
   family: number | null;
+  rejection_reason?: string | null;
 };
 
 type StudentRow = {
@@ -239,10 +239,9 @@ function pickFilenameFromDisposition(disposition: string | null, fallback: strin
 }
 
 async function downloadPdf(path: string, opts: RequestInit = {}, fallbackName = "file.pdf") {
-  const token = getAccessToken();
   const headers: Record<string, string> = { ...(opts.headers as Record<string, string>) };
   if (!headers["Content-Type"] && opts.body) headers["Content-Type"] = "application/json";
-  if (token) headers.Authorization = `Bearer ${token}`;
+
 
   const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
 
@@ -284,30 +283,10 @@ export default function EventDetailsPage() {
 
   const [rows, setRows] = useState<StudentRow[]>([]);
   const [busy, setBusy] = useState(false);
+  const [backPath, setBackPath] = useState("/uni-level-activities");
 
-  /* ===================== Toast Notification (same style) ===================== */
-  const [notification, setNotification] = useState<{
-    show: boolean;
-    message: string;
-    type: "success" | "error" | "warning";
-  }>({ show: false, message: "", type: "success" });
-
-  const toastTimerRef = useRef<number | null>(null);
-
-  const showToast = (message: string, type: "success" | "error" | "warning" = "success") => {
-    if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
-    setNotification({ show: true, message, type });
-    toastTimerRef.current = window.setTimeout(() => {
-      setNotification({ show: false, message: "", type: "success" });
-      toastTimerRef.current = null;
-    }, 2500);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
-    };
-  }, []);
+  /* ===================== Toast Notification ===================== */
+  const { showToast } = useToast();
 
   /* ===================== Images ===================== */
   const [images, setImages] = useState<ApiEventImage[]>([]);
@@ -397,10 +376,17 @@ export default function EventDetailsPage() {
     const res = await apiFetch<ApiEventDetails>(`/api/event/get-events/${id}/`, { method: "GET" });
     setLoadingEvent(false);
 
-    if (!res.ok) {
-      showToast(res.message, "error");
+      if (!res.ok) {
+      if (res.status === 403) {
+        showToast("❌ ليس لديك صلاحية لعرض هذه الفعالية", "error");
+      } else if (res.status === 500) {
+        showToast("❌ حدث خطأ في السيرفر، برجاء المحاولة لاحقاً", "error");
+      } else {
+        showToast(res.message, "error");
+      }
       return;
     }
+
 
     setEvent(res.data);
 
@@ -435,11 +421,6 @@ export default function EventDetailsPage() {
 const uploadImages = async (files: FileList | null) => {
   if (!id || !files || files.length === 0) return;
 
-  const token = getAccessToken();
-  if (!token) {
-    showToast("❌ لا يوجد توكن (access).", "error");
-    return;
-  }
 
   setUploading(true);
 
@@ -452,9 +433,6 @@ const uploadImages = async (files: FileList | null) => {
       `${API_URL}/api/event/manage-events/${id}/upload-images/`,
       {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
         body: fd,
       }
     );
@@ -531,6 +509,10 @@ const uploadImages = async (files: FileList | null) => {
     loadImages();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+    useEffect(() => {
+    const from = sessionStorage.getItem("eventDetails_from");
+    if (from) setBackPath(from);
+  }, []);
 
   const [reportOpen, setReportOpen] = useState(false);
   const [reportForm, setReportForm] = useState<ReportFormState>(emptyReportForm);
@@ -590,6 +572,7 @@ const uploadImages = async (files: FileList | null) => {
         constraints: "",
         description: "",
         max: 0,
+        rejectionReason: "",
       };
     }
 
@@ -612,6 +595,7 @@ const uploadImages = async (files: FileList | null) => {
       constraints: (event.restrictions ?? "").trim() || "—",
       description: (event.description ?? "").trim() || "—",
       max: Number(event.s_limit ?? 0),
+      rejectionReason: (event.rejection_reason ?? "").trim(), 
     };
   }, [event]);
 
@@ -680,9 +664,9 @@ const uploadImages = async (files: FileList | null) => {
       setBusy(false);
 
       if (!res.ok) {
-        showToast(res.message, "error");
-        return;
-      }
+      showToast(res.message, "error"); // ← single line, no status checks
+      return;
+    }
 
       await loadEvent();
       showToast("✅ تم قبول الطالب", "success");
@@ -863,21 +847,6 @@ const uploadImages = async (files: FileList | null) => {
 
   return (
     <div className={styles.page}>
-      {/* ✅ Toast notification (same style you gave me) */}
-      {notification.show && (
-        <div
-          className={`${styles.notification} ${
-            notification.type === "success"
-              ? styles.success
-              : notification.type === "error"
-              ? styles.error
-              : styles.warning
-          }`}
-        >
-          {notification.message}
-        </div>
-      )}
-
       <div className={styles.container}>
         <div className={styles.topBar}>
           <div className={styles.headText}>
@@ -911,13 +880,16 @@ const uploadImages = async (files: FileList | null) => {
             </button>
 
             <button
-              className={styles.backBtn}
-              onClick={() => router.back()}
-              type="button"
-              disabled={exportBusy !== null}
-              style={{ opacity: exportBusy !== null ? 0.7 : 1 }}
-            >
-              <ArrowRight size={18} />
+               className={styles.backBtn}
+                onClick={() => {
+                  sessionStorage.removeItem("eventDetails_from"); // clean up
+                  router.push(backPath);
+                }}
+                type="button"
+                disabled={exportBusy !== null}
+                style={{ opacity: exportBusy !== null ? 0.7 : 1 }}
+              >
+                <ArrowRight size={18} />
               العودة للفعاليات
             </button>
           </div>
@@ -1017,6 +989,48 @@ const uploadImages = async (files: FileList | null) => {
             </div>
           </div>
         </section>
+
+                {ui.rejectionReason && (
+        <section
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "14px",
+            background: "linear-gradient(135deg, #FFF1F1, #FFE4E4)",
+            border: "1.5px solid #FCA5A5",
+            borderRight: "5px solid #EF4444",
+            borderRadius: "14px",
+            padding: "18px 20px",
+            direction: "rtl",
+            marginTop: "8px",
+          }}
+        >
+          <ShieldAlert size={22} color="#EF4444" style={{ flexShrink: 0, marginTop: 2 }} />
+          <div>
+            <div
+              style={{
+                fontSize: "0.85rem",
+                fontWeight: 700,
+                color: "#EF4444",
+                marginBottom: "6px",
+                letterSpacing: "0.02em",
+              }}
+            >
+              سبب الرفض
+            </div>
+            <div
+              style={{
+                fontSize: "0.95rem",
+                color: "#7F1D1D",
+                lineHeight: 1.7,
+                fontWeight: 500,
+              }}
+            >
+              {ui.rejectionReason}
+            </div>
+          </div>
+        </section>
+      )}
 
         <section className={styles.twoCols}>
           <div className={styles.block}>

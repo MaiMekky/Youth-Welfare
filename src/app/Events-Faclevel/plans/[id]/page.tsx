@@ -14,8 +14,8 @@ import {
   Building2,
   Layers,
 } from "lucide-react";
-import Footer from "@/app/FacLevel/components/Footer";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 
 const API_URL = `${getBaseUrl()}/api`;
@@ -110,47 +110,21 @@ export default function PlanDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const id = String(params?.id ?? "");
+  const { showToast } = useToast();
 
   const [plan, setPlan] = useState<ApiPlanDetails | null>(null);
   const [loading, setLoading] = useState(false);
-
-  // هنخلي بدل error box = toast
   const [removingId, setRemovingId] = useState<number | null>(null);
-
-  /* ===================== Toast (same style) ===================== */
-  const [toast, setToast] = useState<{ show: boolean; message: string; type: ToastType }>({
-    show: false,
-    message: "",
-    type: "success",
-  });
-
-  const showToast = (message: string, type: ToastType) => {
-    setToast({ show: true, message, type });
-    window.setTimeout(() => {
-      setToast({ show: false, message: "", type: "success" });
-    }, 2500);
-  };
-
-  function getAccessToken(): string | null {
-    return (
-      localStorage.getItem("access") ||
-      localStorage.getItem("access_token") ||
-      localStorage.getItem("token") ||
-      null
-    );
-  }
 
   async function apiCall(
     path: string,
     opts: RequestInit = {}
   ): Promise<{ ok: true; data: Record<string, unknown> } | { ok: false; message: string }> {
-    const token = getAccessToken();
     const headers: Record<string, string> = {
       Accept: "application/json",
       ...(opts.headers as Record<string, string>),
     };
     if (!headers["Content-Type"] && opts.body) headers["Content-Type"] = "application/json";
-    if (token) headers.Authorization = `Bearer ${token}`;
 
     try {
       const baseUrl = getBaseUrl();
@@ -166,13 +140,22 @@ export default function PlanDetailsPage() {
           })()
         : null;
 
-      if (!res.ok) {
-        const msg =
-          (typeof json === "object" && json && ((json as Record<string, unknown>).detail || (json as Record<string, unknown>).message || (json as Record<string, unknown>).error)) ||
-          (typeof json === "string" ? json : "") ||
-          `طلب غير ناجح (${res.status})`;
-        return { ok: false, message: String(msg) };
+       if (!res.ok) {
+      if (res.status === 403) {
+        return { ok: false, message: "ليس لديك صلاحية لتنفيذ هذا الإجراء" };
       }
+      if (res.status === 500) {
+        return { ok: false, message: "حدث خطأ في السيرفر، برجاء المحاولة لاحقاً" };
+      }
+      const msg =
+        (typeof json === "object" && json &&
+          ((json as Record<string, unknown>).detail ||
+          (json as Record<string, unknown>).message ||
+          (json as Record<string, unknown>).error)) ||
+        (typeof json === "string" ? json : "") ||
+        `طلب غير ناجح (${res.status})`;
+      return { ok: false, message: String(msg) };
+    }
 
       return { ok: true, data: json };
     } catch (e: unknown) {
@@ -207,28 +190,32 @@ export default function PlanDetailsPage() {
     try {
       setLoading(true);
 
-      const token = localStorage.getItem("access");
-      if (!token) {
-        setPlan(null);
-        showToast("❌ مفيش access token. برجاء تسجيل دخول مرة اخري.", "error");
-        return;
-      }
+      // if (!token) {
+      //   setPlan(null);
+      //   showToast("❌ مفيش access token. برجاء تسجيل دخول مرة اخري.", "error");
+      //   return;
+      // }
 
       const res = await authFetch(`${API_URL}/events/plans/${id}/details/`, {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
           Accept: "application/json",
         },
       });
 
       const text = await res.text();
 
-      if (!res.ok) {
-        setPlan(null);
+       if (!res.ok) {
+      setPlan(null);
+      if (res.status === 403) {
+        showToast("❌ ليس لديك صلاحية لعرض هذه الخطة", "error");
+      } else if (res.status === 500) {
+        showToast("❌ حدث خطأ في السيرفر، برجاء المحاولة لاحقاً", "error");
+      } else {
         showToast(`❌ فشل تحميل تفاصيل الخطة (Status ${res.status})`, "error");
-        return;
       }
+      return;
+    }
 
       let parsed: Record<string, unknown> | null = null;
       try {
@@ -289,9 +276,10 @@ export default function PlanDetailsPage() {
     router.push(`/Events-Faclevel/plans/${id}/propsed/create?mode=convert`);
   };
 
-  const onViewLinkedEvent = (eventId: number) => {
-    router.push(`/Events-Faclevel/${eventId}`);
-  };
+const onViewLinkedEvent = (eventId: number) => {
+  sessionStorage.setItem("eventDetails_from", `/Events-Faclevel/plans/${id}`);
+  router.push(`/Events-Faclevel/${eventId}`);
+};
 
   // UI safe fallbacks
   const planTitle = plan?.name ?? "—";
@@ -301,13 +289,6 @@ export default function PlanDetailsPage() {
 
   return (
     <>
-      {/* ✅ Toast */}
-    {toast.show && (
-  <div className={`${styles.toast} ${styles[`toast_${toast.type}`]}`}>
-    {toast.message}
-  </div>
-)}
-
       <div className={styles.page}>
 
         <div className={styles.container}>
@@ -529,7 +510,6 @@ export default function PlanDetailsPage() {
             </div>
           </section>
         </div>
-        <Footer />
       </div>
     </>
   );

@@ -5,9 +5,11 @@ import {
   Eye, Check, X, Clock, Calendar, Users,
   CheckCircle, XCircle, RefreshCw, AlertCircle, Layers, MapPin,
   User, BookOpen, DollarSign, Award, ShieldAlert, Package, Activity,
+  MessageSquare, AlertTriangle,
 } from "lucide-react";
 import styles from "../../FacultyHead/Styles/Activitiesmanagement.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 interface ActivityItem {
   event_id: number;
@@ -47,12 +49,10 @@ interface ActivityDetail {
   type: string;
   resource: string | Record<string, unknown>;
   selected_facs: number[];
+  rejection_reason?: string; 
 }
 
 type StatusFilter = "pending" | "accepted" | "rejected";
-
-const getToken = () =>
-  typeof window !== "undefined" ? localStorage.getItem("access") : null;
 
 const BASE = getBaseUrl();
 
@@ -99,9 +99,7 @@ const deptCache = new Map<number, string>();
 async function fetchDeptName(deptId: number): Promise<string> {
   if (deptCache.has(deptId)) return deptCache.get(deptId)!;
   try {
-    const res = await authFetch(`${BASE}/api/family/departments/${deptId}/`, {
-      headers: { Authorization: `Bearer ${getToken()}` },
-    });
+    const res = await authFetch(`${BASE}/api/family/departments/${deptId}/`);
     if (!res.ok) return `قسم ${deptId}`;
     const data = await res.json();
     const name = data.name || data.dept_name || data.department_name || `قسم ${deptId}`;
@@ -112,32 +110,337 @@ async function fetchDeptName(deptId: number): Promise<string> {
   }
 }
 
-/* ── Confirm Dialog ── */
+/* ── Rejection Reason Dialog ── */
+function RejectionReasonDialog({
+  eventTitle,
+  onConfirm,
+  onCancel,
+  loading,
+}: {
+  eventTitle: string;
+  onConfirm: (reason: string) => void;
+  onCancel: () => void;
+  loading: boolean;
+}) {
+  const [reason, setReason] = useState("");
+  const [touched, setTouched] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const hasError = touched && !reason.trim();
+
+  useEffect(() => {
+    // Focus textarea on mount
+    setTimeout(() => textareaRef.current?.focus(), 50);
+  }, []);
+
+  const handleSubmit = () => {
+    setTouched(true);
+    if (!reason.trim()) return;
+    onConfirm(reason.trim());
+  };
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 1000,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "16px",
+        background: "rgba(15, 23, 42, 0.65)",
+        backdropFilter: "blur(6px)",
+        WebkitBackdropFilter: "blur(6px)",
+        animation: "fadeInOverlay 0.2s ease",
+      }}
+      onClick={onCancel}
+    >
+      <style>{`
+        @keyframes fadeInOverlay {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes slideUpCard {
+          from { opacity: 0; transform: translateY(24px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0)   scale(1); }
+        }
+        .rejection-textarea:focus {
+          outline: none;
+          border-color: #EF4444 !important;
+          box-shadow: 0 0 0 3px rgba(239,68,68,0.15) !important;
+        }
+        .rejection-cancel-btn:hover {
+          background: #F1F5F9 !important;
+        }
+        .rejection-submit-btn:hover:not(:disabled) {
+          background: #DC2626 !important;
+          transform: translateY(-1px);
+          box-shadow: 0 6px 20px rgba(239,68,68,0.35) !important;
+        }
+        .rejection-submit-btn:disabled {
+          opacity: 0.65;
+          cursor: not-allowed;
+        }
+      `}</style>
+
+      <div
+        style={{
+          background: "#FFFFFF",
+          borderRadius: "20px",
+          width: "100%",
+          maxWidth: "480px",
+          boxShadow: "0 25px 60px rgba(0,0,0,0.2), 0 8px 24px rgba(239,68,68,0.08)",
+          animation: "slideUpCard 0.25s cubic-bezier(0.34,1.56,0.64,1)",
+          overflow: "hidden",
+          direction: "rtl",
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Red top stripe */}
+        <div style={{
+          height: "5px",
+          background: "linear-gradient(90deg, #EF4444, #F97316)",
+        }} />
+
+        {/* Header */}
+        <div style={{
+          padding: "28px 28px 0",
+          display: "flex",
+          alignItems: "flex-start",
+          gap: "16px",
+        }}>
+          <div style={{
+            width: "52px",
+            height: "52px",
+            borderRadius: "14px",
+            background: "linear-gradient(135deg, #FEE2E2, #FECACA)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            boxShadow: "0 4px 12px rgba(239,68,68,0.2)",
+          }}>
+            <XCircle size={26} color="#EF4444" />
+          </div>
+          <div style={{ flex: 1 }}>
+            <h2 style={{
+              margin: 0,
+              fontSize: "1.2rem",
+              fontWeight: 700,
+              color: "#111827",
+              lineHeight: 1.3,
+            }}>
+              رفض الفعالية
+            </h2>
+            <p style={{
+              margin: "6px 0 0",
+              fontSize: "0.875rem",
+              color: "#6B7280",
+              lineHeight: 1.5,
+            }}>
+              سيتم إرسال سبب الرفض إلى منشئ الفعالية
+            </p>
+          </div>
+          <button
+            onClick={onCancel}
+            disabled={loading}
+            style={{
+              width: "36px",
+              height: "36px",
+              borderRadius: "10px",
+              border: "none",
+              background: "#F3F4F6",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#6B7280",
+              flexShrink: 0,
+              transition: "background 0.15s",
+            }}
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Event name pill */}
+        <div style={{ padding: "18px 28px 0" }}>
+          <div style={{
+            background: "#FFF7ED",
+            border: "1px solid #FED7AA",
+            borderRadius: "10px",
+            padding: "10px 14px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}>
+            <AlertTriangle size={15} color="#F97316" />
+            <span style={{
+              fontSize: "0.875rem",
+              color: "#9A3412",
+              fontWeight: 600,
+              flex: 1,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}>
+              {eventTitle}
+            </span>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: "20px 28px" }}>
+          <label style={{
+            display: "block",
+            fontSize: "0.875rem",
+            fontWeight: 600,
+            color: "#374151",
+            marginBottom: "8px",
+          }}>
+            سبب الرفض
+            <span style={{ color: "#EF4444", marginRight: "3px" }}>*</span>
+          </label>
+
+          <textarea
+            ref={textareaRef}
+            className="rejection-textarea"
+            value={reason}
+            onChange={e => { setReason(e.target.value); setTouched(false); }}
+            onBlur={() => setTouched(true)}
+            placeholder="اكتب سبب الرفض بوضوح ليتمكن المسؤول من التعديل والإعادة..."
+            rows={4}
+            maxLength={500}
+            style={{
+              width: "100%",
+              resize: "none",
+              borderRadius: "12px",
+              border: `1.5px solid ${hasError ? "#EF4444" : "#E5E7EB"}`,
+              padding: "12px 14px",
+              fontSize: "0.9rem",
+              color: "#111827",
+              background: hasError ? "#FFF5F5" : "#F9FAFB",
+              boxSizing: "border-box",
+              fontFamily: "inherit",
+              lineHeight: 1.6,
+              transition: "border-color 0.2s, box-shadow 0.2s, background 0.2s",
+              display: "block",
+            }}
+          />
+
+          <div style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginTop: "6px",
+          }}>
+            {hasError ? (
+              <span style={{
+                fontSize: "0.8rem",
+                color: "#EF4444",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+              }}>
+                <AlertCircle size={13} />
+                سبب الرفض مطلوب
+              </span>
+            ) : (
+              <span />
+            )}
+            <span style={{
+              fontSize: "0.78rem",
+              color: reason.length > 450 ? "#EF4444" : "#9CA3AF",
+            }}>
+              {reason.length}/500
+            </span>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{
+          padding: "0 28px 28px",
+          display: "flex",
+          gap: "12px",
+          justifyContent: "flex-end",
+        }}>
+          <button
+            className="rejection-cancel-btn"
+            onClick={onCancel}
+            disabled={loading}
+            style={{
+              padding: "10px 22px",
+              borderRadius: "10px",
+              border: "1.5px solid #E5E7EB",
+              background: "#FFFFFF",
+              color: "#374151",
+              fontSize: "0.9rem",
+              fontWeight: 600,
+              cursor: "pointer",
+              transition: "background 0.15s",
+              fontFamily: "inherit",
+            }}
+          >
+            إلغاء
+          </button>
+          <button
+            className="rejection-submit-btn"
+            onClick={handleSubmit}
+            disabled={loading}
+            style={{
+              padding: "10px 24px",
+              borderRadius: "10px",
+              border: "none",
+              background: "linear-gradient(135deg, #EF4444, #DC2626)",
+              color: "#FFFFFF",
+              fontSize: "0.9rem",
+              fontWeight: 700,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              transition: "all 0.2s",
+              boxShadow: "0 4px 14px rgba(239,68,68,0.3)",
+              fontFamily: "inherit",
+            }}
+          >
+            {loading ? (
+              <><RefreshCw size={15} style={{ animation: "spin 1s linear infinite" }} /> جاري الرفض…</>
+            ) : (
+              <><XCircle size={15} /> تأكيد الرفض</>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Confirm Dialog (approve only now) ── */
 function ConfirmDialog({ action, eventTitle, onConfirm, onCancel, loading }: {
-  action: "approve" | "reject";
+  action: "approve";
   eventTitle: string;
   onConfirm: () => void;
   onCancel: () => void;
   loading: boolean;
 }) {
-  const isApprove = action === "approve";
   return (
     <div className={styles.confirmOverlay}>
       <div className={styles.confirmBox}>
-        <div className={styles.confirmIcon} style={{ background: isApprove ? "#ECFDF5" : "#FEF2F2", color: isApprove ? "#10B981" : "#EF4444" }}>
-          {isApprove ? <CheckCircle size={32} /> : <XCircle size={32} />}
+        <div className={styles.confirmIcon} style={{ background: "#ECFDF5", color: "#10B981" }}>
+          <CheckCircle size={32} />
         </div>
-        <h3>{isApprove ? "تأكيد الموافقة" : "تأكيد الرفض"}</h3>
-        <p>هل أنت متأكد من {isApprove ? "الموافقة على" : "رفض"} فعالية<br /><strong style={{ color: "#111827" }}>&quot;{eventTitle}&quot;</strong>؟</p>
+        <h3>تأكيد الموافقة</h3>
+        <p>هل أنت متأكد من الموافقة على فعالية<br /><strong style={{ color: "#111827" }}>&quot;{eventTitle}&quot;</strong>؟</p>
         <div className={styles.confirmBtns}>
           <button className={styles.cancelBtn} onClick={onCancel} disabled={loading}>إلغاء</button>
           <button
             className={styles.confirmActionBtn}
-            style={{ background: isApprove ? "#10B981" : "#EF4444" }}
+            style={{ background: "#10B981" }}
             onClick={onConfirm}
             disabled={loading}
           >
-            {loading ? "جاري التنفيذ…" : isApprove ? "موافقة" : "رفض"}
+            {loading ? "جاري التنفيذ…" : "موافقة"}
           </button>
         </div>
       </div>
@@ -181,7 +484,10 @@ function DetailsModal({ detail, onClose }: { detail: ActivityDetail; onClose: ()
               { icon: <Award size={15} />,       label: "المكافأة",       val: safeStr(detail.reward) || "—" },
               { icon: <ShieldAlert size={15} />, label: "القيود",         val: safeStr(detail.restrictions) || "لا يوجد" },
               { icon: <Package size={15} />,     label: "الموارد",        val: safeStr(detail.resource) || "—" },
-            ].map(({ icon, label, val }) => (
+              ...(isRejected(detail.status) && detail.rejection_reason
+                  ? [{ icon: <MessageSquare size={15} />, label: "سبب الرفض", val: detail.rejection_reason }]
+                  : []),
+              ].map(({ icon, label, val }) => (
               <div key={label} className={styles.detailItem}>
                 <div className={styles.detailIcon}>{icon}</div>
                 <div>
@@ -310,18 +616,19 @@ function ActivityCard({
 
 /* ── Main ── */
 export default function Activities() {
+  const { showToast } = useToast();
   const [allActivities, setAllActivities]     = useState<ActivityItem[]>([]);
   const [loading, setLoading]                 = useState(false);
   const [error, setError]                     = useState("");
-  const [confirm, setConfirm]                 = useState<{ id: number; action: "approve" | "reject"; title: string } | null>(null);
+  const [confirm, setConfirm]                 = useState<{ id: number; action: "approve"; title: string } | null>(null);
+  const [rejectTarget, setRejectTarget]       = useState<{ id: number; title: string } | null>(null);
   const [actionLoading, setActionLoading]     = useState(false);
-  const [toastMsg, setToastMsg]               = useState("");
   const [detailData, setDetailData]           = useState<ActivityDetail | null>(null);
   const [loadingDetailId, setLoadingDetailId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter]       = useState<StatusFilter>("pending");
   const [deptFilter, setDeptFilter]           = useState<string>("all");
   const [search, setSearch]                   = useState("");
-  const [departments, setDepartments] = useState<{ dept_id: number; name: string }[]>([]);
+  const [departments, setDepartments]         = useState<{ dept_id: number; name: string }[]>([]);
 
   const enrichWithDeptNames = useCallback(async (activities: ActivityItem[]) => {
     const uniqueDeptIds = [...new Set(activities.map(a => a.dept_id).filter(Boolean))];
@@ -331,8 +638,6 @@ export default function Activities() {
       dept_name: deptCache.get(a.dept_id) || a.dept_name || `قسم ${a.dept_id}`,
     }));
   }, []);
-
-
 
   const filtered = useMemo(() => {
     let list = allActivities;
@@ -350,20 +655,16 @@ export default function Activities() {
   }, [allActivities, statusFilter, deptFilter, search]);
 
   const fetchDepartments = useCallback(async () => {
-  try {
-    const res = await authFetch(`${BASE}/api/family/departments/`, {
-      headers: { Authorization: `Bearer ${getToken()}` },
-    });
+    try {
+      const res = await authFetch(`${BASE}/api/family/departments/`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setDepartments(data);
+    } catch {
+      showToast("فشل في جلب الأقسام", "error");
+    }
+  }, []);
 
-    if (!res.ok) throw new Error();
-
-    const data = await res.json();
-    setDepartments(data);
-  } catch {
-    showToast("فشل في جلب الأقسام");
-  }
-}, []);
-    
   const counts = useMemo(() => {
     const base = deptFilter === "all" ? allActivities : allActivities.filter(a => String(a.dept_id) === deptFilter);
     return {
@@ -374,71 +675,85 @@ export default function Activities() {
     };
   }, [allActivities, deptFilter]);
 
-  const showToast = (msg: string) => {
-    setToastMsg(msg);
-    setTimeout(() => setToastMsg(""), 3500);
-  };
-
   const fetchActivities = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
-      const res = await authFetch(`${BASE}/api/event/get-events/`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
+      const res = await authFetch(`${BASE}/api/event/get-events/`);
       if (!res.ok) throw new Error("فشل في جلب البيانات");
       const data: ActivityItem[] = await res.json();
       const enriched = await enrichWithDeptNames(data);
       setAllActivities(enriched);
     } catch (err: unknown) {
-      setError((err as Error)?.message || "تعذّر الاتصال بالخادم");
+      setError((err as Error)?.message || "تعذّر الاتصال بالسيرفر");
       setAllActivities([]);
     } finally {
       setLoading(false);
     }
   }, [enrichWithDeptNames]);
 
-useEffect(() => {
-  fetchActivities();
-  fetchDepartments();
-}, [fetchActivities, fetchDepartments]);
+  useEffect(() => {
+    fetchActivities();
+    fetchDepartments();
+  }, [fetchActivities, fetchDepartments]);
 
   const openDetail = async (id: number) => {
     setLoadingDetailId(id);
     try {
-      const res = await authFetch(`${BASE}/api/event/get-events/${id}/`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
+      const res = await authFetch(`${BASE}/api/event/get-events/${id}/`);
       if (!res.ok) throw new Error();
       const data: ActivityDetail = await res.json();
       setDetailData(data);
     } catch {
-      showToast("فشل في جلب تفاصيل الفعالية");
+      showToast("فشل في جلب تفاصيل الفعالية", "error");
     } finally {
       setLoadingDetailId(null);
     }
   };
 
-  const handleAction = async () => {
+  // Approve handler
+  const handleApprove = async () => {
     if (!confirm) return;
     setActionLoading(true);
     try {
-      const endpoint = confirm.action === "approve"
-        ? `${BASE}/api/event/approve-events/${confirm.id}/approve/`
-        : `${BASE}/api/event/approve-events/${confirm.id}/reject/`;
-      const res = await authFetch(endpoint, {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      if (!res.ok) throw new Error();
-      const newStatus = confirm.action === "approve" ? "مقبول" : "مرفوض";
-      setAllActivities(prev =>
-        prev.map(a => a.event_id === confirm.id ? { ...a, status: newStatus } : a)
+      const res = await authFetch(
+        `${BASE}/api/event/approve-events/${confirm.id}/approve/`,
+        { method: "PATCH" }
       );
-      showToast(confirm.action === "approve" ? "تم قبول الفعالية بنجاح" : "تم رفض الفعالية");
+      if (!res.ok) throw new Error();
+      setAllActivities(prev =>
+        prev.map(a => a.event_id === confirm.id ? { ...a, status: "مقبول" } : a)
+      );
+      showToast("تم قبول الفعالية بنجاح", "success");
       setConfirm(null);
     } catch {
-      showToast("فشل في تنفيذ العملية، يرجى المحاولة مجدداً");
+      showToast("فشل في تنفيذ العملية، يرجى المحاولة مجدداً", "error");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Reject handler — now receives the reason
+  const handleReject = async (reason: string) => {
+    if (!rejectTarget) return;
+    setActionLoading(true);
+    try {
+      const res = await authFetch(
+        `${BASE}/api/event/approve-events/${rejectTarget.id}/reject/`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ rejection_reason: reason }),
+        }
+      );
+      if (!res.ok) throw new Error();
+      setAllActivities(prev =>
+        prev.map(a => a.event_id === rejectTarget.id ? { ...a, status: "مرفوض" } : a)
+      );
+      showToast("تم رفض الفعالية", "error");
+      setRejectTarget(null);
+    } catch {
+      showToast("فشل في تنفيذ العملية، يرجى المحاولة مجدداً", "error");
     } finally {
       setActionLoading(false);
     }
@@ -482,7 +797,7 @@ useEffect(() => {
       {/* Main Card */}
       <div className={styles.tableCard}>
 
-        {/* Toolbar — search + dept filter */}
+        {/* Toolbar */}
         <div className={styles.toolbar}>
           <h2 className={styles.toolbarTitle}>قائمة الفعاليات المقدمة</h2>
           <div className={styles.toolbarControls}>
@@ -492,13 +807,12 @@ useEffect(() => {
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
-           <select
+            <select
               className={styles.filterSelect}
               value={deptFilter}
               onChange={e => setDeptFilter(e.target.value)}
             >
               <option value="all">جميع الأقسام</option>
-
               {departments.map(d => (
                 <option key={d.dept_id} value={String(d.dept_id)}>
                   {d.name}
@@ -557,7 +871,7 @@ useEffect(() => {
                 showActions={isPending(activity.status)}
                 detailLoading={loadingDetailId === activity.event_id}
                 onApprove={() => setConfirm({ id: activity.event_id, action: "approve", title: activity.title })}
-                onReject={() => setConfirm({ id: activity.event_id, action: "reject", title: activity.title })}
+                onReject={() => setRejectTarget({ id: activity.event_id, title: activity.title })}
                 onView={() => openDetail(activity.event_id)}
               />
             ))}
@@ -565,12 +879,23 @@ useEffect(() => {
         )}
       </div>
 
+      {/* Approve confirm dialog */}
       {confirm && (
         <ConfirmDialog
-          action={confirm.action}
+          action="approve"
           eventTitle={confirm.title}
-          onConfirm={handleAction}
+          onConfirm={handleApprove}
           onCancel={() => setConfirm(null)}
+          loading={actionLoading}
+        />
+      )}
+
+      {/* Rejection reason dialog */}
+      {rejectTarget && (
+        <RejectionReasonDialog
+          eventTitle={rejectTarget.title}
+          onConfirm={handleReject}
+          onCancel={() => setRejectTarget(null)}
           loading={actionLoading}
         />
       )}
@@ -578,8 +903,6 @@ useEffect(() => {
       {detailData && (
         <DetailsModal detail={detailData} onClose={() => setDetailData(null)} />
       )}
-
-      {toastMsg && <div className={styles.toast}>{toastMsg}</div>}
     </div>
   );
 }

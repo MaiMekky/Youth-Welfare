@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import styles from "../Styles/SemesterReports.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -23,8 +24,6 @@ interface Plan {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const getToken = () =>
-  typeof window !== "undefined" ? localStorage.getItem("access") : null;
 
 const BASE = getBaseUrl();
 
@@ -38,27 +37,42 @@ function fmt(d?: string) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function SemesterReports() {
+  const { showToast } = useToast();
   const [plans, setPlans]               = useState<Plan[]>([]);
   const [loading, setLoading]           = useState(true);
   const [error, setError]               = useState("");
   const [search, setSearch]             = useState("");
   const [currentPage, setCurrentPage]   = useState(1);
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
-  const [toastMsg, setToastMsg]         = useState("");
   const rowsPerPage = 8;
 
-  const showToast = (msg: string) => {
-    setToastMsg(msg);
-    setTimeout(() => setToastMsg(""), 3500);
+  // ── Download PDF ──
+  const handleDownload = async (plan: Plan) => {
+    if (downloadingId !== null) return;
+    setDownloadingId(plan.plan_id);
+    try {
+      const res = await authFetch(`${BASE}/api/event/export-plan-pdf/${plan.plan_id}/`);
+      if (!res.ok) throw new Error();
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      a.href     = url;
+      a.download = `${plan.name}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("✅ تم تحميل الخطة بنجاح", "success");
+    } catch {
+      showToast("⚠️ فشل تحميل الملف، حاول مجدداً", "error");
+    } finally {
+      setDownloadingId(null);
+    }
   };
 
   // ── Fetch plans ──
   const fetchPlans = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await authFetch(`${BASE}/api/events/plans/list/`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
+      const res = await authFetch(`${BASE}/api/events/plans/list/`);
       if (!res.ok) throw new Error();
       const data = await res.json();
       setPlans(Array.isArray(data) ? data : data.results ?? []);
@@ -71,30 +85,6 @@ export default function SemesterReports() {
   }, []);
 
   useEffect(() => { fetchPlans(); }, [fetchPlans]);
-
-  // ── Download PDF ──
-  const handleDownload = async (plan: Plan) => {
-    if (downloadingId !== null) return;
-    setDownloadingId(plan.plan_id);
-    try {
-      const res = await authFetch(`${BASE}/api/event/export-plan-pdf/${plan.plan_id}/`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      if (!res.ok) throw new Error();
-      const blob = await res.blob();
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement("a");
-      a.href     = url;
-      a.download = `${plan.name}.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast("✅ تم تحميل الخطة بنجاح");
-    } catch {
-      showToast("⚠️ فشل تحميل الملف، حاول مجدداً");
-    } finally {
-      setDownloadingId(null);
-    }
-  };
 
   // ── Stats ──
   const totalEvents    = plans.reduce((sum, p) => sum + (p.events_count ?? 0), 0);
@@ -304,7 +294,6 @@ export default function SemesterReports() {
       </div>
 
       {/* ── Toast ── */}
-      {toastMsg && <div className={styles.toast}>{toastMsg}</div>}
     </div>
   );
 }

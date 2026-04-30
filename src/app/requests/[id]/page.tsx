@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./RequestDetails.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 /*
   What I implemented:
@@ -12,8 +13,20 @@ import { authFetch, getBaseUrl } from "@/utils/globalFetch";
   - POST /api/solidarity/faculty/{id}/pre_approve/  -> handlePreApprove()
   - POST /api/solidarity/faculty/{id}/approve/      -> handleApprove()
   - POST /api/solidarity/faculty/{id}/reject/       -> handleReject()
-
 */
+const rejectionReasons = [
+  { id: 1, text: "إزعاج أو تكرار التقديم بشكل غير مبرر" },
+  { id: 2, text: "المستندات المرفوعة غير واضحة أو غير صحيحة" },
+  { id: 3, text: "وجود بيانات غير صحيحة في الطلب" },
+  { id: 4, text: "الدخل المسجل غير مطابق للمستندات" },
+  { id: 5, text: "الطلب لا يستوفي شروط الدعم" },
+  { id: 6, text: "المستندات لا تخص الطالب" },
+  { id: 7, text: "اشتباه في تزوير المستندات" },
+  { id: 8, text: "سبب آخر" }
+];
+const rejectionReasonMap: Record<number, string> = Object.fromEntries(
+  rejectionReasons.map(r => [r.id, r.text])
+);
 type Application = {
   solidarity_id?: number;
   student_name?: string;
@@ -42,6 +55,7 @@ type Application = {
   student?: number | null;
   faculty?: number | null;
   approved_by?: number | null;
+  rejection_reason?: string | null;
 };
 
 type DocumentItem = {
@@ -75,15 +89,70 @@ const EMPTY_DISCOUNTS: SelectedDiscounts = {
   full_discount: "none",
 };
 
+// ====== Colored status badge ======
+function StatusBadge({ status }: { status?: string | null }) {
+  if (!status) return <span>—</span>;
+
+  const styleMap: Record<string, React.CSSProperties> = {
+    "مقبول":           { background: "#d1fae5", color: "#065f46", border: "1px solid #6ee7b7" },
+    "مرفوض":           { background: "#fee2e2", color: "#991b1b", border: "1px solid #fca5a5" },
+    "منتظر":           { background: "#fef3c7", color: "#92400e", border: "1px solid #fcd34d" },
+    "موافقة مبدئية":   { background: "#e0e7ff", color: "#3730a3", border: "1px solid #a5b4fc" },
+  };
+
+  const base: React.CSSProperties = {
+    display: "inline-block",
+    padding: "3px 14px",
+    borderRadius: "999px",
+    fontSize: "13px",
+    fontWeight: 700,
+    letterSpacing: "0.3px",
+    verticalAlign: "middle",
+    ...(styleMap[status] ?? { background: "#f3f4f6", color: "#374151", border: "1px solid #d1d5db" }),
+  };
+
+  return <span style={base}>{status}</span>;
+}
+
+// ====== Rejection reason highlight box ======
+function RejectionBox({ reason }: { reason?: string | null }) {
+  const displayReason = reason
+    ? (rejectionReasonMap[Number(reason)] ?? reason)
+    : "لم يُحدد سبب الرفض";
+  return (
+    <div style={{
+      background: "linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)",
+      border: "1.5px solid #fca5a5",
+      borderRight: "5px solid #ef4444",
+      borderRadius: "10px",
+      padding: "14px 18px",
+      marginTop: "12px",
+      display: "flex",
+      alignItems: "flex-start",
+      gap: "10px",
+    }}>
+      <span style={{ fontSize: "18px", flexShrink: 0, marginTop: "1px" }}>⚠️</span>
+      <div>
+        <div style={{ fontWeight: 700, color: "#991b1b", fontSize: "14px", marginBottom: "4px" }}>
+          سبب الرفض
+        </div>
+        <div style={{ color: "#7f1d1d", fontSize: "15px", lineHeight: 1.6 }}>
+          {reason ?? "لم يُحدد سبب الرفض"}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function RequestDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
+  const { showToast } = useToast();
 
   const [application, setApplication] = useState<Application | null>(null);
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [actionLoading, setActionLoading] = useState<boolean>(false);
-  const [notification, setNotification] = useState<string | null>(null);
 
   const [availableDiscounts, setAvailableDiscounts] = useState<Discounts>({
     bk_discount: [],
@@ -101,11 +170,6 @@ export default function RequestDetailsPage() {
     loadAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
-
-  const showNotification = (message: string, type: "success" | "warning" | "error") => {
-    setNotification(`${type}:${message}`);
-    setTimeout(() => setNotification(null), 3500);
-  };
 
   const loadAll = async () => {
     setLoading(true);
@@ -132,8 +196,9 @@ export default function RequestDetailsPage() {
       setApplication(item);
     } catch (err: unknown) {
       console.error("fetchApplication error:", err);
-      if (((err as Record<string, unknown>)?.response as Record<string, unknown>)?.status === 401) showNotification("Unauthorized — please log in.", "error");
-      else showNotification("فشل في تحميل بيانات الطلب", "error");
+      if (((err as Record<string, unknown>)?.response as Record<string, unknown>)?.status === 401)
+        showToast("Unauthorized — please log in.", "error");
+      else showToast("فشل في تحميل بيانات الطلب", "error");
       setApplication(null);
     }
   };
@@ -147,7 +212,7 @@ export default function RequestDetailsPage() {
       setDocuments(Array.isArray(data) ? data : data ? [data] : []);
     } catch (err: unknown) {
       console.error("fetchDocuments error:", err);
-      showNotification("فشل في تحميل المستندات", "error");
+      showToast("فشل في تحميل المستندات", "error");
       setDocuments([]);
     }
   };
@@ -163,22 +228,18 @@ export default function RequestDetailsPage() {
       );
     } catch (err: unknown) {
       console.error("fetchDiscountValues error:", err);
-      showNotification("فشل في تحميل discounts", "error");
+      showToast("فشل في تحميل discounts", "error");
       setAvailableDiscounts({ bk_discount: [], reg_discount: [], aff_discount: [], full_discount: [] });
     }
   };
 
   const formatDate = (iso?: string | null) => {
     if (!iso) return "-";
-    try {
-      return new Date(iso).toLocaleString();
-    } catch {
-      return iso;
-    }
+    try { return new Date(iso).toLocaleString(); } catch { return iso; }
   };
 
   const canPreApprove = (status?: string | null) => status === "منتظر";
-  const canApprove = (status?: string | null) => status === "موافقة مبدئية";
+  const canApprove   = (status?: string | null) => status === "موافقة مبدئية";
 
   const postAction = async (
     suffix: "pre_approve" | "approve" | "reject",
@@ -199,17 +260,18 @@ export default function RequestDetailsPage() {
       const data = await res.json();
       setApplication((prev) => ({ ...(prev ?? {}), ...(data ?? {}) }));
       await fetchDocuments();
-      showNotification(successMsg, "success");
+      showToast(successMsg, "success");
       return data;
     } catch (err: unknown) {
       console.error(`${suffix} error:`, err);
       setApplication(prevApp);
-      const serverMsg = ((err as Record<string, unknown>)?.response as Record<string, unknown>)?.data
-        ? typeof ((err as Record<string, unknown>).response as Record<string, unknown>).data === "string"
-          ? ((err as Record<string, unknown>).response as Record<string, unknown>).data
-          : JSON.stringify(((err as Record<string, unknown>).response as Record<string, unknown>).data)
-        : "فشل في تنفيذ الإجراء على الخادم";
-      showNotification(serverMsg as string, "error");
+      const serverMsg =
+        ((err as Record<string, unknown>)?.response as Record<string, unknown>)?.data
+          ? typeof ((err as Record<string, unknown>).response as Record<string, unknown>).data === "string"
+            ? ((err as Record<string, unknown>).response as Record<string, unknown>).data
+            : JSON.stringify(((err as Record<string, unknown>).response as Record<string, unknown>).data)
+          : "فشل في تنفيذ الإجراء";
+      showToast(serverMsg as string, "error");
       throw err;
     } finally {
       setActionLoading(false);
@@ -219,13 +281,13 @@ export default function RequestDetailsPage() {
   const handleApprove = async () => {
     const hasDiscount =
       selectedDiscounts.full_discount !== "none" ||
-      selectedDiscounts.bk_discount !== "none" ||
+      selectedDiscounts.bk_discount  !== "none" ||
       selectedDiscounts.aff_discount !== "none" ||
       selectedDiscounts.reg_discount !== "none" ||
       (application?.total_discount && Number(application.total_discount) > 0);
 
     if (!hasDiscount) {
-      showNotification("يجب اختيار نوع خصم أو تطبيق خصم قبل الموافقة النهائية", "warning");
+      showToast("يجب اختيار نوع خصم أو تطبيق خصم قبل الموافقة النهائية", "warning");
       return;
     }
     await postAction("approve", "مقبول", "تمت الموافقة النهائية بنجاح");
@@ -244,16 +306,17 @@ export default function RequestDetailsPage() {
       if (!response.ok) throw new Error("PRE_APPROVE_ERROR");
       const data = await response.json();
       setApplication((prev) => ({ ...(prev ?? {}), ...data }));
-      showNotification("تمت الموافقة مبدئية بنجاح", "success");
+      showToast("تمت الموافقة مبدئية بنجاح", "success");
       await fetchDocuments();
     } catch (err: unknown) {
       console.error("Initial approval error:", err);
-      const serverMsg = ((err as Record<string, unknown>)?.response as Record<string, unknown>)?.data
-        ? typeof ((err as Record<string, unknown>).response as Record<string, unknown>).data === "string"
-          ? ((err as Record<string, unknown>).response as Record<string, unknown>).data
-          : JSON.stringify(((err as Record<string, unknown>).response as Record<string, unknown>).data)
-        : "فشل في تنفيذ الموافقة مبدئية";
-      showNotification(serverMsg as string, "error");
+      const serverMsg =
+        ((err as Record<string, unknown>)?.response as Record<string, unknown>)?.data
+          ? typeof ((err as Record<string, unknown>).response as Record<string, unknown>).data === "string"
+            ? ((err as Record<string, unknown>).response as Record<string, unknown>).data
+            : JSON.stringify(((err as Record<string, unknown>).response as Record<string, unknown>).data)
+          : "فشل في تنفيذ الموافقة مبدئية";
+      showToast(serverMsg as string, "error");
     } finally {
       setActionLoading(false);
       window.location.reload();
@@ -287,10 +350,10 @@ export default function RequestDetailsPage() {
   };
 
   const DISCOUNT_TYPE_MAP: Record<string, string> = {
-    bk_discount: "bk_discount",
+    bk_discount:  "bk_discount",
     reg_discount: "reg_discount",
     aff_discount: "aff_discount",
-    full_discount: "full_discount",
+    full_discount:"full_discount",
   };
 
   const assignDiscounts = async () => {
@@ -300,15 +363,12 @@ export default function RequestDetailsPage() {
     (Object.keys(selectedDiscounts) as Array<keyof SelectedDiscounts>).forEach((key) => {
       const val = selectedDiscounts[key];
       if (val && val !== "none") {
-        payloadDiscounts.push({
-          discount_type: DISCOUNT_TYPE_MAP[key],
-          discount_value: String(val),
-        });
+        payloadDiscounts.push({ discount_type: DISCOUNT_TYPE_MAP[key], discount_value: String(val) });
       }
     });
 
     if (payloadDiscounts.length === 0) {
-      showNotification("لم يتم اختيار أي خصم لإرساله", "warning");
+      showToast("لم يتم اختيار أي خصم لإرساله", "warning");
       return;
     }
 
@@ -316,8 +376,7 @@ export default function RequestDetailsPage() {
     const prevApp = application;
     const baseUrl = getBaseUrl();
     const optimisticTotal = payloadDiscounts.reduce(
-      (sum: number, d: Record<string, unknown>) => sum + Number((d.discount_value as string | number) || 0),
-      0
+      (sum: number, d: Record<string, unknown>) => sum + Number((d.discount_value as string | number) || 0), 0
     );
     setApplication((prev) => ({ ...(prev ?? {} as Record<string, unknown>), total_discount: String(optimisticTotal) }));
 
@@ -333,18 +392,19 @@ export default function RequestDetailsPage() {
       if (!res.ok) throw new Error("DISCOUNT_ASSIGN_ERROR");
       const data = await res.json();
       setApplication((prev) => ({ ...(prev ?? {}), ...(data ?? {}) }));
-      showNotification("تم حفظ الخصومات بنجاح", "success");
+      showToast("تم حفظ الخصومات بنجاح", "success");
       setDiscountsSaved(true);
       await fetchDocuments();
     } catch (err: unknown) {
       console.error("assignDiscounts error:", err);
       setApplication(prevApp);
-      const serverMsg = ((err as Record<string, unknown>)?.response as Record<string, unknown>)?.data
-        ? typeof ((err as Record<string, unknown>).response as Record<string, unknown>).data === "string"
-          ? ((err as Record<string, unknown>).response as Record<string, unknown>).data
-          : JSON.stringify(((err as Record<string, unknown>).response as Record<string, unknown>).data)
-        : "فشل حفظ الخصومات على الخادم";
-      showNotification(serverMsg as string, "error");
+      const serverMsg =
+        ((err as Record<string, unknown>)?.response as Record<string, unknown>)?.data
+          ? typeof ((err as Record<string, unknown>).response as Record<string, unknown>).data === "string"
+            ? ((err as Record<string, unknown>).response as Record<string, unknown>).data
+            : JSON.stringify(((err as Record<string, unknown>).response as Record<string, unknown>).data)
+          : "فشل حفظ الخصومات";
+      showToast(serverMsg as string, "error");
     } finally {
       setActionLoading(false);
     }
@@ -354,7 +414,7 @@ export default function RequestDetailsPage() {
     setSelectedDiscounts(EMPTY_DISCOUNTS);
     setDiscountsSaved(false);
     fetchApplication();
-    showNotification("تم إعادة تعيين الاختيارات", "warning");
+    showToast("تم إعادة تعيين الاختيارات", "warning");
   };
 
   const openDocument = async (docId: number) => {
@@ -363,8 +423,7 @@ export default function RequestDetailsPage() {
       const res = await authFetch(`${baseUrl}/api/files/solidarity/${docId}/download/`);
       if (!res.ok) throw new Error("FILE_ERROR");
       const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      window.open(url, "_blank");
+      window.open(window.URL.createObjectURL(blob), "_blank");
     } catch (error) {
       console.error("Error opening document:", error);
     }
@@ -373,20 +432,6 @@ export default function RequestDetailsPage() {
   return (
     <div className={styles.container}>
       <div className={styles.contentCard}>
-
-        {notification && (
-          <div
-            className={`${styles.notification} ${
-              notification.startsWith("success")
-                ? styles.success
-                : notification.startsWith("warning")
-                ? styles.warning
-                : styles.error
-            }`}
-          >
-            {notification.split(":")[1]}
-          </div>
-        )}
 
         <button onClick={() => router.push("/FacLevel")} className={styles.backBtn}>
           العودة ←
@@ -398,13 +443,17 @@ export default function RequestDetailsPage() {
 
         {loading && <p>جارٍ التحميل...</p>}
 
+        {/* ====== المعلومات الشخصية ====== */}
         <section className={styles.section}>
           <h3>المعلومات الشخصية</h3>
           <div className={styles.infoGrid}>
             <p><strong>الاسم الكامل:</strong> {application?.student_name ?? "-"}</p>
             <p><strong>الرقم القومي / رقم الطالب:</strong> {application?.student_uid ?? "-"}</p>
             <p><strong>الكلية:</strong> {application?.faculty_name ?? "-"}</p>
-            <p><strong>حالة الطلب:</strong> {application?.req_status ?? "-"}</p>
+            <p>
+              <strong>حالة الطلب:</strong>{" "}
+              <StatusBadge status={application?.req_status} />
+            </p>
             <p><strong>تاريخ التقديم:</strong> {formatDate(application?.created_at)}</p>
             <p><strong>المعدل / الدرجة:</strong> {application?.grade ?? "-"}</p>
             <p><strong>هاتف الأب:</strong> {application?.f_phone_num ?? "-"}</p>
@@ -412,6 +461,7 @@ export default function RequestDetailsPage() {
           </div>
         </section>
 
+        {/* ====== الأسرة والدخل ====== */}
         <section className={styles.section}>
           <h3>معلومات الأسرة و الدخل</h3>
           <div className={styles.infoGrid}>
@@ -427,17 +477,19 @@ export default function RequestDetailsPage() {
           </div>
         </section>
 
+        {/* ====== معلومات طلب الدعم ====== */}
         <section className={styles.section}>
           <h3>معلومات طلب الدعم</h3>
           <div className={styles.infoGrid}>
             <p><strong>الخصم المحسوب:</strong> {calculateDiscount()} جنيه</p>
-            <p><strong>إجمالي الخصم من الخادم:</strong> {application?.total_discount ?? "-"}</p>
+            <p><strong>إجمالي الخصم:</strong> {application?.total_discount ?? "-"}</p>
             <p><strong>سبب التقديم:</strong> {application?.reason ?? "-"}</p>
             <p><strong>إعاقات:</strong> {application?.disabilities ?? "-"}</p>
             <p><strong>الحالة الأكاديمية:</strong> {application?.acd_status ?? "-"}</p>
           </div>
         </section>
 
+        {/* ====== المستندات ====== */}
         <section className={styles.section}>
           <h3>المستندات</h3>
           {documents.length === 0 ? (
@@ -466,98 +518,73 @@ export default function RequestDetailsPage() {
           </div>
         </section>
 
+        {/* ====== سبب الرفض — highlighted ====== */}
+        {application?.req_status === "مرفوض" && (
+          <section className={styles.section}>
+            <RejectionBox reason={application?.rejection_reason} />
+          </section>
+        )}
+
+        {/* ====== الخصومات ====== */}
         {application?.req_status === "موافقة مبدئية" && (
           <section className={styles.section}>
             <h3>الخصومات المتاحة</h3>
             <div className={styles.discountsBox}>
               <div className={styles.discountSelect}>
                 <label>خصم مصاريف الكتب:</label>
-                <select
-                  value={selectedDiscounts.bk_discount}
-                  onChange={(e) => handleDiscountChange("bk_discount", e.target.value)}
-                >
+                <select value={selectedDiscounts.bk_discount} onChange={(e) => handleDiscountChange("bk_discount", e.target.value)}>
                   <option value="none">لا يوجد</option>
-                  {availableDiscounts.bk_discount.map((item, index) => (
-                    <option key={index} value={item}>{item}</option>
-                  ))}
+                  {availableDiscounts.bk_discount.map((item, i) => <option key={i} value={item}>{item}</option>)}
                 </select>
               </div>
-
               <div className={styles.discountSelect}>
                 <label>خصم مصاريف الانتساب:</label>
-                <select
-                  value={selectedDiscounts.aff_discount}
-                  onChange={(e) => handleDiscountChange("aff_discount", e.target.value)}
-                >
+                <select value={selectedDiscounts.aff_discount} onChange={(e) => handleDiscountChange("aff_discount", e.target.value)}>
                   <option value="none">لا يوجد</option>
-                  {availableDiscounts.aff_discount.map((item, index) => (
-                    <option key={index} value={item}>{item}</option>
-                  ))}
+                  {availableDiscounts.aff_discount.map((item, i) => <option key={i} value={item}>{item}</option>)}
                 </select>
               </div>
-
               <div className={styles.discountSelect}>
                 <label>خصم مصاريف الانتظام:</label>
-                <select
-                  value={selectedDiscounts.reg_discount}
-                  onChange={(e) => handleDiscountChange("reg_discount", e.target.value)}
-                >
+                <select value={selectedDiscounts.reg_discount} onChange={(e) => handleDiscountChange("reg_discount", e.target.value)}>
                   <option value="none">لا يوجد</option>
-                  {availableDiscounts.reg_discount.map((item, index) => (
-                    <option key={index} value={item}>{item}</option>
-                  ))}
+                  {availableDiscounts.reg_discount.map((item, i) => <option key={i} value={item}>{item}</option>)}
                 </select>
               </div>
-
               <div className={styles.discountSelect}>
                 <label>خصم المصاريف كاملة:</label>
-                <select
-                  value={selectedDiscounts.full_discount}
-                  onChange={(e) => handleDiscountChange("full_discount", e.target.value)}
-                >
+                <select value={selectedDiscounts.full_discount} onChange={(e) => handleDiscountChange("full_discount", e.target.value)}>
                   <option value="none">لا يوجد</option>
-                  {availableDiscounts.full_discount.map((item, index) => (
-                    <option key={index} value={item}>{item}</option>
-                  ))}
+                  {availableDiscounts.full_discount.map((item, i) => <option key={i} value={item}>{item}</option>)}
                 </select>
               </div>
             </div>
 
             <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 12 }}>
               {!discountsSaved && (
-                <button
-                  onClick={assignDiscounts}
-                  disabled={actionLoading}
-                  className={styles.btnApprove}
-                >
+                <button onClick={assignDiscounts} disabled={actionLoading} className={styles.btnApprove}>
                   {actionLoading ? "جاري الحفظ..." : "حفظ الخصومات"}
                 </button>
               )}
-
-              <button
-                onClick={handleResetDiscounts}
-                className={styles.btnReject}
-                disabled={actionLoading}
-              >
+              <button onClick={handleResetDiscounts} className={styles.btnReject} disabled={actionLoading}>
                 إعادة تعيين
               </button>
             </div>
           </section>
         )}
 
+        {/* ====== الأزرار ====== */}
         <div className={styles.actions}>
           {canPreApprove(application?.req_status) && (
             <button onClick={handleInitialApproval} disabled={actionLoading} className={styles.btnApprove}>
               {actionLoading ? "جاري..." : "موافقة مبدئية"}
             </button>
           )}
-
           {canApprove(application?.req_status) && (
             <button onClick={handleApprove} disabled={actionLoading} className={styles.btnApprove}>
               {actionLoading ? "جاري..." : "مقبول"}
             </button>
           )}
-
           {application?.req_status === "مقبول" && (
             <div className={styles.btnReceived}>✅ تم اعتماد الطلب نهائيًا</div>
           )}

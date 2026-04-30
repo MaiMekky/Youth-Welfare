@@ -65,14 +65,11 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ onBack, onSubmit }) => 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = localStorage.getItem("access");
-        if (!token) { setCanCreateFam(false); return; }
 
         const res = await authFetch(`${getBaseUrl()}/api/auth/profile/`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
         });
 

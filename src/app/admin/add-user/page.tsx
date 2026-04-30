@@ -79,14 +79,14 @@ const validateEmail = (email: string) => {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const token = localStorage.getItem('access');
+
 
         const [facultiesRes, departmentsRes] = await Promise.all([
           authFetch(`${getBaseUrl()}/api/family/faculties/`, {
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json' }
           }),
           authFetch(`${getBaseUrl()}/api/family/departments/`, {
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json' }
           }),
         ]);
 
@@ -122,10 +122,7 @@ const validateEmail = (email: string) => {
 
   useEffect(() => {
     if (isEdit && faculties.length > 0) {
-      const token = localStorage.getItem('access');
-      authFetch(`${getBaseUrl()}/api/auth/admin_management/${admin_id}/`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+      authFetch(`${getBaseUrl()}/api/auth/admin_management/${admin_id}/`)
         .then(res => res.json())
         .then(data => {
           setFormData({
@@ -197,8 +194,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
   try {
-    const token = localStorage.getItem('access');
-    if (!token) throw new Error('User not authenticated');
+    // if (!token) throw new Error('User not authenticated');
     // ✅ EMAIL VALIDATION
     const emailError = validateEmail(formData.email);
     if (emailError) {
@@ -258,7 +254,6 @@ const handleSubmit = async (e: React.FormEvent) => {
       method,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify(payload),
     });

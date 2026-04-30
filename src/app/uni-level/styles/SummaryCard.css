@@ -2,21 +2,22 @@
 
 /* ── Stats Grid ── */
 .summary-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 14px;
-  width: 100%;
-  box-sizing: border-box;
-  margin-bottom: 14px;
-  font-family: 'Cairo', sans-serif;
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(260px, 1fr)) !important;
+  gap: 14px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin-bottom: 14px !important;
+  font-family: 'Cairo', sans-serif !important;
+  flex-wrap: unset !important;
 }
 
 /* ── Base Card ── */
 .summary-card {
   border-radius: 10px;
   padding: 14px 20px;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto 1fr;
   gap: 3px;
   transition: transform .18s;
   background: #fff;
@@ -74,10 +75,14 @@
 .summary-total .summary-num{color:#2D5F8A ;}
 /* ── Responsive ── */
 @media (max-width: 1024px) {
-  .summary-grid { grid-template-columns: repeat(2, 1fr); }
+  .summary-grid { 
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
 }
 
 @media (max-width: 480px) {
-  .summary-grid { grid-template-columns: 1fr 1fr; }
-  .summary-num  { font-size: 26px; }
+  .summary-num { font-size: 26px; }
+  .summary-grid {
+    grid-template-columns: 1fr !important;
+  }
 }

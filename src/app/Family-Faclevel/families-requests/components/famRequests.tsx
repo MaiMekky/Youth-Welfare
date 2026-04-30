@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import styles from "../styles/famRequests.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 type Status = "منتظر" | "موافقة مبدئية" | "مرفوض";
 
@@ -18,38 +19,41 @@ const FamRequests = ({ request }: { request: Record<string, unknown> }) => {
     (request.status as Status) || "منتظر"
   );
 
-  const [notification, setNotification] = useState<{
-    message: string;
-    type: "success" | "error";
-  } | null>(null);
-
-  const showNotification = (message: string, type: "success" | "error") => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 2500);
-  };
+  const { showToast } = useToast();
 
   // ====== Approve ======
   const handleApprove = async () => {
-    if (!minMembers || Number(minMembers) <= 0) {
-      showNotification("❌ يجب إدخال الحد الأدنى للأعضاء", "error");
-      return;
-    }
+   if (!minMembers || Number(minMembers) <= 0) {
+    showToast("❌ يجب إدخال الحد الأدنى للأعضاء", "error");
+    return;
+  }
 
-    if (!closeDate) {
-      showNotification("❌ يجب إدخال تاريخ إغلاق التسجيل", "error");
-      return;
-    }
+  // ← add this
+  if (Number(minMembers) < 0) {
+    showToast("❌ الحد الأدنى للأعضاء لا يمكن أن يكون رقماً سالباً", "error");
+    return;
+  }
+
+  if (!closeDate) {
+    showToast("❌ يجب إدخال تاريخ إغلاق التسجيل", "error");
+    return;
+  }
+
+  // ← add this
+  const today = new Date().toISOString().split("T")[0];
+  if (closeDate < today) {
+    showToast("❌ تاريخ إغلاق التسجيل لا يمكن أن يكون في الماضي", "error");
+    return;
+  }
 
     try {
       setLoading(true);
-      const token = localStorage.getItem("access");
 
       const res = await authFetch(
         `${getBaseUrl()}/api/family/faculty/${request.family_id}/pre-approve/`,
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
@@ -62,10 +66,10 @@ const FamRequests = ({ request }: { request: Record<string, unknown> }) => {
       if (!res.ok) throw new Error("Approve failed");
 
       setStatus("موافقة مبدئية"); 
-      showNotification("✅ تم اعتماد طلب إنشاء الأسرة بنجاح", "success");
+      showToast("✅ تم اعتماد طلب إنشاء الأسرة بنجاح", "success");
     } catch (error) {
       console.error(error);
-      showNotification("❌ فشل اعتماد الطلب", "error");
+      showToast("❌ فشل اعتماد الطلب", "error");
     } finally {
       setLoading(false);
     }
@@ -75,25 +79,21 @@ const FamRequests = ({ request }: { request: Record<string, unknown> }) => {
   const handleReject = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("access");
 
       const res = await authFetch(
         `${getBaseUrl()}/api/family/faculty/${request.family_id}/reject/`,
         {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
 
       if (!res.ok) throw new Error("Reject failed");
 
       setStatus("مرفوض"); 
-      showNotification("❌ تم رفض طلب إنشاء الأسرة", "error");
+      showToast("❌ تم رفض طلب إنشاء الأسرة", "error");
     } catch (error) {
       console.error(error);
-      showNotification("❌ فشل رفض الطلب", "error");
+      showToast("❌ فشل رفض الطلب", "error");
     } finally {
       setLoading(false);
     }
@@ -101,19 +101,6 @@ const FamRequests = ({ request }: { request: Record<string, unknown> }) => {
 
   return (
     <div className={styles.requestCard}>
-      {/* ===== Notification ===== */}
-      {notification && (
-        <div
-          className={`${styles.notification} ${
-            notification.type === "success"
-              ? styles.success
-              : styles.error
-          }`}
-        >
-          {notification.message}
-        </div>
-      )}
-
       {/* ===== Header ===== */}
       <div className={styles.cardHeader}>
         <div className={styles.titleRow}>
@@ -185,6 +172,7 @@ const FamRequests = ({ request }: { request: Record<string, unknown> }) => {
             <input
               type="number"
               placeholder="مثال: 10"
+              min={1}   
               value={minMembers}
               onChange={(e) => setMinMembers(e.target.value)}
             />
@@ -194,6 +182,7 @@ const FamRequests = ({ request }: { request: Record<string, unknown> }) => {
             <label>تعيين تاريخ إغلاق التسجيل</label>
             <input
               type="date"
+              min={new Date().toISOString().split("T")[0]} 
               value={closeDate}
               onChange={(e) => setCloseDate(e.target.value)}
             />

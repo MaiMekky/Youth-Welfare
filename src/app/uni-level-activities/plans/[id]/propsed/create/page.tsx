@@ -14,6 +14,8 @@ import {
   Briefcase,
 } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 
 const API_URL = getBaseUrl();
 
@@ -35,16 +37,10 @@ type FormState = {
 };
 
 type FormErrors = Partial<Record<keyof FormState | "selected_facs", string>>;
-/* ===================== Toast (same style) ===================== */
-type ToastType = "success" | "error" | "warning";
 
-function getAccessToken(): string | null {
-  return (
-    localStorage.getItem("access") ||
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("token") ||
-    null
-  );
+function getDeptFromCookie(): number | null {
+  const meta = getSessionMeta();
+  return meta?.dept_ids?.[0] ?? null;
 }
 
 async function apiFetch<T>(
@@ -77,17 +73,15 @@ export default function CreateProposedEventPage() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
+  const { showToast } = useToast();
 
   const planId = String(params?.id ?? "");
   const mode = (searchParams.get("mode") ?? "create") as Mode;
   const isConvert = mode === "convert";
 
-  // ── Departments from localStorage (exactly like CreatePlanModal) ──
+  // ── Departments from cookie session ──
   useEffect(() => {
-    const stored = localStorage.getItem("departments");
-    if (stored) {
-      try { JSON.parse(stored); } catch {}
-    }
+    // departments available via getSessionMeta().departments if needed
   }, []);
 
 const [form, setForm] = useState<FormState>({
@@ -116,19 +110,6 @@ const [form, setForm] = useState<FormState>({
 
   const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [selectedFacultyIds, setSelectedFacultyIds] = useState<number[]>([]);
-  /* ===================== Toast State ===================== */
-  const [toast, setToast] = useState<{ show: boolean; message: string; type: ToastType }>({
-    show: false,
-    message: "",
-    type: "success",
-  });
-
-  const showToast = (message: string, type: ToastType) => {
-    setToast({ show: true, message, type });
-    window.setTimeout(() => {
-      setToast({ show: false, message: "", type: "success" });
-    }, 2500);
-  };
 
   const setField = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((p) => ({ ...p, [key]: value }));
@@ -152,10 +133,13 @@ const toggleAllFacs = () => {
   const validate = useMemo(
     () => (data: FormState): FormErrors => {
       const next: FormErrors = {};
+      const today = new Date().toISOString().split("T")[0]
       if (!data.title.trim()) next.title = "العنوان مطلوب";
       if (!data.location.trim()) next.location = "المكان مطلوب";
       if (!data.st_date.trim()) next.st_date = "تاريخ البداية مطلوب";
+      else if (data.st_date < today) next.st_date = "تاريخ البداية لا يمكن أن يكون في الماضي";
       if (!data.end_date.trim()) next.end_date = "تاريخ النهاية مطلوب";
+      else if (data.end_date < today) next.end_date = "تاريخ النهاية لا يمكن أن يكون في الماضي";
       if (!data.cost.trim()) next.cost = "التكلفة مطلوبة";
       // if (!data.type.trim()) next.type = "نوع النشاط مطلوب";
       // if (isConvert && !data.dept_id) {
@@ -210,10 +194,10 @@ const toggleAllFacs = () => {
         const nextErrors = validate(form);
         setErrors(nextErrors);
         touchAll();
-        // if (Object.keys(nextErrors).length) {
-        //   showToast("⚠️ برجاء ملء الحقول المطلوبة", "warning");
-        //   return;
-        // }
+        if (Object.keys(nextErrors).length) {
+        showToast("برجاء استكمال البيانات المطلوبة ⚠️", "warning"); 
+        return;
+      }
 
         setSubmitting(true);
 
@@ -240,10 +224,14 @@ const toggleAllFacs = () => {
 
       setSubmitting(false);
 
-      if (!res.ok) {
-        showToast(`❌ ${res.message}`, "error");
-        return;
-      }
+     if (!res.ok) {
+    if (res.status === 500) {                          
+      showToast("حدث خطأ غير متوقع ❌", "error");    
+    } else {                                           
+      showToast(`❌ ${res.message}`, "error");
+    }                                                  
+    return;
+  }
 
       showToast("✅ تم إنشاء فعالية مقترحة بنجاح", "success");
 
@@ -394,13 +382,6 @@ const toggleAllFacs = () => {
   }, []);
   return (
     <>
-      {/* ✅ Toast */}
-      {toast.show && (
-        <div className={`${styles.toast} ${styles[`toast_${toast.type}`]}`}>
-          {toast.message}
-        </div>
-      )}
-
       <div className={styles.page}>
         <div className={styles.container}>
           <div className={styles.topBar}>
@@ -605,7 +586,7 @@ const toggleAllFacs = () => {
 
              {isConvert &&  (
                 <div className={styles.field} style={{ gridColumn: "1 / -1" }}>
-                  <label className={styles.label}>الوصف</label>
+                  <label className={styles.label}>الوصف(اكتب قيمة الاشتراك ان وجد)</label>
                   <textarea
                     className={styles.input}
                     placeholder="اكتب وصف مختصر"

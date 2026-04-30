@@ -2,15 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import styles from "../Styles/PageTitleSection.module.css";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 
 export default function PageTitleSection() {
   const [userData, setUserData] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUserData(JSON.parse(storedUser));
-    }
+    const meta = getSessionMeta();
+    if (meta) setUserData({ faculty_name: meta.faculty_name, name: meta.name });
   }, []);
 
   return (

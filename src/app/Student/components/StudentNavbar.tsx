@@ -84,17 +84,12 @@ const StudentNavbar: React.FC = () => {
   const menuRef  = useRef<HTMLDivElement | null>(null);
   const pathname = usePathname();
 
-  const token = typeof window !== 'undefined' ? localStorage.getItem('access') : null;
 
   useEffect(() => {
-    if (!token) return;
-
     const checkRole = async () => {
       try {
         const baseUrl = getBaseUrl();
-        const res = await authFetch(`${baseUrl}/api/family/student/families/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await authFetch(`${baseUrl}/api/family/student/families/`);
         if (!res.ok) return;
 
         const response = await res.json();
@@ -113,7 +108,7 @@ const StudentNavbar: React.FC = () => {
     };
 
     checkRole();
-  }, [token]);
+  }, []);
 
   const baseNavItems: NavItem[] = [
     { key: "home",       label: "أنشطتي",            icon: <IconHome />,       href: "/Student/MainPage"   },
@@ -131,22 +126,26 @@ const StudentNavbar: React.FC = () => {
         ...baseNavItems.slice(3),
       ]
     : baseNavItems;
-
   const handleLogout = async () => {
-    localStorage.clear();
-
     try {
-      await fetch("/api/logout", {
+      await fetch(`${getBaseUrl()}/api/auth/logout/`, {
         method: "POST",
         credentials: "include",
       });
     } catch (err) {
-      console.error("Logout API failed:", err);
+      console.error("Logout failed:", err);
     }
 
-    window.location.replace("/?logout=1");
-  };
+    const wipe = "path=/; max-age=0";
+    document.cookie = `user_type=; ${wipe}`;
+    document.cookie = `roleKey=; ${wipe}`;
+    document.cookie = `session_meta=; ${wipe}`;
 
+    // Set a short-lived cookie so middleware knows this is a logout
+    document.cookie = `logging_out=1; path=/; max-age=5`;
+
+    window.location.replace("/");
+  };
   const isActive = (href: string) =>
     pathname === href || pathname?.startsWith(href + "/");
 

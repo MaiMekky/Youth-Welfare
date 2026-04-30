@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "../CreateEvent.module.css";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowRight, Save } from "lucide-react";
-import Footer from "@/app/FacLevel/components/Footer";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 
 /** ================== API ================== */
 const API_URL = getBaseUrl();
@@ -46,54 +47,20 @@ type ManageEventPayload = {
   resource: string;
 };
 
-function getAccessToken(): string | null {
-  return (
-    localStorage.getItem("access") ||
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("token") ||
-    null
-  );
-}
-
-function getDeptFromToken(): number | null {
-  const token = getAccessToken();
-  if (!token) return null;
-  try {
-    const parts = token.split(".");
-    if (parts.length < 2) return null;
-    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
-    const payload = JSON.parse(atob(padded));
-    const departments = payload?.departments;
-    const deptId1 = Array.isArray(departments) ? departments?.[0]?.dept_id : undefined;
-    const deptIds = payload?.dept_ids;
-    const deptId2 = Array.isArray(deptIds) ? deptIds?.[0] : undefined;
-    const deptId3 = payload?.dept_id;
-    const deptId4 = payload?.dept;
-    const candidate = deptId1 ?? deptId2 ?? deptId3 ?? deptId4;
-    if (typeof candidate === "number") return candidate;
-    if (typeof candidate === "string") { const n = Number(candidate); return Number.isFinite(n) ? n : null; }
-    return null;
-  } catch { return null; }
+function getDeptFromCookie(): number | null {
+  const meta = getSessionMeta();
+  return meta?.dept_ids?.[0] ?? null;
 }
 
 function getDepartments(): { dept_id: number; dept_name: string }[] {
-  try {
-    const raw = localStorage.getItem("departments");
-    if (!raw) return [];
-    return JSON.parse(raw);
-  } catch {
-    return [];
-  }
+  return getSessionMeta()?.departments ?? [];
 }
 async function apiFetch<T>(
   path: string,
   opts: RequestInit = {}
 ): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number; raw?: unknown }> {
-  const token = getAccessToken();
   const headers: Record<string, string> = { ...(opts.headers as Record<string, string>) };
   if (!headers["Content-Type"] && opts.body) headers["Content-Type"] = "application/json";
-  if (token) headers.Authorization = `Bearer ${token}`;
   try {
     const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
     const text = await res.text();
@@ -148,12 +115,7 @@ export default function EventForm({
   const eventId = id ?? routeId;
   const isEditMode = mode === "edit" && !!eventId;
 
-  /** ✅ Notification */
-  const [notification, setNotification] = useState<{ message: string; type: NotifType } | null>(null);
-  const showNotification = (message: string, type: NotifType) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 2500);
-  };
+  const { showToast } = useToast();
 
   // ── Departments from localStorage (exactly like CreatePlanModal) ──
   const [departments, setDepartments] = useState<{ dept_id: number; dept_name: string }[]>([]);
@@ -184,6 +146,7 @@ export default function EventForm({
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const [loadingEvent, setLoadingEvent] = useState(false);
+  const originalForm = useRef<FormState | null>(null);
 
   const setField = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((p) => ({ ...p, [key]: value }));
@@ -206,7 +169,7 @@ export default function EventForm({
     if (!costStr) next.cost = "التكلفة مطلوبة";
     else if (Number.isNaN(costNum) || costNum < 0) next.cost = "التكلفة لازم تكون رقم أكبر أو يساوي 0";
     if (!form.description.trim()) next.description = "الوصف مطلوب";
-    if (!form.type.trim()) next.type = "نوع النشاط مطلوب";
+    // if (!form.type.trim()) next.type = "نوع النشاط مطلوب";
     if (!form.dept) next.dept = "القسم مطلوب";
     return next;
   };
@@ -217,10 +180,9 @@ export default function EventForm({
       setLoadingEvent(true);
       const res = await apiFetch<ApiEventDetails>(`/api/event/get-events/${eventId}/`, { method: "GET" });
       setLoadingEvent(false);
-      if (!res.ok) { showNotification(res.message || "فشل تحميل بيانات الفعالية", "error"); return; }
+      if (!res.ok) { showToast(res.message || "فشل تحميل بيانات الفعالية", "error"); return; }
       const e = res.data;
-      setForm((p) => ({
-        ...p,
+      const loaded: FormState = {
         title: e?.title ?? "",
         st_date: e?.st_date ?? "",
         end_date: e?.end_date ?? "",
@@ -228,27 +190,40 @@ export default function EventForm({
         s_limit: Number(e?.s_limit ?? 100),
         cost: String(e?.cost ?? ""),
         description: e?.description ?? "",
-        type: e?.type ?? "",
+        type: e?.type ?? "داخلي",
         restrictions: e?.restrictions ?? "",
         reward: e?.reward ?? "",
         resource: e?.resource ?? "",
         imgs: e?.imgs ?? "",
         dept: e?.dept ?? "",
-      }));
+      };
+      setForm(loaded);
+      originalForm.current = loaded;  
     })();
   }, [isEditMode, eventId]);
-
+ 
   /** ===== Submit ===== */
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const nextErrors = validate();
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) {
-      showNotification("⚠️   برجاء استكمال البيانات المطلوبة", "warning");
+      showToast("⚠️   برجاء استكمال البيانات المطلوبة", "warning");
       return;
     }
-    const dept = getDeptFromToken();
-    if (!dept) { showNotification("❌ لا يوجد رقم قسم في التوكن", "error"); return; }
+    // ── No-change guard (edit mode only) ──────────────────────────
+    if (isEditMode && originalForm.current) {
+      const keys = Object.keys(form) as (keyof FormState)[];
+      const hasChanged = keys.some(
+        (k) => String(form[k]).trim() !== String(originalForm.current![k]).trim()
+      );
+      if (!hasChanged) {
+        showToast("برجاء التعديل أو إلغاء التعديل ⚠️", "warning");
+        return;
+      }
+    }
+    const dept = getDeptFromCookie();
+    if (!dept) { showToast("❌ لا يوجد رقم قسم في بيانات الجلسة", "error"); return; }
 
     const payload: ManageEventPayload = {
       title: form.title.trim(),
@@ -264,7 +239,7 @@ export default function EventForm({
       end_date: form.end_date,
       s_limit: Number(form.s_limit),
 
-      type: form.type,   
+      type: "داخلي",   
 
       resource: form.resource.trim(),
     };
@@ -273,29 +248,19 @@ export default function EventForm({
     if (isEditMode) {
       const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-events/${eventId}/`, { method: "PATCH", body: JSON.stringify(payload) });
       setSubmitting(false);
-      if (!res.ok) { showNotification(res.message || "❌ حصل خطأ أثناء تعديل الفعالية", "error"); return; }
-      showNotification("✅ تم تعديل الفعالية بنجاح", "success");
+      if (!res.ok) { showToast(res.message || "❌ حصل خطأ أثناء تعديل الفعالية", "error"); return; }
+      showToast("✅ تم تعديل الفعالية بنجاح", "success");
     } else {
       const res = await apiFetch<Record<string, unknown>>("/api/event/manage-events/", { method: "POST", body: JSON.stringify(payload) });
       setSubmitting(false);
-      if (!res.ok) { showNotification(res.message || "❌ حصل خطأ أثناء إنشاء الفعالية", "error"); return; }
-      showNotification("✅ تم إنشاء الفعالية بنجاح", "success");
+      if (!res.ok) { showToast(res.message || "❌ حصل خطأ أثناء إنشاء الفعالية", "error"); return; }
+      showToast("✅ تم إنشاء الفعالية بنجاح", "success");
     }
     router.push("/Events-Faclevel");
   };
 
   return (
     <div className={styles.page}>
-      {/* ✅ Notification */}
-      {notification && (
-        <div className={`${styles.notification} ${
-          notification.type === "success" ? styles.success :
-          notification.type === "warning" ? styles.warning : styles.error
-        }`}>
-          {notification.message}
-        </div>
-      )}
-
       <div className={styles.container}>
         <header className={styles.header}>
           <div className={styles.headerText}>
@@ -326,7 +291,7 @@ export default function EventForm({
             </div>
 
             {/* ── نوع النشاط — from localStorage departments (like CreatePlanModal) ── */}
-            <div className={styles.field}>
+            {/* <div className={styles.field}>
               <label className={styles.label}>نوع النشاط</label>
               <select
                 className={`${styles.input} ${errors.type ? styles.inputError : ""}`}
@@ -338,8 +303,26 @@ export default function EventForm({
                 <option value="خارجي">خارجي</option>
               </select>
               {errors.type && <div className={styles.errorText}>{errors.type}</div>}
-            </div>
+            </div> */}
+              <div className={styles.field}>
+              <label className={styles.label}>القسم</label>
 
+              <select
+                className={`${styles.input} ${errors.dept ? styles.inputError : ""}`}
+                value={form.dept}
+                onChange={(e) => setField("dept", Number(e.target.value))}
+              >
+                <option value="" hidden>اختار القسم</option>
+
+                {departments.map((d) => (
+                  <option key={d.dept_id} value={d.dept_id}>
+                    {d.dept_name}
+                  </option>
+                ))}
+              </select>
+
+              {errors.dept && <div className={styles.errorText}>{errors.dept}</div>}
+            </div>
             
             <div className={styles.field}>
               <label className={styles.label}>تاريخ البداية</label>
@@ -361,26 +344,6 @@ export default function EventForm({
                 onChange={(ev) => setField("end_date", ev.target.value)}
               />
               {errors.end_date && <div className={styles.errorText}>{errors.end_date}</div>}
-            </div>
-
-              <div className={styles.field}>
-              <label className={styles.label}>القسم</label>
-
-              <select
-                className={`${styles.input} ${errors.dept ? styles.inputError : ""}`}
-                value={form.dept}
-                onChange={(e) => setField("dept", Number(e.target.value))}
-              >
-                <option value="" hidden>اختار القسم</option>
-
-                {departments.map((d) => (
-                  <option key={d.dept_id} value={d.dept_id}>
-                    {d.dept_name}
-                  </option>
-                ))}
-              </select>
-
-              {errors.dept && <div className={styles.errorText}>{errors.dept}</div>}
             </div>
             
             <div className={styles.field}>
@@ -451,7 +414,7 @@ export default function EventForm({
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label}>الوصف</label>
+            <label className={styles.label}>الوصف(اكتب قيمة الاشتراك ان وجد)</label>
             <textarea
               className={`${styles.textarea} ${errors.description ? styles.inputError : ""}`}
               placeholder="الوصف"
@@ -473,7 +436,6 @@ export default function EventForm({
           </div>
         </form>
       </div>
-      <Footer />
     </div>
   );
 }

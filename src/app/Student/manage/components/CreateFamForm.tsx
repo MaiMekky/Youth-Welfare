@@ -1,19 +1,12 @@
 "use client";
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import '../styles/CreateFam.css';
-import Toast from './Toast';
 import { ChevronRight, ChevronLeft, Check, User, Users, FileText, Send } from 'lucide-react';
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 
 const CACHE_KEY = 'createFamFormData';
-
-/* ─── Token decode ─── */
-const decodeToken = (token: string) => {
-  try {
-    const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-    return JSON.parse(decodeURIComponent(atob(b64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
-  } catch { return null; }
-};
 
 /* ─── Arabic error map ─── */
 const AR_CODES: Record<string, string> = {
@@ -283,9 +276,8 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
   const [facultyId, setFacultyId]                 = useState<number | null>(null);
   const [departments, setDepartments]             = useState<Department[]>([]);
   const [isSubmitting, setIsSubmitting]           = useState(false);
-  const [toasts, setToasts]                       = useState<ToastNotification[]>([]);
+  const { showToast } = useToast();
 
-  const token = typeof window !== 'undefined' ? localStorage.getItem('access') : null;
   const dupeMap = buildDuplicateMap(boardMembers, committees);
 
   /* ── Activity helpers ── */
@@ -323,47 +315,30 @@ const CreateFamForm: React.FC<CreateFamFormProps> = ({ onBack, onSubmitSuccess }
   }, [familyType, familyName, familyGoals, familyDescription, boardMembers, committees]);
   useEffect(() => { saveCache(); }, [saveCache]);
 
-  /* ── Toast ── */
-  const showToast = (message: string, type: ToastNotification['type']) =>
-    setToasts(p => [...p, { id: Date.now(), message, type }]);
-  const removeToast = (id: number) => setToasts(p => p.filter(t => t.id !== id));
-
   /* ── Fetch departments & faculty ── */
   useEffect(() => {
-    if (!token) return;
-    authFetch(`${getBaseUrl()}/api/family/departments/`, { headers: { Authorization: `Bearer ${token}` } })
+    authFetch(`${getBaseUrl()}/api/family/departments/`)
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (!data) return;
         setDepartments(Array.isArray(data) ? data : data.departments ?? data.results ?? []);
       }).catch(() => {});
-  }, [token]);
+  }, []);
 
-useEffect(() => {
-  if (!token) return;
-
-  const decoded = decodeToken(token);
-
-  authFetch(`${getBaseUrl()}/api/auth/profile/`, {
-    headers: { Authorization: `Bearer ${token}` }
-  })
-    .then(r => r.ok ? r.json() : null)
-    .then(data => {
-      console.log('profile data:', data);
-      console.log('decoded token:', decoded);
-
-      if (!data) return;
-
-      const fid = (data.faculty && data.faculty !== 0)
-        ? data.faculty
-        : decoded?.faculty_id ?? null;
-
-      console.log('resolved facultyId:', fid);
-
-      if (fid) setFacultyId(fid);
-    })
-    .catch(() => {});
-}, [token]);
+  useEffect(() => {
+    const meta = getSessionMeta();
+    if (meta?.student_id) {
+      // Try to get faculty_id from profile API
+      authFetch(`${getBaseUrl()}/api/auth/profile/`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (!data) return;
+          const fid = data.faculty && data.faculty !== 0 ? data.faculty : null;
+          if (fid) setFacultyId(fid);
+        })
+        .catch(() => {});
+    }
+  }, []);
 
   /* ════════════════════════════════════════════
      VALIDATION — per step
@@ -521,7 +496,8 @@ useEffect(() => {
 
     setIsSubmitting(true);
     try {
-      if (!token) { showToast('يرجى تسجيل الدخول أولاً', 'error'); return; }
+      const meta = getSessionMeta();
+      if (!meta) { showToast('يرجى تسجيل الدخول أولاً', 'error'); return; }
 
       const committeesData = Object.entries(committees).map(([key, c]) => {
         const deptId = c.selectedDeptId ? parseInt(c.selectedDeptId) : (facultyId || 0);
@@ -559,7 +535,7 @@ useEffect(() => {
 
       const res = await authFetch(`${getBaseUrl()}/api/family/student/create/`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
@@ -576,7 +552,7 @@ useEffect(() => {
         );
       }
     } catch {
-      showToast('فشل الاتصال بالخادم — تحقق من الاتصال بالإنترنت', 'error');
+      showToast('فشل الاتصال بالسيرفر — تحقق من الاتصال بالإنترنت', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -925,10 +901,6 @@ useEffect(() => {
 
   return (
     <div className="cf-page">
-      <div className="toast-container">
-        {toasts.map(t => <Toast key={t.id} message={t.message} type={t.type} onClose={() => removeToast(t.id)} />)}
-      </div>
-
       <div className="cf-wizard">
 
         <div className="cf-progress-header">

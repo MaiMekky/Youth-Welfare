@@ -18,25 +18,17 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 const API_URL = getBaseUrl();
 
-function getAccessToken(): string | null {
-  return (
-    localStorage.getItem("access") ||
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("token") ||
-    null
-  );
-}
 
 async function apiFetch<T>(
   path: string,
   opts: RequestInit = {}
 ): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number }> {
-  const token = getAccessToken();
   const headers: Record<string, string> = { ...(opts.headers as Record<string, string>) };
   if (!headers["Content-Type"] && opts.body) headers["Content-Type"] = "application/json";
-  if (token) headers.Authorization = `Bearer ${token}`;
+
 
   try {
     const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
@@ -128,24 +120,15 @@ function mapParticipantStatus(s: string): StudentRow["status"] {
 export default function EventDetailsPage() {
   const router = useRouter();
   const params = useParams();
+  const { showToast } = useToast();
   const id = String(params?.id ?? "");
 
   const [event, setEvent] = useState<ApiEventDetails | null>(null);
   const [loadingEvent, setLoadingEvent] = useState(false);
   const [rows, setRows] = useState<StudentRow[]>([]);
-
   const [images, setImages] = useState<ApiEventImage[]>([]);
   const [loadingImages, setLoadingImages] = useState(false);
 
-  /* Toast */
-  const [notification, setNotification] = useState<{
-    show: boolean; message: string; type: "success" | "error" | "warning";
-  }>({ show: false, message: "", type: "success" });
-
-  const showToast = (message: string, type: "success" | "error" | "warning" = "success") => {
-    setNotification({ show: true, message, type });
-    setTimeout(() => setNotification({ show: false, message: "", type: "success" }), 2500);
-  };
 
   const loadEvent = async () => {
     if (!id) return;
@@ -230,16 +213,6 @@ export default function EventDetailsPage() {
 
   return (
     <div className={styles.page}>
-
-      {/* Toast */}
-      {notification.show && (
-        <div className={`${styles.notification} ${
-          notification.type === "success" ? styles.success :
-          notification.type === "error" ? styles.error : styles.warning
-        }`}>
-          {notification.message}
-        </div>
-      )}
 
       <div className={styles.container}>
 

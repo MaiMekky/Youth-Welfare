@@ -51,17 +51,11 @@ const Members: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedFamilyId, setSelectedFamilyId] = useState<number | null>(null);
 
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("access") : null;
-
   useEffect(() => {
-    if (!token) { setError("غير مصرح"); setLoading(false); return; }
     const fetchFamilyId = async () => {
       try {
         const baseUrl = getBaseUrl();
-        const res = await authFetch(`${baseUrl}/api/family/student/families/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await authFetch(`${baseUrl}/api/family/student/families/`);
         if (!res.ok) throw new Error("فشل تحميل قائمة الأسر");
         const response = await res.json();
         let families: Family[] = [];
@@ -83,17 +77,16 @@ const Members: React.FC = () => {
       }
     };
     fetchFamilyId();
-  }, [token]);
+  }, []);
 
   useEffect(() => {
-    if (!selectedFamilyId || !token) return;
+    if (!selectedFamilyId) return;
     const fetchMembers = async () => {
       try {
         setLoading(true);
         const baseUrl = getBaseUrl();
         const response = await authFetch(
-          `${baseUrl}/api/family/student/${selectedFamilyId}/members/`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          `${baseUrl}/api/family/student/${selectedFamilyId}/members/`
         );
         if (!response.ok) throw new Error("فشل تحميل الأعضاء");
         const data = await response.json();
@@ -105,7 +98,7 @@ const Members: React.FC = () => {
       }
     };
     fetchMembers();
-  }, [selectedFamilyId, token]);
+  }, [selectedFamilyId]);
 
   const getRoleClass = (role: string): string => {
     if (role === "أخ أكبر" || role === "أخت كبرى") return "leader";

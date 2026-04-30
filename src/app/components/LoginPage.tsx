@@ -1,11 +1,11 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import logo from "../assets/logo.png";
 import styles from "../Styles/components/LoginPage.module.css";
 import ForgotPasswordModal from "./ForgotPasswordModal";
-import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 interface LoginPageProps {
   onClose: () => void;
@@ -18,21 +18,21 @@ interface Dept { dept_id: number; dept_name: string; }
 const FAC_ROUTE_MAP: Record<number, string> = {
   6: "/FacLevel",                    // إدارة التكافل الاجتماعي
   4: "/Family-Faclevel/events",      // إدارة الأسر الطلابية و الاتحادات
-  1: "/Events-Faclevel",             // إدارة النشاط الثقافي و الفنى
-  2: "/Events-Faclevel",             // إدارة النشاط الاجتماعي
-  3: "/Events-Faclevel",             // إدارة النشاط الرياضي و الرحلات
-  5: "/Events-Faclevel",             // إدارة النشاط العلمى و التكنولوجي
-  7:"/Events-Faclevel"                 // إدارة الجوالة و الرحلات و المعسكرات   
+  1: "/Events-Faclevel/Home",             // إدارة النشاط الثقافي و الفنى
+  2: "/Events-Faclevel/Home",             // إدارة النشاط الاجتماعي
+  3: "/Events-Faclevel/Home",             // إدارة النشاط الرياضي و الرحلات
+  5: "/Events-Faclevel/Home",             // إدارة النشاط العلمى و التكنولوجي
+  7:"/Events-Faclevel/Home"                 // إدارة الجوالة و الرحلات و المعسكرات   
 };
 
 const UNI_ROUTE_MAP: Record<number, string> = {
   6: "/uni-level",                   // إدارة التكافل الاجتماعي
   4: "/uni-level-family",            // إدارة الأسر الطلابية و الاتحادات
-  3: "/uni-level-activities",        // إدارة النشاط الرياضي و الرحلات
-  1: "/uni-level-activities",        // إدارة النشاط الثقافي و الفنى
-  2: "/uni-level-activities",        // إدارة النشاط الاجتماعي
-  5: "/uni-level-activities",        // إدارة النشاط العلمى و التكنولوجي
-  7: "/uni-level-activities"         // إدارة الجوالة و الرحلات و المعسكرات
+  3: "/uni-level-activities/Home",        // إدارة النشاط الرياضي و الرحلات
+  1: "/uni-level-activities/Home",        // إدارة النشاط الثقافي و الفنى
+  2: "/uni-level-activities/Home",        // إدارة النشاط الاجتماعي
+  5: "/uni-level-activities/Home",        // إدارة النشاط العلمى و التكنولوجي
+  7: "/uni-level-activities/Home"         // إدارة الجوالة و الرحلات و المعسكرات
 };
 
 function getFirstRoute(
@@ -47,80 +47,16 @@ function getFirstRoute(
 }
 
 export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps) {
-  const router = useRouter();
+  const { showToast } = useToast();
 
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors]     = useState<Record<string, string>>({});
   const [loading, setLoading]   = useState(false);
-  const [notification, setNotification] = useState<string | null>(null);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-
-  useEffect(() => {
-  const access = localStorage.getItem("access");
-  const role = localStorage.getItem("role");
-  const departments = JSON.parse(localStorage.getItem("departments") || "[]");
-  const user = JSON.parse(localStorage.getItem("user") || "null");
-  const lastRoute = localStorage.getItem("lastRoute");
-
-  if (access && lastRoute) {
-    router.replace(lastRoute);
-    return;
-  }
-  if (!access || !user) return;
-
-  const userType = user.user_type;
-
-  if (userType === "student") {
-    router.replace("/Student");
-    return;
-  }
-
-  if (userType === "admin") {
-    const roleName = role?.trim();
-
-    let roleKey = "";
-
-    if (roleName === "مشرف النظام") roleKey = "super_admin";
-    else if (roleName === "مدير ادارة") roleKey = "uni_manager";
-    else if (roleName === "مسؤول كلية") roleKey = "fac_manager";
-    else if (roleName === "مدير كلية") roleKey = "fac_head";
-    else if (roleName === "مدير عام") roleKey = "General_admin";
-
-    if (roleKey === "super_admin") {
-      router.replace("/CreateAdmins");
-      return;
-    }
-
-    if (roleKey === "uni_manager") {
-      const route = getFirstRoute(departments, UNI_ROUTE_MAP);
-      router.replace(route ?? "/uni-level");
-      return;
-    }
-
-    if (roleKey === "fac_manager") {
-      const route = getFirstRoute(departments, FAC_ROUTE_MAP);
-      router.replace(route ?? "/FacLevel");
-      return;
-    }
-
-    if (roleKey === "fac_head") {
-      router.replace("/FacultyHead");
-      return;
-    }
-
-    if (roleKey === "General_admin") {
-      router.replace("/GeneralAdmin");
-      return;
-    }
-  }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, []);
-
-  const showNotification = (message: string, type: "success" | "warning" | "error") => {
-    setNotification(`${type}:${message}`);
-    setTimeout(() => setNotification(null), 3500);
-  };
+  
+  // Don't check cookies on mount - let middleware handle it
+  // This prevents redirect loops
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -131,127 +67,93 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!validate()) return;
+  setLoading(true);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
-    setLoading(true);
+  try {
+    const baseUrl = getBaseUrl();
+    // ✅ credentials:"include" so backend can Set-Cookie HttpOnly tokens
+    const res = await fetch(`${baseUrl}/api/auth/login/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+      credentials: "include",
+    });
 
-    try {
-      const baseUrl = getBaseUrl();
-      const res  = await authFetch(`${baseUrl}/api/auth/login/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
+    const data = await res.json();
 
-      if (!res.ok) {
-        showNotification("بريد إلكتروني خاطئ أو كلمة مرور خاطئة ❌", "error");
-        setLoading(false);
-        return;
-      }
-
-      // ── Map role → roleKey ───────────────────────────────────
-      let roleKey = "";
-      if (data.user_type === "admin") {
-        const role = data.role?.trim();
-        if      (role === "مشرف النظام")  roleKey = "super_admin";
-        else if (role === "مدير ادارة")   roleKey = "uni_manager";
-        else if (role === "مسؤول كلية")   roleKey = "fac_manager";
-        else if (role === "مدير كلية")    roleKey = "fac_head";
-        else if (role === "مدير عام")     roleKey = "General_admin";
-      }
-
-      // ── Persist tokens & user ────────────────────────────────
-      localStorage.setItem("access",  data.access);
-      localStorage.setItem("refresh", data.refresh);
-      localStorage.setItem("role",    data.role);
-      localStorage.setItem("name",    data.name);
-      localStorage.setItem("user", JSON.stringify({
-        name:         data.name,
-        role:         data.role,
-        faculty_name: data.faculty_name,
-        admin_id:     data.admin_id,
-        user_type:    data.user_type,
-      }));
-     localStorage.setItem("departments", JSON.stringify(data.departments));
-
-      // ── Save departments (fac_manager + uni_manager only) ─────
-      if (
-        (roleKey === "fac_manager" || roleKey === "uni_manager") &&
-        Array.isArray(data.departments) &&
-        data.departments.length > 0
-      ) {
-        localStorage.setItem("departments", JSON.stringify(data.departments));
-        localStorage.setItem("dept_ids",    JSON.stringify(data.dept_ids ?? []));
-      } else {
-        // Remove for all other roles — so Header shows all buttons
-        localStorage.removeItem("departments");
-        localStorage.removeItem("dept_ids");
-      }
-
-      if (data.user_type === "student") {
-        localStorage.setItem("student_id", data.student_id.toString());
-      } else {
-        localStorage.setItem("admin_id", data.admin_id.toString());
-      }
-
-      // ── Cookies ──────────────────────────────────────────────
-      document.cookie = `access=${data.access}; path=/; max-age=604800; SameSite=Lax`;
-      document.cookie = `refresh=${data.refresh}; path=/; max-age=604800; SameSite=Lax`;
-      document.cookie = `user_type=${data.user_type}; path=/; max-age=604800; SameSite=Lax`;
-      document.cookie = `roleKey=${roleKey}; path=/; max-age=604800; SameSite=Lax`;
-      const lastRoute = localStorage.getItem("lastRoute");
-
-      if (lastRoute) {
-        router.push(lastRoute);
-        return;
-      }
-      // ── Routing ──────────────────────────────────────────────
-      if (data.user_type === "admin") {
-        const depts: Dept[] = data.departments ?? [];
-
-        if (roleKey === "super_admin") {
-          router.push("/CreateAdmins");
-
-        } else if (roleKey === "uni_manager") {
-          // Route to first accessible uni-level dept, fallback to /uni-level
-          const route = getFirstRoute(depts, UNI_ROUTE_MAP);
-          router.push(route ?? "/uni-level");
-
-        } else if (roleKey === "fac_manager") {
-          // Route to first accessible fac-level dept, fallback to /FacLevel
-          const route = getFirstRoute(depts, FAC_ROUTE_MAP);
-          router.push(route ?? "/FacLevel");
-
-        } else if (roleKey === "fac_head") {
-          router.push("/FacultyHead");
-
-        } else if (roleKey === "General_admin") {
-          router.push("/GeneralAdmin");
-
-        } else {
-          console.warn("Unknown roleKey:", roleKey, "| raw role:", data.role);
-          showNotification("دور المستخدم غير معروف، تواصل مع الدعم", "error");
-        }
-
-      } else if (data.user_type === "student") {
-        router.push("/Student");
-      }
-
-    } catch (error) {
-      console.error(error);
-      showNotification("حدث خطأ أثناء تسجيل الدخول ❌", "error");
-    } finally {
-      setLoading(false);
+    if (!res.ok) {
+      showToast("بريد إلكتروني خاطئ أو كلمة مرور خاطئة ❌", "error");
+      return;
     }
-  };
+
+    // ── Map role → roleKey ───────────────────────────────────
+    let roleKey = "";
+    if (data.user_type === "admin") {
+      const role = data.role?.trim();
+      if      (role === "مشرف النظام") roleKey = "super_admin";
+      else if (role === "مدير ادارة")  roleKey = "uni_manager";
+      else if (role === "مسؤول كلية")  roleKey = "fac_manager";
+      else if (role === "مدير كلية")   roleKey = "fac_head";
+      else if (role === "مدير عام")    roleKey = "General_admin";
+    }
+
+    // ── Non-sensitive display/routing data in ONE cookie ────
+    // HttpOnly access+refresh are already set by the backend response
+    const sessionData = {
+      user_type:    data.user_type,
+      roleKey,
+      role:         data.role,
+      name:         data.name,
+      faculty_name: data.faculty_name ?? "",
+      admin_id:     data.admin_id ?? null,
+      student_id:   data.student_id ?? null,
+      departments:  data.departments ?? [],
+      dept_ids:     data.dept_ids ?? [],
+    };
+
+    // Middleware needs these as separate cookies (can't parse JSON in edge middleware easily)
+    // Set cookies with longer expiry
+    const cookieOpts = "path=/; max-age=604800; SameSite=Lax";
+    document.cookie = `user_type=${data.user_type}; ${cookieOpts}`;   // no encodeURIComponent
+    document.cookie = `roleKey=${roleKey}; ${cookieOpts}`;             // no encodeURIComponent
+    document.cookie = `session_meta=${encodeURIComponent(JSON.stringify(sessionData))}; ${cookieOpts}`; // only JSON needs encoding
+    
+    const depts: Dept[] = data.departments ?? [];
+    let destination = "/";
+    
+    if (data.user_type === "admin") {
+      if      (roleKey === "super_admin")   destination = "/CreateAdmins"; 
+      else if (roleKey === "uni_manager")   destination = getFirstRoute(depts, UNI_ROUTE_MAP) ?? "/uni-level";
+      else if (roleKey === "fac_manager")   destination = getFirstRoute(depts, FAC_ROUTE_MAP) ?? "/FacLevel";
+      else if (roleKey === "fac_head")      destination = "/FacultyHead";
+      else if (roleKey === "General_admin") destination = "/GeneralAdmin";
+      else {
+        showToast("دور المستخدم غير معروف، تواصل مع الدعم", "error");
+        return;
+      }
+    } else if (data.user_type === "student") {
+      destination = "/Student";
+    }
+    
+    // Cookies are set synchronously via document.cookie above.
+    // Use a hard navigate so the browser sends all cookies with the first request.
+    window.location.href = destination; 
+
+  } catch (error) {
+    console.error(error);
+    showToast("حدث خطأ أثناء تسجيل الدخول ❌", "error");
+  } finally {
+    setLoading(false);
+  }
+};
  // ======= Google Login Handler =======
   const handleGoogleLogin = async () => {
     try {
       // Step 1: Get the Google authorization URL from your backend
-      const initRes = await authFetch(
+      const initRes = await fetch(
         `${getBaseUrl()}/api/auth/google/init/`,
         {
           method: "GET",
@@ -262,7 +164,7 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
       const initData = await initRes.json();
       
       if (!initRes.ok) {
-        showNotification("فشل في الاتصال بـ Google ❌", "error");
+        showToast("فشل في الاتصال بـ Google ❌", "error");
         return;
       }
 
@@ -271,7 +173,7 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
 
     } catch (error) {
       console.error(error);
-      showNotification("خطأ في عملية تسجيل الدخول بـ Google ❌", "error");
+      showToast("خطأ في عملية تسجيل الدخول بـ Google ❌", "error");
     }
   };
 
@@ -284,15 +186,6 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
       </div>
 
       <h2 className={styles.loginTitle}>تسجيل الدخول</h2>
-
-      {notification && (
-        <div className={`${styles.notification} ${
-          notification.startsWith("success") ? styles.success :
-          notification.startsWith("warning") ? styles.warning : styles.error
-        }`}>
-          {notification.split(":")[1]}
-        </div>
-      )}
 
       <form onSubmit={handleLogin} className={styles.loginForm}>
         <input
@@ -350,7 +243,7 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
       {showForgotPassword && (
         <ForgotPasswordModal
           onClose={() => setShowForgotPassword(false)}
-          onSuccess={() => showNotification("تم تغيير كلمة المرور. سجّل الدخول بالكلمة الجديدة.", "success")}
+          onSuccess={() => showToast("تم تغيير كلمة المرور. سجّل الدخول بالكلمة الجديدة.", "success")}
         />
       )}
     </div>

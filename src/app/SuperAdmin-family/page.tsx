@@ -7,6 +7,7 @@ import Tabs from "././components/Tabs";
 import Filters from "././components/Filters";
 import FamiliesGrid from "././components/FamiliesGrid";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 export default function Page() {
   // ✅ Always start with "central" on SSR, then sync from localStorage after mount
@@ -21,12 +22,7 @@ export default function Page() {
   const [loadingFamilies, setLoadingFamilies] = useState(false);
   const [readyOnly, setReadyOnly] = useState<"all" | "true" | "false">("all");
 
-  // Notification state
-  const [notification, setNotification] = useState<{
-    show: boolean;
-    message: string;
-    type: "success" | "error";
-  }>({ show: false, message: "", type: "success" });
+  const { showToast } = useToast();
 
   // ✅ After mount: restore saved tab from localStorage (avoids SSR mismatch)
   useEffect(() => {
@@ -40,14 +36,6 @@ export default function Page() {
     if (!tabReady) return;
     localStorage.setItem("familiesActiveTab", activeTab);
   }, [activeTab, tabReady]);
-
-  // Show notification helper
-  const showNotification = (message: string, type: "success" | "error") => {
-    setNotification({ show: true, message, type });
-    setTimeout(() => {
-      setNotification({ show: false, message: "", type: "success" });
-    }, 2500);
-  };
 
   /* ===================== Stats ===================== */
   const stats = useMemo(() => {
@@ -147,13 +135,11 @@ export default function Page() {
   useEffect(() => {
     const fetchFaculties = async () => {
       try {
-        const token = localStorage.getItem("access");
         const baseUrl = getBaseUrl();
         const res = await authFetch(
           `${baseUrl}/api/family/faculties/`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
           }
@@ -165,7 +151,7 @@ export default function Page() {
         setFaculties([{ faculty_id: -1, name: "الكل" }, ...data]);
       } catch (error) {
         console.error("Error fetching faculties:", error);
-        showNotification("فشل في تحميل قائمة الكليات", "error");
+        showToast("فشل في تحميل قائمة الكليات", "error");
       }
     };
 
@@ -177,7 +163,6 @@ export default function Page() {
     const fetchFamilies = async () => {
       setLoadingFamilies(true);
       try {
-        const token = localStorage.getItem("access");
         const baseUrl = getBaseUrl();
         const params = new URLSearchParams();
 
@@ -193,7 +178,6 @@ export default function Page() {
           `${baseUrl}/api/family/super_dept/?${params.toString()}`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
           }
@@ -205,7 +189,7 @@ export default function Page() {
         setFamilies(data.map(mapFamilyFromApi));
       } catch (error) {
         console.error("Error fetching families:", error);
-        showNotification("فشل في تحميل بيانات الأسر", "error");
+        showToast("فشل في تحميل بيانات الأسر", "error");
         setFamilies([]);
       } finally {
         setLoadingFamilies(false);
@@ -252,12 +236,6 @@ export default function Page() {
   /* ===================== UI ===================== */
   return (
     <div className={styles.container}>
-      {/* Notification */}
-      {notification.show && (
-        <div className={`${styles.notification} ${styles[notification.type]}`}>
-          {notification.message}
-        </div>
-      )}
 
       <header className={styles.headerCard}>
         <div className={styles.titleWrapper}>

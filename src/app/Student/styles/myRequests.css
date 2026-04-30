@@ -453,8 +453,8 @@
 }
 
 .step-circle {
-  width: 34px;
-  height: 34px;
+  width: 33px;
+  height: 33px;
   border-radius: 50%;
   background: var(--border);
   display: flex;

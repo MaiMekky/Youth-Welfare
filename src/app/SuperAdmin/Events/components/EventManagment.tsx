@@ -176,9 +176,7 @@ export default function EventsPage() {
     const load = async () => {
       try {
         setLoading(true); setError(null);
-        const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
         const headers: HeadersInit = {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
           "Content-Type": "application/json",
         };
         const baseUrl = getBaseUrl();

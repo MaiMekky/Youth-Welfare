@@ -3,9 +3,10 @@
 import React, { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import "@/app/Styles/Sidebar.css";
-import { CalendarDays, Users, X, User } from "lucide-react";
+import { CalendarDays, Users, X, User, Home } from "lucide-react";
 import Image from "next/image";
 import logo from "@/app/assets/logo.png";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 
 // ✅ Add this interface
 interface SidebarProps {
@@ -20,8 +21,8 @@ export default function Sidebar({ isOpen = false, setIsOpen = () => {} }: Sideba
   const [userData, setUserData] = React.useState<{ name?: string; faculty_name?: string } | null>(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) { try { setUserData(JSON.parse(storedUser)); } catch {} }
+    const meta = getSessionMeta();
+    if (meta) setUserData({ name: meta.name, faculty_name: meta.faculty_name });
   }, []);
 
   // Close on outside click
@@ -90,6 +91,12 @@ export default function Sidebar({ isOpen = false, setIsOpen = () => {} }: Sideba
         </div>
 
         <nav className="nav">
+           <button
+            onClick={() => go("/Events-Faclevel/Home")}
+            className={pathname === "/Events-Faclevel/Home" ? "active" : ""}
+          >
+            <Home size={18} /><span>الرئيسية</span>
+          </button>
           <button
             onClick={() => go("/Events-Faclevel")}
             className={pathname === "/Events-Faclevel" ? "active" : ""}

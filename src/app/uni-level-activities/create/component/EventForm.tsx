@@ -5,6 +5,8 @@ import styles from "../CreateEvent.module.css";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowRight, Save } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 /** ================== API ================== */
 const API_URL = getBaseUrl();
 
@@ -46,54 +48,21 @@ type ManageEventPayload = {
   selected_facs: number[];
 };
 
-function getAccessToken(): string | null {
-  return (
-    localStorage.getItem("access") ||
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("token") ||
-    null
-  );
-}
-
-function getDeptFromToken(): number | null {
-  const token = getAccessToken();
-  if (!token) return null;
-  try {
-    const parts = token.split(".");
-    if (parts.length < 2) return null;
-    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
-    const payload = JSON.parse(atob(padded));
-    const departments = payload?.departments;
-    const deptId1 = Array.isArray(departments) ? departments?.[0]?.dept_id : undefined;
-    const deptIds = payload?.dept_ids;
-    const deptId2 = Array.isArray(deptIds) ? deptIds?.[0] : undefined;
-    const deptId3 = payload?.dept_id;
-    const deptId4 = payload?.dept;
-    const candidate = deptId1 ?? deptId2 ?? deptId3 ?? deptId4;
-    if (typeof candidate === "number") return candidate;
-    if (typeof candidate === "string") { const n = Number(candidate); return Number.isFinite(n) ? n : null; }
-    return null;
-  } catch { return null; }
+function getDeptFromCookie(): number | null {
+  const meta = getSessionMeta();
+  if (!meta?.dept_ids?.length) return null;
+  return meta.dept_ids[0] ?? null;
 }
 
 function getDepartments(): { dept_id: number; dept_name: string }[] {
-  try {
-    const raw = localStorage.getItem("departments");
-    if (!raw) return [];
-    return JSON.parse(raw);
-  } catch {
-    return [];
-  }
+  return getSessionMeta()?.departments ?? [];
 }
 async function apiFetch<T>(
   path: string,
   opts: RequestInit = {}
 ): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number; raw?: unknown }> {
-  const token = getAccessToken();
   const headers: Record<string, string> = { ...(opts.headers as Record<string, string>) };
   if (!headers["Content-Type"] && opts.body) headers["Content-Type"] = "application/json";
-  if (token) headers.Authorization = `Bearer ${token}`;
   try {
     const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
     const text = await res.text();
@@ -134,7 +103,6 @@ type FormState = {
 };
 
 type FormErrors = Partial<Record<keyof FormState | "selected_facs", string>>;
-type NotifType = "success" | "error" | "warning";
 
 export default function EventForm({
   mode,
@@ -145,16 +113,10 @@ export default function EventForm({
 }) {
   const router = useRouter();
   const params = useParams();
+  const { showToast } = useToast();
   const routeId = params?.id as string | undefined;
   const eventId = id ?? routeId;
   const isEditMode = mode === "edit" && !!eventId;
-
-  /** ✅ Notification */
-  const [notification, setNotification] = useState<{ message: string; type: NotifType } | null>(null);
-  const showNotification = (message: string, type: NotifType) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 2500);
-  };
 
   // ── Departments from localStorage (exactly like CreatePlanModal) ──
   const [departments, setDepartments] = useState<{ dept_id: number; dept_name: string }[]>([]);
@@ -170,7 +132,9 @@ export default function EventForm({
   const [selectedFacultyIds, setSelectedFacultyIds] = useState<number[]>([]);
   const allSelected = faculties.length > 0 && selectedFacultyIds.length === faculties.length;
   const someSelected = selectedFacultyIds.length > 0 && !allSelected;
-
+   // Add this state near the other useState declarations
+  const [originalForm, setOriginalForm] = useState<FormState | null>(null);
+  const [originalFacultyIds, setOriginalFacultyIds] = useState<number[]>([]);
   /** ===== Form ===== */
   const [form, setForm] = useState<FormState>({
     title: "",
@@ -235,52 +199,68 @@ export default function EventForm({
       setLoadingFacs(true);
       const res = await apiFetch<ApiFaculty[]>("/api/family/faculties/", { method: "GET" });
       setLoadingFacs(false);
-      if (!res.ok) { showNotification(res.message || "فشل تحميل الكليات", "error"); return; }
+      if (!res.ok) { showToast(res.message || "فشل تحميل الكليات", "error"); return; }
       const list = Array.isArray(res.data) ? res.data : [];
       setFaculties(list.map((f) => ({ id: f.faculty_id, name: f.name })));
     })();
   }, []);
 
   /** ===== Load event details for edit ===== */
-  useEffect(() => {
-    if (!isEditMode || !eventId) return;
-    (async () => {
-      setLoadingEvent(true);
-      const res = await apiFetch<ApiEventDetails>(`/api/event/get-events/${eventId}/`, { method: "GET" });
-      setLoadingEvent(false);
-      if (!res.ok) { showNotification(res.message || "فشل تحميل بيانات الفعالية", "error"); return; }
-      const e = res.data;
-      setForm((p) => ({
-        ...p,
-        title: e?.title ?? "",
-        st_date: e?.st_date ?? "",
-        end_date: e?.end_date ?? "",
-        location: e?.location ?? "",
-        s_limit: Number(e?.s_limit ?? 100),
-        cost: String(e?.cost ?? ""),
-        description: e?.description ?? "",
-        type: "خارجي",
-        restrictions: e?.restrictions ?? "",
-        reward: e?.reward ?? "",
-        resource: e?.resource ?? "",
-        imgs: e?.imgs ?? "",
-        dept: e?.dept ?? "",
-      }));
-      setSelectedFacultyIds(Array.isArray(e?.selected_facs) ? e.selected_facs : []);
-    })();
-  }, [isEditMode, eventId]);
+ useEffect(() => {
+  if (!isEditMode || !eventId) return;
+  (async () => {
+    setLoadingEvent(true);
+    const res = await apiFetch<ApiEventDetails>(`/api/event/get-events/${eventId}/`, { method: "GET" });
+    setLoadingEvent(false);
+    if (!res.ok) { showToast(res.message || "فشل تحميل بيانات الفعالية", "error"); return; }
+    const e = res.data;
 
+    const loaded: FormState = {
+      title: e?.title ?? "",
+      st_date: e?.st_date ?? "",
+      end_date: e?.end_date ?? "",
+      location: e?.location ?? "",
+      s_limit: Number(e?.s_limit ?? 100),
+      cost: String(e?.cost ?? ""),
+      description: e?.description ?? "",
+      type: "خارجي",
+      restrictions: e?.restrictions ?? "",
+      reward: e?.reward ?? "",
+      resource: e?.resource ?? "",
+      imgs: e?.imgs ?? "",
+      dept: e?.dept ?? "",
+    };
+
+    setForm(loaded);                    // ← populate the form fields
+    setOriginalForm(loaded);            // ← save original for comparison
+    setOriginalFacultyIds(Array.isArray(e?.selected_facs) ? e.selected_facs : []);
+    setSelectedFacultyIds(Array.isArray(e?.selected_facs) ? e.selected_facs : []);  // ← also populate checkboxes
+  })();
+}, [isEditMode, eventId]);
   /** ===== Submit ===== */
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const nextErrors = validate();
     setErrors(nextErrors);
+
+        // Add after validate() check, before getDeptFromToken()
+    if (isEditMode && originalForm) {
+      const formUnchanged =
+        JSON.stringify(form) === JSON.stringify(originalForm) &&
+        JSON.stringify([...selectedFacultyIds].sort()) === JSON.stringify([...originalFacultyIds].sort());
+
+      if (formUnchanged) {
+        showToast("برجاء التعديل أو إلغاء التعديل", "warning");
+        return;
+      }
+    }
     if (Object.keys(nextErrors).length) {
-      showNotification("⚠️   برجاء استكمال البيانات المطلوبة", "warning");
+      showToast("⚠️   برجاء استكمال البيانات المطلوبة", "warning");
       return;
     }
-    const dept = getDeptFromToken();
-    if (!dept) { showNotification("❌ لا يوجد رقم قسم في التوكن", "error"); return; }
+
+    const dept = getDeptFromCookie();
+    if (!dept) { showToast("❌ لا يوجد رقم قسم في بيانات الجلسة", "error"); return; }
 
     const payload: ManageEventPayload = {
       title: form.title.trim(),
@@ -306,29 +286,19 @@ export default function EventForm({
     if (isEditMode) {
       const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-events/${eventId}/`, { method: "PATCH", body: JSON.stringify(payload) });
       setSubmitting(false);
-      if (!res.ok) { showNotification(res.message || "❌ حصل خطأ أثناء تعديل الفعالية", "error"); return; }
-      showNotification("✅ تم تعديل الفعالية بنجاح", "success");
+      if (!res.ok) { showToast(res.message || "❌ حصل خطأ أثناء تعديل الفعالية", "error"); return; }
+      showToast("✅ تم تعديل الفعالية بنجاح", "success");
     } else {
       const res = await apiFetch<Record<string, unknown>>("/api/event/manage-events/", { method: "POST", body: JSON.stringify(payload) });
       setSubmitting(false);
-      if (!res.ok) { showNotification(res.message || "❌ حصل خطأ أثناء إنشاء الفعالية", "error"); return; }
-      showNotification("✅ تم إنشاء الفعالية بنجاح", "success");
+      if (!res.ok) { showToast(res.message || "❌ حصل خطأ أثناء إنشاء الفعالية", "error"); return; }
+      showToast("✅ تم إنشاء الفعالية بنجاح", "success");
     }
     router.push("/uni-level-activities");
   };
 
   return (
     <div className={styles.page}>
-      {/* ✅ Notification */}
-      {notification && (
-        <div className={`${styles.notification} ${
-          notification.type === "success" ? styles.success :
-          notification.type === "warning" ? styles.warning : styles.error
-        }`}>
-          {notification.message}
-        </div>
-      )}
-
       <div className={styles.container}>
         <header className={styles.header}>
           <div className={styles.headerText}>
@@ -371,30 +341,6 @@ export default function EventForm({
               </select>
               {errors.type && <div className={styles.errorText}>{errors.type}</div>}
             </div> */}
-
-            
-            <div className={styles.field}>
-              <label className={styles.label}>تاريخ البداية</label>
-              <input
-                className={`${styles.input} ${errors.st_date ? styles.inputError : ""}`}
-                type="date"
-                value={form.st_date}
-                onChange={(ev) => setField("st_date", ev.target.value)}
-              />
-              {errors.st_date && <div className={styles.errorText}>{errors.st_date}</div>}
-            </div>
-
-            <div className={styles.field}>
-              <label className={styles.label}>تاريخ النهاية</label>
-              <input
-                className={`${styles.input} ${errors.end_date ? styles.inputError : ""}`}
-                type="date"
-                value={form.end_date}
-                onChange={(ev) => setField("end_date", ev.target.value)}
-              />
-              {errors.end_date && <div className={styles.errorText}>{errors.end_date}</div>}
-            </div>
-
               <div className={styles.field}>
               <label className={styles.label}>القسم</label>
 
@@ -413,6 +359,30 @@ export default function EventForm({
               </select>
 
               {errors.dept && <div className={styles.errorText}>{errors.dept}</div>}
+            </div>
+            
+            <div className={styles.field}>
+              <label className={styles.label}>تاريخ البداية</label>
+              <input
+                className={`${styles.input} ${errors.st_date ? styles.inputError : ""}`}
+                type="date"
+                min={new Date().toISOString().split("T")[0]}
+                value={form.st_date}
+                onChange={(ev) => setField("st_date", ev.target.value)}
+              />
+              {errors.st_date && <div className={styles.errorText}>{errors.st_date}</div>}
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>تاريخ النهاية</label>
+              <input
+                className={`${styles.input} ${errors.end_date ? styles.inputError : ""}`}
+                type="date"
+                min={form.st_date || new Date().toISOString().split("T")[0]} 
+                value={form.end_date}
+                onChange={(ev) => setField("end_date", ev.target.value)}
+              />
+              {errors.end_date && <div className={styles.errorText}>{errors.end_date}</div>}
             </div>
             
             <div className={styles.field}>
@@ -483,7 +453,7 @@ export default function EventForm({
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label}>الوصف</label>
+            <label className={styles.label}>الوصف(اكتب قيمة الاشتراك ان وجد)</label>
             <textarea
               className={`${styles.textarea} ${errors.description ? styles.inputError : ""}`}
               placeholder="الوصف"

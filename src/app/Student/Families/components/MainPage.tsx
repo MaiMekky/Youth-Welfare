@@ -1,9 +1,8 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import '../styles/mainpage.css';
-import Toast from './Toast';
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
-
+import { useToast } from "@/app/context/ToastContext";
 interface ApiFamily {
   family_id: number;
   name: string;
@@ -70,22 +69,13 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
   const [loading, setLoading]                     = useState(true);
   const [error, setError]                         = useState<string | null>(null);
   const [joiningId, setJoiningId]                 = useState<number | null>(null);
-  const [toasts, setToasts]                       = useState<ToastNotification[]>([]);
   const [activeTab, setActiveTab]                 = useState<'accepted' | 'pending'>('accepted');
-
-  const token = typeof window !== 'undefined' ? localStorage.getItem('access') : null;
+  const { showToast } = useToast();
 
   const acceptedFamilies = joinedFamilies.filter(f => isAccepted(f.memberStatus));
   const pendingFamilies  = joinedFamilies.filter(f => !isAccepted(f.memberStatus));
 
-  /* ── toast ── */
-  const showToast = (message: string, type: 'success' | 'error' | 'info') => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, message, type }]);
-  };
-  const removeToast = (id: number) => setToasts(prev => prev.filter(t => t.id !== id));
-
-  /* ── mapper ── */
+  /* ====== MAPPER ====== */
   const mapToProgramFamily = (family: ApiFamily): ProgramFamily => ({
     id: family.family_id,
     title: family.name,
@@ -104,10 +94,10 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
 
   /* ── fetch ── */
   const fetchJoinedFamilies = async () => {
-    if (!token) throw new Error('غير مصرح');
-    const res = await authFetch(`${getBaseUrl()}/api/family/student/families/`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await authFetch(
+      `${getBaseUrl()}/api/family/student/families/`
+    );
+
     if (!res.ok) throw new Error('فشل تحميل الأسر الحالية');
     const data = await res.json();
     return extractArray(data)
@@ -116,10 +106,12 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
   };
 
   const fetchAvailableFamilies = async () => {
-    if (!token) throw new Error('غير مصرح');
-    const res = await authFetch(`${getBaseUrl()}/api/family/student/available/`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+
+
+    const res = await authFetch(
+      `${getBaseUrl()}/api/family/student/available/`
+    );
+
     if (!res.ok) throw new Error('فشل تحميل الأسر المتاحة');
     const data = await res.json();
     return extractArray(data).map((f: Record<string, unknown>) =>
@@ -129,13 +121,20 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
 
   /* ── join ── */
   const joinFamily = async (familyId: number) => {
-    if (!token) { showToast('غير مصرح. الرجاء تسجيل الدخول أولاً', 'error'); return; }
+
     try {
       setJoiningId(familyId);
-      const res = await authFetch(`${getBaseUrl()}/api/family/student/${familyId}/join/`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      });
+
+      const res = await authFetch(
+        `${getBaseUrl()}/api/family/student/${familyId}/join/`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
       if (!res.ok) {
         let msg = 'فشل الانضمام للأسرة';
         try { const err = await res.json(); msg = err.message || err.detail || msg; } catch {}
@@ -168,7 +167,6 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
 
   /* ── load ── */
   useEffect(() => {
-    if (!token) { setError('غير مصرح'); setLoading(false); return; }
     const loadData = async () => {
       try {
         setLoading(true);
@@ -211,13 +209,6 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
   ══════════════════════════════════════════ */
   return (
     <>
-      {/* Toast stack */}
-      <div className="toast-container">
-        {toasts.map(t => (
-          <Toast key={t.id} message={t.message} type={t.type} onClose={() => removeToast(t.id)} />
-        ))}
-      </div>
-
       <div dir="rtl" className="container">
 
         {/* ════════════════════════════════

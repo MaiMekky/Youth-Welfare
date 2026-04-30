@@ -141,26 +141,13 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
   const [deptMap, setDeptMap] = useState<Record<number, string>>({});
   const [selectedFamilyId, setSelectedFamilyId] = useState<number | null>(null);
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
-
   // First useEffect: Fetch family ID from families API
   useEffect(() => {
-    if (!token) {
-      setError("غير مصرح");
-      setLoading(false);
-      return;
-    }
-
     const fetchFamilyId = async () => {
       try {
         const baseUrl = getBaseUrl();
         const res = await authFetch(
-          `${baseUrl}/api/family/student/families/`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          `${baseUrl}/api/family/student/families/`
         );
 
         if (!res.ok) throw new Error("فشل تحميل قائمة الأسر");
@@ -202,18 +189,14 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
     };
 
     fetchFamilyId();
-  }, [token]);
+  }, []);
 
   // Fetch departments
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
-        if (!token) return;
-
         const baseUrl = getBaseUrl();
-        const response = await authFetch(`${baseUrl}/api/family/departments/`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await authFetch(`${baseUrl}/api/family/departments/`);
 
         if (response.ok) {
           const data = await response.json();
@@ -240,11 +223,11 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
     };
 
     fetchDepartments();
-  }, [token]);
+  }, []);
 
   // Fetch activities using the selected family ID
   useEffect(() => {
-    if (!selectedFamilyId || !token) return;
+    if (!selectedFamilyId) return;
 
     const fetchActivities = async () => {
       try {
@@ -257,7 +240,6 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
         const response = await authFetch(endpoint, {
           method: 'GET',
           headers: { 
-            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         });

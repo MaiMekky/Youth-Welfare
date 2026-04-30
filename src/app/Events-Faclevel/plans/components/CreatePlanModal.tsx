@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import styles from "../styles/PlansPage.module.css";
 import { X, Save } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 
 const API_URL = `${getBaseUrl()}/api`;
 
@@ -11,8 +13,6 @@ type InitialPlan = { id: number; name: string; term: number; dept?: number } | n
 
 type FormState = { name: string; term: number; dept: number };
 type FormErrors = Partial<Record<keyof FormState, string>>;
-
-type ToastType = "success" | "error" | "warning";
 
 export default function CreatePlanModal({
   open,
@@ -26,68 +26,49 @@ export default function CreatePlanModal({
   onSaved: () => void;
 }) {
   const isEdit = !!initialPlan;
+  const { showToast } = useToast();
 
   const [form, setForm] = useState<FormState>({ name: "", term: 1, dept: 0 });
   const [errors, setErrors] = useState<FormErrors>({});
   const [saving, setSaving] = useState(false);
 
   const [departments, setDepartments] = useState<Record<string, unknown>[]>([]);
-
-  function getFacultyIdFromToken() {
-  try {
-    const token = localStorage.getItem("access");
-    if (!token) return null;
-
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload?.faculty_id ?? null;
-  } catch {
-    return null;
+  const originalForm = useRef<FormState | null>(null);
+  function getFacultyIdFromCookie() {
+    return getSessionMeta()?.admin_id ?? null;
   }
-}
 
-  /* ===================== Toast (same style) ===================== */
-  const [toast, setToast] = useState<{ show: boolean; message: string; type: ToastType }>({
-    show: false,
-    message: "",
-    type: "success",
-  });
+const closeAndReset = useCallback(() => {
+  setForm({ name: "", term: 1, dept: 0 });
+  setErrors({});
+  setSaving(false);
+  originalForm.current = null;  // ← add this
+  onClose();
+}, [onClose]);
 
-  const showToast = (message: string, type: ToastType) => {
-    setToast({ show: true, message, type });
-    window.setTimeout(() => setToast({ show: false, message: "", type: "success" }), 2500);
-  };
-
-  const closeAndReset = useCallback(() => {
-    setForm({ name: "", term: 1, dept: 0 });
-    setErrors({});
-    setSaving(false);
-    onClose();
-  }, [onClose]);
-
-  /* ===================== GET DEPARTMENTS FROM TOKEN ===================== */
+  /* ===================== GET DEPARTMENTS FROM COOKIE ===================== */
   useEffect(() => {
-    const stored = localStorage.getItem("departments");
-    if (stored) {
-      try {
-        setDepartments(JSON.parse(stored));
-      } catch {}
-    }
+    const meta = getSessionMeta();
+    if (meta?.departments?.length) setDepartments(meta.departments as Record<string, unknown>[]);
   }, []);
 
-  useEffect(() => {
-    if (!open) return;
+useEffect(() => {
+  if (!open) return;
 
-    if (initialPlan) {
-      setForm({
-        name: initialPlan.name ?? "",
-        term: initialPlan.term ?? 1,
-        dept: initialPlan.dept ?? 0,
-      });
-    } else {
-      setForm({ name: "", term: 1, dept: 0 });
-    }
-    setErrors({});
-  }, [open, initialPlan]);
+  if (initialPlan) {
+    const loaded: FormState = {
+      name: initialPlan.name ?? "",
+      term: initialPlan.term ?? 1,
+      dept: initialPlan.dept ?? 0,
+    };
+    setForm(loaded);
+    originalForm.current = loaded;  // ← add this
+  } else {
+    setForm({ name: "", term: 1, dept: 0 });
+    originalForm.current = null;    // ← reset for create mode
+  }
+  setErrors({});
+}, [open, initialPlan]);
 
   // ESC
   useEffect(() => {
@@ -127,19 +108,29 @@ export default function CreatePlanModal({
     const nextErrors = validate();
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
-      showToast("❌ مراجعة الحقول المطلوبة", "error");
+      showToast("❌ برجاء استكمال الحقول المطلوبة", "error");
       return;
     }
-
+     
+    // ── No-change guard (edit mode only) ──────────────────────────
+    if (isEdit && originalForm.current) {
+      const keys = Object.keys(form) as (keyof FormState)[];
+      const hasChanged = keys.some(
+        (k) => String(form[k]).trim() !== String(originalForm.current![k]).trim()
+      );
+      if (!hasChanged) {
+        showToast("برجاء التعديل أو إلغاء التعديل ⚠️", "warning");
+        return;
+      }
+    }
     try {
       setSaving(true);
 
-      const token = localStorage.getItem("access");
-      if (!token) {
-        showToast("❌ مفيش access token. برجاء تسجيل الدخول مرة اخري.", "error");
-        return;
-      }
-   const facultyId = getFacultyIdFromToken();
+      // if (!token) {
+      //   showToast("❌ مفيش access token. برجاء تسجيل الدخول مرة اخري.", "error");
+      //   return;
+      // }
+   const facultyId = getFacultyIdFromCookie();
       const payload = {
         name: form.name.trim(),
         term: Number(form.term),
@@ -156,7 +147,6 @@ export default function CreatePlanModal({
       const res = await authFetch(url, {
         method,
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
           Accept: "application/json",
         },
@@ -194,15 +184,7 @@ export default function CreatePlanModal({
   if (!open) return null;
 
   return (
-    <>
-      {toast.show && (
-        <div className={`toast ${toast.type === "success" ? "success" : toast.type === "error" ? "error" : "warning"}`}>
-          <div className="msg">{toast.message}</div>
-          <div className="bar" />
-        </div>
-      )}
-
-      <div className={styles.modalOverlay} onMouseDown={closeAndReset}>
+    <div className={styles.modalOverlay} onMouseDown={closeAndReset}>
         <div className={styles.modal} onMouseDown={(e) => e.stopPropagation()}>
           <div className={styles.modalHeader}>
             <div className={styles.modalHeadText}>
@@ -274,65 +256,5 @@ export default function CreatePlanModal({
           </form>
         </div>
       </div>
-
-      <style jsx>{`
-        .toast {
-          position: fixed;
-          top: 20px;
-          right: 25px;
-          width: 280px;
-          background: #fff;
-          padding: 14px 16px;
-          border-radius: 10px;
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-          font-weight: 700;
-          color: #333;
-          z-index: 100000;
-          animation: fadeIn 0.4s ease forwards;
-          overflow: hidden;
-        }
-        .toast.success {
-          border-right: 6px solid #4caf50;
-        }
-        .toast.error {
-          border-right: 6px solid #f44336;
-        }
-        .toast.warning {
-          border-right: 6px solid #f59e0b;
-        }
-        .msg {
-          text-align: right;
-          line-height: 1.35;
-        }
-        .bar {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          height: 4px;
-          width: 0%;
-          background-color: #d4a017;
-          animation: progress 2.5s linear forwards;
-          transform-origin: left;
-        }
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateX(40px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        @keyframes progress {
-          from {
-            width: 0%;
-          }
-          to {
-            width: 100%;
-          }
-        }
-      `}</style>
-    </>
-  );
+    );
 }

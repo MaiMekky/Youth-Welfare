@@ -13,8 +13,8 @@ import {
   Lightbulb,
   Briefcase,
 } from "lucide-react";
-import Footer from "@/app/FacLevel/components/Footer";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { useToast } from "@/app/context/ToastContext";
 
 const API_URL = `${getBaseUrl()}`;
 
@@ -36,30 +36,16 @@ type FormState = {
 };
 
 type FormErrors = Partial<Record<keyof FormState | "selected_facs", string>>;
-/* ===================== Toast (same style) ===================== */
-type ToastType = "success" | "error" | "warning";
-
-function getAccessToken(): string | null {
-  return (
-    localStorage.getItem("access") ||
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("token") ||
-    null
-  );
-}
-
 
 
 async function apiFetch<T>(
   path: string,
   opts: RequestInit = {}
 ): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number; raw?: Record<string, unknown> }> {
-  const token = getAccessToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(opts.headers as Record<string, string>),
   };
-  if (token) headers.Authorization = `Bearer ${token}`;
   try {
     const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
     const text = await res.text();
@@ -109,50 +95,39 @@ const [form, setForm] = useState<FormState>({
   const [touched, setTouched] = useState<Partial<Record<keyof FormState, boolean>>>({});
   const [submitting, setSubmitting] = useState(false);
 
-  /* ===================== Toast State ===================== */
-  const [toast, setToast] = useState<{ show: boolean; message: string; type: ToastType }>({
-    show: false,
-    message: "",
-    type: "success",
-  });
-
-  const showToast = (message: string, type: ToastType) => {
-    setToast({ show: true, message, type });
-    window.setTimeout(() => {
-      setToast({ show: false, message: "", type: "success" });
-    }, 2500);
-  };
+  const { showToast } = useToast();
 
   const setField = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((p) => ({ ...p, [key]: value }));
     setErrors((p) => ({ ...p, [key]: undefined }));
   };
+const validate = useMemo(
+  () => (data: FormState): FormErrors => {
+    const next: FormErrors = {};
+    const today = new Date().toISOString().split("T")[0];
 
-  const validate = useMemo(
-    () => (data: FormState): FormErrors => {
-      const next: FormErrors = {};
-      if (!data.title.trim()) next.title = "العنوان مطلوب";
-      if (!data.location.trim()) next.location = "المكان مطلوب";
-      if (!data.st_date.trim()) next.st_date = "تاريخ البداية مطلوب";
-      if (!data.end_date.trim()) next.end_date = "تاريخ النهاية مطلوب";
-      if (!data.cost.trim()) next.cost = "التكلفة مطلوبة";
-      if (!data.type.trim()) next.type = "نوع النشاط مطلوب";
-      // if (isConvert && !data.dept_id) {
-      //   next.dept_id = "الإدارة مطلوبة";
-      // }
-      const costNum = Number(String(data.cost).replaceAll(",", "").trim());
-      if (data.cost.trim() && (Number.isNaN(costNum) || costNum < 0)) next.cost = "برجاء ادخال تكلفة صحيحة";
-      if (data.s_limit.trim()) {
-        const limitNum = Number(String(data.s_limit).replaceAll(",", "").trim());
-        if (!Number.isInteger(limitNum) || limitNum < 0) next.s_limit = "برجاء ادخال رقم صحيح 0 أو أكبر";
-      }
-      if (data.st_date && data.end_date && data.st_date > data.end_date) {
-        next.end_date = "تاريخ النهاية لازم يكون بعد/يساوي تاريخ البداية";
-      }
-      return next;
-    },
-    []
-  );
+    if (!data.title.trim()) next.title = "العنوان مطلوب";
+    if (!data.location.trim()) next.location = "المكان مطلوب";
+    if (!data.st_date.trim()) next.st_date = "تاريخ البداية مطلوب";
+    else if (data.st_date < today) next.st_date = "تاريخ البداية لا يمكن أن يكون في الماضي";
+    if (!data.end_date.trim()) next.end_date = "تاريخ النهاية مطلوب";
+    else if (data.end_date < today) next.end_date = "تاريخ النهاية لا يمكن أن يكون في الماضي";
+    if (!data.cost.trim()) next.cost = "التكلفة مطلوبة";
+    // if (!data.type.trim()) next.type = "نوع النشاط مطلوب";
+
+    const costNum = Number(String(data.cost).replaceAll(",", "").trim());
+    if (data.cost.trim() && (Number.isNaN(costNum) || costNum < 0)) next.cost = "برجاء ادخال تكلفة صحيحة";
+    if (data.s_limit.trim()) {
+      const limitNum = Number(String(data.s_limit).replaceAll(",", "").trim());
+      if (!Number.isInteger(limitNum) || limitNum < 0) next.s_limit = "برجاء ادخال رقم صحيح 0 أو أكبر";
+    }
+    if (data.st_date && data.end_date && data.st_date > data.end_date) {
+      next.end_date = "تاريخ النهاية لازم يكون بعد/يساوي تاريخ البداية";
+    }
+    return next;
+  },
+  []
+);
 
   const onBlur = (k: keyof FormState) => {
     setTouched((p) => ({ ...p, [k]: true }));
@@ -162,7 +137,7 @@ const [form, setForm] = useState<FormState>({
 
   const onCancel = () => {
     sessionStorage.removeItem("convert_proposed_payload");
-    router.push('/Events-Faclevel/plans');
+    router.push('/Events-Faclevel/plans/');
   };
 
   const touchAll = () => {
@@ -190,14 +165,17 @@ const [form, setForm] = useState<FormState>({
         //   showToast("⚠️ برجاء ملء الحقول المطلوبة", "warning");
         //   return;
         // }
-
+          if (Object.keys(nextErrors).length) {
+    showToast("برجاء استكمال البيانات المطلوبة ⚠️", "warning");
+        return;
+      }
         setSubmitting(true);
 
       if (!isConvert) {
 
       const payload = {
         title: form.title.trim(),
-        type: form.type.trim(),
+        type: "داخلي", 
         location: form.location.trim(),
         st_date: form.st_date,
         end_date: form.end_date,
@@ -216,10 +194,15 @@ const [form, setForm] = useState<FormState>({
 
       setSubmitting(false);
 
-      if (!res.ok) {
+    if (!res.ok) {
+      if (res.status === 500) {
+        showToast("حدث خطأ غير متوقع ❌", "error");
+      } else {
         showToast(`❌ ${res.message}`, "error");
-        return;
       }
+      return;
+    }
+
 
       showToast("✅ تم إنشاء فعالية مقترحة بنجاح", "success");
 
@@ -237,7 +220,7 @@ const [form, setForm] = useState<FormState>({
         event_id: eventId,
         title: form.title.trim(),
         description: form.description.trim(),
-        type: form.type,
+        type: "داخلي",
         st_date: form.st_date,
         end_date: form.end_date,
         location: form.location.trim(),
@@ -256,7 +239,14 @@ const [form, setForm] = useState<FormState>({
       }
     );
     setSubmitting(false);
-    if (!res2.ok) { console.error("خطأ إضافة فعالية للخطة:", res2); showToast(`❌ ${res2.message}`, "error"); return; }
+     if (!res2.ok) {
+      if (res2.status === 500) {
+        showToast("حدث خطأ غير متوقع ❌", "error");
+      } else {
+        showToast(`❌ ${res2.message}`, "error");
+      }
+      return; 
+    } 
     sessionStorage.setItem(`converted_${planId}_${eventId}`, "1");
     sessionStorage.removeItem("convert_proposed_payload");
     showToast("✅ تم تحويل الفعالية وإضافتها للخطة", "success");
@@ -289,7 +279,7 @@ const [form, setForm] = useState<FormState>({
       end_date: (fallbackRow?.end_date as string) ?? "",
       cost: String(fallbackRow?.cost ?? ""),
       s_limit: String(fallbackRow?.s_limit ?? ""),
-      type: (fallbackRow?.type as string) ?? "",
+      type: (fallbackRow?.type as string) ?? "داخلي",
       restrictions: (fallbackRow?.restrictions as string) ?? "",
       reward: (fallbackRow?.reward as string) ?? "",
       resource: (fallbackRow?.resource as string) ?? "",
@@ -313,7 +303,7 @@ const [form, setForm] = useState<FormState>({
         end_date: (e?.end_date as string) ?? "",
         cost: (e?.cost as string) ?? "",
         s_limit: String(e?.s_limit ?? ""),
-        type: (e?.type as string) ?? "",
+        type: (e?.type as string) ?? "داخلي",
         restrictions: (e?.restrictions as string) ?? "",
         reward: (e?.reward as string) ?? "",
         resource: (e?.resource as string) ?? "",
@@ -335,13 +325,6 @@ const [form, setForm] = useState<FormState>({
 
   return (
     <>
-      {/* ✅ Toast */}
-      {toast.show && (
-        <div className={`${styles.toast} ${styles[`toast_${toast.type}`]}`}>
-          {toast.message}
-        </div>
-      )}
-
       <div className={styles.page}>
         <div className={styles.container}>
           <div className={styles.topBar}>
@@ -351,7 +334,7 @@ const [form, setForm] = useState<FormState>({
                 {isConvert ? "يتم تحميل البيانات من الفعالية المقترحة ويمكن تعديلها" : "املئي البيانات الأساسية للفعالية"}
               </p>
             </div>
-            <button className={styles.backBtn} onClick={() => router.push('/Events-Faclevel/plans')} type="button">
+            <button className={styles.backBtn} onClick={() => router.push('/Events-Faclevel/plans/' + planId + '/')} type="button">
               <ArrowRight size={18} /> العودة للخطة
             </button>
           </div>
@@ -464,7 +447,7 @@ const [form, setForm] = useState<FormState>({
                 </div>
 
                 {/* ── نوع النشاط — from localStorage departments ── */}
-         <div className={styles.field}>
+         {/* <div className={styles.field}>
           <label className={styles.label}>نوع النشاط</label>
 
           <select
@@ -483,7 +466,7 @@ const [form, setForm] = useState<FormState>({
           {touched.type && errors.type && (
             <div className={styles.errorText}>{errors.type}</div>
           )}
-        </div>
+        </div> */}
 
         {/* {isConvert && (
           <div className={styles.field}>
@@ -543,7 +526,7 @@ const [form, setForm] = useState<FormState>({
               )}
                {isConvert && (
                 <div className={styles.field} style={{ gridColumn: "1 / -1" }}>
-                  <label className={styles.label}>الوصف</label>
+                  <label className={styles.label}>الوصف(اكتب قيمة الاشتراك ان وجد)</label>
                   <textarea
                     className={styles.input}
                     placeholder="اكتب وصف مختصر"
@@ -567,7 +550,6 @@ const [form, setForm] = useState<FormState>({
             </form>
           </section>
         </div>
-        <Footer />
       </div>
     </>
   );

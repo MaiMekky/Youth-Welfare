@@ -4,8 +4,8 @@
    DESIGN TOKENS
 ══════════════════════════════════════════ */
 :root {
-  --navy:          #1a2744;
-  --navy-mid:      #243358;
+  --navy:          #1E3A5F;
+  --navy-mid:      #2D5F8A;
   --navy-light:    #2e4070;
   --gold:          #c9972a;
   --gold-bright:   #e0aa35;
@@ -14,7 +14,7 @@
   --white:         #ffffff;
   --surface:       #f5f7fc;
   --border:        #cdd3e8;
-  --text:          #1a2744;
+  --text:          #1E3A5F;
   --text-muted:    #6b7a99;
   --error:         #d93025;
   --error-bg:      #fdf2f1;
@@ -56,79 +56,66 @@
    WIZARD PROGRESS HEADER
    — identical to CreateFamForm's cf-progress-header
 ══════════════════════════════════════════ */
-.cf-progress-header {
-  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
-  padding: 24px 48px 0;
+.cf-page-banner {
+  background: linear-gradient(140deg, var(--navy) 0%, var(--navy-mid) 100%);
+  padding: 28px 48px 24px;
+  text-align: center;
   position: relative;
   flex-shrink: 0;
+  margin: 20px 24px 0; 
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
 }
 
-/* gold top accent stripe */
-.cf-progress-header::before {
+/* .cf-page-banner::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 3px;
   background: linear-gradient(90deg, var(--gold), var(--gold-bright), var(--gold));
-}
+} */
 
-/* top row: back | title | step count */
-.cf-progress-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-  gap: 12px;
-}
-
-.cf-back-page {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: rgba(255, 255, 255, 0.75);
-  padding: 7px 13px;
-  border-radius: var(--radius-sm);
-  font-family: 'Cairo', sans-serif;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition);
-  white-space: nowrap;
-  flex-shrink: 0;
-  text-decoration: none;
-}
-.cf-back-page:hover { background: rgba(255, 255, 255, 0.15); color: #fff; }
-
-.cf-wizard-title {
-  font-size: 1.2rem;
+.cf-page-banner-title {
+  font-size: 1.6rem;
   font-weight: 800;
   color: #fff;
-  margin: 0;
-  text-align: center;
-  flex: 1;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.18);
+  margin: 0 0 6px;
 }
 
-.cf-step-count {
+.cf-page-banner-breadcrumb {
   font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--gold-bright);
-  white-space: nowrap;
-  background: rgba(201, 151, 42, 0.15);
-  padding: 4px 10px;
-  border-radius: 20px;
-  flex-shrink: 0;
+  color: rgba(255,255,255,0.55);
+  font-weight: 500;
 }
+
+/* ══════════════════════════════════════════
+   WIZARD PROGRESS HEADER  (white card — matches image)
+══════════════════════════════════════════ */
+.cf-progress-header {
+  background: #fff;
+  padding: 14px 20px 20px; 
+  border-bottom: 1.5px solid var(--border);
+  flex-shrink: 0;
+  box-shadow: 0 2px 10px rgba(26,39,68,0.05);
+  margin: 0px 24px 0;
+  border-bottom-right-radius: 16px;
+  border-bottom-left-radius: 16px;
+  position: relative;
+}
+
+/* Remove the gold top stripe — no longer needed */
+.cf-progress-header::before { display: none; }
+
+/* Hide the top row entirely (back btn + title + count moved to banner) */
+.cf-progress-top { display: none; }
 
 /* ── Step indicator row ── */
 .cf-steps {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
   gap: 0;
+  padding: 0 16px;
 }
 
 .cf-step-indicator {
@@ -139,86 +126,97 @@
   flex-shrink: 0;
 }
 
-/* circle / bubble */
 .cf-step-circle {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 0.85rem;
+  font-weight: 800;
   transition: all var(--transition);
-  border: 2px solid rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.45);
-  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid var(--border);
+  color: var(--text-muted);
+  background: var(--surface);
   cursor: pointer;
   font-family: 'Cairo', sans-serif;
 }
+
 .cf-step-circle:hover {
-  border-color: var(--gold-bright);
-  color: var(--gold-bright);
-  background: rgba(201, 151, 42, 0.1);
+  border-color: var(--gold);
+  color: var(--gold);
 }
 
 .cf-step-active .cf-step-circle {
   background: var(--gold);
   border-color: var(--gold);
   color: var(--navy);
-  box-shadow: 0 0 0 4px rgba(201, 151, 42, 0.25);
+  box-shadow: 0 0 0 4px rgba(201, 151, 42, 0.2);
+  font-weight: 900;
 }
 
 .cf-step-done .cf-step-circle {
-  background: rgba(201, 151, 42, 0.2);
+  background: var(--surface);
   border-color: var(--gold);
-  color: var(--gold-bright);
+  color: var(--gold);
 }
 
-/* label under circle */
+.cf-step-pending .cf-step-circle {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
 .cf-step-label {
   font-size: 0.72rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--text-muted);
   white-space: nowrap;
   transition: color var(--transition);
   text-align: center;
 }
-.cf-step-active .cf-step-label { color: var(--gold-bright); font-weight: 700; }
-.cf-step-done   .cf-step-label { color: rgba(255, 255, 255, 0.7); }
+.cf-step-active .cf-step-label { color: var(--gold); font-weight: 700; }
+.cf-step-done   .cf-step-label { color: var(--navy); }
 
-/* connector line between bubbles */
+/* connector line */
 .cf-step-line {
   flex: 1;
   height: 2px;
-  background: rgba(255, 255, 255, 0.1);
-  margin: 0 6px;
-  margin-bottom: 22px; /* aligns with center of bubble */
+  background: var(--border);
+  margin: 0 0 22px 0;        /* ← no side margin, only bottom offset */
   transition: background var(--transition);
-  min-width: 40px;
+  min-width: 60px;            /* ← was 120px, too wide */
+  max-width: 160px;
 }
 .cf-line-done { background: var(--gold); }
 
-/* gold fill progress strip at bottom of header */
-.cf-progress-bar {
-  height: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  margin: 0 -48px;
-}
-.cf-progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--gold), var(--gold-bright));
-  transition: width 0.4s ease;
-  border-radius: 0 2px 2px 0;
-}
+/* hide progress bar strip (not in image design) */
+.cf-progress-bar { display: none; }
 
+/* step counter pill — hidden (moved to banner) */
+.cf-step-count {
+  display: flex;
+  align-items: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  padding: 3px 10px;
+  border-radius: 20px;
+  width: fit-content;
+  position: absolute;      
+  bottom: 55px;      
+  left: 48px;                
+}
 /* ══════════════════════════════════════════
    BODY / FORM CONTAINER
 ══════════════════════════════════════════ */
 .member-form-container {
   max-width: 100%;
   width: 100%;
-  padding: 36px 48px 60px;
+  padding: 36px 24px 60px;
   display: flex;
   flex-direction: column;
   gap: 24px;

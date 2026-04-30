@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Search, Wallet, Users, FileText } from "luci
 import Footer from "../FacLevel/components/Footer";
 
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 
 interface StudentType {
   name: string;
@@ -25,8 +26,8 @@ export default function FacultyReport() {
   const [academicYear, setAcademicYear] = useState("");
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) setUserData(JSON.parse(storedUser));
+    const meta = getSessionMeta();
+    if (meta) setUserData({ faculty_name: meta.faculty_name, name: meta.name });
   }, []);
 
 useEffect(() => {

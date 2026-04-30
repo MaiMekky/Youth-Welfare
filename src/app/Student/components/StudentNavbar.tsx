@@ -68,6 +68,14 @@ const IconLogout = () => (
   </svg>
 );
 
+/* ── NEW: Scouts Icon ───────────────────────────────────────── */
+const IconScouts = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <path d="M12 2L8 7H4l2 5-4 5h6l4 5 4-5h6l-4-5 2-5h-4L12 2z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <circle cx="12" cy="12" r="2.5" stroke="currentColor" strokeWidth="1.6"/>
+  </svg>
+);
+
 /* ── Component ──────────────────────────────────────────────── */
 const StudentNavbar: React.FC = () => {
   const [mobileOpen, setMobileOpen]         = useState(false);
@@ -106,6 +114,7 @@ const StudentNavbar: React.FC = () => {
     { key: "home",       label: "أنشطتي",            icon: <IconHome />,       href: "/Student/MainPage"   },
     { key: "activities", label: "الأنشطة",            icon: <IconActivities />, href: "/Student/Activities" },
     { key: "families",   label: "الأسر الطلابية",     icon: <IconFamily />,     href: "/Student/Families"   },
+    { key: "scouts",     label: "الجوالة",             icon: <IconScouts />,     href: "/Student/Scouts"     }, // ← NEW
     { key: "takafol",    label: "التكافل الاجتماعي",  icon: <IconTakafol />,    href: "/Student/takafol"    },
     { key: "profile",    label: "ملفي الشخصي",        icon: <IconProfile />,    href: "/Student/profile"    },
   ];

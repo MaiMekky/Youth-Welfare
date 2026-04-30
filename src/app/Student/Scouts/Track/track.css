@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; }
+a { color: inherit; text-decoration: none; }
+
+/* ── Input focus ring ── */
+input:focus {
+  outline: none;
+  border-color: #C49B3A !important;
+  box-shadow: 0 0 0 3px rgba(196,155,58,.15) !important;
+}
+
+/* ── Refresh button hover ── */
+button[data-refresh]:hover {
+  background: #D9E8F5 !important;
+}
+
+/* ── Request card hover ── */
+[data-request-card]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 18px rgba(30,58,95,.14) !important;
+}
+
+/* ── Legend stage cards hover ── */
+[data-stage-card]:hover {
+  transform: translateY(-3px);
+}
+
+/* ══════════════════ RESPONSIVE ════════════════════════════ */
+@media (max-width: 1024px) {
+  [data-legend-grid] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 768px) {
+  [data-hero] {
+    padding: 24px 20px !important;
+    border-radius: 12px 12px 0 0 !important;
+  }
+  [data-body] {
+    padding: 20px 20px !important;
+  }
+  [data-info-grid] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  [data-timeline] {
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+  [data-search-row] {
+    flex-direction: column !important;
+  }
+  [data-search-row] button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+@media (max-width: 480px) {
+  [data-body] {
+    padding: 16px 14px !important;
+  }
+  [data-info-grid] {
+    grid-template-columns: 1fr !important;
+  }
+  [data-card-header] {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  [data-status-badge] {
+    align-self: flex-start !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,278 @@
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto;
+  direction: rtl;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Cairo', sans-serif;
+  direction: rtl;
+}
+
+.table thead {
+  background: linear-gradient(140deg, #F8FAFC, #F1F5F9);
+  border-bottom: 2px solid #E2ECF5;
+}
+
+.table thead th {
+  padding: 16px 18px;
+  text-align: right;
+  font-size: 14px;
+  font-weight: 800;
+  color: #1E3A5F;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid #F1F5F9;
+  transition: background 200ms ease;
+}
+
+.table tbody tr:hover {
+  background: #F8FAFC;
+}
+
+.table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.table tbody td {
+  padding: 18px 18px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #334155;
+  vertical-align: middle;
+}
+
+/* ── Clan Name ── */
+.clanName {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.clanIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+  border: 1.5px solid #BFDBFE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1E40AF;
+  flex-shrink: 0;
+}
+
+/* ── Faculty Name ── */
+.facultyName {
+  color: #64748B;
+  font-weight: 600;
+}
+
+/* ── Status Badges ── */
+.badgeActive,
+.badgeInactive {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.badgeActive {
+  background: #ECFDF5;
+  color: #065F46;
+  border: 1.5px solid #A7F3D0;
+}
+
+.badgeInactive {
+  background: #FEF2F2;
+  color: #991B1B;
+  border: 1.5px solid #FECACA;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.badgeActive .dot {
+  background: #10B981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.badgeInactive .dot {
+  background: #EF4444;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.08);
+  }
+}
+
+/* ── Stat Cell ── */
+.statCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748B;
+}
+
+.statCell svg {
+  flex-shrink: 0;
+}
+
+.pendingHighlight {
+  color: #F59E0B;
+  font-weight: 800;
+}
+
+/* ── Date Text ── */
+.dateText {
+  color: #94A3B8;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ── Actions ── */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.viewBtn,
+.toggleBtnActive,
+.toggleBtnInactive {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 200ms ease;
+  flex-shrink: 0;
+}
+
+.viewBtn {
+  background: #EFF6FF;
+  border: 1.5px solid #BFDBFE;
+  color: #1E40AF;
+}
+
+.viewBtn:hover {
+  background: #DBEAFE;
+  border-color: #93C5FD;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(30, 64, 175, .2);
+}
+
+.toggleBtnActive {
+  background: #ECFDF5;
+  border: 1.5px solid #A7F3D0;
+  color: #065F46;
+}
+
+.toggleBtnActive:hover {
+  background: #D1FAE5;
+  border-color: #6EE7B7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(6, 95, 70, .2);
+}
+
+.toggleBtnInactive {
+  background: #FEF2F2;
+  border: 1.5px solid #FECACA;
+  color: #991B1B;
+}
+
+.toggleBtnInactive:hover {
+  background: #FEE2E2;
+  border-color: #FCA5A5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(153, 27, 27, .2);
+}
+
+.viewBtn:active,
+.toggleBtnActive:active,
+.toggleBtnInactive:active {
+  transform: translateY(0);
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .table {
+    font-size: 14px;
+  }
+
+  .table thead th {
+    padding: 14px 14px;
+    font-size: 13px;
+  }
+
+  .table tbody td {
+    padding: 16px 14px;
+    font-size: 14px;
+  }
+
+  .clanIcon {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .tableWrapper {
+    border-radius: 0;
+  }
+
+  .table thead th {
+    padding: 12px 10px;
+    font-size: 12px;
+  }
+
+  .table tbody td {
+    padding: 14px 10px;
+    font-size: 13px;
+  }
+
+  .clanName {
+    gap: 8px;
+  }
+
+  .clanIcon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .actions {
+    gap: 6px;
+  }
+
+  .viewBtn,
+  .toggleBtnActive,
+  .toggleBtnInactive {
+    width: 32px;
+    height: 32px;
+  }
+}

@@ -30,7 +30,7 @@
      padding 24px 30px as .pageHeader in doc 6
 ═══════════════════════════════════════════ */
 .bannerCard {
-  background: linear-gradient(140deg, var(--navy) 0%, var(--navy-mid) 100%);
+  background: linear-gradient(140deg, var(--banner-navy) 0%, var(--banner-navy-mid) 100%);
   border-radius: 16px;
   padding: 24px 30px;
   box-shadow: 0 4px 18px rgba(30,58,95,.22);
@@ -55,7 +55,7 @@
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--gold), var(--gold-dark), var(--gold));
+  background: linear-gradient(90deg, var(--banner-gold), var(--banner-gold-dark), var(--banner-gold));
 }
 
 /* ── glow orb ── */
@@ -70,7 +70,7 @@
 
 /* ── icon circle — mirrors gold button shape ── */
 .bannerIcon {
-  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+  background: linear-gradient(135deg, var(--banner-gold) 0%, var(--banner-gold-dark) 100%);
   border-radius: 50%;
   width: 64px;
   height: 64px;
@@ -93,7 +93,7 @@
 .bannerIcon svg {
   width: 30px;
   height: 30px;
-  color: var(--navy);
+  color: var(--banner-navy);
 }
 
 /* ── text ── */
@@ -109,7 +109,7 @@
 .bannerTitle {
   font-size: 20px;
   font-weight: 900;
-  color: var(--white);
+  color: var(--banner-white);
   margin: 0 0 6px;
   line-height: 1.35;
   letter-spacing: -0.2px;
@@ -126,11 +126,11 @@
 
 /* ── CTA — mirrors .btnAddUser exactly ── */
 .bannerButton {
-  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+  background: linear-gradient(135deg, var(--banner-gold) 0%, var(--banner-gold-dark) 100%);
   color: #fff;
   border: none;
   padding: 13px 28px;
-  border-radius: var(--radius);
+  border-radius: var(--banner-radius);
   font-family: 'Cairo', sans-serif;
   font-size: 16px;
   font-weight: 800;

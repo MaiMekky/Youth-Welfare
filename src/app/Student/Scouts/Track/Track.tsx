@@ -69,27 +69,33 @@ const IconHeart = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
-/* ── Types ── */
-type RequestStatus = "pending" | "preliminary_approved" | "accepted" | "rejected";
-
+/* ── Types ──
+   Exactly matches what ScoutStatusSerializer returns (wrapped in success_response).
+   Fields available: scout_member_id, clan, clan_name, group, group_name,
+                     role, status (Arabic), rejection_reason, joined_at
+   NOT available: ref_number, college_name, submitted_at, updated_at
+── */
 interface MemberStatus {
-  // Accept any string from the API — we normalize it below
-  status: string;
-  note?: string;
-  ref_number?: string;
-  college_name?: string;
-  submitted_at?: string;
-  updated_at?: string;
+  scout_member_id: number;
+  clan: number;
+  clan_name: string;
+  group: number | null;
+  group_name: string | null;
+  role: string;
+  status: string;              // Arabic: "منتظر" | "مقبول" | "مرفوض" | "موافقة مبدئية"
+  rejection_reason: string | null;   // FIX #3: backend sends rejection_reason, not note
+  joined_at: string | null;
 }
 
-/* ── Normalize API status string → known key ── */
-function normalizeStatus(raw: string): RequestStatus {
+/* ── Normalize Arabic/English status string → known key ── */
+type RequestStatus = "pending" | "preliminary_approved" | "accepted" | "rejected";
+
+function normalizeStatus(raw: string | undefined | null): RequestStatus {
   const s = (raw ?? "").toLowerCase().trim();
-  if (s === "pending" || s === "قيد المراجعة" || s === "منتظر") return "pending";
-  if (s === "preliminary_approved" || s === "موافقة مبدئية") return "preliminary_approved";
-  if (s === "accepted" || s === "مقبول") return "accepted";
-  if (s === "rejected" || s === "مرفوض") return "rejected";
-  // unknown value → show as pending so the UI never crashes
+  if (s === "pending"  || s === "منتظر")                       return "pending";
+  if (s === "preliminary_approved" || s === "موافقة مبدئية")  return "preliminary_approved";
+  if (s === "accepted" || s === "مقبول")                       return "accepted";
+  if (s === "rejected" || s === "مرفوض")                       return "rejected";
   return "pending";
 }
 
@@ -98,10 +104,10 @@ const statusConfig: Record<RequestStatus, {
   label: string; color: string; bg: string; border: string;
   icon: React.ReactNode; step: number;
 }> = {
-  pending: { label: "منتظر — قيد المراجعة", color: "#D97706", bg: "rgba(217,119,6,.08)", border: "rgba(217,119,6,.28)", icon: <IconClock size={18} />, step: 1 },
-  preliminary_approved: { label: "موافقة مبدئية", color: "#2D5F8A", bg: "#EBF3FB", border: "#B3D4EE", icon: <IconInfo size={18} />, step: 2 },
-  accepted: { label: "مقبول", color: "#059669", bg: "#ECFDF5", border: "#6EE7B7", icon: <IconCheckCircle size={18} />, step: 3 },
-  rejected: { label: "مرفوض", color: "#DC2626", bg: "#FEF2F2", border: "#FECACA", icon: <IconXCircle size={18} />, step: -1 },
+  pending:              { label: "منتظر — قيد المراجعة", color: "#D97706", bg: "rgba(217,119,6,.08)", border: "rgba(217,119,6,.28)", icon: <IconClock size={18} />,        step: 1 },
+  preliminary_approved: { label: "موافقة مبدئية",        color: "#2D5F8A", bg: "#EBF3FB",            border: "#B3D4EE",              icon: <IconInfo size={18} />,         step: 2 },
+  accepted:             { label: "مقبول",                 color: "#059669", bg: "#ECFDF5",            border: "#6EE7B7",              icon: <IconCheckCircle size={18} />,  step: 3 },
+  rejected:             { label: "مرفوض",                 color: "#DC2626", bg: "#FEF2F2",            border: "#FECACA",              icon: <IconXCircle size={18} />,      step: -1 },
 };
 
 /* ── Token palette ── */
@@ -129,9 +135,12 @@ export default function TrackRequestPage() {
     try {
       const res = await authFetch(`${API_URL}/api/student/my_status/`);
       if (res.ok) {
-        setStatus(await res.json());
-      } else if (res.status === 404) {
-        setStatus(null); // no request yet
+        // ── FIX #1: Unwrap success_response wrapper { message, data }
+        const json = await res.json();
+        // data is null when student has no application yet
+        setStatus(json.data ?? null);
+      } else {
+        setStatus(null);
       }
     } finally {
       setLoading(false);
@@ -146,7 +155,7 @@ export default function TrackRequestPage() {
     try {
       const res = await authFetch(`${API_URL}/api/student/join/`, { method: "POST" });
       if (res.ok) {
-        await load(); // refresh status
+        await load();
       } else {
         const data = await res.json().catch(() => ({}));
         setReapplyError(data?.detail || data?.message || "حدث خطأ، يرجى المحاولة لاحقاً");
@@ -263,8 +272,21 @@ function RequestCard({ status, onReapply, reapplyLoading, reapplyError }: {
 }) {
   const normalizedStatus = normalizeStatus(status.status);
   const cfg = statusConfig[normalizedStatus];
-  const isRejected = normalizedStatus === "rejected";
-  const isAccepted = normalizedStatus === "accepted";
+  const isRejected  = normalizedStatus === "rejected";
+  const isAccepted  = normalizedStatus === "accepted";
+  const isPreliminary = normalizedStatus === "preliminary_approved";
+
+  // FIX #3: Backend sends rejection_reason, not note
+  const rejectionNote = status.rejection_reason ?? null;
+
+  // FIX #5: Only show fields that ScoutStatusSerializer actually returns
+  // Available: clan_name, role, joined_at — NOT: college_name, submitted_at, updated_at, ref_number
+  const infoItems = [
+    ...(status.clan_name ? [{ label: "العشيرة", value: status.clan_name }] : []),
+    ...(status.group_name ? [{ label: "الرهط", value: status.group_name }] : []),
+    { label: "الدور", value: status.role || "عضو" },
+    ...(status.joined_at ? [{ label: "تاريخ الانضمام", value: new Date(status.joined_at).toLocaleDateString("ar-EG") }] : []),
+  ];
 
   return (
     <div style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radius, boxShadow: T.shadow, overflow: "hidden", position: "relative" }}>
@@ -276,11 +298,9 @@ function RequestCard({ status, onReapply, reapplyLoading, reapplyError }: {
           <span style={{ width: 42, height: 42, borderRadius: T.radius, background: cfg.bg, border: `1px solid ${cfg.border}`, display: "flex", alignItems: "center", justifyContent: "center", color: cfg.color, flexShrink: 0 }}>{cfg.icon}</span>
           <div>
             <div style={{ fontSize: 17, fontWeight: 800, color: T.navy, fontFamily: T.font }}>طلب الانضمام</div>
-            {status.ref_number && (
-              <div style={{ fontSize: 13, fontWeight: 600, color: T.mute, fontFamily: T.font }}>
-                رقم المرجع: <span style={{ color: T.navy, fontWeight: 700 }}>{status.ref_number}</span>
-              </div>
-            )}
+            <div style={{ fontSize: 13, fontWeight: 600, color: T.mute, fontFamily: T.font }}>
+              رقم الطلب: <span style={{ color: T.navy, fontWeight: 700 }}>#{status.scout_member_id}</span>
+            </div>
           </div>
         </div>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 18px", borderRadius: 100, fontSize: 14, fontWeight: 700, color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}`, whiteSpace: "nowrap", fontFamily: T.font }}>
@@ -289,15 +309,11 @@ function RequestCard({ status, onReapply, reapplyLoading, reapplyError }: {
         </span>
       </div>
 
-      {/* Info grid */}
+      {/* Info grid — only real fields from the serializer */}
       <div style={{ padding: "22px 26px" }}>
-        {(status.college_name || status.submitted_at || status.updated_at) && (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 22 }}>
-            {[
-              ...(status.college_name ? [{ label: "الكلية", value: status.college_name }] : []),
-              ...(status.submitted_at ? [{ label: "تاريخ التقديم", value: status.submitted_at }] : []),
-              ...(status.updated_at ? [{ label: "آخر تحديث", value: status.updated_at }] : []),
-            ].map((item) => (
+        {infoItems.length > 0 && (
+          <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(infoItems.length, 3)}, 1fr)`, gap: 14, marginBottom: 22 }}>
+            {infoItems.map((item) => (
               <div key={item.label} style={{ background: T.bg, borderRadius: T.radius, padding: "14px 16px", border: `1px solid ${T.border}` }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: T.mute, marginBottom: 4, fontFamily: T.font }}>{item.label}</div>
                 <div style={{ fontSize: 15, fontWeight: 800, color: T.navy, fontFamily: T.font }}>{item.value}</div>
@@ -309,16 +325,8 @@ function RequestCard({ status, onReapply, reapplyLoading, reapplyError }: {
         {/* Timeline */}
         <ProgressTimeline status={normalizedStatus} />
 
-        {/* Note */}
-        {status.note && (
-          <div style={{ marginTop: 18, background: T.goldPale, border: `1.5px dashed rgba(196,155,58,.35)`, borderRadius: T.radius, padding: "12px 16px", fontSize: 14, fontWeight: 600, color: "#7A5A00", lineHeight: 1.7, fontFamily: T.font, display: "flex", alignItems: "flex-start", gap: 8 }}>
-            <span style={{ color: T.gold, flexShrink: 0 }}><IconInfo size={16} /></span>
-            {status.note}
-          </div>
-        )}
-
-        {/* Prelim approved action */}
-        {status.status === "preliminary_approved" && (
+        {/* Preliminary approved action */}
+        {isPreliminary && (
           <div style={{ marginTop: 16, background: "#EBF3FB", border: `1.5px solid #B3D4EE`, borderRadius: T.radius, padding: "14px 18px", fontSize: 15, fontWeight: 700, color: T.navyMid, fontFamily: T.font, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <IconShield size={18} />
@@ -345,7 +353,8 @@ function RequestCard({ status, onReapply, reapplyLoading, reapplyError }: {
           <div style={{ marginTop: 16 }}>
             <div style={{ marginBottom: 12, background: "#FEF2F2", border: `1px solid #FECACA`, borderRadius: T.radius, padding: "12px 16px", fontSize: 14, fontWeight: 600, color: "#DC2626", fontFamily: T.font, display: "flex", alignItems: "flex-start", gap: 8 }}>
               <span style={{ flexShrink: 0 }}><IconInfo size={16} /></span>
-              {status.note || "تم رفض طلبك. يمكنك تقديم طلب جديد."}
+              {/* FIX #3: Use rejection_reason directly */}
+              {rejectionNote || "تم رفض طلبك. يمكنك تقديم طلب جديد."}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end" }}>
               <button onClick={onReapply} disabled={reapplyLoading} style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "13px 28px", background: reapplyLoading ? "rgba(196,155,58,.5)" : `linear-gradient(135deg, ${T.gold} 0%, ${T.goldDark} 100%)`, color: "#fff", borderRadius: T.radius, fontFamily: T.font, fontSize: 16, fontWeight: 800, cursor: reapplyLoading ? "not-allowed" : "pointer", border: "none", boxShadow: "0 4px 16px rgba(196,155,58,.4)" }}>

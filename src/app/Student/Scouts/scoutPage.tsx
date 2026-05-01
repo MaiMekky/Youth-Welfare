@@ -72,18 +72,40 @@ const IconLayoutDashboard = ({ size = 18 }: { size?: number }) => (
 );
 
 /* ── Types ── */
+// Matches ClanSerializer fields exactly
 type Clan = {
   clan_id: number;
   name: string;
   description: string;
-  status: string;
+  status: string;          // Arabic: "نشط" | "غير نشط"
   faculty_name: string;
   members_count?: number;
 };
+
+// Matches ScoutStatusSerializer fields exactly
 type MemberStatus = {
-  status: "pending" | "accepted" | "rejected";
-  note?: string;
+  scout_member_id: number;
+  clan: number;
+  clan_name: string;
+  group: number | null;
+  group_name: string | null;
+  role: string;
+  status: string;            // Arabic: "منتظر" | "مقبول" | "مرفوض"
+  rejection_reason: string | null;
+  joined_at: string | null;
 };
+
+/* ── FIX #2: Normalize Arabic/English status → known English key ── */
+type NormalizedStatus = "pending" | "accepted" | "rejected" | "preliminary_approved";
+
+function normalizeStatus(raw: string | undefined | null): NormalizedStatus {
+  const s = (raw ?? "").toLowerCase().trim();
+  if (s === "pending"  || s === "منتظر")            return "pending";
+  if (s === "accepted" || s === "مقبول")             return "accepted";
+  if (s === "rejected" || s === "مرفوض")             return "rejected";
+  if (s === "preliminary_approved" || s === "موافقة مبدئية") return "preliminary_approved";
+  return "pending";
+}
 
 /* ── Token palette ── */
 const T = {
@@ -156,16 +178,28 @@ export default function ScoutsPage() {
         authFetch(`${API_URL}/api/student/my_status/`),
       ]);
 
-      if (clanRes.status === 404 || !clanRes.ok) {
+      // ── FIX #1: Unwrap success_response wrapper ({ message, data })
+      // ── FIX #4: Backend returns 200 with data:null when no clan — NOT 404
+      if (!clanRes.ok) {
         setClanState("none");
       } else {
-        const data: Clan = await clanRes.json();
-        setClan(data);
-        setClanState(data.status === "نشط" ? "active" : "inactive");
+        const json = await clanRes.json();
+        const data: Clan | null = json.data ?? null;
+        if (!data) {
+          // Backend returns { message: "...", data: null } when no clan exists
+          setClanState("none");
+        } else {
+          setClan(data);
+          // FIX: clan status is Arabic "نشط" / "غير نشط"
+          setClanState(data.status === "نشط" ? "active" : "inactive");
+        }
       }
 
+      // ── FIX #1: Unwrap success_response for my_status
       if (statusRes.ok) {
-        setMemberStatus(await statusRes.json());
+        const json = await statusRes.json();
+        // data is null when student has no application yet
+        setMemberStatus(json.data ?? null);
       }
     } finally {
       setLoading(false);
@@ -214,27 +248,41 @@ export default function ScoutsPage() {
       statusBadge: { label: "غير نشطة", color: "#D97706", bg: "rgba(217,119,6,.08)", border: "rgba(217,119,6,.28)" },
       primaryBtn: null, secondaryBtn: null,
     };
-    if (memberStatus?.status === "accepted") return {
-      heading: "أنت عضو في العشيرة 🎉",
+
+    // ── FIX #2: Normalize Arabic status before comparing
+    const normalized = normalizeStatus(memberStatus?.status);
+
+    if (normalized === "accepted") return {
+      heading: "أنت عضو في العشيرة",
       sub: "تم قبول انضمامك، يمكنك الاطلاع على معلومات مجموعتك من لوحة التحكم",
       statusBadge: { label: "مقبول", color: "#059669", bg: "#ECFDF5", border: "#6EE7B7" },
       primaryBtn: { label: "لوحة التحكم", icon: <IconLayoutDashboard size={18} />, href: "/Student/Scouts/dashboard" },
       secondaryBtn: null,
     };
-    if (memberStatus?.status === "pending") return {
+    if (normalized === "pending") return {
       heading: "طلبك قيد المراجعة",
       sub: "تم استلام طلبك وهو قيد المراجعة من قبل مسؤول الكلية",
       statusBadge: { label: "قيد المراجعة", color: "#D97706", bg: "rgba(217,119,6,.08)", border: "rgba(217,119,6,.28)" },
       primaryBtn: { label: "متابعة الطلب", icon: <IconClock size={18} />, href: "/Student/Scouts/Track" },
       secondaryBtn: null,
     };
-    const isRejected = memberStatus?.status === "rejected";
+    if (normalized === "preliminary_approved") return {
+      heading: "موافقة مبدئية على طلبك",
+      sub: "يرجى التوجه إلى الكلية لتسليم الأوراق المطلوبة لاستكمال القبول",
+      statusBadge: { label: "موافقة مبدئية", color: "#2D5F8A", bg: "#EBF3FB", border: "#B3D4EE" },
+      primaryBtn: { label: "متابعة الطلب", icon: <IconClock size={18} />, href: "/Student/Scouts/Track" },
+      secondaryBtn: null,
+    };
+
+    const isRejected = normalized === "rejected";
     return {
       heading: isRejected ? "تم رفض طلبك السابق" : "هل أنت مستعد للانضمام؟",
       sub: isRejected ? "يمكنك تقديم طلب انضمام جديد الآن" : "انضم إلى عشيرة كليتك — سيتم مراجعة طلبك من قبل المسؤول",
       statusBadge: isRejected ? { label: "مرفوض سابقاً", color: "#DC2626", bg: "#FEF2F2", border: "#FECACA" } : null,
       primaryBtn: "join",
-      secondaryBtn: { label: "متابعة الطلبات", icon: <IconClock size={18} />, href: "/Student/Scouts/Track" },
+      secondaryBtn: memberStatus
+        ? { label: "متابعة الطلبات", icon: <IconClock size={18} />, href: "/Student/Scouts/Track" }
+        : null,
     };
   };
 
@@ -347,7 +395,7 @@ export default function ScoutsPage() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end" }}>
                   <button onClick={handleJoin} disabled={joinLoading} style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "14px 32px", background: joinLoading ? "rgba(196,155,58,.5)" : `linear-gradient(135deg, ${T.gold} 0%, ${T.goldDark} 100%)`, color: "#fff", borderRadius: T.radius, fontFamily: T.font, fontSize: 17, fontWeight: 800, cursor: joinLoading ? "not-allowed" : "pointer", border: "none", boxShadow: "0 4px 16px rgba(196,155,58,.4)", whiteSpace: "nowrap" }}>
                     <IconHeart size={18} />
-                    {joinLoading ? "جاري الإرسال..." : memberStatus?.status === "rejected" ? "تقديم طلب جديد" : "تقديم طلب الانضمام"}
+                    {joinLoading ? "جاري الإرسال..." : normalizeStatus(memberStatus?.status) === "rejected" ? "تقديم طلب جديد" : "تقديم طلب الانضمام"}
                   </button>
                   {joinError && <span style={{ fontSize: 13, color: "#ffd9d9", fontFamily: T.font, fontWeight: 600 }}>{joinError}</span>}
                 </div>

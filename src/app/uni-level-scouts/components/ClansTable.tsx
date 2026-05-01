@@ -1,8 +1,9 @@
 "use client";
 import React from "react";
 import styles from "../styles/ClansTable.module.css";
-import { Eye, Power, Building2, Users, GitBranch, Clock } from "lucide-react";
+import { Eye, Power, Building2, Users, GitBranch, Clock, CheckCircle2, XCircle } from "lucide-react";
 import type { Clan } from "../page";
+import { CLAN_STATUS } from "../utils/scoutsDataMapper";
 
 interface Props {
   clans: Clan[];
@@ -30,15 +31,17 @@ export default function ClansTable({ clans, onView, onToggleStatus }: Props) {
             <th>الكلية</th>
             <th>الحالة</th>
             <th>الأعضاء</th>
+            <th>المقبولون</th>
             <th>المجموعات</th>
             <th>طلبات معلقة</th>
+            <th>الهيكل</th>
             <th>تاريخ الإنشاء</th>
             <th>الإجراءات</th>
           </tr>
         </thead>
         <tbody>
           {clans.map((clan) => {
-            const isActive = clan.status === "نشط";
+            const isActive = clan.status === CLAN_STATUS.ACTIVE;
             return (
               <tr key={clan.clan_id}>
                 <td>
@@ -66,6 +69,12 @@ export default function ClansTable({ clans, onView, onToggleStatus }: Props) {
                 </td>
                 <td>
                   <div className={styles.statCell}>
+                    <Users size={14} />
+                    <span>{clan.accepted_count || 0}</span>
+                  </div>
+                </td>
+                <td>
+                  <div className={styles.statCell}>
                     <GitBranch size={14} />
                     <span>{clan.groups_count || 0}</span>
                   </div>
@@ -76,6 +85,21 @@ export default function ClansTable({ clans, onView, onToggleStatus }: Props) {
                     <span className={clan.pending_count > 0 ? styles.pendingHighlight : ""}>
                       {clan.pending_count || 0}
                     </span>
+                  </div>
+                </td>
+                <td>
+                  <div className={styles.statCell}>
+                    {clan.is_structure_complete ? (
+                      <>
+                        <CheckCircle2 size={14} className={styles.completeIcon} />
+                        <span className={styles.completeText}>مكتمل</span>
+                      </>
+                    ) : (
+                      <>
+                        <XCircle size={14} className={styles.incompleteIcon} />
+                        <span className={styles.incompleteText}>غير مكتمل</span>
+                      </>
+                    )}
                   </div>
                 </td>
                 <td>

@@ -18,29 +18,18 @@ import {
   UserX,
   UserMinus,
 } from "lucide-react";
+import {
+  extractClanDetail,
+  buildApiUrl,
+  CLAN_STATUS,
+  type BackendClanDetail,
+  type BackendStats,
+} from "../utils/scoutsDataMapper";
 
 const API_URL = getBaseUrl();
 
-type ClanDetail = {
-  clan_id: number;
-  name: string;
-  description: string;
-  faculty: number;
-  faculty_name: string;
-  status: "نشط" | "غير نشط" | string;
-  min_members: number;
-  members_count: number;
-  created_at: string;
-};
-
-type ClanStats = {
-  total_members: number;
-  accepted_count: number;
-  pending_count: number;
-  rejected_count: number;
-  groups_count: number;
-  unassigned_count: number;
-};
+type ClanDetail = BackendClanDetail;
+type ClanStats = BackendStats;
 
 export default function ClanDetailPage() {
   const params = useParams();
@@ -50,6 +39,7 @@ export default function ClanDetailPage() {
 
   const [clan, setClan] = useState<ClanDetail | null>(null);
   const [stats, setStats] = useState<ClanStats | null>(null);
+  const [structure, setStructure] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview" | "members" | "groups" | "structure">(
     "overview"
@@ -59,15 +49,22 @@ export default function ClanDetailPage() {
     if (!clanId) return;
     setLoading(true);
     try {
-      const res = await authFetch(`${API_URL}/api/dept/clan_detail/${clanId}/`);
+      const url = buildApiUrl(API_URL, "/api/dept/clan_detail/", { clan_id: clanId });
+      const res = await authFetch(url);
+      
       if (!res.ok) {
         showToast("فشل تحميل تفاصيل العشيرة", "error");
         return;
       }
+      
       const json = await res.json();
-      setClan(json.clan || json);
-      setStats(json.stats || null);
-    } catch {
+      const { clan: clanData, stats: statsData, structure: structureData } = extractClanDetail(json);
+      
+      setClan(clanData);
+      setStats(statsData);
+      setStructure(structureData);
+    } catch (error) {
+      console.error("Error fetching clan detail:", error);
       showToast("حدث خطأ أثناء جلب البيانات", "error");
     } finally {
       setLoading(false);
@@ -81,22 +78,28 @@ export default function ClanDetailPage() {
 
   const handleToggleStatus = async () => {
     if (!clan) return;
-    const newStatus = clan.status === "نشط" ? "غير نشط" : "نشط";
+    const newStatus = clan.status === CLAN_STATUS.ACTIVE ? CLAN_STATUS.INACTIVE : CLAN_STATUS.ACTIVE;
     try {
-      const res = await authFetch(`${API_URL}/api/dept/change_clan_status/`, {
+      const url = buildApiUrl(API_URL, "/api/dept/change_clan_status/", {
+        clan_id: clan.clan_id,
+        status: newStatus,
+      });
+      
+      const res = await authFetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clan_id: clan.clan_id, status: newStatus }),
       });
 
       if (!res.ok) {
-        showToast("فشل تغيير حالة العشيرة", "error");
+        const errorData = await res.json().catch(() => ({}));
+        showToast(errorData?.message || "فشل تغيير حالة العشيرة", "error");
         return;
       }
 
       showToast(`تم تغيير حالة العشيرة إلى ${newStatus} ✅`, "success");
       await fetchClanDetail();
-    } catch {
+    } catch (error) {
+      console.error("Error toggling clan status:", error);
       showToast("حدث خطأ أثناء تغيير الحالة", "error");
     }
   };
@@ -127,7 +130,7 @@ export default function ClanDetailPage() {
     );
   }
 
-  const isActive = clan.status === "نشط";
+  const isActive = clan.status === CLAN_STATUS.ACTIVE;
 
   return (
     <div className={styles.page}>

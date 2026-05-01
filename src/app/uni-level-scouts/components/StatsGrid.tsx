@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import styles from "../styles/StatsGrid.module.css";
-import { Shield, CheckCircle, XCircle, Users, GitBranch, Clock } from "lucide-react";
+import { Shield, CheckCircle, XCircle, Users, UserCheck, Clock } from "lucide-react";
 import type { ClanStats } from "../page";
 
 interface Props {
@@ -35,14 +35,14 @@ export default function StatsGrid({ stats }: Props) {
       variant: "blue",
     },
     {
-      label: "إجمالي المجموعات",
-      value: stats.total_groups,
-      icon: GitBranch,
+      label: "الأعضاء المقبولون",
+      value: stats.total_accepted,
+      icon: UserCheck,
       variant: "purple",
     },
     {
       label: "طلبات معلقة",
-      value: stats.pending_requests,
+      value: stats.total_pending,
       icon: Clock,
       variant: "amber",
     },

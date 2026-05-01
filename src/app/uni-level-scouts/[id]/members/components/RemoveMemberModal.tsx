@@ -5,6 +5,7 @@ import { X, AlertTriangle, Loader2 } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
 import type { Member } from "../page";
+import { buildApiUrl } from "../../../utils/scoutsDataMapper";
 
 const API_URL = getBaseUrl();
 
@@ -33,23 +34,27 @@ export default function RemoveMemberModal({ member, clanId, onClose, onSuccess }
 
     setLoading(true);
     try {
-      const res = await authFetch(`${API_URL}/api/dept/remove_member/`, {
+      const url = buildApiUrl(API_URL, "/api/dept/remove_member/", {
+        clan_id: clanId,
+        member_id: member.member_id,
+      });
+      
+      const res = await authFetch(url, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          clan_id: clanId,
-          member_id: member.member_id,
-        }),
       });
 
       if (!res.ok) {
-        showToast("فشل إزالة العضو", "error");
+        const errorData = await res.json().catch(() => ({}));
+        showToast(errorData?.message || "فشل إزالة العضو", "error");
         return;
       }
 
-      showToast("تم إزالة العضو بنجاح ✅", "success");
+      const result = await res.json();
+      showToast(result?.message || "تم إزالة العضو بنجاح ✅", "success");
       onSuccess();
-    } catch {
+    } catch (error) {
+      console.error("Error removing member:", error);
       showToast("حدث خطأ أثناء إزالة العضو", "error");
     } finally {
       setLoading(false);
@@ -87,7 +92,7 @@ export default function RemoveMemberModal({ member, clanId, onClose, onSuccess }
                 <p className={styles.warningTitle}>تحذير: هذا الإجراء لا يمكن التراجع عنه!</p>
                 <p className={styles.warningText}>
                   سيتم حذف العضو <strong>{member.name}</strong> نهائياً من العشيرة. سيتم فقدان
-                  جميع البيانات المرتبطة بهذا العضو.
+                  جميع البيانات المرتبطة بهذا العضو. يمكن للعضو إعادة التقديم لاحقاً.
                 </p>
               </div>
             </div>

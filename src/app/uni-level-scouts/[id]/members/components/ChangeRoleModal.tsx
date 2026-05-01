@@ -5,6 +5,7 @@ import { X, AlertCircle, Loader2 } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
 import type { Member } from "../page";
+import { ALL_ROLES, buildApiUrl } from "../../../utils/scoutsDataMapper";
 
 const API_URL = getBaseUrl();
 
@@ -14,16 +15,6 @@ interface Props {
   onClose: () => void;
   onSuccess: () => void;
 }
-
-const ROLES = [
-  "قائد العشيرة",
-  "مساعد القائد",
-  "قائد كبار الجوالة",
-  "مساعد قائد كبار الجوالة",
-  "قائد مجموعة",
-  "مساعد قائد مجموعة",
-  "عضو",
-];
 
 export default function ChangeRoleModal({ member, clanId, onClose, onSuccess }: Props) {
   const { showToast } = useToast();
@@ -50,24 +41,28 @@ export default function ChangeRoleModal({ member, clanId, onClose, onSuccess }: 
 
     setLoading(true);
     try {
-      const res = await authFetch(`${API_URL}/api/dept/change_member_role/`, {
+      const url = buildApiUrl(API_URL, "/api/dept/change_member_role/", {
+        clan_id: clanId,
+        member_id: member.member_id,
+        role: newRole,
+      });
+      
+      const res = await authFetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          clan_id: clanId,
-          member_id: member.member_id,
-          new_role: newRole,
-        }),
       });
 
       if (!res.ok) {
-        showToast("فشل تغيير دور العضو", "error");
+        const errorData = await res.json().catch(() => ({}));
+        showToast(errorData?.message || "فشل تغيير دور العضو", "error");
         return;
       }
 
-      showToast("تم تغيير دور العضو بنجاح ✅", "success");
+      const result = await res.json();
+      showToast(result?.message || "تم تغيير دور العضو بنجاح ✅", "success");
       onSuccess();
-    } catch {
+    } catch (error) {
+      console.error("Error changing member role:", error);
       showToast("حدث خطأ أثناء تغيير الدور", "error");
     } finally {
       setLoading(false);
@@ -112,7 +107,7 @@ export default function ChangeRoleModal({ member, clanId, onClose, onSuccess }: 
               disabled={loading}
             >
               <option value="">اختر دور...</option>
-              {ROLES.map((role) => (
+              {ALL_ROLES.map((role) => (
                 <option key={role} value={role}>
                   {role}
                 </option>

@@ -3,6 +3,7 @@ import React from "react";
 import styles from "../Members.module.css";
 import { Edit2, Trash2, Mail, GitBranch } from "lucide-react";
 import type { Member } from "../page";
+import { getStatusText, SCOUT_STATUS } from "../../../utils/scoutsDataMapper";
 
 interface Props {
   members: Member[];
@@ -22,27 +23,14 @@ function formatDate(iso: string) {
 
 function getStatusBadgeClass(status: string) {
   switch (status) {
-    case "Accepted":
+    case SCOUT_STATUS.ACCEPTED:
       return styles.badgeAccepted;
-    case "Pending":
+    case SCOUT_STATUS.PENDING:
       return styles.badgePending;
-    case "Rejected":
+    case SCOUT_STATUS.REJECTED:
       return styles.badgeRejected;
     default:
       return styles.badgeDefault;
-  }
-}
-
-function getStatusText(status: string) {
-  switch (status) {
-    case "Accepted":
-      return "مقبول";
-    case "Pending":
-      return "معلق";
-    case "Rejected":
-      return "مرفوض";
-    default:
-      return status;
   }
 }
 
@@ -105,6 +93,7 @@ export default function MembersTable({ members, onChangeRole, onRemove }: Props)
                     className={styles.editBtn}
                     onClick={() => onChangeRole(member)}
                     title="تغيير الدور"
+                    disabled={member.status !== SCOUT_STATUS.ACCEPTED}
                   >
                     <Edit2 size={16} />
                   </button>

@@ -8,6 +8,14 @@ import RemoveMemberModal from "./components/RemoveMemberModal";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
 import { Users, Search, Filter } from "lucide-react";
+import {
+  extractMembersList,
+  mapMemberToFrontend,
+  buildApiUrl,
+  SCOUT_STATUS,
+  ALL_ROLES,
+  type BackendMember,
+} from "../../utils/scoutsDataMapper";
 
 const API_URL = getBaseUrl();
 
@@ -16,11 +24,14 @@ export type Member = {
   user_id: number;
   name: string;
   email: string;
+  gender: string;
+  phone: string;
   role: string;
-  status: "Pending" | "Accepted" | "Rejected" | string;
+  status: string;
   group_id: number | null;
   group_name: string | null;
   joined_at: string;
+  created_at: string;
 };
 
 export default function MembersPage() {
@@ -32,7 +43,7 @@ export default function MembersPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "Pending" | "Accepted" | "Rejected">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | string>("all");
   const [roleFilter, setRoleFilter] = useState<string>("all");
 
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
@@ -43,27 +54,48 @@ export default function MembersPage() {
     if (!clanId) return;
     setLoading(true);
     try {
-      const res = await authFetch(`${API_URL}/api/dept/clan_members/${clanId}/`);
+      // Build query params for backend filters
+      const params: Record<string, any> = { clan_id: clanId };
+      if (statusFilter !== "all") {
+        params.status = statusFilter;
+      }
+      if (roleFilter !== "all") {
+        params.role = roleFilter;
+      }
+
+      const url = buildApiUrl(API_URL, "/api/dept/clan_members/", params);
+      const res = await authFetch(url);
+      
       if (!res.ok) {
         showToast("فشل تحميل الأعضاء", "error");
         return;
       }
+      
       const json = await res.json();
-      const membersList = Array.isArray(json) ? json : json?.members || [];
-      setMembers(membersList);
-    } catch {
+      const backendMembers = extractMembersList(json);
+      
+      // Map backend data to frontend format
+      const mappedMembers = backendMembers.map(mapMemberToFrontend);
+      setMembers(mappedMembers);
+    } catch (error) {
+      console.error("Error fetching members:", error);
       showToast("حدث خطأ أثناء جلب البيانات", "error");
     } finally {
       setLoading(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clanId]);
+  }, [clanId, statusFilter, roleFilter]);
 
   useEffect(() => {
     fetchMembers();
   }, [fetchMembers]);
 
   const handleChangeRole = (member: Member) => {
+    // Only accepted members can have their roles changed
+    if (member.status !== SCOUT_STATUS.ACCEPTED) {
+      showToast("يمكن تغيير دور الأعضاء المقبولين فقط", "error");
+      return;
+    }
     setSelectedMember(member);
     setShowChangeRoleModal(true);
   };
@@ -85,18 +117,16 @@ export default function MembersPage() {
     await fetchMembers();
   };
 
-  // Filter members
+  // Filter members (client-side for search, server-side for status and role)
   const filteredMembers = members.filter((member) => {
     const matchesSearch =
       member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       member.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || member.status === statusFilter;
-    const matchesRole = roleFilter === "all" || member.role === roleFilter;
-    return matchesSearch && matchesStatus && matchesRole;
+    return matchesSearch;
   });
 
-  // Get unique roles for filter
-  const roles = Array.from(new Set(members.map((m) => m.role).filter(Boolean)));
+  // Get unique roles for filter dropdown
+  const availableRoles = Array.from(new Set(members.map((m) => m.role).filter(Boolean)));
 
   return (
     <div className={styles.page}>
@@ -143,13 +173,13 @@ export default function MembersPage() {
           <Filter size={16} />
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+            onChange={(e) => setStatusFilter(e.target.value)}
             className={styles.filterSelect}
           >
             <option value="all">كل الحالات</option>
-            <option value="Pending">معلق</option>
-            <option value="Accepted">مقبول</option>
-            <option value="Rejected">مرفوض</option>
+            <option value={SCOUT_STATUS.PENDING}>معلق</option>
+            <option value={SCOUT_STATUS.ACCEPTED}>مقبول</option>
+            <option value={SCOUT_STATUS.REJECTED}>مرفوض</option>
           </select>
         </div>
 
@@ -161,7 +191,7 @@ export default function MembersPage() {
             className={styles.filterSelect}
           >
             <option value="all">كل الأدوار</option>
-            {roles.map((role) => (
+            {availableRoles.map((role) => (
               <option key={role} value={role}>
                 {role}
               </option>

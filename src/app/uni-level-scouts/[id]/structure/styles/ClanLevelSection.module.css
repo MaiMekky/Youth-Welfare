@@ -1,0 +1,146 @@
+/* ═══════════════════════════════════════════════
+   CLAN LEVEL SECTION — Scouts Theme
+   ═══════════════════════════════════════════════ */
+
+.section {
+  background: #fff;
+  border: 1.5px solid #D4E4F4;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(30, 58, 95, 0.07);
+  font-family: 'Cairo', sans-serif;
+  direction: rtl;
+  transition: box-shadow 220ms ease;
+}
+
+.section:hover {
+  box-shadow: 0 8px 32px rgba(30, 58, 95, 0.11);
+}
+
+/* ── Section Header ── */
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 28px;
+  background: linear-gradient(135deg, #1E3A5F 0%, #2D5F8A 100%);
+  cursor: pointer;
+  user-select: none;
+  gap: 12px;
+  flex-wrap: wrap;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle shimmer strip */
+.sectionHeader::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+}
+
+.sectionHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.sectionIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #F0CB6A;
+  flex-shrink: 0;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.2px;
+}
+
+.sectionSub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+}
+
+.sectionMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.countBadge {
+  background: rgba(240, 203, 106, 0.18);
+  border: 1px solid rgba(240, 203, 106, 0.38);
+  color: #F0CB6A;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.toggleBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 160ms, color 160ms;
+}
+
+.toggleBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+/* ── Entries Grid ── */
+.entriesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 0;
+  background: #F7FAFD;
+  padding: 0;
+  border-top: 1.5px solid #D4E4F4;
+}
+
+/* Each cell separated by subtle dividers */
+.entriesGrid > * {
+  border-left: 1px solid #EEF4FA;
+}
+
+.entriesGrid > *:nth-child(1) {
+  border-left: none;
+}
+
+@media (max-width: 640px) {
+  .sectionHeader {
+    padding: 16px 18px;
+  }
+  .entriesGrid {
+    grid-template-columns: 1fr;
+  }
+  .sectionTitle {
+    font-size: 17px;
+  }
+}

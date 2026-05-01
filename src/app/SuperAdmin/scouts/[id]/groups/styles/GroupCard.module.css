@@ -1,0 +1,228 @@
+/* GroupCard.module.css */
+
+.card {
+  background: #fff;
+  border: 1px solid #E2ECF5;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 4px rgba(26, 46, 66, 0.05);
+  font-family: 'Cairo', sans-serif;
+  direction: rtl;
+  transition: box-shadow 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 16px rgba(30, 58, 95, 0.10);
+  border-color: #BFDBFE;
+  transform: translateY(-2px);
+}
+
+/* ── Body ── */
+.body {
+  padding: 16px 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Top row: name + count badge ── */
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.groupNameRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.groupIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 200ms ease;
+}
+
+.card:hover .groupIcon {
+  transform: scale(1.08);
+}
+
+/* Icon colors per accent */
+.accent_blue .groupIcon {
+  background: #DBEAFE;
+  color: #2D5F8A;
+}
+
+.accent_green .groupIcon {
+  background: #D1FAE5;
+  color: #059669;
+}
+
+.accent_amber .groupIcon {
+  background: #FEF3C7;
+  color: #C49B3A;
+}
+
+.accent_purple .groupIcon {
+  background: #EDE9FE;
+  color: #6D28D9;
+}
+
+.accent_teal .groupIcon {
+  background: #CCFBF1;
+  color: #0D9488;
+}
+
+.accent_rose .groupIcon {
+  background: #FFE4E6;
+  color: #BE123C;
+}
+
+.groupName {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 900;
+  color: #1E3A5F;
+  letter-spacing: -0.2px;
+  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.countBadge {
+  min-width: 26px;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  transition: transform 200ms ease;
+  flex-shrink: 0;
+}
+
+.card:hover .countBadge {
+  transform: scale(1.08);
+}
+
+/* Badge colors per accent */
+.accent_blue .countBadge {
+  background: #2D5F8A;
+}
+
+.accent_green .countBadge {
+  background: #059669;
+}
+
+.accent_amber .countBadge {
+  background: #C49B3A;
+}
+
+.accent_purple .countBadge {
+  background: #6D28D9;
+}
+
+.accent_teal .countBadge {
+  background: #0D9488;
+}
+
+.accent_rose .countBadge {
+  background: #BE123C;
+}
+
+/* Empty state */
+.countEmpty {
+  background: #E2ECF5 !important;
+  color: #64748B;
+  border: 1px solid #CBD5E1;
+}
+
+/* ── Progress row ── */
+.progressRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progressTrack {
+  flex: 1;
+  height: 3px;
+  background: #EDF2F8;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 500ms ease;
+}
+
+/* Fill colors per accent */
+.accent_blue .progressFill {
+  background: #2D5F8A;
+}
+
+.accent_green .progressFill {
+  background: #059669;
+}
+
+.accent_amber .progressFill {
+  background: #C49B3A;
+}
+
+.accent_purple .progressFill {
+  background: #6D28D9;
+}
+
+.accent_teal .progressFill {
+  background: #0D9488;
+}
+
+.accent_rose .progressFill {
+  background: #BE123C;
+}
+
+.progressCount {
+  font-size: 11px;
+  color: #94A3B8;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Meta row ── */
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid #F1F5F9;
+}
+
+.metaItem {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748B;
+}
+
+@media (max-width: 500px) {
+  .groupNameRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

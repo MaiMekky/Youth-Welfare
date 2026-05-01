@@ -1,0 +1,331 @@
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
+from django.db.models import OuterRef, Subquery, Q
+from django.utils import timezone
+from django.shortcuts import get_object_or_404
+from apps.event.models import Events, Prtcps, EventDocs
+from apps.scouts.models import ScoutMembers  
+from apps.accounts.utils import get_current_student, get_client_ip, log_data_access
+from apps.accounts.permissions import require_permission, IsRole
+from .serializers import (
+    EventAvailableSerializer, 
+    EventJoinedSerializer,
+    EventDocsSerializer,
+)
+from drf_spectacular.utils import extend_schema, OpenApiResponse
+
+
+@extend_schema(tags=["Event Student APIs"])
+class StudentEventViewSet(viewsets.ViewSet):
+    """
+    ViewSet for student-facing event operations
+    """
+    permission_classes = [IsRole]
+    allowed_roles = ['student']
+
+    def get_serializer_context(self):
+        return {'request': self.request}
+
+    @action(detail=False, methods=['get'], url_path='available')
+    def available_events(self, request):
+        """
+        GET /events/available/
+        Returns events available for the current student based on faculty
+        """
+        try:
+            student = get_current_student(request)
+            
+            today = timezone.now().date()
+            print(student.faculty.faculty_id)
+            
+            available_events = Events.objects.filter(
+                Q(faculty_id=student.faculty.faculty_id) | 
+                Q(selected_facs__contains=[student.faculty.faculty_id]),
+                active=True,
+                status='مقبول',
+                end_date__gte=today,
+                st_date__gte=today
+            ).exclude(
+                prtcps_set__student=student
+            ).distinct().order_by('st_date')
+            
+            serializer = EventAvailableSerializer(
+                available_events, 
+                many=True, 
+                context=self.get_serializer_context()
+            )
+            
+            return Response({
+                'status': 'success',
+                'count': available_events.count(),
+                'data': serializer.data
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'], url_path='join')
+    def join_event(self, request, pk=None):
+        """
+        POST /events/{id}/join/
+        Adds student to prtcps table for the specified event
+        """
+        try:
+            student = get_current_student(request)
+            
+            event = get_object_or_404(Events, event_id=pk, active=True)
+            
+            today = timezone.now().date()
+            
+            if event.st_date <= today:
+                return Response({
+                    'status': 'error',
+                    'message': 'Cannot join an event that has already started or passed'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            if event.end_date < today:
+                return Response({
+                    'status': 'error',
+                    'message': 'Cannot join an event that has already ended'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            is_eligible = (
+                event.faculty_id == student.faculty_id or 
+                (event.selected_facs and student.faculty_id in event.selected_facs)
+            )
+            
+            if not is_eligible:
+                return Response({
+                    'status': 'error',
+                    'message': 'You are not eligible to join this event based on your faculty'
+                }, status=status.HTTP_403_FORBIDDEN)
+
+            if event.dept_id == 7:
+
+                is_scout = ScoutMembers.objects.filter(
+                    student=student,
+                    clan__faculty_id=student.faculty_id,
+                    status='مقبول'
+                ).exists()
+
+                if not is_scout:
+                    return Response({
+                        'status': 'error',
+                        'message': 'Student must be an approved scout member in their faculty'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+
+                if hasattr(event, 'clan_id') and event.clan_id:
+                    in_clan = ScoutMembers.objects.filter(
+                        student=student,
+                        clan_id=event.clan_id,
+                        status='مقبول'
+                    ).exists()
+
+                    if not in_clan:
+                        return Response({
+                            'status': 'error',
+                            'message': 'Student is not a member of the required clan'
+                        }, status=status.HTTP_400_BAD_REQUEST)
+            existing_participation = Prtcps.objects.filter(
+                event=event, 
+                student=student
+            ).first()
+            
+            if existing_participation:
+                return Response({
+                    'status': 'error',
+                    'message': f'You have already joined this event (Status: {existing_participation.status})'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            current_participants = Prtcps.objects.filter(
+                event=event, 
+                status='مقبول'
+            ).count()
+            
+            if event.s_limit and current_participants >= event.s_limit:
+                return Response({
+                    'status': 'error',
+                    'message': 'This event has reached its maximum participant limit'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            participation = Prtcps.objects.create(
+                event=event,
+                student=student,
+                status='منتظر'
+            )
+            
+            return Response({
+                'status': 'success',
+                'message': 'Successfully joined the event',
+                'data': {
+                    'participation_id': participation.id,
+                    'event_id': event.event_id,
+                    'event_title': event.title,
+                    'status': participation.status,
+                    'event_start_date': event.st_date,
+                    'event_end_date': event.end_date
+                }
+            }, status=status.HTTP_201_CREATED)
+            
+        except Events.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Event not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    from django.db.models import OuterRef, Subquery
+
+    @action(detail=False, methods=['get'], url_path='joined')
+    def joined_events(self, request):
+        """
+        GET /events/joined/
+        Returns events that the student has joined
+        """
+        try:
+            student = get_current_student(request)
+            
+            participations = Prtcps.objects.filter(
+                student=student,
+                event=OuterRef('pk')
+            )
+            
+            joined_events = Events.objects.filter(
+                prtcps_set__student=student,
+            ).annotate(
+                participation_status=Subquery(participations.values('status')[:1]),
+                participation_rank=Subquery(participations.values('rank')[:1]),
+                participation_reward=Subquery(participations.values('reward')[:1]),
+            ).distinct().order_by('-st_date')
+            
+            serializer = EventJoinedSerializer(
+                joined_events, 
+                many=True, 
+                context=self.get_serializer_context()
+            )
+            
+            return Response({
+                'status': 'success',
+                'count': joined_events.count(),
+                'data': serializer.data
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['get'], url_path='my-result')
+    def my_result(self, request, pk=None):
+        """
+        GET /events/{id}/my-result/
+        Returns the student's rank and reward for a specific event they participated in
+        """
+        try:
+            student = get_current_student(request)
+            
+            participation = get_object_or_404(
+                Prtcps,
+                event_id=pk,
+                student=student
+            )
+            
+            event = get_object_or_404(Events, event_id=pk, active=True)
+            
+            result_data = {
+                'event_id': event.event_id,
+                'event_title': event.title,
+                'rank': participation.rank,
+                'reward': participation.reward,
+                'event_start_date': event.st_date,
+                'event_end_date': event.end_date
+            }
+            
+            if participation.rank is None and participation.reward is None:
+                result_data['message'] = 'Results have not been published yet for this event'
+            
+            return Response({
+                'status': 'success',
+                'data': result_data
+            }, status=status.HTTP_200_OK)
+            
+        except Prtcps.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'You have not participated in this event'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        description="Get all images for an event (student access - only for events they are registered in)",
+        responses={
+            200: EventDocsSerializer(many=True),
+            403: OpenApiResponse(description="Permission denied - not a participant"),
+            404: OpenApiResponse(description="Event not found")
+        }
+    )
+    @action(detail=True, methods=['get'], url_path='images')
+    def get_images(self, request, pk=None):
+        """
+        GET /events/{id}/images/
+        Returns all images for a specific event that the student is registered in.
+        Students can ONLY view images for events they are participants of.
+        """
+        try:
+            student = get_current_student(request)
+            ip = get_client_ip(request)
+            
+            # Get the event
+            event = get_object_or_404(Events, event_id=pk, active=True)
+            
+            # Check if student is a participant in this event
+            participation = Prtcps.objects.filter(
+                event=event,
+                student=student
+            ).first()
+            
+            if not participation:
+                raise PermissionDenied("لا يمكنك عرض صور نشاط لم تشارك فيه")
+            
+            # Get all images for the event
+            docs = EventDocs.objects.filter(event=event)
+            
+
+            # Serialize and return the images
+            serializer = EventDocsSerializer(docs, many=True, context={'request': request})
+            
+            return Response({
+                'status': 'success',
+                'count': docs.count(),
+                'data': serializer.data
+            }, status=status.HTTP_200_OK)
+            
+        except Events.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Event not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except PermissionDenied as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)

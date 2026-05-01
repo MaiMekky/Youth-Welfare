@@ -420,7 +420,7 @@
 }
 
 /* Actions */
-.card-actions { display: flex; gap: 8px; margin-top: auto; }
+.card-actions { display: flex; gap: 8px; margin-top: auto; flex-wrap: wrap; }
 
 /* Primary CTA — gold gradient per spec */
 .btn-result {
@@ -446,6 +446,32 @@
   box-shadow: 0 6px 22px rgba(196,155,58,.55);
 }
 .btn-icon { width: 14px; height: 14px; flex-shrink: 0; }
+
+/* View Team Button */
+.btn-view-team {
+  flex: 1;
+  min-width: 150px;
+  padding: 13px 28px;
+  border: 2px solid #3b82f6;
+  border-radius: var(--radius);
+  background: white;
+  color: #3b82f6;
+  font-family: 'Cairo', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--t);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.btn-view-team:hover {
+  background: #3b82f6;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+}
 
 .status-info-bar {
   width: 100%;

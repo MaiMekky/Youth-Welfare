@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './MyEvents.css';
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import EventDetails from '../Activities/EventDetails/EventDetails';
 
 /* ══════════════════════════════════════════
    TYPES
@@ -45,6 +46,8 @@ interface Event {
   participationStatus: string;
   rank: number | null;
   resultReward: string | null;
+  hasTeam?: boolean;
+  teamSettingsEnabled?: boolean;
 }
 
 type FilterType = 'all' | 'مقبول' | 'قيد الانتظار' | 'مرفوض';
@@ -63,7 +66,7 @@ const normalizeStatus = (status: string): string => {
 /* ══════════════════════════════════════════
    MAPPER
 ══════════════════════════════════════════ */
-const mapEvent = (e: ApiJoinedEvent): Event => ({
+const mapEvent = (e: ApiJoinedEvent & { has_team?: boolean; team_settings_enabled?: boolean }): Event => ({
   id:                  e.event_id,
   title:               e.title,
   description:         e.description,
@@ -78,6 +81,8 @@ const mapEvent = (e: ApiJoinedEvent): Event => ({
   participationStatus: normalizeStatus(e.participation_status),
   rank:                e.participation_rank,
   resultReward:        e.participation_reward,
+  hasTeam:             e.has_team,
+  teamSettingsEnabled: e.team_settings_enabled,
 });
 
 /* ══════════════════════════════════════════
@@ -179,6 +184,8 @@ export default function MyEvents() {
     result: MyResult | null;
     loading: boolean;
   } | null>(null);
+  const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
+  const [studentId, setStudentId] = useState<number>(0);
 
  
 
@@ -187,11 +194,34 @@ export default function MyEvents() {
       try {
         setLoading(true);
         const baseUrl = getBaseUrl();
+        
+        // Get student ID from profile
+        const profileRes = await authFetch(`${baseUrl}/api/accounts/student/profile/`);
+        if (profileRes.ok) {
+          const profile = await profileRes.json();
+          setStudentId(profile.student_id || profile.id || 0);
+        }
+        
         const res = await authFetch(`${baseUrl}/api/event/student-events/joined/`);
         if (!res.ok) throw new Error('فشل تحميل الفعاليات');
         const raw = await res.json();
         const arr: ApiJoinedEvent[] = raw.data ?? raw.results ?? (Array.isArray(raw) ? raw : []);
-        setEvents(arr.map(mapEvent));
+        
+        // Check team membership for each event
+        const myTeamsRes = await authFetch(`${baseUrl}/api/event/student-teams/my-teams/`);
+        let teamEventIds: number[] = [];
+        if (myTeamsRes.ok) {
+          const teamsData = await myTeamsRes.json();
+          const teams = teamsData.data || [];
+          teamEventIds = teams.map((t: any) => t.event);
+        }
+        
+        const eventsWithTeamInfo = arr.map(e => ({
+          ...e,
+          has_team: teamEventIds.includes(e.event_id),
+        }));
+        
+        setEvents(eventsWithTeamInfo.map(mapEvent));
       } catch (e: unknown) {
         setError(e instanceof Error ? e.message : String(e));
       } finally {
@@ -347,9 +377,19 @@ export default function MyEvents() {
 
                       <div className="card-actions">
                         {isAccepted ? (
-                          <button className="btn-result" onClick={() => fetchResult(event)}>
-                            <ResultIcon /> نتيجتي
-                          </button>
+                          <>
+                            <button className="btn-result" onClick={() => fetchResult(event)}>
+                              <ResultIcon /> نتيجتي
+                            </button>
+                            {event.teamSettingsEnabled && (
+                              <button 
+                                className="btn-view-team" 
+                                onClick={() => setSelectedEventId(event.id)}
+                              >
+                                {event.hasTeam ? '👥 عرض الفريق' : '⚠️ لا يوجد فريق'}
+                              </button>
+                            )}
+                          </>
                         ) : (
                           <div className={`status-info-bar ${st.cls}`}>
                             <span className="status-dot" style={{ background: st.dot }} />
@@ -366,6 +406,15 @@ export default function MyEvents() {
           </>
         )}
       </div>
+
+      {/* ══ EVENT DETAILS MODAL ══ */}
+      {selectedEventId && (
+        <EventDetails
+          eventId={selectedEventId}
+          studentId={studentId}
+          onClose={() => setSelectedEventId(null)}
+        />
+      )}
 
       {/* ══ RESULT MODAL ══ */}
       {resultModal && (

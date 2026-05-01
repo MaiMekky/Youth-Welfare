@@ -1,39 +1,21 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
-
-:root {
-  --navy:        #1a2744;
-  --navy-mid:    #243358;
-  --navy-light:  #2e4070;
-  --navy-deep:   #111b33;
-  --gold:        #c9972a;
-  --gold-bright: #e0aa35;
-  --gold-pale:   rgba(201,151,42,0.13);
-  --gold-border: rgba(201,151,42,0.28);
-  --white:       #ffffff;
-  --text-nav:    rgba(255,255,255,0.82);
-  --text-muted:  rgba(255,255,255,0.48);
-  --danger:      #c0392b;
-  --shadow-lg:   0 8px 40px rgba(8,14,32,0.45);
-  --radius:      11px;
-  --radius-sm:   8px;
-  --transition:  0.22s cubic-bezier(0.4, 0, 0.2, 1);
-  --navbar-h:    90px;
-  --navbar-h-sm: 72px;
-}
+/* ══════════════════════════════════════════════════════════════
+   Student Navbar Styles
+   Theme variables are defined in theme.css
+══════════════════════════════════════════════════════════════ */
 
 *, *::before, *::after { box-sizing: border-box; }
 
 /* ── Navbar Shell ─────────────────────────────────────────── */
 .navbar {
-  background: linear-gradient(135deg, var(--navy-deep) 0%, var(--navy) 40%, var(--navy-mid) 80%, #1d2e52 100%);
+  background: linear-gradient(135deg, var(--navy-deep) 0%, var(--navy) 40%, var(--navy-mid) 80%, var(--navy-mid) 100%);
   position: sticky;
   top: 0;
-  z-index: 1000;
+  z-index: var(--z-navbar);
   direction: rtl;
   width: 100%;
-  font-family: 'Cairo', sans-serif;
+  font-family: var(--font-family);
   border-bottom: 1px solid var(--gold-border);
-  box-shadow: var(--shadow-lg), 0 1px 0 rgba(201,151,42,0.15) inset;
+  box-shadow: var(--shadow-lg), 0 1px 0 rgba(196, 155, 58, 0.15) inset;
 }
 
 .navbar::before {
@@ -46,7 +28,7 @@
 }
 
 .navbar.scrolled {
-  box-shadow: 0 10px 40px rgba(8,14,32,0.55), 0 1px 0 rgba(201,151,42,0.15) inset;
+  box-shadow: 0 10px 40px rgba(8, 14, 32, 0.55), 0 1px 0 rgba(196, 155, 58, 0.15) inset;
 }
 
 /* ── Inner Layout ──────────────────────────────────────────── */
@@ -147,7 +129,7 @@
   gap: 6px;
   padding: 8px 11px;
   border-radius: var(--radius-sm);
-  font-family: 'Cairo', sans-serif;
+  font-family: var(--font-family);
   font-size: 0.845rem;
   font-weight: 600;
   color: var(--text-nav);
@@ -210,7 +192,7 @@
   background: rgba(192,57,43,0.1);
   border: 1px solid rgba(192,57,43,0.25);
   color: #ec9d98;
-  font-family: 'Cairo', sans-serif;
+  font-family: var(--font-family);
   font-size: 0.875rem;
   font-weight: 700;
   cursor: pointer;
@@ -262,7 +244,7 @@
   overflow: hidden;
   max-height: 0;
   opacity: 0;
-  background: linear-gradient(180deg, var(--navy-mid) 0%, #1c2b49 100%);
+  background: linear-gradient(180deg, var(--navy-mid) 0%, var(--navy) 100%);
   border-top: 1px solid rgba(255,255,255,0.06);
   transition: max-height 0.34s cubic-bezier(0.4,0,0.2,1), opacity 0.26s ease;
 }
@@ -285,7 +267,7 @@
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.07);
   color: var(--text-nav);
-  font-family: 'Cairo', sans-serif;
+  font-family: var(--font-family);
   font-size: 0.88rem;
   font-weight: 600;
   text-decoration: none;
@@ -321,7 +303,7 @@
 .notification-badge-mobile {
   position: absolute;
   top: -6px; left: -6px;
-  background: linear-gradient(135deg, #c0392b, #e74c3c);
+  background: linear-gradient(135deg, var(--danger), #e74c3c);
   color: #fff;
   font-size: 0.58rem;
   font-weight: 800;
@@ -332,7 +314,7 @@
   justify-content: center;
   border-radius: 10px;
   padding: 0 4px;
-  box-shadow: 0 2px 6px rgba(192,57,43,0.5), 0 0 0 2px var(--navy-mid);
+  box-shadow: 0 2px 6px rgba(192, 57, 43, 0.5), 0 0 0 2px var(--navy-mid);
   z-index: 2;
 }
 .notification-badge-mobile { top: -5px; left: -5px; min-width: 16px; height: 16px; font-size: 0.56rem; }
@@ -388,8 +370,8 @@
   display: flex;
   flex-direction: column;
   direction: rtl;
-  background: #f0f3fa;
-  font-family: 'Cairo', sans-serif;
+  background: var(--bg);
+  font-family: var(--font-family);
 }
 
 /* ── Accessibility & Motion ────────────────────────────────── */

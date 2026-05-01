@@ -1,0 +1,101 @@
+/* ══════════════════════════════════════════════════════════════
+   Student Section - Centralized Theme Variables
+   Single source of truth for all colors and design tokens
+══════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  /* ── Primary Colors ── */
+  --navy:        #1E3A5F;
+  --navy-mid:    #2D5F8A;
+  --navy-light:  #EBF3FB;
+  --navy-deep:   #152d4a;
+  
+  --gold:        #C49B3A;
+  --gold-dark:   #A67F2C;
+  --gold-bright: #e0aa35;
+  --gold-pale:   #FDF6E3;
+  --gold-border: rgba(196, 155, 58, 0.28);
+  
+  /* ── Neutral Colors ── */
+  --white:       #ffffff;
+  --bg:          #EDF2F8;
+  --border:      #E2ECF5;
+  --text:        #1A2E42;
+  --text-muted:  #6B8299;
+  
+  /* ── Navbar Specific ── */
+  --text-nav:    rgba(255, 255, 255, 0.82);
+  --text-nav-muted: rgba(255, 255, 255, 0.48);
+  
+  /* ── Status Colors ── */
+  --success:     #059669;
+  --success-bg:  #ECFDF5;
+  --success-border: #86EFAC;
+  
+  --warning:     #D97706;
+  --warning-bg:  #FEF3C7;
+  --warning-border: #FDE68A;
+  
+  --danger:      #c0392b;
+  --danger-bg:   #FEE2E2;
+  --danger-border: #FECACA;
+  
+  --info:        #0284C7;
+  --info-bg:     #E0F2FE;
+  --info-border: #7DD3FC;
+  
+  /* ── Spacing & Layout ── */
+  --radius:      10px;
+  --radius-sm:   8px;
+  --radius-lg:   14px;
+  
+  --shadow:      0 2px 12px rgba(26, 46, 66, 0.08);
+  --shadow-md:   0 4px 20px rgba(26, 46, 66, 0.12);
+  --shadow-lg:   0 8px 40px rgba(8, 14, 32, 0.45);
+  
+  --transition:  0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  --navbar-h:    90px;
+  --navbar-h-sm: 72px;
+  
+  --content-max: 1200px;
+  
+  /* ── Typography ── */
+  --font-family: 'Cairo', sans-serif;
+  
+  /* ── Z-Index Scale ── */
+  --z-navbar:    1000;
+  --z-modal:     2000;
+  --z-tooltip:   3000;
+}
+
+/* ── Global Resets ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* ── Accessibility ── */
+*:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Print Styles ── */
+@media print {
+  :root {
+    --shadow: none;
+    --shadow-md: none;
+    --shadow-lg: none;
+  }
+}

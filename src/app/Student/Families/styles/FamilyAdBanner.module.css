@@ -1,98 +1,91 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
-
-/* ═══════════════════════════════════════════
-   TOKENS — identical to admin page (doc 6)
-═══════════════════════════════════════════ */
-/* AFTER — prefixed, safe from collisions */
-:root {
-  --banner-navy:       #1E3A5F;
-  --banner-navy-mid:   #2D5F8A;
-  --banner-gold:       #C49B3A;
-  --banner-gold-dark:  #A67F2C;
-  --banner-white:      #FFFFFF;
-  --banner-border:     #E2ECF5;
-  --banner-radius:     10px;
-}
+/* ══════════════════════════════════════════════════════════════
+   Family Ad Banner Styles
+   Theme variables are defined in ../../styles/theme.css
+══════════════════════════════════════════════════════════════ */
 
 /* ═══════════════════════════════════════════
    WRAPPER
 ═══════════════════════════════════════════ */
 .bannerContainer {
   width: 100%;
-  font-family: 'Cairo', sans-serif;
+  max-width: 1200px;
+  margin: 28px auto;
+  padding: 0 28px;
+  font-family: var(--font-family);
   direction: rtl;
   box-sizing: border-box;
 }
 
 /* ═══════════════════════════════════════════
    CARD
-   — same gradient, border-radius 16px,
-     padding 24px 30px as .pageHeader in doc 6
 ═══════════════════════════════════════════ */
 .bannerCard {
   background: linear-gradient(140deg, var(--navy) 0%, var(--navy-mid) 100%);
   border-radius: 16px;
-  padding: 24px 30px;
-  box-shadow: 0 4px 18px rgba(30,58,95,.22);
+  padding: 32px 40px;
+  box-shadow: 0 4px 18px rgba(30, 58, 95, 0.22);
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: 28px;
   width: 100%;
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
-  transition: transform .2s, box-shadow .2s;
+  transition: transform var(--transition), box-shadow var(--transition);
 }
 
 .bannerCard:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(30,58,95,.32);
+  box-shadow: 0 8px 28px rgba(30, 58, 95, 0.32);
 }
 
-/* thin gold top accent — same visual language as the header */
 .bannerCard::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--gold), var(--gold-dark), var(--gold));
+  background: linear-gradient(90deg, transparent 0%, var(--gold) 20%, var(--gold-bright) 50%, var(--gold) 80%, transparent 100%);
 }
 
 /* ── glow orb ── */
 .bannerGlow {
   position: absolute;
-  top: -40px; left: -40px;
-  width: 200px; height: 200px;
-  background: radial-gradient(circle, rgba(196,155,58,.13) 0%, transparent 70%);
+  top: -40px;
+  left: -40px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(196, 155, 58, 0.13) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
 }
 
-/* ── icon circle — mirrors gold button shape ── */
+/* ── icon circle ── */
 .bannerIcon {
-  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 100%);
   border-radius: 50%;
-  width: 64px;
-  height: 64px;
-  min-width: 64px;
+  width: 72px;
+  height: 72px;
+  min-width: 72px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(196,155,58,.4);
+  box-shadow: 0 4px 16px rgba(196, 155, 58, 0.4);
   flex-shrink: 0;
   position: relative;
   z-index: 1;
-  transition: transform .2s, box-shadow .2s;
+  transition: transform var(--transition), box-shadow var(--transition);
 }
 
 .bannerCard:hover .bannerIcon {
   transform: scale(1.05);
-  box-shadow: 0 6px 22px rgba(196,155,58,.52);
+  box-shadow: 0 6px 22px rgba(196, 155, 58, 0.52);
 }
 
 .bannerIcon svg {
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
   color: var(--navy);
 }
 
@@ -105,56 +98,56 @@
   min-width: 0;
 }
 
-/* mirrors .pageTitle sizing */
 .bannerTitle {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 900;
   color: var(--white);
-  margin: 0 0 6px;
+  margin: 0 0 8px;
   line-height: 1.35;
   letter-spacing: -0.2px;
+  font-family: var(--font-family);
 }
 
-/* mirrors .pageSubtitle */
 .bannerDescription {
-  font-size: 14px;
-  color: rgba(255,255,255,.65);
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.7);
   margin: 0;
   line-height: 1.7;
   font-weight: 500;
+  font-family: var(--font-family);
 }
 
-/* ── CTA — mirrors .btnAddUser exactly ── */
+/* ── CTA Button ── */
 .bannerButton {
-  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
-  color: #fff;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 100%);
+  color: var(--navy);
   border: none;
-  padding: 13px 28px;
+  padding: 14px 32px;
   border-radius: var(--radius);
-  font-family: 'Cairo', sans-serif;
+  font-family: var(--font-family);
   font-size: 16px;
   font-weight: 800;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  box-shadow: 0 4px 16px rgba(196,155,58,.4);
+  box-shadow: 0 4px 16px rgba(196, 155, 58, 0.4);
   white-space: nowrap;
   flex-shrink: 0;
   position: relative;
   z-index: 1;
-  transition: all .2s;
+  transition: all var(--transition);
 }
 
 .bannerButton:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 22px rgba(196,155,58,.52);
+  box-shadow: 0 6px 22px rgba(196, 155, 58, 0.52);
 }
 
 .arrowIcon {
-  width: 16px;
-  height: 16px;
-  transition: transform .2s;
+  width: 18px;
+  height: 18px;
+  transition: transform var(--transition);
   flex-shrink: 0;
 }
 
@@ -165,17 +158,53 @@
 /* ═══════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .bannerContainer {
+    padding: 0 24px;
+  }
+  .bannerCard {
+    padding: 28px 32px;
+    gap: 24px;
+  }
+}
+
 @media (max-width: 900px) {
-  .bannerCard    { padding: 20px 24px; gap: 18px; }
-  .bannerIcon    { width: 56px; height: 56px; min-width: 56px; }
-  .bannerIcon svg { width: 26px; height: 26px; }
-  .bannerTitle   { font-size: 18px; }
+  .bannerCard {
+    padding: 24px 28px;
+    gap: 20px;
+  }
+  .bannerIcon {
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+  }
+  .bannerIcon svg {
+    width: 30px;
+    height: 30px;
+  }
+  .bannerTitle {
+    font-size: 20px;
+  }
+  .bannerDescription {
+    font-size: 14px;
+  }
 }
 
 @media (max-width: 768px) {
-  .bannerCard    { padding: 20px 22px; gap: 16px; border-radius: 12px; }
-  .bannerTitle   { font-size: 17px; }
-  .bannerDescription { font-size: 13px; }
+  .bannerContainer {
+    padding: 0 20px;
+  }
+  .bannerCard {
+    padding: 22px 24px;
+    gap: 18px;
+    border-radius: 12px;
+  }
+  .bannerTitle {
+    font-size: 18px;
+  }
+  .bannerDescription {
+    font-size: 13px;
+  }
 }
 
 @media (max-width: 700px) {
@@ -183,29 +212,42 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 24px 20px;
+    padding: 28px 24px;
   }
-  .bannerContent { text-align: center; }
-  .bannerButton  { width: 100%; justify-content: center; }
+  .bannerContent {
+    text-align: center;
+  }
+  .bannerButton {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 @media (max-width: 480px) {
-  .bannerCard    { padding: 20px 16px; border-radius: 10px; }
-  .bannerIcon    { width: 52px; height: 52px; min-width: 52px; }
-  .bannerIcon svg { width: 24px; height: 24px; }
-  .bannerTitle   { font-size: 16px; }
-  .bannerDescription { font-size: 13px; }
-  .bannerButton  { font-size: 15px; padding: 12px 20px; }
-}
-/* ═══════════════════════════════════════════
-   WRAPPER
-═══════════════════════════════════════════ */
-.bannerContainer {
-  width: 100%;
-  max-width: 900px;        /* ← constrains width so it doesn't span the full page */
-  margin: 28px auto;       /* ← centers it horizontally + adds vertical breathing room */
-  padding: 0 16px;         /* ← side padding so it doesn't touch viewport edges on mobile */
-  font-family: 'Cairo', sans-serif;
-  direction: rtl;
-  box-sizing: border-box;
+  .bannerContainer {
+    padding: 0 16px;
+  }
+  .bannerCard {
+    padding: 24px 20px;
+    border-radius: 10px;
+  }
+  .bannerIcon {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+  }
+  .bannerIcon svg {
+    width: 26px;
+    height: 26px;
+  }
+  .bannerTitle {
+    font-size: 17px;
+  }
+  .bannerDescription {
+    font-size: 13px;
+  }
+  .bannerButton {
+    font-size: 15px;
+    padding: 12px 24px;
+  }
 }

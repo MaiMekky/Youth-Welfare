@@ -267,14 +267,14 @@ export default function ScoutsPage() {
       heading: "طلبك قيد المراجعة",
       sub: "تم استلام طلبك وهو قيد المراجعة من قبل مسؤول الكلية",
       statusBadge: { label: "قيد المراجعة", color: "#D97706", bg: "rgba(217,119,6,.08)", border: "rgba(217,119,6,.28)" },
-      primaryBtn: { label: "متابعة الطلب", icon: <IconClock size={18} />, href: "/Student/Scouts/Track" },
+      primaryBtn: null,
       secondaryBtn: null,
     };
     if (normalized === "preliminary_approved") return {
       heading: "موافقة مبدئية على طلبك",
       sub: "يرجى التوجه إلى الكلية لتسليم الأوراق المطلوبة لاستكمال القبول",
       statusBadge: { label: "موافقة مبدئية", color: "#2D5F8A", bg: "#EBF3FB", border: "#B3D4EE" },
-      primaryBtn: { label: "متابعة الطلب", icon: <IconClock size={18} />, href: "/Student/Scouts/Track" },
+      primaryBtn: null,
       secondaryBtn: null,
     };
 
@@ -284,9 +284,7 @@ export default function ScoutsPage() {
       sub: isRejected ? "يمكنك تقديم طلب انضمام جديد الآن" : "انضم إلى عشيرة كليتك — سيتم مراجعة طلبك من قبل المسؤول",
       statusBadge: isRejected ? { label: "مرفوض سابقاً", color: "#DC2626", bg: "#FEF2F2", border: "#FECACA" } : null,
       primaryBtn: "join",
-      secondaryBtn: memberStatus
-        ? { label: "متابعة الطلبات", icon: <IconClock size={18} />, href: "/Student/Scouts/Track" }
-        : null,
+      secondaryBtn: null,
     };
   };
 

@@ -108,11 +108,14 @@ const AlertIcon = () => (
 /* ══════════════════════════════════════════
    COMPONENT
 ══════════════════════════════════════════ */
-export default function Teams({ eventId, studentId, isEventFinished }: TeamsProps) {
+export default function Teams({ eventId, studentId: studentIdProp, isEventFinished }: TeamsProps) {
   const { showToast } = useToast();
   
   const [loading, setLoading] = useState(true);
   const [myTeam, setMyTeam] = useState<Team | null>(null);
+
+  // ✅ FIX: resolve the real student ID — use prop if valid (>0), otherwise fetch from profile
+  const [resolvedStudentId, setResolvedStudentId] = useState<number>(studentIdProp || 0);
   
   // Form states
   const [createTeamName, setCreateTeamName] = useState('');
@@ -123,20 +126,53 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
   const [removingMemberId, setRemovingMemberId] = useState<number | null>(null);
   const [copiedCode, setCopiedCode] = useState(false);
 
-  // Load team data
+  // Load team data + resolve student ID
   useEffect(() => {
     loadTeamData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventId]);
 
+  // ✅ FIX: if prop is 0/invalid, sync whenever prop changes later (e.g. parent loads async)
+  useEffect(() => {
+    if (studentIdProp && studentIdProp > 0) {
+      setResolvedStudentId(studentIdProp);
+    }
+  }, [studentIdProp]);
+
   const loadTeamData = async () => {
     try {
       setLoading(true);
-      const myTeamsRes = await authFetch(`${getBaseUrl()}/api/event/student-teams/my-teams/`);
-      if (myTeamsRes.ok) {
-        const raw = await myTeamsRes.json();
+
+      // ✅ FIX: fetch student profile to get real ID when prop is 0
+      const fetchStudentId = async (): Promise<number> => {
+        if (studentIdProp && studentIdProp > 0) return studentIdProp;
+        try {
+          const profileRes = await authFetch(`${getBaseUrl()}/api/auth/profile/`);
+          if (profileRes.ok) {
+            const profile = await profileRes.json();
+            // Handle common API shapes: { student_id } / { id } / { data: { student_id } }
+            const id = profile?.student_id ?? profile?.data?.student_id ?? profile?.id ?? profile?.data?.id ?? 0;
+            return Number(id);
+          }
+        } catch {
+          // silent — fall through to 0
+        }
+        return 0;
+      };
+
+      const [teamsRes, fetchedId] = await Promise.all([
+        authFetch(`${getBaseUrl()}/api/event/student-teams/my-teams/`),
+        fetchStudentId(),
+      ]);
+
+      if (fetchedId > 0) {
+        setResolvedStudentId(fetchedId);
+      }
+
+      if (teamsRes.ok) {
+        const raw = await teamsRes.json();
         const teams: Team[] = raw.data ?? raw.results ?? (Array.isArray(raw) ? raw : []);
-        const eventTeam = teams.find(t => t.event === eventId);
+        const eventTeam = teams.find(t => Number(t.event) === Number(eventId));
         setMyTeam(eventTeam ?? null);
       }
     } catch (error) {
@@ -283,15 +319,14 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
 
   const copyJoinCode = () => {
     if (!myTeam) return;
-    
     navigator.clipboard.writeText(myTeam.join_code);
     setCopiedCode(true);
     showToast('تم نسخ الكود', 'success');
-    
     setTimeout(() => setCopiedCode(false), 2000);
   };
 
-  const isCaptain = myTeam && myTeam.captain === studentId;
+  // ✅ FIX: use resolvedStudentId everywhere instead of studentId prop
+  const isCaptain = myTeam && Number(myTeam.captain) === resolvedStudentId && resolvedStudentId > 0;
   const isApproved = myTeam?.status === 'مقبول';
   const isPending  = myTeam?.status === 'منتظر';
   const isRejected = myTeam?.status === 'مرفوض';
@@ -366,7 +401,7 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
                         <div className="member-details">
                           <h4>
                             {member.student_name}
-                            {member.student_id === studentId && (
+                            {Number(member.student_id) === resolvedStudentId && (
                               <span className="me-badge">(أنت)</span>
                             )}
                           </h4>
@@ -528,7 +563,6 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
             <span className="info-value">{activeMembers.length}</span>
           </div>
 
-          {/* Status Messages */}
           {isPending && (
             <div className="status-message status-pending">
               <AlertIcon />
@@ -564,7 +598,7 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
         <div className="members-list">
           {activeMembers.map((member) => {
             const isMemberCaptain = member.role === 'قائد';
-            const isMe = member.student_id === studentId;
+            const isMe = Number(member.student_id) === resolvedStudentId;
             
             return (
               <div key={member.member_id} className="member-item">
@@ -589,7 +623,6 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
                     </span>
                   )}
 
-                  {/* FIX: captain can remove any non-captain member (including when approved) */}
                   {isCaptain && !isMemberCaptain && !isMe && (
                     <button
                       className="btn-remove"
@@ -613,7 +646,6 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
         </div>
       </div>
 
-      {/* Actions — leave button, always visible to non-approved captains/members */}
       {!isApproved && (
         <div className="team-actions">
           <button

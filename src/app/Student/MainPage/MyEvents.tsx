@@ -356,7 +356,6 @@ export default function MyEvents() {
               ) : filtered.map(event => {
                 const st         = getStatus(event.participationStatus);
                 const isAccepted = event.participationStatus === 'مقبول';
-                const isPending  = event.participationStatus === 'قيد الانتظار';
                 const hasRank    = event.rank !== null;
 
                 return (
@@ -418,7 +417,7 @@ export default function MyEvents() {
                           <ResultIcon /> التفاصيل
                         </button>
 
-                        {isAccepted ? (
+                        {isAccepted && (
                           <>
                             <button className="btn-result" onClick={() => fetchResult(event)}>
                               <ResultIcon /> نتيجتي
@@ -432,11 +431,6 @@ export default function MyEvents() {
                               </button>
                             )}
                           </>
-                        ) : (
-                          <div className={`status-info-bar ${st.cls}`}>
-                            <span className="status-dot" style={{ background: st.dot }} />
-                            {isPending ? 'طلبك قيد المراجعة' : 'تم رفض طلبك'}
-                          </div>
                         )}
                       </div>
                     </div>

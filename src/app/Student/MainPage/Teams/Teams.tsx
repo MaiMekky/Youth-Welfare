@@ -47,6 +47,15 @@ interface TeamsProps {
   isEventFinished: boolean;
 }
 
+interface ConfirmDialogState {
+  open: boolean;
+  title: string;
+  message: string;
+  confirmLabel: string;
+  variant: 'danger' | 'warning';
+  onConfirm: () => void;
+}
+
 /* ══════════════════════════════════════════
    ICONS
 ══════════════════════════════════════════ */
@@ -105,6 +114,71 @@ const AlertIcon = () => (
   </svg>
 );
 
+const LogOutIcon = () => (
+  <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+    <polyline points="16 17 21 12 16 7"/>
+    <line x1="21" y1="12" x2="9" y2="12"/>
+  </svg>
+);
+
+const UserMinusIcon = () => (
+  <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+    <circle cx="9" cy="7" r="4"/>
+    <line x1="22" y1="11" x2="16" y2="11"/>
+  </svg>
+);
+
+/* ══════════════════════════════════════════
+   CONFIRM DIALOG COMPONENT
+══════════════════════════════════════════ */
+function ConfirmDialog({
+  open,
+  title,
+  message,
+  confirmLabel,
+  variant,
+  onConfirm,
+  onCancel,
+}: ConfirmDialogState & { onCancel: () => void }) {
+  if (!open) return null;
+
+  return (
+    <div className="confirm-overlay" onClick={onCancel}>
+      <div
+        className={`confirm-dialog confirm-dialog--${variant}`}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-title"
+        dir="rtl"
+      >
+        <div className={`confirm-icon-wrap confirm-icon-wrap--${variant}`}>
+          {variant === 'danger' ? <UserMinusIcon /> : <LogOutIcon />}
+        </div>
+
+        <div className="confirm-body">
+          <h4 id="confirm-title">{title}</h4>
+          <p>{message}</p>
+        </div>
+
+        <div className="confirm-actions">
+          <button className="btn-confirm-cancel" onClick={onCancel}>
+            إلغاء
+          </button>
+          <button
+            className={`btn-confirm-ok btn-confirm-ok--${variant}`}
+            onClick={() => { onConfirm(); onCancel(); }}
+          >
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ══════════════════════════════════════════
    COMPONENT
 ══════════════════════════════════════════ */
@@ -114,7 +188,6 @@ export default function Teams({ eventId, studentId: studentIdProp, isEventFinish
   const [loading, setLoading] = useState(true);
   const [myTeam, setMyTeam] = useState<Team | null>(null);
 
-  // ✅ FIX: resolve the real student ID — use prop if valid (>0), otherwise fetch from profile
   const [resolvedStudentId, setResolvedStudentId] = useState<number>(studentIdProp || 0);
   
   // Form states
@@ -126,13 +199,28 @@ export default function Teams({ eventId, studentId: studentIdProp, isEventFinish
   const [removingMemberId, setRemovingMemberId] = useState<number | null>(null);
   const [copiedCode, setCopiedCode] = useState(false);
 
+  // Confirm dialog state
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
+    open: false,
+    title: '',
+    message: '',
+    confirmLabel: '',
+    variant: 'danger',
+    onConfirm: () => {},
+  });
+
+  const closeConfirm = () =>
+    setConfirmDialog((prev) => ({ ...prev, open: false }));
+
+  const openConfirm = (opts: Omit<ConfirmDialogState, 'open'>) =>
+    setConfirmDialog({ ...opts, open: true });
+
   // Load team data + resolve student ID
   useEffect(() => {
     loadTeamData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventId]);
 
-  // ✅ FIX: if prop is 0/invalid, sync whenever prop changes later (e.g. parent loads async)
   useEffect(() => {
     if (studentIdProp && studentIdProp > 0) {
       setResolvedStudentId(studentIdProp);
@@ -143,19 +231,17 @@ export default function Teams({ eventId, studentId: studentIdProp, isEventFinish
     try {
       setLoading(true);
 
-      // ✅ FIX: fetch student profile to get real ID when prop is 0
       const fetchStudentId = async (): Promise<number> => {
         if (studentIdProp && studentIdProp > 0) return studentIdProp;
         try {
           const profileRes = await authFetch(`${getBaseUrl()}/api/auth/profile/`);
           if (profileRes.ok) {
             const profile = await profileRes.json();
-            // Handle common API shapes: { student_id } / { id } / { data: { student_id } }
             const id = profile?.student_id ?? profile?.data?.student_id ?? profile?.id ?? profile?.data?.id ?? 0;
             return Number(id);
           }
         } catch {
-          // silent — fall through to 0
+          // silent
         }
         return 0;
       };
@@ -254,67 +340,75 @@ export default function Teams({ eventId, studentId: studentIdProp, isEventFinish
 
   const handleLeaveTeam = async () => {
     if (!myTeam) return;
-    
-    if (!confirm('هل أنت متأكد من رغبتك في مغادرة الفريق؟')) {
-      return;
-    }
 
-    try {
-      setIsLeaving(true);
-      const res = await authFetch(
-        `${getBaseUrl()}/api/event/student-teams/${myTeam.team_id}/leave/`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+    openConfirm({
+      title: 'مغادرة الفريق',
+      message: `هل أنت متأكد من رغبتك في مغادرة فريق "${myTeam.name}"؟ لن تتمكن من العودة إلا بكود انضمام جديد.`,
+      confirmLabel: 'مغادرة الفريق',
+      variant: 'warning',
+      onConfirm: async () => {
+        try {
+          setIsLeaving(true);
+          const res = await authFetch(
+            `${getBaseUrl()}/api/event/student-teams/${myTeam.team_id}/leave/`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+            }
+          );
+
+          const data = await res.json();
+          
+          if (!res.ok) {
+            const errMsg = data.message || data.detail || 'فشل مغادرة الفريق';
+            throw new Error(errMsg);
+          }
+
+          showToast(data.message || 'تم مغادرة الفريق بنجاح', 'success');
+          setMyTeam(null);
+        } catch (error: any) {
+          showToast(error.message || 'حدث خطأ أثناء مغادرة الفريق', 'error');
+        } finally {
+          setIsLeaving(false);
         }
-      );
-
-      const data = await res.json();
-      
-      if (!res.ok) {
-        const errMsg = data.message || data.detail || 'فشل مغادرة الفريق';
-        throw new Error(errMsg);
-      }
-
-      showToast(data.message || 'تم مغادرة الفريق بنجاح', 'success');
-      setMyTeam(null);
-    } catch (error: any) {
-      showToast(error.message || 'حدث خطأ أثناء مغادرة الفريق', 'error');
-    } finally {
-      setIsLeaving(false);
-    }
+      },
+    });
   };
 
-  const handleRemoveMember = async (memberId: number, studentIdToRemove: number) => {
+  const handleRemoveMember = async (memberId: number, studentIdToRemove: number, memberName: string) => {
     if (!myTeam) return;
-    
-    if (!confirm('هل أنت متأكد من رغبتك في إزالة هذا العضو؟')) {
-      return;
-    }
 
-    try {
-      setRemovingMemberId(memberId);
-      const res = await authFetch(
-        `${getBaseUrl()}/api/event/student-teams/${myTeam.team_id}/members/${studentIdToRemove}/`,
-        {
-          method: 'DELETE',
+    openConfirm({
+      title: 'إزالة عضو',
+      message: `هل أنت متأكد من رغبتك في إزالة "${memberName}" من الفريق؟`,
+      confirmLabel: 'إزالة العضو',
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          setRemovingMemberId(memberId);
+          const res = await authFetch(
+            `${getBaseUrl()}/api/event/student-teams/${myTeam.team_id}/members/${studentIdToRemove}/`,
+            {
+              method: 'DELETE',
+            }
+          );
+
+          const data = await res.json();
+          
+          if (!res.ok) {
+            const errMsg = data.message || data.detail || 'فشل إزالة العضو';
+            throw new Error(errMsg);
+          }
+
+          showToast(data.message || 'تم إزالة العضو بنجاح', 'success');
+          await loadTeamData();
+        } catch (error: any) {
+          showToast(error.message || 'حدث خطأ أثناء إزالة العضو', 'error');
+        } finally {
+          setRemovingMemberId(null);
         }
-      );
-
-      const data = await res.json();
-      
-      if (!res.ok) {
-        const errMsg = data.message || data.detail || 'فشل إزالة العضو';
-        throw new Error(errMsg);
-      }
-
-      showToast(data.message || 'تم إزالة العضو بنجاح', 'success');
-      await loadTeamData();
-    } catch (error: any) {
-      showToast(error.message || 'حدث خطأ أثناء إزالة العضو', 'error');
-    } finally {
-      setRemovingMemberId(null);
-    }
+      },
+    });
   };
 
   const copyJoinCode = () => {
@@ -325,7 +419,6 @@ export default function Teams({ eventId, studentId: studentIdProp, isEventFinish
     setTimeout(() => setCopiedCode(false), 2000);
   };
 
-  // ✅ FIX: use resolvedStudentId everywhere instead of studentId prop
   const isCaptain = myTeam && Number(myTeam.captain) === resolvedStudentId && resolvedStudentId > 0;
   const isApproved = myTeam?.status === 'مقبول';
   const isPending  = myTeam?.status === 'منتظر';
@@ -351,6 +444,8 @@ export default function Teams({ eventId, studentId: studentIdProp, isEventFinish
   if (isEventFinished) {
     return (
       <div className="teams-container" dir="rtl">
+        <ConfirmDialog {...confirmDialog} onCancel={closeConfirm} />
+
         <div className="teams-header">
           <TrophyIcon />
           <h2>نتائج الفرق</h2>
@@ -434,6 +529,8 @@ export default function Teams({ eventId, studentId: studentIdProp, isEventFinish
   if (!myTeam) {
     return (
       <div className="teams-container" dir="rtl">
+        <ConfirmDialog {...confirmDialog} onCancel={closeConfirm} />
+
         <div className="teams-header">
           <UsersIcon />
           <h2>الفرق</h2>
@@ -521,6 +618,8 @@ export default function Teams({ eventId, studentId: studentIdProp, isEventFinish
   
   return (
     <div className="teams-container" dir="rtl">
+      <ConfirmDialog {...confirmDialog} onCancel={closeConfirm} />
+
       <div className="teams-header">
         <UsersIcon />
         <h2>فريقي</h2>
@@ -626,7 +725,7 @@ export default function Teams({ eventId, studentId: studentIdProp, isEventFinish
                   {isCaptain && !isMemberCaptain && !isMe && (
                     <button
                       className="btn-remove"
-                      onClick={() => handleRemoveMember(member.member_id, member.student_id)}
+                      onClick={() => handleRemoveMember(member.member_id, member.student_id, member.student_name)}
                       disabled={removingMemberId === member.member_id}
                     >
                       {removingMemberId === member.member_id ? (

@@ -117,6 +117,7 @@ const cd = res.headers.get("content-disposition");
               <option value="الفرقة الثالثة">الفرقة الثالثة</option>
               <option value="الفرقة الرابعة">الفرقة الرابعة</option>
               <option value="الفرقة الخامسة">الفرقة الخامسة</option>
+              <option value="الفرقة السادسة">الفرقة السادسة</option>
             </select>
 
             <div className={styles.modalButtons}>

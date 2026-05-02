@@ -18,7 +18,7 @@
   direction: rtl;
 }
 
-/* ─── Header banner (mirrors .hero) ──────────────────────────── */
+/* ─── Header banner ──────────────────────────────────────────── */
 .teamsHeader {
   background: linear-gradient(90deg, #1f254a 0%, #2C3A5F 60%, #3D4D75 100%);
   border-radius: 14px;
@@ -81,7 +81,7 @@
   position: relative;
 }
 
-/* ─── Ghost button (for header, mirrors .backBtn) ────────────── */
+/* ─── Ghost button ────────────────────────────────────────────── */
 .btnGhost {
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.08);
@@ -134,7 +134,7 @@
   box-shadow: none;
 }
 
-/* ─── Settings panel (mirrors .block) ────────────────────────── */
+/* ─── Settings panel ─────────────────────────────────────────── */
 .settingsPanel {
   background: #fff;
   border: 1px solid #e5e7eb;
@@ -331,7 +331,7 @@
   border-color: #d1d5db;
 }
 
-/* ─── Stats row (mirrors .statsRow) ─────────────────────────── */
+/* ─── Stats row ──────────────────────────────────────────────── */
 .teamsStats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -382,6 +382,83 @@
   font-weight: 700;
   color: #64748b;
   margin-top: 3px;
+}
+
+/* ─── Tabs ───────────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 6px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 6px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.tab {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+  position: relative;
+}
+
+.tab:hover:not(.tabActive) {
+  background: #f8fafc;
+  color: #2C3A5F;
+}
+
+.tabActive {
+  background: linear-gradient(135deg, #2C3A5F, #3D4D75);
+  color: #fff !important;
+  box-shadow: 0 6px 18px rgba(44, 58, 95, 0.28);
+  font-weight: 900;
+}
+
+.tabBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.tabActive .tabBadge {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.tabBadgeGold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #f59e0b;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.tabActive .tabBadgeGold {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 /* ─── Teams grid ─────────────────────────────────────────────── */
@@ -489,7 +566,6 @@
   margin-top: 4px;
 }
 
-/* status badge — same pattern as .badgeSuccess / .badgeBlue */
 .teamStatusBadge {
   display: inline-flex;
   align-items: center;
@@ -550,7 +626,6 @@
   align-items: center;
 }
 
-/* mirrors .actionBtn */
 .actBtn {
   border: 1px solid #e5e7eb;
   background: #fff;
@@ -574,7 +649,6 @@
 
 .actBtn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-/* mirrors .acceptBtn */
 .actAccept {
   background: #e7f8ee;
   color: #067647;
@@ -587,7 +661,6 @@
   box-shadow: 0 8px 18px rgba(6, 118, 71, 0.15);
 }
 
-/* mirrors .rejectBtn */
 .actReject {
   background: #fdebed;
   color: #b42318;
@@ -612,7 +685,6 @@
   box-shadow: 0 8px 18px rgba(55, 48, 163, 0.12);
 }
 
-/* chevron toggle */
 .chevronBtn {
   background: #f8fafc;
   border: 1px solid #e5e7eb;
@@ -632,7 +704,7 @@
   border-color: rgba(44, 58, 95, 0.2);
 }
 
-/* ─── Rejection banner inside card ───────────────────────────── */
+/* ─── Rejection banner ───────────────────────────────────────── */
 .rejectionBanner {
   display: flex;
   align-items: flex-start;
@@ -671,7 +743,6 @@
   margin-bottom: 10px;
 }
 
-/* mirrors .tableWrap / .table */
 .membersTableWrap {
   width: 100%;
   overflow-x: auto;
@@ -989,8 +1060,7 @@
   gap: 5px;
 }
 
-.modalInput,
-.modalTextarea {
+.modalInput {
   width: 100%;
   border: 1px solid #e9edf5;
   border-radius: 12px;
@@ -1004,13 +1074,53 @@
   font-family: inherit;
 }
 
-.modalInput:focus,
-.modalTextarea:focus {
+.modalInput:focus {
   border-color: #b7c6ff;
   box-shadow: 0 0 0 4px rgba(110, 140, 255, 0.18);
 }
 
-.modalTextarea { resize: vertical; min-height: 80px; }
+/* Captain/member select */
+.modalSelect {
+  width: 100%;
+  border: 1px solid #e9edf5;
+  border-radius: 12px;
+  padding: 10px 12px;
+  outline: none;
+  font-weight: 700;
+  color: #2C3A5F;
+  background: #fff;
+  font-size: 14px;
+  transition: border-color 150ms, box-shadow 150ms;
+  font-family: inherit;
+  appearance: none;
+  cursor: pointer;
+}
+
+.modalSelect:focus {
+  border-color: #b7c6ff;
+  box-shadow: 0 0 0 4px rgba(110, 140, 255, 0.18);
+}
+
+.modalTextarea {
+  width: 100%;
+  border: 1px solid #e9edf5;
+  border-radius: 12px;
+  padding: 10px 12px;
+  outline: none;
+  font-weight: 700;
+  color: #2C3A5F;
+  background: #fff;
+  font-size: 14px;
+  transition: border-color 150ms, box-shadow 150ms;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.modalTextarea:focus {
+  border-color: #b7c6ff;
+  box-shadow: 0 0 0 4px rgba(110, 140, 255, 0.18);
+}
 
 .modalHint {
   font-size: 11px;
@@ -1027,7 +1137,6 @@
   background: #fff;
 }
 
-/* save = primary navy */
 .btnSave {
   border: 0;
   background: #2C3A5F;
@@ -1052,9 +1161,8 @@
 
 .btnSave:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
 
-/* reject = red danger */
 .btnRejectFinal {
-  border: 0;
+  border: 1px solid #f5b5ba;
   background: #fdebed;
   color: #b42318;
   border-radius: 12px;
@@ -1065,7 +1173,6 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid #f5b5ba;
   transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
 }
 
@@ -1078,7 +1185,7 @@
 
 .btnRejectFinal:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-/* ─── Winner toggle row (result modal) ───────────────────────── */
+/* ─── Winner toggle row ──────────────────────────────────────── */
 .winnerToggle {
   display: flex;
   align-items: center;
@@ -1106,50 +1213,139 @@
   font-size: 14px;
 }
 
-/* ─── Participants quick-select chips ────────────────────────── */
-.participantChips {
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
+/* ─── Members checkbox grid (create modal) ───────────────────── */
+.membersCheckboxGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid #e9edf5;
   border-radius: 12px;
-  padding: 12px;
+  padding: 10px;
+  background: #fafbff;
 }
 
-.participantChipsLabel {
-  font-size: 11px;
-  font-weight: 900;
-  color: #94a3b8;
-  margin-bottom: 8px;
-}
-
-.participantChipsWrap {
+.memberCheckboxItem {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.participantChip {
-  background: #eef2ff;
-  color: #2C3A5F;
-  border: 1px solid #c7d2fe;
-  padding: 4px 9px;
-  border-radius: 8px;
-  font-size: 11px;
-  font-weight: 800;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 11px;
+  border-radius: 10px;
+  border: 1px solid #e9edf5;
+  background: #fff;
   cursor: pointer;
-  transition: background 140ms, border-color 140ms, transform 140ms;
+  transition: background 150ms, border-color 150ms, box-shadow 150ms;
   user-select: none;
 }
 
-.participantChip:hover {
-  background: #e0e7ff;
-  border-color: #a5b4fc;
-  transform: translateY(-1px);
+.memberCheckboxItem:hover {
+  background: #f0f4ff;
+  border-color: #c7d2fe;
 }
 
-.participantChipSelected {
+.memberCheckboxChecked {
+  background: #eef2ff !important;
+  border-color: #818cf8 !important;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.12);
+}
+
+.memberCheckboxCaptain {
+  background: linear-gradient(135deg, #fefce8, #fef9c3) !important;
+  border-color: #fcd34d !important;
+  cursor: default;
+}
+
+.hiddenCheckbox {
+  display: none;
+}
+
+.checkboxCustom {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 2px solid #cbd5e1;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  transition: background 150ms, border-color 150ms;
+  color: #fff;
+}
+
+.memberCheckboxChecked .checkboxCustom {
+  background: #2C3A5F;
+  border-color: #2C3A5F;
+}
+
+.memberCheckboxCaptain .checkboxCustom {
+  background: #f59e0b;
+  border-color: #f59e0b;
+}
+
+.memberCheckboxInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.memberCheckboxName {
+  font-size: 12px;
+  font-weight: 800;
+  color: #2C3A5F;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.captainTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 900;
+  color: #92400e;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border: 1px solid #fcd34d;
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+.memberCountBadge {
+  margin-right: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
   background: #2C3A5F;
   color: #fff;
-  border-color: #2C3A5F;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.captainNote {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #92400e;
+  background: #fef9c3;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.emptyParticipantsNote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  padding: 10px 12px;
 }
 
 /* ─── Responsive ─────────────────────────────────────────────── */
@@ -1165,13 +1361,15 @@
     gap: 12px;
   }
 
-  .teamsHeaderLeft { justify-content: flex-end; }
+  .teamsHeaderLeft { justify-content: flex-start; }
   .teamsHeaderActions { justify-content: stretch; }
   .teamsHeaderActions > * { flex: 1; justify-content: center; }
 
   .teamCardHeader { flex-direction: column; align-items: flex-start; }
   .teamCardRight  { width: 100%; justify-content: space-between; }
   .teamCardActions { flex-wrap: wrap; }
+
+  .membersCheckboxGrid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 560px) {
@@ -1186,6 +1384,9 @@
   .actBtn { padding: 6px 9px; font-size: 11px; }
 
   .modalCard { width: 98vw; border-radius: 14px; }
+
+  .tabs { flex-direction: row; }
+  .tab { font-size: 12px; padding: 8px 10px; }
 }
 
 @media (max-width: 400px) {

@@ -45,14 +45,24 @@ async function apiFetch<T>(
 
     if (!res.ok) {
       const raw = maybeJson as Record<string, unknown> | string | null;
-      const msg =
-        (typeof raw === "object" && raw !== null &&
-          (String((raw as Record<string, unknown>).detail ?? "") ||
-            String((raw as Record<string, unknown>).message ?? "") ||
-            String((raw as Record<string, unknown>).error ?? ""))) ||
-        (typeof raw === "string" ? raw : "") ||
-        `طلب غير ناجح (${res.status})`;
-      return { ok: false, message: msg || `خطأ (${res.status})`, status: res.status };
+      let msg = "";
+      if (typeof raw === "object" && raw !== null) {
+        msg =
+          String((raw as Record<string, unknown>).detail ?? "") ||
+          String((raw as Record<string, unknown>).message ?? "") ||
+          String((raw as Record<string, unknown>).error ?? "") ||
+          Object.values(raw as Record<string, unknown>)
+            .flatMap((v) => (Array.isArray(v) ? v : [v]))
+            .filter(Boolean)
+            .join(" | ");
+      } else if (typeof raw === "string") {
+        msg = raw;
+      }
+      return {
+        ok: false,
+        message: msg || `طلب غير ناجح (${res.status})`,
+        status: res.status,
+      };
     }
     return { ok: true, data: maybeJson as T };
   } catch (e: unknown) {
@@ -126,6 +136,8 @@ type Props = {
   eventId: string;
   isFacultyEvent?: boolean;
   participants?: { id: number; studentId: string; name: string }[];
+  /** Called with `true` when settings have been saved (teams system is active) */
+  onTeamsConfigured?: (configured: boolean) => void;
 };
 
 /* ─────────────────────────── Settings form type ─────────────────────────── */
@@ -138,13 +150,14 @@ type SettingFormState = {
   require_team_approval: boolean;
 };
 
-const defaultSettingForm: SettingFormState = {
+// Blank defaults for CREATE mode — no pre-filled values
+const blankSettingForm: SettingFormState = {
   enabled: true,
-  min_members: 2,
-  max_members: 10,
+  min_members: "",
+  max_members: "",
   max_teams: "",
   allow_individual_join: false,
-  require_team_approval: true,
+  require_team_approval: false,
 };
 
 /* ─────────────────────────── Helpers ─────────────────────────── */
@@ -170,7 +183,12 @@ function memberStatusClass(status: string): string {
 /* ════════════════════════════════════════════════════════════════
    COMPONENT
 ════════════════════════════════════════════════════════════════ */
-export default function EventTeams({ eventId, isFacultyEvent = false, participants = [] }: Props) {
+export default function EventTeams({
+  eventId,
+  isFacultyEvent = false,
+  participants = [],
+  onTeamsConfigured,
+}: Props) {
   const { showToast } = useToast();
 
   /* ── data ── */
@@ -186,14 +204,17 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   /* ── settings form ── */
-  const [settingForm, setSettingForm] = useState<SettingFormState>(defaultSettingForm);
+  const [settingForm, setSettingForm] = useState<SettingFormState>(blankSettingForm);
   const [savingSettings, setSavingSettings] = useState(false);
-  // snapshot to detect changes
   const settingsSnapshot = useRef<string>("");
 
   /* ── create form ── */
   const [createOpen, setCreateOpen] = useState(false);
-  const [createForm, setCreateForm] = useState({ name: "", captain_id: "", student_ids: "" });
+  const [createForm, setCreateForm] = useState<{
+    name: string;
+    captain_id: string;
+    member_ids: string[];
+  }>({ name: "", captain_id: "", member_ids: [] });
   const [creating, setCreating] = useState(false);
 
   /* ── modals ── */
@@ -215,18 +236,13 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
     setLoadingSettings(false);
     if (res.ok) {
       setSettings(res.data);
-      const form: SettingFormState = {
-        enabled: res.data.enabled,
-        min_members: res.data.min_members,
-        max_members: res.data.max_members,
-        max_teams: res.data.max_teams >= 2147483647 ? "" : res.data.max_teams,
-        allow_individual_join: res.data.allow_individual_join,
-        require_team_approval: res.data.require_team_approval,
-      };
-      setSettingForm(form);
-      settingsSnapshot.current = JSON.stringify(form);
+      // Notify parent whether teams system is configured
+      onTeamsConfigured?.(!!res.data?.setting_id && res.data.enabled);
+    } else {
+      // No settings yet — teams not configured
+      onTeamsConfigured?.(false);
     }
-  }, [eventId]);
+  }, [eventId, onTeamsConfigured]);
 
   const loadTeams = useCallback(async () => {
     setLoadingTeams(true);
@@ -255,8 +271,13 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
 
   /* ─────────── open settings panel ─────────── */
   const openSettings = () => {
-    // If editing, pre-fill from current settings
+    if (settingsOpen) {
+      setSettingsOpen(false);
+      return;
+    }
+
     if (settings?.setting_id) {
+      // EDIT MODE: pre-fill from saved settings
       const form: SettingFormState = {
         enabled: settings.enabled,
         min_members: settings.min_members,
@@ -268,15 +289,15 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
       setSettingForm(form);
       settingsSnapshot.current = JSON.stringify(form);
     } else {
-      setSettingForm(defaultSettingForm);
+      // CREATE MODE: blank form, no pre-filled values
+      setSettingForm(blankSettingForm);
       settingsSnapshot.current = "";
     }
-    setSettingsOpen(v => !v);
+    setSettingsOpen(true);
   };
 
   /* ─────────── save settings ─────────── */
   const saveSettings = async () => {
-    // Validate
     const minM = Number(settingForm.min_members);
     const maxM = Number(settingForm.max_members);
     if (!settingForm.min_members || minM < 1) {
@@ -291,7 +312,7 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
 
     // Detect no changes on edit
     const currentJson = JSON.stringify(settingForm);
-    if (settings?.setting_id && currentJson === settingsSnapshot.current) {
+    if (settings?.setting_id && settingsSnapshot.current && currentJson === settingsSnapshot.current) {
       showToast("⚠️ لم تقم بأي تعديل على الإعدادات", "warning"); return;
     }
 
@@ -314,7 +335,11 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
 
     if (!res.ok) { showToast(res.message, "error"); return; }
 
+    // Update local settings state with fresh data from server
     setSettings(res.data);
+    // Notify parent that teams are now configured
+    onTeamsConfigured?.(res.data.enabled)
+
     settingsSnapshot.current = JSON.stringify(settingForm);
     setSettingsOpen(false);
     showToast(isEdit ? "✅ تم تحديث إعدادات الفرق" : "✅ تم حفظ إعدادات الفرق", "success");
@@ -323,21 +348,30 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
   /* ─────────── create team ─────────── */
   const createTeam = async () => {
     if (!createForm.name.trim()) { showToast("⚠️ اسم الفريق مطلوب", "warning"); return; }
-    if (!createForm.captain_id.trim()) { showToast("⚠️ رقم القائد مطلوب", "warning"); return; }
-    const studentIds = createForm.student_ids
-      .split(",").map(s => Number(s.trim())).filter(n => n > 0);
-    if (studentIds.length === 0) { showToast("⚠️ أدخل أرقام الطلاب", "warning"); return; }
+    if (!createForm.captain_id) { showToast("⚠️ يجب اختيار القائد", "warning"); return; }
+    if (createForm.member_ids.length === 0) { showToast("⚠️ يجب اختيار الأعضاء", "warning"); return; }
+
+    const allIds = [...new Set([createForm.captain_id, ...createForm.member_ids])];
+    const studentIds = allIds.map(s => Number(s)).filter(n => n > 0);
+    const captainId = Number(createForm.captain_id);
 
     setCreating(true);
     const res = await apiFetch<Team>(
       `/api/event/manage-teams/events/${eventId}/create-team/`,
-      { method: "POST", body: JSON.stringify({ name: createForm.name.trim(), captain_id: Number(createForm.captain_id), student_ids: studentIds }) }
+      {
+        method: "POST",
+        body: JSON.stringify({
+          name: createForm.name.trim(),
+          captain_id: captainId,
+          student_ids: studentIds,
+        }),
+      }
     );
     setCreating(false);
     if (!res.ok) { showToast(res.message, "error"); return; }
     showToast("✅ تم إنشاء الفريق بنجاح", "success");
     setCreateOpen(false);
-    setCreateForm({ name: "", captain_id: "", student_ids: "" });
+    setCreateForm({ name: "", captain_id: "", member_ids: [] });
     await loadTeams();
   };
 
@@ -409,22 +443,24 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
     });
   };
 
-  /* ─────────── add participant chip ─────────── */
-  const addParticipantChip = (studentId: string) => {
-    const current = createForm.student_ids
-      .split(",").map(s => s.trim()).filter(Boolean);
-    if (!current.includes(studentId)) {
-      setCreateForm(p => ({
-        ...p,
-        student_ids: [...current, studentId].join(", "),
-      }));
-    }
+  /* ─────────── toggle member checkbox ─────────── */
+  const toggleMember = (studentId: string) => {
+    setCreateForm(prev => {
+      const exists = prev.member_ids.includes(studentId);
+      return {
+        ...prev,
+        member_ids: exists
+          ? prev.member_ids.filter(id => id !== studentId)
+          : [...prev.member_ids, studentId],
+      };
+    });
   };
 
   /* ─────────── derived ─────────── */
   const pendingCount = teams.filter(t => t.status === "منتظر").length;
   const acceptedCount = teams.filter(t => t.status === "مقبول").length;
   const totalMembers = teams.reduce((s, t) => s + t.members_count, 0);
+  const settingsConfigured = !!settings?.setting_id;
 
   /* ════════════════════════════════════════════════════════════════
      RENDER
@@ -455,22 +491,24 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
               onClick={openSettings}
               disabled={loadingSettings}
             >
-              {settings?.setting_id ? <Settings size={15} /> : <Zap size={15} />}
-              {settingsOpen
-                ? "إغلاق"
-                : settings?.setting_id
-                ? "تعديل الإعدادات"
-                : "إعداد الفرق"}
+            {settingsConfigured ? <Settings size={15} /> : <Zap size={15} />}
+            {settingsOpen
+              ? "إغلاق"
+              : settingsConfigured
+              ? "تعديل الإعدادات"
+              : "إعداد الفرق"}
               {settingsOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             </button>
 
-            <button
-              className={styles.btnEmerald}
-              onClick={() => setCreateOpen(true)}
-            >
-              <Plus size={15} />
-              إنشاء فريق
-            </button>
+            {settingsConfigured && (
+              <button
+                className={styles.btnEmerald}
+                onClick={() => setCreateOpen(true)}
+              >
+                <Plus size={15} />
+                إنشاء فريق
+              </button>
+            )}
 
             <button
               className={styles.btnGhost}
@@ -511,12 +549,12 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
                 className={styles.settingsInput}
                 type="number"
                 min={1}
-                value={settingForm.min_members === 0 ? "" : settingForm.min_members}
+                value={settingForm.min_members}
                 placeholder="مثال: 2"
                 onChange={e =>
                   setSettingForm(p => ({
                     ...p,
-                    min_members: e.target.value === "" ? "" : Number(e.target.value),
+                    min_members: e.target.value === "" ? "" : Math.max(1, Number(e.target.value)),
                   }))
                 }
               />
@@ -530,12 +568,12 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
                 className={styles.settingsInput}
                 type="number"
                 min={1}
-                value={settingForm.max_members === 0 ? "" : settingForm.max_members}
+                value={settingForm.max_members}
                 placeholder="مثال: 10"
                 onChange={e =>
                   setSettingForm(p => ({
                     ...p,
-                    max_members: e.target.value === "" ? "" : Number(e.target.value),
+                    max_members: e.target.value === "" ? "" : Math.max(1, Number(e.target.value)),
                   }))
                 }
               />
@@ -554,14 +592,14 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
                 onChange={e =>
                   setSettingForm(p => ({
                     ...p,
-                    max_teams: e.target.value === "" ? "" : Number(e.target.value),
+                    max_teams: e.target.value === "" ? "" : Math.max(1, Number(e.target.value)),
                   }))
                 }
               />
             </div>
           </div>
 
-          {/* Toggles */}
+          {/* Toggles — display real saved values when editing */}
           <div className={styles.settingsGrid}>
             <div
               className={styles.toggleWrap}
@@ -614,8 +652,8 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
         </div>
       )}
 
-      {/* ══ SETTINGS INFO PILLS ══ */}
-      {settings?.setting_id && (
+      {/* ══ SETTINGS INFO PILLS — show real saved values from DB ══ */}
+      {settingsConfigured && settings && (
         <div className={styles.teamsStats}>
           <div className={`${styles.statPill} ${styles.statPillAccent}`}>
             <div className={styles.statPillLabel}>أعضاء الفريق</div>
@@ -644,6 +682,31 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
             <div className={styles.statPillValue}>{acceptedCount}</div>
             <div className={styles.statPillSub}>تم قبولها</div>
           </div>
+
+          {/* ── Toggle status pills showing real saved values ── */}
+          <div className={`${styles.statPill} ${settings.enabled ? styles.statPillGreen : styles.statPillAccent}`}>
+            <div className={styles.statPillLabel}>نظام الفرق</div>
+            <div className={styles.statPillValue} style={{ fontSize: "0.85rem" }}>
+              {settings.enabled ? "مفعّل" : "معطّل"}
+            </div>
+            <div className={styles.statPillSub}>الحالة</div>
+          </div>
+
+          <div className={`${styles.statPill} ${settings.allow_individual_join ? styles.statPillGreen : styles.statPillIndigo}`}>
+            <div className={styles.statPillLabel}>الانضمام الفردي</div>
+            <div className={styles.statPillValue} style={{ fontSize: "0.85rem" }}>
+              {settings.allow_individual_join ? "مسموح" : "غير مسموح"}
+            </div>
+            <div className={styles.statPillSub}>الإعداد</div>
+          </div>
+
+          <div className={`${styles.statPill} ${settings.require_team_approval ? styles.statPillBlue : styles.statPillAccent}`}>
+            <div className={styles.statPillLabel}>موافقة الإدارة</div>
+            <div className={styles.statPillValue} style={{ fontSize: "0.85rem" }}>
+              {settings.require_team_approval ? "مطلوبة" : "غير مطلوبة"}
+            </div>
+            <div className={styles.statPillSub}>الإعداد</div>
+          </div>
         </div>
       )}
 
@@ -653,6 +716,7 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
           <button
             className={`${styles.tab} ${activeTab === "teams" ? styles.tabActive : ""}`}
             onClick={() => setActiveTab("teams")}
+            type="button"
           >
             <Users size={14} />
             الفرق
@@ -663,6 +727,7 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
           <button
             className={`${styles.tab} ${activeTab === "ranking" ? styles.tabActive : ""}`}
             onClick={() => setActiveTab("ranking")}
+            type="button"
           >
             <Trophy size={14} />
             الترتيب
@@ -693,6 +758,8 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
           ) : (
             teams.map((team, idx) => {
               const isExpanded = expandedTeam === team.team_id;
+              const resultAssigned = team.rank !== null;
+
               return (
                 <div
                   key={team.team_id}
@@ -735,11 +802,11 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
                       className={styles.teamCardRight}
                       onClick={e => e.stopPropagation()}
                     >
-                      {/* Copy code */}
                       <button
                         className={styles.actBtn}
                         onClick={() => copyCode(team.team_id, team.join_code)}
                         title="نسخ كود الانضمام"
+                        type="button"
                       >
                         {copyFeedback === team.team_id ? (
                           <><Check size={13} /> تم النسخ</>
@@ -748,7 +815,6 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
                         )}
                       </button>
 
-                      {/* Actions */}
                       {!isFacultyEvent && (
                         <div className={styles.teamCardActions}>
                           {team.status === "منتظر" && (
@@ -757,6 +823,7 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
                                 className={`${styles.actBtn} ${styles.actAccept}`}
                                 disabled={busy}
                                 onClick={() => approveTeam(team.team_id)}
+                                type="button"
                               >
                                 <Check size={14} /> قبول
                               </button>
@@ -767,29 +834,34 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
                                   setRejectModal({ teamId: team.team_id, name: team.name });
                                   setRejectReason("");
                                 }}
+                                type="button"
                               >
                                 <X size={14} /> رفض
                               </button>
                             </>
                           )}
-                          <button
-                            className={`${styles.actBtn} ${styles.actResult}`}
-                            disabled={busy}
-                            onClick={() =>
-                              setResultModal({
-                                teamId: team.team_id,
-                                name: team.name,
-                                rank: team.rank ?? "",
-                                is_winner: team.is_winner,
-                              })
-                            }
-                          >
-                            <Medal size={14} /> النتيجة
-                          </button>
+
+                          {!resultAssigned && (
+                            <button
+                              className={`${styles.actBtn} ${styles.actResult}`}
+                              disabled={busy}
+                              onClick={() =>
+                                setResultModal({
+                                  teamId: team.team_id,
+                                  name: team.name,
+                                  rank: team.rank ?? "",
+                                  is_winner: team.is_winner,
+                                })
+                              }
+                              type="button"
+                            >
+                              <Medal size={14} /> النتيجة
+                            </button>
+                          )}
                         </div>
                       )}
 
-                      <button className={styles.chevronBtn}>
+                      <button className={styles.chevronBtn} type="button">
                         {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </button>
                     </div>
@@ -840,9 +912,7 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
                                   )}
                                 </td>
                                 <td>
-                                  <span
-                                    className={`${styles.memberStatusBadge} ${memberStatusClass(m.status)}`}
-                                  >
+                                  <span className={`${styles.memberStatusBadge} ${memberStatusClass(m.status)}`}>
                                     {m.status}
                                   </span>
                                 </td>
@@ -853,11 +923,10 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
                                         className={styles.delMemberBtn}
                                         disabled={deletingMember === `${team.team_id}-${m.student_id}`}
                                         onClick={() => deleteMember(team.team_id, m.student_id)}
+                                        type="button"
                                       >
                                         <UserMinus size={12} />
-                                        {deletingMember === `${team.team_id}-${m.student_id}`
-                                          ? "..."
-                                          : "إزالة"}
+                                        {deletingMember === `${team.team_id}-${m.student_id}` ? "..." : "إزالة"}
                                       </button>
                                     ) : (
                                       <span style={{ fontSize: 11, color: "#94a3b8", fontWeight: 700 }}>
@@ -922,17 +991,14 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
 
       {/* ── Create Team Modal ── */}
       {createOpen && (
-        <div
-          className={styles.modalOverlay}
-          onClick={() => setCreateOpen(false)}
-        >
+        <div className={styles.modalOverlay} onClick={() => setCreateOpen(false)}>
           <div className={styles.modalCard} onClick={e => e.stopPropagation()}>
             <div className={styles.modalHead}>
               <div>
                 <div className={styles.modalTitle}>إنشاء فريق جديد</div>
-                <div className={styles.modalSub}>أدخل بيانات الفريق والأعضاء</div>
+                <div className={styles.modalSub}>أدخل بيانات الفريق واختر الأعضاء</div>
               </div>
-              <button className={styles.modalClose} onClick={() => setCreateOpen(false)}>
+              <button className={styles.modalClose} onClick={() => setCreateOpen(false)} type="button">
                 <X size={16} />
               </button>
             </div>
@@ -952,69 +1018,103 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
 
               <div className={styles.modalField}>
                 <label className={styles.modalLabel}>
-                  <Crown size={13} /> رقم الطالب القائد (Student ID)
+                  <Crown size={13} /> اختر القائد
                 </label>
-                <input
-                  className={styles.modalInput}
-                  type="number"
-                  placeholder="أدخل الرقم الجامعي للقائد..."
-                  value={createForm.captain_id}
-                  onChange={e => setCreateForm(p => ({ ...p, captain_id: e.target.value }))}
-                />
+                {participants.length === 0 ? (
+                  <div className={styles.emptyParticipantsNote}>
+                    <AlertCircle size={14} color="#f59e0b" />
+                    لا يوجد مشاركون متاحون
+                  </div>
+                ) : (
+                  <select
+                    className={styles.modalSelect}
+                    value={createForm.captain_id}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setCreateForm(p => ({
+                        ...p,
+                        captain_id: val,
+                        member_ids: p.member_ids.includes(val)
+                          ? p.member_ids
+                          : val
+                          ? [...p.member_ids, val]
+                          : p.member_ids,
+                      }));
+                    }}
+                  >
+                    <option value="">-- اختر القائد --</option>
+                    {participants.map(p => (
+                      <option key={p.id} value={p.studentId}>
+                        {p.name} ({p.studentId})
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               <div className={styles.modalField}>
                 <label className={styles.modalLabel}>
-                  <User size={13} /> أرقام الأعضاء (مفصولة بفواصل)
+                  <Users size={13} /> اختر الأعضاء
+                  {createForm.member_ids.length > 0 && (
+                    <span className={styles.memberCountBadge}>{createForm.member_ids.length} محدد</span>
+                  )}
                 </label>
-                <input
-                  className={styles.modalInput}
-                  placeholder="مثال: 11, 34, 13"
-                  value={createForm.student_ids}
-                  onChange={e => setCreateForm(p => ({ ...p, student_ids: e.target.value }))}
-                />
-                <div className={styles.modalHint}>يشمل القائد وجميع الأعضاء</div>
-              </div>
-
-              {/* Quick-select chips */}
-              {participants.length > 0 && (
-                <div className={styles.participantChips}>
-                  <div className={styles.participantChipsLabel}>
-                    المشاركون المتاحون — اضغط لإضافة
+                {participants.length === 0 ? (
+                  <div className={styles.emptyParticipantsNote}>
+                    <AlertCircle size={14} color="#f59e0b" />
+                    لا يوجد مشاركون متاحون
                   </div>
-                  <div className={styles.participantChipsWrap}>
-                    {participants.slice(0, 24).map(p => {
-                      const selected = createForm.student_ids
-                        .split(",").map(s => s.trim()).includes(p.studentId);
+                ) : (
+                  <div className={styles.membersCheckboxGrid}>
+                    {participants.map(p => {
+                      const isChecked = createForm.member_ids.includes(p.studentId);
+                      const isCaptain = createForm.captain_id === p.studentId;
                       return (
-                        <span
+                        <label
                           key={p.id}
-                          className={`${styles.participantChip} ${selected ? styles.participantChipSelected : ""}`}
-                          onClick={() => addParticipantChip(p.studentId)}
-                          title={`إضافة ${p.name}`}
+                          className={`${styles.memberCheckboxItem} ${isChecked ? styles.memberCheckboxChecked : ""} ${isCaptain ? styles.memberCheckboxCaptain : ""}`}
                         >
-                          {p.name} ({p.studentId})
-                        </span>
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => {
+                              if (isCaptain) return;
+                              toggleMember(p.studentId);
+                            }}
+                            disabled={isCaptain}
+                            className={styles.hiddenCheckbox}
+                          />
+                          <div className={styles.checkboxCustom}>
+                            {isChecked && <Check size={10} />}
+                          </div>
+                          <div className={styles.memberCheckboxInfo}>
+                            <span className={styles.memberCheckboxName}>{p.name}</span>
+                            {isCaptain && (
+                              <span className={styles.captainTag}>
+                                <Crown size={9} /> قائد
+                              </span>
+                            )}
+                          </div>
+                        </label>
                       );
                     })}
                   </div>
-                </div>
-              )}
+                )}
+                {createForm.captain_id && (
+                  <div className={styles.captainNote}>
+                    <Crown size={11} color="#d97706" />
+                    القائد مُضاف تلقائياً ضمن الأعضاء
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className={styles.modalFooter}>
-              <button
-                className={styles.btnSave}
-                onClick={createTeam}
-                disabled={creating}
-              >
+              <button className={styles.btnSave} onClick={createTeam} disabled={creating} type="button">
                 <Plus size={15} />
                 {creating ? "جاري الإنشاء..." : "إنشاء الفريق"}
               </button>
-              <button
-                className={styles.btnCancel}
-                onClick={() => setCreateOpen(false)}
-              >
+              <button className={styles.btnCancel} onClick={() => setCreateOpen(false)} type="button">
                 إلغاء
               </button>
             </div>
@@ -1024,21 +1124,17 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
 
       {/* ── Reject Modal ── */}
       {rejectModal && (
-        <div
-          className={styles.modalOverlay}
-          onClick={() => setRejectModal(null)}
-        >
+        <div className={styles.modalOverlay} onClick={() => setRejectModal(null)}>
           <div className={styles.modalCard} onClick={e => e.stopPropagation()}>
             <div className={styles.modalHead}>
               <div>
                 <div className={styles.modalTitle}>رفض الفريق</div>
                 <div className={styles.modalSub}>{rejectModal.name}</div>
               </div>
-              <button className={styles.modalClose} onClick={() => setRejectModal(null)}>
+              <button className={styles.modalClose} onClick={() => setRejectModal(null)} type="button">
                 <X size={16} />
               </button>
             </div>
-
             <div className={styles.modalBody}>
               <div className={styles.modalField}>
                 <label className={styles.modalLabel}>
@@ -1052,17 +1148,12 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
                 />
               </div>
             </div>
-
             <div className={styles.modalFooter}>
-              <button
-                className={styles.btnRejectFinal}
-                onClick={rejectTeam}
-                disabled={busy}
-              >
+              <button className={styles.btnRejectFinal} onClick={rejectTeam} disabled={busy} type="button">
                 <X size={15} />
                 {busy ? "جاري الرفض..." : "تأكيد الرفض"}
               </button>
-              <button className={styles.btnCancel} onClick={() => setRejectModal(null)}>
+              <button className={styles.btnCancel} onClick={() => setRejectModal(null)} type="button">
                 إلغاء
               </button>
             </div>
@@ -1072,28 +1163,21 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
 
       {/* ── Result Modal ── */}
       {resultModal && (
-        <div
-          className={styles.modalOverlay}
-          onClick={() => setResultModal(null)}
-        >
+        <div className={styles.modalOverlay} onClick={() => setResultModal(null)}>
           <div className={styles.modalCard} onClick={e => e.stopPropagation()}>
             <div className={styles.modalHead}>
               <div>
                 <div className={styles.modalTitle}>تسجيل النتيجة</div>
                 <div className={styles.modalSub}>{resultModal.name}</div>
               </div>
-              <button className={styles.modalClose} onClick={() => setResultModal(null)}>
+              <button className={styles.modalClose} onClick={() => setResultModal(null)} type="button">
                 <X size={16} />
               </button>
             </div>
-
             <div className={styles.modalBody}>
-              {/* Winner toggle */}
               <div
                 className={styles.winnerToggle}
-                onClick={() =>
-                  setResultModal(p => p ? { ...p, is_winner: !p.is_winner } : p)
-                }
+                onClick={() => setResultModal(p => p ? { ...p, is_winner: !p.is_winner } : p)}
               >
                 <span className={styles.winnerToggleLabel}>
                   <Trophy size={16} color="#d97706" />
@@ -1101,15 +1185,9 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
                 </span>
                 <div
                   className={`${styles.toggleTrack} ${resultModal.is_winner ? styles.toggleTrackOn : ""}`}
-                  style={
-                    resultModal.is_winner
-                      ? { background: "linear-gradient(135deg,#f59e0b,#d97706)" }
-                      : undefined
-                  }
+                  style={resultModal.is_winner ? { background: "linear-gradient(135deg,#f59e0b,#d97706)" } : undefined}
                 >
-                  <div
-                    className={`${styles.toggleThumb} ${resultModal.is_winner ? styles.toggleThumbOn : ""}`}
-                  />
+                  <div className={`${styles.toggleThumb} ${resultModal.is_winner ? styles.toggleThumbOn : ""}`} />
                 </div>
               </div>
 
@@ -1125,25 +1203,18 @@ export default function EventTeams({ eventId, isFacultyEvent = false, participan
                   value={resultModal.rank}
                   onChange={e =>
                     setResultModal(p =>
-                      p
-                        ? { ...p, rank: e.target.value === "" ? "" : Number(e.target.value) }
-                        : p
+                      p ? { ...p, rank: e.target.value === "" ? "" : Number(e.target.value) } : p
                     )
                   }
                 />
               </div>
             </div>
-
             <div className={styles.modalFooter}>
-              <button
-                className={styles.btnSave}
-                onClick={assignResult}
-                disabled={busy}
-              >
+              <button className={styles.btnSave} onClick={assignResult} disabled={busy} type="button">
                 <Check size={15} />
                 {busy ? "جاري الحفظ..." : "حفظ النتيجة"}
               </button>
-              <button className={styles.btnCancel} onClick={() => setResultModal(null)}>
+              <button className={styles.btnCancel} onClick={() => setResultModal(null)} type="button">
                 إلغاء
               </button>
             </div>

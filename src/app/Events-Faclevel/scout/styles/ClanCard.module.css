@@ -1,0 +1,355 @@
+/* ── ClanCard.module.css ─────────────────────────────────────────── */
+
+.card {
+  position: relative;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1.5px solid #e8eef6;
+  border-radius: 24px;
+  padding: 32px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  font-family: 'Cairo', sans-serif;
+  direction: rtl;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.9) inset,
+    0 8px 32px rgba(30, 64, 120, 0.08),
+    0 2px 8px rgba(30, 64, 120, 0.04);
+  transition: box-shadow 300ms ease, transform 300ms ease;
+  animation: cardReveal 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes cardReveal {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.card:hover {
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.9) inset,
+    0 16px 48px rgba(30, 64, 120, 0.12),
+    0 4px 16px rgba(30, 64, 120, 0.07);
+  transform: translateY(-2px);
+}
+
+/* ── Decorative accent strip at top ── */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(140deg, #1E3A5F 0%, #2D5F8A 100%);
+  border-radius: 24px 24px 0 0;
+}
+
+/* ── Decorative orbs ── */
+.orbTop {
+  position: absolute;
+  top: -80px;
+  right: -80px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.orbBottom {
+  position: absolute;
+  bottom: -100px;
+  left: -60px;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(99, 160, 255, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* ── Icon ── */
+.iconWrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border: 1.5px solid #bfdbfe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: linear-gradient(140deg, #1E3A5F 0%, #2D5F8A 100%);
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.12);
+}
+
+/* ── Title ── */
+.titleStack {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.eyebrow {
+  font-size: 14px;
+  font-weight: 700;
+  color: linear-gradient(140deg, #1E3A5F 0%, #2D5F8A 100%);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.clanName {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.4px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Status Badges ── */
+.badgeActive,
+.badgeInactive {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.badgeActive {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1.5px solid #a7f3d0;
+}
+
+.badgeInactive {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1.5px solid #fecaca;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.badgeActive .dot {
+  background: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+  animation: pulse 2.2s ease-in-out infinite;
+}
+
+.badgeInactive .dot { background: #ef4444; }
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25); }
+  50%       { box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.08); }
+}
+
+/* ── Edit Button ── */
+.editBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #eff6ff;
+  border: 1.5px solid #bfdbfe;
+  color: linear-gradient(140deg, #1E3A5F 0%, #2D5F8A 100%);
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  font-family: 'Cairo', sans-serif;
+  white-space: nowrap;
+}
+
+.editBtn:hover {
+  background: linear-gradient(140deg, #1E3A5F 0%, #2D5F8A 100%);
+  border-color: linear-gradient(140deg, #1E3A5F 0%, #2D5F8A 100%);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(29, 78, 216, 0.28);
+}
+
+.editBtn:active { transform: translateY(0); }
+
+/* ── Divider ── */
+.divider {
+  height: 1px;
+  background: linear-gradient(
+    to left,
+    transparent,
+    #e2e8f0 25%,
+    #e2e8f0 75%,
+    transparent
+  );
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Description ── */
+.descSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.descHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: linear-gradient(140deg, #1E3A5F 0%, #2D5F8A 100%);
+}
+
+.sectionLabel {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+
+.desc {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #475569;
+  line-height: 1.8;
+  padding: 14px 18px;
+  background: #f8fafc;
+  border: 1.5px solid #e8eef6;
+  border-radius: 12px;
+  border-right: 3px solid #1E3A5F;
+}
+
+.muted {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* ── Meta Pills Row ── */
+.metaRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.metaPill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 16px 12px;
+  background: #f8fafc;
+  border: 1.5px solid #e8eef6;
+  border-radius: 14px;
+  transition: background 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.metaPill:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
+}
+
+.metaPillIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: #eff6ff;
+  border: 1.5px solid #bfdbfe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1E3A5F;
+  flex-shrink: 0;
+}
+
+.metaPill:hover .metaPillIcon {
+  background: #dbeafe;
+}
+
+.metaPillContent {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.metaLabel {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+}
+
+.metaValue {
+  display: block;
+  font-size: 15px;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.2px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .metaRow { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .card { padding: 22px 20px; gap: 20px; }
+  .header { flex-direction: column; }
+  .headerRight { width: 100%; justify-content: space-between; }
+  .editBtn { flex: 1; justify-content: center; }
+  .clanName { font-size: 20px; white-space: normal; }
+}
+
+@media (max-width: 480px) {
+  .card { padding: 18px 16px; border-radius: 18px; }
+  .metaRow { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .metaPill { padding: 12px 8px; }
+  .clanName { font-size: 18px; }
+  .iconWrap { width: 48px; height: 48px; border-radius: 13px; }
+}

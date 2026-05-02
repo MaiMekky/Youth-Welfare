@@ -360,6 +360,8 @@ export default function ScoutsPage() {
           والعمل الجماعي من خلال عشائر الكليات والرهوط المنظمة.
         </p>
       </div>
+    );
+  }
 
       {/* ── CONTENT GRID ── */}
       <div style={{
@@ -413,19 +415,16 @@ export default function ScoutsPage() {
         {/* 2 — About */}
         <SectionCard icon={<IconShield size={18} />} title="إدارة الجوالة والخدمة العامة">
           <p style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.85, color: T.mute, margin: "0 0 14px", fontFamily: T.font }}>
-            تقوم إدارة الجوالة والخدمة العامة بتنفيذ عدد من المشروعات المتنوعة والمتدرجة
-            من المستوى الداخلي حتى المستوى القُمي، وقد شاركت فيها عشائر كليات الجامعة،
-            حيث تم إقامة ورش عمل ومعسكرات الإعداد الجوالي.
+            تقوم إدارة الجوالة والخدمة العامة بتنفيذ عدد من المشروعات المتنوعة والمتدرجة من المستوى الداخلي حتى المستوى القُمي، وقد شاركت فيها عشائر كليات الجامعة، حيث تم إقامة ورش عمل ومعسكرات الإعداد الجوالي.
           </p>
           <p style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.85, color: T.mute, margin: 0, fontFamily: T.font }}>
-            تهتم الإدارة بحياة الخلاء والأنشطة التي تبث روح التعاون وتكتشف المواهب،
-            ويقوم بإدارة النشاط مجموعة من الأخصائيين المؤهلين كشفياً وإرشادياً.
+            تهتم الإدارة بحياة الخلاء والأنشطة التي تبث روح التعاون وتكتشف المواهب، ويقوم بإدارة النشاط مجموعة من الأخصائيين المؤهلين كشفياً وإرشادياً.
           </p>
         </SectionCard>
 
         {/* 3 — Benefits */}
         <SectionCard icon={<IconStar size={18} />} title="ماذا ستكتسب من الانضمام؟" fullWidth>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+          <div data-benefits-grid style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
             {[
               { icon: <IconTarget size={22} />, title: "تطوير المهارات القيادية", desc: "اكتساب مهارات القيادة والإدارة من خلال الأنشطة الكشفية المتنوعة" },
               { icon: <IconUsers size={22} />, title: "العمل الجماعي", desc: "التدرب على العمل ضمن فريق وبناء علاقات قوية مع زملائك في الكلية" },

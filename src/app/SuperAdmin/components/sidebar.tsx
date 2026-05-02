@@ -23,6 +23,7 @@ export default function Sidebar({ isOpen = false, setIsOpen = () => {} }: Sideba
     // { label: "إحصائيات الزوار", href: "#" },
     { label: "التكافل الاجتماعي", href: "/SuperAdmin" },
     { label: "الأسر الطلابية",  href: "/SuperAdmin-family" },
+    { label: "العشائر والجوالة", href: "/SuperAdmin/scouts" },
   ];
 
   // Close on outside click

@@ -278,6 +278,15 @@ export default function PlanDetailsPage() {
   const facultyName = plan?.faculty_name ?? "خطة عامة على مستوى الجامعة";
   const termLabel = plan?.term ? `الترم: ${plan.term}` : "—";
 
+  function scopeLabel(raw: string) {
+  const s = (raw || "").trim();
+
+  if (s === "داخلي") return "على مستوى الكلية";
+  if (s === "خارجي") return "على مستوى الجامعة";
+
+  return s || "—";
+}
+
   return (
     <>
       <div className={styles.page}>
@@ -436,7 +445,7 @@ export default function PlanDetailsPage() {
 
                         <td>
                           <span className={`${styles.typePill} ${typeClass(styles, e.type)}`}>
-                            {e.type || "—"}
+                            {scopeLabel(e.type)}
                           </span>
                         </td>
 

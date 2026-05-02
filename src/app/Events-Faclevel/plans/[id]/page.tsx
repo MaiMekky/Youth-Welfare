@@ -286,7 +286,12 @@ const onViewLinkedEvent = (eventId: number) => {
   const planSubtitle = "معلومات شاملة عن الخطة والفعاليات المرتبطة بها";
   const facultyName = plan?.faculty_name ?? "خطة عامة على مستوى الجامعة";
   const termLabel = plan?.term ? `الترم: ${plan.term}` : "—";
-
+  
+  function mapType(raw?: string) {
+  if (raw === "داخلي") return "على مستوى الكلية";
+  if (raw === "خارجي") return "على مستوى الجامعة";
+  return raw || "—";
+}
   return (
     <>
       <div className={styles.page}>
@@ -444,11 +449,11 @@ const onViewLinkedEvent = (eventId: number) => {
                         <td className={styles.cellTitle}>{e.title}</td>
                         <td>{e.dept_name ?? "—"}</td>
 
-                        <td>
-                          <span className={`${styles.typePill} ${typeClass(styles, e.type)}`}>
-                            {e.type || "—"}
-                          </span>
-                        </td>
+                       <td>
+                        <span className={`${styles.typePill} ${typeClass(styles, e.type)}`}>
+                          {mapType(e.type)}
+                        </span>
+                      </td>
 
                         <td>
                           <span className={statusClass(styles, e.status)}>{statusLabel(e.status)}</span>

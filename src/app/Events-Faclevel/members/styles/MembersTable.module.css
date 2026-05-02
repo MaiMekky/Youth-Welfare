@@ -1,0 +1,195 @@
+.tableWrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Cairo', sans-serif;
+  font-size: 14px;
+  direction: rtl;
+  min-width: 900px;
+}
+
+.table thead tr {
+  background: linear-gradient(140deg, #1E3A5F 0%, #2D5F8A 100%);
+}
+
+.table thead th {
+  padding: 14px 16px;
+  text-align: center;
+  color: rgba(255, 255, 255, .9);
+  font-weight: 800;
+  font-size: 13px;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+
+.table thead th:first-child { border-radius: 0 0 0 0; }
+
+.rowEven { background: #fff; }
+.rowOdd  { background: #F7FAFD; }
+
+.table tbody tr {
+  transition: background 150ms;
+  border-bottom: 1px solid #E2ECF5;
+}
+
+.table tbody tr:hover { background: #EBF3FB; }
+
+.table tbody td {
+  padding: 13px 16px;
+  color: #334155;
+  vertical-align: middle;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.tdNum {
+  color: #9CA3AF !important;
+  font-weight: 700;
+  font-size: 13px;
+  width: 40px;
+}
+
+.tdName {
+  font-weight: 800;
+  color: #1E3A5F !important;
+}
+
+.tdEmail {
+  color: #6B8299 !important;
+  font-size: 13px;
+  direction: ltr;
+  text-align: center;
+}
+
+.tdDate {
+  color: #6B8299 !important;
+  font-size: 13px;
+}
+
+/* ── Badges ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.badgeSuccess { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+.badgeDanger  { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+.badgeWarning { background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; }
+.badgeDefault { background: #F3F4F6; color: #6B7280; border: 1px solid #E5E7EB; }
+.badgeMale    { background: #EBF3FB; color: #1E3A5F; border: 1px solid #BFDBFE; }
+.badgeFemale  { background: #FDF2F8; color: #9D174D; border: 1px solid #F9A8D4; }
+
+.roleChip {
+  display: inline-flex;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #F5F3FF;
+  color: #6D28D9;
+  border: 1px solid #DDD6FE;
+  white-space: nowrap;
+}
+
+.groupChip {
+  display: inline-flex;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #EBF3FB;
+  color: #2D5F8A;
+  border: 1px solid #BFDBFE;
+}
+
+.unassigned {
+  color: #D1D5DB;
+  font-weight: 700;
+}
+
+/* ── Actions ── */
+.actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-family: 'Cairo', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 150ms ease;
+  white-space: nowrap;
+}
+
+.reviewBtn {
+  background: #EBF3FB;
+  color: #1E3A5F;
+  border-color: #BFDBFE;
+}
+.reviewBtn:hover {
+  background: #1E3A5F;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.assignBtn {
+  background: #ECFDF5;
+  color: #065F46;
+  border-color: #A7F3D0;
+}
+.assignBtn:hover {
+  background: #059669;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.roleBtn {
+  background: #F5F3FF;
+  color: #6D28D9;
+  border-color: #DDD6FE;
+}
+.roleBtn:hover {
+  background: #7C3AED;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.deleteBtn {
+  background: #FEF2F2;
+  color: #DC2626;
+  border-color: #FECACA;
+}
+.deleteBtn:hover {
+  background: #DC2626;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* ── Responsive: hide less important columns ── */
+@media (max-width: 900px) {
+  .table { font-size: 13px; }
+  .actionBtn span { display: none; }
+  .actionBtn { padding: 7px 8px; }
+}
+
+@media (max-width: 640px) {
+  .tdEmail, .tdDate { display: none; }
+}

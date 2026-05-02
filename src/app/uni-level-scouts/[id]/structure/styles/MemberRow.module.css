@@ -1,0 +1,252 @@
+/* ═══════════════════════════════════════════════
+   MEMBER ROW — Scouts Theme
+   ═══════════════════════════════════════════════ */
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  background: #fff;
+  border-bottom: 1px solid #EEF4FA;
+  transition: background 180ms ease, transform 180ms ease;
+  direction: rtl;
+  font-family: 'Cairo', sans-serif;
+  position: relative;
+}
+
+.row:last-child {
+  border-bottom: none;
+  border-radius: 0 0 14px 14px;
+}
+
+.row:hover {
+  background: #F7FAFD;
+}
+
+/* Leader row — warm gold tint */
+.leaderRow {
+  background: linear-gradient(135deg, #FFFEF5 0%, #FFFBEB 100%);
+  border-bottom-color: #FDE68A;
+}
+
+.leaderRow::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, #F0CB6A, #D97706);
+  border-radius: 0 2px 2px 0;
+}
+
+.leaderRow:hover {
+  background: linear-gradient(135deg, #FFFBEB 0%, #FFF3C4 100%);
+}
+
+/* Compact variant (inside group cards) */
+.compact {
+  padding: 10px 14px;
+  gap: 10px;
+}
+
+/* ── Avatar ── */
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 180ms ease;
+}
+
+.row:hover .avatar {
+  transform: scale(1.05);
+}
+
+/* Compact avatar size */
+.compact .avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+
+.avatar_gold {
+  background: linear-gradient(135deg, #FFFBEB, #FEF3C7);
+  border: 1.5px solid #FDE68A;
+  color: #D97706;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.15);
+}
+
+.avatar_blue {
+  background: linear-gradient(135deg, #EBF3FB, #DBEAFE);
+  border: 1.5px solid #BFDBFE;
+  color: #2563EB;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+}
+
+.avatar_teal {
+  background: linear-gradient(135deg, #E0F5F5, #CCFBF1);
+  border: 1.5px solid #99F6E4;
+  color: #0D9488;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.1);
+}
+
+.avatar_purple {
+  background: linear-gradient(135deg, #F5F3FF, #EDE9FE);
+  border: 1.5px solid #DDD6FE;
+  color: #7C3AED;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.1);
+}
+
+.avatar_green {
+  background: linear-gradient(135deg, #ECFDF5, #D1FAE5);
+  border: 1.5px solid #A7F3D0;
+  color: #059669;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.1);
+}
+
+.avatar_gray {
+  background: linear-gradient(135deg, #F8FAFC, #F1F5F9);
+  border: 1.5px solid #CBD5E1;
+  color: #64748B;
+  box-shadow: 0 2px 6px rgba(100, 116, 139, 0.08);
+}
+
+/* ── Info ── */
+.info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1E3A5F;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.leaderName {
+  font-size: 16px;
+  font-weight: 900;
+  color: #92400E;
+}
+
+.compact .name {
+  font-size: 14px;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+/* ── Role Badge ── */
+.roleBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+
+.role_gold {
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  color: #92400E;
+}
+
+.role_blue {
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  color: #1E40AF;
+}
+
+.role_teal {
+  background: #F0FDFA;
+  border: 1px solid #99F6E4;
+  color: #0F766E;
+}
+
+.role_purple {
+  background: #F5F3FF;
+  border: 1px solid #DDD6FE;
+  color: #5B21B6;
+}
+
+.role_green {
+  background: #ECFDF5;
+  border: 1px solid #A7F3D0;
+  color: #065F46;
+}
+
+.role_gray {
+  background: #F8FAFC;
+  border: 1px solid #CBD5E1;
+  color: #475569;
+}
+
+/* ── Gender Badge ── */
+.genderBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.male {
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  color: #1D4ED8;
+}
+
+.female {
+  background: #FDF2F8;
+  border: 1px solid #FBCFE8;
+  color: #9D174D;
+}
+
+/* ── Group Tag ── */
+.groupTag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  background: #F1F5F9;
+  border: 1px solid #CBD5E1;
+  color: #475569;
+}
+
+/* ── ID Chip ── */
+.idChip {
+  font-size: 11px;
+  font-weight: 800;
+  color: #94A3B8;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  padding: 3px 9px;
+  border-radius: 7px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.3px;
+}

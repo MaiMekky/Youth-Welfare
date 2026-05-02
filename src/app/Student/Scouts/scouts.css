@@ -3,7 +3,7 @@
 /* ── Reset / base ── */
 *, *::before, *::after { box-sizing: border-box; }
 
-/* ── Link hover polish — buttons inherit color so no blue flash ── */
+/* ── Link hover polish ── */
 a { color: inherit; text-decoration: none; }
 
 /* ── Hover lift on section cards ── */
@@ -55,7 +55,8 @@ a[data-btn="ghost"]:hover {
     flex-direction: column !important;
     width: 100% !important;
   }
-  [data-cta-actions] a {
+  [data-cta-actions] a,
+  [data-cta-actions] button {
     width: 100% !important;
     justify-content: center !important;
   }

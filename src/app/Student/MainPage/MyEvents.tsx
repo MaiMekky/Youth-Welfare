@@ -153,11 +153,11 @@ const EmptyTrophyIcon = () => (
    STATUS HELPERS
 ══════════════════════════════════════════ */
 const STATUS_META: Record<string, { cls: string; dot: string }> = {
-  'مقبول':        { cls: 'status-accepted', dot: '#15803d' },
-  'قيد الانتظار': { cls: 'status-pending',  dot: '#b45309' },
-  'مرفوض':        { cls: 'status-rejected', dot: '#b91c1c' },
+  'مقبول':        { cls: 'status-accepted', dot: '#059669' },
+  'قيد الانتظار': { cls: 'status-pending',  dot: '#D97706' },
+  'مرفوض':        { cls: 'status-rejected', dot: '#DC2626' },
 };
-const getStatus = (s: string) => STATUS_META[s] ?? { cls: 'status-default', dot: '#6b7a99' };
+const getStatus = (s: string) => STATUS_META[s] ?? { cls: 'status-default', dot: '#6B8299' };
 
 const FILTERS: { id: FilterType; label: string }[] = [
   { id: 'all',           label: 'الكل'         },
@@ -192,10 +192,10 @@ export default function MyEvents() {
         const raw = await res.json();
         const arr: ApiJoinedEvent[] = raw.data ?? raw.results ?? (Array.isArray(raw) ? raw : []);
         setEvents(arr.map(mapEvent));
-      } catch (e: unknown) { 
-        setError(e instanceof Error ? e.message : String(e)); 
-      } finally { 
-        setLoading(false); 
+      } catch (e: unknown) {
+        setError(e instanceof Error ? e.message : String(e));
+      } finally {
+        setLoading(false);
       }
     };
     load();
@@ -232,7 +232,7 @@ export default function MyEvents() {
   return (
     <div className="my-events-page" dir="rtl">
 
-      {/* ══ HERO ══ */}
+      {/* ══ HERO — navy gradient header block ══ */}
       <div className="my-events-hero">
         <div className="hero-inner">
           <div className="hero-text">
@@ -305,7 +305,7 @@ export default function MyEvents() {
                 return (
                   <div key={event.id} className={`event-card${isAccepted ? ' card-accepted' : ''}`}>
 
-                    {/* ── HEADER: type pill + title + status/rank chips ── */}
+                    {/* ── CARD HEADER: type pill + title + status/rank chips ── */}
                     <div className="card-header">
                       <div className="card-header-top">
                         <span className="type-pill">{event.type}</span>
@@ -320,7 +320,7 @@ export default function MyEvents() {
                       <h3 className="event-title">{event.title}</h3>
                     </div>
 
-                    {/* ── BODY: description + meta + reward + actions ── */}
+                    {/* ── CARD BODY: description + meta + reward + actions ── */}
                     <div className="event-content">
                       <p className="event-description">{event.description}</p>
 

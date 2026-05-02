@@ -296,9 +296,9 @@ export default function Events() {
                       <div className="meta-item">
                         <UsersIcon /><span>{event.takenSeats} / {event.seats} مقعد</span>
                       </div>
-                      {Number(event.cost) > 0 && (
+                      {/* {Number(event.cost) > 0 && (
                         <div className="meta-item"><CoinIcon /><span>{event.cost} ج.م</span></div>
-                      )}
+                      )}  */}
                       {event.reward && (
                         <div className="meta-item meta-wide"><GiftIcon /><span>{event.reward}</span></div>
                       )}

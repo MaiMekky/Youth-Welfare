@@ -33,6 +33,7 @@ function loadFamilyFromStorage(): ProgramFamily | null {
 function FamiliesPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [mounted, setMounted] = useState(false);
 
   // Derive current view and family from URL
   const viewParam = searchParams.get("view") as View | null;
@@ -44,6 +45,11 @@ function FamiliesPageInner() {
     if (viewParam === "familyDetails") return loadFamilyFromStorage();
     return null;
   });
+
+  // Ensure component is mounted before rendering to prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Keep state in sync when the URL changes (e.g. browser back/forward)
   useEffect(() => {
@@ -100,6 +106,11 @@ function FamiliesPageInner() {
   }, [navigate]);
 
   // ─────────────────────────────────────────────────────────────────────────
+
+  // Prevent hydration mismatch by waiting for client-side mount
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div className="student-families-page">

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import '../styles/mainpage.css';
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
+
 interface ApiFamily {
   family_id: number;
   name: string;
@@ -65,10 +66,16 @@ const isElderBrother = (role?: string) => {
 };
 
 export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
+  const [mounted, setMounted] = useState(false);
   const [joinedFamilies, setJoinedFamilies]       = useState<ProgramFamily[]>([]);
   const [loading, setLoading]                     = useState(true);
   const [activeTab, setActiveTab]                 = useState<'accepted' | 'pending'>('accepted');
   const { showToast } = useToast();
+
+  // Ensure component is mounted before rendering to prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const acceptedFamilies = joinedFamilies.filter(f => isAccepted(f.memberStatus));
   const pendingFamilies  = joinedFamilies.filter(f => !isAccepted(f.memberStatus));
@@ -143,6 +150,12 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
   /* ══════════════════════════════════════════
      RENDER
   ══════════════════════════════════════════ */
+  
+  // Prevent hydration mismatch by waiting for client-side mount
+  if (!mounted) {
+    return null;
+  }
+
   return (
     <>
       <div dir="rtl" className="container">

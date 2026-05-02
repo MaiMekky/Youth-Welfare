@@ -3,6 +3,31 @@
    Theme variables are defined in ../../styles/theme.css
 ══════════════════════════════════════════════════════════════ */
 
+/* Ensure CSS variables are available even on hard refresh */
+:root,
+.bannerContainer,
+.bannerCard {
+  --navy:        #1E3A5F !important;
+  --navy-mid:    #2D5F8A !important;
+  --navy-light:  #EBF3FB !important;
+  --navy-deep:   #152d4a !important;
+  --gold:        #C49B3A !important;
+  --gold-dark:   #A67F2C !important;
+  --gold-bright: #e0aa35 !important;
+  --gold-pale:   #FDF6E3 !important;
+  --white:       #ffffff !important;
+  --bg:          #EDF2F8 !important;
+  --border:      #E2ECF5 !important;
+  --text:        #1A2E42 !important;
+  --text-muted:  #6B8299 !important;
+  --radius:      10px !important;
+  --shadow:      0 2px 12px rgba(26, 46, 66, 0.08) !important;
+  --shadow-md:   0 4px 20px rgba(26, 46, 66, 0.12) !important;
+  --shadow-lg:   0 8px 40px rgba(8, 14, 32, 0.45) !important;
+  --transition:  0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  --font-family: 'Cairo', sans-serif !important;
+}
+
 /* ═══════════════════════════════════════════
    WRAPPER
 ═══════════════════════════════════════════ */

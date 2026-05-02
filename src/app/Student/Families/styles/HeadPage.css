@@ -3,18 +3,20 @@
 /* ═══════════════════════════════════════════
    TOKENS — exact copy from the admin page CSS
 ═══════════════════════════════════════════ */
-:root {
-  --navy:        #1E3A5F;
-  --navy-mid:    #2D5F8A;
-  --navy-light:  #EBF3FB;
-  --gold:        #C49B3A;
-  --gold-dark:   #A67F2C;
-  --border:      #E2ECF5;
-  --bg:          #EDF2F8;
-  --text:        #1A2E42;
-  --mute:        #6B8299;
-  --radius:      10px;
-  --shadow:      0 2px 12px rgba(26,46,66,.08);
+:root,
+.families-hero,
+.fam-page-header {
+  --navy:        #1E3A5F !important;
+  --navy-mid:    #2D5F8A !important;
+  --navy-light:  #EBF3FB !important;
+  --gold:        #C49B3A !important;
+  --gold-dark:   #A67F2C !important;
+  --border:      #E2ECF5 !important;
+  --bg:          #EDF2F8 !important;
+  --text:        #1A2E42 !important;
+  --mute:        #6B8299 !important;
+  --radius:      10px !important;
+  --shadow:      0 2px 12px rgba(26,46,66,.08) !important;
 }
 
 /* ═══════════════════════════════════════════

@@ -111,30 +111,90 @@ export default function EventDetails({ eventId, studentId, onClose }: EventDetai
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventId]);
 
+  // FIX: close modal on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const loadEventDetails = async () => {
     try {
       setLoading(true);
-      
-      // Load event details
-      const eventRes = await authFetch(`${getBaseUrl()}/api/event/student-events/${eventId}/`);
-      if (eventRes.ok) {
-        const eventData = await eventRes.json();
-        setEvent(eventData);
+
+      // FIX: The backend StudentEventViewSet has NO generic retrieve action (detail=True GET).
+      // The only way to get a single event's data for a student is through the available
+      // list or the joined list. We fetch both and merge the data.
+
+      // Attempt 1: fetch from available events list and find the matching event
+      const availableRes = await authFetch(`${getBaseUrl()}/api/event/student-events/available/`);
+      if (availableRes.ok) {
+        const raw = await availableRes.json();
+        const arr: any[] = Array.isArray(raw) ? raw : (raw.data ?? raw.results ?? []);
+        const found = arr.find((e: any) => e.event_id === eventId);
+        if (found) {
+          setEvent({
+            event_id:             found.event_id,
+            title:                found.title,
+            description:          found.description,
+            st_date:              found.st_date,
+            end_date:             found.end_date,
+            location:             found.location,
+            type:                 found.type,
+            cost:                 found.cost,
+            s_limit:              found.s_limit,
+            faculty_name:         found.faculty_name,
+            dept_name:            found.dept_name,
+            current_participants: found.current_participants,
+            reward:               found.reward,
+            is_finished:          false, // available events are not finished
+            team_settings:        found.team_settings ?? undefined,
+          });
+        }
       }
 
-      // Load participation data
-      const participationRes = await authFetch(`${getBaseUrl()}/api/event/student-events/joined/`);
-      if (participationRes.ok) {
-        const data = await participationRes.json();
-        const events = data.data || data.results || [];
-        const myParticipation = events.find((e: any) => e.event_id === eventId);
+      // Attempt 2: fetch joined events — covers events the student is already in
+      // (which won't appear in available list due to `.exclude(prtcps_set__student=student)`)
+      const joinedRes = await authFetch(`${getBaseUrl()}/api/event/student-events/joined/`);
+      if (joinedRes.ok) {
+        const joinedRaw = await joinedRes.json();
+        // FIX: backend returns { status, count, data: [...] }
+        const joinedArr: any[] = Array.isArray(joinedRaw)
+          ? joinedRaw
+          : (joinedRaw.data ?? joinedRaw.results ?? []);
+
+        const myParticipation = joinedArr.find((e: any) => e.event_id === eventId);
+
         if (myParticipation) {
+          // FIX: if event wasn't found in available list (already joined), build from joined data
+          setEvent(prev => prev ?? {
+            event_id:             myParticipation.event_id,
+            title:                myParticipation.title,
+            description:          myParticipation.description,
+            st_date:              myParticipation.st_date,
+            end_date:             myParticipation.end_date,
+            location:             myParticipation.location,
+            type:                 myParticipation.type,
+            cost:                 myParticipation.cost ?? '',
+            s_limit:              myParticipation.s_limit ?? 0,
+            faculty_name:         myParticipation.faculty_name ?? '',
+            dept_name:            myParticipation.dept_name ?? '',
+            current_participants: myParticipation.current_participants ?? 0,
+            reward:               myParticipation.reward ?? '',
+            is_finished:          new Date(myParticipation.end_date) < new Date(),
+            team_settings:        myParticipation.team_settings ?? undefined,
+          });
+
+          // FIX: map participation fields from joined response
+          // backend annotates: participation_status, participation_rank, participation_reward
           setParticipation({
-            participation_id: myParticipation.participation_id || 0,
-            status: myParticipation.participation_status,
-            rank: myParticipation.participation_rank,
-            reward: myParticipation.participation_reward,
-            joined_at: myParticipation.joined_at || new Date().toISOString(),
+            participation_id: myParticipation.participation_id ?? 0,
+            status:           myParticipation.participation_status,
+            rank:             myParticipation.participation_rank ?? null,
+            reward:           myParticipation.participation_reward ?? null,
+            joined_at:        myParticipation.joined_at ?? new Date().toISOString(),
           });
         }
       }
@@ -167,6 +227,7 @@ export default function EventDetails({ eventId, studentId, onClose }: EventDetai
 
   return (
     <>
+      {/* FIX: overlay click closes modal */}
       <div className="event-details-overlay" onClick={onClose} />
       <div className="event-details-modal" dir="rtl">
         {/* Header */}
@@ -278,6 +339,13 @@ export default function EventDetails({ eventId, studentId, onClose }: EventDetai
                   </div>
                 )}
               </div>
+
+              {/* FIX: show finished badge if event has ended */}
+              {isEventFinished && (
+                <div className="finished-banner">
+                  <span>🏁 انتهت هذه الفعالية</span>
+                </div>
+              )}
             </div>
           )}
 

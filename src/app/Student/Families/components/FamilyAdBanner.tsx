@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styles from "../styles/FamilyAdBanner.module.css";
 
 interface FamilyAdBannerProps {
@@ -7,6 +7,18 @@ interface FamilyAdBannerProps {
 }
 
 const FamilyAdBanner: React.FC<FamilyAdBannerProps> = ({ onLearnMore }) => {
+    const [mounted, setMounted] = useState(false);
+
+    // Ensure component is mounted before rendering to prevent hydration mismatch
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    // Prevent hydration mismatch by waiting for client-side mount
+    if (!mounted) {
+        return null;
+    }
+
     return (
         <div className={styles.bannerContainer}>
             <div className={styles.bannerCard}>

@@ -295,7 +295,7 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
     };
 
     fetchActivities();
-  }, [selectedFamilyId, token, refreshTrigger, deptMap]);
+  }, [selectedFamilyId, refreshTrigger, deptMap]);
 
   return (
     <div className="activities-wrapper">
@@ -388,12 +388,7 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
                   الكلية: {act.facultyName}
                 </div>
               )}
-              {act.createdBy && (
-                <div className="info-item">
-                  <Users size={16} />
-                  منشئ الفعالية: {act.createdBy}
-                </div>
-              )}
+           
             </div>
           </div>
         ))}

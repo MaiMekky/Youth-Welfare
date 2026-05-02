@@ -72,17 +72,15 @@ const IconLayoutDashboard = ({ size = 18 }: { size?: number }) => (
 );
 
 /* ── Types ── */
-// Matches ClanSerializer fields exactly
 type Clan = {
   clan_id: number;
   name: string;
   description: string;
-  status: string;          // Arabic: "نشط" | "غير نشط"
+  status: string;
   faculty_name: string;
   members_count?: number;
 };
 
-// Matches ScoutStatusSerializer fields exactly
 type MemberStatus = {
   scout_member_id: number;
   clan: number;
@@ -90,20 +88,19 @@ type MemberStatus = {
   group: number | null;
   group_name: string | null;
   role: string;
-  status: string;            // Arabic: "منتظر" | "مقبول" | "مرفوض"
+  status: string;
   rejection_reason: string | null;
   joined_at: string | null;
 };
 
-/* ── FIX #2: Normalize Arabic/English status → known English key ── */
 type NormalizedStatus = "pending" | "accepted" | "rejected" | "preliminary_approved";
 
 function normalizeStatus(raw: string | undefined | null): NormalizedStatus {
   const s = (raw ?? "").toLowerCase().trim();
-  if (s === "pending"  || s === "منتظر")            return "pending";
-  if (s === "accepted" || s === "مقبول")             return "accepted";
-  if (s === "rejected" || s === "مرفوض")             return "rejected";
-  if (s === "preliminary_approved" || s === "موافقة مبدئية") return "preliminary_approved";
+  if (s === "pending"  || s === "منتظر")                          return "pending";
+  if (s === "accepted" || s === "مقبول")                          return "accepted";
+  if (s === "rejected" || s === "مرفوض")                          return "rejected";
+  if (s === "preliminary_approved" || s === "موافقة مبدئية")      return "preliminary_approved";
   return "pending";
 }
 
@@ -158,6 +155,20 @@ function SectionCard({ icon, title, children, fullWidth = false, accentTop = fal
   );
 }
 
+/* ── Bullet List helper ── */
+function BulletList({ items, color }: { items: string[]; color: string }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {items.map(item => (
+        <div key={item} style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: T.font }}>
+          <span style={{ width: 7, height: 7, borderRadius: "50%", background: color, flexShrink: 0 }} />
+          <span style={{ fontSize: 14, fontWeight: 600, color: T.text }}>{item}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /* ══════════════════════════════════════════════════════════════
    MAIN PAGE
 ══════════════════════════════════════════════════════════════ */
@@ -178,27 +189,21 @@ export default function ScoutsPage() {
         authFetch(`${API_URL}/api/student/my_status/`),
       ]);
 
-      // ── FIX #1: Unwrap success_response wrapper ({ message, data })
-      // ── FIX #4: Backend returns 200 with data:null when no clan — NOT 404
       if (!clanRes.ok) {
         setClanState("none");
       } else {
         const json = await clanRes.json();
         const data: Clan | null = json.data ?? null;
         if (!data) {
-          // Backend returns { message: "...", data: null } when no clan exists
           setClanState("none");
         } else {
           setClan(data);
-          // FIX: clan status is Arabic "نشط" / "غير نشط"
           setClanState(data.status === "نشط" ? "active" : "inactive");
         }
       }
 
-      // ── FIX #1: Unwrap success_response for my_status
       if (statusRes.ok) {
         const json = await statusRes.json();
-        // data is null when student has no application yet
         setMemberStatus(json.data ?? null);
       }
     } finally {
@@ -249,7 +254,6 @@ export default function ScoutsPage() {
       primaryBtn: null, secondaryBtn: null,
     };
 
-    // ── FIX #2: Normalize Arabic status before comparing
     const normalized = normalizeStatus(memberStatus?.status);
 
     if (normalized === "accepted") return {
@@ -317,43 +321,31 @@ export default function ScoutsPage() {
       {/* CONTENT GRID */}
       <div data-content-grid style={{ width: "100%", padding: "32px 40px", display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 22, flex: 1, boxSizing: "border-box" }}>
 
-        {/* Clan Info */}
-        <SectionCard icon={<IconCompass size={18} />} title="معلومات العشيرة" accentTop>
-          {clanState === "none" ? (
-            <div style={{ textAlign: "center", padding: "24px 0", color: T.mute, fontFamily: T.font }}>
-              <div style={{ opacity: 0.5, marginBottom: 12 }}><IconAlertCircle size={36} /></div>
-              <p style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>لا تتوفر عشيرة لكليتك حالياً</p>
-            </div>
-          ) : clan ? (
-            <>
-              <p style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.85, color: T.mute, margin: "0 0 18px", fontFamily: T.font }}>
-                {clan.description || "عشيرة كلية تهدف إلى تنمية روح القيادة والعمل الجماعي بين طلاب الكلية."}
-              </p>
-              <div data-org-grid style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                {[
-                  { label: "اسم العشيرة", value: clan.name },
-                  { label: "الكلية", value: clan.faculty_name },
-                  { label: "الحالة", value: clan.status },
-                  ...(clan.members_count !== undefined ? [{ label: "عدد الأعضاء", value: `${clan.members_count} عضو` }] : []),
-                ].map((item) => (
-                  <div key={item.label} style={{ background: T.bg, borderRadius: T.radius, padding: "14px 16px", border: `1px solid ${T.border}`, borderRight: `3px solid ${T.gold}` }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: T.navyMid, background: T.navyLight, borderRadius: 6, padding: "3px 10px", display: "inline-block", marginBottom: 8, fontFamily: T.font }}>{item.label}</div>
-                    <div style={{ fontSize: 15, fontWeight: 800, color: T.navy, fontFamily: T.font }}>{item.value}</div>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : null}
+        {/* What is Scouts */}
+        <SectionCard icon={<IconCompass size={18} />} title="ما هي الجوالة؟" accentTop>
+          <p style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.85, color: T.mute, margin: "0 0 14px", fontFamily: T.font }}>
+            الجوالة ليست مجرد نشاط طلابي، بل تجربة متكاملة تهدف إلى بناء الشخصية وتنمية المهارات الحياتية. تقدم إدارة الجوالة والخدمة العامة بيئة تفاعلية تجمع بين:
+          </p>
+          <BulletList color={T.gold} items={["العمل الجماعي وروح الفريق", "القيادة وتحمل المسؤولية", "خدمة المجتمع والمشاركة الفعالة", "اكتشاف المواهب وتنميتها"]} />
+          <p style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.8, color: T.mute, margin: "16px 0 10px", fontFamily: T.font }}>من خلال المشاركة في الجوالة، يخوض الطالب تجارب متنوعة مثل:</p>
+          <BulletList color={T.navyMid} items={["المعسكرات والأنشطة الخارجية", "ورش العمل والتدريبات القيادية", "الفعاليات المجتمعية والخدمية", "تنظيم الأحداث والعمل ضمن فرق"]} />
         </SectionCard>
 
-        {/* Admin info */}
-        <SectionCard icon={<IconShield size={18} />} title="إدارة الجوالة والخدمة العامة">
-          <p style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.85, color: T.mute, margin: "0 0 14px", fontFamily: T.font }}>
-            تقوم إدارة الجوالة والخدمة العامة بتنفيذ عدد من المشروعات المتنوعة والمتدرجة من المستوى الداخلي حتى المستوى القُمي، وقد شاركت فيها عشائر كليات الجامعة، حيث تم إقامة ورش عمل ومعسكرات الإعداد الجوالي.
-          </p>
-          <p style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.85, color: T.mute, margin: 0, fontFamily: T.font }}>
-            تهتم الإدارة بحياة الخلاء والأنشطة التي تبث روح التعاون وتكتشف المواهب، ويقوم بإدارة النشاط مجموعة من الأخصائيين المؤهلين كشفياً وإرشادياً.
-          </p>
+        {/* Why Join + How to Start */}
+        <SectionCard icon={<IconShield size={18} />} title="لماذا تنضم للجوالة؟">
+          <BulletList color={T.gold} items={["تطور مهاراتك الشخصية والقيادية", "توسّع دائرة علاقاتك داخل وخارج كليتك", "تعيش تجربة مختلفة مليئة بالتحديات والتجارب الواقعية", "تساهم في خدمة مجتمعك بشكل فعّال"]} />
+          <div style={{ borderTop: `1px solid ${T.border}`, marginTop: 20, paddingTop: 18 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+              <span style={{ width: 32, height: 32, background: T.navy, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: T.gold, flexShrink: 0 }}><IconHeart size={15} /></span>
+              <span style={{ fontSize: 15, fontWeight: 800, color: T.navy, fontFamily: T.font }}>كيف تبدأ؟</span>
+            </div>
+            <p style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.85, color: T.mute, margin: "0 0 12px", fontFamily: T.font }}>
+              كل ما عليك هو التقديم والانضمام إلى عشيرة كليتك، وسيتم مراجعة طلبك من قبل المسؤولين، ثم تبدأ رحلتك داخل الجوالة!
+            </p>
+            <p style={{ fontSize: 14, fontWeight: 700, color: T.navyMid, margin: 0, fontFamily: T.font, borderRight: `3px solid ${T.gold}`, paddingRight: 10 }}>
+              الجوالة ليست مجرد نشاط... إنها أسلوب حياة.
+            </p>
+          </div>
         </SectionCard>
 
         {/* Benefits */}
@@ -372,6 +364,32 @@ export default function ScoutsPage() {
             ))}
           </div>
         </SectionCard>
+
+        {/* Clan Info — shown only when a clan exists */}
+        {clan && clanState !== "none" && (
+          <SectionCard icon={<IconCompass size={18} />} title="معلومات العشيرة" fullWidth>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 3fr", gap: 22, alignItems: "start" }}>
+              <div data-org-grid style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, gridColumn: "1 / -1" }}>
+                {[
+                  { label: "اسم العشيرة", value: clan.name },
+                  { label: "الكلية", value: clan.faculty_name },
+                  { label: "الحالة", value: clan.status },
+                  ...(clan.members_count !== undefined ? [{ label: "عدد الأعضاء", value: `${clan.members_count} عضو` }] : []),
+                ].map((item) => (
+                  <div key={item.label} style={{ background: T.bg, borderRadius: T.radius, padding: "14px 16px", border: `1px solid ${T.border}`, borderRight: `3px solid ${T.gold}` }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: T.navyMid, background: T.navyLight, borderRadius: 6, padding: "3px 10px", display: "inline-block", marginBottom: 8, fontFamily: T.font }}>{item.label}</div>
+                    <div style={{ fontSize: 15, fontWeight: 800, color: T.navy, fontFamily: T.font }}>{item.value}</div>
+                  </div>
+                ))}
+              </div>
+              {clan.description && (
+                <p style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.85, color: T.mute, margin: 0, fontFamily: T.font, gridColumn: "1 / -1" }}>
+                  {clan.description}
+                </p>
+              )}
+            </div>
+          </SectionCard>
+        )}
 
         {/* CTA */}
         <div data-cta style={{ gridColumn: "1 / -1", background: `linear-gradient(140deg, ${T.navy} 0%, ${T.navyMid} 100%)`, borderRadius: 16, padding: "32px 40px", boxShadow: "0 4px 18px rgba(30,58,95,.22)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, position: "relative", overflow: "hidden" }}>

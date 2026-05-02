@@ -1,69 +1,75 @@
 /* ══════════════════════════════════════════════════════════════
    Student Section - Centralized Theme Variables
    Single source of truth for all colors and design tokens
+   IMPORTANT: These override global.css for the Student section
 ══════════════════════════════════════════════════════════════ */
 
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
 
-:root {
+/* Use higher specificity to ensure these variables override globals.css */
+:root,
+.student-app,
+.student-content,
+.student-main-page,
+.student-families-page {
   /* ── Primary Colors ── */
-  --navy:        #1E3A5F;
-  --navy-mid:    #2D5F8A;
-  --navy-light:  #EBF3FB;
-  --navy-deep:   #152d4a;
+
+  --navy-mid:    #2D5F8A !important;
+  --navy-light:  #EBF3FB !important;
+
   
-  --gold:        #C49B3A;
-  --gold-dark:   #A67F2C;
-  --gold-bright: #e0aa35;
-  --gold-pale:   #FDF6E3;
-  --gold-border: rgba(196, 155, 58, 0.28);
+  --gold:        #C49B3A !important;
+  --gold-dark:   #A67F2C !important;
+  --gold-bright: #e0aa35 !important;
+  --gold-pale:   #FDF6E3 !important;
+  --gold-border: rgba(196, 155, 58, 0.28) !important;
   
   /* ── Neutral Colors ── */
-  --white:       #ffffff;
-  --bg:          #EDF2F8;
-  --border:      #E2ECF5;
-  --text:        #1A2E42;
-  --text-muted:  #6B8299;
+  --white:       #ffffff !important;
+  --bg:          #EDF2F8 !important;
+  --border:      #E2ECF5 !important;
+  --text:        #1A2E42 !important;
+  --text-muted:  #6B8299 !important;
   
   /* ── Navbar Specific ── */
-  --text-nav:    rgba(255, 255, 255, 0.82);
-  --text-nav-muted: rgba(255, 255, 255, 0.48);
+  --text-nav:    rgba(255, 255, 255, 0.82) !important;
+  --text-nav-muted: rgba(255, 255, 255, 0.48) !important;
   
   /* ── Status Colors ── */
-  --success:     #059669;
-  --success-bg:  #ECFDF5;
-  --success-border: #86EFAC;
+  --success:     #059669 !important;
+  --success-bg:  #ECFDF5 !important;
+  --success-border: #86EFAC !important;
   
-  --warning:     #D97706;
-  --warning-bg:  #FEF3C7;
-  --warning-border: #FDE68A;
+  --warning:     #D97706 !important;
+  --warning-bg:  #FEF3C7 !important;
+  --warning-border: #FDE68A !important;
   
-  --danger:      #c0392b;
-  --danger-bg:   #FEE2E2;
-  --danger-border: #FECACA;
+  --danger:      #c0392b !important;
+  --danger-bg:   #FEE2E2 !important;
+  --danger-border: #FECACA !important;
   
-  --info:        #0284C7;
-  --info-bg:     #E0F2FE;
-  --info-border: #7DD3FC;
+  --info:        #0284C7 !important;
+  --info-bg:     #E0F2FE !important;
+  --info-border: #7DD3FC !important;
   
   /* ── Spacing & Layout ── */
-  --radius:      10px;
-  --radius-sm:   8px;
-  --radius-lg:   14px;
+  --radius:      10px !important;
+  --radius-sm:   8px !important;
+  --radius-lg:   14px !important;
   
-  --shadow:      0 2px 12px rgba(26, 46, 66, 0.08);
-  --shadow-md:   0 4px 20px rgba(26, 46, 66, 0.12);
-  --shadow-lg:   0 8px 40px rgba(8, 14, 32, 0.45);
+  --shadow:      0 2px 12px rgba(26, 46, 66, 0.08) !important;
+  --shadow-md:   0 4px 20px rgba(26, 46, 66, 0.12) !important;
+  --shadow-lg:   0 8px 40px rgba(8, 14, 32, 0.45) !important;
   
-  --transition:  0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition:  0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
   
-  --navbar-h:    90px;
-  --navbar-h-sm: 72px;
+  --navbar-h:    90px !important;
+  --navbar-h-sm: 72px !important;
   
-  --content-max: 1200px;
+  --content-max: 1200px !important;
   
   /* ── Typography ── */
-  --font-family: 'Cairo', sans-serif;
+  --font-family: 'Cairo', sans-serif !important;
   
   /* ── Z-Index Scale ── */
   --z-navbar:    1000;

@@ -41,17 +41,6 @@ interface Team {
   updated_at: string;
 }
 
-interface TeamSettings {
-  setting_id: number;
-  event: number;
-  enabled: boolean;
-  min_members: number;
-  max_members: number;
-  max_teams: number | null;
-  allow_individual_join: boolean;
-  require_team_approval: boolean;
-}
-
 interface TeamsProps {
   eventId: number;
   studentId: number;
@@ -124,8 +113,6 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
   
   const [loading, setLoading] = useState(true);
   const [myTeam, setMyTeam] = useState<Team | null>(null);
-  const [teamSettings, setTeamSettings] = useState<TeamSettings | null>(null);
-  const [ranking, setRanking] = useState<Team[]>([]);
   
   // Form states
   const [createTeamName, setCreateTeamName] = useState('');
@@ -146,18 +133,15 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
     try {
       setLoading(true);
       
-      // Check if event finished and load ranking
-      if (isEventFinished) {
-        await loadRanking();
-      }
-      
-      // Load my teams to see if student is in a team for this event
+      // FIX: Load my teams to see if student is in a team for this event.
+      // Backend returns { count, data: Team[] }
       const myTeamsRes = await authFetch(`${getBaseUrl()}/api/event/student-teams/my-teams/`);
       if (myTeamsRes.ok) {
-        const data = await myTeamsRes.json();
-        const teams: Team[] = data.data || [];
+        const raw = await myTeamsRes.json();
+        // FIX: backend wraps in { count, data: [...] }
+        const teams: Team[] = raw.data ?? raw.results ?? (Array.isArray(raw) ? raw : []);
         const eventTeam = teams.find(t => t.event === eventId);
-        setMyTeam(eventTeam || null);
+        setMyTeam(eventTeam ?? null);
       }
     } catch (error) {
       console.error('Error loading team data:', error);
@@ -166,20 +150,10 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
     }
   };
 
-  const loadRanking = async () => {
-    try {
-      // Note: This endpoint is admin-only in backend, so we'll handle gracefully
-      // In production, you'd need a student-facing ranking endpoint
-      const res = await authFetch(`${getBaseUrl()}/api/event/manage-teams/events/${eventId}/ranking/`);
-      if (res.ok) {
-        const data = await res.json();
-        setRanking(data.ranking || []);
-      }
-    } catch (error) {
-      // Silently fail - ranking might not be available for students
-      console.log('Ranking not available');
-    }
-  };
+  // FIX: Removed loadRanking() — the ranking endpoint is ADMIN-ONLY.
+  // Students cannot access /api/event/manage-teams/events/{id}/ranking/ (returns 403).
+  // When the event is finished, we show the student's own team result (rank/is_winner)
+  // which is already available in the myTeam object fetched from my-teams endpoint.
 
   const handleCreateTeam = async () => {
     if (!createTeamName.trim()) {
@@ -201,10 +175,14 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
       const data = await res.json();
       
       if (!res.ok) {
-        throw new Error(data.message || data.detail || 'فشل إنشاء الفريق');
+        // FIX: backend error can come as { message } or { detail } or DRF validation { field: [...] }
+        const errMsg = data.message || data.detail
+          || (typeof data === 'object' ? Object.values(data).flat().join(' ') : 'فشل إنشاء الفريق');
+        throw new Error(errMsg);
       }
 
       showToast(data.message || 'تم إنشاء الفريق بنجاح', 'success');
+      // FIX: backend returns { message, team: {...} }
       setMyTeam(data.team);
       setCreateTeamName('');
     } catch (error: any) {
@@ -234,10 +212,13 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
       const data = await res.json();
       
       if (!res.ok) {
-        throw new Error(data.message || data.detail || 'فشل الانضمام للفريق');
+        const errMsg = data.message || data.detail
+          || (typeof data === 'object' ? Object.values(data).flat().join(' ') : 'فشل الانضمام للفريق');
+        throw new Error(errMsg);
       }
 
       showToast(data.message || 'تم الانضمام للفريق بنجاح', 'success');
+      // FIX: backend returns { message, team: {...} }
       setMyTeam(data.team);
       setJoinCode('');
     } catch (error: any) {
@@ -267,7 +248,8 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
       const data = await res.json();
       
       if (!res.ok) {
-        throw new Error(data.message || data.detail || 'فشل مغادرة الفريق');
+        const errMsg = data.message || data.detail || 'فشل مغادرة الفريق';
+        throw new Error(errMsg);
       }
 
       showToast(data.message || 'تم مغادرة الفريق بنجاح', 'success');
@@ -298,12 +280,13 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
       const data = await res.json();
       
       if (!res.ok) {
-        throw new Error(data.message || data.detail || 'فشل إزالة العضو');
+        const errMsg = data.message || data.detail || 'فشل إزالة العضو';
+        throw new Error(errMsg);
       }
 
       showToast(data.message || 'تم إزالة العضو بنجاح', 'success');
       
-      // Refresh team data
+      // FIX: refresh team data after removing member
       await loadTeamData();
     } catch (error: any) {
       showToast(error.message || 'حدث خطأ أثناء إزالة العضو', 'error');
@@ -322,9 +305,12 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
     setTimeout(() => setCopiedCode(false), 2000);
   };
 
+  // FIX: status comparisons use the Arabic values that Django stores in the DB
+  // (inferred from TeamService constants: PARTICIPANT_APPROVED='مقبول', etc.)
+  // and confirmed by the Arabic strings in the original Teams.tsx.
   const isCaptain = myTeam && myTeam.captain === studentId;
   const isApproved = myTeam?.status === 'مقبول';
-  const isPending = myTeam?.status === 'منتظر';
+  const isPending  = myTeam?.status === 'منتظر';
   const isRejected = myTeam?.status === 'مرفوض';
 
   /* ══════════════════════════════════════════
@@ -342,11 +328,12 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
   }
 
   /* ══════════════════════════════════════════
-     RENDER: EVENT FINISHED - SHOW RANKING
+     RENDER: EVENT FINISHED - SHOW OWN TEAM RESULT
+     FIX: removed admin-only ranking API call.
+          We show the student's own team result from myTeam,
+          which contains rank and is_winner from the serializer.
   ══════════════════════════════════════════ */
-  if (isEventFinished && ranking.length > 0) {
-    const myTeamInRanking = ranking.find(t => t.team_id === myTeam?.team_id);
-    
+  if (isEventFinished) {
     return (
       <div className="teams-container" dir="rtl">
         <div className="teams-header">
@@ -354,52 +341,73 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
           <h2>نتائج الفرق</h2>
         </div>
 
-        <div className="ranking-podium">
-          {ranking.slice(0, 3).map((team, index) => {
-            const position = index + 1;
-            const isMyTeam = team.team_id === myTeam?.team_id;
-            
-            return (
-              <div
-                key={team.team_id}
-                className={`podium-item podium-${position}${isMyTeam ? ' my-team' : ''}`}
-              >
-                <div className="podium-rank">
-                  {position === 1 && '🥇'}
-                  {position === 2 && '🥈'}
-                  {position === 3 && '🥉'}
-                </div>
-                <div className="podium-content">
-                  <h3>{team.name}</h3>
-                  <p>{team.captain_name}</p>
-                  {team.is_winner && <span className="winner-badge">فائز</span>}
-                  {isMyTeam && <span className="my-team-badge">فريقك</span>}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        {myTeam ? (
+          <div className="my-result-card">
+            <h3>{myTeam.name}</h3>
 
-        {ranking.length > 3 && (
-          <div className="ranking-list">
-            <h3>باقي الفرق</h3>
-            {ranking.slice(3).map((team) => {
-              const isMyTeam = team.team_id === myTeam?.team_id;
-              
-              return (
-                <div
-                  key={team.team_id}
-                  className={`ranking-item${isMyTeam ? ' my-team' : ''}`}
-                >
-                  <span className="ranking-position">#{team.rank || '—'}</span>
-                  <div className="ranking-info">
-                    <h4>{team.name}</h4>
-                    <p>{team.captain_name}</p>
-                  </div>
-                  {isMyTeam && <span className="my-team-badge">فريقك</span>}
+            <div className="result-info">
+              {myTeam.is_winner && (
+                <div className="winner-banner">
+                  🏆 فائز
                 </div>
-              );
-            })}
+              )}
+
+              {myTeam.rank !== null ? (
+                <div className="rank-display">
+                  <span className="rank-label">ترتيبك:</span>
+                  <span className="rank-value">
+                    {myTeam.rank === 1 && '🥇'}
+                    {myTeam.rank === 2 && '🥈'}
+                    {myTeam.rank === 3 && '🥉'}
+                    {myTeam.rank > 3 && `#${myTeam.rank}`}
+                  </span>
+                </div>
+              ) : (
+                <p className="no-rank-msg">لم يتم تحديد الترتيب بعد</p>
+              )}
+
+              <div className="result-team-meta">
+                <span>القائد: {myTeam.captain_name}</span>
+                <span>الأعضاء: {myTeam.members_count}</span>
+              </div>
+            </div>
+
+            {/* Members list in result view */}
+            <div className="members-section">
+              <h4>أعضاء الفريق</h4>
+              <div className="members-list">
+                {myTeam.members
+                  .filter(m => m.status === 'نشط')
+                  .map(member => (
+                    <div key={member.member_id} className="member-item">
+                      <div className="member-info">
+                        <div className="member-avatar">
+                          {member.student_name.charAt(0)}
+                        </div>
+                        <div className="member-details">
+                          <h4>
+                            {member.student_name}
+                            {member.student_id === studentId && (
+                              <span className="me-badge">(أنت)</span>
+                            )}
+                          </h4>
+                          <p>{member.student_email}</p>
+                        </div>
+                      </div>
+                      {member.role === 'قائد' && (
+                        <span className="role-badge captain">
+                          <CrownIcon />
+                          قائد
+                        </span>
+                      )}
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="no-team-result">
+            <p>لم تكن في فريق لهذه الفعالية</p>
           </div>
         )}
       </div>
@@ -495,6 +503,7 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
   /* ══════════════════════════════════════════
      RENDER: MY TEAM VIEW
   ══════════════════════════════════════════ */
+  // FIX: filter uses the Arabic enum value 'نشط' which maps to MemberStatus.ACTIVE in the model
   const activeMembers = myTeam.members.filter(m => m.status === 'نشط');
   
   return (
@@ -576,6 +585,7 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
         
         <div className="members-list">
           {activeMembers.map((member) => {
+            // FIX: role comparison uses Arabic value 'قائد' (MemberRole.CAPTAIN DB value)
             const isMemberCaptain = member.role === 'قائد';
             const isMe = member.student_id === studentId;
             
@@ -602,7 +612,8 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
                     </span>
                   )}
                   
-                  {isCaptain && !isMemberCaptain && !isApproved && (
+                  {/* FIX: captain can remove non-captain members only while team is pending */}
+                  {isCaptain && !isMemberCaptain && !isMe && !isApproved && (
                     <button
                       className="btn-remove"
                       onClick={() => handleRemoveMember(member.member_id, member.student_id)}
@@ -625,7 +636,7 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
         </div>
       </div>
 
-      {/* Actions */}
+      {/* Actions — only show leave button when team is not approved */}
       {!isApproved && (
         <div className="team-actions">
           <button

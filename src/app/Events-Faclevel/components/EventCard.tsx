@@ -29,6 +29,13 @@ function Chip({ label, variant }: { label: string; variant: ChipVariant }) {
   return <span className={`${styles.chip} ${styles[variant]}`}>{label}</span>;
 }
 
+/** Maps raw API type values to user-facing display labels */
+function mapCategoryLabel(raw: string): string {
+  if (raw === "داخلي") return "على مستوى الكلية";
+  if (raw === "خارجي") return "على مستوى الجامعة";
+  return raw;
+}
+
 export default function EventCard({
   item,
   onView,
@@ -44,9 +51,12 @@ export default function EventCard({
   onDelete: (id: number) => void;
   onActiveChange?: (id: number, nextActive: boolean) => void;
   busy?: boolean;
-  hideToggle?: boolean; 
+  hideToggle?: boolean;
 }) {
   if (!item) return null;
+
+  // Display label mapped from raw value; raw value stays in item.categoryLabel for any logic
+  const displayCategory = mapCategoryLabel(item.categoryLabel);
 
   return (
     <article className={styles.card}>
@@ -57,28 +67,29 @@ export default function EventCard({
             <p className={styles.plan}>{item.planName}</p>
           </div>
 
-            {!hideToggle  && item.statusLabel === "مقبول" && (
-          <div className={styles.approvalWrap}>
-            <span className={styles.approvalLabel}>
-              {item.isActive ? "نشط" : "غير نشط"}
-            </span>
+          {!hideToggle && item.statusLabel === "مقبول" && (
+            <div className={styles.approvalWrap}>
+              <span className={styles.approvalLabel}>
+                {item.isActive ? "نشط" : "غير نشط"}
+              </span>
 
-            <label className={styles.switch} aria-label="حالة النشاط">
-              <input
-                type="checkbox"
-                checked={item.isActive}
-                disabled={busy}
-                onChange={(e) => onActiveChange?.(item.id, e.target.checked)}
-              />
-              <span className={styles.slider} />
-            </label>
-          </div>
-        )}
+              <label className={styles.switch} aria-label="حالة النشاط">
+                <input
+                  type="checkbox"
+                  checked={item.isActive}
+                  disabled={busy}
+                  onChange={(e) => onActiveChange?.(item.id, e.target.checked)}
+                />
+                <span className={styles.slider} />
+              </label>
+            </div>
+          )}
         </div>
 
         <div className={styles.chips}>
           <Chip label={item.statusLabel} variant={item.statusVariant} />
-          <Chip label={item.categoryLabel} variant={item.categoryVariant} />
+          {/* Show mapped display label, not the raw داخلي/خارجي value */}
+          <Chip label={displayCategory} variant={item.categoryVariant} />
         </div>
       </div>
 
@@ -106,9 +117,9 @@ export default function EventCard({
           <span>{item.priceText}</span>
         </div>
       </div>
-     <div className={styles.actions}>
 
-         <button className={styles.secondary} onClick={() => onView(item.id)}>
+      <div className={styles.actions}>
+        <button className={styles.secondary} onClick={() => onView(item.id)}>
           <Eye size={18} />
           عرض التفاصيل
         </button>
@@ -125,8 +136,6 @@ export default function EventCard({
             </button>
           </>
         )}
-
-     
       </div>
     </article>
   );

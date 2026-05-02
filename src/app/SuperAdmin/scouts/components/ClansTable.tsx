@@ -1,0 +1,125 @@
+"use client";
+import React from "react";
+import styles from "../styles/ClansTable.module.css";
+import { Eye, Building2, Users, GitBranch, Clock, CheckCircle2, XCircle } from "lucide-react";
+import type { Clan } from "../page";
+import { CLAN_STATUS } from "../utils/scoutsDataMapper";
+
+interface Props {
+  clans: Clan[];
+  onView: (clanId: number) => void;
+}
+
+function formatDate(iso: string) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return d.toLocaleDateString("ar-EG", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+export default function ClansTable({ clans, onView }: Props) {
+  return (
+    <div className={styles.tableWrapper}>
+      <table className={styles.table}>
+        <thead>
+          <tr>
+            <th>اسم العشيرة</th>
+            <th>الكلية</th>
+            <th>الحالة</th>
+            <th>الأعضاء</th>
+            <th>المقبولون</th>
+            <th>المجموعات</th>
+            <th>طلبات معلقة</th>
+            <th>الهيكل</th>
+            <th>تاريخ الإنشاء</th>
+            <th>الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          {clans.map((clan) => {
+            const isActive = clan.status === CLAN_STATUS.ACTIVE;
+            return (
+              <tr key={clan.clan_id}>
+                <td>
+                  <div className={styles.clanName}>
+                    <div className={styles.clanIcon}>
+                      <Building2 size={16} />
+                    </div>
+                    <span>{clan.name}</span>
+                  </div>
+                </td>
+                <td>
+                  <span className={styles.facultyName}>{clan.faculty_name || "—"}</span>
+                </td>
+                <td>
+                  <span className={isActive ? styles.badgeActive : styles.badgeInactive}>
+                    <span className={styles.dot} />
+                    {clan.status}
+                  </span>
+                </td>
+                <td>
+                  <div className={styles.statCell}>
+                    <Users size={14} />
+                    <span>{clan.members_count || 0}</span>
+                  </div>
+                </td>
+                <td>
+                  <div className={styles.statCell}>
+                    <Users size={14} />
+                    <span>{clan.accepted_count || 0}</span>
+                  </div>
+                </td>
+                <td>
+                  <div className={styles.statCell}>
+                    <GitBranch size={14} />
+                    <span>{clan.groups_count || 0}</span>
+                  </div>
+                </td>
+                <td>
+                  <div className={styles.statCell}>
+                    <Clock size={14} />
+                    <span className={clan.pending_count > 0 ? styles.pendingHighlight : ""}>
+                      {clan.pending_count || 0}
+                    </span>
+                  </div>
+                </td>
+                <td>
+                  <div className={styles.statCell}>
+                    {clan.is_structure_complete ? (
+                      <>
+                        <CheckCircle2 size={14} className={styles.completeIcon} />
+                        <span className={styles.completeText}>مكتمل</span>
+                      </>
+                    ) : (
+                      <>
+                        <XCircle size={14} className={styles.incompleteIcon} />
+                        <span className={styles.incompleteText}>غير مكتمل</span>
+                      </>
+                    )}
+                  </div>
+                </td>
+                <td>
+                  <span className={styles.dateText}>{formatDate(clan.created_at)}</span>
+                </td>
+                <td>
+                  <div className={styles.actions}>
+                    <button
+                      className={styles.viewBtn}
+                      onClick={() => onView(clan.clan_id)}
+                      title="عرض التفاصيل"
+                    >
+                      <Eye size={16} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}

@@ -4,22 +4,23 @@
    VARIABLES
 ══════════════════════════════════════════════ */
 :root {
-  --navy:         #0F2547;
-  --navy-mid:     #1A3A6B;
-  --navy-light:   #2D5F8A;
-  --gold:         #B38E19;
+  --navy:         #1E3A5F;
+  --navy-mid:     #2D5F8A;
+  --navy-light:   #EBF3FB;
+  --gold:         #C49B3A;
   --gold-mid:     #C9A320;
-  --gold-pale:    #FBF6E3;
-  --surface:      #F2F4F9;
+  --gold-dark:    #A67F2C;
+  --gold-pale:    #FDF6E3;
+  --surface:      #EDF2F8;
   --card:         #FFFFFF;
-  --border:       #E4E8F0;
-  --text-1:       #0F2547;
+  --border:       #E2ECF5;
+  --text-1:       #1A2E42;
   --text-2:       #374151;
-  --text-3:       #6B7280;
+  --text-3:       #6B8299;
   --text-4:       #9CA3AF;
   --green:        #059669;
   --green-bg:     #ECFDF5;
-  --green-border: #A7F3D0;
+  --green-border: #6EE7B7;
   --red:          #DC2626;
   --red-bg:       #FEF2F2;
   --amber:        #D97706;
@@ -30,9 +31,9 @@
   --r-md:         12px;
   --r-lg:         16px;
   --r-xl:         20px;
-  --sh-sm:        0 1px 4px rgba(15,37,71,.07);
-  --sh-md:        0 4px 16px rgba(15,37,71,.10);
-  --sh-lg:        0 12px 40px rgba(15,37,71,.15);
+  --sh-sm:        0 1px 4px rgba(26,46,66,.07);
+  --sh-md:        0 4px 16px rgba(26,46,66,.10);
+  --sh-lg:        0 12px 40px rgba(26,46,66,.15);
 }
 
 /* ══════════════════════════════════════════════

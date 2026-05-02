@@ -191,6 +191,15 @@ export default function Page() {
     router.push(`/uni-level-activities/${eventId}`);
   };
 
+    function scopeLabel(raw: string) {
+  const s = (raw || "").trim();
+
+  if (s === "داخلي") return "على مستوى الكلية";
+  if (s === "خارجي") return "على مستوى الجامعة";
+
+  return s || "—";
+}
+
   return (
     <div className={styles.page}>
       <div className={styles.container}>

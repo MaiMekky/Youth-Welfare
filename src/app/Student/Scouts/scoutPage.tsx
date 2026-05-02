@@ -56,10 +56,16 @@ const IconStar = ({ size = 18 }: { size?: number }) => (
     <path d="M12 2L8.5 8.5 1 9.27l5.5 5.36L4.82 22 12 18.27 19.18 22l-1.68-7.37L23 9.27l-7.5-.77L12 2z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
-const IconAlertCircle = ({ size = 36 }: { size?: number }) => (
+const IconAlertCircle = ({ size = 18 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
     <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8"/>
     <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+);
+const IconCheckCircle = ({ size = 18 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+    <path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M22 4L12 14.01l-3-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 const IconLayoutDashboard = ({ size = 18 }: { size?: number }) => (
@@ -120,16 +126,12 @@ function SectionCard({ icon, title, children, fullWidth = false, accentTop = fal
   fullWidth?: boolean; accentTop?: boolean;
 }) {
   return (
-    <div
-      data-card
-      style={{
-        background: T.white, border: `1px solid ${T.border}`,
-        borderRadius: T.radius, boxShadow: T.shadow, overflow: "hidden",
-        position: "relative", transition: "transform .2s ease, box-shadow .2s ease",
-        ...(fullWidth ? { gridColumn: "1 / -1" } : {}),
-        ...(accentTop ? { borderTop: `3px solid ${T.navy}` } : {}),
-      }}
-    >
+    <div style={{
+      background: T.white, border: `1px solid ${T.border}`,
+      borderRadius: T.radius, boxShadow: T.shadow, overflow: "hidden",
+      position: "relative", ...(fullWidth ? { gridColumn: "1 / -1" } : {}),
+      ...(accentTop ? { borderTop: `3px solid ${T.navy}` } : {}),
+    }}>
       {!accentTop && (
         <div style={{
           position: "absolute", top: 0, right: 0, width: 4, height: "100%",
@@ -178,8 +180,8 @@ export default function ScoutsPage() {
   const [memberStatus, setMemberStatus] = useState<MemberStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [joinLoading, setJoinLoading] = useState(false);
-  const [joinError, setJoinError] = useState("");
-  const [clanState, setClanState] = useState<"none" | "inactive" | "active" | null>(null);
+  const [joinMsg, setJoinMsg] = useState("");
+  const [clanError, setClanError] = useState<"none" | "inactive" | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -200,6 +202,7 @@ export default function ScoutsPage() {
           setClan(data);
           setClanState(data.status === "نشط" ? "active" : "inactive");
         }
+        setClan(data);
       }
 
       if (statusRes.ok) {
@@ -215,17 +218,17 @@ export default function ScoutsPage() {
 
   const handleJoin = async () => {
     setJoinLoading(true);
-    setJoinError("");
+    setJoinMsg("");
     try {
       const res = await authFetch(`${API_URL}/api/student/join/`, { method: "POST" });
       if (res.ok) {
         router.push("/Student/Scouts/Track");
       } else {
         const data = await res.json().catch(() => ({}));
-        setJoinError(data?.detail || data?.message || "حدث خطأ في إرسال الطلب، يرجى المحاولة لاحقاً");
+        setJoinMsg(data?.detail || data?.message || "حدث خطأ في إرسال الطلب");
       }
     } catch {
-      setJoinError("حدث خطأ في الاتصال، يرجى المحاولة لاحقاً");
+      setJoinMsg("حدث خطأ في الاتصال، يرجى المحاولة لاحقاً");
     } finally {
       setJoinLoading(false);
     }
@@ -288,36 +291,77 @@ export default function ScoutsPage() {
     };
   };
 
-  const cta = getCta();
-
+  /* ── Loading skeleton ── */
   if (loading) {
     return (
-      <div dir="rtl" style={{ minHeight: "100vh", background: T.bg, fontFamily: T.font, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div dir="rtl" style={{
+        minHeight: "100vh", background: T.bg, fontFamily: T.font,
+        display: "flex", alignItems: "center", justifyContent: "center",
+      }}>
         <div style={{ textAlign: "center" }}>
-          <div style={{ width: 52, height: 52, border: `3px solid ${T.border}`, borderTop: `3px solid ${T.gold}`, borderRadius: "50%", margin: "0 auto 16px", animation: "spin 1s linear infinite" }} />
+          <div style={{
+            width: 52, height: 52, border: `3px solid ${T.border}`,
+            borderTop: `3px solid ${T.gold}`, borderRadius: "50%",
+            margin: "0 auto 16px", animation: "spin 1s linear infinite",
+          }} />
           <p style={{ color: T.mute, fontFamily: T.font, fontWeight: 600 }}>جاري التحميل...</p>
         </div>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
-  return (
-    <div dir="rtl" style={{ direction: "rtl", minHeight: "100vh", width: "100%", background: T.bg, fontFamily: T.font, display: "flex", flexDirection: "column", color: T.text }}>
+  const ctaData = renderCTAContent();
 
-      {/* HERO */}
-      <div data-hero style={{ width: "100%", background: `linear-gradient(140deg, ${T.navy} 0%, ${T.navyMid} 100%)`, padding: "32px 40px", textAlign: "center", position: "relative", overflow: "hidden", borderRadius: "16px 16px 0 0", boxShadow: "0 4px 18px rgba(30,58,95,.22)", boxSizing: "border-box" }}>
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, transparent, ${T.gold}, #e5b84a, transparent)` }} />
-        <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse 500px 300px at 5% 70%, rgba(196,155,58,.08) 0%, transparent 60%)`, pointerEvents: "none" }} />
-        <h1 style={{ fontSize: 30, fontWeight: 900, color: "#fff", margin: "0 0 6px", fontFamily: T.font, position: "relative", zIndex: 1 }}>الجوالة</h1>
-        <div style={{ width: 52, height: 3, background: T.gold, borderRadius: 3, margin: "14px auto", position: "relative", zIndex: 1 }} />
-        <p style={{ fontSize: 16, fontWeight: 500, color: "rgba(255,255,255,.65)", margin: 0, fontFamily: T.font, position: "relative", zIndex: 1, maxWidth: 560, marginInline: "auto", lineHeight: 1.75 }}>
-          نظام الأنشطة الكشفية داخل الجامعة — يهدف إلى تنمية المهارات القيادية والعمل الجماعي من خلال عشائر الكليات والرهوط المنظمة.
+  return (
+    <div dir="rtl" style={{
+      direction: "rtl", minHeight: "100vh", width: "100%",
+      background: T.bg, fontFamily: T.font, display: "flex",
+      flexDirection: "column", color: T.text,
+    }}>
+
+      {/* ── HERO HEADER ── */}
+      <div style={{
+        width: "100%",
+        background: `linear-gradient(140deg, ${T.navy} 0%, ${T.navyMid} 100%)`,
+        padding: "32px 40px", textAlign: "center", position: "relative",
+        overflow: "hidden", borderRadius: "16px 16px 0 0",
+        boxShadow: "0 4px 18px rgba(30,58,95,.22)", boxSizing: "border-box",
+      }}>
+        <div style={{
+          position: "absolute", top: 0, left: 0, right: 0, height: 3,
+          background: `linear-gradient(90deg, transparent, ${T.gold}, #e5b84a, transparent)`,
+        }} />
+        <div style={{
+          position: "absolute", inset: 0,
+          background: `radial-gradient(ellipse 500px 300px at 5% 70%, rgba(196,155,58,.08) 0%, transparent 60%)`,
+          pointerEvents: "none",
+        }} />
+        <h1 style={{
+          fontSize: 30, fontWeight: 900, color: "#fff", margin: "0 0 6px",
+          fontFamily: T.font, position: "relative", zIndex: 1,
+        }}>الجوالة</h1>
+        <div style={{
+          width: 52, height: 3, background: T.gold, borderRadius: 3,
+          margin: "14px auto", position: "relative", zIndex: 1,
+        }} />
+        <p style={{
+          fontSize: 16, fontWeight: 500, color: "rgba(255,255,255,.65)",
+          margin: 0, fontFamily: T.font, position: "relative", zIndex: 1,
+          maxWidth: 560, marginInline: "auto", lineHeight: 1.75,
+        }}>
+          نظام الأنشطة الكشفية داخل الجامعة — يهدف إلى تنمية المهارات القيادية
+          والعمل الجماعي من خلال عشائر الكليات والرهوط المنظمة.
         </p>
       </div>
+    );
+  }
 
-      {/* CONTENT GRID */}
-      <div data-content-grid style={{ width: "100%", padding: "32px 40px", display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 22, flex: 1, boxSizing: "border-box" }}>
+      {/* ── CONTENT GRID ── */}
+      <div style={{
+        width: "100%", padding: "32px 40px",
+        display: "grid", gridTemplateColumns: "repeat(2, 1fr)",
+        gap: 22, flex: 1, boxSizing: "border-box",
+      }}>
 
         {/* What is Scouts */}
         <SectionCard icon={<IconCompass size={18} />} title="ما هي الجوالة؟" accentTop>
@@ -346,7 +390,7 @@ export default function ScoutsPage() {
           </div>
         </SectionCard>
 
-        {/* Benefits */}
+        {/* 3 — Benefits */}
         <SectionCard icon={<IconStar size={18} />} title="ماذا ستكتسب من الانضمام؟" fullWidth>
           <div data-benefits-grid style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
             {[
@@ -354,8 +398,17 @@ export default function ScoutsPage() {
               { icon: <IconUsers size={22} />, title: "العمل الجماعي", desc: "التدرب على العمل ضمن فريق وبناء علاقات قوية مع زملائك في الكلية" },
               { icon: <IconAward size={22} />, title: "الانضباط والمسؤولية", desc: "تعلم قيم الانضباط والمسؤولية والالتزام بالمبادئ الكشفية" },
             ].map((b) => (
-              <div key={b.title} data-benefit style={{ background: T.bg, borderRadius: T.radius, padding: "20px 18px", border: `1px solid ${T.border}`, borderTop: `3px solid ${T.gold}`, display: "flex", flexDirection: "column", gap: 12, transition: "transform .2s ease, box-shadow .2s ease" }}>
-                <span style={{ width: 46, height: 46, background: T.goldPale, border: `1px solid rgba(196,155,58,.25)`, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", color: T.goldDark }}>{b.icon}</span>
+              <div key={b.title} style={{
+                background: T.bg, borderRadius: T.radius, padding: "20px 18px",
+                border: `1px solid ${T.border}`, borderTop: `3px solid ${T.gold}`,
+                display: "flex", flexDirection: "column", gap: 12,
+              }}>
+                <span style={{
+                  width: 46, height: 46, background: T.goldPale,
+                  border: `1px solid rgba(196,155,58,.25)`, borderRadius: 12,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: T.goldDark,
+                }}>{b.icon}</span>
                 <div style={{ fontSize: 16, fontWeight: 800, color: T.navy, fontFamily: T.font }}>{b.title}</div>
                 <div style={{ fontSize: 14, fontWeight: 600, color: T.mute, lineHeight: 1.7, fontFamily: T.font }}>{b.desc}</div>
               </div>
@@ -395,39 +448,38 @@ export default function ScoutsPage() {
           <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse 400px 250px at -5% 80%, rgba(196,155,58,.1) 0%, transparent 60%)`, pointerEvents: "none" }} />
 
           <div style={{ position: "relative", zIndex: 1 }}>
-            {cta.statusBadge && (
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 14px", borderRadius: 100, fontSize: 13, fontWeight: 700, color: cta.statusBadge.color, background: cta.statusBadge.bg, border: `1px solid ${cta.statusBadge.border}`, marginBottom: 12, fontFamily: T.font }}>
-                {cta.statusBadge.label}
+            {ctaData.badge && (
+              <span style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                padding: "4px 14px", borderRadius: 100, fontSize: 13, fontWeight: 700,
+                color: ctaData.badge.color, background: ctaData.badge.bg,
+                border: `1px solid ${ctaData.badge.border}`, marginBottom: 12,
+                fontFamily: T.font,
+              }}>
+                {ctaData.badge.label}
               </span>
             )}
-            <h3 style={{ fontSize: 22, fontWeight: 900, color: "#fff", margin: "0 0 10px", fontFamily: T.font }}>{cta.heading}</h3>
-            <p style={{ fontSize: 15, fontWeight: 500, color: "rgba(255,255,255,.6)", margin: 0, lineHeight: 1.65, fontFamily: T.font }}>{cta.sub}</p>
+            <h3 style={{ fontSize: 22, fontWeight: 900, color: "#fff", margin: "0 0 10px", fontFamily: T.font }}>
+              {ctaData.heading}
+            </h3>
+            <p style={{ fontSize: 15, fontWeight: 500, color: "rgba(255,255,255,.6)", margin: 0, lineHeight: 1.65, fontFamily: T.font }}>
+              {ctaData.sub}
+            </p>
           </div>
 
-          {(cta.primaryBtn || cta.secondaryBtn) && (
-            <div data-cta-actions style={{ display: "flex", gap: 14, alignItems: "center", flexShrink: 0, position: "relative", zIndex: 1 }}>
-
-              {cta.primaryBtn === "join" && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end" }}>
-                  <button onClick={handleJoin} disabled={joinLoading} style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "14px 32px", background: joinLoading ? "rgba(196,155,58,.5)" : `linear-gradient(135deg, ${T.gold} 0%, ${T.goldDark} 100%)`, color: "#fff", borderRadius: T.radius, fontFamily: T.font, fontSize: 17, fontWeight: 800, cursor: joinLoading ? "not-allowed" : "pointer", border: "none", boxShadow: "0 4px 16px rgba(196,155,58,.4)", whiteSpace: "nowrap" }}>
-                    <IconHeart size={18} />
-                    {joinLoading ? "جاري الإرسال..." : normalizeStatus(memberStatus?.status) === "rejected" ? "تقديم طلب جديد" : "تقديم طلب الانضمام"}
-                  </button>
-                  {joinError && <span style={{ fontSize: 13, color: "#ffd9d9", fontFamily: T.font, fontWeight: 600 }}>{joinError}</span>}
-                </div>
-              )}
-
-              {cta.primaryBtn && cta.primaryBtn !== "join" && (
-                <Link data-btn="primary" href={cta.primaryBtn.href} style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "14px 32px", background: `linear-gradient(135deg, ${T.gold} 0%, ${T.goldDark} 100%)`, color: "#fff", borderRadius: T.radius, fontFamily: T.font, fontSize: 17, fontWeight: 800, textDecoration: "none", boxShadow: "0 4px 16px rgba(196,155,58,.4)", whiteSpace: "nowrap" }}>
-                  {cta.primaryBtn.icon}
-                  {cta.primaryBtn.label}
-                </Link>
-              )}
-
-              {cta.secondaryBtn && (
-                <Link data-btn="ghost" href={cta.secondaryBtn.href} style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "14px 32px", background: "rgba(255,255,255,.12)", border: "1.5px solid rgba(255,255,255,.28)", borderRadius: T.radius, fontFamily: T.font, fontSize: 16, fontWeight: 700, color: "#fff", textDecoration: "none", whiteSpace: "nowrap" }}>
-                  {cta.secondaryBtn.icon}
-                  {cta.secondaryBtn.label}
+          {ctaData.buttons && (
+            <div style={{ display: "flex", gap: 14, alignItems: "center", flexShrink: 0, position: "relative", zIndex: 1 }}>
+              {ctaData.buttons}
+              {memberStatus?.status !== "accepted" && memberStatus?.status !== "pending" && (
+                <Link href="/Student/Scouts/Track" style={{
+                  display: "inline-flex", alignItems: "center", gap: 10,
+                  padding: "14px 32px", background: "rgba(255,255,255,.12)",
+                  border: "1.5px solid rgba(255,255,255,.28)", borderRadius: T.radius,
+                  fontFamily: T.font, fontSize: 16, fontWeight: 700,
+                  color: "#fff", textDecoration: "none", whiteSpace: "nowrap",
+                }}>
+                  <IconClock size={18} />
+                  متابعة الطلبات
                 </Link>
               )}
             </div>
@@ -435,6 +487,7 @@ export default function ScoutsPage() {
         </div>
 
       </div>
+
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );

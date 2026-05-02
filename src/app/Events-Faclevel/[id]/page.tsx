@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
+import EventTeams from "./EventsTeam";
 
 const API_URL = getBaseUrl();
 
@@ -1640,6 +1641,10 @@ const uploadImages = async (files: FileList | null) => {
             </table>
           </div>
         </section>
+          <EventTeams
+          eventId={id}
+          participants={rows.map(r => ({ id: r.id, studentId: r.studentId, name: r.name }))}
+        />
       </div>
     </div>
   );

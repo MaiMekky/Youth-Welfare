@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
+import TeamsSection from "./TeamsSection";
 const API_URL = getBaseUrl();
 
 
@@ -1124,6 +1125,8 @@ const uploadImages = async (files: FileList | null) => {
             </div>
           )}
         </section>
+
+         <TeamsSection eventId={id} isFacultyEvent={isFacultyEvent} />
 
         {reportOpen && !isFacultyEvent && (
           <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-label="تقرير الفعالية">

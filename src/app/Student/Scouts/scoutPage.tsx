@@ -88,10 +88,27 @@ type Clan = {
 };
 
 type MemberStatus = {
-  status: "pending" | "accepted" | "rejected";
-  note?: string;
-  ref_number?: string;
+  scout_member_id: number;
+  clan: number;
+  clan_name: string;
+  group: number | null;
+  group_name: string | null;
+  role: string;
+  status: string;
+  rejection_reason: string | null;
+  joined_at: string | null;
 };
+
+type NormalizedStatus = "pending" | "accepted" | "rejected" | "preliminary_approved";
+
+function normalizeStatus(raw: string | undefined | null): NormalizedStatus {
+  const s = (raw ?? "").toLowerCase().trim();
+  if (s === "pending"  || s === "منتظر")                          return "pending";
+  if (s === "accepted" || s === "مقبول")                          return "accepted";
+  if (s === "rejected" || s === "مرفوض")                          return "rejected";
+  if (s === "preliminary_approved" || s === "موافقة مبدئية")      return "preliminary_approved";
+  return "pending";
+}
 
 /* ── Token palette ── */
 const T = {
@@ -140,6 +157,20 @@ function SectionCard({ icon, title, children, fullWidth = false, accentTop = fal
   );
 }
 
+/* ── Bullet List helper ── */
+function BulletList({ items, color }: { items: string[]; color: string }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {items.map(item => (
+        <div key={item} style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: T.font }}>
+          <span style={{ width: 7, height: 7, borderRadius: "50%", background: color, flexShrink: 0 }} />
+          <span style={{ fontSize: 14, fontWeight: 600, color: T.text }}>{item}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /* ══════════════════════════════════════════════════════════════
    MAIN PAGE
 ══════════════════════════════════════════════════════════════ */
@@ -160,18 +191,23 @@ export default function ScoutsPage() {
         authFetch(`${API_URL}/api/student/my_status/`),
       ]);
 
-      if (clanRes.status === 404) {
-        setClanError("none");
-      } else if (clanRes.ok) {
-        const data: Clan = await clanRes.json();
-        if (data.status !== "نشط") {
-          setClanError("inactive");
+      if (!clanRes.ok) {
+        setClanState("none");
+      } else {
+        const json = await clanRes.json();
+        const data: Clan | null = json.data ?? null;
+        if (!data) {
+          setClanState("none");
+        } else {
+          setClan(data);
+          setClanState(data.status === "نشط" ? "active" : "inactive");
         }
         setClan(data);
       }
 
       if (statusRes.ok) {
-        setMemberStatus(await statusRes.json());
+        const json = await statusRes.json();
+        setMemberStatus(json.data ?? null);
       }
     } finally {
       setLoading(false);
@@ -198,103 +234,60 @@ export default function ScoutsPage() {
     }
   };
 
-  /* ── CTA block based on combined clan + member state ── */
-  const renderCTAContent = () => {
-    // No clan for this faculty
-    if (clanError === "none") {
-      return {
-        heading: "لا تتوفر عشيرة لكليتك",
-        sub: "لم يتم إنشاء عشيرة لكليتك حتى الآن، تواصل مع إدارة الجوالة للاستفسار",
-        badge: { color: T.mute, bg: "rgba(107,130,153,.12)", border: "rgba(107,130,153,.25)", label: "غير متوفرة" },
-        buttons: null,
-      };
-    }
-    // Clan inactive
-    if (clanError === "inactive" || (clan && clan.status !== "نشط")) {
-      return {
-        heading: "العشيرة غير نشطة حالياً",
-        sub: "عشيرة كليتك موجودة لكنها غير متاحة للانضمام في الوقت الحالي",
-        badge: { color: "#D97706", bg: "rgba(217,119,6,.08)", border: "rgba(217,119,6,.28)", label: "غير نشطة" },
-        buttons: null,
-      };
-    }
-    // Already accepted
-    if (memberStatus?.status === "accepted") {
-      return {
-        heading: "أنت عضو في العشيرة 🎉",
-        sub: "تم قبول انضمامك، يمكنك الاطلاع على معلومات مجموعتك من لوحة التحكم",
-        badge: { color: "#059669", bg: "#ECFDF5", border: "#6EE7B7", label: "مقبول" },
-        buttons: (
-          <Link href="/Student/Scouts/dashboard" style={{
-            display: "inline-flex", alignItems: "center", gap: 10,
-            padding: "14px 32px",
-            background: `linear-gradient(135deg, ${T.gold} 0%, ${T.goldDark} 100%)`,
-            color: "#fff", borderRadius: T.radius, fontFamily: T.font,
-            fontSize: 17, fontWeight: 800, textDecoration: "none",
-            boxShadow: "0 4px 16px rgba(196,155,58,.4)", whiteSpace: "nowrap",
-          }}>
-            <IconLayoutDashboard size={18} />
-            لوحة التحكم
-          </Link>
-        ),
-      };
-    }
-    // Pending request
-    if (memberStatus?.status === "pending") {
-      return {
-        heading: "طلبك قيد المراجعة",
-        sub: "تم استلام طلبك وهو قيد المراجعة من قبل مسؤول الكلية",
-        badge: { color: "#D97706", bg: "rgba(217,119,6,.08)", border: "rgba(217,119,6,.28)", label: "قيد المراجعة" },
-        buttons: (
-          <Link href="/Student/Scouts/Track" style={{
-            display: "inline-flex", alignItems: "center", gap: 10,
-            padding: "14px 32px",
-            background: "rgba(255,255,255,.12)", border: "1.5px solid rgba(255,255,255,.28)",
-            borderRadius: T.radius, fontFamily: T.font, fontSize: 16, fontWeight: 700,
-            color: "#fff", textDecoration: "none", whiteSpace: "nowrap",
-          }}>
-            <IconClock size={18} />
-            متابعة الطلب
-          </Link>
-        ),
-      };
-    }
-    // New applicant or rejected
-    const isRejected = memberStatus?.status === "rejected";
+  /* ── CTA config based on clan + member state ── */
+  type LinkBtn = { label: string; icon: React.ReactNode; href: string };
+  type CtaConfig = {
+    heading: string;
+    sub: string;
+    statusBadge: { label: string; color: string; bg: string; border: string } | null;
+    primaryBtn: LinkBtn | "join" | null;
+    secondaryBtn: LinkBtn | null;
+  };
+
+  const getCta = (): CtaConfig => {
+    if (clanState === "none") return {
+      heading: "لا تتوفر عشيرة لكليتك",
+      sub: "لم يتم إنشاء عشيرة لكليتك حتى الآن، تواصل مع إدارة الجوالة للاستفسار",
+      statusBadge: null, primaryBtn: null, secondaryBtn: null,
+    };
+    if (clanState === "inactive") return {
+      heading: "العشيرة غير نشطة حالياً",
+      sub: "عشيرة كليتك موجودة لكنها غير متاحة للانضمام في الوقت الحالي",
+      statusBadge: { label: "غير نشطة", color: "#D97706", bg: "rgba(217,119,6,.08)", border: "rgba(217,119,6,.28)" },
+      primaryBtn: null, secondaryBtn: null,
+    };
+
+    const normalized = normalizeStatus(memberStatus?.status);
+
+    if (normalized === "accepted") return {
+      heading: "أنت عضو في العشيرة",
+      sub: "تم قبول انضمامك، يمكنك الاطلاع على معلومات مجموعتك من لوحة التحكم",
+      statusBadge: { label: "مقبول", color: "#059669", bg: "#ECFDF5", border: "#6EE7B7" },
+      primaryBtn: { label: "لوحة التحكم", icon: <IconLayoutDashboard size={18} />, href: "/Student/Scouts/dashboard" },
+      secondaryBtn: null,
+    };
+    if (normalized === "pending") return {
+      heading: "طلبك قيد المراجعة",
+      sub: "تم استلام طلبك وهو قيد المراجعة من قبل مسؤول الكلية",
+      statusBadge: { label: "قيد المراجعة", color: "#D97706", bg: "rgba(217,119,6,.08)", border: "rgba(217,119,6,.28)" },
+      primaryBtn: null,
+      secondaryBtn: null,
+    };
+    if (normalized === "preliminary_approved") return {
+      heading: "موافقة مبدئية على طلبك",
+      sub: "يرجى التوجه إلى الكلية لتسليم الأوراق المطلوبة لاستكمال القبول",
+      statusBadge: { label: "موافقة مبدئية", color: "#2D5F8A", bg: "#EBF3FB", border: "#B3D4EE" },
+      primaryBtn: null,
+      secondaryBtn: null,
+    };
+
+    const isRejected = normalized === "rejected";
     return {
       heading: isRejected ? "تم رفض طلبك السابق" : "هل أنت مستعد للانضمام؟",
-      sub: isRejected
-        ? "يمكنك تقديم طلب انضمام جديد الآن"
-        : "انضم إلى عشيرة كليتك — سيتم مراجعة طلبك من قبل المسؤول",
-      badge: isRejected
-        ? { color: "#DC2626", bg: "#FEF2F2", border: "#FECACA", label: "مرفوض سابقاً" }
-        : null,
-      buttons: (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 10 }}>
-          <button
-            onClick={handleJoin}
-            disabled={joinLoading}
-            style={{
-              display: "inline-flex", alignItems: "center", gap: 10,
-              padding: "14px 32px",
-              background: joinLoading
-                ? "rgba(196,155,58,.5)"
-                : `linear-gradient(135deg, ${T.gold} 0%, ${T.goldDark} 100%)`,
-              color: "#fff", borderRadius: T.radius, fontFamily: T.font,
-              fontSize: 17, fontWeight: 800, cursor: joinLoading ? "not-allowed" : "pointer",
-              border: "none", boxShadow: "0 4px 16px rgba(196,155,58,.4)", whiteSpace: "nowrap",
-            }}
-          >
-            <IconHeart size={18} />
-            {joinLoading ? "جاري الإرسال..." : isRejected ? "تقديم طلب جديد" : "تقديم طلب الانضمام"}
-          </button>
-          {joinMsg && (
-            <span style={{ fontSize: 13, color: "#ffd9d9", fontFamily: T.font, fontWeight: 600 }}>
-              {joinMsg}
-            </span>
-          )}
-        </div>
-      ),
+      sub: isRejected ? "يمكنك تقديم طلب انضمام جديد الآن" : "انضم إلى عشيرة كليتك — سيتم مراجعة طلبك من قبل المسؤول",
+      statusBadge: isRejected ? { label: "مرفوض سابقاً", color: "#DC2626", bg: "#FEF2F2", border: "#FECACA" } : null,
+      primaryBtn: "join",
+      secondaryBtn: null,
     };
   };
 
@@ -370,56 +363,31 @@ export default function ScoutsPage() {
         gap: 22, flex: 1, boxSizing: "border-box",
       }}>
 
-        {/* 1 — Clan Info */}
-        <SectionCard icon={<IconCompass size={18} />} title="معلومات العشيرة" accentTop>
-          {clanError === "none" ? (
-            <div style={{
-              textAlign: "center", padding: "24px 0",
-              color: T.mute, fontFamily: T.font, fontSize: 16, fontWeight: 600,
-            }}>
-              <IconAlertCircle size={36} />
-              <p style={{ marginTop: 12 }}>لا تتوفر عشيرة لكليتك حالياً</p>
-            </div>
-          ) : clan ? (
-            <>
-              <p style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.85, color: T.mute, margin: "0 0 18px", fontFamily: T.font }}>
-                {clan.description || "عشيرة كلية تهدف إلى تنمية روح القيادة والعمل الجماعي بين طلاب الكلية."}
-              </p>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                {[
-                  { label: "الكلية", value: clan.faculty_name },
-                  { label: "الحالة", value: clan.status },
-                  ...(clan.members_count !== undefined
-                    ? [{ label: "عدد الأعضاء", value: `${clan.members_count} عضو` }]
-                    : []),
-                ].map((item) => (
-                  <div key={item.label} style={{
-                    background: T.bg, borderRadius: T.radius, padding: "14px 16px",
-                    border: `1px solid ${T.border}`, borderRight: `3px solid ${T.gold}`,
-                  }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: T.navyMid, marginBottom: 4, fontFamily: T.font }}>
-                      {item.label}
-                    </div>
-                    <div style={{ fontSize: 15, fontWeight: 800, color: T.navy, fontFamily: T.font }}>
-                      {item.value}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <p style={{ color: T.mute, fontFamily: T.font }}>جاري التحميل...</p>
-          )}
+        {/* What is Scouts */}
+        <SectionCard icon={<IconCompass size={18} />} title="ما هي الجوالة؟" accentTop>
+          <p style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.85, color: T.mute, margin: "0 0 14px", fontFamily: T.font }}>
+            الجوالة ليست مجرد نشاط طلابي، بل تجربة متكاملة تهدف إلى بناء الشخصية وتنمية المهارات الحياتية. تقدم إدارة الجوالة والخدمة العامة بيئة تفاعلية تجمع بين:
+          </p>
+          <BulletList color={T.gold} items={["العمل الجماعي وروح الفريق", "القيادة وتحمل المسؤولية", "خدمة المجتمع والمشاركة الفعالة", "اكتشاف المواهب وتنميتها"]} />
+          <p style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.8, color: T.mute, margin: "16px 0 10px", fontFamily: T.font }}>من خلال المشاركة في الجوالة، يخوض الطالب تجارب متنوعة مثل:</p>
+          <BulletList color={T.navyMid} items={["المعسكرات والأنشطة الخارجية", "ورش العمل والتدريبات القيادية", "الفعاليات المجتمعية والخدمية", "تنظيم الأحداث والعمل ضمن فرق"]} />
         </SectionCard>
 
-        {/* 2 — About */}
-        <SectionCard icon={<IconShield size={18} />} title="إدارة الجوالة والخدمة العامة">
-          <p style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.85, color: T.mute, margin: "0 0 14px", fontFamily: T.font }}>
-            تقوم إدارة الجوالة والخدمة العامة بتنفيذ عدد من المشروعات المتنوعة والمتدرجة من المستوى الداخلي حتى المستوى القُمي، وقد شاركت فيها عشائر كليات الجامعة، حيث تم إقامة ورش عمل ومعسكرات الإعداد الجوالي.
-          </p>
-          <p style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.85, color: T.mute, margin: 0, fontFamily: T.font }}>
-            تهتم الإدارة بحياة الخلاء والأنشطة التي تبث روح التعاون وتكتشف المواهب، ويقوم بإدارة النشاط مجموعة من الأخصائيين المؤهلين كشفياً وإرشادياً.
-          </p>
+        {/* Why Join + How to Start */}
+        <SectionCard icon={<IconShield size={18} />} title="لماذا تنضم للجوالة؟">
+          <BulletList color={T.gold} items={["تطور مهاراتك الشخصية والقيادية", "توسّع دائرة علاقاتك داخل وخارج كليتك", "تعيش تجربة مختلفة مليئة بالتحديات والتجارب الواقعية", "تساهم في خدمة مجتمعك بشكل فعّال"]} />
+          <div style={{ borderTop: `1px solid ${T.border}`, marginTop: 20, paddingTop: 18 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+              <span style={{ width: 32, height: 32, background: T.navy, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: T.gold, flexShrink: 0 }}><IconHeart size={15} /></span>
+              <span style={{ fontSize: 15, fontWeight: 800, color: T.navy, fontFamily: T.font }}>كيف تبدأ؟</span>
+            </div>
+            <p style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.85, color: T.mute, margin: "0 0 12px", fontFamily: T.font }}>
+              كل ما عليك هو التقديم والانضمام إلى عشيرة كليتك، وسيتم مراجعة طلبك من قبل المسؤولين، ثم تبدأ رحلتك داخل الجوالة!
+            </p>
+            <p style={{ fontSize: 14, fontWeight: 700, color: T.navyMid, margin: 0, fontFamily: T.font, borderRight: `3px solid ${T.gold}`, paddingRight: 10 }}>
+              الجوالة ليست مجرد نشاط... إنها أسلوب حياة.
+            </p>
+          </div>
         </SectionCard>
 
         {/* 3 — Benefits */}
@@ -448,24 +416,36 @@ export default function ScoutsPage() {
           </div>
         </SectionCard>
 
-        {/* 4 — CTA */}
-        <div style={{
-          gridColumn: "1 / -1",
-          background: `linear-gradient(140deg, ${T.navy} 0%, ${T.navyMid} 100%)`,
-          borderRadius: 16, padding: "32px 40px",
-          boxShadow: "0 4px 18px rgba(30,58,95,.22)",
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          gap: 24, position: "relative", overflow: "hidden",
-        }}>
-          <div style={{
-            position: "absolute", top: 0, left: 0, right: 0, height: 3,
-            background: `linear-gradient(90deg, transparent, ${T.gold}, #e5b84a, transparent)`,
-          }} />
-          <div style={{
-            position: "absolute", inset: 0,
-            background: `radial-gradient(ellipse 400px 250px at -5% 80%, rgba(196,155,58,.1) 0%, transparent 60%)`,
-            pointerEvents: "none",
-          }} />
+        {/* Clan Info — shown only when a clan exists */}
+        {clan && clanState !== "none" && (
+          <SectionCard icon={<IconCompass size={18} />} title="معلومات العشيرة" fullWidth>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 3fr", gap: 22, alignItems: "start" }}>
+              <div data-org-grid style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, gridColumn: "1 / -1" }}>
+                {[
+                  { label: "اسم العشيرة", value: clan.name },
+                  { label: "الكلية", value: clan.faculty_name },
+                  { label: "الحالة", value: clan.status },
+                  ...(clan.members_count !== undefined ? [{ label: "عدد الأعضاء", value: `${clan.members_count} عضو` }] : []),
+                ].map((item) => (
+                  <div key={item.label} style={{ background: T.bg, borderRadius: T.radius, padding: "14px 16px", border: `1px solid ${T.border}`, borderRight: `3px solid ${T.gold}` }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: T.navyMid, background: T.navyLight, borderRadius: 6, padding: "3px 10px", display: "inline-block", marginBottom: 8, fontFamily: T.font }}>{item.label}</div>
+                    <div style={{ fontSize: 15, fontWeight: 800, color: T.navy, fontFamily: T.font }}>{item.value}</div>
+                  </div>
+                ))}
+              </div>
+              {clan.description && (
+                <p style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.85, color: T.mute, margin: 0, fontFamily: T.font, gridColumn: "1 / -1" }}>
+                  {clan.description}
+                </p>
+              )}
+            </div>
+          </SectionCard>
+        )}
+
+        {/* CTA */}
+        <div data-cta style={{ gridColumn: "1 / -1", background: `linear-gradient(140deg, ${T.navy} 0%, ${T.navyMid} 100%)`, borderRadius: 16, padding: "32px 40px", boxShadow: "0 4px 18px rgba(30,58,95,.22)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, position: "relative", overflow: "hidden" }}>
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, transparent, ${T.gold}, #e5b84a, transparent)` }} />
+          <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse 400px 250px at -5% 80%, rgba(196,155,58,.1) 0%, transparent 60%)`, pointerEvents: "none" }} />
 
           <div style={{ position: "relative", zIndex: 1 }}>
             {ctaData.badge && (

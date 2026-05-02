@@ -1,29 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
-
-/* ── Design Tokens ── */
-:root {
-  --navy:       #1E3A5F;
-  --navy-mid:   #2D5F8A;
-  --navy-light: #EBF3FB;
-  --gold:       #C49B3A;
-  --gold-dark:  #A67F2C;
-  --gold-pale:  #FDF6E3;
-  --green:      #059669;
-  --green-bg:   #ECFDF5;
-  --green-bdr:  #6EE7B7;
-  --red:        #DC2626;
-  --red-bg:     #FEF2F2;
-  --red-bdr:    #FECACA;
-  --warning:    #D97706;
-  --border:     #E2ECF5;
-  --bg:         #EDF2F8;
-  --text:       #1A2E42;
-  --mute:       #6B8299;
-  --radius:     10px;
-  --shadow:     0 2px 12px rgba(26,46,66,.08);
-  --shadow-lg:  0 8px 32px rgba(26,46,66,.14);
-  --transition: 0.22s ease;
-}
+/* ══════════════════════════════════════════════════════════════
+   My Requests Component Styles
+   Theme variables are defined in theme.css
+══════════════════════════════════════════════════════════════ */
 
 /* ── Base ── */
 .my-requests-container {

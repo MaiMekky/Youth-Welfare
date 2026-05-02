@@ -1,8 +1,10 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import '../styles/mainpage.css';
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
+
 interface ApiFamily {
   family_id: number;
   name: string;
@@ -64,13 +66,16 @@ const isElderBrother = (role?: string) => {
 };
 
 export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
-  const [availableFamilies, setAvailableFamilies] = useState<ProgramFamily[]>([]);
+  const [mounted, setMounted] = useState(false);
   const [joinedFamilies, setJoinedFamilies]       = useState<ProgramFamily[]>([]);
   const [loading, setLoading]                     = useState(true);
-  const [error, setError]                         = useState<string | null>(null);
-  const [joiningId, setJoiningId]                 = useState<number | null>(null);
   const [activeTab, setActiveTab]                 = useState<'accepted' | 'pending'>('accepted');
   const { showToast } = useToast();
+
+  // Ensure component is mounted before rendering to prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const acceptedFamilies = joinedFamilies.filter(f => isAccepted(f.memberStatus));
   const pendingFamilies  = joinedFamilies.filter(f => !isAccepted(f.memberStatus));
@@ -105,79 +110,17 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
       .map((f: Record<string, unknown>) => mapToProgramFamily(f as unknown as ApiFamily));
   };
 
-  const fetchAvailableFamilies = async () => {
-
-
-    const res = await authFetch(
-      `${getBaseUrl()}/api/family/student/available/`
-    );
-
-    if (!res.ok) throw new Error('فشل تحميل الأسر المتاحة');
-    const data = await res.json();
-    return extractArray(data).map((f: Record<string, unknown>) =>
-      mapToProgramFamily(f as unknown as ApiFamily)
-    );
-  };
-
-  /* ── join ── */
-  const joinFamily = async (familyId: number) => {
-
-    try {
-      setJoiningId(familyId);
-
-      const res = await authFetch(
-        `${getBaseUrl()}/api/family/student/${familyId}/join/`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (!res.ok) {
-        let msg = 'فشل الانضمام للأسرة';
-        try { const err = await res.json(); msg = err.message || err.detail || msg; } catch {}
-        throw new Error(msg);
-      }
-      const joinedFamily = availableFamilies.find(f => f.id === familyId);
-      if (joinedFamily) {
-        setJoinedFamilies(prev => [...prev, {
-          ...joinedFamily,
-          createdAt: new Date().toLocaleDateString('ar-EG'),
-          memberStatus: 'منتظر',
-        }]);
-        setAvailableFamilies(prev => prev.filter(f => f.id !== familyId));
-        setActiveTab('pending');
-      }
-      showToast('تم إرسال طلب الانضمام للأسرة بنجاح!', 'success');
-      setTimeout(async () => {
-        try {
-          const [joined, available] = await Promise.all([fetchJoinedFamilies(), fetchAvailableFamilies()]);
-          setJoinedFamilies(joined);
-          setAvailableFamilies(available);
-        } catch (err) { console.error('Error refreshing data:', err); }
-      }, 500);
-    } catch (err: unknown) {
-      showToast((err as Error).message || 'حدث خطأ أثناء الانضمام للأسرة', 'error');
-    } finally {
-      setJoiningId(null);
-    }
-  };
-
   /* ── load ── */
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const [joined, available] = await Promise.all([fetchJoinedFamilies(), fetchAvailableFamilies()]);
+        const joined = await fetchJoinedFamilies();
         setJoinedFamilies(joined);
-        setAvailableFamilies(available);
         if (!joined.some(f => isAccepted(f.memberStatus)) && joined.length > 0) {
           setActiveTab('pending');
         }
       } catch (err: unknown) {
-        setError((err as Error).message);
         showToast((err as Error).message || 'فشل تحميل البيانات', 'error');
       } finally {
         setLoading(false);
@@ -207,6 +150,12 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
   /* ══════════════════════════════════════════
      RENDER
   ══════════════════════════════════════════ */
+  
+  // Prevent hydration mismatch by waiting for client-side mount
+  if (!mounted) {
+    return null;
+  }
+
   return (
     <>
       <div dir="rtl" className="container">
@@ -409,146 +358,37 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
         </section>
 
         {/* ════════════════════════════════
-            SECTION 2 — الأسر المتاحة
+            SECTION 2 — Browse Available Families Button
         ════════════════════════════════ */}
         <section className="section-block">
-          <div className="section-header">
-            <div className="section-header__icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
-                stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
-                viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="8"/>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-              </svg>
-            </div>
-            <div className="section-header__text">
-              <h2 className="section-header__title">الأسر المتاحة للانضمام</h2>
-              <p className="section-header__subtitle">تصفح الأسر المتاحة وتقدم بطلب الانضمام</p>
-            </div>
-            {!loading && availableFamilies.length > 0 && (
-              <span className="section-header__badge">{availableFamilies.length}</span>
-            )}
-          </div>
-
-          <div className="section-body">
-            {error && (
-              <div className="error-box">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
+          <div className="browse-families-section">
+            <div className="browse-content">
+              <div className="browse-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none"
                   stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
                   viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="12" y1="8" x2="12" y2="12"/>
-                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
-                <p>{error}</p>
               </div>
-            )}
-
-            <div className="programs-grid-wrapper">
-              <div className="programs-grid">
-                {loading ? (
-                  <div className="loading-state" style={{ gridColumn: '1 / -1' }}>
-                    <div className="spinner-large" />
-                    <p>جاري التحميل...</p>
-                  </div>
-
-                ) : availableFamilies.length === 0 ? (
-                  <div className="empty-state" style={{ gridColumn: '1 / -1' }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <p style={{ fontSize: '15px', margin: '0', fontWeight: 700 }}>لا توجد أسر متاحة حالياً</p>
-                    <p style={{ fontSize: '13px', marginTop: '6px', opacity: 0.7 }}>تحقق مرة أخرى لاحقاً</p>
-                  </div>
-
-                ) : availableFamilies.map(program => (
-                  <div key={program.id} className="program-card">
-                    <div className="program-content">
-                      <div className="card-header-section">
-                        <h3>{program.title}</h3>
-                        <span className="family-badge">متاحة</span>
-                      </div>
-
-                      <div className="card-info-section">
-                        <div className="info-row">
-                          <div className="info-label">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
-                              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                              viewBox="0 0 24 24">
-                              <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
-                              <line x1="4" y1="22" x2="4" y2="15"/>
-                            </svg>
-                            <span>نوع الأسرة</span>
-                          </div>
-                          <p className="info-value">{program.type}</p>
-                        </div>
-
-                        <div className="info-row">
-                          <div className="info-label">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
-                              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                              viewBox="0 0 24 24">
-                              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                            </svg>
-                            <span>الوصف</span>
-                          </div>
-                          <p className="info-value">{program.subtitle}</p>
-                        </div>
-
-                        <div className="info-row">
-                          <div className="info-label">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
-                              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                              viewBox="0 0 24 24">
-                              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                              <circle cx="9" cy="7" r="4"/>
-                              <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                            </svg>
-                            <span>الأعضاء</span>
-                          </div>
-                          <p className="info-value">{program.views}</p>
-                        </div>
-
-                        <div className="info-row">
-                          <div className="info-label">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
-                              stroke="currentColor" strokeWidth="2" strokeLinejoin="round" viewBox="0 0 24 24">
-                              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                              <circle cx="12" cy="10" r="3"/>
-                            </svg>
-                            <span>المكان</span>
-                          </div>
-                          <p className="info-value">{program.place}</p>
-                        </div>
-                      </div>
-
-                      <button
-                        className="join-btn"
-                        onClick={() => joinFamily(program.id)}
-                        disabled={joiningId === program.id}
-                      >
-                        {joiningId === program.id ? (
-                          <><span className="spinner" />جاري الانضمام...</>
-                        ) : (
-                          <>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="none"
-                              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                              viewBox="0 0 24 24">
-                              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                              <circle cx="9" cy="7" r="4"/>
-                              <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                            </svg>
-                            انضم للأسرة
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                ))}
+              <div className="browse-text">
+                <h3>اكتشف الأسر المتاحة</h3>
+                <p>تصفح جميع الأسر الطلابية المتاحة وانضم إلى المجتمع الذي يناسبك</p>
               </div>
+              <Link href="/Student/Families/available" className="browse-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+                  stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
+                  viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                تصفح الأسر المتاحة للانضمام
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
+                  stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                  viewBox="0 0 24 24">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </Link>
             </div>
           </div>
         </section>

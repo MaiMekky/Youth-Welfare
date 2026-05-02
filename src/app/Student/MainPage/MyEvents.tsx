@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './MyEvents.css';
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import EventDetails from './EventDetails/EventDetails';
 
 /* ══════════════════════════════════════════
    TYPES
@@ -45,6 +46,8 @@ interface Event {
   participationStatus: string;
   rank: number | null;
   resultReward: string | null;
+  hasTeam?: boolean;
+  teamSettingsEnabled?: boolean;
 }
 
 type FilterType = 'all' | 'مقبول' | 'قيد الانتظار' | 'مرفوض';
@@ -63,7 +66,7 @@ const normalizeStatus = (status: string): string => {
 /* ══════════════════════════════════════════
    MAPPER
 ══════════════════════════════════════════ */
-const mapEvent = (e: ApiJoinedEvent): Event => ({
+const mapEvent = (e: ApiJoinedEvent & { has_team?: boolean; team_settings_enabled?: boolean }): Event => ({
   id:                  e.event_id,
   title:               e.title,
   description:         e.description,
@@ -78,6 +81,8 @@ const mapEvent = (e: ApiJoinedEvent): Event => ({
   participationStatus: normalizeStatus(e.participation_status),
   rank:                e.participation_rank,
   resultReward:        e.participation_reward,
+  hasTeam:             e.has_team,
+  teamSettingsEnabled: e.team_settings_enabled,
 });
 
 /* ══════════════════════════════════════════
@@ -150,6 +155,26 @@ const EmptyTrophyIcon = () => (
 );
 
 /* ══════════════════════════════════════════
+   META ROW HELPER
+   — renders icon + value; shows "—" when value is empty/null/undefined
+══════════════════════════════════════════ */
+const MetaRow = ({
+  icon,
+  value,
+}: {
+  icon: React.ReactNode;
+  value: string | null | undefined;
+}) => (
+  <div className="meta-item">
+    {icon}
+    {value
+      ? <span>{value}</span>
+      : <span className="meta-value-empty" />
+    }
+  </div>
+);
+
+/* ══════════════════════════════════════════
    STATUS HELPERS
 ══════════════════════════════════════════ */
 const STATUS_META: Record<string, { cls: string; dot: string }> = {
@@ -179,19 +204,43 @@ export default function MyEvents() {
     result: MyResult | null;
     loading: boolean;
   } | null>(null);
+  const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
+  const [studentId,       setStudentId]       = useState<number>(0);
 
- 
-
+  /* ── Fetch events + team info ── */
   useEffect(() => {
     const load = async () => {
       try {
         setLoading(true);
         const baseUrl = getBaseUrl();
+
+        // Get student ID from profile
+        const profileRes = await authFetch(`${baseUrl}/api/accounts/student/profile/`);
+        if (profileRes.ok) {
+          const profile = await profileRes.json();
+          setStudentId(profile.student_id ?? profile.id ?? 0);
+        }
+
         const res = await authFetch(`${baseUrl}/api/event/student-events/joined/`);
         if (!res.ok) throw new Error('فشل تحميل الفعاليات');
         const raw = await res.json();
         const arr: ApiJoinedEvent[] = raw.data ?? raw.results ?? (Array.isArray(raw) ? raw : []);
-        setEvents(arr.map(mapEvent));
+
+        // Check team membership for each event
+        const myTeamsRes = await authFetch(`${baseUrl}/api/event/student-teams/my-teams/`);
+        let teamEventIds: number[] = [];
+        if (myTeamsRes.ok) {
+          const teamsData = await myTeamsRes.json();
+          const teams = teamsData.data ?? [];
+          teamEventIds = teams.map((t: { event: number }) => t.event);
+        }
+
+        const eventsWithTeamInfo = arr.map(e => ({
+          ...e,
+          has_team: teamEventIds.includes(e.event_id),
+        }));
+
+        setEvents(eventsWithTeamInfo.map(mapEvent));
       } catch (e: unknown) {
         setError(e instanceof Error ? e.message : String(e));
       } finally {
@@ -202,15 +251,19 @@ export default function MyEvents() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /* ── Fetch result for a single event ── */
   const fetchResult = useCallback(async (event: Event) => {
     setResultModal({ event, result: null, loading: true });
     try {
-      const baseUrl = getBaseUrl();
-      const res = await authFetch(`${baseUrl}/api/event/student-events/${event.id}/my-result/`);
+      const res = await authFetch(`${getBaseUrl()}/api/event/student-events/${event.id}/my-result/`);
       if (!res.ok) throw new Error('فشل تحميل النتيجة');
       const raw = await res.json();
       const d   = raw.data ?? raw;
-      setResultModal({ event, loading: false, result: { rank: d.rank, reward: d.reward, message: d.message } });
+      setResultModal({
+        event,
+        loading: false,
+        result: { rank: d.rank, reward: d.reward, message: d.message },
+      });
     } catch {
       setResultModal(prev =>
         prev ? { ...prev, loading: false, result: { rank: null, reward: null, message: 'تعذّر تحميل النتيجة' } } : null
@@ -218,6 +271,7 @@ export default function MyEvents() {
     }
   }, []);
 
+  /* ── Derived counts ── */
   const counts = {
     all:             events.length,
     'مقبول':        events.filter(e => e.participationStatus === 'مقبول').length,
@@ -229,10 +283,13 @@ export default function MyEvents() {
     ? events
     : events.filter(e => e.participationStatus === activeFilter);
 
+  /* ══════════════════════════════════════════
+     RENDER
+  ══════════════════════════════════════════ */
   return (
     <div className="my-events-page" dir="rtl">
 
-      {/* ══ HERO — navy gradient header block ══ */}
+      {/* ══ HERO ══ */}
       <div className="my-events-hero">
         <div className="hero-inner">
           <div className="hero-text">
@@ -299,13 +356,12 @@ export default function MyEvents() {
               ) : filtered.map(event => {
                 const st         = getStatus(event.participationStatus);
                 const isAccepted = event.participationStatus === 'مقبول';
-                const isPending  = event.participationStatus === 'قيد الانتظار';
                 const hasRank    = event.rank !== null;
 
                 return (
                   <div key={event.id} className={`event-card${isAccepted ? ' card-accepted' : ''}`}>
 
-                    {/* ── CARD HEADER: type pill + title + status/rank chips ── */}
+                    {/* ── CARD HEADER ── */}
                     <div className="card-header">
                       <div className="card-header-top">
                         <span className="type-pill">{event.type}</span>
@@ -314,21 +370,24 @@ export default function MyEvents() {
                             <span className="status-dot" style={{ background: st.dot }} />
                             {event.participationStatus}
                           </span>
-                          {hasRank && <span className="rank-chip">🏆 #{event.rank}</span>}
+                          {hasRank && (
+                            <span className="rank-chip">🏆 #{event.rank}</span>
+                          )}
                         </div>
                       </div>
                       <h3 className="event-title">{event.title}</h3>
                     </div>
 
-                    {/* ── CARD BODY: description + meta + reward + actions ── */}
+                    {/* ── CARD BODY ── */}
                     <div className="event-content">
                       <p className="event-description">{event.description}</p>
 
+                      {/* Meta rows — each on its own full-width line, wraps if long, shows — if empty */}
                       <div className="event-meta">
-                        <div className="meta-item"><CalIcon /><span>{event.date}</span></div>
-                        <div className="meta-item"><PinIcon /><span>{event.location}</span></div>
-                        <div className="meta-item"><BuildingIcon /><span>{event.faculty}</span></div>
-                        <div className="meta-item"><TagIcon /><span>{event.dept}</span></div>
+                        <MetaRow icon={<CalIcon />}      value={event.date}     />
+                        <MetaRow icon={<PinIcon />}      value={event.location} />
+                        <MetaRow icon={<BuildingIcon />} value={event.faculty}  />
+                        <MetaRow icon={<TagIcon />}      value={event.dept}     />
                       </div>
 
                       {event.reward && (
@@ -340,21 +399,38 @@ export default function MyEvents() {
 
                       {(event.rank !== null || event.resultReward) && (
                         <div className="result-inline">
-                          {event.rank !== null && <span className="result-tag">🏅 المركز {event.rank}</span>}
-                          {event.resultReward  && <span className="result-tag">🎁 {event.resultReward}</span>}
+                          {event.rank !== null && (
+                            <span className="result-tag">🏅 المركز {event.rank}</span>
+                          )}
+                          {event.resultReward && (
+                            <span className="result-tag">🎁 {event.resultReward}</span>
+                          )}
                         </div>
                       )}
 
                       <div className="card-actions">
-                        {isAccepted ? (
-                          <button className="btn-result" onClick={() => fetchResult(event)}>
-                            <ResultIcon /> نتيجتي
-                          </button>
-                        ) : (
-                          <div className={`status-info-bar ${st.cls}`}>
-                            <span className="status-dot" style={{ background: st.dot }} />
-                            {isPending ? 'طلبك قيد المراجعة' : 'تم رفض طلبك'}
-                          </div>
+                        {/* Details button for all events */}
+                        <button
+                          className="btn-details"
+                          onClick={() => setSelectedEventId(event.id)}
+                        >
+                          <ResultIcon /> التفاصيل
+                        </button>
+
+                        {isAccepted && (
+                          <>
+                            <button className="btn-result" onClick={() => fetchResult(event)}>
+                              <ResultIcon /> نتيجتي
+                            </button>
+                            {event.teamSettingsEnabled && (
+                              <button
+                                className="btn-view-team"
+                                onClick={() => setSelectedEventId(event.id)}
+                              >
+                                {event.hasTeam ? '👥 عرض الفريق' : '⚠️ انشاء فريق او طلب انضمام بالكود'}
+                              </button>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>
@@ -367,6 +443,15 @@ export default function MyEvents() {
         )}
       </div>
 
+      {/* ══ EVENT DETAILS MODAL ══ */}
+      {selectedEventId !== null && (
+        <EventDetails
+          eventId={selectedEventId}
+          studentId={studentId}
+          onClose={() => setSelectedEventId(null)}
+        />
+      )}
+
       {/* ══ RESULT MODAL ══ */}
       {resultModal && (
         <>
@@ -377,7 +462,9 @@ export default function MyEvents() {
                 <CloseIcon />
               </button>
               <p className="modal-event-name">{resultModal.event.title}</p>
-              <p className="modal-event-sub">{resultModal.event.date} · {resultModal.event.location}</p>
+              <p className="modal-event-sub">
+                {resultModal.event.date} · {resultModal.event.location}
+              </p>
             </div>
 
             <div className="modal-body">
@@ -389,13 +476,17 @@ export default function MyEvents() {
               ) : !resultModal.result?.rank && !resultModal.result?.reward ? (
                 <div className="modal-pending">
                   <div className="modal-icon-wrap modal-icon-pending"><TrophyIcon /></div>
-                  <p className="modal-main-msg">{resultModal.result?.message ?? 'لم تُنشر النتائج بعد'}</p>
-                  <p className="modal-sub-msg">ستظهر نتيجتك هنا بعد نشرها من قِبَل الإدارة</p>
+                  <p className="modal-main-msg">
+                    {resultModal.result?.message ?? 'لم تُنشر النتائج بعد'}
+                  </p>
+                  <p className="modal-sub-msg">
+                    ستظهر نتيجتك هنا بعد نشرها من قِبَل الإدارة
+                  </p>
                 </div>
               ) : (
                 <div className="modal-result-content">
                   <div className="modal-icon-wrap modal-icon-trophy"><TrophyIcon /></div>
-                  <p className="modal-congrats">مبروك على مشاركتك! </p>
+                  <p className="modal-congrats">مبروك على مشاركتك! 🎉</p>
 
                   {resultModal.result?.rank && (
                     <div className="result-big-rank">

@@ -4,6 +4,7 @@ import './Events.css';
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
 
+
 /* ══════════════════════════════════════════
    TYPES
 ══════════════════════════════════════════ */
@@ -92,12 +93,6 @@ const BuildingIcon = () => (
     <path d="M8 21V9M16 21V9M2 9h20"/>
   </svg>
 );
-const CoinIcon = () => (
-  <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-    <circle cx="12" cy="12" r="9"/>
-    <path d="M12 7v2M12 15v2M9.5 9.5C9.5 8.7 10.6 8 12 8s2.5.7 2.5 1.5S13.4 11 12 11s-2.5.7-2.5 1.5S10.6 14 12 14s2.5-.7 2.5-1.5"/>
-  </svg>
-);
 const GiftIcon = () => (
   <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
     <polyline points="20 12 20 22 4 22 4 12"/>
@@ -110,6 +105,13 @@ const GiftIcon = () => (
 const CheckIcon = () => (
   <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
     <polyline points="20 6 9 17 4 12"/>
+  </svg>
+);
+const InfoIcon = () => (
+  <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <circle cx="12" cy="12" r="10"/>
+    <line x1="12" y1="16" x2="12" y2="12"/>
+    <line x1="12" y1="8" x2="12.01" y2="8"/>
   </svg>
 );
 
@@ -141,7 +143,25 @@ export default function Events() {
   const [activeType,  setActiveType]  = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  /* ── Fetch ── */
+  // /* ── Fetch student info ── */
+  // useEffect(() => {
+  //   const loadStudentInfo = async () => {
+  //     try {
+  //       // FIX: load student profile to get studentId for Teams component
+  //       const res = await authFetch(`${getBaseUrl()}/api/accounts/student/profile/`);
+  //       if (res.ok) {
+  //         const data = await res.json();
+  //         // adjust the field name to match your actual profile API response
+  //         setStudentId(data.student_id ?? data.id ?? 0);
+  //       }
+  //     } catch {
+  //       // non-critical — Teams will still work; captain actions may be hidden
+  //     }
+  //   };
+  //   loadStudentInfo();
+  // }, []);
+
+  /* ── Fetch events ── */
   useEffect(() => {
     const load = async () => {
       try {
@@ -149,7 +169,10 @@ export default function Events() {
         const res = await authFetch(`${getBaseUrl()}/api/event/student-events/available/`);
         if (!res.ok) throw new Error('فشل تحميل الفعاليات');
         const raw = await res.json();
-        const arr: ApiEvent[] = Array.isArray(raw) ? raw : (raw.results ?? raw.data ?? []);
+        // FIX: backend wraps in { status, count, data: [...] }
+        const arr: ApiEvent[] = Array.isArray(raw)
+          ? raw
+          : (raw.data ?? raw.results ?? []);
         setEvents(arr.map(mapEvent));
       } catch (e: unknown) {
         setError(e instanceof Error ? e.message : 'فشل تحميل الفعاليات');
@@ -162,19 +185,21 @@ export default function Events() {
   }, []);
 
   /* ── Join ── */
-  const joinEvent = async (id: number) => {
+  const joinEvent = async (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
     try {
       setJoiningId(id);
       const res = await authFetch(`${getBaseUrl()}/api/event/student-events/${id}/join/`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json' },
       });
+      const body = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || err.detail || 'فشل إرسال الطلب');
+        // FIX: backend error shape is { status, message } 
+        throw new Error(body.message || body.detail || 'فشل إرسال الطلب');
       }
       setRegistered(prev => new Set([...prev, id]));
-      setEvents(prev => prev.map(e => e.id === id ? { ...e, takenSeats: e.takenSeats + 1 } : e));
+      setEvents(prev => prev.map(ev => ev.id === id ? { ...ev, takenSeats: ev.takenSeats + 1 } : ev));
       showToast('تم إرسال الطلب بنجاح', 'success');
     } catch (e: unknown) {
       showToast(e instanceof Error ? e.message : 'حدث خطأ', 'error');
@@ -194,155 +219,159 @@ export default function Events() {
      RENDER
   ══════════════════════════════════════════ */
   return (
-    <div className="events-page" dir="rtl">
+    <>
+      <div className="events-page" dir="rtl">
 
-      {/* ══ HERO ══ */}
-      <div className="events-hero">
-        <div className="hero-inner">
-          <div className="hero-text">
-            <h1 className="hero-title">جميع الأنشطة والفعاليات</h1>
-            <p className="hero-sub">استكشف الفعاليات المتاحة وسجّل في ما يناسبك مباشرةً</p>
+        {/* ══ HERO ══ */}
+        <div className="events-hero">
+          <div className="hero-inner">
+            <div className="hero-text">
+              <h1 className="hero-title">جميع الأنشطة والفعاليات</h1>
+              <p className="hero-sub">استكشف الفعاليات المتاحة وسجّل في ما يناسبك مباشرةً</p>
+            </div>
+            <span className="hero-count">{filtered.length} فعالية</span>
           </div>
-          <span className="hero-count">{filtered.length} فعالية</span>
+
+          <div className="hero-filters">
+            {types.map(t => (
+              <button
+                key={t}
+                className={`filter-pill${activeType === t ? ' active' : ''}`}
+                onClick={() => setActiveType(t)}
+              >
+                {t === 'all' ? 'جميع الفعاليات' : t}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="hero-filters">
-          {types.map(t => (
-            <button
-              key={t}
-              className={`filter-pill${activeType === t ? ' active' : ''}`}
-              onClick={() => setActiveType(t)}
-            >
-              {t === 'all' ? 'جميع الفعاليات' : t}
-            </button>
-          ))}
+        {/* ══ BODY ══ */}
+        <div className="events-body">
+
+          {/* Search + count */}
+          <div className="search-bar-row">
+            <div className="search-wrap">
+              <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input
+                className="search-input"
+                type="text"
+                placeholder="ابحث عن فعالية..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <span className="results-label">عرض <strong>{filtered.length}</strong> فعالية</span>
+          </div>
+
+          {loading && (
+            <div className="ev-center-state">
+              <div className="ev-spinner" />
+              <p>جاري تحميل الفعاليات...</p>
+            </div>
+          )}
+
+          {!loading && error && (
+            <div className="ev-center-state ev-error">
+              <p>⚠️ {error}</p>
+            </div>
+          )}
+
+          {!loading && !error && (
+            <div className="events-grid">
+              {filtered.length === 0 && (
+                <div className="empty-state"><p>لا توجد فعاليات تطابق البحث</p></div>
+              )}
+
+              {filtered.map(event => {
+                const isReg     = registered.has(event.id);
+                const isJoining = joiningId === event.id;
+                const pct       = seatsPercent(event.takenSeats, event.seats);
+
+                return (
+                  <div
+                    key={event.id}
+                    className="event-card"
+                  >
+
+                    {/* ── CARD HEADER ── */}
+                    <div className="card-header">
+                      <div className="card-header-top">
+                        <span className={`event-badge ${getBadgeClass(event.type)}`}>{event.type}</span>
+                        <div className="card-chips">
+                          {isReg && (
+                            <span className="status-badge">✓ مسجّل</span>
+                          )}
+                          {event.isFull && !isReg && (
+                            <span className="full-badge">مكتمل</span>
+                          )}
+                          {event.daysLeft > 0 && (
+                            <span className="days-chip">{event.daysLeft} يوم</span>
+                          )}
+                        </div>
+                      </div>
+                      <h3 className="event-title">{event.title}</h3>
+                    </div>
+
+                    {/* ── CARD BODY ── */}
+                    <div className="event-content">
+                      <p className="event-description">{event.description}</p>
+
+                      <div className="event-meta">
+                        <div className="meta-item"><CalendarIcon /><span>{event.date}</span></div>
+                        <div className="meta-item"><PinIcon /><span>{event.location}</span></div>
+                        <div className="meta-item"><BuildingIcon /><span>{event.faculty}</span></div>
+                        <div className="meta-item">
+                          <UsersIcon /><span>{event.takenSeats} / {event.seats} مقعد</span>
+                        </div>
+                        {event.reward && (
+                          <div className="meta-item meta-wide"><GiftIcon /><span>{event.reward}</span></div>
+                        )}
+                      </div>
+
+                      {/* Seats bar */}
+                      <div className="seats-row">
+                        <div className="seats-bar">
+                          <div
+                            className={`seats-fill ${pct >= 90 ? 'seats-fill-danger' : pct >= 60 ? 'seats-fill-warn' : ''}`}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        <span className="seats-pct">{pct}%</span>
+                      </div>
+
+                      {/* CTA buttons */}
+                      <div className="card-actions" onClick={(e) => e.stopPropagation()}>
+                        {isReg ? (
+                          <button className="register-btn registered-btn" disabled>
+                            <CheckIcon /> تم التسجيل
+                          </button>
+                        ) : event.isFull ? (
+                          <button className="register-btn full-btn" disabled>
+                            المقاعد مكتملة
+                          </button>
+                        ) : (
+                          <button
+                            className="register-btn"
+                            onClick={(e) => joinEvent(e, event.id)}
+                            disabled={isJoining}
+                          >
+                            {isJoining
+                              ? <><span className="btn-spinner" /> جاري إرسال الطلب...</>
+                              : 'التسجيل في الفعالية'
+                            }
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
-
-      {/* ══ BODY ══ */}
-      <div className="events-body">
-
-        {/* Search + count */}
-        <div className="search-bar-row">
-          <div className="search-wrap">
-            <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            <input
-              className="search-input"
-              type="text"
-              placeholder="ابحث عن فعالية..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <span className="results-label">عرض <strong>{filtered.length}</strong> فعالية</span>
-        </div>
-
-        {loading && (
-          <div className="ev-center-state">
-            <div className="ev-spinner" />
-            <p>جاري تحميل الفعاليات...</p>
-          </div>
-        )}
-
-        {!loading && error && (
-          <div className="ev-center-state ev-error">
-            <p>⚠️ {error}</p>
-          </div>
-        )}
-
-        {!loading && !error && (
-          <div className="events-grid">
-            {filtered.length === 0 && (
-              <div className="empty-state"><p>لا توجد فعاليات تطابق البحث</p></div>
-            )}
-
-            {filtered.map(event => {
-              const isReg     = registered.has(event.id);
-              const isJoining = joiningId === event.id;
-              const pct       = seatsPercent(event.takenSeats, event.seats);
-
-              return (
-                <div key={event.id} className="event-card">
-
-                  {/* ── CARD HEADER ── */}
-                  <div className="card-header">
-                    <div className="card-header-top">
-                      <span className={`event-badge ${getBadgeClass(event.type)}`}>{event.type}</span>
-                      <div className="card-chips">
-                        {isReg && (
-                          <span className="status-badge">✓ مسجّل</span>
-                        )}
-                        {event.isFull && !isReg && (
-                          <span className="full-badge">مكتمل</span>
-                        )}
-                        {event.daysLeft > 0 && (
-                          <span className="days-chip">{event.daysLeft} يوم</span>
-                        )}
-                      </div>
-                    </div>
-                    <h3 className="event-title">{event.title}</h3>
-                  </div>
-
-                  {/* ── CARD BODY ── */}
-                  <div className="event-content">
-                    <p className="event-description">{event.description}</p>
-
-                    <div className="event-meta">
-                      <div className="meta-item"><CalendarIcon /><span>{event.date}</span></div>
-                      <div className="meta-item"><PinIcon /><span>{event.location}</span></div>
-                      <div className="meta-item"><BuildingIcon /><span>{event.faculty}</span></div>
-                      <div className="meta-item">
-                        <UsersIcon /><span>{event.takenSeats} / {event.seats} مقعد</span>
-                      </div>
-                      {/* {Number(event.cost) > 0 && (
-                        <div className="meta-item"><CoinIcon /><span>{event.cost} ج.م</span></div>
-                      )}  */}
-                      {event.reward && (
-                        <div className="meta-item meta-wide"><GiftIcon /><span>{event.reward}</span></div>
-                      )}
-                    </div>
-
-                    {/* Seats bar */}
-                    <div className="seats-row">
-                      <div className="seats-bar">
-                        <div
-                          className={`seats-fill ${pct >= 90 ? 'seats-fill-danger' : pct >= 60 ? 'seats-fill-warn' : ''}`}
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                      <span className="seats-pct">{pct}%</span>
-                    </div>
-
-                    {/* CTA button */}
-                    {isReg ? (
-                      <button className="register-btn registered-btn" disabled>
-                        <CheckIcon /> تم التسجيل
-                      </button>
-                    ) : event.isFull ? (
-                      <button className="register-btn full-btn" disabled>
-                        المقاعد مكتملة
-                      </button>
-                    ) : (
-                      <button
-                        className="register-btn"
-                        onClick={() => joinEvent(event.id)}
-                        disabled={isJoining}
-                      >
-                        {isJoining
-                          ? <><span className="btn-spinner" /> جاري إرسال الطلب...</>
-                          : 'التسجيل في الفعالية'
-                        }
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </div>
+    </>
   );
 }

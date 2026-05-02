@@ -112,10 +112,11 @@ const cd = res.headers.get("content-disposition");
               className={styles.yearSelect}
             >
               <option value="" disabled hidden>اختر السنة</option>
-              <option value="الفرقة الاولى">الفرقة الأولى</option>
+              <option value="الفرقة الأولى">الفرقة الأولى</option>
               <option value="الفرقة الثانية">الفرقة الثانية</option>
               <option value="الفرقة الثالثة">الفرقة الثالثة</option>
               <option value="الفرقة الرابعة">الفرقة الرابعة</option>
+              <option value="الفرقة الخامسة">الفرقة الخامسة</option>
             </select>
 
             <div className={styles.modalButtons}>

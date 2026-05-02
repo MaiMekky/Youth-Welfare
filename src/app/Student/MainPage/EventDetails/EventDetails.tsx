@@ -222,7 +222,8 @@ export default function EventDetails({ eventId, studentId, onClose }: EventDetai
     return null;
   }
 
-  const showTeamsTab = event.team_settings?.enabled === true;
+  // FIX: Always show teams tab - removed condition
+  const showTeamsTab = true;
   const isEventFinished = event.is_finished || new Date(event.end_date) < new Date();
 
   return (

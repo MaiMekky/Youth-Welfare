@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import './Events.css';
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
-import EventDetails from './EventDetails/EventDetails';
+
 
 /* ══════════════════════════════════════════
    TYPES
@@ -143,11 +143,6 @@ export default function Events() {
   const [activeType,  setActiveType]  = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // FIX: EventDetails modal state
-  const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
-  // FIX: store current studentId from session/auth for Teams component
-  const [studentId, setStudentId] = useState<number>(0);
-
   // /* ── Fetch student info ── */
   // useEffect(() => {
   //   const loadStudentInfo = async () => {
@@ -191,7 +186,6 @@ export default function Events() {
 
   /* ── Join ── */
   const joinEvent = async (e: React.MouseEvent, id: number) => {
-    // FIX: stop propagation so click doesn't also open the EventDetails modal
     e.stopPropagation();
     try {
       setJoiningId(id);
@@ -212,29 +206,6 @@ export default function Events() {
     } finally {
       setJoiningId(null);
     }
-  };
-
-  /* ── Open event details ── */
-  const openEventDetails = (id: number) => {
-    setSelectedEventId(id);
-  };
-
-  const closeEventDetails = () => {
-    setSelectedEventId(null);
-    // FIX: reload events list to reflect any participation changes made inside the modal
-    const reload = async () => {
-      try {
-        const res = await authFetch(`${getBaseUrl()}/api/event/student-events/available/`);
-        if (res.ok) {
-          const raw = await res.json();
-          const arr: ApiEvent[] = Array.isArray(raw) ? raw : (raw.data ?? raw.results ?? []);
-          setEvents(arr.map(mapEvent));
-        }
-      } catch {
-        // silently ignore reload errors
-      }
-    };
-    reload();
   };
 
   /* ── Filters ── */
@@ -319,12 +290,9 @@ export default function Events() {
                 const pct       = seatsPercent(event.takenSeats, event.seats);
 
                 return (
-                  // FIX: entire card is clickable to open EventDetails
                   <div
                     key={event.id}
                     className="event-card"
-                    onClick={() => openEventDetails(event.id)}
-                    style={{ cursor: 'pointer' }}
                   >
 
                     {/* ── CARD HEADER ── */}
@@ -375,14 +343,6 @@ export default function Events() {
 
                       {/* CTA buttons */}
                       <div className="card-actions" onClick={(e) => e.stopPropagation()}>
-                        {/* FIX: "details" button always visible */}
-                        <button
-                          className="details-btn"
-                          onClick={(e) => { e.stopPropagation(); openEventDetails(event.id); }}
-                        >
-                          <InfoIcon /> التفاصيل
-                        </button>
-
                         {isReg ? (
                           <button className="register-btn registered-btn" disabled>
                             <CheckIcon /> تم التسجيل
@@ -412,15 +372,6 @@ export default function Events() {
           )}
         </div>
       </div>
-
-      {/* FIX: EventDetails modal — rendered outside the scrollable list */}
-      {selectedEventId !== null && (
-        <EventDetails
-          eventId={selectedEventId}
-          studentId={studentId}
-          onClose={closeEventDetails}
-        />
-      )}
     </>
   );
 }

@@ -216,6 +216,13 @@
 }
 .btn:disabled { opacity: 0.65; cursor: not-allowed; }
 
+/* FIX: cap icon size inside all .btn variants so SVG never bloats the button */
+.btn .icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
 .btn-primary {
   background: linear-gradient(135deg, var(--gold-light), var(--gold-dark));
   color: var(--white);
@@ -281,6 +288,7 @@
   font-weight: 700;
   cursor: pointer;
   transition: all var(--t);
+  white-space: nowrap;
 }
 .btn-remove:hover:not(:disabled) {
   background: #fee2e2;
@@ -288,6 +296,13 @@
 }
 .btn-remove:disabled { opacity: 0.6; cursor: not-allowed; }
 .btn-remove .icon { width: 0.875rem; height: 0.875rem; }
+
+/* FIX: leave button — compact, not full-width */
+.btn-leave {
+  width: auto;
+  min-width: 160px;
+  padding: 10px 24px;
+}
 
 .btn-spinner {
   display: inline-block;
@@ -297,6 +312,13 @@
   border-top-color: white;
   border-radius: 50%;
   animation: teamSpin 0.65s linear infinite;
+  flex-shrink: 0;
+}
+
+/* Dark variant for use inside light-background buttons (e.g. btn-remove) */
+.btn-spinner--dark {
+  border-color: rgba(220,38,38,0.25);
+  border-top-color: var(--red);
 }
 
 /* ══════════════════════════════════════════
@@ -602,9 +624,8 @@
 ══════════════════════════════════════════ */
 .team-actions {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
 }
-.team-actions .btn { max-width: 280px; }
 
 /* ══════════════════════════════════════════
    MY RESULT CARD (finished event)
@@ -745,7 +766,7 @@
     gap: 10px;
   }
   .member-actions { width: 100%; justify-content: flex-end; }
-  .team-actions .btn { max-width: 100%; }
+  .btn-leave { width: 100%; }
 
   .result-team-meta { flex-direction: column; gap: 8px; }
   .result-team-meta span { text-align: center; }

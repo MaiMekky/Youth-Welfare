@@ -500,7 +500,8 @@
 }
 
 /* Primary gold CTA */
-.btn-result {
+.btn-result,
+.btn-details {
   flex: 1;
   min-width: 120px;
   padding: 0 22px;
@@ -522,7 +523,8 @@
   position: relative;
   overflow: hidden;
 }
-.btn-result::after {
+.btn-result::after,
+.btn-details::after {
   content: '';
   position: absolute;
   top: 0; left: -75%;
@@ -531,12 +533,15 @@
   transform: skewX(-20deg);
   transition: left 0.55s ease;
 }
-.btn-result:hover:not(:disabled)::after { left: 130%; }
-.btn-result:hover {
+.btn-result:hover:not(:disabled)::after,
+.btn-details:hover:not(:disabled)::after { left: 130%; }
+.btn-result:hover,
+.btn-details:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 28px rgba(196,155,58,.52);
 }
-.btn-result:active { transform: translateY(0); }
+.btn-result:active,
+.btn-details:active { transform: translateY(0); }
 .btn-icon { width: 14px; height: 14px; flex-shrink: 0; }
 
 /* View Team Button */
@@ -791,6 +796,7 @@
   .events-grid { grid-template-columns: 1fr; }
   .card-actions { flex-direction: column; }
   .btn-result,
+  .btn-details,
   .btn-view-team { width: 100%; height: 46px; }
 }
 

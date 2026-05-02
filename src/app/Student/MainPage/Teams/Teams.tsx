@@ -132,13 +132,9 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
   const loadTeamData = async () => {
     try {
       setLoading(true);
-      
-      // FIX: Load my teams to see if student is in a team for this event.
-      // Backend returns { count, data: Team[] }
       const myTeamsRes = await authFetch(`${getBaseUrl()}/api/event/student-teams/my-teams/`);
       if (myTeamsRes.ok) {
         const raw = await myTeamsRes.json();
-        // FIX: backend wraps in { count, data: [...] }
         const teams: Team[] = raw.data ?? raw.results ?? (Array.isArray(raw) ? raw : []);
         const eventTeam = teams.find(t => t.event === eventId);
         setMyTeam(eventTeam ?? null);
@@ -149,11 +145,6 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
       setLoading(false);
     }
   };
-
-  // FIX: Removed loadRanking() — the ranking endpoint is ADMIN-ONLY.
-  // Students cannot access /api/event/manage-teams/events/{id}/ranking/ (returns 403).
-  // When the event is finished, we show the student's own team result (rank/is_winner)
-  // which is already available in the myTeam object fetched from my-teams endpoint.
 
   const handleCreateTeam = async () => {
     if (!createTeamName.trim()) {
@@ -175,14 +166,12 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
       const data = await res.json();
       
       if (!res.ok) {
-        // FIX: backend error can come as { message } or { detail } or DRF validation { field: [...] }
         const errMsg = data.message || data.detail
           || (typeof data === 'object' ? Object.values(data).flat().join(' ') : 'فشل إنشاء الفريق');
         throw new Error(errMsg);
       }
 
       showToast(data.message || 'تم إنشاء الفريق بنجاح', 'success');
-      // FIX: backend returns { message, team: {...} }
       setMyTeam(data.team);
       setCreateTeamName('');
     } catch (error: any) {
@@ -218,7 +207,6 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
       }
 
       showToast(data.message || 'تم الانضمام للفريق بنجاح', 'success');
-      // FIX: backend returns { message, team: {...} }
       setMyTeam(data.team);
       setJoinCode('');
     } catch (error: any) {
@@ -285,8 +273,6 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
       }
 
       showToast(data.message || 'تم إزالة العضو بنجاح', 'success');
-      
-      // FIX: refresh team data after removing member
       await loadTeamData();
     } catch (error: any) {
       showToast(error.message || 'حدث خطأ أثناء إزالة العضو', 'error');
@@ -305,9 +291,6 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
     setTimeout(() => setCopiedCode(false), 2000);
   };
 
-  // FIX: status comparisons use the Arabic values that Django stores in the DB
-  // (inferred from TeamService constants: PARTICIPANT_APPROVED='مقبول', etc.)
-  // and confirmed by the Arabic strings in the original Teams.tsx.
   const isCaptain = myTeam && myTeam.captain === studentId;
   const isApproved = myTeam?.status === 'مقبول';
   const isPending  = myTeam?.status === 'منتظر';
@@ -328,10 +311,7 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
   }
 
   /* ══════════════════════════════════════════
-     RENDER: EVENT FINISHED - SHOW OWN TEAM RESULT
-     FIX: removed admin-only ranking API call.
-          We show the student's own team result from myTeam,
-          which contains rank and is_winner from the serializer.
+     RENDER: EVENT FINISHED
   ══════════════════════════════════════════ */
   if (isEventFinished) {
     return (
@@ -372,7 +352,6 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
               </div>
             </div>
 
-            {/* Members list in result view */}
             <div className="members-section">
               <h4>أعضاء الفريق</h4>
               <div className="members-list">
@@ -503,7 +482,6 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
   /* ══════════════════════════════════════════
      RENDER: MY TEAM VIEW
   ══════════════════════════════════════════ */
-  // FIX: filter uses the Arabic enum value 'نشط' which maps to MemberStatus.ACTIVE in the model
   const activeMembers = myTeam.members.filter(m => m.status === 'نشط');
   
   return (
@@ -585,7 +563,6 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
         
         <div className="members-list">
           {activeMembers.map((member) => {
-            // FIX: role comparison uses Arabic value 'قائد' (MemberRole.CAPTAIN DB value)
             const isMemberCaptain = member.role === 'قائد';
             const isMe = member.student_id === studentId;
             
@@ -611,16 +588,16 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
                       قائد
                     </span>
                   )}
-                  
-                  {/* FIX: captain can remove non-captain members only while team is pending */}
-                  {isCaptain && !isMemberCaptain && !isMe && !isApproved && (
+
+                  {/* FIX: captain can remove any non-captain member (including when approved) */}
+                  {isCaptain && !isMemberCaptain && !isMe && (
                     <button
                       className="btn-remove"
                       onClick={() => handleRemoveMember(member.member_id, member.student_id)}
                       disabled={removingMemberId === member.member_id}
                     >
                       {removingMemberId === member.member_id ? (
-                        <span className="btn-spinner" />
+                        <span className="btn-spinner btn-spinner--dark" />
                       ) : (
                         <>
                           <XIcon />
@@ -636,11 +613,11 @@ export default function Teams({ eventId, studentId, isEventFinished }: TeamsProp
         </div>
       </div>
 
-      {/* Actions — only show leave button when team is not approved */}
+      {/* Actions — leave button, always visible to non-approved captains/members */}
       {!isApproved && (
         <div className="team-actions">
           <button
-            className="btn btn-danger"
+            className="btn btn-danger btn-leave"
             onClick={handleLeaveTeam}
             disabled={isLeaving}
           >

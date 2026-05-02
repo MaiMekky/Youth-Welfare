@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './MyEvents.css';
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
-import EventDetails from '../Activities/EventDetails/EventDetails';
+import EventDetails from './EventDetails/EventDetails';
 
 /* ══════════════════════════════════════════
    TYPES
@@ -410,6 +410,14 @@ export default function MyEvents() {
                       )}
 
                       <div className="card-actions">
+                        {/* Details button for all events */}
+                        <button
+                          className="btn-details"
+                          onClick={() => setSelectedEventId(event.id)}
+                        >
+                          <ResultIcon /> التفاصيل
+                        </button>
+
                         {isAccepted ? (
                           <>
                             <button className="btn-result" onClick={() => fetchResult(event)}>
@@ -420,7 +428,7 @@ export default function MyEvents() {
                                 className="btn-view-team"
                                 onClick={() => setSelectedEventId(event.id)}
                               >
-                                {event.hasTeam ? '👥 عرض الفريق' : '⚠️ لا يوجد فريق'}
+                                {event.hasTeam ? '👥 عرض الفريق' : '⚠️ انشاء فريق او طلب انضمام بالكود'}
                               </button>
                             )}
                           </>

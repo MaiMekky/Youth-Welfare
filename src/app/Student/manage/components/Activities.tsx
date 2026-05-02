@@ -295,7 +295,7 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
     };
 
     fetchActivities();
-  }, [selectedFamilyId, token, refreshTrigger, deptMap]);
+  }, [selectedFamilyId, refreshTrigger, deptMap]);
 
   return (
     <div className="activities-wrapper">

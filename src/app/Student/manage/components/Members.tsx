@@ -31,17 +31,27 @@ interface Family {
   member_count: number;
 }
 
+// ========= Empty state icon ==========
+const EmptyIcon: React.FC = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.5}
+    className="members-empty-icon"
+  >
+    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+  </svg>
+);
+
 const Members: React.FC = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedFamilyId, setSelectedFamilyId] = useState<number | null>(null);
 
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("access") : null;
-
   useEffect(() => {
-    if (!token) { setError("غير مصرح"); setLoading(false); return; }
     const fetchFamilyId = async () => {
       try {
         const baseUrl = getBaseUrl();
@@ -70,7 +80,7 @@ const Members: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!selectedFamilyId || !token) return;
+    if (!selectedFamilyId) return;
     const fetchMembers = async () => {
       try {
         setLoading(true);
@@ -100,8 +110,15 @@ const Members: React.FC = () => {
   if (loading) {
     return (
       <div className="members-wrapper">
-        <div className="members-grid">
-          <p>جاري تحميل الأعضاء…</p>
+        <div className="members-page-header">
+          <h1 className="members-page-title">أعضاء الأسرة</h1>
+          <p className="members-page-subtitle">قائمة أعضاء الأسرة المسجلين</p>
+        </div>
+        <div className="members-section-body">
+          <div className="members-loading">
+            <div className="members-spinner" />
+            <span className="members-loading-text">جاري تحميل الأعضاء…</span>
+          </div>
         </div>
       </div>
     );
@@ -110,8 +127,14 @@ const Members: React.FC = () => {
   if (error) {
     return (
       <div className="members-wrapper">
-        <div className="members-grid">
-          <p className="error-text">⚠️ {error}</p>
+        <div className="members-page-header">
+          <h1 className="members-page-title">أعضاء الأسرة</h1>
+          <p className="members-page-subtitle">قائمة أعضاء الأسرة المسجلين</p>
+        </div>
+        <div className="members-section-body">
+          <div className="members-grid">
+            <p className="members-error">⚠️ {error}</p>
+          </div>
         </div>
       </div>
     );
@@ -119,56 +142,65 @@ const Members: React.FC = () => {
 
   return (
     <div className="members-wrapper">
-      <div className="members-grid">
-        {members.length === 0 ? (
-          <p>لا يوجد أعضاء</p>
-        ) : (
-          members.map((m) => (
-            <div key={m.student_id} className="member-card">
-
-              {/* Header — avatar first in DOM = rightmost in RTL */}
-              <div className="member-header">
-                <div className="member-role-icon">
-                  <UserRound size={20} />
-                </div>
-                <div className="member-name-section">
-                  <div className="member-name">{m.student_name}</div>
-                  <div className={`member-role-tag ${getRoleClass(m.role)}`}>
-                    {m.role}
-                  </div>
-                </div>
-              </div>
-
-              {/* Info rows */}
-              <div className="member-info">
-                <div className="info-row">
-                  <span className="info-label">البريد:</span>
-                  <span className="info-value">{m.email}</span>
-                </div>
-                <div className="info-row">
-                  <span className="info-label">الهاتف:</span>
-                  <span className="info-value">{m.phone}</span>
-                </div>
-                {m.dept_name && (
-                  <div className="info-row">
-                    <span className="info-label">القسم:</span>
-                    <span className="info-value">{m.dept_name}</span>
-                  </div>
-                )}
-                <div className="info-row">
-                  <span className="info-label">انضم في:</span>
-                  <span className="info-value">
-                    {new Date(m.joined_at).toLocaleDateString("ar-EG")}
-                  </span>
-                </div>
-              </div>
-
+      <div className="members-page-header">
+        <h1 className="members-page-title">أعضاء الأسرة</h1>
+        <p className="members-page-subtitle">قائمة أعضاء الأسرة المسجلين</p>
+      </div>
+      <div className="members-section-body">
+        <div className="members-grid">
+          {members.length === 0 ? (
+            <div className="members-empty">
+              <EmptyIcon />
+              <p className="members-empty-text">لا يوجد أعضاء</p>
             </div>
-          ))
-        )}
+          ) : (
+            members.map((m) => (
+              <div key={m.student_id} className="member-card">
+
+                {/* Header — avatar first in DOM = rightmost in RTL */}
+                <div className="member-header">
+                  <div className="member-role-icon">
+                    <UserRound size={20} />
+                  </div>
+                  <div className="member-name-section">
+                    <div className="member-name">{m.student_name}</div>
+                    <div className={`member-role-tag ${getRoleClass(m.role)}`}>
+                      {m.role}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Info rows */}
+                <div className="member-info">
+                  <div className="info-row">
+                    <span className="info-label">البريد:</span>
+                    <span className="info-value">{m.email}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">الهاتف:</span>
+                    <span className="info-value">{m.phone}</span>
+                  </div>
+                  {m.dept_name && (
+                    <div className="info-row">
+                      <span className="info-label">القسم:</span>
+                      <span className="info-value">{m.dept_name}</span>
+                    </div>
+                  )}
+                  <div className="info-row">
+                    <span className="info-label">انضم في:</span>
+                    <span className="info-value">
+                      {new Date(m.joined_at).toLocaleDateString("ar-EG")}
+                    </span>
+                  </div>
+                </div>
+
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
-export default Members;
+export default Members; 

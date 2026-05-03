@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import FamilyAdBanner from "./FamilyAdBanner";
 import "../styles/HeadPage.css";
 
@@ -9,11 +9,23 @@ interface HeadPageProps {
 }
 
 export default function HeadPage({ onCreateClick }: HeadPageProps) {
+  const [mounted, setMounted] = useState(false);
+
+  // Ensure component is mounted before rendering to prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const handleLearnMore = () => {
     if (onCreateClick) {
       onCreateClick();
     }
   };
+
+  // Prevent hydration mismatch by waiting for client-side mount
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <>

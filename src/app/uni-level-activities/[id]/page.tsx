@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
+import TeamsSection from "./TeamsSection";
 const API_URL = getBaseUrl();
 
 
@@ -35,7 +36,6 @@ async function apiFetch<T>(
     ...(opts.headers as Record<string, string>),
   };
 
-  // add content-type only if body exists AND not FormData
   const isFormData = typeof FormData !== "undefined" && opts.body instanceof FormData;
   if (!headers["Content-Type"] && opts.body && !isFormData) headers["Content-Type"] = "application/json";
 
@@ -52,12 +52,12 @@ async function apiFetch<T>(
         })()
       : null;
 
-     if (!res.ok) {
+    if (!res.ok) {
       if (res.status === 403) {
         return { ok: false, message: "ليس لديك صلاحية للوصول لهذه الفعالية", status: 403 };
       }
       if (res.status === 500) {
-        return { ok: false, message: "حدث خطأ في الخادم، برجاء المحاولة لاحقاً", status: 500 };
+        return { ok: false, message: "حدث خطأ في السيرفر، برجاء المحاولة لاحقاً", status: 500 };
       }
       const msg =
         (typeof maybeJson === "object" &&
@@ -69,7 +69,6 @@ async function apiFetch<T>(
         `طلب غير ناجح (${res.status})`;
       return { ok: false, message: String(msg), status: res.status, raw: maybeJson };
     }
-
 
     return { ok: true, data: maybeJson as T };
   } catch (e: unknown) {
@@ -132,31 +131,26 @@ type ReportFormState = {
 const emptyReportForm: ReportFormState = {
   event_title: "",
   event_code: "",
-
   male_count: "",
   female_count: "",
   total_participants: "",
-
   start_date: "",
   duration_days: "",
-
   project_stages: "",
   preparation_stage: "",
   execution_stage: "",
   evaluation_stage: "",
   achieved_goals: "",
-
   committee_preparation: "",
   committee_organizing: "",
   committee_execution: "",
   committee_purchases: "",
   committee_supervision: "",
   committee_other: "",
-
   evaluation: "excellent",
-
   suggestions: "",
 };
+
 type ApiEventDetails = {
   event_id: number;
   created_by_name: string;
@@ -191,6 +185,7 @@ type ApiEventDetails = {
   faculty: number | null;
   created_by: number;
   family: number | null;
+  rejection_reason?: string | null;
 };
 
 type StudentRow = {
@@ -241,7 +236,6 @@ async function downloadPdf(path: string, opts: RequestInit = {}, fallbackName = 
   const headers: Record<string, string> = { ...(opts.headers as Record<string, string>) };
   if (!headers["Content-Type"] && opts.body) headers["Content-Type"] = "application/json";
 
-
   const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
 
   if (!res.ok) {
@@ -258,16 +252,13 @@ async function downloadPdf(path: string, opts: RequestInit = {}, fallbackName = 
 
   const blob = await res.blob();
   const url = URL.createObjectURL(blob);
-
   const filename = pickFilenameFromDisposition(res.headers.get("content-disposition"), fallbackName);
-
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;
   document.body.appendChild(a);
   a.click();
   a.remove();
-
   URL.revokeObjectURL(url);
 }
 
@@ -275,7 +266,7 @@ async function downloadPdf(path: string, opts: RequestInit = {}, fallbackName = 
 export default function EventDetailsPage() {
   const router = useRouter();
   const params = useParams();
-  const id = String(params?.id ?? ""); // eventId
+  const id = String(params?.id ?? "");
 
   const [event, setEvent] = useState<ApiEventDetails | null>(null);
   const [loadingEvent, setLoadingEvent] = useState(false);
@@ -284,7 +275,6 @@ export default function EventDetailsPage() {
   const [busy, setBusy] = useState(false);
   const [backPath, setBackPath] = useState("/uni-level-activities");
 
-  /* ===================== Toast Notification ===================== */
   const { showToast } = useToast();
 
   /* ===================== Images ===================== */
@@ -305,41 +295,27 @@ export default function EventDetailsPage() {
     "evaluation_stage",
     "achieved_goals",
   ];
-      const committeeFields: (keyof ReportFormState)[] = [
-      "committee_preparation",
-      "committee_organizing",
-      "committee_execution",
-      "committee_purchases",
-      "committee_supervision",
-      "committee_other",
-    ];
+  const committeeFields: (keyof ReportFormState)[] = [
+    "committee_preparation",
+    "committee_organizing",
+    "committee_execution",
+    "committee_purchases",
+    "committee_supervision",
+    "committee_other",
+  ];
 
   const validateReportForm = (form: ReportFormState): ReportErrors => {
     const next: ReportErrors = {};
 
-    // required text/date
     if (!form.event_title.trim()) next.event_title = "عنوان الفعالية مطلوب";
     if (!form.event_code.trim()) next.event_code = "كود الفعالية مطلوب";
     if (!form.start_date) next.start_date = "تاريخ البداية مطلوب";
 
-    // required numbers: non-negative integer
     const requireNonNegInt = (key: keyof ReportFormState, v: number | "") => {
-      if (v === "") {
-        next[key] = "الحقل مطلوب";
-        return;
-      }
-      if (!Number.isFinite(v)) {
-        next[key] = "لازم يكون رقم صحيح";
-        return;
-      }
-      if (!Number.isInteger(v)) {
-        next[key] = "لازم يكون رقم صحيح بدون كسور";
-        return;
-      }
-      if (v < 0) {
-        next[key] = "مينفعش أقل من صفر";
-        return;
-      }
+      if (v === "") { next[key] = "الحقل مطلوب"; return; }
+      if (!Number.isFinite(v)) { next[key] = "لازم يكون رقم صحيح"; return; }
+      if (!Number.isInteger(v)) { next[key] = "لازم يكون رقم صحيح بدون كسور"; return; }
+      if (v < 0) { next[key] = "مينفعش أقل من صفر"; return; }
     };
 
     requireNonNegInt("male_count", form.male_count);
@@ -347,35 +323,30 @@ export default function EventDetailsPage() {
     requireNonNegInt("total_participants", form.total_participants);
     requireNonNegInt("duration_days", form.duration_days);
 
-    // required + max 250
     for (const k of MAX_250_FIELDS) {
       const v = String(form[k] ?? "").trim();
       if (!v) next[k] = "الحقل مطلوب";
       else if (v.length > 250) next[k] = `الحد الأقصى 250 حرف (حاليًا ${v.length})`;
     }
-      for (const k of committeeFields) {
+    for (const k of committeeFields) {
       const v = String(form[k] ?? "").trim();
       if (!v) next[k] = "الحقل مطلوب";
       else if (v.length > 250) next[k] = `الحد الأقصى 250 حرف`;
     }
 
     if (!form.evaluation) next.evaluation = "التقييم مطلوب";
-
     if (!form.suggestions.trim()) next.suggestions = "الاقتراحات مطلوبة";
 
-
-  
     return next;
   };
 
   const loadEvent = async () => {
     if (!id) return;
-
     setLoadingEvent(true);
     const res = await apiFetch<ApiEventDetails>(`/api/event/get-events/${id}/`, { method: "GET" });
     setLoadingEvent(false);
 
-      if (!res.ok) {
+    if (!res.ok) {
       if (res.status === 403) {
         showToast("❌ ليس لديك صلاحية لعرض هذه الفعالية", "error");
       } else if (res.status === 500) {
@@ -386,9 +357,7 @@ export default function EventDetailsPage() {
       return;
     }
 
-
     setEvent(res.data);
-
     const parts = Array.isArray(res.data.participants) ? res.data.participants : [];
     const mapped: StudentRow[] = parts.map((p) => ({
       id: p.id,
@@ -409,96 +378,80 @@ export default function EventDetailsPage() {
 
     if (!res.ok) {
       console.error(res.message);
-      // مش هنوقف الصفحة على فشل الصور
       showToast("تعذر تحميل الصور", "warning");
       return;
     }
-
     setImages(Array.isArray(res.data) ? res.data : []);
   };
 
-const uploadImages = async (files: FileList | null) => {
-  if (!id || !files || files.length === 0) return;
+  const uploadImages = async (files: FileList | null) => {
+    if (!id || !files || files.length === 0) return;
+    setUploading(true);
 
+    try {
+      const fd = new FormData();
+      Array.from(files).forEach((f) => fd.append("images", f));
+      fd.append("doc_type", docType);
 
-  setUploading(true);
-
-  try {
-    const fd = new FormData();
-    Array.from(files).forEach((f) => fd.append("images", f));
-    fd.append("doc_type", docType);
-
-    const res = await authFetch(
-      `${API_URL}/api/event/manage-events/${id}/upload-images/`,
-      {
+      const res = await authFetch(`${API_URL}/api/event/manage-events/${id}/upload-images/`, {
         method: "POST",
         body: fd,
-      }
-    );
+      });
 
-    let errorMessage = "";
-    let successMessage = "";
+      let errorMessage = "";
+      let successMessage = "";
 
-    if (!res.ok) {
-      try {
-        const data = await res.json();
-        if (data.detail) {
-          switch (data.detail) {
-            case "Only the event creator can upload images for this event":
-              errorMessage = "❌ لا يمكنك رفع الصور إلا إذا كنت منشئ النشاط";
-              break;
-            default:
-              errorMessage = `❌ ${data.detail}`;
-          }
-        }
-
-        else if (data.images && Array.isArray(data.images)) {
-          const messages: string[] = [];
-          data.images.forEach((msg: string) => {
-            if (msg.includes("exceeds")) {
-              messages.push("❌ حجم الصورة أكبر من 20 ميجابايت");
-            } else if (msg.includes("invalid extension")) {
-              messages.push("❌ الصورة يجب أن تكون بصيغة jpg أو jpeg أو png أو pdf");
-            } else {
-              messages.push(`❌ ${msg}`);
+      if (!res.ok) {
+        try {
+          const data = await res.json();
+          if (data.detail) {
+            switch (data.detail) {
+              case "Only the event creator can upload images for this event":
+                errorMessage = "❌ لا يمكنك رفع الصور إلا إذا كنت منشئ النشاط";
+                break;
+              default:
+                errorMessage = `❌ ${data.detail}`;
             }
-          });
-          errorMessage = messages.join(", ");
+          } else if (data.images && Array.isArray(data.images)) {
+            const messages: string[] = [];
+            data.images.forEach((msg: string) => {
+              if (msg.includes("exceeds")) {
+                messages.push("❌ حجم الصورة أكبر من 20 ميجابايت");
+              } else if (msg.includes("invalid extension")) {
+                messages.push("❌ الصورة يجب أن تكون بصيغة jpg أو jpeg أو png أو pdf");
+              } else {
+                messages.push(`❌ ${msg}`);
+              }
+            });
+            errorMessage = messages.join(", ");
+          } else if (data.doc_type && Array.isArray(data.doc_type)) {
+            errorMessage = "❌ نوع المستند غير مدعوم";
+          }
+        } catch (err) {
+          console.error("Error parsing server response:", err);
+          errorMessage = "❌ حدث خطأ أثناء رفع الصور";
         }
-        else if (data.doc_type && Array.isArray(data.doc_type)) {
-          errorMessage = "❌ نوع المستند غير مدعوم";
-        }
-      } catch (err) {
-        console.error("Error parsing server response:", err);
-        errorMessage = "❌ حدث خطأ أثناء رفع الصور";
+      } else {
+        successMessage = "✅ تم رفع الصور بنجاح";
       }
-    } else {
-      successMessage = "✅ تم رفع الصور بنجاح";
-    }
-    if (errorMessage) showToast(errorMessage, "error");
-    if (successMessage) showToast(successMessage, "success");
 
-    if (fileRef.current) fileRef.current.value = "";
+      if (errorMessage) showToast(errorMessage, "error");
+      if (successMessage) showToast(successMessage, "success");
 
-    if (!errorMessage) {
-      await loadImages(); 
+      if (fileRef.current) fileRef.current.value = "";
+      if (!errorMessage) await loadImages();
+    } finally {
+      setUploading(false);
     }
-  } finally {
-    setUploading(false);
-  }
-};
+  };
+
   const deleteImage = async (docId: number) => {
     if (!id || !docId) return;
-
     setDeletingDocId(docId);
     const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-events/${id}/images/${docId}/`, { method: "DELETE" });
     setDeletingDocId(null);
 
-    if (!res.ok) {
-      showToast(res.message, "error");
-      return;
-    }
-
+    if (!res.ok) { showToast(res.message, "error"); return; }
     setImages((prev) => prev.filter((x) => x.doc_id !== docId));
     showToast("✅ تم مسح الصورة", "success");
   };
@@ -508,7 +461,8 @@ const uploadImages = async (files: FileList | null) => {
     loadImages();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
-    useEffect(() => {
+
+  useEffect(() => {
     const from = sessionStorage.getItem("eventDetails_from");
     if (from) setBackPath(from);
   }, []);
@@ -517,6 +471,12 @@ const uploadImages = async (files: FileList | null) => {
   const [reportForm, setReportForm] = useState<ReportFormState>(emptyReportForm);
 
   const openReportModal = () => {
+    // If faculty event, show permission error
+    if (isFacultyEvent) {
+      showToast("❌ ليس لديك صلاحية لتصدير هذا التقرير", "error");
+      return;
+    }
+
     const start = event?.st_date ?? "";
     const end = event?.end_date ?? "";
 
@@ -562,6 +522,7 @@ const uploadImages = async (files: FileList | null) => {
         subtitle: "معلومات شاملة عن تفاصيل الفعالية والمشاركين",
         status: "",
         type: "",
+        typeLabel: "",
         scope: "",
         cost: "",
         startDate: "",
@@ -571,6 +532,7 @@ const uploadImages = async (files: FileList | null) => {
         constraints: "",
         description: "",
         max: 0,
+        rejectionReason: "",
       };
     }
 
@@ -579,11 +541,17 @@ const uploadImages = async (files: FileList | null) => {
     const costNum = Number(String(event.cost ?? "").trim());
     const costText = !Number.isFinite(costNum) || costNum === 0 ? "مجاني" : `${costNum} جنيه`;
 
+    // Map type display label
+    let typeLabel = event.type ?? "";
+    if (event.type === "داخلي") typeLabel = "داخلي - على مستوى الكلية";
+    else if (event.type === "خارجي") typeLabel = "خارجي - على مستوى الجامعة";
+
     return {
       title: event.title ?? "",
       subtitle: "معلومات شاملة عن تفاصيل الفعالية والمشاركين",
       status: event.status ?? "",
       type: event.type ?? "",
+      typeLabel,
       scope,
       cost: costText,
       startDate: event.st_date ?? "",
@@ -593,6 +561,7 @@ const uploadImages = async (files: FileList | null) => {
       constraints: (event.restrictions ?? "").trim() || "—",
       description: (event.description ?? "").trim() || "—",
       max: Number(event.s_limit ?? 0),
+      rejectionReason: (event.rejection_reason ?? "").trim(),
     };
   }, [event]);
 
@@ -613,36 +582,23 @@ const uploadImages = async (files: FileList | null) => {
     setEditingRewardId(row.id);
     setDraftReward(row.reward ?? "");
   };
-  const cancelReward = () => {
-    setEditingRewardId(null);
-    setDraftReward("");
-  };
+  const cancelReward = () => { setEditingRewardId(null); setDraftReward(""); };
 
   const startEditRank = (row: StudentRow) => {
     setEditingRewardId(null);
     setEditingRankId(row.id);
     setDraftRank(row.rank ?? "");
   };
-  const cancelRank = () => {
-    setEditingRankId(null);
-    setDraftRank("");
-  };
+  const cancelRank = () => { setEditingRankId(null); setDraftRank(""); };
 
   /* ===================== Participants APIs ===================== */
   const approveAll = async () => {
     if (!id) return;
     try {
       setBusy(true);
-      const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-participants/${id}/approve-all-participants/`, {
-        method: "PATCH",
-      });
+      const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-participants/${id}/approve-all-participants/`, { method: "PATCH" });
       setBusy(false);
-
-      if (!res.ok) {
-        showToast(res.message, "error");
-        return;
-      }
-
+      if (!res.ok) { showToast(res.message, "error"); return; }
       await loadEvent();
       showToast("✅ تم قبول الجميع بنجاح", "success");
     } catch {
@@ -655,16 +611,9 @@ const uploadImages = async (files: FileList | null) => {
     if (!id || !studentId) return;
     try {
       setBusy(true);
-      const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-participants/${id}/participants/${studentId}/approve/`, {
-        method: "PATCH",
-      });
+      const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-participants/${id}/participants/${studentId}/approve/`, { method: "PATCH" });
       setBusy(false);
-
-      if (!res.ok) {
-      showToast(res.message, "error"); // ← single line, no status checks
-      return;
-    }
-
+      if (!res.ok) { showToast(res.message, "error"); return; }
       await loadEvent();
       showToast("✅ تم قبول الطالب", "success");
     } catch {
@@ -677,16 +626,9 @@ const uploadImages = async (files: FileList | null) => {
     if (!id || !studentId) return;
     try {
       setBusy(true);
-      const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-participants/${id}/participants/${studentId}/reject/`, {
-        method: "PATCH",
-      });
+      const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-participants/${id}/participants/${studentId}/reject/`, { method: "PATCH" });
       setBusy(false);
-
-      if (!res.ok) {
-        showToast(res.message, "error");
-        return;
-      }
-
+      if (!res.ok) { showToast(res.message, "error"); return; }
       await loadEvent();
       showToast("❌ تم رفض الطالب", "warning");
     } catch {
@@ -697,7 +639,6 @@ const uploadImages = async (files: FileList | null) => {
 
   const assignResult = async (studentId: string, rank: number | null, reward: string) => {
     if (!id || !studentId) return;
-
     try {
       setBusy(true);
       const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-participants/${id}/participants/${studentId}/assign-result/`, {
@@ -705,17 +646,11 @@ const uploadImages = async (files: FileList | null) => {
         body: JSON.stringify({ rank, reward }),
       });
       setBusy(false);
-
-      if (!res.ok) {
-        showToast(res.message, "error");
-        return;
-      }
-
+      if (!res.ok) { showToast(res.message, "error"); return; }
       setEditingRankId(null);
       setEditingRewardId(null);
       setDraftRank("");
       setDraftReward("");
-
       await loadEvent();
       showToast("✅ تم حفظ النتيجة بنجاح", "success");
     } catch {
@@ -727,33 +662,26 @@ const uploadImages = async (files: FileList | null) => {
   const saveReward = async (rowId: number) => {
     const row = rows.find((r) => r.id === rowId);
     if (!row) return;
-
     const rankNum = toRankNumber(row.rank);
     await assignResult(row.studentId, rankNum, draftReward);
   };
 
-   const saveRank = async (rowId: number) => {
-      const row = rows.find((r) => r.id === rowId);
-      if (!row) return;
-
-      const value = draftRank.trim();
-      if (!value) {
-        showToast("⚠️ من فضلك أدخل رقم الترتيب", "warning");
-        return;
-      }
-
-      if (!/^\d+$/.test(value)) {
-        showToast("❌ الترتيب يجب أن يكون رقم صحيح فقط", "error");
-        return;
-      }
-
-      const rankNum = Number(value);
-
-      await assignResult(row.studentId, rankNum, row.reward ?? "");
-    };
+  const saveRank = async (rowId: number) => {
+    const row = rows.find((r) => r.id === rowId);
+    if (!row) return;
+    const value = draftRank.trim();
+    if (!value) { showToast("⚠️ من فضلك أدخل رقم الترتيب", "warning"); return; }
+    if (!/^\d+$/.test(value)) { showToast("❌ الترتيب يجب أن يكون رقم صحيح فقط", "error"); return; }
+    const rankNum = Number(value);
+    await assignResult(row.studentId, rankNum, row.reward ?? "");
+  };
 
   const pendingCount = rows.filter((r) => r.status === "منتظر").length;
   const isFacultyEvent = (event?.faculty ?? null) !== null;
+
+  // Check if teams are enabled — passed from TeamsSection via callback
+  const [teamsEnabled, setTeamsEnabled] = useState(false);
+
   const statusBadgeClass = useMemo(() => {
     const s = (ui.status || "").trim();
     if (s === "نشط") return styles.badgeSuccess;
@@ -763,6 +691,23 @@ const uploadImages = async (files: FileList | null) => {
   }, [ui.status]);
 
   const [exportBusy, setExportBusy] = useState<null | "report" | "summary">(null);
+
+  const exportEventSummary = async () => {
+    if (isFacultyEvent) {
+      showToast("❌ ليس لديك صلاحية لتصدير هذا الملخص", "error");
+      return;
+    }
+    if (!id) return;
+    try {
+      setExportBusy("summary");
+      await downloadPdf(`/api/event/summary-reports/${id}/summary-pdf/`, { method: "GET" }, `event_${id}_summary.pdf`);
+      showToast("✅ تم تنزيل ملخص الفعالية", "success");
+    } catch (e: unknown) {
+      showToast((e as Error)?.message || "حصل خطأ أثناء تصدير ملخص الفعالية", "error");
+    } finally {
+      setExportBusy(null);
+    }
+  };
 
   const submitReportPdf = async () => {
     if (!id) return;
@@ -776,61 +721,33 @@ const uploadImages = async (files: FileList | null) => {
     const body = {
       event_title: reportForm.event_title.trim(),
       event_code: reportForm.event_code.trim(),
-
       male_count: Number(reportForm.male_count),
       female_count: Number(reportForm.female_count),
       total_participants: Number(reportForm.total_participants),
-
       start_date: reportForm.start_date,
       duration_days: Number(reportForm.duration_days),
-
       project_stages: reportForm.project_stages.trim(),
       preparation_stage: reportForm.preparation_stage.trim(),
       execution_stage: reportForm.execution_stage.trim(),
       evaluation_stage: reportForm.evaluation_stage.trim(),
       achieved_goals: reportForm.achieved_goals.trim(),
-
       committee_preparation: reportForm.committee_preparation.trim(),
       committee_organizing: reportForm.committee_organizing.trim(),
       committee_execution: reportForm.committee_execution.trim(),
       committee_purchases: reportForm.committee_purchases.trim(),
       committee_supervision: reportForm.committee_supervision.trim(),
       committee_other: reportForm.committee_other.trim(),
-
       evaluation: reportForm.evaluation,
-
       suggestions: [reportForm.suggestions.trim()],
     };
 
     try {
       setExportBusy("report");
-      await downloadPdf(
-        `/api/event/reports/${id}/pdf/`,
-        { method: "POST", body: JSON.stringify(body) },
-        `event_${id}_report.pdf`
-      );
+      await downloadPdf(`/api/event/reports/${id}/pdf/`, { method: "POST", body: JSON.stringify(body) }, `event_${id}_report.pdf`);
       setReportOpen(false);
       showToast("✅ تم تنزيل تقرير الفعالية", "success");
     } catch (e: unknown) {
       showToast((e as Error)?.message || "حصل خطأ أثناء تصدير تقرير الفعالية", "error");
-    } finally {
-      setExportBusy(null);
-    }
-  };
-
-  const exportEventSummary = async () => {
-    if (!id) return;
-
-    try {
-      setExportBusy("summary");
-      await downloadPdf(
-        `/api/event/summary-reports/${id}/summary-pdf/`,
-        { method: "GET" },
-        `event_${id}_summary.pdf`
-      );
-      showToast("✅ تم تنزيل ملخص الفعالية", "success");
-    } catch (e: unknown) {
-      showToast((e as Error)?.message || "حصل خطأ أثناء تصدير ملخص الفعالية", "error");
     } finally {
       setExportBusy(null);
     }
@@ -852,41 +769,43 @@ const uploadImages = async (files: FileList | null) => {
           </div>
 
           <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+            {/* ملخص الفعالية — disabled for faculty events */}
             <button
               className={styles.actionBtn}
               type="button"
               onClick={exportEventSummary}
               disabled={exportBusy !== null}
-              style={{ opacity: exportBusy !== null ? 0.7 : 1 }}
-              title="تصدير ملخص الفعالية PDF"
+              style={{ opacity: isFacultyEvent || exportBusy !== null ? 0.5 : 1, cursor: isFacultyEvent ? "not-allowed" : "pointer" }}
+              title={isFacultyEvent ? "ليس لديك صلاحية لتصدير هذا الملخص" : "تصدير ملخص الفعالية PDF"}
             >
               <FileText size={18} />
               {exportBusy === "summary" ? "جاري التصدير..." : "ملخص الفعالية"}
             </button>
 
+            {/* تقرير الفعالية — disabled for faculty events */}
             <button
               className={styles.actionBtn}
               type="button"
               onClick={openReportModal}
               disabled={exportBusy !== null || !event}
-              style={{ opacity: exportBusy !== null || !event ? 0.7 : 1 }}
-              title="تصدير تقرير الفعالية PDF"
+              style={{ opacity: isFacultyEvent || exportBusy !== null || !event ? 0.5 : 1, cursor: isFacultyEvent ? "not-allowed" : "pointer" }}
+              title={isFacultyEvent ? "ليس لديك صلاحية لتصدير هذا التقرير" : "تصدير تقرير الفعالية PDF"}
             >
               <FileText size={18} />
               {exportBusy === "report" ? "جاري التصدير..." : "تقرير الفعالية"}
             </button>
 
             <button
-               className={styles.backBtn}
-                onClick={() => {
-                  sessionStorage.removeItem("eventDetails_from"); // clean up
-                  router.push(backPath);
-                }}
-                type="button"
-                disabled={exportBusy !== null}
-                style={{ opacity: exportBusy !== null ? 0.7 : 1 }}
-              >
-                <ArrowRight size={18} />
+              className={styles.backBtn}
+              onClick={() => {
+                sessionStorage.removeItem("eventDetails_from");
+                router.push(backPath);
+              }}
+              type="button"
+              disabled={exportBusy !== null}
+              style={{ opacity: exportBusy !== null ? 0.7 : 1 }}
+            >
+              <ArrowRight size={18} />
               العودة للفعاليات
             </button>
           </div>
@@ -902,9 +821,7 @@ const uploadImages = async (files: FileList | null) => {
 
         <div className={styles.statsRow}>
           <div className={`${styles.statCard} ${styles.statAmber}`}>
-            <div className={styles.statIcon}>
-              <Users size={20} />
-            </div>
+            <div className={styles.statIcon}><Users size={20} /></div>
             <div className={styles.statText}>
               <div className={styles.statLabel}>المقاعد المتبقية</div>
               <div className={styles.statValue}>{remaining}</div>
@@ -912,9 +829,7 @@ const uploadImages = async (files: FileList | null) => {
           </div>
 
           <div className={`${styles.statCard} ${styles.statGreen}`}>
-            <div className={styles.statIcon}>
-              <CheckCircle2 size={20} />
-            </div>
+            <div className={styles.statIcon}><CheckCircle2 size={20} /></div>
             <div className={styles.statText}>
               <div className={styles.statLabel}>الحد الأقصى</div>
               <div className={styles.statValue}>{ui.max}</div>
@@ -922,9 +837,7 @@ const uploadImages = async (files: FileList | null) => {
           </div>
 
           <div className={`${styles.statCard} ${styles.statIndigo}`}>
-            <div className={styles.statIcon}>
-              <Users size={20} />
-            </div>
+            <div className={styles.statIcon}><Users size={20} /></div>
             <div className={styles.statText}>
               <div className={styles.statLabel}>العدد الحالي</div>
               <div className={styles.statValue}>{registered}</div>
@@ -934,65 +847,66 @@ const uploadImages = async (files: FileList | null) => {
 
         <section className={styles.infoGrid}>
           <div className={styles.infoCard}>
-            <div className={styles.infoLabel}>
-              <DollarSign size={16} /> التكلفة
-            </div>
+            <div className={styles.infoLabel}><DollarSign size={16} /> التكلفة</div>
             <div className={styles.infoValue}>{ui.cost}</div>
           </div>
 
           <div className={styles.infoCard}>
-            <div className={styles.infoLabel}>
-              <ShieldAlert size={16} /> حالة الفعالية
-            </div>
+            <div className={styles.infoLabel}><ShieldAlert size={16} /> حالة الفعالية</div>
             <div className={statusBadgeClass}>{ui.status || "—"}</div>
           </div>
 
           <div className={styles.infoCard}>
-            <div className={styles.infoLabel}>
-              <Users size={16} /> نطاق الفعالية
-            </div>
+            <div className={styles.infoLabel}><Users size={16} /> نطاق الفعالية</div>
             <div className={styles.infoValue}>{ui.scope || "—"}</div>
           </div>
 
           <div className={styles.infoCard}>
-            <div className={styles.infoLabel}>
-              <Timer size={16} /> نوع الفعالية
-            </div>
-            <div className={styles.badgeBlue}>{ui.type || "—"}</div>
+            <div className={styles.infoLabel}><Timer size={16} /> نوع الفعالية</div>
+            {/* Show original type value + mapped label */}
+            <div className={styles.badgeBlue}>{ui.typeLabel || ui.type || "—"}</div>
           </div>
 
           <div className={`${styles.infoCard} ${styles.infoWide}`}>
-            <div className={styles.infoLabel}>
-              <MapPin size={16} /> المكان
-            </div>
+            <div className={styles.infoLabel}><MapPin size={16} /> المكان</div>
             <div className={styles.infoValue}>{ui.location || "—"}</div>
           </div>
 
           <div className={styles.infoCard}>
-            <div className={styles.infoLabel}>
-              <CalendarDays size={16} /> تاريخ البداية
-            </div>
-            <div className={styles.infoValue} dir="ltr">
-              {ui.startDate || "—"}
-            </div>
+            <div className={styles.infoLabel}><CalendarDays size={16} /> تاريخ البداية</div>
+            <div className={styles.infoValue} dir="ltr">{ui.startDate || "—"}</div>
           </div>
 
           <div className={styles.infoCard}>
-            <div className={styles.infoLabel}>
-              <CalendarDays size={16} /> تاريخ النهاية
-            </div>
-            <div className={styles.infoValue} dir="ltr">
-              {ui.endDate || "—"}
-            </div>
+            <div className={styles.infoLabel}><CalendarDays size={16} /> تاريخ النهاية</div>
+            <div className={styles.infoValue} dir="ltr">{ui.endDate || "—"}</div>
           </div>
         </section>
+
+        {ui.rejectionReason && (
+          <section style={{
+            display: "flex", alignItems: "flex-start", gap: "14px",
+            background: "linear-gradient(135deg, #FFF1F1, #FFE4E4)",
+            border: "1.5px solid #FCA5A5", borderRight: "5px solid #EF4444",
+            borderRadius: "14px", padding: "18px 20px", direction: "rtl", marginTop: "8px",
+          }}>
+            <ShieldAlert size={22} color="#EF4444" style={{ flexShrink: 0, marginTop: 2 }} />
+            <div>
+              <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#EF4444", marginBottom: "6px", letterSpacing: "0.02em" }}>
+                سبب الرفض
+              </div>
+              <div style={{ fontSize: "0.95rem", color: "#7F1D1D", lineHeight: 1.7, fontWeight: 500 }}>
+                {ui.rejectionReason}
+              </div>
+            </div>
+          </section>
+        )}
 
         <section className={styles.twoCols}>
           <div className={styles.block}>
             <div className={styles.blockTitle}>المكافأة</div>
             <div className={styles.blockBody}>{ui.reward}</div>
           </div>
-
           <div className={styles.block}>
             <div className={styles.blockTitle}>القيود والشروط</div>
             <div className={styles.blockBody}>{ui.constraints}</div>
@@ -1004,37 +918,33 @@ const uploadImages = async (files: FileList | null) => {
           <div className={styles.blockBody}>{ui.description}</div>
         </section>
 
-        {/* ===================== Images Component ===================== */}
+        {/* ===================== Images ===================== */}
         <section className={styles.imagesBlock}>
           <div className={styles.imagesHead}>
-            <div className={styles.imagesTitle}>
-              <ImageIcon size={18} />
-              صور الفعالية
-            </div>
-          {(  !isFacultyEvent &&
-            <div className={styles.imagesActions}>
-              <input
-                ref={fileRef}
-                className={styles.fileInput}
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={(e) => uploadImages(e.target.files)}
-                disabled={uploading}
-              />
-
-              <button
-                type="button"
-                className={styles.uploadBtn}
-                onClick={() => fileRef.current?.click()}
-                disabled={uploading}
-                title="إضافة صورة"
-              >
-                <UploadCloud size={18} />
-                {uploading ? "جاري الرفع..." : "إضافة صورة"}
-              </button>
-            </div>
-          )}
+            <div className={styles.imagesTitle}><ImageIcon size={18} /> صور الفعالية</div>
+            {!isFacultyEvent && (
+              <div className={styles.imagesActions}>
+                <input
+                  ref={fileRef}
+                  className={styles.fileInput}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => uploadImages(e.target.files)}
+                  disabled={uploading}
+                />
+                <button
+                  type="button"
+                  className={styles.uploadBtn}
+                  onClick={() => fileRef.current?.click()}
+                  disabled={uploading}
+                  title="إضافة صورة"
+                >
+                  <UploadCloud size={18} />
+                  {uploading ? "جاري الرفع..." : "إضافة صورة"}
+                </button>
+              </div>
+            )}
           </div>
 
           {loadingImages ? (
@@ -1049,30 +959,25 @@ const uploadImages = async (files: FileList | null) => {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={img.file_url} alt={img.file_name} />
                   </div>
-
                   <div className={styles.imageMeta}>
-                    <div className={styles.imageName} title={img.file_name}>
-                      {img.file_name}
-                    </div>
+                    <div className={styles.imageName} title={img.file_name}>{img.file_name}</div>
                   </div>
-
                   <div className={styles.imageBtns}>
                     <a className={styles.viewLink} href={img.file_url} target="_blank" rel="noreferrer">
-                      <Eye size={16} />
-                      عرض الصورة
+                      <Eye size={16} /> عرض الصورة
                     </a>
-                {!isFacultyEvent && (
-                    <button
-                      type="button"
-                      className={styles.deleteImgBtn}
-                      onClick={() => deleteImage(img.doc_id)}
-                      disabled={deletingDocId === img.doc_id}
-                      title="مسح"
-                    >
-                      <Trash2 size={16} />
-                      {deletingDocId === img.doc_id ? "..." : "مسح الصورة"}
-                    </button>
-                     )}
+                    {!isFacultyEvent && (
+                      <button
+                        type="button"
+                        className={styles.deleteImgBtn}
+                        onClick={() => deleteImage(img.doc_id)}
+                        disabled={deletingDocId === img.doc_id}
+                        title="مسح"
+                      >
+                        <Trash2 size={16} />
+                        {deletingDocId === img.doc_id ? "..." : "مسح الصورة"}
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -1080,6 +985,7 @@ const uploadImages = async (files: FileList | null) => {
           )}
         </section>
 
+        {/* ===================== Report Modal ===================== */}
         {reportOpen && !isFacultyEvent && (
           <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-label="تقرير الفعالية">
             <div className={styles.modalCard}>
@@ -1088,7 +994,6 @@ const uploadImages = async (files: FileList | null) => {
                   <div className={styles.modalTitle}>تقرير الفعالية</div>
                   <div className={styles.modalSub}>املئي البيانات المطلوبة ثم اضغطي تنزيل</div>
                 </div>
-
                 <button className={styles.modalClose} type="button" onClick={closeReportModal} disabled={exportBusy !== null}>
                   <X size={18} />
                 </button>
@@ -1098,323 +1003,182 @@ const uploadImages = async (files: FileList | null) => {
                 <div className={styles.modalGrid2}>
                   <div className={styles.modalField}>
                     <label className={styles.modalLabel}>عنوان الفعالية</label>
-                    <input
-                      className={styles.modalInput}
-                      value={reportForm.event_title}
-                      onChange={(e) => setReportField("event_title", e.target.value)}
-                      placeholder="عنوان الفعالية"
-                    />
+                    <input className={styles.modalInput} value={reportForm.event_title}
+                      onChange={(e) => setReportField("event_title", e.target.value)} placeholder="عنوان الفعالية" />
                     {reportErrors.event_title && <div className={styles.modalError}>{reportErrors.event_title}</div>}
                   </div>
 
                   <div className={styles.modalField}>
                     <label className={styles.modalLabel}>كود الفعالية</label>
-                    <input
-                      className={styles.modalInput}
-                      value={reportForm.event_code}
-                      onChange={(e) => setReportField("event_code", e.target.value)}
-                      placeholder="مثال: EVT-001"
-                    />
+                    <input className={styles.modalInput} value={reportForm.event_code}
+                      onChange={(e) => setReportField("event_code", e.target.value)} placeholder="مثال: EVT-001" />
                     {reportErrors.event_code && <div className={styles.modalError}>{reportErrors.event_code}</div>}
                   </div>
 
                   <div className={styles.modalField}>
                     <label className={styles.modalLabel}>عدد الذكور</label>
-                    <input
-                      className={styles.modalInput}
-                      type="number"
-                      min={0}
-                      value={reportForm.male_count}
-                      onChange={(e) => setReportField("male_count", e.target.value === "" ? "" : Number(e.target.value))}
-                      placeholder="0"
-                    />
+                    <input className={styles.modalInput} type="number" min={0} value={reportForm.male_count}
+                      onChange={(e) => setReportField("male_count", e.target.value === "" ? "" : Number(e.target.value))} placeholder="0" />
                     {reportErrors.male_count && <div className={styles.modalError}>{reportErrors.male_count}</div>}
                   </div>
 
                   <div className={styles.modalField}>
                     <label className={styles.modalLabel}>عدد الإناث</label>
-                    <input
-                      className={styles.modalInput}
-                      type="number"
-                      min={0}
-                      value={reportForm.female_count}
-                      onChange={(e) => setReportField("female_count", e.target.value === "" ? "" : Number(e.target.value))}
-                      placeholder="0"
-                    />
+                    <input className={styles.modalInput} type="number" min={0} value={reportForm.female_count}
+                      onChange={(e) => setReportField("female_count", e.target.value === "" ? "" : Number(e.target.value))} placeholder="0" />
                     {reportErrors.female_count && <div className={styles.modalError}>{reportErrors.female_count}</div>}
                   </div>
 
                   <div className={styles.modalField}>
                     <label className={styles.modalLabel}>إجمالي المشاركين</label>
-                    <input
-                      className={styles.modalInput}
-                      type="number"
-                      min={0}
-                      value={reportForm.total_participants}
-                      onChange={(e) =>
-                        setReportField("total_participants", e.target.value === "" ? "" : Number(e.target.value))
-                      }
-                      placeholder="0"
-                    />
-                    {reportErrors.total_participants && (
-                      <div className={styles.modalError}>{reportErrors.total_participants}</div>
-                    )}
+                    <input className={styles.modalInput} type="number" min={0} value={reportForm.total_participants}
+                      onChange={(e) => setReportField("total_participants", e.target.value === "" ? "" : Number(e.target.value))} placeholder="0" />
+                    {reportErrors.total_participants && <div className={styles.modalError}>{reportErrors.total_participants}</div>}
                   </div>
 
                   <div className={styles.modalField}>
                     <label className={styles.modalLabel}>تاريخ البداية</label>
-                    <input
-                      className={styles.modalInput}
-                      type="date"
-                      value={reportForm.start_date}
-                      onChange={(e) => setReportField("start_date", e.target.value)}
-                    />
+                    <input className={styles.modalInput} type="date" value={reportForm.start_date}
+                      onChange={(e) => setReportField("start_date", e.target.value)} />
                     {reportErrors.start_date && <div className={styles.modalError}>{reportErrors.start_date}</div>}
                   </div>
 
                   <div className={styles.modalField}>
                     <label className={styles.modalLabel}>مدة التنفيذ (بالأيام)</label>
-                    <input
-                      className={styles.modalInput}
-                      type="number"
-                      min={0}
-                      value={reportForm.duration_days}
-                      onChange={(e) => setReportField("duration_days", e.target.value === "" ? "" : Number(e.target.value))}
-                      placeholder="0"
-                    />
+                    <input className={styles.modalInput} type="number" min={0} value={reportForm.duration_days}
+                      onChange={(e) => setReportField("duration_days", e.target.value === "" ? "" : Number(e.target.value))} placeholder="0" />
                     {reportErrors.duration_days && <div className={styles.modalError}>{reportErrors.duration_days}</div>}
                   </div>
 
-                    <div className={styles.modalField}>
-                  <label className={styles.modalLabel}>التقييم العام</label>
-
-                  <select
-                  className={styles.modalInput}
-                  value={reportForm.evaluation}
-                  onChange={(e)=>setReportField("evaluation",e.target.value as ReportFormState["evaluation"])}
-                  >
-
-                  <option value="excellent">ممتاز</option>
-                  <option value="very_good">جيد جداً</option>
-                  <option value="good">جيد</option>
-                  <option value="acceptable">مقبول</option>
-
-                  </select>
-                  
-                  <div className={styles.modalHintRow}>
-                      {reportErrors.evaluation && (
-                        <span className={styles.modalErrorInline}>{reportErrors.evaluation}</span>
-                      )}
+                  <div className={styles.modalField}>
+                    <label className={styles.modalLabel}>التقييم العام</label>
+                    <select className={styles.modalInput} value={reportForm.evaluation}
+                      onChange={(e) => setReportField("evaluation", e.target.value as ReportFormState["evaluation"])}>
+                      <option value="excellent">ممتاز</option>
+                      <option value="very_good">جيد جداً</option>
+                      <option value="good">جيد</option>
+                      <option value="acceptable">مقبول</option>
+                    </select>
+                    <div className={styles.modalHintRow}>
+                      {reportErrors.evaluation && <span className={styles.modalErrorInline}>{reportErrors.evaluation}</span>}
                     </div>
                   </div>
-
                 </div>
 
                 <div className={styles.modalField}>
                   <label className={styles.modalLabel}>مراحل المشروع</label>
-                  <textarea
-                    className={styles.modalTextarea}
-                    rows={3}
-                    maxLength={250}
-                    value={reportForm.project_stages}
-                    onChange={(e) => setReportField("project_stages", e.target.value)}
-                    placeholder="اكتب مراحل المشروع..."
-                  />
+                  <textarea className={styles.modalTextarea} rows={3} maxLength={250} value={reportForm.project_stages}
+                    onChange={(e) => setReportField("project_stages", e.target.value)} placeholder="اكتب مراحل المشروع..." />
                   <div className={styles.modalHintRow}>
                     <span className={styles.modalHint}>{(reportForm.project_stages ?? "").length}/250</span>
-                    {reportErrors.project_stages && (
-                      <span className={styles.modalErrorInline}>{reportErrors.project_stages}</span>
-                    )}
+                    {reportErrors.project_stages && <span className={styles.modalErrorInline}>{reportErrors.project_stages}</span>}
                   </div>
                 </div>
 
                 <div className={styles.modalGrid2}>
                   <div className={styles.modalField}>
                     <label className={styles.modalLabel}>مرحلة الإعداد</label>
-                    <textarea
-                      className={styles.modalTextarea}
-                      rows={3}
-                      maxLength={250}
-                      value={reportForm.preparation_stage}
-                      onChange={(e) => setReportField("preparation_stage", e.target.value)}
-                      placeholder="اكتب تفاصيل الإعداد..."
-                    />
+                    <textarea className={styles.modalTextarea} rows={3} maxLength={250} value={reportForm.preparation_stage}
+                      onChange={(e) => setReportField("preparation_stage", e.target.value)} placeholder="اكتب تفاصيل الإعداد..." />
                     <div className={styles.modalHintRow}>
                       <span className={styles.modalHint}>{(reportForm.preparation_stage ?? "").length}/250</span>
-                      {reportErrors.preparation_stage && (
-                        <span className={styles.modalErrorInline}>{reportErrors.preparation_stage}</span>
-                      )}
+                      {reportErrors.preparation_stage && <span className={styles.modalErrorInline}>{reportErrors.preparation_stage}</span>}
                     </div>
                   </div>
 
                   <div className={styles.modalField}>
                     <label className={styles.modalLabel}>مرحلة التنفيذ</label>
-                    <textarea
-                      className={styles.modalTextarea}
-                      rows={3}
-                      maxLength={250}
-                      value={reportForm.execution_stage}
-                      onChange={(e) => setReportField("execution_stage", e.target.value)}
-                      placeholder="اكتب تفاصيل التنفيذ..."
-                    />
+                    <textarea className={styles.modalTextarea} rows={3} maxLength={250} value={reportForm.execution_stage}
+                      onChange={(e) => setReportField("execution_stage", e.target.value)} placeholder="اكتب تفاصيل التنفيذ..." />
                     <div className={styles.modalHintRow}>
                       <span className={styles.modalHint}>{(reportForm.execution_stage ?? "").length}/250</span>
-                      {reportErrors.execution_stage && (
-                        <span className={styles.modalErrorInline}>{reportErrors.execution_stage}</span>
-                      )}
+                      {reportErrors.execution_stage && <span className={styles.modalErrorInline}>{reportErrors.execution_stage}</span>}
                     </div>
                   </div>
 
                   <div className={styles.modalField}>
                     <label className={styles.modalLabel}>مرحلة التقييم والمتابعة والنتائج</label>
-                    <textarea
-                      className={styles.modalTextarea}
-                      rows={3}
-                      maxLength={250}
-                      value={reportForm.evaluation_stage}
-                      onChange={(e) => setReportField("evaluation_stage", e.target.value)}
-                      placeholder="اكتب تفاصيل التقييم والمتابعة والنتائج..."
-                    />
+                    <textarea className={styles.modalTextarea} rows={3} maxLength={250} value={reportForm.evaluation_stage}
+                      onChange={(e) => setReportField("evaluation_stage", e.target.value)} placeholder="اكتب تفاصيل التقييم..." />
                     <div className={styles.modalHintRow}>
                       <span className={styles.modalHint}>{(reportForm.evaluation_stage ?? "").length}/250</span>
-                      {reportErrors.evaluation_stage && (
-                        <span className={styles.modalErrorInline}>{reportErrors.evaluation_stage}</span>
-                      )}
+                      {reportErrors.evaluation_stage && <span className={styles.modalErrorInline}>{reportErrors.evaluation_stage}</span>}
                     </div>
                   </div>
 
                   <div className={styles.modalField}>
                     <label className={styles.modalLabel}>ما تحقق من أهداف</label>
-                    <textarea
-                      className={styles.modalTextarea}
-                      rows={3}
-                      maxLength={250}
-                      value={reportForm.achieved_goals}
-                      onChange={(e) => setReportField("achieved_goals", e.target.value)}
-                      placeholder="اكتب ما تحقق من أهداف المشروع..."
-                    />
+                    <textarea className={styles.modalTextarea} rows={3} maxLength={250} value={reportForm.achieved_goals}
+                      onChange={(e) => setReportField("achieved_goals", e.target.value)} placeholder="اكتب ما تحقق من أهداف المشروع..." />
                     <div className={styles.modalHintRow}>
                       <span className={styles.modalHint}>{(reportForm.achieved_goals ?? "").length}/250</span>
-                      {reportErrors.achieved_goals && (
-                        <span className={styles.modalErrorInline}>{reportErrors.achieved_goals}</span>
-                      )}
+                      {reportErrors.achieved_goals && <span className={styles.modalErrorInline}>{reportErrors.achieved_goals}</span>}
                     </div>
                   </div>
 
                   <div className={styles.modalField}>
-                  <label className={styles.modalLabel}>لجنة الإعداد</label>
-                  <input
-                  className={styles.modalInput}
-                  value={reportForm.committee_preparation}
-                  onChange={(e)=>setReportField("committee_preparation",e.target.value)}
-                  placeholder="لجنة الاعداد..."
-                  />
-                        <div className={styles.modalHintRow}>
-                      {reportErrors.committee_preparation && (
-                        <span className={styles.modalErrorInline}>{reportErrors.committee_preparation}</span>
-                      )}
-                    </div>
-                  </div>
-
-            
-
-                  <div className={styles.modalField}>
-                  <label className={styles.modalLabel}>لجنة التنظيم</label>
-                  <input
-                  className={styles.modalInput}
-                  value={reportForm.committee_organizing}
-                  onChange={(e)=>setReportField("committee_organizing",e.target.value)}
-                  placeholder="لجنة التنظيم..."
-                  />
-                       <div className={styles.modalHintRow}>
-                      {reportErrors.committee_organizing && (
-                        <span className={styles.modalErrorInline}>{reportErrors.committee_organizing}</span>
-                      )}
-                    </div>
-                  </div>
-             
-                  <div className={styles.modalField}>
-                  <label className={styles.modalLabel}>لجنة التنفيذ</label>
-                  <input
-                  className={styles.modalInput}
-                  value={reportForm.committee_execution}
-                  onChange={(e)=>setReportField("committee_execution",e.target.value)}
-                  placeholder="لجنة التنفيذ..."
-                  />
-                      <div className={styles.modalHintRow}>
-                      {reportErrors.committee_execution && (
-                        <span className={styles.modalErrorInline}>{reportErrors.committee_execution}</span>
-                      )}
-                    </div>
-                  </div>
-              
-
-                  <div className={styles.modalField}>
-                  <label className={styles.modalLabel}>لجنة المشتريات</label>
-                  <input
-                  className={styles.modalInput}
-                  value={reportForm.committee_purchases}
-                  onChange={(e)=>setReportField("committee_purchases",e.target.value)}
-                  placeholder="لجنة المشتريات..."
-                  />
-                  
-                  <div className={styles.modalHintRow}>
-                      {reportErrors.committee_purchases && (
-                        <span className={styles.modalErrorInline}>{reportErrors.committee_purchases}</span>
-                      )}
-                    </div>
-                  </div>
-
-
-                  <div className={styles.modalField}>
-                  <label className={styles.modalLabel}>لجنة الإشراف</label>
-                  <input
-                  className={styles.modalInput}
-                  value={reportForm.committee_supervision}
-                  onChange={(e)=>setReportField("committee_supervision",e.target.value)}
-                  placeholder="لجنة الإشراف..."
-                  />
+                    <label className={styles.modalLabel}>لجنة الإعداد</label>
+                    <input className={styles.modalInput} value={reportForm.committee_preparation}
+                      onChange={(e) => setReportField("committee_preparation", e.target.value)} placeholder="لجنة الاعداد..." />
                     <div className={styles.modalHintRow}>
-                      {reportErrors.committee_supervision && (
-                        <span className={styles.modalErrorInline}>{reportErrors.committee_supervision}</span>
-                      )}
-                    </div>
-                  </div>
-                
-
-                  <div className={styles.modalField}>
-                  <label className={styles.modalLabel}>لجان أخرى</label>
-                  <input
-                  className={styles.modalInput}
-                  value={reportForm.committee_other}
-                  onChange={(e)=>setReportField("committee_other",e.target.value)}
-                  placeholder="لجان أخرى..."
-                  />
-                      <div className={styles.modalHintRow}>
-                      {reportErrors.committee_other && (
-                        <span className={styles.modalErrorInline}>{reportErrors.committee_other}</span>
-                      )}
+                      {reportErrors.committee_preparation && <span className={styles.modalErrorInline}>{reportErrors.committee_preparation}</span>}
                     </div>
                   </div>
 
                   <div className={styles.modalField}>
-                  <label className={styles.modalLabel}>مقترحات للتحسين</label>
-                  <textarea
-                    className={styles.modalTextarea}
-                    rows={3}
-                    maxLength={250}
-                    value={reportForm.suggestions}
-                    onChange={(e) => setReportField("suggestions", e.target.value)}
-                    placeholder="اكتب مقترحات للتحسين..."
-                  />
-                  <div className={styles.modalHintRow}>
-                    <span className={styles.modalHint}>{(reportForm.suggestions ?? "").length}/250</span>
-                    {reportErrors.suggestions && (
-                      <span className={styles.modalErrorInline}>{reportErrors.suggestions}</span>
-                    )}
+                    <label className={styles.modalLabel}>لجنة التنظيم</label>
+                    <input className={styles.modalInput} value={reportForm.committee_organizing}
+                      onChange={(e) => setReportField("committee_organizing", e.target.value)} placeholder="لجنة التنظيم..." />
+                    <div className={styles.modalHintRow}>
+                      {reportErrors.committee_organizing && <span className={styles.modalErrorInline}>{reportErrors.committee_organizing}</span>}
+                    </div>
                   </div>
-                </div>
-              
+
+                  <div className={styles.modalField}>
+                    <label className={styles.modalLabel}>لجنة التنفيذ</label>
+                    <input className={styles.modalInput} value={reportForm.committee_execution}
+                      onChange={(e) => setReportField("committee_execution", e.target.value)} placeholder="لجنة التنفيذ..." />
+                    <div className={styles.modalHintRow}>
+                      {reportErrors.committee_execution && <span className={styles.modalErrorInline}>{reportErrors.committee_execution}</span>}
+                    </div>
+                  </div>
+
+                  <div className={styles.modalField}>
+                    <label className={styles.modalLabel}>لجنة المشتريات</label>
+                    <input className={styles.modalInput} value={reportForm.committee_purchases}
+                      onChange={(e) => setReportField("committee_purchases", e.target.value)} placeholder="لجنة المشتريات..." />
+                    <div className={styles.modalHintRow}>
+                      {reportErrors.committee_purchases && <span className={styles.modalErrorInline}>{reportErrors.committee_purchases}</span>}
+                    </div>
+                  </div>
+
+                  <div className={styles.modalField}>
+                    <label className={styles.modalLabel}>لجنة الإشراف</label>
+                    <input className={styles.modalInput} value={reportForm.committee_supervision}
+                      onChange={(e) => setReportField("committee_supervision", e.target.value)} placeholder="لجنة الإشراف..." />
+                    <div className={styles.modalHintRow}>
+                      {reportErrors.committee_supervision && <span className={styles.modalErrorInline}>{reportErrors.committee_supervision}</span>}
+                    </div>
+                  </div>
+
+                  <div className={styles.modalField}>
+                    <label className={styles.modalLabel}>لجان أخرى</label>
+                    <input className={styles.modalInput} value={reportForm.committee_other}
+                      onChange={(e) => setReportField("committee_other", e.target.value)} placeholder="لجان أخرى..." />
+                    <div className={styles.modalHintRow}>
+                      {reportErrors.committee_other && <span className={styles.modalErrorInline}>{reportErrors.committee_other}</span>}
+                    </div>
+                  </div>
+
+                  <div className={styles.modalField}>
+                    <label className={styles.modalLabel}>مقترحات للتحسين</label>
+                    <textarea className={styles.modalTextarea} rows={3} maxLength={250} value={reportForm.suggestions}
+                      onChange={(e) => setReportField("suggestions", e.target.value)} placeholder="اكتب مقترحات للتحسين..." />
+                    <div className={styles.modalHintRow}>
+                      <span className={styles.modalHint}>{(reportForm.suggestions ?? "").length}/250</span>
+                      {reportErrors.suggestions && <span className={styles.modalErrorInline}>{reportErrors.suggestions}</span>}
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1422,14 +1186,8 @@ const uploadImages = async (files: FileList | null) => {
                 <button className={styles.modalCancel} type="button" onClick={closeReportModal} disabled={exportBusy !== null}>
                   إلغاء
                 </button>
-
-                <button
-                  className={styles.modalPrimary}
-                  type="button"
-                  onClick={submitReportPdf}
-                  disabled={exportBusy !== null}
-                  style={{ opacity: exportBusy !== null ? 0.7 : 1 }}
-                >
+                <button className={styles.modalPrimary} type="button" onClick={submitReportPdf}
+                  disabled={exportBusy !== null} style={{ opacity: exportBusy !== null ? 0.7 : 1 }}>
                   <FileText size={18} />
                   {exportBusy === "report" ? "جاري التنزيل..." : "تنزيل PDF"}
                 </button>
@@ -1446,25 +1204,26 @@ const uploadImages = async (files: FileList | null) => {
             </div>
 
             <div className={styles.tableChips}>
-              <span className={styles.miniChip}>
-                <Medal size={14} /> {ranksCount}
-              </span>
-              <span className={styles.miniChip}>
-                <Award size={14} /> {rewardsCount}
-              </span>
-             {!isFacultyEvent && (
-              <button
-                className={`${styles.actionBtn} ${styles.acceptBtn}`}
-                type="button"
-                onClick={approveAll}
-                disabled={pendingCount === 0 || busy}
-                style={{ opacity: pendingCount === 0 || busy ? 0.6 : 1 }}
-              >
-                <Check size={16} />
-                قبول الجميع ({pendingCount})
-              </button>
+              {/* Hide rank/reward counts and approve-all when teams are enabled */}
+              {!teamsEnabled && (
+                <>
+                  <span className={styles.miniChip}><Medal size={14} /> {ranksCount}</span>
+                  <span className={styles.miniChip}><Award size={14} /> {rewardsCount}</span>
+                </>
               )}
-            </div>            
+              {!isFacultyEvent && !teamsEnabled && (
+                <button
+                  className={`${styles.actionBtn} ${styles.acceptBtn}`}
+                  type="button"
+                  onClick={approveAll}
+                  disabled={pendingCount === 0 || busy}
+                  style={{ opacity: pendingCount === 0 || busy ? 0.6 : 1 }}
+                >
+                  <Check size={16} />
+                  قبول الجميع ({pendingCount})
+                </button>
+              )}
+            </div>
           </div>
 
           <div className={styles.tableWrap}>
@@ -1474,8 +1233,9 @@ const uploadImages = async (files: FileList | null) => {
                   <th>اسم الطالب</th>
                   <th>رقم الطالب</th>
                   <th>حالة التسجيل</th>
-                  <th>الترتيب</th>
-                  <th>المكافأة</th>
+                  {/* Hide rank/reward columns when teams enabled */}
+                  {!teamsEnabled && <th>الترتيب</th>}
+                  {!teamsEnabled && <th>المكافأة</th>}
                   <th>الإجراءات</th>
                 </tr>
               </thead>
@@ -1485,120 +1245,111 @@ const uploadImages = async (files: FileList | null) => {
                   <tr key={r.id}>
                     <td>{r.name}</td>
                     <td dir="ltr">{r.studentId}</td>
-
                     <td>
                       <span className={participantBadgeClass(r.status)}>{r.status}</span>
                     </td>
 
-                    <td>
-                      <span className={styles.cellValue}>{(r.rank ?? "").trim() ? r.rank : "-"}</span>
-                    </td>
+                    {!teamsEnabled && (
+                      <td>
+                        <span className={styles.cellValue}>{(r.rank ?? "").trim() ? r.rank : "-"}</span>
+                      </td>
+                    )}
+                    {!teamsEnabled && (
+                      <td>
+                        <span className={styles.cellValue}>{(r.reward ?? "").trim() ? r.reward : "-"}</span>
+                      </td>
+                    )}
 
                     <td>
-                      <span className={styles.cellValue}>{(r.reward ?? "").trim() ? r.reward : "-"}</span>
-                    </td>
-
-                    <td>
-                     <div className={styles.rowActions}>
-  {/* ✅ لو Faculty Event: عرض التفاصيل فقط */}
-                  {isFacultyEvent ? (
-                    <button
-                      className={styles.actionBtn}
-                      type="button"
-                      onClick={() => router.push(`/uni-level-activities/${id}/student/${r.studentId}`)}
-                    >
-                      <Eye size={16} />
-                      عرض التفاصيل
-                    </button>
-                  ) : (
-                    <>
-                      {r.status === "منتظر" && (
-                        <>
+                      <div className={styles.rowActions}>
+                        {isFacultyEvent ? (
                           <button
-                            className={`${styles.actionBtn} ${styles.acceptBtn}`}
+                            className={styles.actionBtn}
                             type="button"
-                            disabled={busy}
-                            onClick={() => approveParticipant(r.studentId)}
+                            onClick={() => router.push(`/uni-level-activities/${id}/student/${r.studentId}`)}
                           >
-                            <Check size={16} />
-                            قبول
+                            <Eye size={16} /> عرض التفاصيل
                           </button>
+                        ) : (
+                          <>
+                            {/* Approve/Reject — hidden when teams enabled */}
+                            {!teamsEnabled && r.status === "منتظر" && (
+                              <>
+                                <button
+                                  className={`${styles.actionBtn} ${styles.acceptBtn}`}
+                                  type="button"
+                                  disabled={busy}
+                                  onClick={() => approveParticipant(r.studentId)}
+                                >
+                                  <Check size={16} /> قبول
+                                </button>
+                                <button
+                                  className={`${styles.actionBtn} ${styles.rejectBtn}`}
+                                  type="button"
+                                  disabled={busy}
+                                  onClick={() => rejectParticipant(r.studentId)}
+                                >
+                                  <X size={16} /> رفض
+                                </button>
+                              </>
+                            )}
 
-                          <button
-                            className={`${styles.actionBtn} ${styles.rejectBtn}`}
-                            type="button"
-                            disabled={busy}
-                            onClick={() => rejectParticipant(r.studentId)}
-                          >
-                            <X size={16} />
-                            رفض
-                          </button>
-                        </>
-                      )}
+                            {/* Reward — hidden when teams enabled */}
+                            {!teamsEnabled && (
+                              editingRewardId === r.id ? (
+                                <div className={styles.inlineEdit}>
+                                  <input className={styles.inlineInput} value={draftReward}
+                                    onChange={(e) => setDraftReward(e.target.value)} placeholder="المكافأة" />
+                                  <button className={styles.iconBtn} type="button" disabled={busy} onClick={() => saveReward(r.id)}>
+                                    <Check size={18} />
+                                  </button>
+                                  <button className={styles.iconBtn} type="button" disabled={busy} onClick={cancelReward}>
+                                    <X size={18} />
+                                  </button>
+                                </div>
+                              ) : (
+                                <button className={styles.actionBtn} type="button" disabled={busy} onClick={() => startEditReward(r)}>
+                                  <Award size={16} /> مكافأة
+                                </button>
+                              )
+                            )}
 
-                      {editingRewardId === r.id ? (
-                        <div className={styles.inlineEdit}>
-                          <input
-                            className={styles.inlineInput}
-                            value={draftReward}
-                            onChange={(e) => setDraftReward(e.target.value)}
-                            placeholder="المكافأة"
-                          />
-                          <button className={styles.iconBtn} type="button" disabled={busy} onClick={() => saveReward(r.id)}>
-                            <Check size={18} />
-                          </button>
-                          <button className={styles.iconBtn} type="button" disabled={busy} onClick={cancelReward}>
-                            <X size={18} />
-                          </button>
-                        </div>
-                      ) : (
-                        <button className={styles.actionBtn} type="button" disabled={busy} onClick={() => startEditReward(r)}>
-                          <Award size={16} />
-                          مكافأة
-                        </button>
-                      )}
+                            {/* Rank — hidden when teams enabled */}
+                            {!teamsEnabled && (
+                              editingRankId === r.id ? (
+                                <div className={styles.inlineEdit}>
+                                  <input className={styles.inlineInput} type="number" min={1} value={draftRank}
+                                    onChange={(e) => setDraftRank(e.target.value)} placeholder="المركز" />
+                                  <button className={styles.iconBtn} type="button" disabled={busy} onClick={() => saveRank(r.id)}>
+                                    <Check size={18} />
+                                  </button>
+                                  <button className={styles.iconBtn} type="button" disabled={busy} onClick={cancelRank}>
+                                    <X size={18} />
+                                  </button>
+                                </div>
+                              ) : (
+                                <button className={styles.actionBtn} type="button" disabled={busy} onClick={() => startEditRank(r)}>
+                                  <Medal size={16} /> ترتيب
+                                </button>
+                              )
+                            )}
 
-                      {editingRankId === r.id ? (
-                        <div className={styles.inlineEdit}>
-                          <input
-                            className={styles.inlineInput}
-                            type="number"
-                            min={1}
-                            value={draftRank}
-                            onChange={(e) => setDraftRank(e.target.value)}
-                            placeholder="المركز"
-                          />
-                          <button className={styles.iconBtn} type="button" disabled={busy} onClick={() => saveRank(r.id)}>
-                            <Check size={18} />
-                          </button>
-                          <button className={styles.iconBtn} type="button" disabled={busy} onClick={cancelRank}>
-                            <X size={18} />
-                          </button>
-                        </div>
-                      ) : (
-                        <button className={styles.actionBtn} type="button" disabled={busy} onClick={() => startEditRank(r)}>
-                          <Medal size={16} />
-                          ترتيب
-                        </button>
-                      )}
-
-                      <button
-                        className={styles.actionBtn}
-                        type="button"
-                        onClick={() => router.push(`/uni-level-activities/${id}/student/${r.studentId}`)}
-                      >
-                        <Eye size={16} />
-                        عرض التفاصيل
-                      </button>
-                    </>
-                  )}
+                            <button
+                              className={styles.actionBtn}
+                              type="button"
+                              onClick={() => router.push(`/uni-level-activities/${id}/student/${r.studentId}`)}
+                            >
+                              <Eye size={16} /> عرض التفاصيل
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>
                 ))}
                 {rows.length === 0 && (
                   <tr>
-                    <td colSpan={6} style={{ textAlign: "center", padding: 18, opacity: 0.75, fontWeight: 700 }}>
+                    <td colSpan={teamsEnabled ? 4 : 6} style={{ textAlign: "center", padding: 18, opacity: 0.75, fontWeight: 700 }}>
                       لا يوجد مشاركين حتى الآن
                     </td>
                   </tr>
@@ -1607,6 +1358,13 @@ const uploadImages = async (files: FileList | null) => {
             </table>
           </div>
         </section>
+
+        <TeamsSection
+          eventId={id}
+          isFacultyEvent={isFacultyEvent}
+          participants={rows}
+          onTeamsEnabledChange={setTeamsEnabled}
+        />
       </div>
     </div>
   );

@@ -5,6 +5,38 @@ import { useEffect, useState } from "react";
 import styles from "./requestDetails.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
+const rejectionReasons = [
+  { id: 1, text: "إزعاج أو تكرار التقديم بشكل غير مبرر" },
+  { id: 2, text: "المستندات المرفوعة غير واضحة أو غير صحيحة" },
+  { id: 3, text: "وجود بيانات غير صحيحة في الطلب" },
+  { id: 4, text: "الدخل المسجل غير مطابق للمستندات" },
+  { id: 5, text: "الطلب لا يستوفي شروط الدعم" },
+  { id: 6, text: "المستندات لا تخص الطالب" },
+  { id: 7, text: "اشتباه في تزوير المستندات" },
+  { id: 8, text: "سبب آخر" }
+];
+const rejectionReasonMap: Record<number, string> = Object.fromEntries(
+  rejectionReasons.map(r => [r.id, r.text])
+);
+// ====== Colored status badge helper ======
+function StatusBadge({ status }: { status?: string }) {
+  if (!status) return <span>—</span>;
+
+  const styleMap: Record<string, React.CSSProperties> = {
+    "مقبول":           { background: "#d1fae5", color: "#065f46", border: "1px solid #6ee7b7" },
+    "مرفوض":           { background: "#fee2e2", color: "#991b1b", border: "1px solid #fca5a5" },
+    "منتظر":           { background: "#fef3c7", color: "#92400e", border: "1px solid #fcd34d" },
+    "موافقة مبدئية":   { background: "#e0e7ff", color: "#3730a3", border: "1px solid #a5b4fc" },
+  };
+
+  const base: React.CSSProperties = {
+    display: "inline-block", padding: "3px 14px", borderRadius: "999px",
+    fontSize: "13px", fontWeight: 700, letterSpacing: "0.3px", verticalAlign: "middle",
+    ...(styleMap[status] ?? { background: "#f3f4f6", color: "#374151", border: "1px solid #d1d5db" }),
+  };
+
+  return <span style={base}>{status}</span>;
+}
 
 export default function RequestDetailsPage() {
   const { id } = useParams();
@@ -17,15 +49,10 @@ export default function RequestDetailsPage() {
 
   useEffect(() => {
     const fetchFaculties = async () => {
-
-      const res = await authFetch(
-        `${getBaseUrl()}/api/family/faculties/`
-      );
-
+      const res = await authFetch(`${getBaseUrl()}/api/family/faculties/`);
       const d = await res.json();
       setFaculties(Array.isArray(d) ? d : d.results ?? d.data ?? []);
     };
-
     fetchFaculties();
   }, []);
 
@@ -37,17 +64,10 @@ export default function RequestDetailsPage() {
   const fetchDetails = async () => {
     try {
       setLoading(true);
-
-      const response = await authFetch(
-        `${getBaseUrl()}/api/solidarity/student/${id}/detail/`
-      );
-
+      const response = await authFetch(`${getBaseUrl()}/api/solidarity/student/${id}/detail/`);
       const res = await response.json();
       setData(res);
-
-      if (originalDocuments.length === 0 && res?.documents) {
-        setOriginalDocuments(res.documents);
-      }
+      if (originalDocuments.length === 0 && res?.documents) setOriginalDocuments(res.documents);
     } catch (err) {
       console.error("Error loading details:", err);
     } finally {
@@ -62,20 +82,10 @@ export default function RequestDetailsPage() {
 
   const handleOpenDocument = async (docId: number) => {
     try {
-
-      const response = await authFetch(
-        `${getBaseUrl()}/api/files/solidarity/${docId}/download/`
-      );
-
-      if (!response.ok) {
-        console.error("Failed to download document");
-        return;
-      }
-
+      const response = await authFetch(`${getBaseUrl()}/api/files/solidarity/${docId}/download/`);
+      if (!response.ok) { console.error("Failed to download document"); return; }
       const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-
-      window.open(url, "_blank");
+      window.open(URL.createObjectURL(blob), "_blank");
     } catch (error) {
       console.error("Error opening document:", error);
     }
@@ -83,12 +93,14 @@ export default function RequestDetailsPage() {
 
   if (loading || !data) return <p className={styles.loading}>جاري التحميل...</p>;
 
+  const reqStatus = data.req_status as string | undefined;
+
   return (
     <div className={styles.container}>
       <div className={styles.contentCard}>
-        <button className={styles.backBtn} onClick={() => router.push('/Student/takafol')}>
-          ← العودة
-        </button>
+      <button className={styles.backBtn} onClick={() => router.push('/Student/takafol?tab=myRequests')}>
+        ← العودة
+      </button>
 
         <h2 className={styles.pageTitle}>تفاصيل الطلب</h2>
 
@@ -100,6 +112,10 @@ export default function RequestDetailsPage() {
             <p><strong>التقدير:</strong> {data.grade as string}</p>
             <p><strong>النظام الأكاديمي:</strong> {data.acd_status as string}</p>
             <p><strong>رقم الطلب:</strong> {data.solidarity_id as string}</p>
+            <p>
+              <strong>حالة الطلب:</strong>{" "}
+              <StatusBadge status={reqStatus} />
+            </p>
           </div>
         </section>
 
@@ -152,6 +168,33 @@ export default function RequestDetailsPage() {
             <p>لا توجد ملفات مرفوعة</p>
           )}
         </section>
+
+        {/* Rejection reason — highlighted */}
+        {reqStatus === "مرفوض" && (
+          <section className={styles.section}>
+            <div style={{
+              background: "linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)",
+              border: "1.5px solid #fca5a5",
+              borderRight: "5px solid #ef4444",
+              borderRadius: "10px",
+              padding: "14px 18px",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "10px",
+              marginTop: "10px",
+            }}>
+              <span style={{ fontSize: "18px", flexShrink: 0, marginTop: "1px" }}>⚠️</span>
+              <div>
+                <div style={{ fontWeight: 700, color: "#991b1b", fontSize: "14px", marginBottom: "4px" }}>
+                  سبب الرفض
+                </div>
+                <div style={{ color: "#7f1d1d", fontSize: "15px", lineHeight: 1.6 }}>
+                 {rejectionReasonMap[Number(data?.rejection_reason)] ?? data?.rejection_reason ?? "لم يُحدد"}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );

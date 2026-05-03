@@ -5,6 +5,7 @@ import "@/app/uni-level/styles/Sidebar.css";
 import { Menu, X, User,Users } from "lucide-react";
 import Image from "next/image";
 import logo from "../../assets/logo1.png";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,19 +35,8 @@ export default function Sidebar() {
 
   // Load admin info
   useEffect(() => {
-    const userDataString = localStorage.getItem("user");
-    if (userDataString) {
-      try {
-        const userData = JSON.parse(userDataString);
-        setAdminInfo({
-          name: userData.name || "مدير النظام",
-          email: userData.email || "admin@helwan.edu.eg",
-          role: userData.role || "",
-        });
-      } catch (error) {
-        console.error("فشل في قراءة بيانات المدير", error);
-      }
-    }
+    const meta = getSessionMeta();
+    if (meta) setAdminInfo({ name: meta.name || "مدير النظام", email: "", role: meta.role || "" });
   }, []);
 
   // Close sidebar when clicking outside

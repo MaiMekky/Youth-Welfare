@@ -5,6 +5,7 @@ import styles from "../styles/PlansPage.module.css";
 import { X, Save } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 
 const API_URL = `${getBaseUrl()}/api`;
 
@@ -33,17 +34,9 @@ export default function CreatePlanModal({
 
   const [departments, setDepartments] = useState<Record<string, unknown>[]>([]);
   const originalForm = useRef<FormState | null>(null);
-  function getFacultyIdFromToken() {
-  try {
-    const token = localStorage.getItem("access");
-    if (!token) return null;
-
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload?.faculty_id ?? null;
-  } catch {
-    return null;
+  function getFacultyIdFromCookie() {
+    return getSessionMeta()?.admin_id ?? null;
   }
-}
 
 const closeAndReset = useCallback(() => {
   setForm({ name: "", term: 1, dept: 0 });
@@ -53,14 +46,10 @@ const closeAndReset = useCallback(() => {
   onClose();
 }, [onClose]);
 
-  /* ===================== GET DEPARTMENTS FROM TOKEN ===================== */
+  /* ===================== GET DEPARTMENTS FROM COOKIE ===================== */
   useEffect(() => {
-    const stored = localStorage.getItem("departments");
-    if (stored) {
-      try {
-        setDepartments(JSON.parse(stored));
-      } catch {}
-    }
+    const meta = getSessionMeta();
+    if (meta?.departments?.length) setDepartments(meta.departments as Record<string, unknown>[]);
   }, []);
 
 useEffect(() => {
@@ -141,7 +130,7 @@ useEffect(() => {
       //   showToast("❌ مفيش access token. برجاء تسجيل الدخول مرة اخري.", "error");
       //   return;
       // }
-   const facultyId = getFacultyIdFromToken();
+   const facultyId = getFacultyIdFromCookie();
       const payload = {
         name: form.name.trim(),
         term: Number(form.term),

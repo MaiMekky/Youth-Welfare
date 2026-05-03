@@ -5,6 +5,8 @@ import Image from "next/image";
 import logo from "@/app/assets/capital-uni-logo.png";
 import { useRouter } from "next/navigation";
 import { Menu } from "lucide-react";
+import { getBaseUrl } from "@/utils/globalFetch";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 
 
 interface HeaderProps {
@@ -20,9 +22,16 @@ interface Dept { dept_id: number; name: string; }
 
 function readDepts(): Dept[] {
   try {
-    const raw = localStorage.getItem("departments");
-    return raw ? JSON.parse(raw) : [];
-  } catch { return []; }
+    const raw = document.cookie
+      .split("; ")
+      .find((c) => c.startsWith("session_meta="))
+      ?.split("=")[1];
+    if (!raw) return [];
+    const meta = JSON.parse(decodeURIComponent(raw));
+    return (meta?.departments ?? []) as Dept[];
+  } catch {
+    return [];
+  }
 }
 
 export default function Header({ onSidebarOpen }: HeaderProps) {
@@ -44,21 +53,26 @@ export default function Header({ onSidebarOpen }: HeaderProps) {
     setShowFamily(ids.some((id) => FAMILY_IDS.has(id)));
     setShowActivity(ids.some((id) => ACTIVITY_IDS.has(id)));
   }, []);
-const handleLogout = async () => {
-  localStorage.clear();
+    const handleLogout = async () => {
+      try {
+        await fetch(`${getBaseUrl()}/api/auth/logout/`, {
+          method: "POST",
+          credentials: "include",
+        });
+      } catch (err) {
+        console.error("Logout failed:", err);
+      }
 
-  try {
-    await fetch("/api/logout", {
-      method: "POST",
-      credentials: "include", // ← ensures cookies are sent/received
-    });
-  } catch (err) {
-    console.error("Logout API failed:", err);
-  }
+      const wipe = "path=/; max-age=0";
+      document.cookie = `user_type=; ${wipe}`;
+      document.cookie = `roleKey=; ${wipe}`;
+      document.cookie = `session_meta=; ${wipe}`;
 
-  // Use ?logout=1 to bypass the middleware auto-redirect
-  window.location.replace("/?logout=1");
-};
+      // Set a short-lived cookie so middleware knows this is a logout
+      document.cookie = `logging_out=1; path=/; max-age=5`;
+
+      window.location.replace("/");
+    };
 
   const nav = (path: string) => { router.push(path); setIsMenuOpen(false); };
 
@@ -95,7 +109,7 @@ const handleLogout = async () => {
             </button>
           )}
           {showActivity && (
-            <button className={styles.navBtn} onClick={() => nav("/Events-Faclevel")}>
+            <button className={styles.navBtn} onClick={() => nav("/Events-Faclevel/Home")}>
               الأنشطة
             </button>
           )}
@@ -130,7 +144,7 @@ const handleLogout = async () => {
             </button>
           )}
           {showActivity && (
-            <button className={styles.dropdownBtn} onClick={() => nav("/Events-Faclevel")}>
+            <button className={styles.dropdownBtn} onClick={() => nav("/Events-Faclevel/Home")}>
               الأنشطة
             </button>
           )}

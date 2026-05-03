@@ -68,6 +68,14 @@ const IconLogout = () => (
   </svg>
 );
 
+/* ── NEW: Scouts Icon ───────────────────────────────────────── */
+const IconScouts = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <path d="M12 2L8 7H4l2 5-4 5h6l4 5 4-5h6l-4-5 2-5h-4L12 2z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <circle cx="12" cy="12" r="2.5" stroke="currentColor" strokeWidth="1.6"/>
+  </svg>
+);
+
 /* ── Component ──────────────────────────────────────────────── */
 const StudentNavbar: React.FC = () => {
   const [mobileOpen, setMobileOpen]         = useState(false);
@@ -106,6 +114,7 @@ const StudentNavbar: React.FC = () => {
     { key: "home",       label: "أنشطتي",            icon: <IconHome />,       href: "/Student/MainPage"   },
     { key: "activities", label: "الأنشطة",            icon: <IconActivities />, href: "/Student/Activities" },
     { key: "families",   label: "الأسر الطلابية",     icon: <IconFamily />,     href: "/Student/Families"   },
+    { key: "scouts",     label: "الجوالة",             icon: <IconScouts />,     href: "/Student/Scouts"     }, // ← NEW
     { key: "takafol",    label: "التكافل الاجتماعي",  icon: <IconTakafol />,    href: "/Student/takafol"    },
     { key: "profile",    label: "ملفي الشخصي",        icon: <IconProfile />,    href: "/Student/profile"    },
   ];
@@ -117,21 +126,26 @@ const StudentNavbar: React.FC = () => {
         ...baseNavItems.slice(3),
       ]
     : baseNavItems;
-const handleLogout = async () => {
-  localStorage.clear();
+  const handleLogout = async () => {
+    try {
+      await fetch(`${getBaseUrl()}/api/auth/logout/`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
 
-  try {
-    await fetch("/api/logout", {
-      method: "POST",
-      credentials: "include", // ← ensures cookies are sent/received
-    });
-  } catch (err) {
-    console.error("Logout API failed:", err);
-  }
+    const wipe = "path=/; max-age=0";
+    document.cookie = `user_type=; ${wipe}`;
+    document.cookie = `roleKey=; ${wipe}`;
+    document.cookie = `session_meta=; ${wipe}`;
 
-  // Use ?logout=1 to bypass the middleware auto-redirect
-  window.location.replace("/?logout=1");
-};
+    // Set a short-lived cookie so middleware knows this is a logout
+    document.cookie = `logging_out=1; path=/; max-age=5`;
+
+    window.location.replace("/");
+  };
   const isActive = (href: string) =>
     pathname === href || pathname?.startsWith(href + "/");
 

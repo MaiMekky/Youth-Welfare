@@ -56,10 +56,10 @@ const commonErrorMessages: Record<string, string> = {
   
   // Network errors
   'network error': 'خطأ في الاتصال بالشبكة',
-  'connection failed': 'فشل الاتصال بالخادم',
+  'connection failed': 'فشل الاتصال بالسيرفر',
   'timeout': 'انتهت مهلة الاتصال',
-  'server error': 'خطأ في الخادم',
-  'internal server error': 'خطأ داخلي في الخادم',
+  'server error': 'خطأ في السيرفر',
+  'internal server error': 'خطأ داخلي في السيرفر',
   'service unavailable': 'الخدمة غير متاحة حالياً',
   
   // Database errors
@@ -306,7 +306,7 @@ export function translateErrorMessage(message: string): string {
  */
 export function handleNetworkError(error: any): string {
   if (error.name === 'TypeError' && error.message.includes('fetch')) {
-    return 'فشل الاتصال بالخادم، يرجى التحقق من الاتصال بالإنترنت';
+    return 'فشل الاتصال بالسيرفر، يرجى التحقق من الاتصال بالإنترنت';
   }
   
   if (error.name === 'AbortError') {

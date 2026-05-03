@@ -70,10 +70,7 @@ const Overview: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedFamilyId, setSelectedFamilyId] = useState<number | null>(null);
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
-
   useEffect(() => {
-    if (!token) { setError("غير مصرح"); setLoading(false); return; }
     const fetchFamilyId = async () => {
       try {
         const baseUrl = getBaseUrl();
@@ -102,7 +99,7 @@ const Overview: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!selectedFamilyId || !token) return;
+    if (!selectedFamilyId) return;
     const fetchDashboard = async () => {
       try {
         setLoading(true);
@@ -142,35 +139,49 @@ const Overview: React.FC = () => {
   const recentMembers = useMemo(() => members.slice(0, 5), [members]);
   const recentPosts   = useMemo(() => posts.slice(0, 5), [posts]);
 
-  if (loading) return <div className="overview-wrapper"><p>جاري التحميل…</p></div>;
-  if (error)   return <div className="overview-wrapper"><p className="error-box">⚠️ {error}</p></div>;
+  if (loading) return (
+    <div className="overview-wrapper">
+      <div className="overview-loading">
+        <div className="overview-spinner" />
+        <p>جاري التحميل…</p>
+      </div>
+    </div>
+  );
+  if (error) return <div className="overview-wrapper"><p className="error-box">⚠️ {error}</p></div>;
 
   return (
     <div className="overview-wrapper">
 
-      {/* ── Statistics ── */}
+      {/* ── Statistics — Pattern #7: navy gradient header + white body ── */}
       <div className="statistics-section">
-        <h2 className="statistics-title">الإحصائيات</h2>
-        <div className="statistics-grid">
-          <div className="stat-card">
-            <div className="stat-icon members-icon"><Users size={24} /></div>
-            <div className="stat-content">
-              <div className="stat-value">{statistics.totalMembers}</div>
-              <div className="stat-label">إجمالي الأعضاء</div>
+        <div className="statistics-header">
+          <h2 className="statistics-title">الإحصائيات</h2>
+        </div>
+        <div className="statistics-body">
+          <div className="statistics-grid">
+            {/* Pattern #4 — navy top border */}
+            <div className="stat-card">
+              <div className="stat-icon members-icon"><Users size={24} /></div>
+              <div className="stat-content">
+                <div className="stat-value">{statistics.totalMembers}</div>
+                <div className="stat-label">إجمالي الأعضاء</div>
+              </div>
             </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon upcoming-icon"><Clock size={24} /></div>
-            <div className="stat-content">
-              <div className="stat-value">{statistics.postsCount}</div>
-              <div className="stat-label">المنشورات</div>
+            {/* Pattern #4 — gold top border */}
+            <div className="stat-card gold-top">
+              <div className="stat-icon upcoming-icon"><Clock size={24} /></div>
+              <div className="stat-content">
+                <div className="stat-value">{statistics.postsCount}</div>
+                <div className="stat-label">المنشورات</div>
+              </div>
             </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon completed-icon"><CheckCircle size={24} /></div>
-            <div className="stat-content">
-              <div className="stat-value">{statistics.activeMembers}</div>
-              <div className="stat-label">أعضاء نشطين</div>
+            {/* Pattern #4 — green top border */}
+            <div className="stat-card green-top">
+              <div className="stat-icon completed-icon"><CheckCircle size={24} /></div>
+              <div className="stat-content">
+                <div className="stat-value">{statistics.activeMembers}</div>
+                <div className="stat-label">أعضاء نشطين</div>
+              </div>
             </div>
           </div>
         </div>
@@ -179,7 +190,7 @@ const Overview: React.FC = () => {
       {/* ── Overview grid ── */}
       <div className="overview-container">
 
-        {/* Leadership members */}
+        {/* Pattern #4 — card with right gold stripe */}
         <div className="overview-card members-card">
           <div className="section-header">
             <Users size={18} />
@@ -202,12 +213,16 @@ const Overview: React.FC = () => {
                 </div>
               ))
             ) : (
-              <p>لا يوجد أعضاء</p>
+              /* Pattern #8 — empty state */
+              <div className="empty-state">
+                <Users size={40} />
+                <p>لا يوجد أعضاء</p>
+              </div>
             )}
           </div>
         </div>
 
-        {/* Recent posts */}
+        {/* Pattern #4 — card with right gold stripe */}
         <div className="overview-card activities-card">
           <div className="section-header">
             <BookOpen size={18} />
@@ -223,6 +238,7 @@ const Overview: React.FC = () => {
                   <div key={post.id} className="activity-item">
                     <div className="activity-title-row">
                       <p className="activity-title">{post.title}</p>
+                      {/* Pattern #6 — status badge pill */}
                       <span className="status-badge upcoming">منشور</span>
                     </div>
                     <p className="activity-desc">
@@ -233,7 +249,11 @@ const Overview: React.FC = () => {
                 );
               })
             ) : (
-              <p>لا توجد منشورات</p>
+              /* Pattern #8 — empty state */
+              <div className="empty-state">
+                <BookOpen size={40} />
+                <p>لا توجد منشورات</p>
+              </div>
             )}
           </div>
         </div>

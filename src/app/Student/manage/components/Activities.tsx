@@ -141,16 +141,8 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
   const [deptMap, setDeptMap] = useState<Record<number, string>>({});
   const [selectedFamilyId, setSelectedFamilyId] = useState<number | null>(null);
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
-
   // First useEffect: Fetch family ID from families API
   useEffect(() => {
-    if (!token) {
-      setError("غير مصرح");
-      setLoading(false);
-      return;
-    }
-
     const fetchFamilyId = async () => {
       try {
         const baseUrl = getBaseUrl();
@@ -197,14 +189,12 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
     };
 
     fetchFamilyId();
-  }, [token]);
+  }, []);
 
   // Fetch departments
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
-        if (!token) return;
-
         const baseUrl = getBaseUrl();
         const response = await authFetch(`${baseUrl}/api/family/departments/`);
 
@@ -233,11 +223,11 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
     };
 
     fetchDepartments();
-  }, [token]);
+  }, []);
 
   // Fetch activities using the selected family ID
   useEffect(() => {
-    if (!selectedFamilyId || !token) return;
+    if (!selectedFamilyId) return;
 
     const fetchActivities = async () => {
       try {
@@ -305,7 +295,7 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
     };
 
     fetchActivities();
-  }, [selectedFamilyId, token, refreshTrigger, deptMap]);
+  }, [selectedFamilyId, refreshTrigger, deptMap]);
 
   return (
     <div className="activities-wrapper">
@@ -398,12 +388,7 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
                   الكلية: {act.facultyName}
                 </div>
               )}
-              {act.createdBy && (
-                <div className="info-item">
-                  <Users size={16} />
-                  منشئ الفعالية: {act.createdBy}
-                </div>
-              )}
+           
             </div>
           </div>
         ))}

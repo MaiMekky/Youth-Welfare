@@ -15,7 +15,7 @@ const TrackReqButton: React.FC<TrackReqButtonProps> = ({ onReviewClick }) => {
       <div className={styles.heroBg} aria-hidden />
 
       <div className={styles.heroInner}>
-        {/* Left: text block */}
+        {/* Text block */}
         <div className={styles.heroText}>
           <h1 className={styles.heroTitle}>إدارة الأسر الطلابية</h1>
           <p className={styles.heroSub}>
@@ -23,7 +23,7 @@ const TrackReqButton: React.FC<TrackReqButtonProps> = ({ onReviewClick }) => {
           </p>
         </div>
 
-        {/* Right: action buttons */}
+        {/* Action buttons */}
         <div className={styles.heroActions}>
           {/* <button className={styles.btnPrimary} onClick={onCreateClick}>
             <Plus size={17} strokeWidth={2.5} />

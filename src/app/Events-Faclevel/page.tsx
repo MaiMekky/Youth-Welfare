@@ -10,8 +10,11 @@ import { EventItem, ChipVariant } from "./components/EventCard";
 import { useRouter } from "next/navigation";
 import { Plus, Search } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 
 const API_URL = getBaseUrl();
+
+const TAB_SESSION_KEY = "eventsList_activeTab";
 
 type ApiEvent = {
   event_id: number;
@@ -29,17 +32,10 @@ type ApiEvent = {
   active?: boolean | string | number;
 };
 function getDepartmentsFromToken(): { dept_id: number; dept_name: string }[] {
-  if (typeof window === "undefined") return [];
-  const stored = localStorage.getItem("departments");
-  if (!stored) return [];
-  try {
-    const departments = JSON.parse(stored);
-    const excluded = ["التكافل الإجتماعي", "الأسر الطلابية"];
-    return departments.filter((d: Record<string, unknown>) => !excluded.includes(d.dept_name as string));
-  } catch (err) {
-    console.error("Departments parse error:", err);
-    return [];
-  }
+  const meta = getSessionMeta();
+  if (!meta?.departments?.length) return [];
+  const excluded = ["التكافل الإجتماعي", "الأسر الطلابية"];
+  return meta.departments.filter((d) => !excluded.includes(d.dept_name));
 }
 
 async function apiFetch<T>(
@@ -122,14 +118,29 @@ export default function Page() {
 
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<EventsTab>("faculty");
+
+  // Restore active tab from sessionStorage so "back" lands on the correct tab
+  const [activeTab, setActiveTab] = useState<EventsTab>(() => {
+    if (typeof window !== "undefined") {
+      const saved = sessionStorage.getItem(TAB_SESSION_KEY);
+      if (saved === "faculty" || saved === "dept") return saved;
+    }
+    return "faculty";
+  });
+
   const [userDepartments, setUserDepartments] = useState<Record<string, unknown>[]>([]);
   const [deptFilter, setDeptFilter] = useState<number | "all">("all");
   const [search, setSearch] = useState("");
 
-useEffect(() => {
-  window.scrollTo(0, 0);
-}, []);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Persist active tab whenever it changes
+  const handleTabChange = (tab: EventsTab) => {
+    setActiveTab(tab);
+    sessionStorage.setItem(TAB_SESSION_KEY, tab);
+  };
 
   const showFilters = userDepartments.length > 1;
 
@@ -212,7 +223,14 @@ useEffect(() => {
   }, [visibleEvents]);
 
   const goCreate = () => router.push("/Events-Faclevel/create");
-  const onView = (id: number) => router.push(`/Events-Faclevel/${id}`);
+
+  const onView = (id: number) => {
+    // Save current tab and the back path so EventDetails can restore both
+    sessionStorage.setItem(TAB_SESSION_KEY, activeTab);
+    sessionStorage.setItem("eventDetails_from", "/Events-Faclevel");
+    router.push(`/Events-Faclevel/${id}`);
+  };
+
   const onEdit = (id: number) => router.push(`/Events-Faclevel/create/${id}`);
 
   return (
@@ -233,7 +251,7 @@ useEffect(() => {
 
         <Tabs<EventsTab>
           value={activeTab}
-          onChange={setActiveTab}
+          onChange={handleTabChange}
           items={tabItems}
         />
 
@@ -304,8 +322,6 @@ useEffect(() => {
           )}
         </div>
       </div>
-
-     
     </div>
   );
 }

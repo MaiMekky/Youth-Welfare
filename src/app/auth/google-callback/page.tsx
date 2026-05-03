@@ -63,23 +63,27 @@ function GoogleCallbackContent() {
         setMessage("✅ تم تسجيل الدخول بنجاح");
         
         const data = loginData as Record<string, unknown>;
-        localStorage.setItem("access", String(data.access_token ?? ''));
-        localStorage.setItem("refresh", String(data.refresh_token ?? ''));
-        localStorage.setItem("user", JSON.stringify({
-          name: data.name,
-          email: data.email,
-          picture: data.picture,
-          user_type: "student"
-        }));
-        localStorage.setItem("student_id", String(data.user_id ?? ''));
-        localStorage.setItem("name", String(data.name ?? ''));
 
-        document.cookie = `access=${String(data.access_token ?? '')}; path=/; max-age=604800; SameSite=Lax`;
-        document.cookie = `refresh=${String(data.refresh_token ?? '')}; path=/; max-age=604800; SameSite=Lax`;
-        document.cookie = `user_type=student; path=/; max-age=604800; SameSite=Lax`;
+        // Store session data in cookies (same pattern as normal login)
+        const sessionData = {
+          user_type:    "student",
+          roleKey:      "",
+          role:         "",
+          name:         String(data.name ?? ""),
+          faculty_name: "",
+          admin_id:     null,
+          student_id:   data.user_id ?? null,
+          departments:  [],
+          dept_ids:     [],
+        };
+
+        const cookieOpts = "path=/; max-age=604800; SameSite=Lax";
+        document.cookie = `user_type=student; ${cookieOpts}`;
+        document.cookie = `roleKey=; ${cookieOpts}`;
+        document.cookie = `session_meta=${encodeURIComponent(JSON.stringify(sessionData))}; ${cookieOpts}`;
 
         // Redirect to dashboard
-        setTimeout(() => router.push("/Student"), 1500);
+        window.location.href = "/Student";
 
       } catch (error) {
         console.error("Error:", error);

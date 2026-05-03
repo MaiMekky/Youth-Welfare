@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+
+/* ── Reset / base ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* ── Link hover polish ── */
+a { color: inherit; text-decoration: none; }
+
+/* ── Hover lift on section cards ── */
+[data-card]:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 18px rgba(30,58,95,.14) !important;
+}
+
+/* ── Primary button hover ── */
+a[data-btn="primary"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(196,155,58,.55) !important;
+}
+
+/* ── Ghost button hover ── */
+a[data-btn="ghost"]:hover {
+  background: rgba(255,255,255,.22) !important;
+  transform: translateY(-1px);
+}
+
+/* ── Benefit card hover ── */
+[data-benefit]:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 18px rgba(30,58,95,.14) !important;
+}
+
+/* ══════════════════ RESPONSIVE ════════════════════════════ */
+@media (max-width: 1024px) {
+  [data-benefits-grid] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  [data-content-grid] {
+    grid-template-columns: 1fr !important;
+    padding: 20px 20px !important;
+  }
+  [data-hero] {
+    padding: 24px 20px !important;
+    border-radius: 12px 12px 0 0 !important;
+  }
+  [data-cta] {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 24px 24px !important;
+  }
+  [data-cta-actions] {
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+  [data-cta-actions] a,
+  [data-cta-actions] button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+  [data-org-grid] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 480px) {
+  [data-content-grid] {
+    padding: 16px 14px !important;
+    gap: 16px !important;
+  }
+  [data-benefits-grid] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

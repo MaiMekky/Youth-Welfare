@@ -13,7 +13,6 @@ import {
   Lightbulb,
   Briefcase,
 } from "lucide-react";
-import Footer from "@/app/FacLevel/components/Footer";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
 
@@ -114,7 +113,7 @@ const validate = useMemo(
     if (!data.end_date.trim()) next.end_date = "تاريخ النهاية مطلوب";
     else if (data.end_date < today) next.end_date = "تاريخ النهاية لا يمكن أن يكون في الماضي";
     if (!data.cost.trim()) next.cost = "التكلفة مطلوبة";
-    if (!data.type.trim()) next.type = "نوع النشاط مطلوب";
+    // if (!data.type.trim()) next.type = "نوع النشاط مطلوب";
 
     const costNum = Number(String(data.cost).replaceAll(",", "").trim());
     if (data.cost.trim() && (Number.isNaN(costNum) || costNum < 0)) next.cost = "برجاء ادخال تكلفة صحيحة";
@@ -138,7 +137,7 @@ const validate = useMemo(
 
   const onCancel = () => {
     sessionStorage.removeItem("convert_proposed_payload");
-    router.push('/Events-Faclevel/plans');
+    router.push('/Events-Faclevel/plans/');
   };
 
   const touchAll = () => {
@@ -176,7 +175,7 @@ const validate = useMemo(
 
       const payload = {
         title: form.title.trim(),
-        type: form.type.trim(),
+        type: "داخلي", 
         location: form.location.trim(),
         st_date: form.st_date,
         end_date: form.end_date,
@@ -221,7 +220,7 @@ const validate = useMemo(
         event_id: eventId,
         title: form.title.trim(),
         description: form.description.trim(),
-        type: form.type,
+        type: "داخلي",
         st_date: form.st_date,
         end_date: form.end_date,
         location: form.location.trim(),
@@ -280,7 +279,7 @@ const validate = useMemo(
       end_date: (fallbackRow?.end_date as string) ?? "",
       cost: String(fallbackRow?.cost ?? ""),
       s_limit: String(fallbackRow?.s_limit ?? ""),
-      type: (fallbackRow?.type as string) ?? "",
+      type: (fallbackRow?.type as string) ?? "داخلي",
       restrictions: (fallbackRow?.restrictions as string) ?? "",
       reward: (fallbackRow?.reward as string) ?? "",
       resource: (fallbackRow?.resource as string) ?? "",
@@ -304,7 +303,7 @@ const validate = useMemo(
         end_date: (e?.end_date as string) ?? "",
         cost: (e?.cost as string) ?? "",
         s_limit: String(e?.s_limit ?? ""),
-        type: (e?.type as string) ?? "",
+        type: (e?.type as string) ?? "داخلي",
         restrictions: (e?.restrictions as string) ?? "",
         reward: (e?.reward as string) ?? "",
         resource: (e?.resource as string) ?? "",
@@ -335,7 +334,7 @@ const validate = useMemo(
                 {isConvert ? "يتم تحميل البيانات من الفعالية المقترحة ويمكن تعديلها" : "املئي البيانات الأساسية للفعالية"}
               </p>
             </div>
-            <button className={styles.backBtn} onClick={() => router.push('/Events-Faclevel/plans')} type="button">
+            <button className={styles.backBtn} onClick={() => router.push('/Events-Faclevel/plans/' + planId + '/')} type="button">
               <ArrowRight size={18} /> العودة للخطة
             </button>
           </div>
@@ -448,7 +447,7 @@ const validate = useMemo(
                 </div>
 
                 {/* ── نوع النشاط — from localStorage departments ── */}
-         <div className={styles.field}>
+         {/* <div className={styles.field}>
           <label className={styles.label}>نوع النشاط</label>
 
           <select
@@ -467,7 +466,7 @@ const validate = useMemo(
           {touched.type && errors.type && (
             <div className={styles.errorText}>{errors.type}</div>
           )}
-        </div>
+        </div> */}
 
         {/* {isConvert && (
           <div className={styles.field}>
@@ -527,7 +526,7 @@ const validate = useMemo(
               )}
                {isConvert && (
                 <div className={styles.field} style={{ gridColumn: "1 / -1" }}>
-                  <label className={styles.label}>الوصف</label>
+                  <label className={styles.label}>الوصف(اكتب قيمة الاشتراك ان وجد)</label>
                   <textarea
                     className={styles.input}
                     placeholder="اكتب وصف مختصر"
@@ -551,7 +550,6 @@ const validate = useMemo(
             </form>
           </section>
         </div>
-        <Footer />
       </div>
     </>
   );

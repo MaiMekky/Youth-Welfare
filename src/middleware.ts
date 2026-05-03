@@ -72,20 +72,23 @@ const allowedByRoleKey: Record<string, Record<string, string[]>> = {
     fac_head: ["/FacultyHead"],
     General_admin: ["/GeneralAdmin"],
   },
-  student: {
-    "": ["/Student", "/Student/Activities", "/my-requests"],
-  },
+ student: {
+  "": [
+    "/Student",
+    "/Student/MainPage",
+    "/Student/Activities",
+    "/Student/Families",
+    "/Student/StudentUnion",
+    "/Student/manage",
+    "/Student/profile",
+    "/Student/takafol",
+    "/my-requests",
+  ],
+},
 };
 
-const VALID_USER_TYPES = new Set(["admin", "student"]);
-
-const VALID_ADMIN_ROLE_KEYS = new Set([
-  "super_admin",
-  "uni_manager",
-  "fac_manager",
-  "fac_head",
-  "General_admin",
-]);
+const VALID_USER_TYPES  = new Set(["admin", "student"]);
+const VALID_ADMIN_ROLES = new Set(["super_admin", "uni_manager", "fac_manager", "fac_head", "General_admin"]);
 
 function noCache(res: NextResponse) {
   res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
@@ -94,93 +97,82 @@ function noCache(res: NextResponse) {
   return res;
 }
 
-function redirectTo(resUrl: string, req: NextRequest) {
-  return noCache(NextResponse.redirect(new URL(resUrl, req.url)));
+function redirectTo(url: string, req: NextRequest) {
+  if (new URL(url, req.url).pathname === req.nextUrl.pathname) {
+    return noCache(NextResponse.next());
+  }
+  return noCache(NextResponse.redirect(new URL(url, req.url)));
 }
 
-function defaultRedirect(userType: string, roleKey: string) {
-  if (userType === "admin") {
-    if (roleKey === "super_admin")  return "/SuperAdmin";
-    if (roleKey === "uni_manager")  return "/uni-level";
-    if (roleKey === "fac_manager")  return "/FacLevel";
-    if (roleKey === "fac_head")     return "/FacultyHead";
-    if (roleKey === "General_admin") return "/GeneralAdmin";
-    return "/";
-  }
+function defaultRedirect(userType: string, roleKey: string): string {
   if (userType === "student") return "/Student";
+  if (userType === "admin") {
+    if (roleKey === "super_admin")   return "/CreateAdmins";
+    if (roleKey === "uni_manager")   return "/uni-level";
+    if (roleKey === "fac_manager")   return "/FacLevel";
+    if (roleKey === "fac_head")      return "/FacultyHead";
+    if (roleKey === "General_admin") return "/GeneralAdmin";
+  }
   return "/";
 }
 
 export function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
-  const token     = req.cookies.get("access")?.value;
-  const userType  = req.cookies.get("user_type")?.value || "";
-  const roleKey   = req.cookies.get("roleKey")?.value || "";
-  const lastRoute = req.cookies.get("lastRoute")?.value;
-
-  // ── Skip static files & API routes ──────────────────────────
-  const isStaticFile = /\.(.*)$/.test(path);
+  // Skip static & API
   if (
     path.startsWith("/_next") ||
     path.startsWith("/api")   ||
     path === "/favicon.ico"   ||
-    isStaticFile
-  ) {
+    /\.(.*)$/.test(path)
+  ) return NextResponse.next();
+
+  // Read JS-set cookies only (HttpOnly tokens are validated by Django per-request)
+  const userType = req.cookies.get("user_type")?.value || "";
+  const roleKey  = req.cookies.get("roleKey")?.value   || "";
+
+  // Decode in case they were encoded with encodeURIComponent
+  // const userType = decodeURIComponent(rawUserType);
+  // const roleKey  = decodeURIComponent(rawRoleKey);
+
+  const isLoggedIn = VALID_USER_TYPES.has(userType) && (
+    userType === "student" || VALID_ADMIN_ROLES.has(roleKey)
+  );
+
+  // Root: redirect logged-in users to their home
+  if (path === "/") {
+    const isLoggingOut = req.cookies.get("logging_out")?.value === "1";
+    if (!isLoggingOut && isLoggedIn) {
+      const dest = defaultRedirect(userType, roleKey);
+      if (dest !== "/") return redirectTo(dest, req);
+    }
     return NextResponse.next();
   }
 
-  // ── Root page ("/") ─────────────────────────────────────────
-  // ONLY this block — the duplicate old blocks are removed
-  if (path === "/") {
-    const isLoggingOut = req.nextUrl.searchParams.get("logout") === "1";
-
-    if (!isLoggingOut && token && lastRoute) {
-      return redirectTo(lastRoute, req); // auto-redirect logged-in users
-    }
-
-    return NextResponse.next(); // logout or unauthenticated → show login page
-  }
-
-  // ── Protected route checks ───────────────────────────────────
-  const isProtected = protectedRoutes.some((route) =>
-    path.startsWith(route)
-  );
-
+  const isProtected = protectedRoutes.some(r => path.startsWith(r));
   if (!isProtected) return NextResponse.next();
 
-  if (!token)                                               return redirectTo("/", req);
-  if (!VALID_USER_TYPES.has(userType))                      return redirectTo("/", req);
-  if (userType === "admin" && !VALID_ADMIN_ROLE_KEYS.has(roleKey)) {
-    return redirectTo("/", req);
-  }
+  // Not logged in → home
+  if (!isLoggedIn) return redirectTo("/", req);
 
   const rulesForUserType = allowedByRoleKey[userType];
   if (!rulesForUserType) return redirectTo("/", req);
 
   if (userType === "admin") {
-    const allowedRoutes = rulesForUserType[roleKey] || [];
-    const isAllowed = allowedRoutes.some((route) => path.startsWith(route));
-
-    if (!isAllowed) {
-      const fallback = allowedRoutes[0] || defaultRedirect(userType, roleKey);
-      return redirectTo(fallback, req);
+    const allowed = rulesForUserType[roleKey] || [];
+    if (!allowed.some(r => path.startsWith(r))) {
+      return redirectTo(allowed[0] ?? defaultRedirect(userType, roleKey), req);
     }
   }
 
   if (userType === "student") {
-    const allowedRoutes = rulesForUserType[""] || ["/Student"];
-    const isAllowed = allowedRoutes.some((route) => path.startsWith(route));
-
-    if (!isAllowed) {
-      const fallback = allowedRoutes[0] || defaultRedirect(userType, roleKey);
-      return redirectTo(fallback, req);
+    const allowed = rulesForUserType[""] || ["/Student"];
+    if (!allowed.some(r => path.startsWith(r))) {
+      return redirectTo("/Student", req);
     }
   }
 
   return noCache(NextResponse.next());
 }
 
-export const config = {
-  matcher: ["/:path*"],
-};
+export const config = { matcher: ["/:path*"] };

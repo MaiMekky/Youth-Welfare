@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Search, Wallet, Users, FileText } from "luci
 import Footer from "../FacLevel/components/Footer";
 
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { getSessionMeta } from "@/utils/cookieHelpers";
 
 interface StudentType {
   name: string;
@@ -25,8 +26,8 @@ export default function FacultyReport() {
   const [academicYear, setAcademicYear] = useState("");
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) setUserData(JSON.parse(storedUser));
+    const meta = getSessionMeta();
+    if (meta) setUserData({ faculty_name: meta.faculty_name, name: meta.name });
   }, []);
 
 useEffect(() => {
@@ -111,10 +112,12 @@ const cd = res.headers.get("content-disposition");
               className={styles.yearSelect}
             >
               <option value="" disabled hidden>اختر السنة</option>
-              <option value="الفرقة الاولى">الفرقة الأولى</option>
+              <option value="الفرقة الأولى">الفرقة الأولى</option>
               <option value="الفرقة الثانية">الفرقة الثانية</option>
               <option value="الفرقة الثالثة">الفرقة الثالثة</option>
               <option value="الفرقة الرابعة">الفرقة الرابعة</option>
+              <option value="الفرقة الخامسة">الفرقة الخامسة</option>
+              <option value="الفرقة السادسة">الفرقة السادسة</option>
             </select>
 
             <div className={styles.modalButtons}>

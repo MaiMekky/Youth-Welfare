@@ -54,7 +54,7 @@ type EventRow = {
 const mapApiEvent = (e: ApiEvent, facultyMap: Map<number, string>): EventRow => {
   const facultyName =
     (e.faculty_id != null ? facultyMap.get(e.faculty_id) : undefined) ??
-    e.faculty_name ?? "—";
+    e.faculty_name ?? "علي مستوي الجامعة";
   return {
     event_id:    e.event_id,
     title:       e.title       ?? "",

@@ -181,7 +181,7 @@ export default function ScoutsPage() {
   const [loading, setLoading] = useState(true);
   const [joinLoading, setJoinLoading] = useState(false);
   const [joinMsg, setJoinMsg] = useState("");
-  const [clanError, setClanError] = useState<"none" | "inactive" | null>(null);
+  const [clanState, setClanState] = useState<"none" | "inactive" | "active" | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -202,7 +202,6 @@ export default function ScoutsPage() {
           setClan(data);
           setClanState(data.status === "نشط" ? "active" : "inactive");
         }
-        setClan(data);
       }
 
       if (statusRes.ok) {
@@ -310,7 +309,7 @@ export default function ScoutsPage() {
     );
   }
 
-  const ctaData = renderCTAContent();
+  const ctaData = getCta();
 
   return (
     <div dir="rtl" style={{
@@ -353,10 +352,6 @@ export default function ScoutsPage() {
           والعمل الجماعي من خلال عشائر الكليات والرهوط المنظمة.
         </p>
       </div>
-    );
-  }
-
-      {/* ── CONTENT GRID ── */}
       <div style={{
         width: "100%", padding: "32px 40px",
         display: "grid", gridTemplateColumns: "repeat(2, 1fr)",
@@ -448,15 +443,15 @@ export default function ScoutsPage() {
           <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse 400px 250px at -5% 80%, rgba(196,155,58,.1) 0%, transparent 60%)`, pointerEvents: "none" }} />
 
           <div style={{ position: "relative", zIndex: 1 }}>
-            {ctaData.badge && (
+            {ctaData.statusBadge && (
               <span style={{
                 display: "inline-flex", alignItems: "center", gap: 6,
                 padding: "4px 14px", borderRadius: 100, fontSize: 13, fontWeight: 700,
-                color: ctaData.badge.color, background: ctaData.badge.bg,
-                border: `1px solid ${ctaData.badge.border}`, marginBottom: 12,
+                color: ctaData.statusBadge.color, background: ctaData.statusBadge.bg,
+                border: `1px solid ${ctaData.statusBadge.border}`, marginBottom: 12,
                 fontFamily: T.font,
               }}>
-                {ctaData.badge.label}
+                {ctaData.statusBadge.label}
               </span>
             )}
             <h3 style={{ fontSize: 22, fontWeight: 900, color: "#fff", margin: "0 0 10px", fontFamily: T.font }}>
@@ -467,22 +462,53 @@ export default function ScoutsPage() {
             </p>
           </div>
 
-          {ctaData.buttons && (
-            <div style={{ display: "flex", gap: 14, alignItems: "center", flexShrink: 0, position: "relative", zIndex: 1 }}>
-              {ctaData.buttons}
-              {memberStatus?.status !== "accepted" && memberStatus?.status !== "pending" && (
-                <Link href="/Student/Scouts/Track" style={{
+          <div style={{ display: "flex", gap: 14, alignItems: "center", flexShrink: 0, position: "relative", zIndex: 1 }}>
+            {ctaData.primaryBtn === "join" && (
+              <button
+                onClick={handleJoin}
+                disabled={joinLoading}
+                style={{
                   display: "inline-flex", alignItems: "center", gap: 10,
-                  padding: "14px 32px", background: "rgba(255,255,255,.12)",
-                  border: "1.5px solid rgba(255,255,255,.28)", borderRadius: T.radius,
+                  padding: "14px 32px", background: T.gold,
+                  border: "none", borderRadius: T.radius,
                   fontFamily: T.font, fontSize: 16, fontWeight: 700,
-                  color: "#fff", textDecoration: "none", whiteSpace: "nowrap",
-                }}>
-                  <IconClock size={18} />
-                  متابعة الطلبات
-                </Link>
-              )}
-            </div>
+                  color: "#fff", cursor: joinLoading ? "not-allowed" : "pointer",
+                  opacity: joinLoading ? 0.7 : 1, whiteSpace: "nowrap",
+                }}
+              >
+                {joinLoading ? "جاري الإرسال..." : "انضم الآن"}
+              </button>
+            )}
+            {ctaData.primaryBtn && ctaData.primaryBtn !== "join" && (
+              <Link href={ctaData.primaryBtn.href} style={{
+                display: "inline-flex", alignItems: "center", gap: 10,
+                padding: "14px 32px", background: T.gold,
+                border: "none", borderRadius: T.radius,
+                fontFamily: T.font, fontSize: 16, fontWeight: 700,
+                color: "#fff", textDecoration: "none", whiteSpace: "nowrap",
+              }}>
+                {ctaData.primaryBtn.icon}
+                {ctaData.primaryBtn.label}
+              </Link>
+            )}
+            {ctaData.primaryBtn === "join" && (
+              <Link href="/Student/Scouts/Track" style={{
+                display: "inline-flex", alignItems: "center", gap: 10,
+                padding: "14px 32px", background: "rgba(255,255,255,.12)",
+                border: "1.5px solid rgba(255,255,255,.28)", borderRadius: T.radius,
+                fontFamily: T.font, fontSize: 16, fontWeight: 700,
+                color: "#fff", textDecoration: "none", whiteSpace: "nowrap",
+              }}>
+                <IconClock size={18} />
+                متابعة الطلبات
+              </Link>
+            )}
+          </div>
+
+          {joinMsg && (
+            <p style={{ color: "#FCA5A5", fontFamily: T.font, fontSize: 14, fontWeight: 600, margin: "12px 0 0", position: "relative", zIndex: 1 }}>
+              {joinMsg}
+            </p>
           )}
         </div>
 

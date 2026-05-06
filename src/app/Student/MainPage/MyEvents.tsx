@@ -214,13 +214,7 @@ export default function MyEvents() {
         setLoading(true);
         const baseUrl = getBaseUrl();
 
-        // Get student ID from profile
-        const profileRes = await authFetch(`${baseUrl}/api/accounts/student/profile/`);
-        if (profileRes.ok) {
-          const profile = await profileRes.json();
-          setStudentId(profile.student_id ?? profile.id ?? 0);
-        }
-
+        
         const res = await authFetch(`${baseUrl}/api/event/student-events/joined/`);
         if (!res.ok) throw new Error('فشل تحميل الفعاليات');
         const raw = await res.json();

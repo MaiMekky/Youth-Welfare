@@ -143,24 +143,6 @@ export default function Events() {
   const [activeType,  setActiveType]  = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // /* ── Fetch student info ── */
-  // useEffect(() => {
-  //   const loadStudentInfo = async () => {
-  //     try {
-  //       // FIX: load student profile to get studentId for Teams component
-  //       const res = await authFetch(`${getBaseUrl()}/api/accounts/student/profile/`);
-  //       if (res.ok) {
-  //         const data = await res.json();
-  //         // adjust the field name to match your actual profile API response
-  //         setStudentId(data.student_id ?? data.id ?? 0);
-  //       }
-  //     } catch {
-  //       // non-critical — Teams will still work; captain actions may be hidden
-  //     }
-  //   };
-  //   loadStudentInfo();
-  // }, []);
-
   /* ── Fetch events ── */
   useEffect(() => {
     const load = async () => {

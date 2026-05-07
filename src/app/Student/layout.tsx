@@ -2,7 +2,7 @@
 import React from "react";
 import "./styles/theme.css"; // Import theme FIRST for consistent variables
 import "./styles/studentNavbar.css";
-import "./styles/headerCard.css";
+// import "./styles/headerCard.css";
 import "./styles/layout.css";
 import StudentNavbar from "./components/StudentNavbar";
 import StudentFooter from "./components/StudentFooter";

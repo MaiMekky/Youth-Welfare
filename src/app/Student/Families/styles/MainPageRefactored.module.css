@@ -1,0 +1,187 @@
+/* ══════════════════════════════════════════════════════════════
+   Main Page Refactored Styles
+══════════════════════════════════════════════════════════════ */
+
+.container {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 28px;
+  width: 100%;
+  font-family: var(--font-family);
+}
+
+/* ── Browse Section ── */
+.browseSection {
+  margin: 24px 0;
+}
+
+.browseCard {
+  background: linear-gradient(140deg, var(--navy) 0%, var(--navy-mid) 100%);
+  border-radius: var(--radius-lg);
+  padding: 48px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.browseCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent 0%, var(--gold) 20%, var(--gold-bright) 50%, var(--gold) 80%, transparent 100%);
+}
+
+.browseCard::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 600px 400px at 10% 50%, rgba(196, 155, 58, 0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.browseIcon {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--navy);
+  flex-shrink: 0;
+  box-shadow: 0 6px 24px rgba(196, 155, 58, 0.4);
+  position: relative;
+  z-index: 1;
+  transition: all var(--transition);
+}
+
+.browseCard:hover .browseIcon {
+  transform: scale(1.05) rotate(5deg);
+  box-shadow: 0 8px 32px rgba(196, 155, 58, 0.5);
+}
+
+.browseContent {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.browseTitle {
+  margin: 0 0 8px;
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--white);
+  font-family: var(--font-family);
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+}
+
+.browseDescription {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.75);
+  font-family: var(--font-family);
+  line-height: 1.6;
+}
+
+.browseLink {
+  position: relative;
+  z-index: 1;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .container {
+    padding: 0 20px;
+  }
+
+  .browseCard {
+    padding: 40px;
+    gap: 28px;
+  }
+
+  .browseIcon {
+    width: 76px;
+    height: 76px;
+  }
+
+  .browseTitle {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+
+  .browseCard {
+    padding: 36px 28px;
+    gap: 24px;
+  }
+
+  .browseIcon {
+    width: 68px;
+    height: 68px;
+  }
+
+  .browseTitle {
+    font-size: 22px;
+  }
+
+  .browseDescription {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 700px) {
+  .browseCard {
+    flex-direction: column;
+    text-align: center;
+    padding: 40px 24px;
+  }
+
+  .browseContent {
+    text-align: center;
+  }
+
+  .browseLink {
+    width: 100%;
+  }
+
+  .browseLink button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 12px;
+  }
+
+  .browseCard {
+    padding: 32px 20px;
+  }
+
+  .browseIcon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .browseTitle {
+    font-size: 20px;
+  }
+
+  .browseDescription {
+    font-size: 13px;
+  }
+}

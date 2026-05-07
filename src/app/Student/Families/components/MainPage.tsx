@@ -36,11 +36,6 @@ interface MainPageProps {
   onViewFamilyDetails?: (family: ProgramFamily) => void;
 }
 
-interface ToastNotification {
-  id: number;
-  message: string;
-  type: 'success' | 'error' | 'info';
-}
 
 /* ── helpers ── */
 const extractArray = (data: Record<string, unknown>): Record<string, unknown>[] => {
@@ -66,16 +61,13 @@ const isElderBrother = (role?: string) => {
 };
 
 export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
-  const [mounted, setMounted] = useState(false);
+  
   const [joinedFamilies, setJoinedFamilies]       = useState<ProgramFamily[]>([]);
   const [loading, setLoading]                     = useState(true);
   const [activeTab, setActiveTab]                 = useState<'accepted' | 'pending'>('accepted');
   const { showToast } = useToast();
 
-  // Ensure component is mounted before rendering to prevent hydration mismatch
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+
 
   const acceptedFamilies = joinedFamilies.filter(f => isAccepted(f.memberStatus));
   const pendingFamilies  = joinedFamilies.filter(f => !isAccepted(f.memberStatus));
@@ -147,15 +139,7 @@ export default function MainPage({ onViewFamilyDetails }: MainPageProps) {
     return status;
   };
 
-  /* ══════════════════════════════════════════
-     RENDER
-  ══════════════════════════════════════════ */
-  
-  // Prevent hydration mismatch by waiting for client-side mount
-  if (!mounted) {
-    return null;
-  }
-
+ 
   return (
     <>
       <div dir="rtl" className="container">

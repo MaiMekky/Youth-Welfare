@@ -26,6 +26,7 @@
 .heroTopAccent {
   position: absolute;
   top: 0;
+   margin-bottom: 20px;
   left: 0;
   right: 0;
   height: 3px;
@@ -147,8 +148,8 @@
 ══════════════════════════════════════════════════════════════ */
 .searchSection {
   max-width: 1320px;
-  margin: -20px auto 0;
-  padding: 0 40px;
+  margin: 20px auto 0;
+  padding: 0 20px;
   position: relative;
   z-index: 10;
 }
@@ -360,18 +361,18 @@
   gap: 14px;
   padding: 24px 24px 18px;
   border-bottom: 1px solid var(--border);
-  background: var(--navy-light);
+  background: var(--navy-mid);
 }
 
 .cardIcon {
   width: 48px;
   height: 48px;
   border-radius: var(--radius);
-  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+  background:#ecf0bd;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--gold);
+  color: var(--gold-dark);
   flex-shrink: 0;
   box-shadow: 0 4px 12px rgba(30, 58, 95, 0.2);
 }
@@ -380,7 +381,7 @@
   margin: 0;
   font-size: 18px;
   font-weight: 800;
-  color: var(--navy);
+  color: var(--navy-light);
   line-height: 1.3;
   font-family: var(--font-family);
   flex: 1;

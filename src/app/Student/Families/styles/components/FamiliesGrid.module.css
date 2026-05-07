@@ -1,0 +1,63 @@
+/* ══════════════════════════════════════════════════════════════
+   Families Grid Styles
+══════════════════════════════════════════════════════════════ */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+/* ── Responsive ── */
+@media (min-width: 1400px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  }
+}
+
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .grid {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--gold) transparent;
+    padding-bottom: 8px;
+  }
+
+  .grid::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .grid::-webkit-scrollbar-track {
+    background: rgba(196, 155, 58, 0.08);
+    border-radius: 4px;
+  }
+
+  .grid::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border-radius: 4px;
+  }
+
+  .grid > * {
+    min-width: 280px;
+    max-width: 280px;
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid > * {
+    min-width: 260px;
+    max-width: 260px;
+  }
+}

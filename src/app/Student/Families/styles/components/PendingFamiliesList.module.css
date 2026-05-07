@@ -1,0 +1,16 @@
+/* ══════════════════════════════════════════════════════════════
+   Pending Families List Styles
+══════════════════════════════════════════════════════════════ */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .list {
+    gap: 10px;
+  }
+}

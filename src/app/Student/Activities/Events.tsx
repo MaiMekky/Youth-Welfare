@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import './Events.css';
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
+import StudentHero from "../components/StudentHero";
 
 
 /* ══════════════════════════════════════════
@@ -143,24 +144,6 @@ export default function Events() {
   const [activeType,  setActiveType]  = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // /* ── Fetch student info ── */
-  // useEffect(() => {
-  //   const loadStudentInfo = async () => {
-  //     try {
-  //       // FIX: load student profile to get studentId for Teams component
-  //       const res = await authFetch(`${getBaseUrl()}/api/accounts/student/profile/`);
-  //       if (res.ok) {
-  //         const data = await res.json();
-  //         // adjust the field name to match your actual profile API response
-  //         setStudentId(data.student_id ?? data.id ?? 0);
-  //       }
-  //     } catch {
-  //       // non-critical — Teams will still work; captain actions may be hidden
-  //     }
-  //   };
-  //   loadStudentInfo();
-  // }, []);
-
   /* ── Fetch events ── */
   useEffect(() => {
     const load = async () => {
@@ -215,6 +198,11 @@ export default function Events() {
     (!searchQuery || e.title.includes(searchQuery) || (e.description ?? '').includes(searchQuery))
   );
 
+  const filterOptions = types.map(t => ({
+    id: t,
+    label: t === 'all' ? 'جميع الفعاليات' : t,
+  }));
+
   /* ══════════════════════════════════════════
      RENDER
   ══════════════════════════════════════════ */
@@ -223,27 +211,15 @@ export default function Events() {
       <div className="events-page" dir="rtl">
 
         {/* ══ HERO ══ */}
-        <div className="events-hero">
-          <div className="hero-inner">
-            <div className="hero-text">
-              <h1 className="hero-title">جميع الأنشطة والفعاليات</h1>
-              <p className="hero-sub">استكشف الفعاليات المتاحة وسجّل في ما يناسبك مباشرةً</p>
-            </div>
-            <span className="hero-count">{filtered.length} فعالية</span>
-          </div>
-
-          <div className="hero-filters">
-            {types.map(t => (
-              <button
-                key={t}
-                className={`filter-pill${activeType === t ? ' active' : ''}`}
-                onClick={() => setActiveType(t)}
-              >
-                {t === 'all' ? 'جميع الفعاليات' : t}
-              </button>
-            ))}
-          </div>
-        </div>
+        <StudentHero
+          title="جميع الأنشطة والفعاليات"
+          subtitle="استكشف الفعاليات المتاحة وسجّل في ما يناسبك مباشرةً"
+          count={filtered.length}
+          countLabel="فعالية"
+          filters={filterOptions}
+          activeFilter={activeType}
+          onFilterChange={setActiveType}
+        />
 
         {/* ══ BODY ══ */}
         <div className="events-body">

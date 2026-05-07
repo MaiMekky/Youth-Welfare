@@ -1,40 +1,45 @@
 "use client";
 import React from "react";
-import "../styles/headerCard.css";
+import styles from "../styles/headerCard.module.css";
 
 interface HeaderCardProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
 }
 
+const filters = [
+  { id: "info", label: "معلومات الدعم" },
+  { id: "apply", label: "تقديم طلب" },
+  { id: "myRequests", label: "طلباتي" },
+];
+
 export default function HeaderCard({ activeTab, onTabChange }: HeaderCardProps) {
   return (
-    <header className="header-card-container">
-      <div className="header-card">
-        <h1 className="header-title">التكافل الاجتماعي</h1>
-        <p className="header-subtitle">نظام الدعم المالي والاجتماعي لطلاب جامعة العاصمة</p>
+    <div className={styles["header-card-container"]}>
+      {/* ── Hero card (no tabs inside) ── */}
+      <div className={styles["header-card"]}>
+        <h1 className={styles["header-title"]}>التكافل الاجتماعي</h1>
+        <p className={styles["header-subtitle"]}>
+          نظام الدعم المالي والاجتماعي لطلاب جامعة العاصمة
+        </p>
+      </div>
 
-        <div className="header-tabs">
-          <button
-            className={`tab-btn${activeTab === "info"       ? " active" : ""}`}
-            onClick={() => onTabChange("info")}
-          >
-            معلومات الدعم
-          </button>
-          <button
-            className={`tab-btn${activeTab === "apply"      ? " active" : ""}`}
-            onClick={() => onTabChange("apply")}
-          >
-            تقديم طلب
-          </button>
-          <button
-            className={`tab-btn${activeTab === "myRequests" ? " active" : ""}`}
-            onClick={() => onTabChange("myRequests")}
-          >
-            طلباتي
-          </button>
+      {/* ── Gold segmented tab card ── */}
+      <div className={styles["tab-card-wrapper"]}>
+        <div className={styles["tab-card"]}>
+          {filters.map((filter) => (
+            <button
+              key={filter.id}
+              className={`${styles["tab-segment"]} ${
+                activeTab === filter.id ? styles["active"] : ""
+              }`}
+              onClick={() => onTabChange(filter.id)}
+            >
+              {filter.label}
+            </button>
+          ))}
         </div>
       </div>
-    </header>
+    </div>
   );
 }

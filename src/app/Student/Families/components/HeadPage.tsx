@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import FamilyAdBanner from "./FamilyAdBanner";
-import "../styles/HeadPage.css";
+import StudentHero from "../../components/StudentHero";
 
 interface HeadPageProps {
   onCreateClick?: () => void;
@@ -17,12 +17,10 @@ export default function HeadPage({ onCreateClick }: HeadPageProps) {
 
   return (
     <>
-      <header className="scouts-hero">
-        <h1 className="scouts-hero__title">الأسر الطلابية</h1>
-        <p className="scouts-hero__sub">
-          انضم إلى الأسر الطلابية المتنوعة وكن جزءًا من مجتمع طلابي نشط
-        </p>
-      </header>
+      <StudentHero
+        title="الأسر الطلابية"
+        subtitle="انضم إلى الأسر الطلابية المتنوعة وكن جزءًا من مجتمع طلابي نشط"
+      />
 
       <div className="fam-banner-wrap">
         <FamilyAdBanner onLearnMore={handleLearnMore} />

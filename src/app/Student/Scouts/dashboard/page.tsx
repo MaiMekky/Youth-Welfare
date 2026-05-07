@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import styles from "./Dashboard.module.css";
+import StudentHero from "../../components/StudentHero";
 
 const API_URL = getBaseUrl();
 
@@ -207,49 +208,46 @@ export default function DashboardPage() {
     <div dir="rtl" className={styles.container}>
 
       {/* ══ HERO ══ */}
-      <div className={styles.hero}>
-        <div className={styles.heroTopStripe} />
-        <div className={styles.heroInner}>
-
-          {/* back nav */}
-          <div className={styles.heroNav}>
-            <Link href="/Student/Scouts" className={styles.backLink}>
-              العودة للجوالة <IconArrowRight size={14} />
-            </Link>
-          </div>
-
-          {/* title block */}
-          <div className={styles.heroBody}>
-            <div className={styles.heroIconWrap}>
-              <IconCompass size={30} />
-            </div>
-            <div className={styles.heroText}>
-              <div className={styles.heroLabel}>لوحة التحكم</div>
-              <div className={styles.heroTitle}>{clan.name}</div>
-              <div className={styles.heroClan}>نظام إدارة الجوالة — جامعة العاصمة</div>
-            </div>
-          </div>
-
-          {/* meta pills */}
-          <div className={styles.heroMeta}>
-            {membership.role && (
-              <span className={styles.heroPill}>
-                <IconCheckCircle size={13} />
-                {membership.role}
+      <div style={{ position: 'relative' }}>
+        <StudentHero
+          title={clan.name}
+          subtitle="نظام إدارة الجوالة — جامعة العاصمة"
+        />
+        {/* Back navigation overlay */}
+        <div style={{
+          position: 'absolute',
+          top: '28px',
+          left: '48px',
+          zIndex: 10
+        }}>
+          <Link href="/Student/Scouts" className={styles.backLink}>
+            العودة للجوالة <IconArrowRight size={14} />
+          </Link>
+        </div>
+        {/* Meta pills below hero */}
+        <div className={styles.heroMeta} style={{
+          padding: '0 48px 20px',
+          marginTop: '-10px',
+          position: 'relative',
+          zIndex: 2
+        }}>
+          {membership.role && (
+            <span className={styles.heroPill}>
+              <IconCheckCircle size={13} />
+              {membership.role}
+            </span>
+          )}
+          <div className={styles.heroDivider} />
+          <StatusBadge status={membership.status} />
+          {membership.joined_at && (
+            <>
+              <div className={styles.heroDivider} />
+              <span className={styles.heroSubPill}>
+                <IconCalendar size={12} />
+                {new Date(membership.joined_at).toLocaleDateString("ar-EG")}
               </span>
-            )}
-            <div className={styles.heroDivider} />
-            <StatusBadge status={membership.status} />
-            {membership.joined_at && (
-              <>
-                <div className={styles.heroDivider} />
-                <span className={styles.heroSubPill}>
-                  <IconCalendar size={12} />
-                  {new Date(membership.joined_at).toLocaleDateString("ar-EG")}
-                </span>
-              </>
-            )}
-          </div>
+            </>
+          )}
         </div>
       </div>
 

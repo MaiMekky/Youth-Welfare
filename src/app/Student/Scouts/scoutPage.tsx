@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import "./scouts.css";
+import StudentHero from "../components/StudentHero";
 
 const API_URL = getBaseUrl();
 
@@ -369,16 +370,10 @@ export default function ScoutsPage() {
     <div className="scouts-page" dir="rtl">
 
       {/* ── HERO ── */}
-      <header className="scouts-hero">
-        <div className="scouts-hero__topline" />
-        <div className="scouts-hero__glow" />
-        <h1 className="scouts-hero__title">الجوالة</h1>
-        <div className="scouts-hero__divider" />
-        <p className="scouts-hero__sub">
-          نظام الأنشطة الكشفية داخل الجامعة — يهدف إلى تنمية المهارات القيادية
-          والعمل الجماعي من خلال عشائر الكليات والرهوط المنظمة.
-        </p>
-      </header>
+      <StudentHero
+        title="الجوالة"
+        subtitle="نظام الأنشطة الكشفية داخل الجامعة — يهدف إلى تنمية المهارات القيادية والعمل الجماعي من خلال عشائر الكليات والرهوط المنظمة."
+      />
 
       {/* ── CONTENT ── */}
       <main className="scouts-grid">

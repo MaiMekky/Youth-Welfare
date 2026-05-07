@@ -65,6 +65,7 @@ body {
   border-radius: var(--radius-lg);
   padding: 24px 30px;
   box-shadow: var(--shadow-lg);
+  width: 100%;
   text-align: center;
   position: relative;
   overflow: hidden;

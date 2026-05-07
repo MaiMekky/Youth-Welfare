@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import './MyEvents.css';
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import EventDetails from './EventDetails/EventDetails';
+import StudentHero from "../components/StudentHero";
 
 /* ══════════════════════════════════════════
    TYPES
@@ -165,11 +166,34 @@ const MetaRow = ({
   icon: React.ReactNode;
   value: string | null | undefined;
 }) => (
-  <div className="meta-item">
+  <div className="meta-item" style={{
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '9px',
+    padding: '9px 14px',
+    fontSize: '13px',
+    fontWeight: 700,
+    color: '#2D4A63',
+    lineHeight: 1.45,
+    borderBottom: '1px solid #EDF3FA',
+    minWidth: 0
+  }}>
     {icon}
     {value
-      ? <span>{value}</span>
-      : <span className="meta-value-empty" />
+      ? <span style={{
+          flex: 1,
+          minWidth: 0,
+          whiteSpace: 'normal',
+          overflowWrap: 'break-word',
+          wordBreak: 'break-word'
+        }}>{value}</span>
+      : <span className="meta-value-empty" style={{
+          flex: 1,
+          minWidth: 0,
+          whiteSpace: 'normal',
+          overflowWrap: 'break-word',
+          wordBreak: 'break-word'
+        }} />
     }
   </div>
 );
@@ -280,47 +304,43 @@ export default function MyEvents() {
   /* ══════════════════════════════════════════
      RENDER
   ══════════════════════════════════════════ */
+  const filterOptions = FILTERS.map(f => ({
+    id: f.id,
+    label: f.label,
+    count: counts[f.id],
+  }));
+
+  const statsData = [
+    { num: counts.all,            label: 'إجمالي' },
+    { num: counts['مقبول'],       label: 'مقبول'  },
+    { num: counts['مرفوض'],       label: 'مرفوض'  },
+  ];
+
   return (
-    <div className="my-events-page" dir="rtl">
+    <div className="my-events-page" dir="rtl" style={{
+      width: '100%',
+      minHeight: '100vh',
+      background: '#EDF2F8',
+      fontFamily: "'Cairo', sans-serif"
+    }}>
 
       {/* ══ HERO ══ */}
-      <div className="my-events-hero">
-        <div className="hero-inner">
-          <div className="hero-text">
-            <h1 className="hero-title">أنشطتي</h1>
-            <span className="hero-title-accent" />
-            <p className="hero-sub">تتبع جميع الأنشطة والفعاليات التي سجّلت بها أو شاركت فيها</p>
-          </div>
-          <div className="hero-stats">
-            {[
-              { num: counts.all,            lbl: 'إجمالي' },
-              { num: counts['مقبول'],       lbl: 'مقبول'  },
-              { num: counts['مرفوض'],       lbl: 'مرفوض'  },
-            ].map(s => (
-              <div key={s.lbl} className="stat-pill">
-                <span className="stat-num">{s.num}</span>
-                <span className="stat-lbl">{s.lbl}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="hero-filter-tabs">
-          {FILTERS.map(f => (
-            <button
-              key={f.id}
-              className={`filter-tab${activeFilter === f.id ? ' active' : ''}`}
-              onClick={() => setActiveFilter(f.id)}
-            >
-              {f.label}
-              <span className="tab-count">{counts[f.id]}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+      <StudentHero
+        title="أنشطتي"
+        subtitle="تتبع جميع الأنشطة والفعاليات التي سجّلت بها أو شاركت فيها"
+        stats={statsData}
+        filters={filterOptions}
+        activeFilter={activeFilter}
+        onFilterChange={(id) => setActiveFilter(id as FilterType)}
+      />
 
       {/* ══ BODY ══ */}
-      <div className="my-events-body">
+      <div className="my-events-body" style={{
+        maxWidth: '1300px',
+        margin: '0 auto',
+        padding: '30px 32px 60px',
+        width: '100%'
+      }}>
 
         {loading && (
           <div className="ev-center-state">
@@ -335,17 +355,55 @@ export default function MyEvents() {
 
         {!loading && !error && (
           <>
-            <p className="results-bar">
-              عرض <strong>{filtered.length}</strong>
+            <p className="results-bar" style={{
+              fontSize: '13px',
+              fontWeight: 700,
+              color: '#6B8299',
+              marginBottom: '22px'
+            }}>
+              عرض <strong style={{ color: '#1A2E42' }}>{filtered.length}</strong>
               {activeFilter !== 'all' ? ` فعالية · ${activeFilter}` : ' فعالية'}
             </p>
 
-            <div className="events-grid">
+            <div className="events-grid" style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '22px',
+              alignItems: 'start'
+            }}>
               {filtered.length === 0 ? (
-                <div className="empty-state">
-                  <div className="empty-icon"><EmptyTrophyIcon /></div>
-                  <h2 className="empty-title">لا توجد فعاليات في هذه الفئة</h2>
-                  <p className="empty-subtitle">جرّب اختيار فئة أخرى</p>
+                <div className="empty-state" style={{
+                  gridColumn: '1/-1',
+                  textAlign: 'center',
+                  padding: '80px 32px',
+                  background: '#ffffff',
+                  borderRadius: '14px',
+                  border: '2px dashed rgba(196,155,58,.30)',
+                  boxShadow: '0 2px 14px rgba(26,46,66,.09)'
+                }}>
+                  <div className="empty-icon" style={{
+                    width: '76px',
+                    height: '76px',
+                    margin: '0 auto 20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: '#FDF6E3',
+                    borderRadius: '50%',
+                    border: '2px dashed rgba(196,155,58,.30)'
+                  }}><EmptyTrophyIcon /></div>
+                  <h2 className="empty-title" style={{
+                    fontSize: '15px',
+                    fontWeight: 800,
+                    color: '#1E3A5F',
+                    margin: '0 0 6px'
+                  }}>لا توجد فعاليات في هذه الفئة</h2>
+                  <p className="empty-subtitle" style={{
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    color: '#6B8299',
+                    margin: 0
+                  }}>جرّب اختيار فئة أخرى</p>
                 </div>
               ) : filtered.map(event => {
                 const st         = getStatus(event.participationStatus);
@@ -353,31 +411,137 @@ export default function MyEvents() {
                 const hasRank    = event.rank !== null;
 
                 return (
-                  <div key={event.id} className={`event-card${isAccepted ? ' card-accepted' : ''}`}>
+                  <div key={event.id} className={`event-card${isAccepted ? ' card-accepted' : ''}`} style={{
+                    background: '#ffffff',
+                    borderRadius: '14px',
+                    border: isAccepted ? '1px solid rgba(196,155,58,0.40)' : '1px solid #DDE8F2',
+                    borderTop: isAccepted ? '3px solid #1E3A5F' : undefined,
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    boxShadow: '0 2px 14px rgba(26,46,66,.09)',
+                    position: 'relative'
+                  }}>
 
                     {/* ── CARD HEADER ── */}
-                    <div className="card-header">
-                      <div className="card-header-top">
-                        <span className="type-pill">{event.type}</span>
-                        <div className="card-chips">
-                          <span className={`status-chip ${st.cls}`}>
-                            <span className="status-dot" style={{ background: st.dot }} />
+                    <div className="card-header" style={{
+                      padding: '20px 24px 18px',
+                      borderBottom: '1px solid #EDF3FA',
+                      background: '#2D5F8A',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '14px',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}>
+                      <div className="card-header-top" style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '8px',
+                        flexWrap: 'wrap'
+                      }}>
+                        <span className="type-pill" style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          padding: '5px 14px',
+                          background: '#FDF6E3',
+                          border: '1px solid rgba(196,155,58,0.30)',
+                          borderRadius: '100px',
+                          fontSize: '11.5px',
+                          fontWeight: 800,
+                          color: '#A67F2C',
+                          whiteSpace: 'nowrap',
+                          letterSpacing: '0.03em',
+                          flexShrink: 0,
+                          boxShadow: '0 1px 6px rgba(196,155,58,0.12)'
+                        }}>{event.type}</span>
+                        <div className="card-chips" style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          flexWrap: 'wrap'
+                        }}>
+                          <span className={`status-chip ${st.cls}`} style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            padding: '5px 12px',
+                            borderRadius: '100px',
+                            fontSize: '11.5px',
+                            fontWeight: 800,
+                            whiteSpace: 'nowrap',
+                            background: st.cls === 'status-accepted' ? '#ECFDF5' : st.cls === 'status-pending' ? 'rgba(217,119,6,0.08)' : st.cls === 'status-rejected' ? '#FEF2F2' : 'rgba(107,130,153,0.09)',
+                            color: st.cls === 'status-accepted' ? '#059669' : st.cls === 'status-pending' ? '#D97706' : st.cls === 'status-rejected' ? '#DC2626' : '#6B8299',
+                            border: st.cls === 'status-accepted' ? '1px solid #6EE7B7' : st.cls === 'status-pending' ? '1px solid rgba(217,119,6,0.22)' : st.cls === 'status-rejected' ? '1px solid #FECACA' : '1px solid rgba(107,130,153,0.22)'
+                          }}>
+                            <span className="status-dot" style={{ 
+                              width: '5px', 
+                              height: '5px', 
+                              borderRadius: '50%', 
+                              flexShrink: 0,
+                              background: st.dot 
+                            }} />
                             {event.participationStatus}
                           </span>
                           {hasRank && (
-                            <span className="rank-chip">🏆 #{event.rank}</span>
+                            <span className="rank-chip" style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              background: '#FDF6E3',
+                              color: '#A67F2C',
+                              border: '1px solid rgba(196,155,58,0.28)',
+                              padding: '5px 12px',
+                              borderRadius: '100px',
+                              fontSize: '11.5px',
+                              fontWeight: 800
+                            }}>🏆 #{event.rank}</span>
                           )}
                         </div>
                       </div>
-                      <h3 className="event-title">{event.title}</h3>
+                      <h3 className="event-title" style={{
+                        fontSize: '16px',
+                        fontWeight: 900,
+                        color: '#EBF3FB',
+                        lineHeight: 1.45,
+                        margin: 0,
+                        letterSpacing: '-0.01em',
+                        wordBreak: 'break-word'
+                      }}>{event.title}</h3>
                     </div>
 
                     {/* ── CARD BODY ── */}
-                    <div className="event-content">
-                      <p className="event-description">{event.description}</p>
+                    <div className="event-content" style={{
+                      padding: '20px 24px 22px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      flex: 1,
+                      gap: '14px'
+                    }}>
+                      <p className="event-description" style={{
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        color: '#6B8299',
+                        lineHeight: 1.8,
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        margin: 0
+                      }}>{event.description}</p>
 
                       {/* Meta rows — each on its own full-width line, wraps if long, shows — if empty */}
-                      <div className="event-meta">
+                      <div className="event-meta" style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 0,
+                        padding: '4px 0',
+                        background: '#F8FBFE',
+                        borderRadius: '8px',
+                        border: '1px solid #EDF3FA',
+                        overflow: 'hidden'
+                      }}>
                         <MetaRow icon={<CalIcon />}      value={event.date}     />
                         <MetaRow icon={<PinIcon />}      value={event.location} />
                         <MetaRow icon={<BuildingIcon />} value={event.faculty}  />
@@ -385,41 +549,139 @@ export default function MyEvents() {
                       </div>
 
                       {event.reward && (
-                        <div className="reward-strip">
+                        <div className="reward-strip" style={{
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: '9px',
+                          padding: '11px 14px',
+                          background: '#FDF6E3',
+                          border: '1px solid rgba(196,155,58,0.28)',
+                          borderRadius: '8px',
+                          fontSize: '13px',
+                          fontWeight: 700,
+                          color: '#A67F2C',
+                          lineHeight: 1.5,
+                          wordBreak: 'break-word'
+                        }}>
                           <GiftIcon />
                           <span>{event.reward}</span>
                         </div>
                       )}
 
                       {(event.rank !== null || event.resultReward) && (
-                        <div className="result-inline">
+                        <div className="result-inline" style={{ display: 'flex', gap: '7px', flexWrap: 'wrap' }}>
                           {event.rank !== null && (
-                            <span className="result-tag">🏅 المركز {event.rank}</span>
+                            <span className="result-tag" style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              padding: '5px 12px',
+                              background: '#ECFDF5',
+                              border: '1px solid #6EE7B7',
+                              borderRadius: '100px',
+                              fontSize: '12px',
+                              fontWeight: 700,
+                              color: '#059669'
+                            }}>🏅 المركز {event.rank}</span>
                           )}
                           {event.resultReward && (
-                            <span className="result-tag">🎁 {event.resultReward}</span>
+                            <span className="result-tag" style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              padding: '5px 12px',
+                              background: '#ECFDF5',
+                              border: '1px solid #6EE7B7',
+                              borderRadius: '100px',
+                              fontSize: '12px',
+                              fontWeight: 700,
+                              color: '#059669'
+                            }}>🎁 {event.resultReward}</span>
                           )}
                         </div>
                       )}
 
-                      <div className="card-actions">
+                      <div className="card-actions" style={{
+                        display: 'flex',
+                        gap: '10px',
+                        marginTop: 'auto',
+                        flexWrap: 'wrap'
+                      }}>
                         {/* Details button for all events */}
                         <button
                           className="btn-details"
                           onClick={() => setSelectedEventId(event.id)}
+                          style={{
+                            flex: 1,
+                            minWidth: '120px',
+                            padding: '0 22px',
+                            height: '48px',
+                            background: 'linear-gradient(135deg, #D4AF55 0%, #C49B3A 50%, #A67F2C 100%)',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontFamily: "'Cairo', sans-serif",
+                            fontSize: '15px',
+                            fontWeight: 900,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            boxShadow: '0 4px 20px rgba(196,155,58,.32)',
+                            position: 'relative',
+                            overflow: 'hidden'
+                          }}
                         >
                           <ResultIcon /> التفاصيل
                         </button>
 
                         {isAccepted && (
                           <>
-                            <button className="btn-result" onClick={() => fetchResult(event)}>
+                            <button className="btn-result" onClick={() => fetchResult(event)} style={{
+                              flex: 1,
+                              minWidth: '120px',
+                              padding: '0 22px',
+                              height: '48px',
+                              background: 'linear-gradient(135deg, #D4AF55 0%, #C49B3A 50%, #A67F2C 100%)',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '8px',
+                              fontFamily: "'Cairo', sans-serif",
+                              fontSize: '15px',
+                              fontWeight: 900,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '8px',
+                              boxShadow: '0 4px 20px rgba(196,155,58,.32)',
+                              position: 'relative',
+                              overflow: 'hidden'
+                            }}>
                               <ResultIcon /> نتيجتي
                             </button>
                             {event.teamSettingsEnabled && (
                               <button
                                 className="btn-view-team"
                                 onClick={() => setSelectedEventId(event.id)}
+                                style={{
+                                  flex: 1,
+                                  minWidth: '120px',
+                                  padding: '0 18px',
+                                  height: '48px',
+                                  border: '1.5px solid #3b82f6',
+                                  borderRadius: '8px',
+                                  background: '#fff',
+                                  color: '#3b82f6',
+                                  fontFamily: "'Cairo', sans-serif",
+                                  fontSize: '14px',
+                                  fontWeight: 800,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: '6px',
+                                  position: 'relative',
+                                  overflow: 'hidden'
+                                }}
                               >
                                 {event.hasTeam ? '👥 عرض الفريق' : '⚠️ انشاء فريق او طلب انضمام بالكود'}
                               </button>
@@ -449,19 +711,78 @@ export default function MyEvents() {
       {/* ══ RESULT MODAL ══ */}
       {resultModal && (
         <>
-          <div className="modal-overlay" onClick={() => setResultModal(null)} />
-          <div className="result-modal">
-            <div className="modal-header">
-              <button className="modal-close" onClick={() => setResultModal(null)}>
+          <div className="modal-overlay" onClick={() => setResultModal(null)} style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15,25,50,0.62)',
+            zIndex: 900,
+            backdropFilter: 'blur(5px)'
+          }} />
+          <div className="result-modal" style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '440px',
+            maxWidth: 'calc(100vw - 32px)',
+            background: '#ffffff',
+            borderRadius: '18px',
+            overflow: 'hidden',
+            zIndex: 901,
+            boxShadow: '0 12px 40px rgba(30,58,95,.20)',
+            border: '1px solid #DDE8F2'
+          }}>
+            <div className="modal-header" style={{
+              background: '#2D5F8A',
+              padding: '26px 32px 22px',
+              position: 'relative',
+              overflow: 'hidden',
+              minHeight: '90px'
+            }}>
+              <button className="modal-close" onClick={() => setResultModal(null)} style={{
+                position: 'absolute',
+                top: '16px',
+                left: '18px',
+                background: 'rgba(255,255,255,0.12)',
+                border: '1.5px solid rgba(46, 41, 41, 0.28)',
+                color: 'rgba(39, 35, 35, 0.8)',
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 10
+              }}>
                 <CloseIcon />
               </button>
-              <p className="modal-event-name">{resultModal.event.title}</p>
-              <p className="modal-event-sub">
+              <p className="modal-event-name" style={{
+                fontSize: '15px',
+                fontWeight: 800,
+                color: '#252222',
+                margin: '0 0 5px',
+                paddingLeft: '44px',
+                paddingRight: 0,
+                lineHeight: 1.4,
+                wordBreak: 'normal',
+                position: 'relative',
+                zIndex: 2
+              }}>{resultModal.event.title}</p>
+              <p className="modal-event-sub" style={{
+                fontSize: '13px',
+                fontWeight: 500,
+                color: 'rgba(34, 30, 30, 0.7)',
+                paddingLeft: '44px',
+                paddingRight: 0,
+                margin: 0,
+                position: 'relative',
+                zIndex: 2
+              }}>
                 {resultModal.event.date} · {resultModal.event.location}
               </p>
             </div>
 
-            <div className="modal-body">
+            <div className="modal-body" style={{ padding: '30px 28px 36px' }}>
               {resultModal.loading ? (
                 <div className="modal-loading">
                   <div className="ev-spinner" />

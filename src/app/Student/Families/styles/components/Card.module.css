@@ -1,0 +1,178 @@
+/* ══════════════════════════════════════════════════════════════
+   Card Component Styles
+══════════════════════════════════════════════════════════════ */
+
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Variants ── */
+.card--default {
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.card--elevated {
+  border: none;
+  box-shadow: var(--shadow-md);
+}
+
+.card--outlined {
+  border: 2px solid var(--border);
+  box-shadow: none;
+}
+
+.card--gradient {
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.card--gradient::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--gold), var(--gold-dark));
+}
+
+/* ── Padding ── */
+.card--padding-none {
+  padding: 0;
+}
+
+.card--padding-sm {
+  padding: 12px;
+}
+
+.card--padding-md {
+  padding: 20px;
+}
+
+.card--padding-lg {
+  padding: 28px;
+}
+
+/* ── Interactive States ── */
+.card--hover:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.card--clickable {
+  cursor: pointer;
+}
+
+.card--clickable:active {
+  transform: translateY(-1px);
+}
+
+/* ── Card Header ── */
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+
+.cardIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--navy-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--navy-mid);
+  flex-shrink: 0;
+}
+
+.cardHeaderText {
+  flex: 1;
+  min-width: 0;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1.3;
+  font-family: var(--font-family);
+}
+
+.cardSubtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 500;
+  line-height: 1.4;
+  font-family: var(--font-family);
+}
+
+.cardBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 100px;
+  background: var(--gold-pale);
+  border: 1px solid var(--gold-border);
+  color: var(--gold-dark);
+  font-size: 12px;
+  font-weight: 800;
+  font-family: var(--font-family);
+  flex-shrink: 0;
+}
+
+.cardAction {
+  flex-shrink: 0;
+}
+
+/* ── Card Body ── */
+.cardBody {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text);
+  font-family: var(--font-family);
+}
+
+/* ── Card Footer ── */
+.cardFooter {
+  padding-top: 16px;
+  margin-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .card--padding-md {
+    padding: 16px;
+  }
+
+  .card--padding-lg {
+    padding: 20px;
+  }
+
+  .cardHeader {
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+  }
+
+  .cardTitle {
+    font-size: 15px;
+  }
+
+  .cardSubtitle {
+    font-size: 12px;
+  }
+}

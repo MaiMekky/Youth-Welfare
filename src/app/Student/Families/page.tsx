@@ -4,9 +4,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import HeadPage from "./components/HeadPage";
 import RequestDetails from "./components/RequestDetails";
 import CreateFamForm from "../manage/components/CreateFamForm";
-import MainPage, { type ProgramFamily } from "./components/MainPage";
+import MainPageRefactored from "./components/MainPageRefactored";
 import TrackRequest from "../manage/components/TrackRequest";
 import FamilyDetails from "./familyDetails/[id]/FamilyDetails";
+import type { ProgramFamily } from "./types";
 
 type View = "home" | "requestDetails" | "createForm" | "trackRequest" | "familyDetails";
 
@@ -109,7 +110,7 @@ function FamiliesPageInner() {
             onCreateClick={handleNavigateToRequestDetails}
             onReviewClick={handleNavigateToTrackRequest}
           />
-          <MainPage onViewFamilyDetails={handleViewFamilyDetails} />
+          <MainPageRefactored onViewFamilyDetails={handleViewFamilyDetails} />
         </>
       )}
 

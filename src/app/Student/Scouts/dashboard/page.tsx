@@ -9,69 +9,73 @@ const API_URL = getBaseUrl();
 /* ══════════════════════════════════════════════════════════════
    ICONS
 ══════════════════════════════════════════════════════════════ */
-const IconArrowRight = ({ size = 18 }: { size?: number }) => (
+const IconArrowRight = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-    <path d="M19 12H5M12 5l7 7-7 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
-
-const IconCompass = ({ size = 24 }: { size?: number }) => (
+const IconCompass = ({ size = 28 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
     <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8"/>
     <path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
     <circle cx="12" cy="12" r="1" fill="currentColor"/>
   </svg>
 );
-
-const IconUsers = ({ size = 20 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-    <path d="M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    <circle cx="10" cy="7" r="4" stroke="currentColor" strokeWidth="1.8"/>
-    <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-const IconShield = ({ size = 20 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
 const IconUser = ({ size = 18 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
     <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
     <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="1.8"/>
   </svg>
 );
-
-const IconStar = ({ size = 18 }: { size?: number }) => (
+const IconUsers = ({ size = 18 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-    <path d="M12 2L8.5 8.5 1 9.27l5.5 5.36L4.82 22 12 18.27 19.18 22l-1.68-7.37L23 9.27l-7.5-.77L12 2z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <circle cx="10" cy="7" r="4" stroke="currentColor" strokeWidth="1.8"/>
+    <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
-
-const IconInfo = ({ size = 18 }: { size?: number }) => (
+const IconShield = ({ size = 18 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8"/>
-    <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
-
-const IconGroup = ({ size = 20 }: { size?: number }) => (
+const IconStar = ({ size = 14 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+    <path d="M12 2L8.5 8.5 1 9.27l5.5 5.36L4.82 22 12 18.27 19.18 22l-1.68-7.37L23 9.27l-7.5-.77L12 2z"
+      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+const IconGroup = ({ size = 18 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
     <rect x="2" y="7" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.8"/>
     <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
-
-const IconCheckCircle = ({ size = 16 }: { size?: number }) => (
+const IconInfo = ({ size = 32 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8"/>
+    <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+);
+const IconCheckCircle = ({ size = 14 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
     <path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
     <path d="M22 4L12 14.01l-3-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
-
-const IconCalendar = ({ size = 16 }: { size?: number }) => (
+const IconMail = ({ size = 12 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" strokeWidth="1.8"/>
+    <path d="M22 6l-10 7L2 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+  </svg>
+);
+const IconPhone = ({ size = 12 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+    <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.47 19.79 19.79 0 01.04 4.78 2 2 0 012 2.61h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 10.09a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"
+      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+const IconCalendar = ({ size = 12 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
     <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.8"/>
     <path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
@@ -79,38 +83,14 @@ const IconCalendar = ({ size = 16 }: { size?: number }) => (
 );
 
 /* ══════════════════════════════════════════════════════════════
-   TYPES (matching backend response)
+   TYPES
 ══════════════════════════════════════════════════════════════ */
-type MembershipInfo = {
-  role: string;
-  status: string;
-  joined_at: string | null;
-};
-
-type ClanInfo = {
-  clan_id: number;
-  name: string;
-  description?: string;
-};
-
-type GroupInfo = {
-  group_id: number;
-  name: string;
-};
-
-type GroupLeader = {
-  name: string;
-  email: string;
-  phone: string;
-};
-
-type GroupMember = {
-  name: string;
-  role: string;
-  gender?: string;
-};
-
-type DashboardData = {
+type MembershipInfo  = { role: string; status: string; joined_at: string | null; };
+type ClanInfo        = { clan_id: number; name: string; description?: string; };
+type GroupInfo       = { group_id: number; name: string; };
+type GroupLeader     = { name: string; email: string; phone: string; };
+type GroupMember     = { name: string; role: string; gender?: string; };
+type DashboardData   = {
   membership: MembershipInfo;
   clan: ClanInfo;
   group: GroupInfo | null;
@@ -119,304 +99,275 @@ type DashboardData = {
 };
 
 /* ══════════════════════════════════════════════════════════════
-   COMPONENTS
+   SUB-COMPONENTS
 ══════════════════════════════════════════════════════════════ */
 
-/* ── Section Card ── */
-function SectionCard({ 
-  icon, 
-  title, 
-  children, 
-  fullWidth = false, 
-  accentTop = false 
+function SectionCard({
+  icon, title, subtitle, children, fullWidth = false, accentVariant = "gold",
 }: {
-  icon: React.ReactNode;
-  title: string;
-  children: React.ReactNode;
-  fullWidth?: boolean;
-  accentTop?: boolean;
+  icon: React.ReactNode; title: string; subtitle?: string;
+  children: React.ReactNode; fullWidth?: boolean; accentVariant?: "gold" | "navy";
 }) {
   return (
-    <div className={`${styles.card} ${fullWidth ? styles.cardFullWidth : ""} ${accentTop ? styles.cardAccentTop : ""}`}>
-      {!accentTop && <div className={styles.cardAccentRight} />}
+    <div className={`${styles.card} ${fullWidth ? styles.cardFullWidth : ""} ${accentVariant === "navy" ? styles.accentNavy : ""}`}>
+      <div className={styles.cardAccentBar} />
       <div className={styles.cardHeader}>
-        <span className={styles.cardIcon}>{icon}</span>
-        <h2 className={styles.cardTitle}>{title}</h2>
+        <div className={styles.cardIconBox}>{icon}</div>
+        <div className={styles.cardTitleBlock}>
+          <div className={styles.cardTitle}>{title}</div>
+          {subtitle && <div className={styles.cardSubtitle}>{subtitle}</div>}
+        </div>
       </div>
       <div className={styles.cardBody}>{children}</div>
     </div>
   );
 }
 
-/* ── Role Badge ── */
 function RoleBadge({ role }: { role: string }) {
-  const isLeader = role.includes("قائد") || role.toLowerCase().includes("leader");
+  const isLeader    = role.includes("قائد") || role.toLowerCase().includes("leader");
   const isAssistant = role.includes("مساعد") || role.toLowerCase().includes("assistant");
-  
-  const badgeClass = isLeader 
-    ? styles.roleLeader 
-    : isAssistant 
-    ? styles.roleAssistant 
-    : styles.roleMember;
-
+  const cls = isLeader ? styles.roleLeader : isAssistant ? styles.roleAssistant : styles.roleMember;
   return (
-    <span className={`${styles.memberRoleBadge} ${badgeClass}`}>
+    <span className={`${styles.roleBadge} ${cls}`}>
       {isLeader && <IconStar size={11} />}
       {role}
     </span>
   );
 }
 
-/* ── Status Badge ── */
 function StatusBadge({ status }: { status: string }) {
-  const statusClass = 
-    status === "مقبول" || status === "accepted" 
-      ? styles.statusAccepted 
-      : status === "منتظر" || status === "pending"
-      ? styles.statusPending
-      : styles.statusRejected;
-
-  return (
-    <span className={`${styles.statusBadge} ${statusClass}`}>
-      {status}
-    </span>
-  );
+  const isAccepted = status === "مقبول" || status === "accepted";
+  const isPending  = status === "منتظر" || status === "pending";
+  const cls = isAccepted ? styles.statusAccepted : isPending ? styles.statusPending : styles.statusRejected;
+  return <span className={`${styles.statusBadge} ${cls}`}>{status}</span>;
 }
 
 /* ══════════════════════════════════════════════════════════════
    MAIN PAGE
 ══════════════════════════════════════════════════════════════ */
 export default function DashboardPage() {
-  const [data, setData] = useState<DashboardData | null>(null);
+  const [data, setData]       = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError]     = useState("");
 
   const load = useCallback(async () => {
-    setLoading(true);
-    setError("");
+    setLoading(true); setError("");
     try {
       const res = await authFetch(`${API_URL}/api/student/dashboard/`);
-      
-      if (res.status === 403) {
-        setError("غير مصرح — يجب أن تكون عضواً مقبولاً للوصول إلى هذه الصفحة");
-        return;
-      }
-      
-      if (!res.ok) {
-        setError("حدث خطأ أثناء تحميل البيانات، يرجى المحاولة لاحقاً");
-        return;
-      }
-      
+      if (res.status === 403) { setError("غير مصرح — يجب أن تكون عضواً مقبولاً للوصول إلى هذه الصفحة"); return; }
+      if (!res.ok)            { setError("حدث خطأ أثناء تحميل البيانات، يرجى المحاولة لاحقاً"); return; }
       const response = await res.json();
-      // Extract data from the success_response wrapper
-      const dashboardData = response.data || response;
-      setData(dashboardData);
-    } catch (err) {
-      console.error("Dashboard load error:", err);
-      setError("حدث خطأ في الاتصال");
-    } finally {
-      setLoading(false);
-    }
+      setData(response.data || response);
+    } catch { setError("حدث خطأ في الاتصال"); }
+    finally  { setLoading(false); }
   }, []);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  useEffect(() => { load(); }, [load]);
 
-  /* ── Loading State ── */
-  if (loading) {
-    return (
-      <div dir="rtl" className={styles.loadingContainer}>
-        <div className={styles.loadingContent}>
-          <div className={styles.spinner} />
-          <p className={styles.loadingText}>جاري تحميل لوحة التحكم...</p>
-        </div>
+  /* ── Loading ── */
+  if (loading) return (
+    <div dir="rtl" className={styles.loadingContainer}>
+      <div className={styles.loadingContent}>
+        <div className={styles.spinner} />
+        <p className={styles.loadingText}>جاري تحميل لوحة التحكم…</p>
       </div>
-    );
-  }
+    </div>
+  );
 
-  /* ── Error State ── */
-  if (error || !data) {
-    return (
-      <div dir="rtl" className={styles.errorContainer}>
-        <div className={styles.errorContent}>
-          <div className={styles.errorIcon}>
-            <IconInfo size={32} />
-          </div>
-          <p className={styles.errorTitle}>تعذر تحميل البيانات</p>
-          <p className={styles.errorMessage}>{error || "لا توجد بيانات متاحة"}</p>
-          <Link href="/Student/Scouts" className={styles.errorButton}>
-            العودة للجوالة
-          </Link>
-        </div>
+  /* ── Error ── */
+  if (error || !data) return (
+    <div dir="rtl" className={styles.errorContainer}>
+      <div className={styles.errorContent}>
+        <div className={styles.errorIcon}><IconInfo size={32} /></div>
+        <p className={styles.errorTitle}>تعذر تحميل البيانات</p>
+        <p className={styles.errorMessage}>{error || "لا توجد بيانات متاحة"}</p>
+        <Link href="/Student/Scouts" className={styles.errorButton}>العودة للجوالة</Link>
       </div>
-    );
-  }
+    </div>
+  );
+
+  if (!data.clan) return (
+    <div dir="rtl" className={styles.errorContainer}>
+      <div className={styles.errorContent}>
+        <div className={styles.errorIcon}><IconInfo size={32} /></div>
+        <p className={styles.errorTitle}>بيانات العشيرة غير متوفرة</p>
+        <p className={styles.errorMessage}>لا توجد معلومات عن العشيرة حالياً</p>
+        <Link href="/Student/Scouts" className={styles.errorButton}>العودة للجوالة</Link>
+      </div>
+    </div>
+  );
 
   const { membership, clan, group, group_leaders, group_members } = data;
 
-  /* ── Safety Check ── */
-  if (!clan) {
-    return (
-      <div dir="rtl" className={styles.errorContainer}>
-        <div className={styles.errorContent}>
-          <div className={styles.errorIcon}>
-            <IconInfo size={32} />
-          </div>
-          <p className={styles.errorTitle}>بيانات العشيرة غير متوفرة</p>
-          <p className={styles.errorMessage}>لا توجد معلومات عن العشيرة حالياً</p>
-          <Link href="/Student/Scouts" className={styles.errorButton}>
-            العودة للجوالة
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  // Convert group_leaders object to array
-  const leadersArray = group_leaders 
-    ? Object.entries(group_leaders).map(([role, leader]) => ({
-        role,
-        ...leader
-      }))
+  const leadersArray = group_leaders
+    ? Object.entries(group_leaders).map(([role, leader]) => ({ role, ...leader }))
     : [];
 
   return (
     <div dir="rtl" className={styles.container}>
-      {/* ── HERO SECTION ── */}
-      <div className={styles.hero}>
-        <div className={styles.heroTopAccent} />
-        <div className={styles.heroGlow} />
-        
-        <div className={styles.heroBackButton}>
-          <Link href="/Student/Scouts" className={styles.backLink}>
-            <IconArrowRight size={16} />
-            العودة للجوالة
-          </Link>
-        </div>
 
-        <div className={styles.heroContent}>
-          <div className={styles.heroIcon}>
-            <IconCompass size={30} />
+      {/* ══ HERO ══ */}
+      <div className={styles.hero}>
+        <div className={styles.heroTopStripe} />
+        <div className={styles.heroInner}>
+
+          {/* back nav */}
+          <div className={styles.heroNav}>
+            <Link href="/Student/Scouts" className={styles.backLink}>
+              العودة للجوالة <IconArrowRight size={14} />
+            </Link>
           </div>
-          <div className={styles.heroText}>
-            <h1>لوحة التحكم</h1>
-            <p>{clan.name}</p>
+
+          {/* title block */}
+          <div className={styles.heroBody}>
+            <div className={styles.heroIconWrap}>
+              <IconCompass size={30} />
+            </div>
+            <div className={styles.heroText}>
+              <div className={styles.heroLabel}>لوحة التحكم</div>
+              <div className={styles.heroTitle}>{clan.name}</div>
+              <div className={styles.heroClan}>نظام إدارة الجوالة — جامعة العاصمة</div>
+            </div>
           </div>
-          <div className={styles.heroRoleBadge}>
+
+          {/* meta pills */}
+          <div className={styles.heroMeta}>
             {membership.role && (
-              <span className={styles.roleBadge}>
-                <IconCheckCircle size={14} />
+              <span className={styles.heroPill}>
+                <IconCheckCircle size={13} />
                 {membership.role}
               </span>
             )}
+            <div className={styles.heroDivider} />
+            <StatusBadge status={membership.status} />
+            {membership.joined_at && (
+              <>
+                <div className={styles.heroDivider} />
+                <span className={styles.heroSubPill}>
+                  <IconCalendar size={12} />
+                  {new Date(membership.joined_at).toLocaleDateString("ar-EG")}
+                </span>
+              </>
+            )}
           </div>
         </div>
-        <div className={styles.heroAccent} />
       </div>
 
-      {/* ── CONTENT GRID ── */}
+      {/* ══ CONTENT GRID ══ */}
       <div className={styles.content}>
-        
-        {/* ── Membership Info ── */}
-        <SectionCard icon={<IconUser size={18} />} title="معلومات العضوية" accentTop>
-          <div className={styles.membershipInfo}>
-            <div className={styles.membershipGrid}>
-              <div className={styles.membershipItem}>
-                <span className={styles.membershipItemLabel}>الدور</span>
-                <span className={styles.membershipItemValue}>{membership.role}</span>
-              </div>
-              <div className={styles.membershipItem}>
-                <span className={styles.membershipItemLabel}>الحالة</span>
-                <StatusBadge status={membership.status} />
-              </div>
-              {membership.joined_at && (
-                <div className={styles.membershipItem}>
-                  <span className={styles.membershipItemLabel}>تاريخ الانضمام</span>
-                  <span className={styles.membershipItemValue}>
-                    {new Date(membership.joined_at).toLocaleDateString("ar-EG")}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        </SectionCard>
 
-        {/* ── Clan Info ── */}
-        <SectionCard icon={<IconShield size={18} />} title="معلومات العشيرة">
-          <div className={styles.infoGrid}>
-            <div className={styles.infoItem}>
-              <div className={styles.infoLabel}>اسم العشيرة</div>
-              <div className={styles.infoValue}>{clan.name}</div>
+        {/* ── Membership ── */}
+        <SectionCard
+          icon={<IconUser size={18} />}
+          title="معلومات العضوية"
+          subtitle="بيانات العضو الحالية"
+          accentVariant="navy"
+        >
+          <div className={styles.membershipRow}>
+            <div className={styles.membershipCell}>
+              <span className={styles.membershipCellLabel}>الدور</span>
+              <span className={styles.membershipCellValue}>{membership.role}</span>
             </div>
-            <div className={styles.infoItem}>
-              <div className={styles.infoLabel}>رقم العشيرة</div>
-              <div className={styles.infoValue}>{clan.clan_id}</div>
+            <div className={styles.membershipCell}>
+              <span className={styles.membershipCellLabel}>الحالة</span>
+              <StatusBadge status={membership.status} />
             </div>
-            {clan.description && (
-              <div className={styles.infoItem} style={{ gridColumn: "1 / -1" }}>
-                <div className={styles.infoLabel}>الوصف</div>
-                <div className={styles.infoValue}>{clan.description}</div>
+            {membership.joined_at && (
+              <div className={styles.membershipCell}>
+                <span className={styles.membershipCellLabel}>تاريخ الانضمام</span>
+                <span className={styles.membershipCellValue}>
+                  {new Date(membership.joined_at).toLocaleDateString("ar-EG")}
+                </span>
               </div>
             )}
           </div>
         </SectionCard>
 
-        {/* ── Group Info ── */}
-        <SectionCard icon={<IconGroup size={18} />} title="معلومات الرهط" fullWidth>
+        {/* ── Clan ── */}
+        <SectionCard
+          icon={<IconShield size={18} />}
+          title="معلومات العشيرة"
+          subtitle="بيانات العشيرة المسجلة"
+        >
+          <div className={styles.infoGrid}>
+            <div className={styles.infoTile}>
+              <div className={styles.infoTileLabel}>اسم العشيرة</div>
+              <div className={styles.infoTileValue}>{clan.name}</div>
+            </div>
+            <div className={styles.infoTile}>
+              <div className={styles.infoTileLabel}>رقم العشيرة</div>
+              <div className={styles.infoTileValue}>{clan.clan_id}</div>
+            </div>
+            {clan.description && (
+              <div className={styles.infoTile} style={{ gridColumn: "1 / -1" }}>
+                <div className={styles.infoTileLabel}>الوصف</div>
+                <div className={styles.infoTileDesc}>{clan.description}</div>
+              </div>
+            )}
+          </div>
+        </SectionCard>
+
+        {/* ── Group ── */}
+        <SectionCard
+          icon={<IconGroup size={18} />}
+          title="معلومات الرهط"
+          subtitle={group ? group.name : "لم يتم التعيين بعد"}
+          fullWidth
+        >
           {!group ? (
             <div className={styles.emptyState}>
-              <div className={styles.emptyIcon}>
-                <IconGroup size={28} />
-              </div>
+              <div className={styles.emptyIconWrap}><IconGroup size={24} /></div>
               <p className={styles.emptyTitle}>لم يتم تعيينك في رهط بعد</p>
-              <p className={styles.emptyMessage}>سيتم تعيينك من قبل الإدارة قريباً</p>
+              <p className={styles.emptyMessage}>سيتم تعيينك من قِبل الإدارة قريباً</p>
             </div>
           ) : (
             <>
-              <div className={styles.groupHeader}>
-                <span className={styles.groupHeaderIcon}>
-                  <IconGroup size={20} />
-                </span>
+              <div className={styles.groupBanner}>
+                <div className={styles.groupBannerIcon}><IconGroup size={22} /></div>
                 <div>
-                  <div className={styles.groupHeaderLabel}>اسم الرهط</div>
-                  <div className={styles.groupHeaderName}>{group.name}</div>
+                  <div className={styles.groupBannerLabel}>الرهط الحالي</div>
+                  <div className={styles.groupBannerName}>{group.name}</div>
                 </div>
               </div>
-              <div className={styles.statsGrid}>
-                <div className={styles.statCard}>
-                  <div className={styles.statValue}>{group_members.length}</div>
-                  <div className={styles.statLabel}>عضو</div>
+              <div className={styles.statsRow}>
+                <div className={styles.statTile}>
+                  <div className={styles.statNum}>{group_members.length}</div>
+                  <div className={styles.statUnit}>إجمالي الأعضاء</div>
                 </div>
-                <div className={styles.statCard}>
-                  <div className={styles.statValue}>{leadersArray.length}</div>
-                  <div className={styles.statLabel}>قائد / مساعد</div>
+                <div className={styles.statTile}>
+                  <div className={styles.statNum}>{leadersArray.length}</div>
+                  <div className={styles.statUnit}>القادة والمساعدون</div>
                 </div>
               </div>
             </>
           )}
         </SectionCard>
 
-        {/* ── Group Leaders ── */}
+        {/* ── Leaders ── */}
         {group && leadersArray.length > 0 && (
-          <SectionCard icon={<IconStar size={18} />} title="قادة الرهط" fullWidth>
-            <div className={styles.memberList}>
+          <SectionCard
+            icon={<IconStar size={18} />}
+            title="قادة الرهط"
+            subtitle={`${leadersArray.length} قائد / مساعد`}
+            fullWidth
+          >
+            <div className={styles.leaderList}>
               {leadersArray.map((leader, idx) => (
-                <div key={idx} className={styles.memberCard}>
-                  <div className={styles.memberInfo}>
-                    <div className={`${styles.memberAvatar} ${styles.leaderAvatar}`}>
-                      <IconUser size={18} />
-                    </div>
-                    <div>
-                      <div className={styles.memberName}>{leader.name}</div>
-                      <div className={styles.contactInfo}>
-                        {leader.email && (
-                          <div className={styles.memberEmail}>{leader.email}</div>
-                        )}
-                        {leader.phone && (
-                          <div className={styles.memberPhone}>{leader.phone}</div>
-                        )}
-                      </div>
+                <div key={idx} className={styles.leaderRow}>
+                  <div className={styles.leaderAvatar}><IconUser size={20} /></div>
+                  <div className={styles.leaderMeta}>
+                    <div className={styles.leaderName}>{leader.name}</div>
+                    <div className={styles.leaderContacts}>
+                      {leader.email && (
+                        <span className={styles.leaderContact}>
+                          <IconMail size={12} /> {leader.email}
+                        </span>
+                      )}
+                      {leader.phone && (
+                        <span className={styles.leaderContact}>
+                          <IconPhone size={12} /> {leader.phone}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <RoleBadge role={leader.role} />
@@ -426,20 +377,23 @@ export default function DashboardPage() {
           </SectionCard>
         )}
 
-        {/* ── Group Members ── */}
+        {/* ── Members ── */}
         {group && group_members.length > 0 && (
-          <SectionCard icon={<IconUsers size={18} />} title="أعضاء الرهط" fullWidth>
+          <SectionCard
+            icon={<IconUsers size={18} />}
+            title="أعضاء الرهط"
+            subtitle={`${group_members.length} عضو مسجل`}
+            fullWidth
+          >
             <div className={styles.membersGrid}>
               {group_members.map((member, idx) => (
-                <div key={idx} className={styles.memberGridCard}>
-                  <div className={styles.memberInfo}>
-                    <div className={styles.memberGridAvatar}>
-                      <IconUser size={16} />
-                    </div>
+                <div key={idx} className={styles.memberTile}>
+                  <div className={styles.memberTileLeft}>
+                    <div className={styles.memberAvatar}><IconUser size={16} /></div>
                     <div>
-                      <div className={styles.memberGridName}>{member.name}</div>
+                      <div className={styles.memberName}>{member.name}</div>
                       {member.gender && (
-                        <div className={styles.memberGender}>
+                        <div className={styles.memberSub}>
                           {member.gender === "female" ? "أنثى" : "ذكر"}
                         </div>
                       )}

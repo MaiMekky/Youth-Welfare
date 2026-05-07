@@ -187,22 +187,17 @@ export default function AvailableFamiliesPage() {
         </div>
 
         <div className={styles.heroContent}>
-          <div className={styles.heroIcon}>
-            <IconSearch size={28} />
+          
           </div>
           <div className={styles.heroText}>
             <h1>الأسر المتاحة للانضمام</h1>
+            
             <p>اكتشف الأسر الطلابية وانضم إلى المجتمع الذي يناسبك</p>
           </div>
-          {!loading && families.length > 0 && (
-            <div className={styles.heroStats}>
-              <span className={styles.statBadge}>
-                {families.length} أسرة متاحة
-              </span>
-            </div>
-          )}
-        </div>
-        <div className={styles.heroAccent} />
+        
+        
+        
+        
       </div>
 
       {/* Search Bar */}

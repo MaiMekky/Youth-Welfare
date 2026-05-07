@@ -221,35 +221,10 @@ export default function DashboardPage() {
           zIndex: 10
         }}>
           <Link href="/Student/Scouts" className={styles.backLink}>
-            العودة للجوالة <IconArrowRight size={14} />
+            العودة  <IconArrowRight size={14} />
           </Link>
         </div>
-        {/* Meta pills below hero */}
-        <div className={styles.heroMeta} style={{
-          padding: '0 48px 20px',
-          marginTop: '-10px',
-          position: 'relative',
-          zIndex: 2
-        }}>
-          {membership.role && (
-            <span className={styles.heroPill}>
-              <IconCheckCircle size={13} />
-              {membership.role}
-            </span>
-          )}
-          <div className={styles.heroDivider} />
-          <StatusBadge status={membership.status} />
-          {membership.joined_at && (
-            <>
-              <div className={styles.heroDivider} />
-              <span className={styles.heroSubPill}>
-                <IconCalendar size={12} />
-                {new Date(membership.joined_at).toLocaleDateString("ar-EG")}
-              </span>
-            </>
-          )}
-        </div>
-      </div>
+     </div>
 
       {/* ══ CONTENT GRID ══ */}
       <div className={styles.content}>

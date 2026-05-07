@@ -26,6 +26,7 @@
 .heroTopAccent {
   position: absolute;
   top: 0;
+   margin-bottom: 20px;
   left: 0;
   right: 0;
   height: 3px;
@@ -147,8 +148,8 @@
 ══════════════════════════════════════════════════════════════ */
 .searchSection {
   max-width: 1320px;
-  margin: -20px auto 0;
-  padding: 0 40px;
+  margin: 20px auto 0;
+  padding: 0 20px;
   position: relative;
   z-index: 10;
 }

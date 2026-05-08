@@ -113,7 +113,7 @@ export default function ApplicationDetailsForm({ onSuccess, onNotify }: Applicat
   const documentsList = [
     { id: "socialResearch", title: "بحث اجتماعي من وحدة التضامن الاجتماعي", desc: "بحث اجتماعي معتمد من الوحدة.", required: true },
     { id: "salaryProof",    title: "مفردات المرتب أو المعاش أو ما يفيد بالدخل", desc: "مفردات مرتب حديثة أو شهادة معاش.", required: true },
-    { id: "fatherId",       title: "صورة البطاقة الشخصية للوالد", desc: "صورة واضحة من وجهي البطاقة.", required: true },
+    { id: "fatherId",       title: "صورة البطاقة الشخصية لجميع افراد الأسرة  كاملة او شهادة الميلاد لمن لم يتم السن", desc: "صورة واضحة من وجهي البطاقة.", required: true },
     { id: "studentId",      title: "صورة البطاقة الشخصية للطالب", desc: "صورة من وجهي البطاقة الشخصية للطالب.", required: true },
     { id: "landProof",      title: "حيازة زراعية لسكان الأقاليم", desc: "شهادة حيازة أو ملكية أرض زراعية.", required: false },
     { id: "takafulCard",    title: "صورة بطاقة تكافل وكرامة", desc: "صورة من البطاقة إن وجدت.", required: false },
@@ -178,6 +178,7 @@ export default function ApplicationDetailsForm({ onSuccess, onNotify }: Applicat
                 <option value="بالمعاش">بالمعاش</option>
                 <option value="مريض">مريض</option>
                 <option value="متوفى">متوفى</option>
+                <option value="كريم النسب">كريم النسب</option>
               </select>
               {errors.fatherStatus && <span className="error">{errors.fatherStatus}</span>}
             </div>
@@ -190,6 +191,7 @@ export default function ApplicationDetailsForm({ onSuccess, onNotify }: Applicat
                 <option value="بالمعاش">بالمعاش</option>
                 <option value="مريضة">مريضة</option>
                 <option value="متوفاة">متوفاة</option>
+                <option value="كريم النسب">كريم النسب</option>
               </select>
               {errors.motherStatus && <span className="error">{errors.motherStatus}</span>}
             </div>

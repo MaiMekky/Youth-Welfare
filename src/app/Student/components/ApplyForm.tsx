@@ -41,10 +41,7 @@ export default function ApplyForm({ onNavigateToRequests }: { onNavigateToReques
      {showForm && (
   <ApplicationDetailsForm
     onSuccess={() => {
-      // alert("🔔 تنبيه هام:\n\nيرجى التوجه إلى الجامعة وتسليم المستندات الرسمية خلال مدة من 3 إلى 5 أيام عمل من تاريخ تقديم الطلب لضمان مراجعة ملفك دون تأخير.");
-      // // تغيير التبويب من Apply إلى MyRequests
-      // const changeTab = (window as Record<string, unknown>).changeTabToMyRequests;
-      // if (changeTab) changeTab();
+      
       handleSuccess();
     }}
      onNotify={handleNotify}

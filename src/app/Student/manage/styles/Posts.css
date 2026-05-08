@@ -103,29 +103,31 @@
 }
 
 /* ========= CARD LAYOUT ========= */
+/*
+  Layout (RTL):
+  [ text-section (flex:1) ]   [ avatar ]
+  Avatar sits on the LEFT visually (start of LTR),
+  but since direction is RTL, we use a normal row so
+  the avatar appears on the LEFT and text on the RIGHT.
+*/
 .posts-page .post-content {
   display: flex;
-  flex-direction: row-reverse;
-  justify-content: space-between;
+  flex-direction: row;           /* avatar LEFT, text RIGHT in RTL context */
   align-items: flex-start;
   gap: 20px;
   padding: 22px 28px 22px 22px;
   width: 100%;
   box-sizing: border-box;
-}
-
-.posts-page .post-content .text-section {
-  flex: 1;
   direction: rtl;
-  text-align: right;
 }
 
-/* ========= AVATAR ========= */
+/* ── Avatar (sits on the left edge in LTR = inline-start in RTL) ── */
 .posts-page .avatar {
   flex-shrink: 0;
   display: flex;
   align-items: flex-start;
   justify-content: center;
+  order: -1;                     /* push avatar visually to the start (right in RTL) */
 }
 
 .posts-page .avatar .user-icon {
@@ -139,6 +141,14 @@
   box-sizing: border-box;
 }
 
+/* ── Text section ── */
+.posts-page .post-content .text-section {
+  flex: 1;
+  direction: rtl;
+  text-align: right;
+  min-width: 0;
+}
+
 /* ========= META INFO ========= */
 .posts-page .meta {
   text-align: right;
@@ -147,11 +157,11 @@
 
 .posts-page .author-row {
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;           /* RTL: renders right-to-left naturally */
   align-items: center;
   gap: 10px;
   margin-bottom: 5px;
-  justify-content: flex-start;
+  justify-content: flex-start;  /* in RTL flex-start = right side */
 }
 
 .posts-page .author-name {
@@ -181,6 +191,8 @@
   font-weight: 500;
   color: var(--mute);
   font-family: 'Cairo', sans-serif;
+  display: block;
+  text-align: right;
 }
 
 /* ========= BODY ========= */
@@ -190,6 +202,8 @@
   color: var(--navy);
   margin: 0 0 8px 0;
   font-family: 'Cairo', sans-serif;
+  text-align: right;
+  direction: rtl;
 }
 
 .posts-page .post-text {
@@ -199,6 +213,8 @@
   color: var(--text);
   margin: 0;
   font-family: 'Cairo', sans-serif;
+  text-align: right;
+  direction: rtl;
 }
 
 /* ========= LOADING STATE ========= */
@@ -275,91 +291,33 @@
 
 /* ========= RESPONSIVE ========= */
 @media (max-width: 1024px) {
-  .posts-page {
-    padding: 22px 24px;
-  }
+  .posts-page { padding: 22px 24px; }
 }
 
 @media (max-width: 768px) {
-  .posts-page {
-    padding: 18px 16px;
-  }
-
-  .posts-page .page-header-block {
-    padding: 18px 22px;
-    border-radius: 12px 12px 0 0;
-  }
-
-  .posts-page .page-title {
-    font-size: 20px;
-  }
-
-  .posts-page .section-body {
-    padding: 18px 16px;
-  }
-
-  .posts-page .post-content {
-    padding: 18px 20px 18px 16px;
-    gap: 14px;
-  }
-
-  .posts-page .post-title {
-    font-size: 16px;
-  }
-
-  .posts-page .author-name {
-    font-size: 14px;
-  }
+  .posts-page { padding: 18px 16px; }
+  .posts-page .page-header-block { padding: 18px 22px; border-radius: 12px 12px 0 0; }
+  .posts-page .page-title { font-size: 20px; }
+  .posts-page .section-body { padding: 18px 16px; }
+  .posts-page .post-content { padding: 18px 20px 18px 16px; gap: 14px; }
+  .posts-page .post-title { font-size: 16px; }
+  .posts-page .author-name { font-size: 14px; }
 }
 
 @media (max-width: 480px) {
-  .posts-page {
-    padding: 12px 12px;
-  }
+  .posts-page { padding: 12px; }
+  .posts-page .page-header-block { padding: 15px 18px; border-radius: 10px 10px 0 0; }
+  .posts-page .page-title { font-size: 17px; }
+  .posts-page .section-body { padding: 14px 12px; }
+  .posts-page .post-content { padding: 14px 16px 14px 12px; gap: 10px; }
+  .posts-page .avatar .user-icon { width: 40px; height: 40px; padding: 9px; }
+  .posts-page .post-title { font-size: 15px; }
+  .posts-page .post-text { font-size: 13px; line-height: 1.7; }
+  .posts-page .author-name { font-size: 13px; }
+  .posts-page .author-role { font-size: 11px; padding: 4px 10px; }
+  .posts-page .date-time { font-size: 11px; }
+}
 
-  .posts-page .page-header-block {
-    padding: 15px 18px;
-    border-radius: 10px 10px 0 0;
-  }
-
-  .posts-page .page-title {
-    font-size: 17px;
-  }
-
-  .posts-page .section-body {
-    padding: 14px 12px;
-  }
-
-  .posts-page .post-content {
-    padding: 14px 16px 14px 12px;
-    gap: 10px;
-  }
-
-  .posts-page .avatar .user-icon {
-    width: 40px;
-    height: 40px;
-    padding: 9px;
-  }
-
-  .posts-page .post-title {
-    font-size: 15px;
-  }
-
-  .posts-page .post-text {
-    font-size: 13px;
-    line-height: 1.7;
-  }
-
-  .posts-page .author-name {
-    font-size: 13px;
-  }
-
-  .posts-page .author-role {
-    font-size: 11px;
-    padding: 4px 10px;
-  }
-
-  .posts-page .date-time {
-    font-size: 11px;
-  }
+@media (max-width: 360px) {
+  .posts-page .post-content { padding: 12px 14px; gap: 8px; }
 }

@@ -1,114 +1,123 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-  --navy:       #1E3A5F;
-  --navy-mid:   #2D5F8A;
-  --navy-light: #EBF3FB;
-  --gold:       #C49B3A;
-  --gold-dark:  #A67F2C;
-  --gold-pale:  #FDF6E3;
-  --green:      #059669;
-  --green-bg:   #ECFDF5;
-  --green-bdr:  #6EE7B7;
-  --red:        #DC2626;
-  --red-bg:     #FEF2F2;
-  --red-bdr:    #FECACA;
-  --warning:    #D97706;
-  --border:     #E2ECF5;
-  --bg:         #EDF2F8;
-  --text:       #1A2E42;
-  --mute:       #6B8299;
+  --navy:       #1e3a5f;
+  --navy-mid:   #2d5f8a;
+  --navy-deep:  #152c47;
+  --gold:       #c49b3a;
+  --gold-dark:  #a67f2c;
+  --gold-light: #d4af55;
   --radius:     10px;
-  --shadow:     0 2px 12px rgba(26,46,66,.08);
 }
 
-/* ═══════════════════════════════════════════
-   HERO CARD — navy gradient header block
-═══════════════════════════════════════════ */
+/* ══════════════════════════════════════════
+   HERO CARD  —  mirrors .student-hero
+══════════════════════════════════════════ */
 .heroCard {
-  width: 100%;
-  background: linear-gradient(140deg, #1E3A5F 0%, #2D5F8A 100%);
-  border-radius: 16px;
+  background: linear-gradient(
+    140deg,
+    var(--navy-deep, #152c47) 0%,
+    var(--navy,      #1e3a5f) 50%,
+    var(--navy-mid,  #2d5f8a) 100%
+  );
+  border-radius: 20px;
+
+  /* StudentHero floating layout */
+  margin: 24px 32px 0;
+  width: calc(100% - 64px);
+  box-sizing: border-box;
+
+  /* Bottom padding present (no flush tabs in this component) */
+  padding: 28px 32px 28px;
+
+  box-shadow: 0 12px 40px rgba(30, 58, 95, 0.20);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 18px rgba(30, 58, 95, 0.22);
-  margin-bottom: 24px;
   font-family: 'Cairo', sans-serif;
   direction: rtl;
 }
 
-/* Gold accent stripe on top */
+/* Gold top shimmer — StudentHero ::before */
 .heroCard::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--gold) 0%, var(--gold-dark) 50%, var(--gold) 100%);
-  z-index: 2;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--gold,       #c49b3a) 25%,
+    var(--gold-light, #d4af55) 50%,
+    var(--gold,       #c49b3a) 75%,
+    transparent 100%
+  );
 }
 
-/* Subtle radial glow */
+/* Ambient glow blobs — StudentHero ::after */
 .heroBg {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at 10% 50%, rgba(196, 155, 58, 0.09) 0%, transparent 55%),
-    radial-gradient(ellipse at 90% 20%, rgba(255, 255, 255, 0.03) 0%, transparent 45%);
+    radial-gradient(ellipse 600px 400px at -10%  70%, rgba(196,155,58,0.10)  0%, transparent 55%),
+    radial-gradient(ellipse 400px 300px at  100%   0%, rgba(255,255,255,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse 300px 200px at   50% 120%, rgba(45,95,138,0.20)  0%, transparent 60%);
   pointer-events: none;
   z-index: 0;
 }
 
-/* ── Inner layout ── */
+/* ── Inner row  —  .student-hero__inner ── */
 .heroInner {
   position: relative;
   z-index: 1;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 32px;
-  padding: 24px 30px;
+  gap: 24px;
 }
 
-/* ── Text block ── */
-.heroText {
-  flex: 1;
-  min-width: 0;
-}
+/* ── Text block  —  .student-hero__text ── */
+.heroText { flex: 1; min-width: 0; }
 
+/* ── Title  —  .student-hero__title ── */
 .heroTitle {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 900;
-  color: #ffffff;
-  margin: 0 0 6px 0;
+  color: #fff;
+  margin: 0;
+  font-family: 'Cairo', sans-serif;
+  letter-spacing: -0.03em;
   line-height: 1.2;
-  letter-spacing: -0.01em;
 }
 
-/* Gold underline */
+/* Gold gradient underline */
 .heroTitle::after {
   content: '';
   display: block;
-  width: 44px;
+  width: 40px;
   height: 3px;
-  background: var(--gold);
+  background: linear-gradient(90deg, var(--gold, #c49b3a), var(--gold-light, #d4af55));
   border-radius: 3px;
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
+/* ── Subtitle  —  .student-hero__subtitle ── */
 .heroSub {
   font-size: 14px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.65);
-  margin: 14px 0 0 0;
-  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.60);
+  margin: 14px 0 0;
+  font-family: 'Cairo', sans-serif;
+  line-height: 1.7;
+  max-width: 500px;
 }
 
-/* ── Action buttons ── */
+/* ── Action buttons  —  .student-hero__stats position ── */
 .heroActions {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  align-items: flex-start;
+  gap: 10px;
   flex-shrink: 0;
+  padding-top: 4px;
 }
 
 /* Shared button base */
@@ -117,11 +126,11 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 13px 28px;
+  padding: 11px 22px;
   border: none;
   border-radius: var(--radius);
   font-family: 'Cairo', sans-serif;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 800;
   cursor: pointer;
   white-space: nowrap;
@@ -129,62 +138,76 @@
 }
 
 .btnPrimary:hover,
-.btnSecondary:hover { transform: translateY(-2px); }
+.btnSecondary:hover  { transform: translateY(-2px); }
 .btnPrimary:active,
 .btnSecondary:active { transform: translateY(0); }
 
-/* Gold gradient — primary action */
+/* Gold gradient — primary */
 .btnPrimary {
-  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+  background: linear-gradient(135deg, var(--gold, #c49b3a) 0%, var(--gold-dark, #a67f2c) 100%);
   color: #fff;
-  box-shadow: 0 4px 16px rgba(196, 155, 58, 0.4);
+  box-shadow: 0 4px 16px rgba(196, 155, 58, 0.40);
 }
 .btnPrimary:hover {
   box-shadow: 0 6px 22px rgba(196, 155, 58, 0.55);
 }
 
-/* Ghost — secondary action (only on dark bg) */
+/* Ghost — secondary (dark bg only) */
 .btnSecondary {
   background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
+  color: #fff;
   border: 1.5px solid rgba(255, 255, 255, 0.28);
 }
 .btnSecondary:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.4);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.20);
+  border-color: rgba(255, 255, 255, 0.42);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.20);
 }
 
-/* ═══════════════════════════════════════════
+/* ══════════════════════════════════════════
    RESPONSIVE
-═══════════════════════════════════════════ */
+══════════════════════════════════════════ */
 @media (max-width: 768px) {
-  .heroInner {
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 20px;
-    padding: 15px 18px;
+  .heroCard {
+    margin: 16px 16px 0;
+    width: calc(100% - 32px);
+    padding: 18px 20px 20px;
+    border-radius: 12px;
   }
 
-  .heroText { width: 100%; }
+  .heroInner {
+    flex-direction: column;
+    gap: 16px;
+  }
 
-  .heroTitle { font-size: 17px; }
+  .heroTitle { font-size: 20px; }
+  .heroSub   { font-size: 13px; }
 
   .heroActions {
     width: 100%;
-    flex-direction: column;
+    flex-direction: row;
     gap: 10px;
   }
 
   .btnPrimary,
   .btnSecondary {
-    width: 100%;
+    flex: 1;
     justify-content: center;
+    font-size: 14px;
+    padding: 10px 14px;
   }
 }
 
 @media (max-width: 480px) {
-  .heroInner { padding: 15px 18px; }
-  .heroTitle  { font-size: 17px; }
-  .heroSub    { font-size: 13px; margin-top: 10px; }
+  .heroCard {
+    margin: 12px 10px 0;
+    width: calc(100% - 20px);
+    padding: 15px 18px 18px;
+    border-radius: 10px;
+  }
+
+  .heroTitle { font-size: 17px; }
+  .heroSub   { font-size: 12px; margin-top: 10px; }
 }
+
+

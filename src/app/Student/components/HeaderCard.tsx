@@ -8,25 +8,32 @@ interface HeaderCardProps {
 }
 
 const filters = [
-  { id: "info", label: "معلومات الدعم" },
-  { id: "apply", label: "تقديم طلب" },
-  { id: "myRequests", label: "طلباتي" },
+  { id: "info",       label: "معلومات الدعم" },
+  { id: "apply",      label: "تقديم طلب"     },
+  { id: "myRequests", label: "طلباتي"         },
 ];
 
 export default function HeaderCard({ activeTab, onTabChange }: HeaderCardProps) {
   return (
     <div className={styles["header-card-container"]}>
-      {/* ── Hero card (no tabs inside) ── */}
+      {/*
+        Hero card — tabs live INSIDE at the bottom,
+        matching the StudentHero .student-hero pattern.
+      */}
       <div className={styles["header-card"]}>
-        <h1 className={styles["header-title"]}>التكافل الاجتماعي</h1>
-        <p className={styles["header-subtitle"]}>
-          نظام الدعم المالي والاجتماعي لطلاب جامعة العاصمة
-        </p>
-      </div>
 
-      {/* ── Gold segmented tab card ── */}
-      <div className={styles["tab-card-wrapper"]}>
-        <div className={styles["tab-card"]}>
+        {/* ── Text content ── */}
+        <div className={styles["header-card__inner"]}>
+          <div className={styles["header-card__text"]}>
+            <h1 className={styles["header-title"]}>التكافل الاجتماعي</h1>
+            <p className={styles["header-subtitle"]}>
+              نظام الدعم المالي والاجتماعي لطلاب جامعة العاصمة
+            </p>
+          </div>
+        </div>
+
+        {/* ── Filter tabs flush to the bottom edge ── */}
+        <div className={styles["header-card__filters"]}>
           {filters.map((filter) => (
             <button
               key={filter.id}
@@ -39,6 +46,7 @@ export default function HeaderCard({ activeTab, onTabChange }: HeaderCardProps) 
             </button>
           ))}
         </div>
+
       </div>
     </div>
   );

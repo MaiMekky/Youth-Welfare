@@ -3,10 +3,10 @@
 :root {
   --navy:        #1E3A5F;
   --navy-mid:    #2D5F8A;
-  --navy-light:  #EBF3FB;
+  --navy-deep:   #152C47;
   --gold:        #C49B3A;
   --gold-dark:   #A67F2C;
-  --gold-pale:   #FDF6E3;
+  --gold-light:  #D4AF55;
   --green:       #059669;
   --green-bg:    #ECFDF5;
   --green-bdr:   #6EE7B7;
@@ -21,13 +21,11 @@
   --radius:      10px;
   --radius-lg:   16px;
   --shadow:      0 2px 12px rgba(26,46,66,.08);
-  --shadow-lg:   0 4px 18px rgba(30,58,95,.22);
+  --shadow-lg:   0 8px 28px rgba(30,58,95,.14);
   --transition:  0.2s cubic-bezier(0.4,0,0.2,1);
 }
 
-/* ═══════════════════════════════════════════
-   PAGE
-═══════════════════════════════════════════ */
+/* ══ PAGE ══ */
 .page {
   min-height: 100vh;
   background: var(--bg);
@@ -35,15 +33,15 @@
   direction: rtl;
 }
 
-/* ═══════════════════════════════════════════
-   HERO HEADER — Pattern #1: navy gradient header
-═══════════════════════════════════════════ */
+/* ══ HERO ══ */
 .hero {
-  background: linear-gradient(140deg, var(--navy) 0%, var(--navy-mid) 100%);
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  background: linear-gradient(140deg, var(--navy-deep) 0%, var(--navy) 50%, var(--navy-mid) 100%);
+  border-radius: 20px;
+  margin: 20px 24px 0;
+  padding: clamp(18px, 4vw, 32px) clamp(18px, 5vw, 36px);
   position: relative;
   overflow: hidden;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 12px 40px rgba(30,58,95,.20);
 }
 
 .hero::before {
@@ -51,73 +49,75 @@
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--gold), #e5b84a, var(--gold));
-  z-index: 2;
+  background: linear-gradient(90deg, transparent, var(--gold), var(--gold-light), var(--gold), transparent);
 }
 
-.heroBg {
+.hero::after {
+  content: '';
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at 8% 50%, rgba(196,155,58,0.10) 0%, transparent 55%),
-    radial-gradient(ellipse at 92% 20%, rgba(255,255,255,0.03) 0%, transparent 40%);
+    radial-gradient(ellipse 500px 300px at -5% 70%, rgba(196,155,58,.10) 0%, transparent 55%),
+    radial-gradient(ellipse 300px 200px at 100% 0%, rgba(255,255,255,.04) 0%, transparent 50%);
   pointer-events: none;
 }
 
 .heroInner {
   position: relative;
   z-index: 1;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 24px 30px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: clamp(12px, 3vw, 24px);
+  flex-wrap: wrap;
 }
 
-.heroText { flex: 1; min-width: 0; }
+.heroText {
+  flex: 1 1 200px;
+  min-width: 0;
+}
 
-/* Pattern #1 — page title 24px/900 white */
 .heroTitle {
-  font-size: 24px;
+  font-size: clamp(16px, 3.5vw, 24px);
   font-weight: 900;
   color: #fff;
-  margin: 0 0 6px;
+  margin: 0;
   line-height: 1.2;
+  word-break: break-word;
 }
 
 .heroTitle::after {
   content: '';
   display: block;
-  width: 44px;
+  width: 38px;
   height: 3px;
-  background: var(--gold);
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
   border-radius: 3px;
   margin-top: 10px;
 }
 
-/* Pattern #1 — subtitle rgba(255,255,255,.65) 14px/500 */
 .heroSub {
-  font-size: 14px;
+  font-size: clamp(12px, 2vw, 14px);
   font-weight: 500;
-  color: rgba(255,255,255,0.65);
-  margin: 14px 0 0;
+  color: rgba(255,255,255,0.60);
+  margin: 10px 0 0;
+  line-height: 1.7;
+  word-break: break-word;
 }
 
-/* Pattern #3 — secondary/ghost button on dark background */
+/* Back button */
 .backBtn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 13px 28px;
-  background: rgba(255,255,255,0.12);
-  border: 1.5px solid rgba(255,255,255,0.28);
+  gap: 7px;
+  padding: 10px clamp(14px, 3vw, 22px);
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.22);
   border-radius: var(--radius);
-  color: #fff;
+  color: rgba(255,255,255,.85);
   font-family: 'Cairo', sans-serif;
-  font-size: 16px;
-  font-weight: 800;
+  font-size: clamp(12px, 2vw, 13px);
+  font-weight: 700;
   cursor: pointer;
   transition: all var(--transition);
   white-space: nowrap;
@@ -125,258 +125,171 @@
 }
 
 .backBtn:hover {
-  background: rgba(255,255,255,0.20);
-  border-color: rgba(255,255,255,0.40);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  background: rgba(255,255,255,.18);
+  border-color: rgba(255,255,255,.36);
+  color: #fff;
 }
 
-/* ═══════════════════════════════════════════
-   CONTENT AREA
-═══════════════════════════════════════════ */
+/* ══ CONTENT ══ */
 .content {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 32px 40px 56px;
+  padding: clamp(16px, 3vw, 24px) clamp(14px, 3vw, 24px) 48px;
 }
 
-/* ── Empty / Loading / Error states ── */
+/* States */
 .stateBox {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  min-height: 320px;
+  gap: 14px;
+  min-height: 280px;
   background: #fff;
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
   padding: 48px 32px;
   text-align: center;
 }
 
-/* Body text 15px/600 — state title uses stronger weight */
-.stateTitle {
-  font-size: 15px;
-  font-weight: 800;
-  color: var(--navy);
-  margin: 0;
-}
-
-/* Labels 13px/700 */
-.stateMsg {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--mute);
-  margin: 0;
-}
-
+.stateTitle { font-size: 15px; font-weight: 800; color: var(--navy); margin: 0; }
+.stateMsg   { font-size: 13px; font-weight: 600; color: var(--mute); margin: 0; }
 .stateIconEmpty { color: var(--border); }
 .stateIconError { color: var(--red); }
 
-/* Pattern #9 — spinner 44×44, gold top */
 .spinner {
-  width: 44px;
-  height: 44px;
+  width: 40px; height: 40px;
   border: 3px solid var(--border);
   border-top-color: var(--gold);
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin .8s linear infinite;
 }
-
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ═══════════════════════════════════════════
-   CARDS GRID
-═══════════════════════════════════════════ */
+/* ══ CARDS GRID ══ */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 480px), 1fr));
+  gap: 16px;
 }
 
-/* Pattern #4 — content card */
+/* Card */
 .card {
   background: #fff;
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   transition: all var(--transition);
-  position: relative;
-}
-
-/* Pattern #4 — 4px right gold stripe */
-.card::before {
-  content: '';
-  position: absolute;
-  top: 0; right: 0;
-  width: 4px;
-  height: 100%;
-  background: linear-gradient(180deg, var(--gold), var(--gold-dark));
-  border-radius: 0 var(--radius) var(--radius) 0;
 }
 
 .card:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-lg);
-  border-color: rgba(196,155,58,0.35);
+  border-color: rgba(196,155,58,.30);
 }
 
-/* Card top section */
-.cardTop {
-  padding: 22px 22px 18px;
-  flex: 1;
-}
+/* Status top stripe */
+.cardStripe { height: 4px; width: 100%; flex-shrink: 0; }
+.cardStripe.accepted { background: linear-gradient(90deg, #059669, #34d399); }
+.cardStripe.rejected { background: linear-gradient(90deg, #DC2626, #f87171); }
+.cardStripe.pending  { background: linear-gradient(90deg, #D97706, #fbbf24); }
 
-.cardTitleRow {
+/* Card header */
+.cardHead {
+  padding: 16px 20px 12px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 10px;
+  flex-wrap: wrap;
 }
 
-/* Body text 15px/600 — card title stronger */
 .cardTitle {
   font-size: 15px;
   font-weight: 800;
-  color: var(--navy);
+  color: var(--text);
   margin: 0;
   line-height: 1.3;
-  flex: 1;
-}
-
-/* Body text 15px/600 */
-.cardDesc {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--mute);
-  line-height: 1.65;
-  margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
+  flex: 1 1 120px;
+  min-width: 0;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* Divider */
-.divider {
-  height: 1px;
-  background: var(--border);
-  margin: 0 22px;
-}
-
-/* Meta info section */
-.meta {
-  padding: 16px 22px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.metaItem {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-}
-
-.metaIcon {
-  color: var(--gold);
-  flex-shrink: 0;
-}
-
-/* Labels 13px/700 */
-.metaLabel {
-  color: var(--mute);
-  font-weight: 700;
-  font-size: 13px;
-  min-width: 90px;
-}
-
-/* Body text */
-.metaVal {
-  color: var(--text);
-  font-weight: 600;
-  font-size: 15px;
-  flex: 1;
-  text-align: left;
-}
-
-/* ═══════════════════════════════════════════
-   STATUS BADGES — Pattern #6: pill shape
-═══════════════════════════════════════════ */
+/* Badge */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   padding: 5px 14px;
   border-radius: 100px;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 800;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
-/* Pattern #6 — green for accepted */
-.accepted {
-  background: var(--green-bg);
-  color: #065F46;
-  border: 1px solid var(--green-bdr);
+.accepted { background: var(--green-bg); color: #065F46; border: 1px solid var(--green-bdr); }
+.rejected { background: var(--red-bg);   color: #991B1B; border: 1px solid var(--red-bdr); }
+.pending  { background: #FFFBEB;         color: var(--warning); border: 1px solid #FDE68A; }
+
+.cardDesc {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mute);
+  line-height: 1.65;
+  margin: 0 20px 14px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-/* Pattern #6 — red for rejected */
-.rejected {
-  background: var(--red-bg);
-  color: #991B1B;
-  border: 1px solid var(--red-bdr);
+.divider { height: 1px; background: var(--border); margin: 0 20px; }
+
+/* Meta 3-column grid */
+.meta {
+  padding: 14px 20px 18px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px 16px;
 }
 
-/* Pattern #6 — amber for pending */
-.pending {
-  background: #FFFBEB;
-  color: var(--warning);
-  border: 1px solid #FDE68A;
+.metaItem { display: flex; flex-direction: column; gap: 4px; }
+
+.metaLabel {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--mute);
 }
 
-/* ═══════════════════════════════════════════
-   RESPONSIVE
-═══════════════════════════════════════════ */
+.metaIcon { color: var(--gold); flex-shrink: 0; }
+
+.metaVal { font-size: 13px; font-weight: 700; color: var(--text); }
+
+/* ══ RESPONSIVE ══ */
+@media (max-width: 900px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 768px) {
-  .heroInner {
-    flex-direction: column;
-    align-items: flex-end;
-    padding: 15px 18px;
-    gap: 16px;
-  }
-
-  /* Responsive header title size */
-  .heroTitle { font-size: 17px; }
-  .heroSub   { font-size: 13px; }
-
-  /* Buttons full-width stacked on mobile */
-  .backBtn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .content {
-    padding: 20px 16px 40px;
-  }
-
-  /* Mobile: single column */
-  .grid {
-    grid-template-columns: 1fr;
-  }
+  .hero { margin: 14px 14px 0; }
+  .heroInner { gap: 12px; }
+  .backBtn { flex: 1 1 100%; justify-content: center; }
+  .meta { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 480px) {
-  .heroTitle  { font-size: 17px; }
-  .heroSub    { font-size: 13px; }
-  .cardTitle  { font-size: 15px; }
-  .metaLabel  { min-width: 75px; }
+  .hero { margin: 10px 10px 0; border-radius: 16px; }
+  .heroInner { flex-direction: column; align-items: stretch; }
+  .heroTitle::after { margin-top: 8px; }
+  .meta { grid-template-columns: 1fr; }
+  .cardHead { flex-direction: column; align-items: flex-start; }
+  .cardTitle { white-space: normal; }
 }

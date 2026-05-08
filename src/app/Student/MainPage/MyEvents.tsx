@@ -632,7 +632,7 @@ export default function MyEvents() {
                             overflow: 'hidden'
                           }}
                         >
-                          <ResultIcon /> التفاصيل
+                       التفاصيل
                         </button>
 
                         {isAccepted && (
@@ -657,7 +657,7 @@ export default function MyEvents() {
                               position: 'relative',
                               overflow: 'hidden'
                             }}>
-                              <ResultIcon /> نتيجتي
+                              نتيجتي
                             </button>
                             {event.teamSettingsEnabled && (
                               <button

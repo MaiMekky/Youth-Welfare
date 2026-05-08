@@ -247,8 +247,8 @@ const Posts: React.FC<PostsProps> = ({ refreshTrigger = 0 }) => {
     <div className="posts-page" dir="rtl">
       <div className="posts-container">
         <div className="page-header-block">
-          <h1 className="page-title">آخر الأخبار والإعلانات</h1>
-          <p className="page-subtitle">تابع أحدث الأخبار والمستجدات</p>
+          <h1 className="page-title">آخر المنشورات والإعلانات</h1>
+         
         </div>
         <div className="section-body">
           {error && <p className="error-msg">{error}</p>}

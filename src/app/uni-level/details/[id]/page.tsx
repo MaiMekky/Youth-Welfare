@@ -13,11 +13,13 @@ const rejectionReasons = [
   { id: 5, text: "الطلب لا يستوفي شروط الدعم" },
   { id: 6, text: "المستندات لا تخص الطالب" },
   { id: 7, text: "اشتباه في تزوير المستندات" },
-  { id: 8, text: "سبب آخر" }
+  { id: 8, text: "سبب آخر" },
 ];
+
 const rejectionReasonMap: Record<number, string> = Object.fromEntries(
-  rejectionReasons.map(r => [r.id, r.text])
+  rejectionReasons.map((r) => [r.id, r.text])
 );
+
 interface StudentDetail {
   solidarity_id?: string | number;
   student_name?: string;
@@ -28,6 +30,8 @@ interface StudentDetail {
   father_income?: string | number;
   mother_income?: string | number;
   total_income?: string | number;
+  total_discount?: string | number;
+  discount_type?: string[];
   m_phone_num?: string;
   f_phone_num?: string;
   housing_status?: string;
@@ -78,21 +82,16 @@ export default function ApplicationDetailsPage() {
         const appRes = await authFetch(
           `${baseUrl}/api/solidarity/super_dept/${id}/applications/`
         );
-
         if (!appRes.ok) throw new Error("APPLICATION_ERROR");
-
         const appData = await appRes.json();
         setData(appData as StudentDetail);
 
         const docsRes = await authFetch(
           `${baseUrl}/api/solidarity/super_dept/${id}/documents/`
         );
-
         if (!docsRes.ok) throw new Error("DOCS_ERROR");
-
         const docsData = await docsRes.json();
         setDocs(docsData);
-
       } catch (err) {
         console.error(err);
         setErrorMsg("حدث خطأ أثناء تحميل البيانات");
@@ -123,9 +122,11 @@ export default function ApplicationDetailsPage() {
   if (errorMsg) return <p style={{ color: "red", textAlign: "center", padding: "2rem" }}>{errorMsg}</p>;
   if (!data) return <p style={{ textAlign: "center", padding: "2rem" }}>لا توجد بيانات للطلب</p>;
 
+  const discountTypes: string[] = Array.isArray(data?.discount_type) ? data.discount_type : [];
+
   return (
     <div className="details-container">
-      <button className="btnBack" onClick={() => router.push('/uni-level')}>
+      <button className="btnBack" onClick={() => router.push("/uni-level")}>
         ← العودة
       </button>
 
@@ -135,12 +136,12 @@ export default function ApplicationDetailsPage() {
       <section className="section info">
         <h3>البيانات الأساسية</h3>
         <ul>
-          <li><strong>رقم التضامن:</strong> {String(data?.solidarity_id ?? '')}</li>
+          <li><strong>رقم التضامن:</strong> {String(data?.solidarity_id ?? "")}</li>
           <li><strong>الاسم:</strong> {data?.student_name}</li>
-          <li><strong>الرقم الجامعي:</strong> {String(data?.student_uid ?? '')}</li>
+          <li><strong>الرقم الجامعي:</strong> {String(data?.student_uid ?? "")}</li>
           <li><strong>الكلية:</strong> {data?.faculty_name}</li>
           <li><strong>الحالة الدراسية:</strong> {data?.acd_status}</li>
-          <li><strong>عدد أفراد الأسرة:</strong> {String(data?.family_numbers ?? '')}</li>
+          <li><strong>عدد أفراد الأسرة:</strong> {String(data?.family_numbers ?? "")}</li>
           <li>
             <strong>حالة الطلب:</strong>{" "}
             <StatusBadge status={data?.req_status} />
@@ -152,9 +153,30 @@ export default function ApplicationDetailsPage() {
       <section className="section info">
         <h3>المعلومات المالية</h3>
         <ul>
-          <li><strong>دخل الأب:</strong> {String(data?.father_income ?? '')}</li>
-          <li><strong>دخل الأم:</strong> {String(data?.mother_income ?? '')}</li>
-          <li><strong>إجمالي الدخل:</strong> {String(data?.total_income ?? '')}</li>
+          <li><strong>دخل الأب:</strong> {String(data?.father_income ?? "")}</li>
+          <li><strong>دخل الأم:</strong> {String(data?.mother_income ?? "")}</li>
+          <li><strong>إجمالي الدخل:</strong> {String(data?.total_income ?? "")}</li>
+        </ul>
+      </section>
+
+      {/* الخصومات */}
+      <section className="section info">
+        <h3>الخصم</h3>
+        <ul>
+          <li>
+            <strong>إجمالي الخصم:</strong>{" "}
+            {data?.total_discount != null ? String(data.total_discount) : "—"}
+          </li>
+          <li>
+            <strong>أنواع الخصم:</strong>{" "}
+         {discountTypes.length > 0 ? (
+            <span className="discount-tags">
+              {discountTypes.join(", ")}
+            </span>
+          ) : (
+            "—"
+          )}
+          </li>
         </ul>
       </section>
 
@@ -175,9 +197,12 @@ export default function ApplicationDetailsPage() {
         <ul>
           <li><strong>سبب الطلب:</strong> {data?.reason}</li>
           <li><strong>الإعاقة:</strong> {data?.disabilities}</li>
-          <li><strong>الترتيب بين الإخوة:</strong> {String(data?.arrange_of_brothers ?? '')}</li>
+          <li><strong>الترتيب بين الإخوة:</strong> {String(data?.arrange_of_brothers ?? "")}</li>
           <li><strong>الموافقة من:</strong> {data?.approved_by}</li>
-          <li><strong>آخر تحديث:</strong> {data?.updated_at ? new Date(data.updated_at).toLocaleString() : '-'}</li>
+          <li>
+            <strong>آخر تحديث:</strong>{" "}
+            {data?.updated_at ? new Date(data.updated_at).toLocaleString() : "-"}
+          </li>
         </ul>
       </section>
 
@@ -189,8 +214,8 @@ export default function ApplicationDetailsPage() {
         ) : (
           <div className="docsContainer">
             {docs.map((doc) => (
-              <div key={String(doc.doc_id ?? '')} className="docCard">
-                <p><strong>{String(doc.doc_type ?? '')}</strong></p>
+              <div key={String(doc.doc_id ?? "")} className="docCard">
+                <p><strong>{String(doc.doc_type ?? "")}</strong></p>
                 <button
                   onClick={() => openDocument(Number(doc.doc_id))}
                   className="docLinkButton"
@@ -206,14 +231,16 @@ export default function ApplicationDetailsPage() {
         )}
       </section>
 
-      {/* سبب الرفض — highlighted when rejected */}
+      {/* سبب الرفض */}
       {data?.req_status === "مرفوض" && (
         <section className="section info">
           <div className="rejection-highlight">
             <div>
               <div className="rejection-label">سبب الرفض</div>
               <div className="rejection-text">
-                {rejectionReasonMap[Number(data?.rejection_reason)] ?? data?.rejection_reason ?? "لم يُحدد"}
+                {rejectionReasonMap[Number(data?.rejection_reason)] ??
+                  data?.rejection_reason ??
+                  "لم يُحدد"}
               </div>
             </div>
           </div>

@@ -144,6 +144,19 @@ export default function RequestDetailsPage() {
         </section>
 
         <section className={styles.section}>
+          <h3>الخصم</h3>
+          <div className={styles.infoGrid}>
+            <p><strong>إجمالي الخصم:</strong> {(data.total_discount as number) ?? "—"}</p>
+            <p>
+              <strong>نوع الخصم:</strong>{" "}
+              {Array.isArray(data.discount_type) && (data.discount_type as string[]).length > 0
+                ? (data.discount_type as string[]).join("، ")
+                : "—"}
+            </p>
+          </div>
+        </section>
+
+        <section className={styles.section}>
           <h3>سبب طلب الدعم</h3>
           <div className={styles.longText}>{(data.reason as string) || "—"}</div>
         </section>

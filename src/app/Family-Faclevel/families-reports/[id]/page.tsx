@@ -186,27 +186,42 @@ const handleAddMember = async () => {
 
 
   const newMember = await res.json();
+  console.log("Add member response:", newMember);
 
-  const student = {
-    memberId: newMember.student_id || newMember.id,
-    name: newMember.student_name || newMember.name,
-    id: newMember.u_id || newMember.university_id,
-    major: newMember.dept_name || newMember.major,
-    role: newMember.role || "عضو",
+  const student: Student = {
+    memberId: newMember.student_id ?? newMember.id ?? newMember.member_id ?? 0,
+    name:     newMember.student_name ?? newMember.name ?? newMember.full_name ?? "—",
+    id:       newMember.u_id ?? newMember.university_id ?? newMember.national_id ?? nid,
+    major:    newMember.dept_name ?? newMember.major ?? newMember.department ?? "—",
+    role:     newMember.role ?? "عضو",
     joinDate: newMember.joined_at
       ? new Date(newMember.joined_at).toLocaleDateString("ar-EG")
       : new Date().toLocaleDateString("ar-EG"),
   };
+  // If critical fields are still missing, re-fetch the full member list
+  if (!student.name || student.name === "—") {
+    // Re-fetch family data to get the newly added member with full info
+    const resFresh = await authFetch(`${getBaseUrl()}/api/family/faculty/${id}/details/`);
+    if (resFresh.ok) {
+      const freshData = await resFresh.json();
+      const freshStudents = freshData.family_members.map((member: Record<string, unknown>) => ({
+        memberId: member.student_id,
+        name:     member.student_name,
+        id:       member.u_id,
+        major:    member.dept_name,
+        role:     member.role,
+        joinDate: new Date(member.joined_at as string).toLocaleDateString("ar-EG"),
+      }));
+      setStudentsData(freshStudents);
+      setFamilyData(prev => ({ ...prev, totalMembers: freshStudents.length }));
+      setNid("");
+      showToast("✅ تم إضافة الطالب بنجاح", "success");
+      return; // exit early, state already updated
+    }
+  }
 
-  setStudentsData((prev) => {
-    const updated = [...prev, student];
-    return updated;
-  });
-
-  setFamilyData((prev) => ({
-    ...prev,
-    totalMembers: prev.totalMembers + 1,
-  }));
+  setStudentsData(prev => [...prev, student]);
+  setFamilyData(prev => ({ ...prev, totalMembers: prev.totalMembers + 1 }));
 
     setNid("");
 
@@ -313,14 +328,14 @@ const handleExport = async () => {
               </span>
               تصدير
             </button>
-            <button className={`${styles.actionBtn} ${styles.print}`}>
+            {/* <button className={`${styles.actionBtn} ${styles.print}`}>
               <span className={styles.btnIcon}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                   <path d="M6 9V2h12v7M6 18h12v4H6v-4z"></path>
                   <rect x="6" y="14" width="12" height="4"></rect>
                 </svg>
               </span>طباعة
-            </button>
+            </button> */}
             <button 
               className={`${styles.actionBtn} ${styles.back}`} 
               onClick={handleBack}

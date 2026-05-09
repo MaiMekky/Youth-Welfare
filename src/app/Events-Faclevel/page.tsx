@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { Plus, Search } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { getSessionMeta } from "@/utils/cookieHelpers";
+import { useToast } from "@/app/context/ToastContext";
 
 const API_URL = getBaseUrl();
 
@@ -115,7 +116,7 @@ type EventsTab = "faculty" | "dept";
 
 export default function Page() {
   const router = useRouter();
-
+  const { showToast } = useToast();
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -233,6 +234,14 @@ export default function Page() {
 
   const onEdit = (id: number) => router.push(`/Events-Faclevel/create/${id}`);
 
+    const onDelete = async (id: number) => {
+    const prev = events;
+    const res = await apiFetch<Record<string, unknown>>(`/api/event/get-events/${id}/`, { method: "DELETE" });
+    if (!res.ok) { setEvents(prev); showToast(res.message || "فشل الغاء الفعالية", "error"); return; }
+    showToast("✅ تم الغاء الفعالية بنجاح", "success");
+    await fetchEvents();
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.container}>
@@ -317,7 +326,7 @@ export default function Page() {
               onItemsChange={setEvents}
               onView={onView}
               onEdit={onEdit}
-              onDelete={() => {}}
+              onDelete={onDelete}
             />
           )}
         </div>

@@ -16,6 +16,8 @@ interface FiltersBarProps {
     grade: string;
     disability: string;
     status: string;
+    date_from: string;
+    date_to: string;
     [key: string]: string;
   };
   setFilters: React.Dispatch<React.SetStateAction<{
@@ -29,6 +31,8 @@ interface FiltersBarProps {
     grade: string;
     disability: string;
     status: string;
+    date_from: string;
+    date_to: string;
     [key: string]: string;
   }>>;
   onApply: () => void;
@@ -47,6 +51,8 @@ const EMPTY_FILTERS = {
   disability: "",
   status: "",
   search: "",
+  date_from: "",
+  date_to: "",
 };
 
 export default function FiltersBar({
@@ -60,41 +66,37 @@ export default function FiltersBar({
     setFilters((prev) => ({ ...prev, [key]: value }));
     if (key === "search") onSearchChange(value);
   };
-const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[]>([]);
+
+  const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[]>([]);
+
   const clearAllFilters = () => {
     setFilters(EMPTY_FILTERS);
     onSearchChange("");
   };
 
-  // count how many non-search filters are active
   const activeCount = useMemo(() => {
     const { ...rest } = filters;
     return Object.values(rest).filter((v) => v && v !== "").length;
   }, [filters]);
 
   useEffect(() => {
-  const fetchFaculties = async () => {
-    try {
-      const res = await authFetch(
-        `${getBaseUrl()}/api/family/faculties/`
-      );
-
-      const data = await res.json();
-      setFaculties(data);
-    } catch (err) {
-      console.error("Error fetching faculties:", err);
-    }
-  };
-
-  fetchFaculties();
-}, []);
+    const fetchFaculties = async () => {
+      try {
+        const res = await authFetch(`${getBaseUrl()}/api/family/faculties/`);
+        const data = await res.json();
+        setFaculties(data);
+      } catch (err) {
+        console.error("Error fetching faculties:", err);
+      }
+    };
+    fetchFaculties();
+  }, []);
 
   return (
     <div className={styles.filtersContainer}>
 
       {/* ── Search ── */}
       <div className={styles.searchWrapper}>
-        {/* search icon */}
         <svg className={styles.searchIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
           <circle cx="11" cy="11" r="8" />
           <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -120,6 +122,7 @@ const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[
         >
           <option value="" disabled hidden>حالة الأب</option>
           <option value="none">غير محدد</option>
+          <option value="كريم النسب">كريم النسب</option>
           <option value="يعمل">يعمل</option>
           <option value="بالمعاش">بالمعاش</option>
           <option value="مريض">مريض</option>
@@ -133,6 +136,7 @@ const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[
         >
           <option value="" disabled hidden>حالة الأم</option>
           <option value="none">غير محدد</option>
+          <option value="كريم النسب">كريم النسب</option>
           <option value="تعمل">تعمل</option>
           <option value="بالمعاش">بالمعاش</option>
           <option value="مريضة">مريضة</option>
@@ -211,8 +215,34 @@ const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[
           <option value="منتظر">منتظر</option>
           <option value="مرفوض">مرفوض</option>
         </select>
-
+  
       </div>
+          <div className={styles.divider} />
+
+      {/* ── Filter selects ── */}
+      <div className={styles.filterSelects}>
+        {/* ── Date range ── */}
+        <label className={styles.dateLabel}>
+          <span className={styles.dateLabelText}>من تاريخ</span>
+          <input
+            type="date"
+            value={filters.date_from || ""}
+            onChange={(e) => handleChange("date_from", e.target.value)}
+            className={styles.select}
+          />
+        </label>
+
+        <label className={styles.dateLabel}>
+          <span className={styles.dateLabelText}>إلى تاريخ</span>
+          <input
+            type="date"
+            value={filters.date_to || ""}
+            onChange={(e) => handleChange("date_to", e.target.value)}
+            className={styles.select}
+          />
+        </label>
+        </div>
+
 
       {/* ── Footer ── */}
       <div className={styles.footer}>
@@ -224,20 +254,12 @@ const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[
 
         {activeCount > 0 && (
           <button onClick={clearAllFilters} className={styles.clearBtn} type="button">
-            {/* x icon */}
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-            مسح الفلاتر
+             تعيين افتراضي
           </button>
         )}
 
         <button onClick={onApply} className={styles.applyBtn} type="button">
-          {/* filter icon */}
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-            <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
-          </svg>
-          تطبيق
+          عرض النتائج
         </button>
       </div>
 

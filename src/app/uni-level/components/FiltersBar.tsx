@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import styles from "../styles/FiltersBar.module.css"
+import styles from "../styles/FiltersBar.module.css";
 import { useEffect, useState } from "react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
@@ -11,119 +11,106 @@ interface FiltersBarProps {
   onSearchChange: (value: string) => void;
 }
 
+const EMPTY_FILTERS = {
+  fatherStatus: "",
+  fatherIncome: "",
+  motherStatus: "",
+  housingStatus: "",
+  brothers: "",
+  totalIncome: "",
+  faculty: "",
+  grade: "",
+  disability: "",
+  status: "",
+  search: "",
+  date_from: "",
+  date_to: "",
+};
+
 export default function FiltersBar({ filters, setFilters, onApply, onSearchChange }: FiltersBarProps) {
 
   const handleChange = (key: string, value: string) => {
     setFilters((prev: Record<string, string>) => ({ ...prev, [key]: value }));
-    if (key === "search") {
-      onSearchChange(value); // <--- تحديث البحث للجدول
-    }
+    if (key === "search") onSearchChange(value);
   };
+
   const [faculties, setFaculties] = useState<{ faculty_id: number; name: string }[]>([]);
+
   const clearAllFilters = () => {
-    const cleared = {
-      fatherStatus: "",
-      fatherIncome: "",
-      motherStatus: "",
-      housingStatus: "",
-      brothers: "",
-      totalIncome: "",
-      faculty: "",
-      grade: "",
-      disability: "",
-      status: "",
-      search: "",
+    setFilters(EMPTY_FILTERS);
+    onSearchChange("");
+  };
+
+  useEffect(() => {
+    const fetchFaculties = async () => {
+      try {
+        const res = await authFetch(`${getBaseUrl()}/api/family/faculties/`);
+        const data = await res.json();
+        setFaculties(data);
+      } catch (err) {
+        console.error("Error fetching faculties:", err);
+      }
     };
-    setFilters(cleared);
-    onSearchChange(""); // مسح البحث أيضًا
-  };
+    fetchFaculties();
+  }, []);
 
-    useEffect(() => {
-  const fetchFaculties = async () => {
-    try {
-      const res = await authFetch(
-        `${getBaseUrl()}/api/family/faculties/`
-      );
-
-      const data = await res.json();
-      setFaculties(data);
-    } catch (err) {
-      console.error("Error fetching faculties:", err);
-    }
-  };
-
-  fetchFaculties();
-}, []);
   return (
     <div className={styles.filtersContainer}>
-      {/* <h2 className={styles.sectionTitle}>البحث وفلترة الطلاب</h2> */}
 
       <div className={styles.filtersRow}>
-           <div className={styles.searchWrapper}>
+        <div className={styles.searchWrapper}>
           <svg className={styles.searchIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-          <circle cx="11" cy="11" r="8" />
-          <line x1="21" y1="21" x2="16.65" y2="16.65" />
-        </svg>
-        <input
-          type="text"
-          placeholder="ابحث بالاسم أو كود التكافل..."
-          value={filters.search || ""}
-          onChange={(e) => handleChange("search", e.target.value)}
-          className={styles.searchField}
-        />
-      </div>
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input
+            type="text"
+            placeholder="ابحث بالاسم أو كود التكافل..."
+            value={filters.search || ""}
+            onChange={(e) => handleChange("search", e.target.value)}
+            className={styles.searchField}
+          />
+        </div>
 
-      <div className={styles.divider} />
+        <div className={styles.divider} />
 
         <div className={styles.filterSelects}>
-          {/* Father's status */}
+
           <select value={filters.fatherStatus || ""} onChange={(e) => handleChange("fatherStatus", e.target.value)} className={styles.select}>
             <option value="" disabled hidden>حالة الأب</option>
             <option value="none">لا يوجد</option>
-            <option value="working">يعمل</option>
-            <option value="retired">بالمعاش</option>
-            <option value="sick">مريض</option>
-            <option value="deceased">متوفى</option>
+            <option value="كريم النسب">كريم النسب</option>
+            <option value="يعمل">يعمل</option>
+            <option value="بالمعاش">بالمعاش</option>
+            <option value="مريض">مريض</option>
+            <option value="متوفى">متوفى</option>
           </select>
 
-          {/* Mother's status */}
           <select value={filters.motherStatus || ""} onChange={(e) => handleChange("motherStatus", e.target.value)} className={styles.select}>
             <option value="" disabled hidden>حالة الأم</option>
             <option value="none">لا يوجد</option>
-            <option value="working">تعمل</option>
-            <option value="retired">بالمعاش</option>
-            <option value="sick">مريضة</option>
-            <option value="deceased">متوفاة</option>
+            <option value="كريم النسب">كريم النسب</option>
+            <option value="يعمل">تعمل</option>
+            <option value="بالمعاش">بالمعاش</option>
+            <option value="مريض">مريض</option>
+            <option value="متوفاة">متوفاة</option>
           </select>
 
-          {/* Housing status */}
-                <select
-          value={filters.housingStatus || ""}
-          onChange={(e) => handleChange("housingStatus", e.target.value)}
-          className={styles.select}
-        >
-          <option value="" disabled hidden>حالة السكن</option>
-          <option value="none">لا يوجد</option>
-          <option value="ملك">ملك</option>
-          <option value="ايجار">ايجار</option>
-        </select>
+          <select value={filters.housingStatus || ""} onChange={(e) => handleChange("housingStatus", e.target.value)} className={styles.select}>
+            <option value="" disabled hidden>حالة السكن</option>
+            <option value="none">لا يوجد</option>
+            <option value="ملك">ملك</option>
+            <option value="ايجار">ايجار</option>
+          </select>
 
+          <select value={filters.brothers || ""} onChange={(e) => handleChange("brothers", e.target.value)} className={styles.select}>
+            <option value="" disabled hidden>عدد أفراد الأسرة</option>
+            <option value="none">لا يوجد</option>
+            <option value="few">1–2</option>
+            <option value="moderate">3–5</option>
+            <option value="many">6 فأكثر</option>
+          </select>
 
-          {/* Brothers */}
-          <select
-          value={filters.brothers || ""}
-          onChange={(e) => handleChange("brothers", e.target.value)}
-          className={styles.select}
-        >
-          <option value="" disabled hidden>عدد أفراد الأسرة</option>
-          <option value="none">لا يوجد</option>
-          <option value="few">1–2</option>
-          <option value="moderate">3–5</option>
-          <option value="many">6 فأكثر</option>
-        </select>
-
-
-          {/* Total Income */}
           <select value={filters.totalIncome || ""} onChange={(e) => handleChange("totalIncome", e.target.value)} className={styles.select}>
             <option value="" disabled hidden>الدخل الإجمالي</option>
             <option value="none">لا يوجد</option>
@@ -132,46 +119,23 @@ export default function FiltersBar({ filters, setFilters, onApply, onSearchChang
             <option value="high">مرتفع</option>
           </select>
 
-          {/* Faculty */}
           <select value={filters.faculty || ""} onChange={(e) => handleChange("faculty", e.target.value)} className={styles.select}>
             <option value="" disabled hidden>الكلية</option>
-             <option value="none">غير محدد</option>
-             {faculties.map((fac) => (
-            <option key={fac.faculty_id} value={fac.name}>
-              {fac.name}
-            </option>
-          ))}
+            <option value="none">غير محدد</option>
+            {faculties.map((fac) => (
+              <option key={fac.faculty_id} value={fac.name}>
+                {fac.name}
+              </option>
+            ))}
           </select>
 
-          {/* Grade */}
-         {/* <select
-          value={filters.grade || ""}
-          onChange={(e) => handleChange("grade", e.target.value)}
-          className={styles.select}
-        >
-          <option value="" disabled hidden>التقدير</option>
-          <option value="none">لا يوجد</option>
-          <option value="امتياز">امتياز</option>
-          <option value="جيد جدا">جيد جدا</option>
-          <option value="جيد">جيد</option>
-          <option value="مقبول">مقبول</option>
-        </select> */}
+          <select value={filters.disability || ""} onChange={(e) => handleChange("disability", e.target.value)} className={styles.select}>
+            <option value="" disabled hidden>ذوي الهمم</option>
+            <option value="none">لا يوجد</option>
+            <option value="نعم">نعم</option>
+            <option value="لا">لا</option>
+          </select>
 
-
-          {/* Disability */}
-         <select
-          value={filters.disability || ""}
-          onChange={(e) => handleChange("disability", e.target.value)}
-          className={styles.select}
-        >
-          <option value="" disabled hidden>ذوي الهمم</option>
-          <option value="none">لا يوجد</option>
-          <option value="نعم">نعم</option>
-          <option value="لا">لا</option>
-        </select>
-
-
-          {/* Request status */}
           <select value={filters.status || ""} onChange={(e) => handleChange("status", e.target.value)} className={styles.select}>
             <option value="" disabled hidden>حالة الطلب</option>
             <option value="none">لا يوجد</option>
@@ -180,19 +144,44 @@ export default function FiltersBar({ filters, setFilters, onApply, onSearchChang
             <option value="منتظر">منتظر</option>
             <option value="مرفوض">مرفوض</option>
           </select>
+       
         </div>
+
+         <div className={styles.divider} />
+
+        <div className={styles.filterSelects}>
+
+          {/* ── Date range ── */}
+          <label className={styles.dateLabel}>
+            <span className={styles.dateLabelText}>من تاريخ</span>
+            <input
+              type="date"
+              value={filters.date_from || ""}
+              onChange={(e) => handleChange("date_from", e.target.value)}
+              className={styles.select}
+            />
+          </label>
+
+          <label className={styles.dateLabel}>
+            <span className={styles.dateLabelText}>إلى تاريخ</span>
+            <input
+              type="date"
+              value={filters.date_to || ""}
+              onChange={(e) => handleChange("date_to", e.target.value)}
+              className={styles.select}
+            />
+          </label>
+         </div>
+
         <div className={styles.buttonsWrapper}>
-  <button onClick={clearAllFilters} className={styles.clearBtn}>
-     تعيين افتراضي
-  </button>
+          <button onClick={clearAllFilters} className={styles.clearBtn}>
+            تعيين افتراضي
+          </button>
+          <button onClick={onApply} className={styles.applyBtn}>
+            عرض النتائج
+          </button>
+        </div>
 
-  <button onClick={onApply} className={styles.applyBtn}>
-     عرض النتائج
-  </button>
-</div>
-
-
-        
       </div>
     </div>
   );

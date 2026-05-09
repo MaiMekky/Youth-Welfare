@@ -10,10 +10,11 @@ import { useToast } from "@/app/context/ToastContext";
   What I implemented:
   - GET /api/solidarity/faculty/{id}/applications/  -> fetchApplication()
   - GET /api/solidarity/faculty/{id}/documents/     -> fetchDocuments()
-  - POST /api/solidarity/faculty/{id}/pre_approve/  -> handlePreApprove()
+  - POST /api/solidarity/faculty/{id}/pre_approve/  -> handleInitialApproval()
   - POST /api/solidarity/faculty/{id}/approve/      -> handleApprove()
   - POST /api/solidarity/faculty/{id}/reject/       -> handleReject()
 */
+
 const rejectionReasons = [
   { id: 1, text: "إزعاج أو تكرار التقديم بشكل غير مبرر" },
   { id: 2, text: "المستندات المرفوعة غير واضحة أو غير صحيحة" },
@@ -22,11 +23,13 @@ const rejectionReasons = [
   { id: 5, text: "الطلب لا يستوفي شروط الدعم" },
   { id: 6, text: "المستندات لا تخص الطالب" },
   { id: 7, text: "اشتباه في تزوير المستندات" },
-  { id: 8, text: "سبب آخر" }
+  { id: 8, text: "سبب آخر" },
 ];
+
 const rejectionReasonMap: Record<number, string> = Object.fromEntries(
-  rejectionReasons.map(r => [r.id, r.text])
+  rejectionReasons.map((r) => [r.id, r.text])
 );
+
 type Application = {
   solidarity_id?: number;
   student_name?: string;
@@ -119,6 +122,7 @@ function RejectionBox({ reason }: { reason?: string | null }) {
   const displayReason = reason
     ? (rejectionReasonMap[Number(reason)] ?? reason)
     : "لم يُحدد سبب الرفض";
+
   return (
     <div style={{
       background: "linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)",
@@ -137,7 +141,7 @@ function RejectionBox({ reason }: { reason?: string | null }) {
           سبب الرفض
         </div>
         <div style={{ color: "#7f1d1d", fontSize: "15px", lineHeight: 1.6 }}>
-          {reason ?? "لم يُحدد سبب الرفض"}
+          {displayReason}
         </div>
       </div>
     </div>
@@ -162,6 +166,10 @@ export default function RequestDetailsPage() {
   });
   const [selectedDiscounts, setSelectedDiscounts] = useState<SelectedDiscounts>(EMPTY_DISCOUNTS);
   const [discountsSaved, setDiscountsSaved] = useState(false);
+
+  // ====== Reject modal state ======
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [selectedReason, setSelectedReason] = useState<number | null>(null);
 
   const baseAmount = 1500;
 
@@ -188,7 +196,9 @@ export default function RequestDetailsPage() {
       const data = await res.json();
       let item: Application | null = null;
       if (Array.isArray(data)) {
-        const bySolidarity = data.find((it: Record<string, unknown>) => String(it.solidarity_id) === String(id));
+        const bySolidarity = data.find(
+          (it: Record<string, unknown>) => String(it.solidarity_id) === String(id)
+        );
         item = bySolidarity ?? (data.length > 0 ? data[0] : null);
       } else if (data && typeof data === "object") {
         item = data;
@@ -217,21 +227,35 @@ export default function RequestDetailsPage() {
     }
   };
 
-  const fetchDiscountValues = async () => {
-    try {
-      const baseUrl = getBaseUrl();
-      const res = await authFetch(`${baseUrl}/api/solidarity/faculty/faculty/discounts/`);
-      if (!res.ok) throw new Error("DISCOUNT_ERROR");
-      const data = await res.json();
-      setAvailableDiscounts(
-        data.discounts || { bk_discount: [], reg_discount: [], aff_discount: [], full_discount: [] }
-      );
-    } catch (err: unknown) {
-      console.error("fetchDiscountValues error:", err);
-      showToast("فشل في تحميل discounts", "error");
-      setAvailableDiscounts({ bk_discount: [], reg_discount: [], aff_discount: [], full_discount: [] });
-    }
-  };
+const fetchDiscountValues = async () => {
+  try {
+    const baseUrl = getBaseUrl();
+    const res = await authFetch(`${baseUrl}/api/solidarity/faculty/faculty/discounts/`);
+    if (!res.ok) throw new Error("DISCOUNT_ERROR");
+
+    const data = await res.json();
+
+    const discounts = data.discounts || {};
+
+    setAvailableDiscounts({
+      bk_discount:   Array.isArray(discounts.bk_discount)   ? discounts.bk_discount   : [],
+      reg_discount:  Array.isArray(discounts.reg_discount)  ? discounts.reg_discount  : [],
+      aff_discount:  Array.isArray(discounts.aff_discount)  ? discounts.aff_discount  : [],
+      full_discount: Array.isArray(discounts.full_discount) ? discounts.full_discount : [],
+    });
+
+  } catch (err: unknown) {
+    console.error("fetchDiscountValues error:", err);
+    showToast("فشل في تحميل discounts", "error");
+
+    setAvailableDiscounts({
+      bk_discount: [],
+      reg_discount: [],
+      aff_discount: [],
+      full_discount: [],
+    });
+  }
+};
 
   const formatDate = (iso?: string | null) => {
     if (!iso) return "-";
@@ -240,6 +264,8 @@ export default function RequestDetailsPage() {
 
   const canPreApprove = (status?: string | null) => status === "منتظر";
   const canApprove   = (status?: string | null) => status === "موافقة مبدئية";
+  const canReject    = (status?: string | null) =>
+    status === "منتظر" || status === "موافقة مبدئية";
 
   const postAction = async (
     suffix: "pre_approve" | "approve" | "reject",
@@ -281,9 +307,9 @@ export default function RequestDetailsPage() {
   const handleApprove = async () => {
     const hasDiscount =
       selectedDiscounts.full_discount !== "none" ||
-      selectedDiscounts.bk_discount  !== "none" ||
-      selectedDiscounts.aff_discount !== "none" ||
-      selectedDiscounts.reg_discount !== "none" ||
+      selectedDiscounts.bk_discount   !== "none" ||
+      selectedDiscounts.aff_discount  !== "none" ||
+      selectedDiscounts.reg_discount  !== "none" ||
       (application?.total_discount && Number(application.total_discount) > 0);
 
     if (!hasDiscount) {
@@ -323,14 +349,53 @@ export default function RequestDetailsPage() {
     }
   };
 
+  // ====== Open reject modal ======
+  const openRejectModal = () => {
+    setSelectedReason(null);
+    setShowRejectModal(true);
+  };
+
+  // ====== Handle reject — sends reason as number, displays as string ======
+  const handleReject = async () => {
+    if (!selectedReason) {
+      showToast("يرجى اختيار سبب الرفض", "error");
+      return;
+    }
+    try {
+      const response = await authFetch(
+        `${getBaseUrl()}/api/solidarity/faculty/${id}/reject/`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ rejection_reason: selectedReason }),
+        }
+      );
+      if (!response.ok) throw new Error("حدث خطأ أثناء رفض الطلب");
+      await response.json();
+      setApplication((prev) => ({
+        ...(prev ?? {}),
+        req_status: "مرفوض",
+        rejection_reason: String(selectedReason),
+      }));
+      setShowRejectModal(false);
+      setSelectedReason(null);
+      showToast("تم رفض الطلب بنجاح", "error");
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
+      showToast("فشل رفض الطلب", "error");
+    }
+  };
+
   const calculateDiscount = () => {
     if (application?.total_discount) {
       const v = Number(application.total_discount);
       return isNaN(v) ? baseAmount : v;
     }
-    if (selectedDiscounts.full_discount !== "none") return Number(selectedDiscounts.full_discount) || baseAmount;
+    if (selectedDiscounts.full_discount !== "none")
+      return Number(selectedDiscounts.full_discount) || baseAmount;
     let total = 0;
-    total += selectedDiscounts.bk_discount !== "none" ? Number(selectedDiscounts.bk_discount) || 0 : 0;
+    total += selectedDiscounts.bk_discount  !== "none" ? Number(selectedDiscounts.bk_discount)  || 0 : 0;
     total += selectedDiscounts.reg_discount !== "none" ? Number(selectedDiscounts.reg_discount) || 0 : 0;
     total += selectedDiscounts.aff_discount !== "none" ? Number(selectedDiscounts.aff_discount) || 0 : 0;
     return total;
@@ -350,10 +415,10 @@ export default function RequestDetailsPage() {
   };
 
   const DISCOUNT_TYPE_MAP: Record<string, string> = {
-    bk_discount:  "bk_discount",
-    reg_discount: "reg_discount",
-    aff_discount: "aff_discount",
-    full_discount:"full_discount",
+    bk_discount:   "bk_discount",
+    reg_discount:  "reg_discount",
+    aff_discount:  "aff_discount",
+    full_discount: "full_discount",
   };
 
   const assignDiscounts = async () => {
@@ -376,9 +441,14 @@ export default function RequestDetailsPage() {
     const prevApp = application;
     const baseUrl = getBaseUrl();
     const optimisticTotal = payloadDiscounts.reduce(
-      (sum: number, d: Record<string, unknown>) => sum + Number((d.discount_value as string | number) || 0), 0
+      (sum: number, d: Record<string, unknown>) =>
+        sum + Number((d.discount_value as string | number) || 0),
+      0
     );
-    setApplication((prev) => ({ ...(prev ?? {} as Record<string, unknown>), total_discount: String(optimisticTotal) }));
+    setApplication((prev) => ({
+      ...(prev ?? ({} as Record<string, unknown>)),
+      total_discount: String(optimisticTotal),
+    }));
 
     try {
       const res = await authFetch(
@@ -481,8 +551,13 @@ export default function RequestDetailsPage() {
         <section className={styles.section}>
           <h3>معلومات طلب الدعم</h3>
           <div className={styles.infoGrid}>
-            <p><strong>الخصم المحسوب:</strong> {calculateDiscount()} جنيه</p>
-            <p><strong>إجمالي الخصم:</strong> {application?.total_discount ?? "-"}</p>
+            <p><strong>إجمالي الخصم:</strong> {application?.total_discount ? `${application.total_discount} جنيه` : "-"}</p>
+            <p>
+              <strong>نوع الخصم:</strong>{" "}
+              {Array.isArray((application as Record<string, unknown>)?.discount_type) && ((application as Record<string, unknown>).discount_type as string[]).length > 0
+                ? ((application as Record<string, unknown>).discount_type as string[]).join("، ")
+                : "-"}
+            </p>
             <p><strong>سبب التقديم:</strong> {application?.reason ?? "-"}</p>
             <p><strong>إعاقات:</strong> {application?.disabilities ?? "-"}</p>
             <p><strong>الحالة الأكاديمية:</strong> {application?.acd_status ?? "-"}</p>
@@ -532,30 +607,50 @@ export default function RequestDetailsPage() {
             <div className={styles.discountsBox}>
               <div className={styles.discountSelect}>
                 <label>خصم مصاريف الكتب:</label>
-                <select value={selectedDiscounts.bk_discount} onChange={(e) => handleDiscountChange("bk_discount", e.target.value)}>
+                <select
+                  value={selectedDiscounts.bk_discount}
+                  onChange={(e) => handleDiscountChange("bk_discount", e.target.value)}
+                >
                   <option value="none">لا يوجد</option>
-                  {availableDiscounts.bk_discount.map((item, i) => <option key={i} value={item}>{item}</option>)}
+                  {availableDiscounts.bk_discount.map((item, i) => (
+                    <option key={i} value={item}>{item}</option>
+                  ))}
                 </select>
               </div>
               <div className={styles.discountSelect}>
                 <label>خصم مصاريف الانتساب:</label>
-                <select value={selectedDiscounts.aff_discount} onChange={(e) => handleDiscountChange("aff_discount", e.target.value)}>
+                <select
+                  value={selectedDiscounts.aff_discount}
+                  onChange={(e) => handleDiscountChange("aff_discount", e.target.value)}
+                >
                   <option value="none">لا يوجد</option>
-                  {availableDiscounts.aff_discount.map((item, i) => <option key={i} value={item}>{item}</option>)}
+                  {availableDiscounts.aff_discount.map((item, i) => (
+                    <option key={i} value={item}>{item}</option>
+                  ))}
                 </select>
               </div>
               <div className={styles.discountSelect}>
                 <label>خصم مصاريف الانتظام:</label>
-                <select value={selectedDiscounts.reg_discount} onChange={(e) => handleDiscountChange("reg_discount", e.target.value)}>
+                <select
+                  value={selectedDiscounts.reg_discount}
+                  onChange={(e) => handleDiscountChange("reg_discount", e.target.value)}
+                >
                   <option value="none">لا يوجد</option>
-                  {availableDiscounts.reg_discount.map((item, i) => <option key={i} value={item}>{item}</option>)}
+                  {availableDiscounts.reg_discount.map((item, i) => (
+                    <option key={i} value={item}>{item}</option>
+                  ))}
                 </select>
               </div>
               <div className={styles.discountSelect}>
                 <label>خصم المصاريف كاملة:</label>
-                <select value={selectedDiscounts.full_discount} onChange={(e) => handleDiscountChange("full_discount", e.target.value)}>
+                <select
+                  value={selectedDiscounts.full_discount}
+                  onChange={(e) => handleDiscountChange("full_discount", e.target.value)}
+                >
                   <option value="none">لا يوجد</option>
-                  {availableDiscounts.full_discount.map((item, i) => <option key={i} value={item}>{item}</option>)}
+                  {availableDiscounts.full_discount.map((item, i) => (
+                    <option key={i} value={item}>{item}</option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -585,6 +680,11 @@ export default function RequestDetailsPage() {
               {actionLoading ? "جاري..." : "مقبول"}
             </button>
           )}
+          {canReject(application?.req_status) && (
+            <button onClick={openRejectModal} disabled={actionLoading} className={styles.btnReject}>
+              رفض
+            </button>
+          )}
           {application?.req_status === "مقبول" && (
             <div className={styles.btnReceived}>✅ تم اعتماد الطلب نهائيًا</div>
           )}
@@ -593,7 +693,42 @@ export default function RequestDetailsPage() {
           )}
         </div>
 
-      </div>
+      </div>{/* end contentCard */}
+
+      {/* ====== Reject Modal ====== */}
+      {showRejectModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalBox}>
+            <h3 className={styles.modalTitle}>اختر سبب رفض الطلب</h3>
+            <div className={styles.reasonList}>
+              {rejectionReasons.map((reason) => (
+                <label key={reason.id} className={styles.reasonItem}>
+                  <input
+                    type="radio"
+                    name="rejectReason"
+                    value={reason.id}
+                    checked={selectedReason === reason.id}
+                    onChange={() => setSelectedReason(reason.id)}
+                  />
+                  {reason.text}
+                </label>
+              ))}
+            </div>
+            <div className={styles.modalActions}>
+              <button className={styles.btnReject} onClick={handleReject}>
+                تأكيد الرفض
+              </button>
+              <button
+                className={styles.btnApprove}
+                onClick={() => { setShowRejectModal(false); setSelectedReason(null); }}
+              >
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

@@ -61,7 +61,6 @@ type ApiParticipant = {
   reward: string | null;
   status: string;
 };
-
 type ApiEventImage = {
   doc_id: number;
   event: number;
@@ -98,6 +97,7 @@ type ApiEventDetails = {
   faculty: number | null;
   created_by: number;
   family: number | null;
+  rejection_reason?: string | null;
 };
 
 type StudentRow = {
@@ -162,37 +162,39 @@ export default function EventDetailsPage() {
   }, [id]);
 
   /* Derived UI */
-  const ui = useMemo(() => {
-    if (!event) return {
-      title: "", subtitle: "معلومات شاملة عن تفاصيل الفعالية والمشاركين",
-      status: "", type: "", scope: "", cost: "",
-      startDate: "", endDate: "", location: "",
-      reward: "", constraints: "", description: "", max: 0,
-    };
+ const ui = useMemo(() => {
+  if (!event) return {
+    title: "", subtitle: "معلومات شاملة عن تفاصيل الفعالية والمشاركين",
+    status: "", type: "", scope: "", cost: "",
+    startDate: "", endDate: "", location: "",
+    reward: "", constraints: "", description: "", max: 0,
+    rejectionReason: "",   // ← add here
+  };
 
-    const scope = event.dept_name
-      ? `على مستوى ${event.dept_name}`
-      : event.dept ? `القسم رقم ${event.dept}` : "—";
+  const scope = event.dept_name
+    ? `على مستوى ${event.dept_name}`
+    : event.dept ? `القسم رقم ${event.dept}` : "—";
 
-    const costNum = Number(String(event.cost ?? "").trim());
-    const costText = !Number.isFinite(costNum) || costNum === 0 ? "مجاني" : `${costNum} جنيه`;
+  const costNum = Number(String(event.cost ?? "").trim());
+  const costText = !Number.isFinite(costNum) || costNum === 0 ? "مجاني" : `${costNum} جنيه`;
 
-    return {
-      title: event.title ?? "",
-      subtitle: "معلومات شاملة عن تفاصيل الفعالية والمشاركين",
-      status: event.status ?? "",
-      type: event.type ?? "",
-      scope,
-      cost: costText,
-      startDate: event.st_date ?? "",
-      endDate: event.end_date ?? "",
-      location: event.location ?? "",
-      reward: (event.reward ?? "").trim() || "—",
-      constraints: (event.restrictions ?? "").trim() || "—",
-      description: (event.description ?? "").trim() || "—",
-      max: Number(event.s_limit ?? 0),
-    };
-  }, [event]);
+  return {
+    title: event.title ?? "",
+    subtitle: "معلومات شاملة عن تفاصيل الفعالية والمشاركين",
+    status: event.status ?? "",
+    type: event.type ?? "",
+    scope,
+    cost: costText,
+    startDate: event.st_date ?? "",
+    endDate: event.end_date ?? "",
+    location: event.location ?? "",
+    reward: (event.reward ?? "").trim() || "—",
+    constraints: (event.restrictions ?? "").trim() || "—",
+    description: (event.description ?? "").trim() || "—",
+    max: Number(event.s_limit ?? 0),
+    rejectionReason: (event.rejection_reason ?? "").trim(),  // ← add here
+  };
+}, [event]);
 
   const registered = rows.length;
   const remaining = Math.max(ui.max - registered, 0);
@@ -297,7 +299,24 @@ export default function EventDetailsPage() {
                 <div className={styles.infoValue} dir="ltr">{ui.endDate || "—"}</div>
               </div>
             </section>
-
+              {ui.rejectionReason && (
+                    <section style={{
+                      display: "flex", alignItems: "flex-start", gap: "14px",
+                      background: "linear-gradient(135deg, #FFF1F1, #FFE4E4)",
+                      border: "1.5px solid #FCA5A5", borderRight: "5px solid #EF4444",
+                      borderRadius: "14px", padding: "18px 20px", direction: "rtl", marginTop: "18px",
+                    }}>
+                      <ShieldAlert size={22} color="#EF4444" style={{ flexShrink: 0, marginTop: 2 }} />
+                      <div>
+                        <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#EF4444", marginBottom: "6px", letterSpacing: "0.02em" }}>
+                          سبب الرفض
+                        </div>
+                        <div style={{ fontSize: "0.95rem", color: "#7F1D1D", lineHeight: 1.7, fontWeight: 500 }}>
+                          {ui.rejectionReason}
+                        </div>
+                      </div>
+                    </section>
+                  )}
             {/* Reward & Constraints */}
             <section className={styles.twoCols}>
               <div className={styles.block}>

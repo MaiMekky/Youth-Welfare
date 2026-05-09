@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useTransition } from "react";
 import "../styles/ApplicationsTable.css";
 import { useRouter } from "next/navigation";
 import FiltersBar from "./FiltersBar";
@@ -38,69 +38,82 @@ const fetchApplications = async (appliedFilters: Record<string, string> = {}): P
       let apiKey = key;
       let apiValue = value;
       switch (key) {
-        case "disability":    apiKey = "disabilities";                                          break;
-        case "faculty":       apiKey = "faculty"; apiValue = String(facultyMap[value] ?? "");  break;
-        case "brothers":      apiKey = "family_numbers";                                        break;
-        case "fatherStatus":  apiKey = "father_status";                                         break;
-        case "motherStatus":  apiKey = "mother_status";                                         break;
-        case "housingStatus": apiKey = "housing_status";                                        break;
-        case "grade":         apiKey = "grade";                                                 break;
-        case "status":        apiKey = "status";                                                break;
-        case "totalIncome":   apiKey = "total_income";                                          break;
-        case "search":        apiKey = "student_id";                                            break;
+        case "disability":    apiKey = "disabilities";                                         break;
+        case "faculty":       apiKey = "faculty"; apiValue = String(facultyMap[value] ?? ""); break;
+        case "brothers":      apiKey = "family_numbers";                                       break;
+        case "fatherStatus":  apiKey = "father_status";                                        break;
+        case "motherStatus":  apiKey = "mother_status";                                        break;
+        case "housingStatus": apiKey = "housing_status";                                       break;
+        case "grade":         apiKey = "grade";                                                break;
+        case "status":        apiKey = "status";                                               break;
+        case "totalIncome":   apiKey = "total_income";                                         break;
+        case "search":        apiKey = "student_id";                                           break;
+        case "date_from":     apiKey = "date_from";                                            break;
+        case "date_to":       apiKey = "date_to";                                              break;
       }
       return `${apiKey}=${encodeURIComponent(apiValue)}`;
     })
     .join("&");
 
   const url = `${getBaseUrl()}/api/solidarity/super_dept/all_applications/${query ? `?${query}` : ""}`;
-
-  // authFetch attaches the token and silently refreshes on 401 automatically
   const res = await authFetch(url, { method: "GET" });
   if (!res.ok) throw new Error("فشل في جلب البيانات");
 
   const data = await res.json();
-
   return data.map((app: Record<string, unknown>) => ({
-    id: app.solidarity_id,
-    studentName: app.student_name,
+    id:           app.solidarity_id,
+    studentName:  app.student_name,
     requestNumber: app.student_uid,
-    college: app.faculty_name,
-    amount: app.total_income,
-    date: app.created_at ? new Date(app.created_at as string).toLocaleDateString() : "-",
-    status: app.req_status,
+    college:      app.faculty_name,
+    amount:       app.total_income,
+    date:         app.created_at ? new Date(app.created_at as string).toLocaleDateString() : "-",
+    status:       app.req_status,
     fatherStatus: app.father_status,
     motherStatus: app.mother_status,
     housingStatus: app.housing_status,
-    brothers: app.family_numbers,
-    totalIncome: app.total_income_level,
-    grade: app.grade,
-    disability: app.disabilities,
+    brothers:     app.family_numbers,
+    totalIncome:  app.total_income_level,
+    grade:        app.grade,
+    disability:   app.disabilities,
   }));
+};
+
+const defaultFilters: Record<string, string> = {
+  fatherStatus: "",
+  motherStatus: "",
+  housingStatus: "",
+  brothers: "",
+  totalIncome: "",
+  faculty: "",
+  grade: "",
+  disability: "",
+  status: "",
+  search: "",
+  date_from: "",
+  date_to: "",
 };
 
 export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (apps: Application[]) => void }) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [applications, setApplications] = useState<Application[]>([]);
-  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [filters, setFilters] = useState<Record<string, string>>(defaultFilters);
   const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const loadApplications = async (appliedFilters: Record<string, string> = {}) => {
-    try {
-      setLoading(true);
-      setCurrentPage(1);
-      const data = await fetchApplications(appliedFilters);
-      if (onDataLoaded) onDataLoaded(data);
-      setApplications(data);
-    } catch (err) {
-      console.error(err);
-      throw err; // let authFetch's silent refresh / logout propagate
-    } finally {
-      setLoading(false);
-    }
+  const loadApplications = (appliedFilters: Record<string, string> = {}) => {
+    startTransition(async () => {
+      try {
+        const data = await fetchApplications(appliedFilters);
+        if (onDataLoaded) onDataLoaded(data);
+        setApplications(data);
+        setCurrentPage(1);
+      } catch (err) {
+        console.error(err);
+        throw err;
+      }
+    });
   };
 
   useEffect(() => {
@@ -118,16 +131,15 @@ export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (ap
     );
   });
 
-  const totalPages  = Math.ceil(filteredApps.length / rowsPerPage);
-  const startIndex  = (currentPage - 1) * rowsPerPage + 1;
-  const endIndex    = Math.min(currentPage * rowsPerPage, filteredApps.length);
+  const totalPages    = Math.ceil(filteredApps.length / rowsPerPage);
+  const startIndex    = (currentPage - 1) * rowsPerPage + 1;
+  const endIndex      = Math.min(currentPage * rowsPerPage, filteredApps.length);
   const paginatedApps = filteredApps.slice(startIndex - 1, endIndex);
 
   const handleNavigate = (app: Application) => {
     localStorage.setItem("selectedApplication", JSON.stringify(app));
     router.push(`/uni-level/details/${app.id}`);
   };
- 
 
   return (
     <div>
@@ -138,12 +150,11 @@ export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (ap
         onSearchChange={setSearchTerm}
       />
 
-      <div className="table-container">
-        {loading && (
-        <div className="table-loading-overlay">
-          <div className="table-spinner" />
-        </div>
-      )}
+      {/* Smooth in-place refresh — table dims while fetching, no spinner overlay */}
+      <div
+        className="table-container"
+        style={{ opacity: isPending ? 0.5 : 1, transition: "opacity 0.25s ease" }}
+      >
         <div className="table-scroll-wrapper">
           <table>
             <thead>
@@ -193,7 +204,7 @@ export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (ap
               {paginatedApps.length === 0 && (
                 <tr>
                   <td colSpan={7} style={{ textAlign: "center", padding: "20px" }}>
-                    لا توجد بيانات مطابقة
+                    {isPending ? "جاري التحديث..." : "لا توجد بيانات مطابقة"}
                   </td>
                 </tr>
               )}

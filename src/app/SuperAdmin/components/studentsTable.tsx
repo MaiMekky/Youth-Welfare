@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import styles from "../Styles/studentsTable.module.css";
@@ -29,6 +29,8 @@ interface Filters {
   grade: string;
   disability: string;
   status: string;
+  date_from: string;
+  date_to: string;
   [key: string]: string;
 }
 
@@ -43,6 +45,8 @@ const defaultFilters: Filters = {
   grade: "",
   disability: "",
   status: "",
+  date_from: "",
+  date_to: "",
 };
 
 const facultyMap: { [key: string]: number } = {
@@ -60,46 +64,48 @@ const fetchApplications = async (appliedFilters: Record<string, unknown> = {}): 
       let apiKey = key;
       let apiValue = value;
       switch (key) {
-        case "disability":    apiKey = "disabilities";                                                   break;
-        case "faculty":       apiKey = "faculty"; apiValue = facultyMap[value as string] ?? "";          break;
-        case "brothers":      apiKey = "family_numbers";                                                  break;
-        case "fatherStatus":  apiKey = "father_status";                                                   break;
-        case "motherStatus":  apiKey = "mother_status";                                                   break;
-        case "housingStatus": apiKey = "housing_status";                                                  break;
-        case "grade":         apiKey = "grade";                                                           break;
-        case "status":        apiKey = "status";                                                          break;
-        case "totalIncome":   apiKey = "total_income";                                                    break;
-        case "search":        apiKey = "student_id";                                                      break;
+        case "disability":    apiKey = "disabilities";                                                  break;
+        case "faculty":       apiKey = "faculty"; apiValue = facultyMap[value as string] ?? "";         break;
+        case "brothers":      apiKey = "family_numbers";                                                break;
+        case "fatherStatus":  apiKey = "father_status";                                                 break;
+        case "motherStatus":  apiKey = "mother_status";                                                 break;
+        case "housingStatus": apiKey = "housing_status";                                                break;
+        case "grade":         apiKey = "grade";                                                         break;
+        case "status":        apiKey = "status";                                                        break;
+        case "totalIncome":   apiKey = "total_income";                                                  break;
+        case "search":        apiKey = "student_id";                                                    break;
+        case "date_from":     apiKey = "date_from";                                                     break;
+        case "date_to":       apiKey = "date_to";                                                       break;
       }
       return `${apiKey}=${encodeURIComponent(apiValue as string)}`;
     })
     .join("&");
 
   const url = `${getBaseUrl()}/api/solidarity/super_dept/all_applications/${query ? `?${query}` : ""}`;
-
-  // authFetch attaches the token and silently refreshes on 401 automatically
   const res = await authFetch(url, { method: "GET" });
   if (!res.ok) throw new Error("فشل في جلب البيانات");
-
   return await res.json();
 };
 
 export default function StudentsTable() {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [applications, setApplications] = useState<Application[]>([]);
   const [filters, setFilters] = useState<Filters>(defaultFilters);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const loadApplications = async (appliedFilters: Record<string, unknown> = {}) => {
-    try {
-      const data = await fetchApplications(appliedFilters);
-      setApplications(data);
-    } catch (err) {
-      console.error(err);
-      throw err; // let authFetch's silent refresh / logout propagate
-    }
+  const loadApplications = (appliedFilters: Record<string, unknown> = {}) => {
+    startTransition(async () => {
+      try {
+        const data = await fetchApplications(appliedFilters);
+        setApplications(data);
+      } catch (err) {
+        console.error(err);
+        throw err;
+      }
+    });
   };
 
   useEffect(() => {
@@ -117,9 +123,9 @@ export default function StudentsTable() {
     );
   });
 
-  const totalPages = Math.ceil(filteredApps.length / rowsPerPage);
-  const startIndex = (currentPage - 1) * rowsPerPage + 1;
-  const endIndex   = Math.min(startIndex + rowsPerPage - 1, filteredApps.length);
+  const totalPages  = Math.ceil(filteredApps.length / rowsPerPage);
+  const startIndex  = (currentPage - 1) * rowsPerPage + 1;
+  const endIndex    = Math.min(startIndex + rowsPerPage - 1, filteredApps.length);
   const visibleApps = filteredApps.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   const getStatusClass = (status: string) => {
@@ -168,7 +174,11 @@ export default function StudentsTable() {
         onApply={() => loadApplications(filters)}
       />
 
-      <div className={styles.studentsTable}>
+      {/* Smooth in-place refresh — table stays mounted, dims while fetching */}
+      <div
+        className={styles.studentsTable}
+        style={{ opacity: isPending ? 0.5 : 1, transition: "opacity 0.25s ease" }}
+      >
         <div className={styles.tableWrapper}>
           <table className={styles.table}>
             <thead>
@@ -211,8 +221,8 @@ export default function StudentsTable() {
               ))}
               {filteredApps.length === 0 && (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: "center", padding: "20px" }}>
-                    لا توجد بيانات مطابقة
+                  <td colSpan={9} style={{ textAlign: "center", padding: "20px" }}>
+                    {isPending ? "جاري التحديث..." : "لا توجد بيانات مطابقة"}
                   </td>
                 </tr>
               )}

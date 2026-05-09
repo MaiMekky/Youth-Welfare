@@ -29,7 +29,7 @@ export default function Sidebar({
 
   useEffect(() => {
     const meta = getSessionMeta();
-    if (meta) setAdminInfo({ name: meta.name || "مدير الكلية" });
+    if (meta) setAdminInfo({ name: meta.name || "امين الكلية" });
   }, []);
 
   useEffect(() => {
@@ -87,7 +87,7 @@ export default function Sidebar({
         <div className="profile-card">
           <div className="profile-icon"><User size={22} /></div>
           <div className="admin-info">
-            <h3>مدير الكلية/ {adminInfo.name || "المشرف العام"}</h3>
+            <h3>امين الكلية/ {adminInfo.name || "المشرف العام"}</h3>
           </div>
         </div>
 

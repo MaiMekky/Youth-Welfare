@@ -768,10 +768,7 @@ export default function Activities() {
           <h1>مراجعة واعتماد الفعاليات</h1>
           <p>مراجعة وإدارة الفعاليات المقترحة من مدراء الأقسام</p>
         </div>
-        <button className={styles.refreshBtn} onClick={fetchActivities}>
-          <RefreshCw size={15} className={loading ? styles.spinnerSm : ""} />
-          تحديث البيانات
-        </button>
+      
       </div>
 
       {/* Stats */}

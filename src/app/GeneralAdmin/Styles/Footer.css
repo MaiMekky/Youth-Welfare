@@ -229,6 +229,13 @@
   box-shadow: 0 4px 12px rgba(201, 151, 42, 0.3);
 }
 
+@media (max-width: 1200px) {
+  .footerTop {
+    grid-template-columns: 1.2fr 1fr 1fr 1fr;
+    gap: 1.75rem;
+  }
+}
+
 @media (max-width: 1100px) {
   .footerTop {
     grid-template-columns: 1fr 1fr;
@@ -237,10 +244,115 @@
   }
 }
 
+@media (max-width: 768px) {
+  .footerTop {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 2rem 1.5rem;
+  }
+
+  .brandBlock {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .brandIcon {
+    width: 80px;
+    height: 80px;
+  }
+
+  .brandName {
+    font-size: 1.1rem;
+  }
+
+  .colTitle {
+    font-size: 0.95rem;
+  }
+}
+
 @media (max-width: 640px) {
   .footerTop {
     grid-template-columns: 1fr;
     gap: 1.75rem;
-    padding: 2rem var(--gutter-xs);
+    padding: 2rem 1rem;
+  }
+
+  .brandIcon {
+    width: 70px;
+    height: 70px;
+  }
+
+  .brandName {
+    font-size: 1rem;
+  }
+
+  .brandSub {
+    font-size: 0.75rem;
+  }
+
+  .brandDesc {
+    font-size: 0.8rem;
+  }
+
+  .metaRow {
+    font-size: 0.78rem;
+  }
+
+  .colTitle {
+    font-size: 0.9rem;
+  }
+
+  .colDesc {
+    font-size: 0.8rem;
+  }
+
+  .colListPlain li,
+  .colListIcon li {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .footerTop {
+    padding: 1.5rem 0.75rem;
+    gap: 1.5rem;
+  }
+
+  .brandIcon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .brandName {
+    font-size: 0.95rem;
+  }
+
+  .brandSub {
+    font-size: 0.7rem;
+  }
+
+  .brandDesc,
+  .colDesc {
+    font-size: 0.78rem;
+    line-height: 1.6;
+  }
+
+  .metaRow {
+    font-size: 0.75rem;
+  }
+
+  .colTitle {
+    font-size: 0.85rem;
+  }
+
+  .colListPlain li,
+  .colListIcon li {
+    font-size: 0.78rem;
+  }
+
+  .socialBtn {
+    width: 30px;
+    height: 30px;
   }
 }

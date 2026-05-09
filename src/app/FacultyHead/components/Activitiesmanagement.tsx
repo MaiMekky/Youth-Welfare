@@ -638,9 +638,7 @@ const handleReject = async (reason: string) => {
           <h1>مراجعة واعتماد الفعاليات</h1>
           <p>إدارة ومتابعة طلبات الفعاليات المقدمة من إدارات الكليات</p>
         </div>
-        <button className={styles.refreshBtn} onClick={fetchEvents}>
-          <RefreshCw size={15}/> تحديث البيانات
-        </button>
+      
       </div>
 
       {/* Stats */}

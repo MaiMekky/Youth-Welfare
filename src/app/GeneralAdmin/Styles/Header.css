@@ -347,14 +347,55 @@
 
 /* ── Responsive ──────────────────────────────── */
 
+@media (max-width: 1200px) {
+  .headerTitleH1 {
+    font-size: 0.95rem;
+  }
+  .headerTitleP {
+    font-size: 0.72rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .header {
+    padding: 0 20px;
+  }
+  .headerLogoWrap {
+    width: 70px;
+    height: 70px;
+  }
+  .headerLogoImg {
+    width: 70px;
+    height: 70px;
+  }
+}
+
 @media (max-width: 768px) {
   .header {
-    height: 56px;
+    height: 70px;
     padding: 0 16px;
+  }
+
+  .headerBrand {
+    gap: 10px;
+  }
+
+  .headerLogoWrap {
+    width: 60px;
+    height: 60px;
+  }
+
+  .headerLogoImg {
+    width: 60px;
+    height: 60px;
   }
 
   .headerTitleH1 {
     font-size: 0.85rem;
+  }
+
+  .headerTitleP {
+    font-size: 0.7rem;
   }
 
   .headerDivider {
@@ -376,15 +417,109 @@
   .chevron {
     display: none;
   }
+
+  .dropdown {
+    min-width: 200px;
+    right: 0;
+    left: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .header {
+    height: 64px;
+    padding: 0 12px;
+  }
+
+  .headerBrand {
+    gap: 8px;
+  }
+
+  .headerLogoWrap {
+    width: 50px;
+    height: 50px;
+  }
+
+  .headerLogoImg {
+    width: 50px;
+    height: 50px;
+  }
+
+  .headerTitleH1 {
+    font-size: 0.8rem;
+  }
+
+  .headerTitleP {
+    display: none;
+  }
+
+  .headerSidebarToggle {
+    width: 36px;
+    height: 36px;
+  }
+
+  .userBtn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .userAvatar {
+    width: 28px;
+    height: 28px;
+    font-size: 0.65rem;
+  }
 }
 
 @media (max-width: 480px) {
-  .headerTitleP {
-    display: none;
+  .header {
+    height: 60px;
+    padding: 0 10px;
+  }
+
+  .headerBrand {
+    gap: 6px;
   }
 
   .headerLogoWrap {
     width: 46px;
     height: 46px;
+  }
+
+  .headerLogoImg {
+    width: 46px;
+    height: 46px;
+  }
+
+  .headerTitleH1 {
+    font-size: 0.75rem;
+  }
+
+  .headerSidebarToggle {
+    width: 34px;
+    height: 34px;
+  }
+
+  .userBtn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .userAvatar {
+    width: 26px;
+    height: 26px;
+    font-size: 0.6rem;
+  }
+
+  .dropdown {
+    min-width: 180px;
+  }
+
+  .dropdownHeader {
+    padding: 12px;
+  }
+
+  .dropdownItem {
+    padding: 10px 12px;
+    font-size: 0.8rem;
   }
 }

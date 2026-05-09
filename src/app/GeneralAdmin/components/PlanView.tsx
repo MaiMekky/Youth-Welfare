@@ -474,7 +474,7 @@ export default function PlanView() {
   const totalPlans    = plans.length;
   const completePlans = plans.filter(p => (p.events_count ?? 0) > 0).length;
   const missingPlans  = plans.filter(p => (p.events_count ?? 0) === 0).length;
-
+  const totalEvents = plans.reduce((sum, p) => sum + (p.events_count ?? 0), 0);
   const years = Array.from(new Set(plans.map(p => p.academic_year).filter(Boolean))) as string[];
 
   const filtered = plans.filter(p => {
@@ -490,44 +490,51 @@ export default function PlanView() {
   return (
     <div className={styles.root}>
 
-      {/* ── Tabs ── */}
-      <div className={styles.tabs}>
-        <button
-          className={`${styles.tab} ${activeTab === "plans" ? styles.active : ""}`}
-          onClick={() => setActiveTab("plans")}
-        >
-          <FileText size={18} /> خطط الاقسام
-        </button>
-      </div>
-
+     
       {activeTab === "plans" && (
         <>
-          {/* Info banner */}
-          <div className={styles.infoBanner}>
-            <CheckCircle size={22} />
-            <div className={styles.infoBannerText}>
-              <h3>خطط الاقسام السنوية</h3>
+          {/* Header Hero Card */}
+          <div className={styles.header}>
+            <div className={styles.headerText}>
+              <h1>خطط الاقسام السنوية</h1>
               <p>عرض ومراجعة الخطط السنوية المرسلة من كل قسم للأنشطة الطلابية والفعاليات. يتم تحديث هذه الخطط في بداية كل عام دراسي.</p>
             </div>
           </div>
 
-          {/* Stats row */}
-          <div className={styles.statsRow}>
-
-            {/* إجمالي الخطط */}
-            <div className={styles.statItem}>
-              <div className={`${styles.statIconBox} ${styles.navy}`}>
-                <Layers size={22} />
-              </div>
-              <div className={styles.statContent}>
-                <div className={styles.statValue}>{totalPlans}</div>
-                <div className={styles.statTitle}>إجمالي الخطط</div>
+          {/* Stats Grid */}
+          <div className={styles.statsGrid}>
+            <div className={`${styles.statCard} ${styles.total}`}>
+              <div className={styles.statIcon}><Layers size={24} /></div>
+              <div className={styles.statBody}>
+                <div className={styles.statNum}>{totalPlans}</div>
+                <div className={styles.statLabel}>إجمالي الخطط</div>
               </div>
             </div>
 
-           
+            <div className={`${styles.statCard} ${styles.approved}`}>
+              <div className={styles.statIcon}><CheckCircle size={24} /></div>
+              <div className={styles.statBody}>
+                <div className={styles.statNum}>{completePlans}</div>
+                <div className={styles.statLabel}>خطط مكتملة</div>
+              </div>
+            </div>
 
-          </div>{/* ← statsRow closes here */}
+            <div className={`${styles.statCard} ${styles.pending}`}>
+              <div className={styles.statIcon}><Clock size={24} /></div>
+              <div className={styles.statBody}>
+                <div className={styles.statNum}>{missingPlans}</div>
+                <div className={styles.statLabel}>خطط مفقودة</div>
+              </div>
+            </div>
+
+            <div className={`${styles.statCard} ${styles.rejected}`}>
+              <div className={styles.statIcon}><FileText size={24} /></div>
+              <div className={styles.statBody}>
+                <div className={styles.statNum}>{totalEvents}</div>
+                <div className={styles.statLabel}>إجمالي الفعاليات</div>
+              </div>
+            </div>
+          </div>
 
           {/* Section header */}
           <div className={styles.sectionHeader}>
@@ -537,8 +544,7 @@ export default function PlanView() {
             </div>
             <div className={styles.sectionControls}>
               <input
-                className={styles.filterSelect}
-                style={{ minWidth: 200 }}
+                className={styles.searchInput}
                 placeholder="ابحث باسم الخطة…"
                 value={search}
                 onChange={e => setSearch(e.target.value)}

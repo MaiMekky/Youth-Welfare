@@ -120,35 +120,66 @@
 
 /* ── Toolbar ── */
 .toolbar {
-  padding: 14px 18px;
+  padding: 18px 20px;
   border-bottom: 1px solid #F3F4F6;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 16px;
   margin-top: 16px;
 }
 
-.toolbarTitle { margin: 0; font-size: 15px; font-weight: 700; color: #1E3A5F; }
+.toolbarTitle { 
+  margin: 0; 
+  font-size: 15px; 
+  font-weight: 700; 
+  color: #1E3A5F;
+  flex-shrink: 0;
+}
 
-.toolbarControls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.toolbarControls { 
+  display: flex; 
+  gap: 10px; 
+  align-items: center; 
+  flex-wrap: wrap;
+  flex: 1;
+  justify-content: flex-end;
+}
 
 .searchInput {
-  padding: 8px 13px;
+  padding: 10px 16px 10px 42px;
   border: 1.5px solid #E5E7EB;
-  border-radius: 9px;
+  border-radius: 10px;
   font-family: 'Cairo', sans-serif;
   font-size: 13px;
   outline: none;
-  width: 210px;
-  background: #F9FAFB;
+  min-width: 260px;
+  max-width: 380px;
+  flex: 1;
+  background: #F9FAFB url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%236B7280" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>') no-repeat 13px center;
   text-align: right;
   color: #374151;
-  transition: border 0.2s, background 0.2s;
+  transition: all 0.22s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 
-.searchInput:focus { border-color: #2D5F8A; background: #fff; }
+.searchInput::placeholder {
+  color: #9CA3AF;
+  font-weight: 500;
+}
+
+.searchInput:focus { 
+  border-color: #2D5F8A; 
+  background-color: #fff;
+  box-shadow: 0 3px 10px rgba(45, 95, 138, 0.12), 0 0 0 3px rgba(45, 95, 138, 0.06);
+  transform: translateY(-1px);
+}
+
+.searchInput:hover:not(:focus) {
+  border-color: #CBD5E1;
+  background-color: #fff;
+}
 
 .refreshBtn {
   display: flex; align-items: center; gap: 6px;
@@ -753,22 +784,232 @@
 }
 
 /* ── Responsive ── */
+@media (max-width: 1200px) {
+  .cardsGrid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .statsRow { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 768px) {
-  .root { padding: 14px; }
+  .root { padding: 0; }
   .pageHeader h1 { font-size: 18px; }
-  .tabs { flex-direction: column; }
-  .table { min-width: 600px; }
-  .searchInput { width: 160px; }
+  .tabs { 
+    flex-direction: row;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tab {
+    flex: 1 0 auto;
+    min-width: 140px;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  .table { min-width: 700px; }
+  .tableWrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .searchInput { 
+    width: 100%; 
+    min-width: auto;
+    max-width: 100%;
+    padding: 10px 16px 10px 40px;
+  }
   .statsRow { padding: 14px 14px 0; }
-  .modal { max-height: 95vh; border-radius: 14px; }
-  .eventTitle { max-width: 200px; }
-  .actionBtns { flex-direction: column; align-items: flex-start; gap: 5px; }
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px 16px;
+  }
+  .toolbarTitle {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  .toolbarControls {
+    width: 100%;
+    flex-direction: column;
+  }
+  .searchInput,
+  .refreshBtn {
+    width: 100%;
+  }
+  .modal { 
+    max-height: 95vh; 
+    border-radius: 14px;
+    max-width: 95%;
+  }
+  .eventTitle { max-width: 180px; }
+  .actionBtns { 
+    flex-direction: column; 
+    align-items: stretch; 
+    gap: 6px;
+    width: 100%;
+  }
+  .detailBtn,
+  .downloadBtn {
+    width: 100%;
+  }
+  .cardsGrid {
+    grid-template-columns: 1fr;
+    padding: 14px;
+    gap: 14px;
+  }
+  .cardActions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .btnView,
+  .btnDownload {
+    width: 100%;
+  }
+  .planInfoStrip {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .planInfoDivider {
+    display: none;
+  }
+  .planInfoItem {
+    width: 100%;
+    padding: 4px 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .sectionCard {
+    border-radius: 12px;
+  }
+  .statsRow {
+    padding: 12px 12px 0;
+    gap: 12px;
+  }
+  .statCard {
+    padding: 12px 14px;
+  }
+  .statIcon {
+    width: 40px;
+    height: 40px;
+  }
+  .statNum {
+    font-size: 24px;
+  }
+  .statLabel {
+    font-size: 11px;
+  }
+  .toolbar {
+    padding: 12px 14px;
+  }
+  .toolbarTitle {
+    font-size: 14px;
+  }
+  .searchInput {
+    padding: 10px 14px 10px 38px;
+    font-size: 12.5px;
+  }
+  .cardsGrid {
+    padding: 12px;
+    gap: 12px;
+  }
+  .facultyCard {
+    padding: 18px;
+  }
+  .facultyName {
+    font-size: 15px;
+  }
+  .cardCounts {
+    padding: 12px 14px;
+  }
+  .countValue {
+    font-size: 26px;
+  }
+  .countLabel {
+    font-size: 12px;
+  }
+  .eventGrid {
+    grid-template-columns: 1fr;
+  }
+  .pagination {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .pgInfo {
+    text-align: center;
+  }
+  .pgControls {
+    justify-content: center;
+  }
 }
 
 @media (max-width: 480px) {
-  .root { padding: 10px; }
-  .table th, .table td { padding: 8px 9px; font-size: 11.5px; }
-  .eventGrid { grid-template-columns: 1fr 1fr; }
+  .root { padding: 0; }
+  .table { min-width: 600px; }
+  .table th, .table td { 
+    padding: 8px 9px; 
+    font-size: 11.5px; 
+  }
+  .eventGrid { grid-template-columns: 1fr; }
+  .cardsGrid {
+    padding: 10px;
+    gap: 10px;
+  }
+  .facultyCard {
+    padding: 16px;
+  }
+  .facultyName {
+    font-size: 14px;
+  }
+  .cardCounts {
+    flex-direction: column;
+    gap: 12px;
+    padding: 10px 12px;
+  }
+  .countItem {
+    text-align: center;
+  }
+  .modal {
+    border-radius: 12px;
+  }
+  .modalHeader {
+    padding: 14px 16px;
+  }
+  .modalTitle {
+    font-size: 15px;
+  }
+  .modalSubtitle {
+    font-size: 11px;
+  }
+  .eventsSection {
+    padding: 16px 16px 18px;
+  }
+  .eventCardHeader {
+    padding: 11px 14px;
+  }
+  .eventTitle {
+    font-size: 12.5px;
+    max-width: 150px;
+  }
+  .eventMeta {
+    gap: 8px;
+  }
+  .eventMeta span {
+    font-size: 10px;
+  }
+  .eventDetails {
+    padding: 14px 14px 16px;
+  }
+  .eventDesc {
+    font-size: 12px;
+    padding: 10px 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .facultyName { font-size: 13px; }
+  .countValue { font-size: 22px; }
+  .eventTitle { max-width: 120px; }
 }
 
 /* ── Plan Cards Grid (GeneralAdmin style) ── */

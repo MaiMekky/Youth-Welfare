@@ -687,26 +687,242 @@
   .stats-bar { grid-template-columns: repeat(2, 1fr); }
   .card-meta  { grid-template-columns: repeat(3, 1fr); }
 }
+@media (max-width: 1200px) {
+  .stats-bar { grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .card-meta { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (max-width: 1024px) {
+  .act-page { padding: 24px; }
+  .stats-bar { grid-template-columns: repeat(2, 1fr); }
+  .card-meta { grid-template-columns: repeat(3, 1fr); }
+  .act-title { font-size: 24px; }
+  .dm-stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .act-page { padding: 20px; }
+  .stats-bar { grid-template-columns: repeat(2, 1fr); }
+  .card-meta { grid-template-columns: repeat(3, 1fr); }
+  .status-tabs { grid-template-columns: repeat(3, 1fr); }
+}
+
 @media (max-width: 768px) {
   .act-page { padding: 16px; gap: 1rem; }
-  .stats-bar { grid-template-columns: repeat(2, 1fr); }
-  .act-header { flex-direction: column; align-items: flex-start; }
-  .act-header-right { width: 100%; }
-  .card-top { flex-direction: column; }
-  .card-actions { width: 100%; }
-  .card-meta { grid-template-columns: repeat(2, 1fr); }
-  .card-title { font-size: 16px; }
-  .stab { font-size: 13px; padding: 16px 8px; }
+  .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  
+  .act-header { 
+    flex-direction: column; 
+    align-items: flex-start; 
+    gap: 12px;
+  }
+  
+  .act-header-right { 
+    width: 100%; 
+    flex-direction: column;
+  }
+  
+  .refresh-btn,
+  .dept-filter-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .act-title { font-size: 22px; }
+  .act-subtitle { font-size: 13px; }
+  
+  .stat-card { padding: 16px 18px; }
+  .sc-num { font-size: 28px; }
+  .sc-label { font-size: 12px; }
+  
+  .card-top { 
+    flex-direction: column; 
+    gap: 12px;
+  }
+  
+  .card-actions { 
+    width: 100%; 
+    justify-content: stretch;
+  }
+  
+  .card-actions button {
+    flex: 1;
+  }
+  
+  .card-meta { 
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 8px;
+  }
+  
+  .card-title { font-size: 17px; }
+  
+  .stab { 
+    font-size: 13px; 
+    padding: 14px 8px; 
+    gap: 6px;
+  }
+  
+  .stab-count {
+    min-width: 22px;
+    height: 22px;
+    font-size: 12px;
+    padding: 0 6px;
+  }
+  
   .dm-info-grid { grid-template-columns: 1fr; }
+  .dm-modal { max-width: 95%; }
+  .dm-header { padding: 18px 20px; }
+  .dm-body { padding: 20px; gap: 16px; }
+  .dm-title { font-size: 18px; }
+  .dm-desc { font-size: 13px; }
 }
-@media (max-width: 600px) {
-  .stats-bar { grid-template-columns: repeat(2, 1fr); }
-  .card-meta { grid-template-columns: repeat(2, 1fr); }
-  .stab { font-size: 12px; padding: 12px 6px; }
-}
-@media (max-width: 420px) {
-  .dm-body    { padding: 1rem; }
-  .dm-header  { padding: 1.25rem; }
+
+@media (max-width: 640px) {
+  .act-page { padding: 12px; }
+  .stats-bar { grid-template-columns: 1fr; gap: 10px; }
+  
+  .act-title { font-size: 20px; }
+  .act-subtitle { font-size: 12px; }
+  
+  .stat-card { 
+    padding: 14px 16px; 
+    gap: 12px;
+  }
+  .sc-num { font-size: 24px; }
+  .sc-label { font-size: 11px; }
+  
+  .card-inner { padding: 18px 16px; }
+  .card-title { font-size: 16px; }
+  .card-dept { font-size: 12px; }
+  
+  .card-meta { 
+    grid-template-columns: 1fr; 
+    gap: 8px;
+  }
+  
+  .meta-pill { 
+    padding: 10px 12px; 
+    gap: 8px;
+  }
+  .mp-label { font-size: 10px; }
+  .mp-val { font-size: 13px; }
+  
+  .stab { 
+    font-size: 12px; 
+    padding: 12px 6px; 
+    gap: 4px;
+  }
+  
+  .stab-count {
+    min-width: 20px;
+    height: 20px;
+    font-size: 11px;
+  }
+  
+  .card-actions button {
+    height: 36px;
+    padding: 0 14px;
+    font-size: 13px;
+    gap: 5px;
+  }
+  
   .dm-stats-row { grid-template-columns: 1fr; }
-  .status-tabs  { }
+  .dm-header { padding: 16px 18px; }
+  .dm-body { padding: 18px; gap: 14px; }
+  .dm-title { font-size: 17px; }
+  .dm-desc { font-size: 12px; }
+  .dm-stat { padding: 10px 12px; gap: 8px; }
+  .dm-stat-label { font-size: 10px; }
+  .dm-stat-val { font-size: 12px; }
+}
+
+@media (max-width: 480px) {
+  .act-page { padding: 10px; }
+  
+  .act-title { font-size: 18px; }
+  .act-subtitle { font-size: 11px; }
+  
+  .refresh-btn,
+  .dept-filter-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+  
+  .stat-card { padding: 12px 14px; }
+  .sc-num { font-size: 22px; }
+  .sc-label { font-size: 10px; }
+  
+  .card-inner { padding: 16px 14px; }
+  .card-title { font-size: 15px; }
+  .card-badges-row { gap: 4px; }
+  
+  .type-badge,
+  .status-chip {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+  
+  .card-actions button {
+    height: 34px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+  
+  .stab {
+    font-size: 11px;
+    padding: 10px 4px;
+  }
+  
+  .stab-count {
+    min-width: 18px;
+    height: 18px;
+    font-size: 10px;
+  }
+  
+  .dm-header { padding: 14px 16px; }
+  .dm-body { padding: 16px; gap: 12px; }
+  .dm-title { font-size: 16px; }
+  .dm-close { width: 32px; height: 32px; }
+  .confirm-box { padding: 24px 20px; }
+  .confirm-title { font-size: 17px; }
+  .confirm-body { font-size: 13px; }
+}
+
+@media (max-width: 420px) {
+  .act-page { padding: 8px; }
+  .stats-bar { gap: 8px; }
+  .stat-card { padding: 10px 12px; gap: 10px; }
+  .sc-num { font-size: 20px; }
+  
+  .card-inner { padding: 14px 12px; }
+  .card-title { font-size: 14px; }
+  
+  .card-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .card-actions button {
+    width: 100%;
+  }
+  
+  .dm-body { padding: 14px; }
+  .dm-header { padding: 12px 14px; }
+  .dm-stats-row { grid-template-columns: 1fr; }
+  .status-tabs { grid-template-columns: 1fr; }
+  
+  .stab {
+    padding: 10px 12px;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 360px) {
+  .act-page { padding: 6px; }
+  .act-title { font-size: 16px; }
+  .stat-card { padding: 8px 10px; }
+  .sc-num { font-size: 18px; }
+  .sc-label { font-size: 9px; }
+  .card-inner { padding: 12px 10px; }
+  .card-title { font-size: 13px; }
 }

@@ -264,6 +264,15 @@ const handleApproveAll = async () => {
               <span className={styles.infoLabel}>الأسرة:</span>
               <span className={styles.infoValue}>{eventData.familyName}</span>
             </div>
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>الشروط:</span>
+              <span className={styles.infoValue}>{eventData.restrictions || "—"}</span>
+            </div>
+
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>المكافأة:</span>
+              <span className={styles.infoValue}>{eventData.reward || "—"}</span>
+            </div>
             </div>
           </div>
         </div>
@@ -278,7 +287,11 @@ const handleApproveAll = async () => {
         <div className={styles.studentsCard}>
           <div className={styles.studentsHeader}>
             <h2 className={styles.cardTitle}>المشاركون</h2>
-            <button className={styles.approveAllButton} onClick={handleApproveAll}>
+            <button
+              className={styles.approveAllButton}
+              onClick={handleApproveAll}
+              disabled={studentsData.length === 0}
+            >
               اعتماد الجميع
             </button>
           </div>
@@ -295,12 +308,33 @@ const handleApproveAll = async () => {
     </tr>
   </thead>
   <tbody>
-    {studentsData.map((p, idx) => (
+  {studentsData.length === 0 ? (
+    <tr>
+      <td colSpan={5} className={styles.emptyState}>
+        <div className={styles.emptyStateContent}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M5.5 21a6.5 6.5 0 0113 0"/>
+          </svg>
+          <p>لا يوجد مشاركون حتى الآن</p>
+        </div>
+      </td>
+    </tr>
+  ) : (studentsData.map((p, idx) => (
       <tr key={idx}>
         <td>{p.name}</td>
         <td>{p.nationalId}</td>
         <td>{p.collegeId}</td>
-        <td>{p.status}</td>
+        <td>
+        <span className={`${styles.statusBadge} ${
+          p.status === "مقبول" ? styles.statusApproved :
+          p.status === "مرفوض" ? styles.statusRejected :
+          styles.statusPending
+        }`}>
+          {p.status}
+        </span>
+      </td>
+        
         {/* <td>{p.rank ?? "-"}</td>
         <td>{p.reward ?? "-"}</td> */}
         <td>
@@ -308,15 +342,31 @@ const handleApproveAll = async () => {
     <button
       className={styles.approveButton}
       onClick={() => handleParticipantAction(p.studentId, "approve")}
+      disabled={p.status === "مقبول"}
       title="اعتماد"
     >
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"> <polyline points="20 6 9 17 4 12" /> </svg> </button> {/* Reject Button */} <button className={styles.rejectButton} onClick={() => handleParticipantAction(p.studentId, "reject")} title="رفض" > <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"> <line x1="18" y1="6" x2="6" y2="18" /> <line x1="6" y1="6" x2="18" y2="18" /> </svg> </button>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
+    </button>
+    <button
+      className={styles.rejectButton}
+      onClick={() => handleParticipantAction(p.studentId, "reject")}
+      disabled={p.status === "مرفوض"}
+      title="رفض"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    </button>
   </div>
 </td>
 
 
       </tr>
-    ))}
+    ))
+  )}
   </tbody>
 </table>
           </div>

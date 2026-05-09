@@ -3,17 +3,17 @@ import React, { useState, useEffect } from "react";
 import styles from "./FacultyReport.module.css";
 import { ChevronLeft, ChevronRight, Search, Wallet, Users, FileText } from "lucide-react";
 import Footer from "../FacLevel/components/Footer";
-
+import { useToast } from "@/app/context/ToastContext";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { getSessionMeta } from "@/utils/cookieHelpers";
 
 interface StudentType {
   name: string;
-  id: number | string;
   req: number;
   amount: number;
   date: string;
   gpa: string | number;
+  discount: number;
 }
 
 export default function FacultyReport() {
@@ -24,7 +24,7 @@ export default function FacultyReport() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [showExportModal, setShowExportModal] = useState(false);
   const [academicYear, setAcademicYear] = useState("");
-
+  const { showToast } = useToast();
   useEffect(() => {
     const meta = getSessionMeta();
     if (meta) setUserData({ faculty_name: meta.faculty_name, name: meta.name });
@@ -33,35 +33,32 @@ export default function FacultyReport() {
 useEffect(() => {
   fetchData();
 }, []);
+const [totalDiscount, setTotalDiscount] = useState(0);
+const [isExporting, setIsExporting] = useState(false);
+
 const fetchData = async () => {
   try {
-    const res = await authFetch(
-      `${getBaseUrl()}/api/solidarity/faculty/faculty_approved/`
-    );
-
+    const res = await authFetch(`${getBaseUrl()}/api/solidarity/faculty/faculty_approved/`);
     if (!res.ok) throw new Error("API_ERROR");
-
     const data = await res.json();
 
+    setTotalDiscount(Number(data.total_discount) || 0);
+
     const mapped: StudentType[] = data.results.map((item: Record<string, unknown>) => ({
-      name: item.student_name,
-      id: item.student_id,
-      req: item.solidarity_id,
+      name: item.student_name as string,
+      req: item.solidarity_id as number,
       amount: Number(item.total_income) || 0,
-      date: "-",
-      gpa: "-",
+      discount: Number(item.discount_amount) || 0,
     }));
 
     setStudents(mapped);
-
   } catch (err) {
     console.error("API Error:", err);
   }
 };
 
-
   const filteredStudents = students.filter((s) =>
-    [s.name, s.id, String(s.req)].join(" ").toLowerCase().includes(searchQuery.toLowerCase())
+    [s.name, String(s.req)].join(" ").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const totalPages     = Math.ceil(filteredStudents.length / rowsPerPage);
@@ -70,33 +67,45 @@ const fetchData = async () => {
   const totalAmount    = filteredStudents.reduce((acc, s) => acc + (s.amount || 0), 0);
 const handleExport = async () => {
   try {
-const res = await authFetch(
-  `${getBaseUrl()}/api/solidarity/faculty/export/?acd_year=${academicYear}`
-);
+    setIsExporting(true);
 
-if (!res.ok) throw new Error("EXPORT_ERROR");
+    const res = await authFetch(
+      `${getBaseUrl()}/api/solidarity/faculty/export/?acd_year=${academicYear}`
+    );
 
-const blob = await res.blob();
+    if (res.status === 422) {
+      showToast("لا توجد سنة دراسية لهذه الفرقة", "error");
+      setShowExportModal(false);
+      setAcademicYear("");
+      return;
+    }
+
+    if (!res.ok) throw new Error("EXPORT_ERROR");
+
+    const blob = await res.blob();
     const url = window.URL.createObjectURL(
-new Blob([blob], { type: "application/pdf" })
+      new Blob([blob], { type: "application/pdf" })
     );
 
     const link = document.createElement("a");
     link.href = url;
 
-const cd = res.headers.get("content-disposition");
+    const cd = res.headers.get("content-disposition");
     link.download = cd?.match(/filename="?(.+)"?/)?.[1] ?? "report.pdf";
 
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-
     window.URL.revokeObjectURL(url);
 
     setShowExportModal(false);
+    setAcademicYear("");
 
   } catch (err) {
     console.error("Export error:", err);
+    showToast("حدث خطأ أثناء التصدير", "error");
+  } finally {
+    setIsExporting(false);
   }
 };
   return (
@@ -123,17 +132,19 @@ const cd = res.headers.get("content-disposition");
             <div className={styles.modalButtons}>
               <button
                 className={styles.cancelBtn}
-                onClick={() => setShowExportModal(false)}
+                onClick={() => {
+                  setShowExportModal(false);
+                  setAcademicYear("");
+                }}
               >
                 إلغاء
               </button>
-
               <button
                 className={styles.confirmBtn}
                 onClick={handleExport}
-                disabled={!academicYear}
+                disabled={!academicYear || isExporting}
               >
-                تصدير
+                {isExporting ? "جاري التصدير..." : "تصدير"}
               </button>
             </div>
           </div>
@@ -152,12 +163,12 @@ const cd = res.headers.get("content-disposition");
         {/* ── Stats ── */}
         <section className={styles.statsSection}>
           <div className={`${styles.statBox} ${styles.yellow}`}>
-            <div>
-              <p>إجمالي المبلغ</p>
-              <h2>{totalAmount.toLocaleString()} ج.م</h2>
-            </div>
-            <span className={styles.icon}><Wallet size={28} /></span>
+          <div>
+            <p>إجمالي الخصم</p>
+            <h2>{totalDiscount.toLocaleString()} ج.م</h2>
           </div>
+          <span className={styles.icon}><Wallet size={28} /></span>
+        </div>
           <div className={`${styles.statBox} ${styles.blue}`}>
             <div>
               <p>إجمالي الطلبات</p>
@@ -189,22 +200,22 @@ const cd = res.headers.get("content-disposition");
 
           <div className={styles.tableScroll}>
             <table className={styles.reportTable}>
-              <thead>
+             <thead>
                 <tr>
-                  <th>اسم الطالب</th>
-                  <th>رقم الطالب</th>
                   <th>رقم الطلب</th>
-                  <th>المبلغ (جنيه)</th>
+                  <th>اسم الطالب</th>
+                  <th>الدخل (جنيه)</th>
+                  <th>الخصم (جنيه)</th>
                 </tr>
               </thead>
               <tbody>
                 {currentStudents.length > 0 ? (
                   currentStudents.map((s, i) => (
                     <tr key={i}>
-                      <td>{s.name}</td>
-                      <td>{s.id}</td>
                       <td>{s.req}</td>
+                       <td>{s.name}</td>
                       <td className={styles.amount}>{s.amount.toLocaleString()}</td>
+                      <td className={styles.amount}>{s.discount.toLocaleString()}</td>
                     </tr>
                   ))
                 ) : (

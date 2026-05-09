@@ -18,27 +18,16 @@ const rejectionReasons = [
 const rejectionReasonMap: Record<number, string> = Object.fromEntries(
   rejectionReasons.map(r => [r.id, r.text])
 );
+
 // ====== Colored status badge helper ======
 function StatusBadge({ status }: { status?: string }) {
   if (!status) return <span>—</span>;
 
   const styleMap: Record<string, React.CSSProperties> = {
-    "مقبول": {
-      background: "#d1fae5", color: "#065f46",
-      border: "1px solid #6ee7b7",
-    },
-    "مرفوض": {
-      background: "#fee2e2", color: "#991b1b",
-      border: "1px solid #fca5a5",
-    },
-    "منتظر": {
-      background: "#fef3c7", color: "#92400e",
-      border: "1px solid #fcd34d",
-    },
-    "موافقة مبدئية": {
-      background: "#e0e7ff", color: "#3730a3",
-      border: "1px solid #a5b4fc",
-    },
+    "مقبول": { background: "#d1fae5", color: "#065f46", border: "1px solid #6ee7b7" },
+    "مرفوض": { background: "#fee2e2", color: "#991b1b", border: "1px solid #fca5a5" },
+    "منتظر": { background: "#fef3c7", color: "#92400e", border: "1px solid #fcd34d" },
+    "موافقة مبدئية": { background: "#e0e7ff", color: "#3730a3", border: "1px solid #a5b4fc" },
   };
 
   const baseStyle: React.CSSProperties = {
@@ -49,13 +38,32 @@ function StatusBadge({ status }: { status?: string }) {
     fontWeight: 700,
     letterSpacing: "0.3px",
     verticalAlign: "middle",
-    ...(styleMap[status] ?? {
-      background: "#f3f4f6", color: "#374151", border: "1px solid #d1d5db",
-    }),
+    ...(styleMap[status] ?? { background: "#f3f4f6", color: "#374151", border: "1px solid #d1d5db" }),
   };
 
   return <span style={baseStyle}>{status}</span>;
 }
+
+type Discounts = {
+  aff_discount: number[];
+  reg_discount: number[];
+  bk_discount: number[];
+  full_discount: number[];
+};
+
+type SelectedDiscounts = {
+  bk_discount: string;
+  reg_discount: string;
+  aff_discount: string;
+  full_discount: string;
+};
+
+const EMPTY_DISCOUNTS: SelectedDiscounts = {
+  bk_discount: "none",
+  reg_discount: "none",
+  aff_discount: "none",
+  full_discount: "none",
+};
 
 export default function StudentDetailsPage() {
   const { id } = useParams();
@@ -68,19 +76,27 @@ export default function StudentDetailsPage() {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [selectedReason, setSelectedReason] = useState<number | null>(null);
 
+  // ====== Discount state ======
+  const [availableDiscounts, setAvailableDiscounts] = useState<Discounts>({
+    bk_discount: [], reg_discount: [], aff_discount: [], full_discount: [],
+  });
+  const [selectedDiscounts, setSelectedDiscounts] = useState<SelectedDiscounts>(EMPTY_DISCOUNTS);
+  const [discountsSaved, setDiscountsSaved] = useState(false);
+
+  const fetchDetails = async () => {
+    try {
+      const baseUrl = getBaseUrl();
+      const response = await authFetch(
+        `${baseUrl}/api/solidarity/super_dept/${id}/applications/`
+      );
+      const result = await response.json();
+      setData(result);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
-    const fetchDetails = async () => {
-      try {
-        const baseUrl = getBaseUrl();
-        const response = await authFetch(
-          `${baseUrl}/api/solidarity/super_dept/${id}/applications/`
-        );
-        const result = await response.json();
-        setData(result);
-      } catch (error) {
-        console.error(error);
-      }
-    };
     if (id) fetchDetails();
   }, [id]);
 
@@ -102,6 +118,31 @@ export default function StudentDetailsPage() {
     if (id) fetchDocs();
   }, [id]);
 
+  // ====== Fetch faculty discounts ======
+  useEffect(() => {
+    const fetchDiscounts = async () => {
+      try {
+        const res = await authFetch(
+          `${getBaseUrl()}/api/solidarity/super_dept/${id}/faculty_discounts/`
+        );
+        if (!res.ok) return;
+        const result = await res.json();
+        const d = result?.discounts;
+        if (d) {
+          setAvailableDiscounts({
+            bk_discount:   Array.isArray(d.bk_discount)   ? d.bk_discount   : [],
+            reg_discount:  Array.isArray(d.reg_discount)  ? d.reg_discount  : [],
+            aff_discount:  Array.isArray(d.aff_discount)  ? d.aff_discount  : [],
+            full_discount: Array.isArray(d.full_discount) ? d.full_discount : [],
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching faculty discounts:", error);
+      }
+    };
+    if (id) fetchDiscounts();
+  }, [id]);
+
   const openDocument = async (docId: number) => {
     try {
       const res = await authFetch(
@@ -116,15 +157,57 @@ export default function StudentDetailsPage() {
     }
   };
 
+  // ====== Discount helpers ======
+  const handleDiscountChange = (field: keyof SelectedDiscounts, value: string) => {
+    setDiscountsSaved(false);
+    setSelectedDiscounts(prev => {
+      if (field === "full_discount" && value !== "none") {
+        return { bk_discount: "none", reg_discount: "none", aff_discount: "none", full_discount: value };
+      }
+      if (field !== "full_discount" && prev.full_discount !== "none" && value !== "none") {
+        return { ...prev, [field]: value, full_discount: "none" };
+      }
+      return { ...prev, [field]: value };
+    });
+  };
+
+  const handleResetDiscounts = () => {
+    setSelectedDiscounts(EMPTY_DISCOUNTS);
+    setDiscountsSaved(false);
+    showToast("تم إعادة تعيين الاختيارات", "warning");
+  };
+
+  const buildDiscountsPayload = () => {
+    const DISCOUNT_TYPE_MAP: Record<string, string> = {
+      bk_discount: "bk_discount",
+      reg_discount: "reg_discount",
+      aff_discount: "aff_discount",
+      full_discount: "full_discount",
+    };
+    return (Object.keys(selectedDiscounts) as Array<keyof SelectedDiscounts>)
+      .filter(k => selectedDiscounts[k] !== "none")
+      .map(k => ({ discount_type: DISCOUNT_TYPE_MAP[k], discount_value: String(selectedDiscounts[k]) }));
+  };
+
+  // ====== Approve — sends discounts in body ======
   const handleApprove = async () => {
+    const payload = buildDiscountsPayload();
+    if (payload.length === 0) {
+      showToast("يجب اختيار نوع خصم قبل القبول", "error");
+      return;
+    }
     try {
       const response = await authFetch(
         `${getBaseUrl()}/api/solidarity/super_dept/${id}/change_to_approve/`,
-        { method: "POST", headers: { "Content-Type": "application/json" } }
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({   discounts: payload.length > 0 ? payload : []  }),
+        }
       );
       if (!response.ok) throw new Error("حدث خطأ أثناء قبول الطالب");
       await response.json();
-      setData((prev) => ({ ...prev, req_status: "مقبول" }));
+      await fetchDetails();
       showToast("✅ تم قبول الطالب بنجاح", "success");
     } catch (error) {
       console.error(error);
@@ -150,7 +233,11 @@ export default function StudentDetailsPage() {
       );
       if (!response.ok) throw new Error("حدث خطأ أثناء رفض الطالب");
       await response.json();
-      setData((prev) => ({ ...prev, req_status: "مرفوض" }));
+      setData(prev => ({
+        ...prev,
+        req_status: "مرفوض",
+        rejection_reason: selectedReason,
+      }));
       setShowRejectModal(false);
       setSelectedReason(null);
       showToast("❌ تم رفض الطالب بنجاح", "error");
@@ -159,6 +246,10 @@ export default function StudentDetailsPage() {
       showToast("❌ فشل رفض الطالب", "error");
     }
   };
+
+  // ====== Derived helpers ======
+  const status = String(data?.req_status ?? "");
+  const showDiscountBlock = status === "منتظر" || status === "مرفوض";
 
   if (loading || !data) return <p className={styles.loading}>جاري التحميل...</p>;
 
@@ -195,6 +286,13 @@ export default function StudentDetailsPage() {
             </p>
             <p><strong>المراجع:</strong> {String(data.approved_by ?? "—")}</p>
             <p><strong>آخر تحديث:</strong> {String(data.updated_at ?? '').slice(0, 10)}</p>
+            <p><strong>إجمالي الخصم:</strong> {data.total_discount != null ? `${data.total_discount} جنيه` : "—"}</p>
+            <p>
+              <strong>نوع الخصم:</strong>{" "}
+              {Array.isArray(data.discount_type) && (data.discount_type as string[]).length > 0
+                ? (data.discount_type as string[]).join("، ")
+                : "—"}
+            </p>
           </div>
         </section>
 
@@ -264,10 +362,9 @@ export default function StudentDetailsPage() {
           )}
         </section>
 
-        
-          {/* Rejection reason — highlighted */}
-          {data?.req_status === "مرفوض" && (
-            <section className={styles.section}>
+        {/* سبب الرفض */}
+        {status === "مرفوض" && (
+          <section className={styles.section}>
             <div style={{
               marginTop: "14px",
               background: "linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)",
@@ -290,17 +387,82 @@ export default function StudentDetailsPage() {
               </div>
             </div>
           </section>
-          )}
+        )}
+
+        {/* ====== الخصومات — تظهر عند منتظر أو مرفوض ====== */}
+        {showDiscountBlock && (
+          <section className={styles.section}>
+            <h3>الخصومات المتاحة</h3>
+            <div className={styles.discountsBox}>
+              <div className={styles.discountSelect}>
+                <label>خصم مصاريف الكتب:</label>
+                <select
+                  value={selectedDiscounts.bk_discount}
+                  onChange={e => handleDiscountChange("bk_discount", e.target.value)}
+                >
+                  <option value="none">لا يوجد</option>
+                  {availableDiscounts.bk_discount.map((item, i) => (
+                    <option key={i} value={item}>{item}</option>
+                  ))}
+                </select>
+              </div>
+              <div className={styles.discountSelect}>
+                <label>خصم مصاريف الانتساب:</label>
+                <select
+                  value={selectedDiscounts.aff_discount}
+                  onChange={e => handleDiscountChange("aff_discount", e.target.value)}
+                >
+                  <option value="none">لا يوجد</option>
+                  {availableDiscounts.aff_discount.map((item, i) => (
+                    <option key={i} value={item}>{item}</option>
+                  ))}
+                </select>
+              </div>
+              <div className={styles.discountSelect}>
+                <label>خصم مصاريف الانتظام:</label>
+                <select
+                  value={selectedDiscounts.reg_discount}
+                  onChange={e => handleDiscountChange("reg_discount", e.target.value)}
+                >
+                  <option value="none">لا يوجد</option>
+                  {availableDiscounts.reg_discount.map((item, i) => (
+                    <option key={i} value={item}>{item}</option>
+                  ))}
+                </select>
+              </div>
+              <div className={styles.discountSelect}>
+                <label>خصم المصاريف كاملة:</label>
+                <select
+                  value={selectedDiscounts.full_discount}
+                  onChange={e => handleDiscountChange("full_discount", e.target.value)}
+                >
+                  <option value="none">لا يوجد</option>
+                  {availableDiscounts.full_discount.map((item, i) => (
+                    <option key={i} value={item}>{item}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 12 }}>
+              <button
+                onClick={handleResetDiscounts}
+                className={styles.rejectBtn}
+              >
+                إعادة تعيين
+              </button>
+            </div>
+          </section>
+        )}
 
         {/* الأزرار */}
         <div className={styles.actions}>
-          {data.req_status === "مقبول" && (
+          {status === "مقبول" && (
             <button className={styles.rejectBtn} onClick={openRejectModal}>رفض الطالب</button>
           )}
-          {data.req_status === "مرفوض" && (
+          {status === "مرفوض" && (
             <button className={styles.approveBtn} onClick={handleApprove}>قبول الطالب</button>
           )}
-          {data.req_status !== "مقبول" && data.req_status !== "مرفوض" && (
+          {status !== "مقبول" && status !== "مرفوض" && (
             <>
               <button className={styles.approveBtn} onClick={handleApprove}>قبول الطالب</button>
               <button className={styles.rejectBtn} onClick={openRejectModal}>رفض الطالب</button>

@@ -105,7 +105,44 @@
   position: relative;
   overflow: hidden;
 }
+/* ── Status Badge ── */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
 
+.statusApproved {
+  background: var(--green-bg);
+  color: #065F46;
+  border: 1px solid var(--green-bdr);
+}
+
+.statusRejected {
+  background: var(--red-bg);
+  color: #991B1B;
+  border: 1px solid var(--red-bdr);
+}
+
+.statusPending {
+  background: #FFFBEB;
+  color: #92400E;
+  border: 1px solid #FDE68A;
+}
+
+/* ── Disabled action buttons ── */
+.approveButton:disabled,
+.rejectButton:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  pointer-events: none;
+}
 .studentsCard {
   background: #fff;
   border-radius: var(--radius);
@@ -121,7 +158,40 @@
   height: 3px;
   background: linear-gradient(90deg, var(--navy), var(--navy-mid), var(--gold));
 }
+/* ── Empty State ── */
+.emptyState {
+  padding: 48px 16px !important;
+  text-align: center !important;
+  border-bottom: none !important;
+}
 
+.emptyStateContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--mute);
+}
+
+.emptyStateContent svg {
+  opacity: 0.4;
+}
+
+.emptyStateContent p {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--mute);
+}
+
+/* ── Disabled approve-all ── */
+.approveAllButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none;
+  box-shadow: none;
+}
 .cardTitle {
   font-size: 17px;
   font-weight: 800;

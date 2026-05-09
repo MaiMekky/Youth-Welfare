@@ -58,14 +58,18 @@
 ══════════════════════════════════════════ */
 .cf-page-banner {
   background: linear-gradient(140deg, var(--navy) 0%, var(--navy-mid) 100%);
-  padding: 28px 48px 24px;
-  text-align: center;
+  padding: 20px 28px;
   position: relative;
   flex-shrink: 0;
-  margin: 20px 24px 0; 
+  margin: 20px 24px 0;
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
+
 
 /* .cf-page-banner::before {
   content: '';
@@ -74,18 +78,31 @@
   height: 3px;
   background: linear-gradient(90deg, var(--gold), var(--gold-bright), var(--gold));
 } */
+.cf-page-banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;  
+  text-align: right;   /* RTL: right = visual left */
+}
 
 .cf-page-banner-title {
-  font-size: 1.6rem;
+  font-size: clamp(0.9rem, 2.5vw, 1.45rem);
   font-weight: 800;
   color: #fff;
-  margin: 0 0 6px;
+  margin: 0;
+  word-break: break-word;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cf-page-banner-breadcrumb {
-  font-size: 0.82rem;
+  font-size: clamp(0.7rem, 1.8vw, 0.8rem);
   color: rgba(255,255,255,0.55);
   font-weight: 500;
+  word-break: break-word;
 }
 
 /* ══════════════════════════════════════════
@@ -93,14 +110,13 @@
 ══════════════════════════════════════════ */
 .cf-progress-header {
   background: #fff;
-  padding: 14px 20px 20px; 
+  padding: 14px 20px 20px;
   border-bottom: 1.5px solid var(--border);
   flex-shrink: 0;
   box-shadow: 0 2px 10px rgba(26,39,68,0.05);
-  margin: 0px 24px 0;
+  margin: 0 24px;
   border-bottom-right-radius: 16px;
   border-bottom-left-radius: 16px;
-  position: relative;
 }
 
 /* Remove the gold top stripe — no longer needed */
@@ -112,10 +128,11 @@
 /* ── Step indicator row ── */
 .cf-steps {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: center;   /* back to center — line and circles share same row */
+  justify-content: stretch;
   gap: 0;
-  padding: 0 16px;
+  padding: 16px 16px 0;
+  width: 100%;
 }
 
 .cf-step-indicator {
@@ -124,6 +141,9 @@
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
+  /* pull the label out of the flex row so it doesn't affect line alignment */
+  position: relative;
+  padding-bottom: 24px; /* space for the label below */
 }
 
 .cf-step-circle {
@@ -175,19 +195,25 @@
   white-space: nowrap;
   transition: color var(--transition);
   text-align: center;
+  /* position label absolutely below the circle */
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
 }
 .cf-step-active .cf-step-label { color: var(--gold); font-weight: 700; }
 .cf-step-done   .cf-step-label { color: var(--navy); }
 
-/* connector line */
 .cf-step-line {
   flex: 1;
   height: 2px;
   background: var(--border);
-  margin: 0 0 22px 0;        /* ← no side margin, only bottom offset */
+  min-width: 0;
+  max-width: none;
+  margin: 0;           /* no margin needed — flex center handles it */
+  align-self: auto;    /* inherits center from parent */
+  margin-bottom: 24px; /* match indicator padding-bottom to stay centered */
   transition: background var(--transition);
-  min-width: 60px;            /* ← was 120px, too wide */
-  max-width: 160px;
 }
 .cf-line-done { background: var(--gold); }
 
@@ -197,18 +223,32 @@
 /* step counter pill — hidden (moved to banner) */
 .cf-step-count {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.8);
-  background: rgba(255, 255, 255, 0.12);
-  border: 1.5px solid rgba(255, 255, 255, 0.2);
-  padding: 3px 10px;
-  border-radius: 20px;
-  width: fit-content;
-  position: absolute;      
-  bottom: 55px;      
-  left: 48px;                
+  justify-content: center;
+  flex-shrink: 0;
+  width: clamp(52px, 9vw, 72px);
+  height: clamp(52px, 9vw, 72px);
+  background: rgba(255,255,255,0.1);
+  border: 2px solid rgba(201, 151, 42, 0.5);
+  border-radius: 50%;
+  gap: 1px;
+}
+
+.cf-step-count-current {
+  font-size: clamp(1.1rem, 3vw, 1.6rem);
+  font-weight: 900;
+  color: var(--gold-bright);
+  line-height: 1;
+  font-family: 'Cairo', sans-serif;
+}
+
+.cf-step-count-total {
+  font-size: clamp(0.58rem, 1.4vw, 0.72rem);
+  font-weight: 600;
+  color: rgba(255,255,255,0.55);
+  line-height: 1;
+  font-family: 'Cairo', sans-serif;
 }
 /* ══════════════════════════════════════════
    BODY / FORM CONTAINER
@@ -708,6 +748,7 @@ select.member-input {
   font-weight: 700;
   cursor: pointer;
   transition: all var(--transition);
+  max-width: fit-content;
 }
 .add-activity-btn:hover {
   background: var(--navy-mid);
@@ -750,7 +791,7 @@ select.member-input {
 }
 
 /* Dot indicators */
-.cf-footer-dots { display: flex; gap: 7px; align-items: center; }
+.cf-footer-dots { display: flex; gap: 7px; align-items: center;}
 
 .cf-dot {
   width: 8px;
@@ -814,6 +855,11 @@ select.member-input {
 /* ══════════════════════════════════════════
    RESPONSIVE — 900px
 ══════════════════════════════════════════ */
+/* ══════════════════════════════════════════
+   RESPONSIVE — complete overhaul
+══════════════════════════════════════════ */
+
+/* ── 900px ── */
 @media (max-width: 900px) {
   .assistantGrid          { grid-template-columns: repeat(2, 1fr); }
   .assistantCardFull      { grid-column: span 2; }
@@ -823,41 +869,91 @@ select.member-input {
   .activityGridFull       { grid-column: span 1; }
 }
 
-/* ══════════════════════════════════════════
-   RESPONSIVE — 680px
-══════════════════════════════════════════ */
-@media (max-width: 680px) {
-  /* header */
-  .cf-progress-header     { padding: 18px 20px 0; }
-  .cf-progress-bar        { margin: 0 -20px; }
-  .cf-wizard-title        { font-size: 1rem; }
-
-  /* body */
-  .member-form-container  { padding: 18px 16px 40px; }
-  .stepNavButtons         { padding: 16px; }
-
-  /* grids collapse to 1 column */
-  .member-form-grid       { grid-template-columns: 1fr; }
-  .assistantGrid          { grid-template-columns: 1fr; }
-  .assistantCardFull      { grid-column: span 1; }
-  .assistant-inputs       { grid-template-columns: 1fr; }
-
-  /* hide step labels on narrow screens */
-  .cf-step-label          { display: none; }
-
-  /* shrink step circles */
-  .cf-step-circle         { width: 30px; height: 30px; }
-  .cf-step-line           { min-width: 14px; }
-
-  /* full-width submit */
-  .add-member-btn         { width: 100%; padding: 14px; }
+/* ── 768px ── */
+@media (max-width: 768px) {
+  .cf-page-banner {
+    margin: 12px 12px 0;
+    padding: 16px 16px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    gap: 12px;
+  }
+  .cf-progress-header {
+    margin: 0 12px;
+    padding: 12px 12px 16px;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+  }
+  .cf-steps             { padding: 8px 8px 0; }
+  .member-form-container { padding: 16px 12px 40px; }
+  .stepNavButtons       { padding: 12px 16px; gap: 10px; }
+  .assistantGrid        { padding: 14px; gap: 12px; }
+  .committeesWrapper    { padding: 14px; }
+  .committeeBody        { padding: 14px 12px; }
+  .member-section > :not(.member-section-title) { padding: 14px; }
 }
 
-/* ══════════════════════════════════════════
-   RESPONSIVE — 400px
-══════════════════════════════════════════ */
+/* ── 600px ── */
+@media (max-width: 600px) {
+  /* banner */
+  .cf-page-banner       { margin: 8px 8px 0; padding: 14px 14px; }
+  .cf-page-banner-breadcrumb { display: none; } /* too cramped — hide breadcrumb */
+  .cf-step-count        { width: 48px; height: 48px; }
+
+  /* steps */
+  .cf-step-indicator    { padding-bottom: 20px; }
+  .cf-step-line         { margin-bottom: 20px; }
+  .cf-step-circle       { width: 32px; height: 32px; font-size: 0.78rem; }
+  .cf-step-label        { font-size: 0.6rem; }
+
+  /* grid */
+  .assistantGrid        { grid-template-columns: 1fr; padding: 12px; }
+  .assistantCardFull    { grid-column: span 1; }
+  .assistant-inputs     { grid-template-columns: 1fr; }
+  .member-form-grid     { grid-template-columns: 1fr; }
+
+  /* footer nav */
+  .stepNavButtons       { padding: 10px 12px; }
+  .add-member-btn       { padding: 11px 20px; font-size: 0.88rem; }
+  .stepNavPrev          { padding: 10px 16px; font-size: 0.88rem; }
+
+  /* sections */
+  .member-section > :not(.member-section-title) { padding: 12px; }
+  .committeesWrapper    { padding: 12px; }
+  .committeeBody        { padding: 12px 10px; }
+  .activityCard         { padding: 12px; }
+  .committeeSummary     { padding: 12px 14px; font-size: 0.85rem; }
+}
+
+/* ── 400px ── */
 @media (max-width: 400px) {
-  .cf-step-count          { display: none; }
-  .cf-progress-top        { gap: 8px; }
-  .cf-back-page           { font-size: 0.78rem; padding: 5px 10px; }
+  /* banner */
+  .cf-page-banner       { margin: 4px 4px 0; padding: 12px 12px; gap: 8px; }
+  .cf-page-banner-title { font-size: 0.92rem; }
+  .cf-step-count        { width: 42px; height: 42px; }
+  .cf-step-count-current { font-size: 1rem; }
+  .cf-step-count-total  { font-size: 0.56rem; }
+
+  /* progress header */
+  .cf-progress-header   { margin: 0 4px; padding: 10px 6px 14px; }
+  .cf-steps             { padding: 6px 4px 0; }
+
+  /* steps — hide labels, shrink circles */
+  .cf-step-indicator    { padding-bottom: 0; }
+  .cf-step-label        { display: none; }
+  .cf-step-line         { margin-bottom: 0; }
+  .cf-step-circle       { width: 28px; height: 28px; font-size: 0.72rem; }
+
+  /* nav buttons */
+  .stepNavButtons       { padding: 8px 10px; gap: 6px; }
+  .add-member-btn       { padding: 10px 14px; font-size: 0.82rem; }
+  .stepNavPrev          { padding: 9px 12px; font-size: 0.82rem; }
+
+  /* form */
+  .member-form-container { padding: 10px 8px 32px; }
+  .member-section > :not(.member-section-title) { padding: 10px; }
+  .committeesWrapper    { padding: 10px; }
+  .activityCard         { padding: 10px; }
+  .member-input         { font-size: 0.88rem; height: 44px; }
+  .assistantGrid        { padding: 10px; gap: 10px; }
 }

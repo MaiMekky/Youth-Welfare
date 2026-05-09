@@ -3,7 +3,6 @@
 import React, { useState, useMemo } from "react";
 import PageTitleSection from "./components/PageTitleSection";
 import StatsGrid from "./components/StatsGrid";
-import FiltersSection from "./components/FiltersSection";
 import RequestsTable from "./components/RequestsTable";
 import Footer from "./components/Footer";
 import DiscountsSection from "./components/DiscountsSection";
@@ -45,15 +44,7 @@ export default function FinancialSupportPage() {
         <StatsGrid requests={requests} />
 
         <DiscountsSection />
-
-        {/* الفلاتر */}
-        <FiltersSection
-          selectedFilter={selectedFilter}
-          setSelectedFilter={setSelectedFilter}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-        />
-
+        
         {/* جدول الطلبات بعد الفلترة */}
         <RequestsTable
           onDataFetched={setRequests}        // parent state setter — يستقبل RequestsTable البيانات ويخزنها في الأب

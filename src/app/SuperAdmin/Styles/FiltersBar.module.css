@@ -52,7 +52,8 @@
   background: #fff;
   box-shadow: 0 0 0 3px rgba(45,95,138,.1);
 }
-
+.dateLabel { display: flex; flex-direction: column; gap: 4px; }
+.dateLabelText { font-size: 0.72rem; font-weight: 600; color: #6b7280; padding-right: 2px; }
 /* ── Divider ── */
 .divider {
   height: 1px;

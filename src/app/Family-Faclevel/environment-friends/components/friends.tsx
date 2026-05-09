@@ -751,14 +751,17 @@ export default function FriendsForm() {
     <div className={styles.formContainer}>
 
      <div className={styles["cf-page-banner"]}>
-      <h1 className={styles["cf-page-banner-title"]}>إنشاء أسرة أصدقاء البيئة</h1>
-      <p className={styles["cf-page-banner-breadcrumb"]}>
-        إدارة الأسرة الطلابية / طلبات / إنشاء أسرة أصدقاء البيئة
-      </p>
-        <span className={styles["cf-step-count"]}>
-          {currentStep + 1} / {STEPS.length}
-        </span>
-    </div>
+  <div className={styles["cf-page-banner-text"]}>
+    <h1 className={styles["cf-page-banner-title"]}>إنشاء أسرة أصدقاء البيئة</h1>
+    <p className={styles["cf-page-banner-breadcrumb"]}>
+      إدارة الأسرة الطلابية / طلبات / إنشاء أسرة أصدقاء البيئة
+    </p>
+  </div>
+  <div className={styles["cf-step-count"]}>
+    <span className={styles["cf-step-count-current"]}>{currentStep + 1}</span>
+    <span className={styles["cf-step-count-total"]}>/ {STEPS.length}</span>
+  </div>
+</div>
 
     {/* ══ Wizard Progress Header ══ */}
     <div className={styles["cf-progress-header"]}>

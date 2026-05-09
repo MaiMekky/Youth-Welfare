@@ -13,7 +13,8 @@ interface Leader {
   email: string;
   gender: "M" | "F";
   role: string;
-  createdAt: string;
+  academicYear: string;
+  major: string;
 }
 
 const emptyLeader: Leader = {
@@ -24,7 +25,8 @@ const emptyLeader: Leader = {
   email: "",
   gender: "M",
   role: "",
-  createdAt: "",
+  academicYear: "",
+  major: "",
 };
 
 const FamilyLeaders: React.FC = () => {
@@ -47,20 +49,16 @@ const FamilyLeaders: React.FC = () => {
       if (!res.ok) throw new Error("فشل جلب القادة");
       const data = await res.json();
       const formatted = data.map((d: Record<string, unknown>) => ({
-        name: d.name || "",
-        universityId: d.university_id || "",
-        nationalId: d.national_id,
-        phone: d.phone_number || "",
-        email: d.email || "",
-        gender: d.gender || "M",
-        role: d.gender === "F" ? "أخت كبرى / مساعد" : "أخ أكبر / قائد",
-        createdAt: new Date().toLocaleDateString("ar-EG", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        }),
-      }));
+      name: d.name || "",
+      universityId: d.university_id || "",
+      nationalId: d.national_id,
+      phone: d.phone_number || "",
+      email: d.email || "",
+      gender: d.gender || "M",
+      role: d.gender === "F" ? "أخت كبرى / مساعد" : "أخ أكبر / قائد",
+      academicYear: d.acd_year || "—",
+      major: d.major || "—",
+    }));
       setLeaders(formatted);
     } catch (err: unknown) {
       showToast((err as Error).message || "حدث خطأ", "error");
@@ -221,7 +219,8 @@ const FamilyLeaders: React.FC = () => {
                 <th>الهاتف</th>
                 <th>البريد الإلكتروني</th>
                 <th>الدور</th>
-                <th>تاريخ الإنشاء</th>
+                <th>السنة الدراسية</th>
+                <th>التخصص</th>
                 <th>الإجراءات</th>
               </tr>
             </thead>
@@ -253,29 +252,30 @@ const FamilyLeaders: React.FC = () => {
                 </tr>
               ) : (
                 filteredLeaders.map((leader, index) => (
-                  <tr key={index}>
-                    <td data-label="الاسم">{leader.name}</td>
-                    <td data-label="الرقم الجامعي">{leader.universityId}</td>
-                    <td data-label="الرقم القومي">{leader.nationalId}</td>
-                    <td data-label="الهاتف">{leader.phone}</td>
-                    <td data-label="البريد الإلكتروني">{leader.email}</td>
-                    <td data-label="الدور">
-                      <span className={leader.role.includes("قائد") ? styles.roleLeader : styles.roleAssistant}>
-                        {leader.role}
-                      </span>
-                    </td>
-                    <td data-label="تاريخ الإنشاء">{leader.createdAt}</td>
-                    <td data-label="الإجراءات" className={styles.actionButtons}>
-                      <button className={styles.deleteButton} onClick={() => handleDelete(index)} disabled={loading}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                          <polyline points="3 6 5 6 21 6" />
-                          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                          <path d="M10 11v6" />
-                          <path d="M14 11v6" />
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
+                <tr key={index}>
+                <td data-label="الاسم">{leader.name}</td>
+                <td data-label="الرقم الجامعي">{leader.universityId}</td>
+                <td data-label="الرقم القومي">{leader.nationalId}</td>
+                <td data-label="الهاتف">{leader.phone}</td>
+                <td data-label="البريد الإلكتروني">{leader.email}</td>
+                <td data-label="الدور">
+                  <span className={leader.role.includes("قائد") ? styles.roleLeader : styles.roleAssistant}>
+                    {leader.role}
+                  </span>
+                </td>
+                <td data-label="السنة الدراسية">{leader.academicYear}</td>
+                <td data-label="التخصص">{leader.major}</td>
+                <td data-label="الإجراءات" className={styles.actionButtons}>
+                  <button className={styles.deleteButton} onClick={() => handleDelete(index)} disabled={loading}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                      <path d="M10 11v6" />
+                      <path d="M14 11v6" />
+                    </svg>
+                  </button>
+                </td>
+              </tr>
                 ))
               )}
             </tbody>

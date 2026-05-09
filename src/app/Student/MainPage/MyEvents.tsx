@@ -471,8 +471,8 @@ export default function MyEvents() {
                             fontSize: '11.5px',
                             fontWeight: 800,
                             whiteSpace: 'nowrap',
-                            background: st.cls === 'status-accepted' ? '#ECFDF5' : st.cls === 'status-pending' ? 'rgba(217,119,6,0.08)' : st.cls === 'status-rejected' ? '#FEF2F2' : 'rgba(107,130,153,0.09)',
-                            color: st.cls === 'status-accepted' ? '#059669' : st.cls === 'status-pending' ? '#D97706' : st.cls === 'status-rejected' ? '#DC2626' : '#6B8299',
+                            background: st.cls === 'status-accepted' ? '#ECFDF5' : st.cls === 'status-pending' ? '#F57E0B' : st.cls === 'status-rejected' ? '#FEF2F2' : 'rgba(107,130,153,0.09)',
+                            color: st.cls === 'status-accepted' ? '#059669' : st.cls === 'status-pending' ? '#ffffff' : st.cls === 'status-rejected' ? '#DC2626' : '#6B8299',
                             border: st.cls === 'status-accepted' ? '1px solid #6EE7B7' : st.cls === 'status-pending' ? '1px solid rgba(217,119,6,0.22)' : st.cls === 'status-rejected' ? '1px solid #FECACA' : '1px solid rgba(107,130,153,0.22)'
                           }}>
                             <span className="status-dot" style={{ 

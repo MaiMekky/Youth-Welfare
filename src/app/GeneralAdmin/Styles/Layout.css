@@ -29,9 +29,15 @@
   min-width: 0;
 }
 
+@media (max-width: 1200px) {
+  .layout-content {
+    padding: 1.75rem 1.5rem;
+  }
+}
+
 @media (max-width: 1024px) {
   .layout-content {
-    padding: var(--gutter-sm);
+    padding: 1.5rem 1.25rem;
   }
 }
 
@@ -44,12 +50,24 @@
     margin-left: 0;
   }
   .layout-content {
-    padding: var(--gutter-sm) var(--gutter-xs);
+    padding: 1.25rem 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .layout-content {
+    padding: 1rem 0.75rem;
   }
 }
 
 @media (max-width: 576px) {
   .layout-content {
-    padding: var(--gutter-xs);
+    padding: 0.75rem 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .layout-content {
+    padding: 0.5rem 0.5rem;
   }
 }

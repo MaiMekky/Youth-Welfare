@@ -409,9 +409,123 @@
 }
 
 /* ── Responsive ── */
+@media (max-width: 1024px) {
+  .statsRow { grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (max-width: 768px) {
   .root { padding: 14px; }
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
   .headerText h1 { font-size: 18px; }
+  .headerText p { font-size: 12px; }
+  .refreshBtn {
+    width: 100%;
+    justify-content: center;
+  }
+  .statsRow { 
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .statCard {
+    padding: 14px 16px;
+  }
+  .statIcon {
+    width: 42px;
+    height: 42px;
+  }
+  .statNum {
+    font-size: 26px;
+  }
+  .statLabel {
+    font-size: 11px;
+  }
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .searchInput { 
+    width: 100%;
+    max-width: 100%;
+  }
+  .table { min-width: 700px; }
+  .tableWrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .pagination {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .pgInfo {
+    text-align: center;
+  }
+  .pgControls {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .root { padding: 12px; }
+  .headerText h1 { font-size: 16px; }
+  .statsRow {
+    gap: 10px;
+  }
+  .statCard {
+    padding: 12px 14px;
+  }
+  .statIcon {
+    width: 38px;
+    height: 38px;
+  }
+  .statNum {
+    font-size: 24px;
+  }
+  .toolbar {
+    padding: 12px 14px;
+  }
+  .toolbarTitle {
+    font-size: 14px;
+  }
   .table { min-width: 600px; }
-  .searchInput { width: 160px; }
+  .table th,
+  .table td {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+  .downloadBtn {
+    padding: 6px 12px;
+    font-size: 11.5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .root { padding: 10px; }
+  .headerText h1 { font-size: 15px; }
+  .table { min-width: 550px; }
+  .table th,
+  .table td {
+    padding: 7px 8px;
+    font-size: 11px;
+  }
+  .nameCell {
+    font-size: 12px;
+  }
+  .downloadBtn {
+    padding: 5px 10px;
+    font-size: 11px;
+    gap: 4px;
+  }
+  .termBadge {
+    padding: 2px 8px;
+    font-size: 10.5px;
+  }
+}
+
+@media (max-width: 360px) {
+  .headerText h1 { font-size: 14px; }
+  .table { min-width: 500px; }
 }

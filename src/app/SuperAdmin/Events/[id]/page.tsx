@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
+import EventTeamsView from "./EventsTeamView";
+
 const API_URL = getBaseUrl();
 
 
@@ -370,6 +372,9 @@ export default function EventDetailsPage() {
                 </div>
               )}
             </section>
+
+            {/* Teams View — view only */}
+            <EventTeamsView eventId={id} />
 
             {/* Participants Table — view only */}
             <section className={styles.tableBlock}>

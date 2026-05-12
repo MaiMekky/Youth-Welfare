@@ -55,7 +55,7 @@ export default function Sidebar({ isOpen = false, setIsOpen = () => {} }: Sideba
               </div>
             </div>
           </div>
-          <h2 className="sidebar-title">إدارة الأسر الطلابية</h2> <p className="sidebar-subtitle">جامعة العاصمة - قسم خدمات الطلاب</p> <button className="sidebar-close-btn" onClick={() => setIsOpen(false)} aria-label="إغلاق القائمة"> <X size={20} /> </button>
+          <h2 className="sidebar-title">إدارة الأسر والاتحادات</h2> <p className="sidebar-subtitle">جامعة العاصمة - قسم خدمات الطلاب</p> <button className="sidebar-close-btn" onClick={() => setIsOpen(false)} aria-label="إغلاق القائمة"> <X size={20} /> </button>
         </div>
 
         <div className="profile-card">
@@ -68,7 +68,10 @@ export default function Sidebar({ isOpen = false, setIsOpen = () => {} }: Sideba
 
         <nav className="nav">
           <button className={pathname === "/uni-level-family" ? "active" : ""} onClick={() => go("/uni-level-family")}>
-            <Users size={18} /><span>ادارة الأسر</span>
+            <Users size={18} /><span>الأسر الطلابية</span>
+          </button>
+          <button className={pathname === "/uni-level-family/unions" ? "active" : ""} onClick={() => go("/uni-level-family/unions")}>
+            <Users size={18} /><span>الاتحادات</span>
           </button>
         </nav>
 

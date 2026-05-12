@@ -590,7 +590,6 @@ export default function FamilyDetailsPage() {
                     <th>الرقم الجامعي</th>
                     <th>الرقم القومي</th>
                     {isCentralFamily && <th>الكلية</th>}
-                    <th>اللجنة</th>
                     <th>المنصب</th>
                     <th>الحالة</th>
                     <th>تاريخ الانضمام</th>
@@ -610,9 +609,6 @@ export default function FamilyDetailsPage() {
                             <span className={styles.facultyBadge}>{m.faculty_name}</span>
                           </td>
                         )}
-                        <td data-label="اللجنة">
-                          <span className={getDeptBadgeClass(m.dept_name)}>{m.dept_name}</span>
-                        </td>
                         <td data-label="المنصب">
                           <span className={getRoleBadgeClass(m.role)}>{m.role}</span>
                         </td>

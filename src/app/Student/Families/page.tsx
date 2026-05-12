@@ -7,9 +7,10 @@ import CreateFamForm from "../manage/components/CreateFamForm";
 import MainPageRefactored from "./components/MainPageRefactored";
 import TrackRequest from "../manage/components/TrackRequest";
 import FamilyDetails from "./familyDetails/[id]/FamilyDetails";
+import UnionInfo from "./union-info/UnionInfo";
 import type { ProgramFamily } from "./types";
 
-type View = "home" | "requestDetails" | "createForm" | "trackRequest" | "familyDetails";
+type View = "home" | "requestDetails" | "createForm" | "trackRequest" | "familyDetails" | "unionInfo";
 
 // ─── Storage key for persisting the selected family across navigation ──────────
 const FAMILY_STORAGE_KEY = "selected_family_details";
@@ -100,6 +101,10 @@ function FamiliesPageInner() {
     navigate("familyDetails", { id: String(family.id) });
   }, [navigate]);
 
+  const handleNavigateToUnionInfo = useCallback(() => {
+    navigate("unionInfo");
+  }, [navigate]);
+
   // ─────────────────────────────────────────────────────────────────────────
 
   return (
@@ -109,6 +114,7 @@ function FamiliesPageInner() {
           <HeadPage
             onCreateClick={handleNavigateToRequestDetails}
             onReviewClick={handleNavigateToTrackRequest}
+            onUnionInfoClick={handleNavigateToUnionInfo}
           />
           <MainPageRefactored onViewFamilyDetails={handleViewFamilyDetails} />
         </>
@@ -137,6 +143,10 @@ function FamiliesPageInner() {
           family={selectedFamily}
           onBack={handleNavigateBack}
         />
+      )}
+
+      {currentView === "unionInfo" && (
+        <UnionInfo onBack={handleNavigateBack} />
       )}
 
       {/* Fallback: URL says familyDetails but we lost the family data */}

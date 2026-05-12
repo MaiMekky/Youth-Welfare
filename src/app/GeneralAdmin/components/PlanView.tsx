@@ -299,7 +299,7 @@ function PlanDetailsModal({
                             {ev.restrictions && (
                               <div className={styles.eventDetailItem}>
                                 <Info size={13} />
-                                <span className={styles.eventDetailLabel}>القيود</span>
+                                <span className={styles.eventDetailLabel}>الشروط</span>
                                 <span className={styles.eventDetailValue}>{ev.restrictions}</span>
                               </div>
                             )}

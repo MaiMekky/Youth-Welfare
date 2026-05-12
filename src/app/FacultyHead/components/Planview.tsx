@@ -276,7 +276,7 @@ function PlanDetailsModal({ planId, planName, onClose }: {
                                 )}
                                 {ev.restrictions && (
                                   <div className={styles.eventGridItem}>
-                                    <span className={styles.gridLabel}><AlertTriangle size={12} /> القيود</span>
+                                    <span className={styles.gridLabel}><AlertTriangle size={12} /> الشروط</span>
                                     <span className={styles.gridVal}>{ev.restrictions}</span>
                                   </div>
                                 )}

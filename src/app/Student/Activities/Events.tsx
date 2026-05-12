@@ -25,7 +25,7 @@ interface ApiEvent {
   is_full: boolean;
   current_participants: number;
   imgs: string | null;
-  reward: string;
+  reward: string | null;
 }
 
 interface Event {
@@ -43,27 +43,43 @@ interface Event {
   reward: string;
   isFull: boolean;
   daysLeft: number;
+  startDate: string; // ISO date string for comparison
+  canRegister: boolean; // whether registration is allowed
 }
 
 /* ══════════════════════════════════════════
    MAPPER
 ══════════════════════════════════════════ */
-const mapEvent = (e: ApiEvent): Event => ({
-  id:          e.event_id,
-  title:       e.title,
-  description: e.description,
-  date:        new Date(e.st_date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }),
-  location:    e.location,
-  seats:       e.s_limit,
-  takenSeats:  e.current_participants,
-  type:        e.type,
-  faculty:     e.faculty_name,
-  dept:        e.dept_name,
-  cost:        e.cost,
-  reward:      e.reward,
-  isFull:      e.is_full,
-  daysLeft:    e.days_remaining,
-});
+const mapEvent = (e: ApiEvent): Event => {
+  const startDate = new Date(e.st_date);
+  const now = new Date();
+  const daysUntilStart = Math.ceil((startDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  
+  // Can register if: 3 or more days before start date AND not full
+  // Example: Event on 15/2, today is 10/2 (5 days before) -> can register
+  // Example: Event on 15/2, today is 12/2 (3 days before) -> can register
+  // Example: Event on 15/2, today is 13/2 (2 days before) -> cannot register
+  const canRegister = daysUntilStart >= 3 && !e.is_full;
+  
+  return {
+    id:          e.event_id,
+    title:       e.title || '---',
+    description: e.description || '---',
+    date:        new Date(e.st_date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }),
+    location:    e.location || '---',
+    seats:       e.s_limit || 0,
+    takenSeats:  e.current_participants || 0,
+    type:        e.type || '---',
+    faculty:     e.faculty_name || '---',
+    dept:        e.dept_name || '---',
+    cost:        e.cost || '---',
+    reward:      e.reward || '---',
+    isFull:      e.is_full,
+    daysLeft:    e.days_remaining,
+    startDate:   e.st_date,
+    canRegister: canRegister,
+  };
+};
 
 /* ══════════════════════════════════════════
    ICONS
@@ -264,6 +280,7 @@ export default function Events() {
                 const isReg     = registered.has(event.id);
                 const isJoining = joiningId === event.id;
                 const pct       = seatsPercent(event.takenSeats, event.seats);
+                const canApply  = event.canRegister && !isReg && !event.isFull;
 
                 return (
                   <div
@@ -281,6 +298,9 @@ export default function Events() {
                           )}
                           {event.isFull && !isReg && (
                             <span className="full-badge">مكتمل</span>
+                          )}
+                          {!event.canRegister && !event.isFull && !isReg && (
+                            <span className="full-badge">التسجيل غير متاح</span>
                           )}
                           {event.daysLeft > 0 && (
                             <span className="days-chip">{event.daysLeft} يوم</span>
@@ -301,7 +321,7 @@ export default function Events() {
                         <div className="meta-item">
                           <UsersIcon /><span>{event.takenSeats} / {event.seats} مقعد</span>
                         </div>
-                        {event.reward && (
+                        {event.reward && event.reward !== '---' && (
                           <div className="meta-item meta-wide"><GiftIcon /><span>{event.reward}</span></div>
                         )}
                       </div>
@@ -327,11 +347,15 @@ export default function Events() {
                           <button className="register-btn full-btn" disabled>
                             المقاعد مكتملة
                           </button>
+                        ) : !event.canRegister ? (
+                          <button className="register-btn full-btn" disabled>
+                            التسجيل مغلق
+                          </button>
                         ) : (
                           <button
                             className="register-btn"
                             onClick={(e) => joinEvent(e, event.id)}
-                            disabled={isJoining}
+                            disabled={isJoining || !canApply}
                           >
                             {isJoining
                               ? <><span className="btn-spinner" /> جاري إرسال الطلب...</>

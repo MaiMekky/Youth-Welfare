@@ -326,7 +326,7 @@ export default function EventDetailsPage() {
                 <div className={styles.blockBody}>{ui.reward}</div>
               </div>
               <div className={styles.block}>
-                <div className={styles.blockTitle}>القيود والشروط</div>
+                <div className={styles.blockTitle}>الشروط </div>
                 <div className={styles.blockBody}>{ui.constraints}</div>
               </div>
             </section>

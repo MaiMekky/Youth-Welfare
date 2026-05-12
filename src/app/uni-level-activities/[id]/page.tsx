@@ -908,7 +908,7 @@ export default function EventDetailsPage() {
             <div className={styles.blockBody}>{ui.reward}</div>
           </div>
           <div className={styles.block}>
-            <div className={styles.blockTitle}>القيود والشروط</div>
+            <div className={styles.blockTitle}>الشروط </div>
             <div className={styles.blockBody}>{ui.constraints}</div>
           </div>
         </section>
@@ -992,7 +992,7 @@ export default function EventDetailsPage() {
               <div className={styles.modalHead}>
                 <div>
                   <div className={styles.modalTitle}>تقرير الفعالية</div>
-                  <div className={styles.modalSub}>املئي البيانات المطلوبة ثم اضغطي تنزيل</div>
+                  <div className={styles.modalSub}>املأ البيانات المطلوبة ثم اضغط تنزيل</div>
                 </div>
                 <button className={styles.modalClose} type="button" onClick={closeReportModal} disabled={exportBusy !== null}>
                   <X size={18} />

@@ -161,6 +161,78 @@
   font-weight: 600;
 }
 
+/* Role Badges - System Consistent Styling */
+.roleBadgeLeader {
+  background: #2C3A5F;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-block;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.roleBadgeDeputy {
+  background: #5A6C8F;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-block;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.roleBadgeMember {
+  background: #6c757d;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-block;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Department Badges - System Consistent Styling */
+.deptBadge {
+  background: #e3f2fd;
+  color: #1565C0;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-block;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.deptBadgeNone {
+  background: #f8f9fa;
+  color: #adb5bd;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px dashed #dee2e6;
+  display: inline-block;
+  text-align: center;
+}
+
+/* Faculty Badge - System Consistent Styling */
+.facultyBadge {
+  color: #495057;
+  padding: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: inline-block;
+  text-align: center;
+}
+
 /* Content Area */
 .contentArea {
   background: white;
@@ -168,6 +240,61 @@
   border-radius: 15px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   margin-top: 20px;
+}
+
+/* Filter Section */
+.filterSection {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px;
+  padding: 18px 22px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  border: 1px solid #dee2e6;
+  flex-wrap: wrap;
+}
+
+.filterLabel {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #2C3A5F;
+  white-space: nowrap;
+}
+
+.filterSelect {
+  padding: 10px 16px;
+  border: 2px solid #ced4da;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #495057;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 200px;
+  font-family: 'Cairo', sans-serif;
+}
+
+.filterSelect:hover {
+  border-color: #2C3A5F;
+  box-shadow: 0 2px 8px rgba(44, 58, 95, 0.1);
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: #2C3A5F;
+  box-shadow: 0 0 0 3px rgba(44, 58, 95, 0.1);
+}
+
+.filterCount {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 500;
+  padding: 6px 12px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
 }
 
 .sectionTitle {
@@ -356,6 +483,16 @@
     font-size: 0.75rem;
     width: 100%;
   }
+
+  /* Adjust badge sizes for mobile */
+  .roleBadgeLeader,
+  .roleBadgeDeputy,
+  .roleBadgeMember,
+  .deptBadge,
+  .facultyBadge {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+  }
 }
 
 @media (min-width: 769px) {
@@ -510,6 +647,21 @@
 
   .eventsGrid {
     grid-template-columns: 1fr;
+  }
+
+  .filterSection {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .filterSelect {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .filterCount {
+    text-align: center;
   }
 }
 

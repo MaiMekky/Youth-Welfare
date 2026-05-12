@@ -24,6 +24,7 @@ interface FamilyMember {
   joined_at: string;
   dept: number | null;
   dept_name: string | null;
+  faculty_name?: string | null;
 }
 
 interface FamilyEvent {
@@ -245,6 +246,7 @@ export default function FamilyDetailsPage() {
   const [familyData, setFamilyData] = useState<FamilyData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [facultyFilter, setFacultyFilter] = useState<string>('الكل');
   const { showToast } = useToast();
   
   const router = useRouter();
@@ -390,6 +392,20 @@ export default function FamilyDetailsPage() {
     return statusMap[status] || styles.infoBadgeYellow;
   };
 
+  const getRoleBadgeClass = (role: string) => {
+    const roleMap: { [key: string]: string } = {
+      'أخ أكبر': styles.roleBadgeLeader,
+      'نائب': styles.roleBadgeDeputy,
+      'عضو': styles.roleBadgeMember,
+    };
+    return roleMap[role] || styles.roleBadgeMember;
+  };
+
+  const getDeptBadgeClass = (deptName: string) => {
+    if (!deptName || deptName === '—') return styles.deptBadgeNone;
+    return styles.deptBadge;
+  };
+
   if (loading) {
     return (
       <div className={styles.pageContainer}>
@@ -430,6 +446,7 @@ export default function FamilyDetailsPage() {
     u_id: m.u_id ?? '—',
     national_id: m.national_id ?? '—',
     dept_name: m.dept_name ?? '—',
+    faculty_name: m.faculty_name ?? '—',
     role: m.role ?? '—',
     status: m.status ?? '—',
     joined_at: m.joined_at ?? null,
@@ -458,6 +475,21 @@ export default function FamilyDetailsPage() {
         return { backgroundColor: '#F5F5F5', color: '#666' };
     }
   };
+
+  // Get unique faculty names for filter
+  const uniqueFaculties = ['الكل', ...Array.from(new Set(
+    familyData?.family_members
+      .map(m => m.faculty_name)
+      .filter((name): name is string => !!name)
+  ))];
+
+  // Filter members by faculty
+  const filteredMembers = familyData?.family_members.filter(member => {
+    if (facultyFilter === 'الكل') return true;
+    return member.faculty_name === facultyFilter;
+  }) || [];
+
+  const isCentralFamily = familyData?.type === 'مركزية';
 
   return (
     <div className={styles.pageContainer}>
@@ -522,9 +554,32 @@ export default function FamilyDetailsPage() {
       {/* Tab Content */}
       {activeTab === 'members' && (
         <div className={styles.contentArea}>
-          {familyData.family_members.length === 0 ? (
+          {/* Faculty Filter for Central Families */}
+          {isCentralFamily && uniqueFaculties.length > 1 && (
+            <div className={styles.filterSection}>
+              <label className={styles.filterLabel}>تصفية حسب الكلية:</label>
+              <select 
+                className={styles.filterSelect}
+                value={facultyFilter}
+                onChange={(e) => setFacultyFilter(e.target.value)}
+              >
+                {uniqueFaculties.map((faculty) => (
+                  <option key={faculty} value={faculty}>
+                    {faculty}
+                  </option>
+                ))}
+              </select>
+              <span className={styles.filterCount}>
+                ({filteredMembers.length} من {familyData.family_members.length} عضو)
+              </span>
+            </div>
+          )}
+
+          {filteredMembers.length === 0 ? (
             <div className={styles.emptyStateContainer}>
-              <p className={styles.emptyStateText}>لا توجد أعضاء حالياً</p>
+              <p className={styles.emptyStateText}>
+                {facultyFilter !== 'الكل' ? 'لا توجد أعضاء من هذه الكلية' : 'لا توجد أعضاء حالياً'}
+              </p>
             </div>
           ) : (
             <div className={styles.tableContainer}>
@@ -534,6 +589,7 @@ export default function FamilyDetailsPage() {
                     <th>الاسم</th>
                     <th>الرقم الجامعي</th>
                     <th>الرقم القومي</th>
+                    {isCentralFamily && <th>الكلية</th>}
                     <th>اللجنة</th>
                     <th>المنصب</th>
                     <th>الحالة</th>
@@ -542,15 +598,24 @@ export default function FamilyDetailsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {familyData.family_members.map((raw) => {
+                  {filteredMembers.map((raw) => {
                     const m = normalizeMember(raw);
                     return (
                       <tr key={m.student_id}>
                         <td data-label="الاسم">{m.student_name}</td>
                         <td data-label="الرقم الجامعي">{m.u_id}</td>
                         <td data-label="الرقم القومي">{m.national_id}</td>
-                        <td data-label="اللجنة">{m.dept_name}</td>
-                        <td data-label="المنصب">{m.role}</td>
+                        {isCentralFamily && (
+                          <td data-label="الكلية">
+                            <span className={styles.facultyBadge}>{m.faculty_name}</span>
+                          </td>
+                        )}
+                        <td data-label="اللجنة">
+                          <span className={getDeptBadgeClass(m.dept_name)}>{m.dept_name}</span>
+                        </td>
+                        <td data-label="المنصب">
+                          <span className={getRoleBadgeClass(m.role)}>{m.role}</span>
+                        </td>
                         <td data-label="الحالة">
                           <span className={getStatusColor(m.status)}>{m.status}</span>
                         </td>

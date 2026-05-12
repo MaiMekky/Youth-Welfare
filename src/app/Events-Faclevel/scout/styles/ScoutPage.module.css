@@ -382,3 +382,130 @@
   .pageTitle { font-size: 20px; }
   .emptyState { padding: 48px 16px; }
 }
+
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  gap: 8px;
+  background: #fff;
+  padding: 8px;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(30, 58, 95, .08);
+  overflow-x: auto;
+}
+
+.tab,
+.tabActive {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 160ms ease;
+  white-space: nowrap;
+  font-family: 'Cairo', sans-serif;
+  background: transparent;
+  color: #6B8299;
+}
+
+.tab:hover {
+  background: #F7FAFD;
+  color: #2D5F8A;
+}
+
+.tabActive {
+  background: linear-gradient(135deg, #C49B3A, #A67F2C);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(196, 155, 58, .3);
+}
+
+/* ── Tab Content ── */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.overviewTab {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.previewTab {
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px 32px;
+  box-shadow: 0 2px 12px rgba(30, 58, 95, .08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  text-align: center;
+}
+
+.previewHeader h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 900;
+  color: #1E3A5F;
+}
+
+.previewHeader p {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: #6B8299;
+  font-weight: 600;
+}
+
+.goToBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #C49B3A, #A67F2C);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(196, 155, 58, .4);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+  font-family: 'Cairo', sans-serif;
+}
+
+.goToBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(196, 155, 58, .52);
+}
+
+.goToBtn:active {
+  transform: translateY(0);
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .tabs {
+    gap: 6px;
+    padding: 6px;
+  }
+  
+  .tab,
+  .tabActive {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+  
+  .previewTab {
+    padding: 28px 20px;
+  }
+  
+  .previewHeader h3 {
+    font-size: 18px;
+  }
+}

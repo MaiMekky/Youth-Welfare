@@ -126,30 +126,9 @@ export default function Sidebar({ isOpen = false, setIsOpen = () => {} }: Sideba
             <>
               <button
                 onClick={() => go("/Events-Faclevel/scout")}
-                className={pathname === "/Events-Faclevel/scout" ? "active" : ""}
+                className={pathname.startsWith("/Events-Faclevel/scout") ? "active" : ""}
               >
                 <Tent size={18} /><span>الجوالة</span>
-              </button>
-
-              <button
-                onClick={() => go("/Events-Faclevel/members")}
-                className={pathname === "/Events-Faclevel/members" ? "active" : ""}
-              >
-                <Users size={18} /><span>الاعضاء</span>
-              </button>
-
-              <button
-                onClick={() => go("/Events-Faclevel/groups")}
-                className={pathname === "/Events-Faclevel/groups" ? "active" : ""}
-              >
-                <FolderTree size={18} /><span>الرهوط</span>
-              </button>
-
-              <button
-                onClick={() => go("/Events-Faclevel/structure")}
-                className={pathname === "/Events-Faclevel/structure" ? "active" : ""}
-              >
-                <GitBranch size={18} /><span>الهيكل التنظيمي</span>
               </button>
             </>
           )}

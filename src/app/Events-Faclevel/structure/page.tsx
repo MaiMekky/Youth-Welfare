@@ -5,7 +5,8 @@ import ClanLevelSection from "./components/ClanLevelSection";
 import GroupLevelSection from "./components/GroupLevelSection";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
-import { GitBranch, RefreshCw } from "lucide-react";
+import { GitBranch, RefreshCw, ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const API_URL = getBaseUrl();
 
@@ -35,6 +36,7 @@ export type StructureData = {
 
 export default function StructurePage() {
   const { showToast } = useToast();
+  const router = useRouter();
 
   const [structure, setStructure]     = useState<StructureData | null>(null);
   const [loading, setLoading]         = useState(true);
@@ -70,6 +72,14 @@ export default function StructurePage() {
       {/* decorative orbs */}
       <div className={styles.orb1} aria-hidden />
       <div className={styles.orb2} aria-hidden />
+
+      {/* Breadcrumb / Back Button */}
+      <div className={styles.breadcrumb}>
+        <button onClick={() => router.push("/Events-Faclevel/scout")} className={styles.backBtn}>
+          <ArrowRight size={18} />
+          <span>العودة إلى الجوالة</span>
+        </button>
+      </div>
 
       {/* ── Header ── */}
       <header className={styles.header}>

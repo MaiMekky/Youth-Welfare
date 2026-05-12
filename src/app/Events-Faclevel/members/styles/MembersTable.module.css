@@ -193,3 +193,188 @@
 @media (max-width: 640px) {
   .tdEmail, .tdDate { display: none; }
 }
+
+/* ══════════════════════════════════════════════
+   MOBILE CARD VIEW
+   ══════════════════════════════════════════════ */
+
+/* Hide table on mobile, show cards */
+@media (max-width: 768px) {
+  .tableWrapper {
+    display: none;
+  }
+}
+
+/* Hide cards on desktop, show table */
+.mobileCards {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobileCards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+/* ── Member Card ── */
+.memberCard {
+  background: #fff;
+  border: 1.5px solid #E2ECF5;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(26, 46, 66, .06);
+  transition: all 200ms ease;
+}
+
+.memberCard:hover {
+  box-shadow: 0 4px 16px rgba(26, 46, 66, .12);
+  transform: translateY(-2px);
+}
+
+/* ── Card Header ── */
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(140deg, #1E3A5F 0%, #2D5F8A 100%);
+  border-bottom: 2px solid #C49B3A;
+}
+
+.cardHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.cardNumber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, .15);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #C49B3A;
+  flex-shrink: 0;
+}
+
+.cardName {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 900;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* ── Card Body ── */
+.cardBody {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #F7FAFD;
+}
+
+.cardRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.cardIcon {
+  color: #6B8299;
+  flex-shrink: 0;
+}
+
+.cardLabel {
+  font-weight: 700;
+  color: #6B8299;
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.cardValue {
+  color: #1E3A5F;
+  font-weight: 600;
+  word-break: break-word;
+  flex: 1;
+}
+
+/* ── Card Actions ── */
+.cardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fff;
+  border-top: 1px solid #E2ECF5;
+}
+
+.cardActions .actionBtn {
+  flex: 1 1 calc(50% - 4px);
+  min-width: 0;
+  justify-content: center;
+  padding: 9px 12px;
+  font-size: 13px;
+}
+
+.cardActions .actionBtn span {
+  display: inline;
+}
+
+/* ── Responsive Adjustments ── */
+@media (max-width: 480px) {
+  .memberCard {
+    border-radius: 12px;
+  }
+
+  .cardHeader {
+    padding: 12px 14px;
+  }
+
+  .cardName {
+    font-size: 14px;
+  }
+
+  .cardBody {
+    padding: 12px 14px;
+    gap: 8px;
+  }
+
+  .cardRow {
+    font-size: 12px;
+  }
+
+  .cardLabel {
+    min-width: 70px;
+  }
+
+  .cardActions {
+    padding: 10px 14px;
+    gap: 6px;
+  }
+
+  .cardActions .actionBtn {
+    flex: 1 1 100%;
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+}

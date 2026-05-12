@@ -222,3 +222,44 @@
   .statsStrip { grid-template-columns: 1fr; }
   .page { padding: 16px 14px 28px; }
 }
+
+/* ── Breadcrumb / Back Button ── */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: #fff;
+  border: 1.5px solid #E2ECF5;
+  color: #2D5F8A;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Cairo', sans-serif;
+  transition: all 180ms ease;
+}
+
+.backBtn:hover {
+  background: #EBF3FB;
+  border-color: #2D5F8A;
+  box-shadow: 0 2px 10px rgba(45, 95, 138, .12);
+  transform: translateX(4px);
+}
+
+.backBtn:active {
+  transform: translateX(2px);
+}
+
+@media (max-width: 640px) {
+  .backBtn {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+}

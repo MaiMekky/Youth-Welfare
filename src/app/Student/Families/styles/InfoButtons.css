@@ -1,0 +1,286 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+
+/* ═══════════════════════════════════════════
+   INFO BUTTONS CONTAINER
+═══════════════════════════════════════════ */
+.info-buttons-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 28px auto;
+  padding: 0 28px;
+  box-sizing: border-box;
+  font-family: 'Cairo', sans-serif;
+  direction: rtl;
+}
+
+.info-buttons-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  width: 100%;
+}
+
+/* ═══════════════════════════════════════════
+   INFO BUTTON STYLES
+═══════════════════════════════════════════ */
+.info-btn {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 24px 28px;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 18px rgba(30, 58, 95, 0.22);
+  position: relative;
+  overflow: hidden;
+  font-family: 'Cairo', sans-serif;
+  direction: rtl;
+  text-align: right;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Family Info Button - Gold Theme */
+.info-btn-family {
+  background: linear-gradient(135deg, #C49B3A 0%, #e0aa35 100%);
+}
+
+.info-btn-family::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.info-btn-family:hover::before {
+  opacity: 1;
+}
+
+.info-btn-family .info-btn-content h3,
+.info-btn-family .info-btn-content p {
+  color: #1E3A5F;
+}
+
+.info-btn-family .info-btn-arrow {
+  color: #1E3A5F;
+}
+
+/* Union Info Button - Navy Theme */
+.info-btn-union {
+  background: linear-gradient(135deg, #1E3A5F 0%, #2D5F8A 100%);
+}
+
+.info-btn-union::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(135deg, rgba(196, 155, 58, 0.15) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.info-btn-union:hover::before {
+  opacity: 1;
+}
+
+.info-btn-union .info-btn-content h3,
+.info-btn-union .info-btn-content p {
+  color: #fff;
+}
+
+.info-btn-union .info-btn-arrow {
+  color: #C49B3A;
+}
+
+/* Hover Effects */
+.info-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(30, 58, 95, 0.35);
+}
+
+/* ═══════════════════════════════════════════
+   ICON STYLES
+═══════════════════════════════════════════ */
+.info-btn-icon {
+  font-size: 42px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+}
+
+.info-btn-family .info-btn-icon svg {
+  width: 32px;
+  height: 32px;
+  color: #1E3A5F;
+  stroke-width: 2.5;
+}
+
+.info-btn-union .info-btn-icon {
+  font-size: 42px;
+}
+
+/* ═══════════════════════════════════════════
+   CONTENT STYLES
+═══════════════════════════════════════════ */
+.info-btn-content {
+  flex: 1;
+  text-align: right;
+  min-width: 0;
+}
+
+.info-btn-content h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  line-height: 1.3;
+}
+
+.info-btn-content p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  opacity: 0.9;
+}
+
+/* ═══════════════════════════════════════════
+   ARROW STYLES
+═══════════════════════════════════════════ */
+.info-btn-arrow {
+  font-size: 28px;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+  font-weight: bold;
+}
+
+.info-btn:hover .info-btn-arrow {
+  transform: translateX(-5px);
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE DESIGN
+═══════════════════════════════════════════ */
+
+/* Tablets and smaller desktops */
+@media (max-width: 1024px) {
+  .info-buttons-container {
+    padding: 0 24px;
+  }
+  
+  .info-btn {
+    padding: 22px 24px;
+    gap: 16px;
+  }
+  
+  .info-btn-content h3 {
+    font-size: 17px;
+  }
+  
+  .info-btn-content p {
+    font-size: 13px;
+  }
+}
+
+/* Mobile landscape and tablets */
+@media (max-width: 900px) {
+  .info-buttons-wrapper {
+    gap: 16px;
+  }
+  
+  .info-btn {
+    padding: 20px 22px;
+    gap: 14px;
+    border-radius: 12px;
+  }
+  
+  .info-btn-icon {
+    font-size: 36px;
+    width: 42px;
+    height: 42px;
+  }
+  
+  .info-btn-family .info-btn-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .info-btn-content h3 {
+    font-size: 16px;
+  }
+  
+  .info-btn-content p {
+    font-size: 13px;
+  }
+  
+  .info-btn-arrow {
+    font-size: 24px;
+  }
+}
+
+/* Stack buttons vertically on mobile */
+@media (max-width: 768px) {
+  .info-buttons-container {
+    padding: 0 20px;
+    margin: 20px auto;
+  }
+  
+  .info-buttons-wrapper {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  
+  .info-btn {
+    padding: 20px 22px;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  .info-buttons-container {
+    padding: 0 16px;
+  }
+  
+  .info-btn {
+    padding: 18px 18px;
+    gap: 12px;
+    border-radius: 10px;
+  }
+  
+  .info-btn-icon {
+    font-size: 32px;
+    width: 38px;
+    height: 38px;
+  }
+  
+  .info-btn-family .info-btn-icon svg {
+    width: 26px;
+    height: 26px;
+  }
+  
+  .info-btn-content h3 {
+    font-size: 15px;
+  }
+  
+  .info-btn-content p {
+    font-size: 12px;
+  }
+  
+  .info-btn-arrow {
+    font-size: 22px;
+  }
+}

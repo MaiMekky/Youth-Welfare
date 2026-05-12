@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════
-   Family Ad Banner Styles - Modern Professional Design
+   Family Ad Banner Styles
    Theme variables are defined in ../../styles/theme.css
 ══════════════════════════════════════════════════════════════ */
 
@@ -7,20 +7,20 @@
 :root,
 .bannerContainer,
 .bannerCard {
-  --navy:        #1a2744 !important;
-  --navy-mid:    #243358 !important;
+  --navy:        #1E3A5F !important;
+  --navy-mid:    #2D5F8A !important;
   --navy-light:  #EBF3FB !important;
-  --navy-deep:   #111b33 !important;
-  --gold:        #c9972a !important;
+  --navy-deep:   #152d4a !important;
+  --gold:        #C49B3A !important;
   --gold-dark:   #A67F2C !important;
   --gold-bright: #e0aa35 !important;
   --gold-pale:   #FDF6E3 !important;
   --white:       #ffffff !important;
-  --bg:          #f4f6fa !important;
+  --bg:          #EDF2F8 !important;
   --border:      #E2ECF5 !important;
-  --text:        #1a2744 !important;
+  --text:        #1A2E42 !important;
   --text-muted:  #6B8299 !important;
-  --radius:      11px !important;
+  --radius:      10px !important;
   --shadow:      0 2px 12px rgba(26, 46, 66, 0.08) !important;
   --shadow-md:   0 4px 20px rgba(26, 46, 66, 0.12) !important;
   --shadow-lg:   0 8px 40px rgba(8, 14, 32, 0.45) !important;
@@ -33,25 +33,25 @@
 ═══════════════════════════════════════════ */
 .bannerContainer {
   width: 100%;
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 0;
+  max-width: 1200px;
+  margin: 28px auto;
+  padding: 0 28px;
   font-family: var(--font-family);
   direction: rtl;
   box-sizing: border-box;
 }
 
 /* ═══════════════════════════════════════════
-   CARD - Enhanced Modern Design
+   CARD
 ═══════════════════════════════════════════ */
 .bannerCard {
-  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
-  border-radius: 20px;
-  padding: 40px 48px;
-  box-shadow: 0 10px 40px rgba(26, 39, 68, 0.25), 0 2px 8px rgba(26, 39, 68, 0.15);
+  background: var(--navy-mid);
+  border-radius: 16px;
+  padding: 32px 40px;
+  box-shadow: 0 4px 18px rgba(30, 58, 95, 0.22);
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 28px;
   width: 100%;
   position: relative;
   overflow: hidden;
@@ -60,8 +60,8 @@
 }
 
 .bannerCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 15px 50px rgba(26, 39, 68, 0.35), 0 4px 12px rgba(26, 39, 68, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(30, 58, 95, 0.32);
 }
 
 .bannerCard::before {
@@ -70,38 +70,33 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
+  height: 3px;
   background: linear-gradient(90deg, transparent 0%, var(--gold) 20%, var(--gold-bright) 50%, var(--gold) 80%, transparent 100%);
 }
 
 /* ── glow orb ── */
 .bannerGlow {
   position: absolute;
-  top: -60px;
-  left: -60px;
-  width: 280px;
-  height: 280px;
-  background: radial-gradient(circle, rgba(201, 151, 42, 0.15) 0%, transparent 70%);
+  top: -40px;
+  left: -40px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(196, 155, 58, 0.13) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
-  transition: transform 0.5s ease;
-}
-
-.bannerCard:hover .bannerGlow {
-  transform: scale(1.2);
 }
 
 /* ── icon circle ── */
 .bannerIcon {
   background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 100%);
-  border-radius: 18px;
-  width: 88px;
-  height: 88px;
-  min-width: 88px;
+  border-radius: 50%;
+  width: 72px;
+  height: 72px;
+  min-width: 72px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 24px rgba(201, 151, 42, 0.4);
+  box-shadow: 0 4px 16px rgba(196, 155, 58, 0.4);
   flex-shrink: 0;
   position: relative;
   z-index: 1;
@@ -109,13 +104,13 @@
 }
 
 .bannerCard:hover .bannerIcon {
-  transform: scale(1.08) rotate(-5deg);
-  box-shadow: 0 12px 32px rgba(201, 151, 42, 0.55);
+  transform: scale(1.05);
+  box-shadow: 0 6px 22px rgba(196, 155, 58, 0.52);
 }
 
 .bannerIcon svg {
-  width: 42px;
-  height: 42px;
+  width: 34px;
+  height: 34px;
   color: var(--navy);
 }
 
@@ -129,19 +124,18 @@
 }
 
 .bannerTitle {
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 900;
   color: var(--white);
-  margin: 0 0 12px;
+  margin: 0 0 8px;
   line-height: 1.35;
-  letter-spacing: -0.4px;
+  letter-spacing: -0.2px;
   font-family: var(--font-family);
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .bannerDescription {
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.85);
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.7);
   margin: 0;
   line-height: 1.7;
   font-weight: 500;
@@ -153,16 +147,16 @@
   background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 100%);
   color: var(--navy);
   border: none;
-  padding: 16px 36px;
-  border-radius: 12px;
+  padding: 14px 32px;
+  border-radius: var(--radius);
   font-family: var(--font-family);
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 800;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  box-shadow: 0 6px 20px rgba(201, 151, 42, 0.4);
+  gap: 10px;
+  box-shadow: 0 4px 16px rgba(196, 155, 58, 0.4);
   white-space: nowrap;
   flex-shrink: 0;
   position: relative;
@@ -171,87 +165,47 @@
 }
 
 .bannerButton:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(201, 151, 42, 0.55);
-  background: linear-gradient(135deg, var(--gold-bright) 0%, #f0c040 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(196, 155, 58, 0.52);
 }
 
 .arrowIcon {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   transition: transform var(--transition);
   flex-shrink: 0;
 }
 
 .bannerButton:hover .arrowIcon {
-  transform: translateX(-6px);
+  transform: translateX(-4px);
 }
 
 /* ═══════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════ */
 @media (max-width: 1024px) {
+  .bannerContainer {
+    padding: 0 24px;
+  }
   .bannerCard {
-    padding: 36px 40px;
-    gap: 28px;
-  }
-  .bannerIcon {
-    width: 80px;
-    height: 80px;
-    min-width: 80px;
-  }
-  .bannerIcon svg {
-    width: 38px;
-    height: 38px;
-  }
-  .bannerTitle {
-    font-size: 24px;
+    padding: 28px 32px;
+    gap: 24px;
   }
 }
 
 @media (max-width: 900px) {
   .bannerCard {
-    padding: 32px 36px;
-    gap: 24px;
-    border-radius: 18px;
-  }
-  .bannerIcon {
-    width: 76px;
-    height: 76px;
-    min-width: 76px;
-    border-radius: 16px;
-  }
-  .bannerIcon svg {
-    width: 36px;
-    height: 36px;
-  }
-  .bannerTitle {
-    font-size: 22px;
-  }
-  .bannerDescription {
-    font-size: 15px;
-  }
-  .bannerButton {
-    padding: 14px 30px;
-    font-size: 16px;
-  }
-}
-
-@media (max-width: 768px) {
-  .bannerCard {
-    padding: 28px 32px;
+    padding: 24px 28px;
     gap: 20px;
-    border-radius: 16px;
   }
   .bannerIcon {
-    width: 70px;
-    height: 70px;
-    min-width: 70px;
-    border-radius: 14px;
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
   }
   .bannerIcon svg {
-    width: 34px;
-    height: 34px;
+    width: 30px;
+    height: 30px;
   }
   .bannerTitle {
     font-size: 20px;
@@ -261,13 +215,29 @@
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+  .bannerContainer {
+    padding: 0 20px;
+  }
+  .bannerCard {
+    padding: 22px 24px;
+    gap: 18px;
+    border-radius: 12px;
+  }
+  .bannerTitle {
+    font-size: 18px;
+  }
+  .bannerDescription {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 700px) {
   .bannerCard {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 36px 28px;
-    gap: 24px;
+    padding: 28px 24px;
   }
   .bannerContent {
     text-align: center;
@@ -279,32 +249,30 @@
 }
 
 @media (max-width: 480px) {
+  .bannerContainer {
+    padding: 0 16px;
+  }
   .bannerCard {
-    padding: 32px 24px;
-    border-radius: 14px;
+    padding: 24px 20px;
+    border-radius: 10px;
   }
   .bannerIcon {
-    width: 64px;
-    height: 64px;
-    min-width: 64px;
-    border-radius: 12px;
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
   }
   .bannerIcon svg {
-    width: 30px;
-    height: 30px;
+    width: 26px;
+    height: 26px;
   }
   .bannerTitle {
-    font-size: 18px;
+    font-size: 17px;
   }
   .bannerDescription {
     font-size: 13px;
   }
   .bannerButton {
     font-size: 15px;
-    padding: 13px 28px;
-  }
-  .arrowIcon {
-    width: 18px;
-    height: 18px;
+    padding: 12px 24px;
   }
 }

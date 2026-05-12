@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './Events.css';
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
@@ -43,8 +43,8 @@ interface Event {
   reward: string;
   isFull: boolean;
   daysLeft: number;
-  startDate: string; // ISO date string for comparison
-  canRegister: boolean; // whether registration is allowed
+  startDate: string;
+  canRegister: boolean;
 }
 
 /* ══════════════════════════════════════════
@@ -54,13 +54,8 @@ const mapEvent = (e: ApiEvent): Event => {
   const startDate = new Date(e.st_date);
   const now = new Date();
   const daysUntilStart = Math.ceil((startDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-  
-  // Can register if: 3 or more days before start date AND not full
-  // Example: Event on 15/2, today is 10/2 (5 days before) -> can register
-  // Example: Event on 15/2, today is 12/2 (3 days before) -> can register
-  // Example: Event on 15/2, today is 13/2 (2 days before) -> cannot register
   const canRegister = daysUntilStart >= 3 && !e.is_full;
-  
+
   return {
     id:          e.event_id,
     title:       e.title || '---',
@@ -124,13 +119,189 @@ const CheckIcon = () => (
     <polyline points="20 6 9 17 4 12"/>
   </svg>
 );
-const InfoIcon = () => (
-  <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-    <circle cx="12" cy="12" r="10"/>
-    <line x1="12" y1="16" x2="12" y2="12"/>
-    <line x1="12" y1="8" x2="12.01" y2="8"/>
+const WarningIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="modal-warn-icon">
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+    <line x1="12" y1="9" x2="12" y2="13"/>
+    <line x1="12" y1="17" x2="12.01" y2="17"/>
   </svg>
 );
+const ShieldIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+  </svg>
+);
+const BanIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <circle cx="12" cy="12" r="10"/>
+    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+  </svg>
+);
+const UndoIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <path d="M3 7v6h6"/>
+    <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>
+  </svg>
+);
+const UserCheckIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+    <circle cx="8.5" cy="7" r="4"/>
+    <polyline points="17 11 19 13 23 9"/>
+  </svg>
+);
+
+/* ══════════════════════════════════════════
+   CONFIRMATION MODAL
+══════════════════════════════════════════ */
+interface ConfirmModalProps {
+  event: Event | null;
+  onConfirm: () => void;
+  onCancel: () => void;
+  isLoading: boolean;
+}
+
+const ConfirmModal: React.FC<ConfirmModalProps> = ({ event, onConfirm, onCancel, isLoading }) => {
+  // Close on Escape
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
+    document.addEventListener('keydown', handleKey);
+    // Prevent body scroll
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handleKey);
+      document.body.style.overflow = '';
+    };
+  }, [onCancel]);
+
+  if (!event) return null;
+
+  return (
+    <div className="modal-overlay" onClick={onCancel} role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div className="modal-container" onClick={e => e.stopPropagation()}>
+
+        {/* ── MODAL HEADER ── */}
+        <div className="modal-header">
+          <div className="modal-header-icon">
+            <WarningIcon />
+          </div>
+          <div className="modal-header-text">
+            <h2 id="modal-title" className="modal-title">تأكيد التسجيل في الفعالية</h2>
+            <p className="modal-event-name">{event.title}</p>
+          </div>
+          <button className="modal-close-btn" onClick={onCancel} aria-label="إغلاق">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* ── MODAL BODY ── */}
+        <div className="modal-body">
+
+          {/* Confirmation question */}
+          <div className="modal-confirm-banner">
+            <span className="modal-confirm-q">هل أنت متأكد من رغبتك في التسجيل؟</span>
+            <span className="modal-confirm-sub">يرجى قراءة الشروط والقيود أدناه قبل تأكيد طلبك</span>
+          </div>
+
+          {/* ── RESTRICTIONS GRID ── */}
+          <div className="modal-restrictions">
+
+            {/* Card 1 — No undo */}
+            <div className="restriction-card restriction-red">
+              <div className="restriction-icon-wrap restriction-icon-red">
+                <UndoIcon />
+              </div>
+              <div className="restriction-content">
+                <h4 className="restriction-title">لا يمكن التراجع عن التسجيل</h4>
+                <p className="restriction-desc">
+                  بمجرد تأكيد تسجيلك، <strong>لن تتمكن من إلغاء طلبك بنفسك</strong> عبر المنصة.
+                  في حال رغبتك في الانسحاب لاحقًا، يتعين عليك التواصل المباشر مع{' '}
+                  <strong>مسؤولي النشاط</strong> وإبلاغهم قبل انعقاد الفعالية.
+                </p>
+              </div>
+            </div>
+
+            {/* Card 2 — Absence penalty */}
+            <div className="restriction-card restriction-orange">
+              <div className="restriction-icon-wrap restriction-icon-orange">
+                <BanIcon />
+              </div>
+              <div className="restriction-content">
+                <h4 className="restriction-title">قاعدة الغياب المتكرر</h4>
+                <p className="restriction-desc">
+                  إذا قمت بالتسجيل في فعالية و<strong>لم تحضر 3 مرات متتالية</strong> دون إخطار مسبق،
+                  سيتم <strong>تعليق حقك في التسجيل</strong> في الفعاليات القادمة تلقائيًا.
+                  احرص على الحضور أو الإلغاء المسبق مع المسؤولين.
+                </p>
+              </div>
+            </div>
+
+            {/* Card 3 — Commitment */}
+            <div className="restriction-card restriction-navy">
+              <div className="restriction-icon-wrap restriction-icon-navy">
+                <ShieldIcon />
+              </div>
+              <div className="restriction-content">
+                <h4 className="restriction-title">الالتزام بشروط الفعالية</h4>
+                <p className="restriction-desc">
+                  بالتسجيل، أنت تُقرّ بالتزامك بكافة قواعد وأنظمة الفعالية، بما تشمل{' '}
+                  <strong>المواعيد، والسلوك، ومتطلبات الحضور</strong>.
+                  أي مخالفة قد تؤثر على سجلّك الأكاديمي والأنشطة المستقبلية.
+                </p>
+              </div>
+            </div>
+
+            {/* Card 4 — Contact officials */}
+            <div className="restriction-card restriction-green">
+              <div className="restriction-icon-wrap restriction-icon-green">
+                <UserCheckIcon />
+              </div>
+              <div className="restriction-content">
+                <h4 className="restriction-title">للاستفسار والتواصل</h4>
+                <p className="restriction-desc">
+                  لأي استفسار أو طلب استثنائي يخص التسجيل أو الانسحاب، يرجى التواصل مع{' '}
+                  <strong>مسؤولي النشاط المختصين</strong> في القسم أو الكلية المنظِّمة للفعالية
+                  خلال ساعات العمل الرسمية.
+                </p>
+              </div>
+            </div>
+
+          </div>{/* end modal-restrictions */}
+
+          {/* Disclaimer bar */}
+          <div className="modal-disclaimer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="disclaimer-icon">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="16" x2="12" y2="12"/>
+              <line x1="12" y1="8" x2="12.01" y2="8"/>
+            </svg>
+            <span>
+              بالنقر على «تأكيد التسجيل» أدناه، فإنك تُقرّ بأنك قرأت وفهمت جميع الشروط المذكورة وتوافق عليها.
+            </span>
+          </div>
+
+        </div>{/* end modal-body */}
+
+        {/* ── MODAL FOOTER ── */}
+        <div className="modal-footer">
+          <button className="modal-btn modal-btn-cancel" onClick={onCancel} disabled={isLoading}>
+            إلغاء
+          </button>
+          <button className="modal-btn modal-btn-confirm" onClick={onConfirm} disabled={isLoading}>
+            {isLoading
+              ? <><span className="btn-spinner" /> جاري إرسال الطلب...</>
+              : <><CheckIcon /> تأكيد التسجيل</>
+            }
+          </button>
+        </div>
+
+      </div>
+    </div>
+  );
+};
 
 /* ══════════════════════════════════════════
    HELPERS
@@ -160,6 +331,9 @@ export default function Events() {
   const [activeType,  setActiveType]  = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Modal state
+  const [modalEvent,  setModalEvent]  = useState<Event | null>(null);
+
   /* ── Fetch events ── */
   useEffect(() => {
     const load = async () => {
@@ -168,7 +342,6 @@ export default function Events() {
         const res = await authFetch(`${getBaseUrl()}/api/event/student-events/available/`);
         if (!res.ok) throw new Error('فشل تحميل الفعاليات');
         const raw = await res.json();
-        // FIX: backend wraps in { status, count, data: [...] }
         const arr: ApiEvent[] = Array.isArray(raw)
           ? raw
           : (raw.data ?? raw.results ?? []);
@@ -183,29 +356,42 @@ export default function Events() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* ── Join ── */
-  const joinEvent = async (e: React.MouseEvent, id: number) => {
+  /* ── Open modal ── */
+  const openModal = useCallback((e: React.MouseEvent, event: Event) => {
     e.stopPropagation();
+    setModalEvent(event);
+  }, []);
+
+  /* ── Cancel modal ── */
+  const closeModal = useCallback(() => {
+    if (joiningId !== null) return; // don't close while submitting
+    setModalEvent(null);
+  }, [joiningId]);
+
+  /* ── Confirm join (called from modal) ── */
+  const confirmJoin = useCallback(async () => {
+    if (!modalEvent) return;
+    const id = modalEvent.id;
     try {
       setJoiningId(id);
       const res = await authFetch(`${getBaseUrl()}/api/event/student-events/${id}/join/`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) {
-        // FIX: backend error shape is { status, message } 
         throw new Error(body.message || body.detail || 'فشل إرسال الطلب');
       }
       setRegistered(prev => new Set([...prev, id]));
       setEvents(prev => prev.map(ev => ev.id === id ? { ...ev, takenSeats: ev.takenSeats + 1 } : ev));
       showToast('تم إرسال الطلب بنجاح', 'success');
+      setModalEvent(null);
     } catch (e: unknown) {
       showToast(e instanceof Error ? e.message : 'حدث خطأ', 'error');
     } finally {
       setJoiningId(null);
     }
-  };
+  }, [modalEvent, showToast]);
 
   /* ── Filters ── */
   const types    = ['all', ...Array.from(new Set(events.map(e => e.type)))];
@@ -224,6 +410,16 @@ export default function Events() {
   ══════════════════════════════════════════ */
   return (
     <>
+      {/* Confirmation Modal */}
+      {modalEvent && (
+        <ConfirmModal
+          event={modalEvent}
+          onConfirm={confirmJoin}
+          onCancel={closeModal}
+          isLoading={joiningId !== null}
+        />
+      )}
+
       <div className="events-page" dir="rtl">
 
         {/* ══ HERO ══ */}
@@ -283,10 +479,7 @@ export default function Events() {
                 const canApply  = event.canRegister && !isReg && !event.isFull;
 
                 return (
-                  <div
-                    key={event.id}
-                    className="event-card"
-                  >
+                  <div key={event.id} className="event-card">
 
                     {/* ── CARD HEADER ── */}
                     <div className="card-header">
@@ -354,7 +547,7 @@ export default function Events() {
                         ) : (
                           <button
                             className="register-btn"
-                            onClick={(e) => joinEvent(e, event.id)}
+                            onClick={(e) => openModal(e, event)}
                             disabled={isJoining || !canApply}
                           >
                             {isJoining

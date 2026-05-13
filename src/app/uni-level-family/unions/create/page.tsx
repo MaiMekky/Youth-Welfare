@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowRight, Save, Users } from "lucide-react";
+import { ArrowRight, Save } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
 import styles from "./styles/create.module.css";
@@ -17,86 +17,190 @@ interface Faculty {
 interface Department {
   dept_id: number;
   name: string;
-  faculty: number;
 }
 
-interface Student {
-  uid: number;
-  nid: number;
-  name: string;
-  phone_number?: string;
-}
-
-interface Committee {
+interface CommitteeState {
   committee_key: string;
-  head: { uid: number; dept_id: number };
-  assistant: { uid: number; dept_id: number };
+  dept_id: string;                        // ← shared for the whole committee
+  head:      { uid: string };
+  assistant: { uid: string };
 }
 
 const COMMITTEES = [
-  { key: "cultural", name: "اللجنة الثقافية" },
-  { key: "social", name: "اللجنة الاجتماعية" },
-  { key: "sports", name: "اللجنة الرياضية" },
-  { key: "artistic", name: "اللجنة الفنية" },
+  { key: "cultural",   name: "اللجنة الثقافية" },
+  { key: "newspaper",  name: "لجنة صحف الحائط" },
+  { key: "social",     name: "لجنة الأنشطة الاجتماعية والرحلات" },
+  { key: "arts",       name: "اللجنة الفنية" },
   { key: "scientific", name: "اللجنة العلمية" },
-  { key: "technical", name: "اللجنة التقنية" },
-  { key: "media", name: "اللجنة الإعلامية" },
+  { key: "service",    name: "لجنة الخدمة العامة والمعسكرات" },
+  { key: "sports",     name: "اللجنة الرياضية" },
 ];
 
+// ───────────────────────── error flattener ─────────────────────────
+
+/** Recursively flatten any Django DRF error structure into a single string. */
+function flattenError(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value))     return value.map(flattenError).join(" ");
+  if (value && typeof value === "object") {
+    return Object.values(value as Record<string, unknown>)
+      .map(flattenError)
+      .join(" | ");
+  }
+  return String(value ?? "");
+}
+
+/** Turn a backend error response body into a human-readable message. */
+function parseBackendError(errorData: unknown): string {
+  if (typeof errorData === "string") return errorData;
+  if (Array.isArray(errorData))      return errorData.map(flattenError).join(" ");
+  if (errorData && typeof errorData === "object") {
+    const obj = errorData as Record<string, unknown>;
+    // Prefer top-level `detail` / `message` if present and string
+    if (typeof obj.detail  === "string") return obj.detail;
+    if (typeof obj.message === "string") return obj.message;
+    // Otherwise flatten everything
+    return Object.values(obj).map(flattenError).join(" | ");
+  }
+  return "فشل إنشاء الاتحاد";
+}
+
+// ───────────────────────── validation helpers ─────────────────────────
+
+interface FormErrors {
+  name?: string;
+  description?: string;
+  president_nid?: string;
+  vice_president_nid?: string;
+  committees: {
+    [key: string]: {
+      dept?: string;
+      head_uid?: string;
+      assistant_uid?: string;
+    };
+  };
+}
+
+function validateNID(value: string): string | undefined {
+  if (!value.trim()) return "هذا الحقل مطلوب";
+  if (!/^\d+$/.test(value)) return "يجب أن يحتوي على أرقام فقط";
+  if (value.length < 9 || value.length > 14)
+    return "رقم الهوية يجب أن يكون بين 9 و 14 رقماً";
+  return undefined;
+}
+
+function validateUID(value: string): string | undefined {
+  if (!value.trim()) return "هذا الحقل مطلوب";
+  if (!/^\d+$/.test(value)) return "يجب أن يحتوي على أرقام فقط";
+  return undefined;
+}
+
+function buildErrors(
+  formData: { name: string; description: string; president_nid: string; vice_president_nid: string },
+  committees: CommitteeState[]
+): FormErrors {
+  const errors: FormErrors = { committees: {} };
+
+  if (!formData.name.trim())
+    errors.name = "اسم الاتحاد مطلوب";
+  else if (formData.name.trim().length < 5)
+    errors.name = "يجب أن يكون الاسم 5 أحرف على الأقل";
+
+  if (!formData.description.trim())
+    errors.description = "وصف الاتحاد مطلوب";
+  else if (formData.description.trim().length < 10)
+    errors.description = "يجب أن يكون الوصف 10 أحرف على الأقل";
+
+  const presErr = validateNID(formData.president_nid);
+  if (presErr) errors.president_nid = presErr;
+
+  const viceErr = validateNID(formData.vice_president_nid);
+  if (viceErr) errors.vice_president_nid = viceErr;
+
+  if (
+    !errors.president_nid &&
+    !errors.vice_president_nid &&
+    formData.president_nid === formData.vice_president_nid
+  ) {
+    errors.vice_president_nid = "لا يمكن أن يكون نائب الرئيس هو نفس الرئيس";
+  }
+
+  committees.forEach((c) => {
+    const cErr: FormErrors["committees"][string] = {};
+
+    if (!c.dept_id) cErr.dept = "يرجى اختيار القسم";
+
+    const headUidErr = validateUID(c.head.uid);
+    if (headUidErr) cErr.head_uid = headUidErr;
+
+    const asstUidErr = validateUID(c.assistant.uid);
+    if (asstUidErr) cErr.assistant_uid = asstUidErr;
+
+    if (!cErr.head_uid && !cErr.assistant_uid && c.head.uid === c.assistant.uid) {
+      cErr.assistant_uid = "لا يمكن أن يكون المساعد هو نفس الرئيس في هذه اللجنة";
+    }
+
+    if (Object.keys(cErr).length > 0) errors.committees[c.committee_key] = cErr;
+  });
+
+  return errors;
+}
+
+function hasErrors(errors: FormErrors): boolean {
+  if (errors.name || errors.description || errors.president_nid || errors.vice_president_nid)
+    return true;
+  return Object.keys(errors.committees).length > 0;
+}
+
+// ───────────────────────── main component ─────────────────────────
+
 function CreateUnionContent() {
-  const router = useRouter();
+  const router     = useRouter();
   const searchParams = useSearchParams();
   const { showToast } = useToast();
 
-  const [faculties, setFaculties] = useState<Faculty[]>([]);
+  const [faculties,   setFaculties]   = useState<Faculty[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading,   setLoading]   = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
-  // Form state
   const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    faculty_id: searchParams.get("faculty") || "",
-    president_nid: "",
+    name:               "",
+    description:        "",
+    faculty_id:         searchParams.get("faculty") || "",
+    president_nid:      "",
     vice_president_nid: "",
   });
 
-  const [committees, setCommittees] = useState<Committee[]>(
-    COMMITTEES.map(c => ({
+  const [committees, setCommittees] = useState<CommitteeState[]>(
+    COMMITTEES.map((c) => ({
       committee_key: c.key,
-      head: { uid: 0, dept_id: 0 },
-      assistant: { uid: 0, dept_id: 0 },
+      dept_id:   "",                        // ← one shared dept per committee
+      head:      { uid: "" },
+      assistant: { uid: "" },
     }))
   );
 
-  // Fetch faculties
+  const [errors, setErrors] = useState<FormErrors>({ committees: {} });
+
+  useEffect(() => {
+    if (submitted) setErrors(buildErrors(formData, committees));
+  }, [formData, committees, submitted]);
+
   const fetchFaculties = useCallback(async () => {
     try {
-      const response = await authFetch(`${API_URL}/family/faculties/`);
-      if (!response.ok) {
-        console.warn("Faculties endpoint not available");
-        return;
-      }
-      const data = await response.json();
-      setFaculties(data);
-    } catch (error) {
-      console.warn("Error fetching faculties:", error);
-    }
+      const res = await authFetch(`${API_URL}/family/faculties/`);
+      if (!res.ok) return;
+      setFaculties(await res.json());
+    } catch { /* ignore */ }
   }, []);
 
-  // Fetch departments
   const fetchDepartments = useCallback(async () => {
     try {
-      const response = await authFetch(`${API_URL}/family/departments/`);
-      if (!response.ok) {
-        console.warn("Departments endpoint not available");
-        return;
-      }
-      const data = await response.json();
-      setDepartments(data);
-    } catch (error) {
-      console.warn("Error fetching departments:", error);
-    }
+      const res = await authFetch(`${API_URL}/family/departments/`);
+      if (!res.ok) return;
+      setDepartments(await res.json());
+    } catch { /* ignore */ }
   }, []);
 
   useEffect(() => {
@@ -104,99 +208,94 @@ function CreateUnionContent() {
     fetchDepartments();
   }, [fetchFaculties, fetchDepartments]);
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  const handleInputChange = (field: string, value: string) =>
+    setFormData((prev) => ({ ...prev, [field]: value }));
 
   const handleCommitteeChange = (
     index: number,
     role: "head" | "assistant",
-    field: "uid" | "dept_id",
     value: string
   ) => {
-    setCommittees(prev => {
+    setCommittees((prev) => {
       const updated = [...prev];
-      updated[index][role][field] = parseInt(value) || 0;
+      updated[index] = { ...updated[index], [role]: { uid: value } };
       return updated;
     });
   };
 
+  const handleCommitteeDept = (index: number, value: string) => {
+    setCommittees((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], dept_id: value };
+      return updated;
+    });
+  };
+
+  // ── submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitted(true);
 
-    // Validation
-    if (!formData.name.trim()) {
-      showToast("يرجى إدخال اسم الاتحاد", "error");
-      return;
-    }
-    if (!formData.description.trim()) {
-      showToast("يرجى إدخال وصف الاتحاد", "error");
-      return;
-    }
-    if (!formData.president_nid) {
-      showToast("يرجى إدخال رقم هوية رئيس الاتحاد", "error");
-      return;
-    }
-    if (!formData.vice_president_nid) {
-      showToast("يرجى إدخال رقم هوية نائب رئيس الاتحاد", "error");
-      return;
-    }
+    const validationErrors = buildErrors(formData, committees);
+    setErrors(validationErrors);
 
-    // Validate all committees are filled
-    for (let i = 0; i < committees.length; i++) {
-      const committee = committees[i];
-      if (!committee.head.uid || !committee.head.dept_id) {
-        showToast(`يرجى إكمال بيانات رئيس ${COMMITTEES[i].name}`, "error");
-        return;
-      }
-      if (!committee.assistant.uid || !committee.assistant.dept_id) {
-        showToast(`يرجى إكمال بيانات مساعد ${COMMITTEES[i].name}`, "error");
-        return;
-      }
+    if (hasErrors(validationErrors)) {
+      showToast("يرجى تصحيح الأخطاء قبل الإرسال", "error");
+      const firstError = document.querySelector(`.${styles.errorMsg}`);
+      firstError?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
     }
 
     try {
       setLoading(true);
 
       const payload = {
-        name: formData.name,
-        description: formData.description,
-        faculty_id: formData.faculty_id ? parseInt(formData.faculty_id) : null,
-        president_nid: parseInt(formData.president_nid),
+        name:               formData.name.trim(),
+        description:        formData.description.trim(),
+        faculty_id:         formData.faculty_id ? parseInt(formData.faculty_id) : null,
+        president_nid:      parseInt(formData.president_nid),
         vice_president_nid: parseInt(formData.vice_president_nid),
-        committees: committees,
+        committees: committees.map((c) => ({
+          committee_key: c.committee_key,
+          head: {
+            uid:     parseInt(c.head.uid),
+            dept_id: parseInt(c.dept_id),   // shared dept
+          },
+          assistant: {
+            uid:     parseInt(c.assistant.uid),
+            dept_id: parseInt(c.dept_id),   // shared dept
+          },
+        })),
       };
 
       const response = await authFetch(`${API_URL}/family/unions/`, {
-        method: "POST",
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body:    JSON.stringify(payload),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        const errorMsg = typeof errorData === "string" 
-          ? errorData 
-          : errorData.detail || errorData.message || "فشل إنشاء الاتحاد";
-        throw new Error(errorMsg);
+        throw new Error(parseBackendError(errorData));
       }
 
       const data = await response.json();
-      showToast("تم إنشاء الاتحاد بنجاح", "success");
+      showToast("تم إنشاء الاتحاد بنجاح ✓", "success");
       router.push(`/uni-level-family/unions/${data.family_id}`);
     } catch (error) {
       console.error("Error creating union:", error);
-      const errorMsg = error instanceof Error ? error.message : "فشل إنشاء الاتحاد";
-      showToast(errorMsg, "error");
+      showToast(error instanceof Error ? error.message : "فشل إنشاء الاتحاد", "error");
     } finally {
       setLoading(false);
     }
   };
 
+  const getCommitteeErrors = (key: string) => errors.committees[key] || {};
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <button className={styles.backBtn} onClick={() => router.back()}>
+        <button className={styles.backBtn} onClick={() => router.back()} type="button">
           <ArrowRight size={20} />
         </button>
         <div>
@@ -205,21 +304,23 @@ function CreateUnionContent() {
         </div>
       </header>
 
-      <form onSubmit={handleSubmit} className={styles.form}>
-        {/* Basic Info */}
+      <form onSubmit={handleSubmit} className={styles.form} noValidate>
+
+        {/* ── Basic Info ── */}
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>المعلومات الأساسية</h2>
           <div className={styles.formGrid}>
+
             <div className={styles.formGroup}>
               <label className={styles.label}>اسم الاتحاد *</label>
               <input
                 type="text"
-                className={styles.input}
+                className={`${styles.input} ${errors.name ? styles.inputError : ""}`}
                 value={formData.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
                 placeholder="مثال: اتحاد طلاب كلية الهندسة"
-                required
               />
+              {errors.name && <span className={styles.errorMsg}>{errors.name}</span>}
             </div>
 
             <div className={styles.formGroup}>
@@ -230,9 +331,9 @@ function CreateUnionContent() {
                 onChange={(e) => handleInputChange("faculty_id", e.target.value)}
               >
                 <option value="">اتحاد عام (بدون كلية)</option>
-                {faculties.map(faculty => (
-                  <option key={faculty.faculty_id} value={faculty.faculty_id}>
-                    {faculty.name}
+                {faculties.map((f) => (
+                  <option key={f.faculty_id} value={f.faculty_id}>
+                    {f.name}
                   </option>
                 ))}
               </select>
@@ -241,126 +342,142 @@ function CreateUnionContent() {
             <div className={styles.formGroup} style={{ gridColumn: "1 / -1" }}>
               <label className={styles.label}>الوصف *</label>
               <textarea
-                className={styles.textarea}
+                className={`${styles.textarea} ${errors.description ? styles.inputError : ""}`}
                 value={formData.description}
                 onChange={(e) => handleInputChange("description", e.target.value)}
                 placeholder="وصف مختصر عن الاتحاد وأهدافه"
                 rows={4}
-                required
               />
+              {errors.description && (
+                <span className={styles.errorMsg}>{errors.description}</span>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Leadership */}
+        {/* ── Leadership ── */}
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>القيادة</h2>
           <div className={styles.formGrid}>
+
             <div className={styles.formGroup}>
               <label className={styles.label}>رقم هوية رئيس الاتحاد *</label>
               <input
-                type="number"
-                className={styles.input}
+                type="text"
+                inputMode="numeric"
+                className={`${styles.input} ${errors.president_nid ? styles.inputError : ""}`}
                 value={formData.president_nid}
-                onChange={(e) => handleInputChange("president_nid", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("president_nid", e.target.value.replace(/\D/g, ""))
+                }
                 placeholder="أدخل رقم الهوية"
-                required
+                maxLength={14}
               />
+              {errors.president_nid && (
+                <span className={styles.errorMsg}>{errors.president_nid}</span>
+              )}
             </div>
 
             <div className={styles.formGroup}>
               <label className={styles.label}>رقم هوية نائب رئيس الاتحاد *</label>
               <input
-                type="number"
-                className={styles.input}
+                type="text"
+                inputMode="numeric"
+                className={`${styles.input} ${errors.vice_president_nid ? styles.inputError : ""}`}
                 value={formData.vice_president_nid}
-                onChange={(e) => handleInputChange("vice_president_nid", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("vice_president_nid", e.target.value.replace(/\D/g, ""))
+                }
                 placeholder="أدخل رقم الهوية"
-                required
+                maxLength={14}
               />
+              {errors.vice_president_nid && (
+                <span className={styles.errorMsg}>{errors.vice_president_nid}</span>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Committees */}
+        {/* ── Committees ── */}
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>اللجان (7 لجان)</h2>
           <div className={styles.committeesGrid}>
-            {COMMITTEES.map((committee, index) => (
-              <div key={committee.key} className={styles.committeeCard}>
-                <h3 className={styles.committeeTitle}>{committee.name}</h3>
-                
-                <div className={styles.committeeSection}>
-                  <h4 className={styles.committeeSubtitle}>رئيس اللجنة</h4>
-                  <div className={styles.formRow}>
-                    <div className={styles.formGroup}>
-                      <label className={styles.label}>رقم الجامعة (UID)</label>
-                      <input
-                        type="number"
-                        className={styles.input}
-                        value={committees[index].head.uid || ""}
-                        onChange={(e) => handleCommitteeChange(index, "head", "uid", e.target.value)}
-                        placeholder="UID"
-                        required
-                      />
-                    </div>
-                    <div className={styles.formGroup}>
-                      <label className={styles.label}>القسم</label>
-                      <select
-                        className={styles.select}
-                        value={committees[index].head.dept_id || ""}
-                        onChange={(e) => handleCommitteeChange(index, "head", "dept_id", e.target.value)}
-                        required
-                      >
-                        <option value="">اختر القسم</option>
-                        {departments.map(dept => (
-                          <option key={dept.dept_id} value={dept.dept_id}>
-                            {dept.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                </div>
+            {COMMITTEES.map((committee, index) => {
+              const cErr = getCommitteeErrors(committee.key);
+              return (
+                <div key={committee.key} className={styles.committeeCard}>
+                  <h3 className={styles.committeeTitle}>{committee.name}</h3>
 
-                <div className={styles.committeeSection}>
-                  <h4 className={styles.committeeSubtitle}>مساعد رئيس اللجنة</h4>
-                  <div className={styles.formRow}>
+                  {/* ── Shared dept (once per card) ── */}
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>القسم *</label>
+                    <select
+                      className={`${styles.select} ${cErr.dept ? styles.inputError : ""}`}
+                      value={committees[index].dept_id}
+                      onChange={(e) => handleCommitteeDept(index, e.target.value)}
+                    >
+                      <option value="">اختر القسم</option>
+                      {departments.map((d) => (
+                        <option key={d.dept_id} value={d.dept_id}>
+                          {d.name}
+                        </option>
+                      ))}
+                    </select>
+                    {cErr.dept && <span className={styles.errorMsg}>{cErr.dept}</span>}
+                  </div>
+
+                  {/* Head */}
+                  <div className={styles.committeeSection}>
+                    <h4 className={styles.committeeSubtitle}>رئيس اللجنة</h4>
                     <div className={styles.formGroup}>
                       <label className={styles.label}>رقم الجامعة (UID)</label>
                       <input
-                        type="number"
-                        className={styles.input}
-                        value={committees[index].assistant.uid || ""}
-                        onChange={(e) => handleCommitteeChange(index, "assistant", "uid", e.target.value)}
+                        type="text"
+                        inputMode="numeric"
+                        className={`${styles.input} ${cErr.head_uid ? styles.inputError : ""}`}
+                        value={committees[index].head.uid}
+                        onChange={(e) =>
+                          handleCommitteeChange(index, "head", e.target.value.replace(/\D/g, ""))
+                        }
                         placeholder="UID"
-                        required
                       />
+                      {cErr.head_uid && (
+                        <span className={styles.errorMsg}>{cErr.head_uid}</span>
+                      )}
                     </div>
+                  </div>
+
+                  {/* Assistant */}
+                  <div className={styles.committeeSection}>
+                    <h4 className={styles.committeeSubtitle}>مساعد رئيس اللجنة</h4>
                     <div className={styles.formGroup}>
-                      <label className={styles.label}>القسم</label>
-                      <select
-                        className={styles.select}
-                        value={committees[index].assistant.dept_id || ""}
-                        onChange={(e) => handleCommitteeChange(index, "assistant", "dept_id", e.target.value)}
-                        required
-                      >
-                        <option value="">اختر القسم</option>
-                        {departments.map(dept => (
-                          <option key={dept.dept_id} value={dept.dept_id}>
-                            {dept.name}
-                          </option>
-                        ))}
-                      </select>
+                      <label className={styles.label}>رقم الجامعة (UID)</label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        className={`${styles.input} ${cErr.assistant_uid ? styles.inputError : ""}`}
+                        value={committees[index].assistant.uid}
+                        onChange={(e) =>
+                          handleCommitteeChange(
+                            index,
+                            "assistant",
+                            e.target.value.replace(/\D/g, "")
+                          )
+                        }
+                        placeholder="UID"
+                      />
+                      {cErr.assistant_uid && (
+                        <span className={styles.errorMsg}>{cErr.assistant_uid}</span>
+                      )}
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
-        {/* Submit */}
+        {/* ── Actions ── */}
         <div className={styles.actions}>
           <button
             type="button"
@@ -370,11 +487,7 @@ function CreateUnionContent() {
           >
             إلغاء
           </button>
-          <button
-            type="submit"
-            className={styles.submitBtn}
-            disabled={loading}
-          >
+          <button type="submit" className={styles.submitBtn} disabled={loading}>
             {loading ? (
               <>
                 <div className={styles.spinner} />
@@ -395,11 +508,13 @@ function CreateUnionContent() {
 
 export default function CreateUnionPage() {
   return (
-    <Suspense fallback={
-      <div style={{ padding: "2rem", textAlign: "center" }}>
-        <p>جاري التحميل...</p>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div style={{ padding: "2rem", textAlign: "center" }}>
+          <p>جاري التحميل...</p>
+        </div>
+      }
+    >
       <CreateUnionContent />
     </Suspense>
   );

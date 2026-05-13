@@ -8,7 +8,7 @@ import type { StatItem } from "./components/StatsGrid";
 import Tabs from "./components/Tabs";
 import { EventItem, ChipVariant } from "./components/EventCard";
 import { useRouter } from "next/navigation";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, CalendarSearch } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { getSessionMeta } from "@/utils/cookieHelpers";
 import { useToast } from "@/app/context/ToastContext";
@@ -32,6 +32,7 @@ type ApiEvent = {
   dept_id: number;
   active?: boolean | string | number;
 };
+
 function getDepartmentsFromToken(): { dept_id: number; dept_name: string }[] {
   const meta = getSessionMeta();
   if (!meta?.departments?.length) return [];
@@ -72,10 +73,15 @@ function toBool(v: unknown): boolean | null {
 
 function statusVariant(status: string): ChipVariant {
   const s = (status || "").trim();
-  if (s === "نشط") return "success";
-  if (s === "منتظر") return "primary";
-  if (s === "مكتمل") return "info";
-  if (s === "غير نشط" || s === "ملغي") return "danger";
+  if (s === "نشط")                return "success";
+  if (s === "مقبول")              return "accepted";   // emerald green
+  if (s === "موافقة مبدئية")     return "pending";  // cyan/teal
+  if (s === "منتظر")              return "pending";    // amber
+  if (s === "مكتمل")              return "completed";  // blue
+  if (s === "منتهي الصلاحية")    return "expired";    // slate/grey
+  if (s === "مرفوض")             return "rejected";   // rose/red
+  if (s === "ملغي")              return "cancelled";  // deep red/crimson
+  if (s === "غير نشط")           return "danger";
   return "purple";
 }
 
@@ -120,7 +126,6 @@ export default function Page() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Restore active tab from sessionStorage so "back" lands on the correct tab
   const [activeTab, setActiveTab] = useState<EventsTab>(() => {
     if (typeof window !== "undefined") {
       const saved = sessionStorage.getItem(TAB_SESSION_KEY);
@@ -132,12 +137,13 @@ export default function Page() {
   const [userDepartments, setUserDepartments] = useState<Record<string, unknown>[]>([]);
   const [deptFilter, setDeptFilter] = useState<number | "all">("all");
   const [search, setSearch] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo]   = useState("");
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Persist active tab whenever it changes
   const handleTabChange = (tab: EventsTab) => {
     setActiveTab(tab);
     sessionStorage.setItem(TAB_SESSION_KEY, tab);
@@ -150,17 +156,41 @@ export default function Page() {
     setUserDepartments(depts);
   }, []);
 
-  const fetchEvents = async () => {
-    setLoading(true);
-    const res = await apiFetch<ApiEvent[]>("/api/event/get-events/");
-    setLoading(false);
+  const buildQueryString = (from: string, to: string) => {
+    const params = new URLSearchParams();
+    if (from) params.set("date_from", from);
+    if (to)   params.set("date_to",   to);
+    const qs = params.toString();
+    return qs ? `?${qs}` : "";
+  };
+
+  // silent=true -> refresh list in background without showing the loading spinner
+  const fetchEvents = async (silent = false) => {
+    if (!silent) setLoading(true);
+    const qs  = buildQueryString(dateFrom, dateTo);
+    const res = await apiFetch<ApiEvent[]>(`/api/event/get-events/${qs}`);
+    if (!silent) setLoading(false);
     if (!res.ok) return;
     setEvents(res.data.map(toEventItem));
   };
 
+  // Initial load — show spinner
   useEffect(() => {
-    fetchEvents();
+    fetchEvents(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Date filter changes — debounce 400 ms, silent refresh (no spinner flash)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const qs = buildQueryString(dateFrom, dateTo);
+      apiFetch<ApiEvent[]>(`/api/event/get-events/${qs}`).then((res) => {
+        if (res.ok) setEvents(res.data.map(toEventItem));
+      });
+    }, 400);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateFrom, dateTo]);
 
   const facultyCount = useMemo(
     () => events.filter((e) => e.faculty_id !== null).length,
@@ -174,7 +204,7 @@ export default function Page() {
 
   const tabItems: { key: EventsTab; label: string; badge: number }[] = [
     { key: "faculty", label: "فعاليات الكلية", badge: facultyCount },
-    { key: "dept", label: "فعاليات القسم", badge: deptCount },
+    { key: "dept",    label: "فعاليات القسم",  badge: deptCount },
   ];
 
   const visibleEvents = useMemo(() => {
@@ -196,7 +226,7 @@ export default function Page() {
   }, [events, activeTab, deptFilter, search]);
 
   const stats: StatItem[] = useMemo(() => {
-    const active = visibleEvents.filter((e) => e.isActive).length;
+    const active   = visibleEvents.filter((e) => e.isActive).length;
     const inactive = visibleEvents.filter((e) => !e.isActive).length;
     return [
       {
@@ -226,7 +256,6 @@ export default function Page() {
   const goCreate = () => router.push("/Events-Faclevel/create");
 
   const onView = (id: number) => {
-    // Save current tab and the back path so EventDetails can restore both
     sessionStorage.setItem(TAB_SESSION_KEY, activeTab);
     sessionStorage.setItem("eventDetails_from", "/Events-Faclevel");
     router.push(`/Events-Faclevel/${id}`);
@@ -234,11 +263,31 @@ export default function Page() {
 
   const onEdit = (id: number) => router.push(`/Events-Faclevel/create/${id}`);
 
-    const onDelete = async (id: number) => {
+  const onDelete = async (id: number) => {
     const prev = events;
-    const res = await apiFetch<Record<string, unknown>>(`/api/event/get-events/${id}/`, { method: "DELETE" });
-    if (!res.ok) { setEvents(prev); showToast(res.message || "فشل الغاء الفعالية", "error"); return; }
+    const res  = await apiFetch<Record<string, unknown>>(
+      `/api/event/get-events/${id}/`,
+      { method: "DELETE" }
+    );
+    if (!res.ok) {
+      setEvents(prev);
+      showToast(res.message || "فشل الغاء الفعالية", "error");
+      return;
+    }
     showToast("✅ تم الغاء الفعالية بنجاح", "success");
+    await fetchEvents();
+  };
+
+  const onMarkCompleted = async (id: number) => {
+    const res = await apiFetch<Record<string, unknown>>(
+      `/api/event/manage-events/${id}/mark-completed/`,
+      { method: "PATCH" }
+    );
+    if (!res.ok) {
+      showToast(res.message || "فشل تغيير حالة الفعالية", "error");
+      return;
+    }
+    showToast("✅ تم إتمام الفعالية بنجاح", "success");
     await fetchEvents();
   };
 
@@ -264,16 +313,19 @@ export default function Page() {
           items={tabItems}
         />
 
-        {showFilters && (
-          <div className={styles.filtersBar}>
-            <div className={styles.searchBox}>
-              <Search size={16} />
-              <input
-                placeholder="ابحث باسم الفعالية..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
+        <div className={styles.filtersBar}>
+          {/* Search */}
+          <div className={styles.searchBox}>
+            <Search size={16} />
+            <input
+              placeholder="ابحث باسم الفعالية..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+
+          {/* Dept filter — only when user has >1 dept */}
+          {showFilters && (
             <select
               value={deptFilter}
               className={styles.searchBox}
@@ -290,8 +342,31 @@ export default function Page() {
                 </option>
               ))}
             </select>
+          )}
+           {/* Date from */}
+          <div className={styles.dateGroup}>
+            <label className={styles.dateLabel}>من تاريخ</label>
+            <div className={styles.dateBox}>
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+              />
+            </div>
           </div>
-        )}
+
+          {/* Date to */}
+          <div className={styles.dateGroup}>
+            <label className={styles.dateLabel}>إلى تاريخ</label>
+            <div className={styles.dateBox}>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
 
         <StatsGrid items={stats} />
 
@@ -318,7 +393,7 @@ export default function Page() {
                 fontWeight: 600,
               }}
             >
-              لا يوجد فعاليات حتي الان 
+              لا يوجد فعاليات حتي الان
             </div>
           ) : (
             <EventsGrid
@@ -327,6 +402,7 @@ export default function Page() {
               onView={onView}
               onEdit={onEdit}
               onDelete={onDelete}
+              onMarkCompleted={onMarkCompleted}
             />
           )}
         </div>

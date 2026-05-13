@@ -16,6 +16,7 @@ import {
   LayoutDashboard,
   RefreshCw,
   Tag,
+  AlertTriangle,
 } from "lucide-react";
 import styles from "./page.module.css";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
@@ -45,6 +46,12 @@ type ProcessedEvent = ApiEvent & {
   isUrgent: boolean;
   isToday: boolean;
   isPast: boolean;
+  /** days elapsed since end_date; -1 if end_date is in the future */
+  daysOverEnd: number;
+  /** true when accepted, past end_date, and within the 7-day completion window */
+  needsCompletion: boolean;
+  /** days remaining in the 7-day completion window */
+  completionDaysLeft: number;
 };
 
 type StatCard = {
@@ -62,6 +69,16 @@ function getDaysUntil(dateStr: string): number {
   const target = new Date(dateStr);
   target.setHours(0, 0, 0, 0);
   return Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function getDaysOverEnd(endDateStr: string): number {
+  if (!endDateStr) return -1;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const end = new Date(endDateStr);
+  end.setHours(0, 0, 0, 0);
+  const diff = Math.floor((today.getTime() - end.getTime()) / (1000 * 60 * 60 * 24));
+  return diff >= 0 ? diff : -1;
 }
 
 function fmtShort(d: string) {
@@ -97,6 +114,9 @@ function UpcomingRow({ ev, onClick }: { ev: ProcessedEvent; onClick: () => void 
     ? styles.urgencySoon
     : styles.urgencyNormal;
 
+  const isLastDay   = ev.completionDaysLeft === 0;
+  const isUrgentEnd = ev.completionDaysLeft <= 2 && ev.completionDaysLeft >= 0;
+
   return (
     <button className={styles.upcomingRow} onClick={onClick}>
       <div className={`${styles.upcomingDot} ${urgencyClass}`} />
@@ -122,6 +142,30 @@ function UpcomingRow({ ev, onClick }: { ev: ProcessedEvent; onClick: () => void 
             </span>
           )}
         </div>
+
+        {/* ── Completion warning inline ── */}
+        {ev.needsCompletion && (
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
+              marginTop: "4px",
+              padding: "2px 8px",
+              borderRadius: "99px",
+              fontSize: "0.72rem",
+              fontWeight: 700,
+              background: isLastDay ? "#FEF2F2" : isUrgentEnd ? "#FFFBEB" : "#F0FDF4",
+              color: isLastDay ? "#DC2626" : isUrgentEnd ? "#B45309" : "#15803D",
+              border: `1px solid ${isLastDay ? "#FECACA" : isUrgentEnd ? "#FDE68A" : "#BBF7D0"}`,
+            }}
+          >
+            <AlertTriangle size={11} />
+            {isLastDay
+              ? "آخر يوم للإتمام"
+              : `${ev.completionDaysLeft} ${ev.completionDaysLeft === 1 ? "يوم" : "أيام"} للإتمام`}
+          </div>
+        )}
       </div>
       <div className={styles.upcomingRight}>
         {ev.isToday ? (
@@ -236,28 +280,46 @@ export default function HomePage() {
   const processed = useMemo<ProcessedEvent[]>(() => {
     return events
       .map((e) => {
-        const daysUntil = getDaysUntil(e.st_date);
+        const daysUntil  = getDaysUntil(e.st_date);
+        const daysOverEnd = getDaysOverEnd(e.end_date);
+        // Event is within 7-day completion window when:
+        //   faculty_id present + accepted + end_date passed + ≤ 7 days ago
+        const needsCompletion =
+          e.faculty_id !== null &&
+          isApproved(e.status) &&
+          daysOverEnd >= 0 &&
+          daysOverEnd <= 7;
+        const completionDaysLeft = needsCompletion ? 7 - daysOverEnd : -1;
+
         return {
           ...e,
           daysUntil,
           isToday: daysUntil === 0,
           isUrgent: daysUntil >= 0 && daysUntil <= 3,
           isPast: daysUntil < 0,
+          daysOverEnd,
+          needsCompletion,
+          completionDaysLeft,
         };
       })
       .sort((a, b) => new Date(a.st_date).getTime() - new Date(b.st_date).getTime());
   }, [events]);
 
-  const upcomingEvents = useMemo(
-    () => processed.filter((e) => !e.isPast && e.daysUntil <= 30).slice(0, 8),
-    [processed]
-  );
+  // Upcoming events (within 30 days) + events needing completion
+  const upcomingEvents = useMemo(() => {
+    const upcoming = processed.filter((e) => !e.isPast && e.daysUntil <= 30);
+    const needCompletion = processed.filter(
+      (e) => e.needsCompletion && !upcoming.find((u) => u.event_id === e.event_id)
+    );
+    // Merge, completion-needed ones first, then upcoming by date; cap at 8
+    return [...needCompletion, ...upcoming].slice(0, 8);
+  }, [processed]);
 
   const stats = useMemo<StatCard[]>(() => {
-    const total = events.length;
-    const approved = events.filter((e) => isApproved(e.status)).length;
-    const pending = events.filter((e) => isPending(e.status)).length;
-    const upcoming7 = processed.filter((e) => !e.isPast && e.daysUntil <= 7).length;
+    const total     = events.length;
+    const approved  = events.filter((e) => isApproved(e.status)).length;
+    const pending   = events.filter((e) => isPending(e.status)).length;
+    const needComp  = processed.filter((e) => e.needsCompletion).length;
 
     return [
       {
@@ -282,11 +344,11 @@ export default function HomePage() {
         sub: "تحتاج إجراء",
       },
       {
-        label: "خلال 7 أيام",
-        value: upcoming7,
+        label: "تحتاج إتماماً",
+        value: needComp,
         icon: <TrendingUp size={22} />,
         accent: "red" as const,
-        sub: "فعاليات قريبة",
+        sub: needComp > 0 ? "انتهت ولم تُتمّ — أقل من 7 أيام" : "لا توجد فعاليات معلقة",
       },
     ];
   }, [events, processed]);
@@ -462,6 +524,21 @@ export default function HomePage() {
               <span className={styles.summaryMiniLabel}>فعاليات قادمة</span>
               <span className={`${styles.summaryMiniVal} ${styles.summaryFuture}`}>
                 {processed.filter((e) => !e.isPast).length}
+              </span>
+            </div>
+            <div className={styles.summaryDivider} />
+            {/* New: needs completion count */}
+            <div className={styles.summaryMiniRow}>
+              <span className={styles.summaryMiniLabel}>تحتاج إتماماً</span>
+              <span
+                className={styles.summaryMiniVal}
+                style={{
+                  color: processed.filter((e) => e.needsCompletion).length > 0
+                    ? "#DC2626"
+                    : undefined,
+                }}
+              >
+                {processed.filter((e) => e.needsCompletion).length}
               </span>
             </div>
           </div>

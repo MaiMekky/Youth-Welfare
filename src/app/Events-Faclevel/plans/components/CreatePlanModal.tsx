@@ -35,7 +35,7 @@ export default function CreatePlanModal({
   const [departments, setDepartments] = useState<Record<string, unknown>[]>([]);
   const originalForm = useRef<FormState | null>(null);
   function getFacultyIdFromCookie() {
-    return getSessionMeta()?.admin_id ?? null;
+    return getSessionMeta()?.faculty_id ?? null;
   }
 
 const closeAndReset = useCallback(() => {

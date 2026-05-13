@@ -74,12 +74,12 @@ export default function StructurePage() {
       <div className={styles.orb2} aria-hidden />
 
       {/* Breadcrumb / Back Button */}
-      <div className={styles.breadcrumb}>
+      {/* <div className={styles.breadcrumb}>
         <button onClick={() => router.push("/Events-Faclevel/scout")} className={styles.backBtn}>
           <ArrowRight size={18} />
           <span>العودة إلى الجوالة</span>
         </button>
-      </div>
+      </div> */}
 
       {/* ── Header ── */}
       <header className={styles.header}>

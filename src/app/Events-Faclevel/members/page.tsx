@@ -145,12 +145,12 @@ export default function MembersPage() {
     <div className={styles.page}>
       <div className={styles.container}>
         {/* Breadcrumb / Back Button */}
-        <div className={styles.breadcrumb}>
+        {/* <div className={styles.breadcrumb}>
           <button onClick={() => router.push("/Events-Faclevel/scout")} className={styles.backBtn}>
             <ArrowRight size={18} />
             <span>العودة إلى الجوالة</span>
           </button>
-        </div>
+        </div> */}
 
         {/* Header */}
         <div className={styles.header}>

@@ -178,6 +178,56 @@
   font-size: 11px;
 }
 
+/* Error Banner */
+.errorBanner {
+  background: var(--error-bg);
+  border: 2px solid var(--error-border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.errorBannerIcon {
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.errorBanner strong {
+  color: var(--error);
+  font-size: 14px;
+  font-weight: 800;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.errorList {
+  margin: 0;
+  padding: 0 0 0 20px;
+  list-style: disc;
+  color: var(--error);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.errorList li {
+  margin: 4px 0;
+}
+
 .textarea {
   resize: vertical;
   min-height: 100px;

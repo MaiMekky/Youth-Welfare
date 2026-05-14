@@ -84,14 +84,15 @@ interface FormErrors {
 function validateNID(value: string): string | undefined {
   if (!value.trim()) return "هذا الحقل مطلوب";
   if (!/^\d+$/.test(value)) return "يجب أن يحتوي على أرقام فقط";
-  if (value.length < 9 || value.length > 14)
-    return "رقم الهوية يجب أن يكون بين 9 و 14 رقماً";
+  // if (value.length !== 14)
+  //   return "رقم الهوية يجب أن يكون 14 رقماً بالضبط";
   return undefined;
 }
 
 function validateUID(value: string): string | undefined {
   if (!value.trim()) return "هذا الحقل مطلوب";
   if (!/^\d+$/.test(value)) return "يجب أن يحتوي على أرقام فقط";
+  // if (value.length < 4) return "رقم الجامعة يجب أن يكون 4 أرقام على الأقل";
   return undefined;
 }
 
@@ -125,6 +126,7 @@ function buildErrors(
     errors.vice_president_nid = "لا يمكن أن يكون نائب الرئيس هو نفس الرئيس";
   }
 
+  // Validate committees
   committees.forEach((c) => {
     const cErr: FormErrors["committees"][string] = {};
 
@@ -141,6 +143,31 @@ function buildErrors(
     }
 
     if (Object.keys(cErr).length > 0) errors.committees[c.committee_key] = cErr;
+  });
+
+  // Cross-validation: Check for duplicate UIDs across all committees
+  const allUids: Record<string, string> = {};
+  committees.forEach((c) => {
+    const headUid = c.head.uid.trim();
+    const asstUid = c.assistant.uid.trim();
+    
+    if (headUid && !errors.committees[c.committee_key]?.head_uid) {
+      if (allUids[headUid]) {
+        if (!errors.committees[c.committee_key]) errors.committees[c.committee_key] = {};
+        errors.committees[c.committee_key].head_uid = `هذا الكود مستخدم بالفعل في ${allUids[headUid]}`;
+      } else {
+        allUids[headUid] = `${c.committee_key} (رئيس)`;
+      }
+    }
+    
+    if (asstUid && !errors.committees[c.committee_key]?.assistant_uid) {
+      if (allUids[asstUid]) {
+        if (!errors.committees[c.committee_key]) errors.committees[c.committee_key] = {};
+        errors.committees[c.committee_key].assistant_uid = `هذا الكود مستخدم بالفعل في ${allUids[asstUid]}`;
+      } else {
+        allUids[asstUid] = `${c.committee_key} (مساعد)`;
+      }
+    }
   });
 
   return errors;
@@ -258,15 +285,36 @@ function CreateUnionContent() {
         committees: committees.map((c) => ({
           committee_key: c.committee_key,
           head: {
-            uid:     parseInt(c.head.uid),
-            dept_id: parseInt(c.dept_id),   // shared dept
+            uid:     parseInt(c.head.uid) || 0,
+            dept_id: parseInt(c.dept_id) || 0,
           },
           assistant: {
-            uid:     parseInt(c.assistant.uid),
-            dept_id: parseInt(c.dept_id),   // shared dept
+            uid:     parseInt(c.assistant.uid) || 0,
+            dept_id: parseInt(c.dept_id) || 0,
           },
         })),
       };
+
+      // Validate no NaN or 0 values before sending
+      if (isNaN(payload.president_nid) || payload.president_nid === 0) {
+        throw new Error("رقم هوية رئيس الاتحاد غير صالح");
+      }
+      if (isNaN(payload.vice_president_nid) || payload.vice_president_nid === 0) {
+        throw new Error("رقم هوية نائب رئيس الاتحاد غير صالح");
+      }
+      
+      payload.committees.forEach((c, idx) => {
+        if (c.head.uid === 0 || c.assistant.uid === 0) {
+          throw new Error(`بيانات اللجنة ${COMMITTEES[idx].name} غير مكتملة`);
+        }
+        if (c.head.dept_id === 0 || c.assistant.dept_id === 0) {
+          throw new Error(`يرجى اختيار القسم للجنة ${COMMITTEES[idx].name}`);
+        }
+      });
+
+      console.log("=== Submitting Union Creation ===");
+      console.log("Payload:", JSON.stringify(payload, null, 2));
+      console.log("Number of committees:", payload.committees.length);
 
       const response = await authFetch(`${API_URL}/family/unions/`, {
         method:  "POST",
@@ -275,8 +323,18 @@ function CreateUnionContent() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(parseBackendError(errorData));
+        const contentType = response.headers.get("content-type") || "";
+        if (contentType.includes("application/json")) {
+          const errorData = await response.json();
+          console.error("Backend error response:", errorData);
+          console.error("Payload sent:", payload);
+          throw new Error(parseBackendError(errorData));
+        } else {
+          const text = await response.text();
+          console.error("Non-JSON error response:", text);
+          console.error("Payload sent:", payload);
+          throw new Error(text || `خطأ في الخادم (${response.status})`);
+        }
       }
 
       const data = await response.json();
@@ -305,6 +363,25 @@ function CreateUnionContent() {
       </header>
 
       <form onSubmit={handleSubmit} className={styles.form} noValidate>
+
+        {/* Error Summary Banner */}
+        {submitted && hasErrors(errors) && (
+          <div className={styles.errorBanner}>
+            <span className={styles.errorBannerIcon}>⚠</span>
+            <div>
+              <strong>يوجد أخطاء في النموذج — يرجى المراجعة والتصحيح</strong>
+              <ul className={styles.errorList}>
+                {errors.name && <li>اسم الاتحاد: {errors.name}</li>}
+                {errors.description && <li>الوصف: {errors.description}</li>}
+                {errors.president_nid && <li>رئيس الاتحاد: {errors.president_nid}</li>}
+                {errors.vice_president_nid && <li>نائب الرئيس: {errors.vice_president_nid}</li>}
+                {Object.keys(errors.committees).length > 0 && (
+                  <li>يوجد {Object.keys(errors.committees).length} خطأ في بيانات اللجان</li>
+                )}
+              </ul>
+            </div>
+          </div>
+        )}
 
         {/* ── Basic Info ── */}
         <div className={styles.section}>

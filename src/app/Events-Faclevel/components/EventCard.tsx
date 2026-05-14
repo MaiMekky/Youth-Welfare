@@ -2,7 +2,7 @@
 
 import React from "react";
 import styles from "../styles/EventsPage.module.css";
-import { CalendarDays, MapPin, Users, DollarSign, Eye, Pencil, Trash2, CheckCircle2, AlertTriangle } from "lucide-react";
+import { CalendarDays, MapPin, Users, DollarSign, Eye, Pencil, Trash2, CheckCircle2 } from "lucide-react";
 
 export type ChipVariant = "success" | "primary" | "info" | "purple" | "danger" | "warning" | "orange" | "teal" | "rose" | "accepted" | "tentative" | "pending" | "completed" | "expired" | "rejected" | "cancelled";
 
@@ -102,29 +102,20 @@ export default function EventCard({
   const isPastEnd   = isPastEndDate(item.time);
   const isAccepted  = item.statusLabel === "مقبول";
 
-  // Days elapsed since end_date (0 = ended today, 6 = 6 days ago)
+  // Days elapsed since end_date (0 = ended today, 1 = 1 day ago, etc.)
   const elapsed     = daysSinceEnd(item.time);
-  // Remaining days inside the 7-day completion window
-  const daysLeft    = elapsed >= 0 ? 7 - elapsed : -1;
 
   // Hide edit & cancel when: cancelled, rejected, or end date has passed
   const hideEditDelete = isCancelled || isRejected || isPastEnd;
 
-  // Show "إتمام الفعالية" only when:
+  // Show "إتمام الفعالية" anytime when:
   //   • faculty_id is present (dept events are hidden from fac admin)
   //   • status is مقبول
   //   • end date has passed
-  //   • still within the 7-day window (daysLeft >= 0 means elapsed <= 7)
   const showMarkCompleted =
     item.faculty_id !== null &&
     isAccepted &&
-    isPastEnd &&
-    elapsed >= 0 &&
-    elapsed <= 7;
-
-  // Urgency level for the warning strip
-  const isLastDay   = daysLeft === 0;
-  const isUrgent    = daysLeft <= 2 && daysLeft >= 0;
+    isPastEnd;
 
   return (
     <article className={styles.card}>
@@ -184,42 +175,6 @@ export default function EventCard({
         </div>
       </div>
 
-      {/* ── 7-day completion warning strip ── */}
-      {showMarkCompleted && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            margin: "8px 0 0",
-            padding: "8px 12px",
-            borderRadius: "8px",
-            fontSize: "0.82rem",
-            fontWeight: 600,
-            background: isLastDay
-              ? "#FEF2F2"
-              : isUrgent
-              ? "#FFFBEB"
-              : "#F0FDF4",
-            color: isLastDay
-              ? "#DC2626"
-              : isUrgent
-              ? "#B45309"
-              : "#15803D",
-            border: `1px solid ${
-              isLastDay ? "#FECACA" : isUrgent ? "#FDE68A" : "#BBF7D0"
-            }`,
-          }}
-        >
-          <AlertTriangle size={15} />
-          {isLastDay
-            ? "⛔ آخر يوم لإتمام الفعالية — ستنتهي صلاحيتها اليوم!"
-            : isUrgent
-            ? `⚠ تبقّى ${daysLeft} ${daysLeft === 1 ? "يوم" : "أيام"} فقط لإتمام الفعالية`
-            : `تبقّى ${daysLeft} أيام لإتمام الفعالية قبل انتهاء الصلاحية`}
-        </div>
-      )}
-
       <div className={styles.actions}>
         <button className={styles.secondary} onClick={() => onView(item.id)}>
           <Eye size={18} />
@@ -248,7 +203,7 @@ export default function EventCard({
           >
             <CheckCircle2 size={18} />
             إتمام الفعالية
-            {daysLeft >= 0 && (
+            {elapsed >= 0 && (
               <span
                 style={{
                   marginRight: "6px",
@@ -256,15 +211,11 @@ export default function EventCard({
                   borderRadius: "99px",
                   fontSize: "0.75rem",
                   fontWeight: 700,
-                  background: isLastDay
-                    ? "rgba(220,38,38,0.18)"
-                    : isUrgent
-                    ? "rgba(180,83,9,0.15)"
-                    : "rgba(21,128,61,0.15)",
-                  color: isLastDay ? "#DC2626" : isUrgent ? "#B45309" : "#15803D",
+                  background: "rgba(21,128,61,0.15)",
+                  color: "#15803D",
                 }}
               >
-                {isLastDay ? "اليوم فقط" : `${daysLeft} ${daysLeft === 1 ? "يوم" : "أيام"}`}
+                {elapsed === 0 ? "انتهى اليوم" : `منذ ${elapsed} ${elapsed === 1 ? "يوم" : "أيام"}`}
               </span>
             )}
           </button>

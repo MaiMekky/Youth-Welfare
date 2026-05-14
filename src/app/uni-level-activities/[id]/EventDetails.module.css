@@ -943,3 +943,220 @@
   }
 }
 
+
+
+/* ===================== Add Student Button ===================== */
+.addStudentBtn{
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.addStudentBtn:hover{
+  background: linear-gradient(135deg, #059669, #047857) !important;
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+/* ===================== Modal Styles ===================== */
+.modalOverlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 20, 60, 0.45);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  z-index: 9999;
+}
+
+.modalCard{
+  width: min(900px, 96vw);
+  max-height: 90vh;
+  overflow: auto;
+  background: #fff;
+  border: 1px solid #e9edf5;
+  border-radius: 16px;
+  box-shadow: 0 18px 50px rgba(10, 20, 60, 0.22);
+}
+
+.addStudentModal{
+  width: min(500px, 96vw);
+  max-height: 90vh;
+  overflow: auto;
+  background: #fff;
+  border: 1px solid #e9edf5;
+  border-radius: 16px;
+  box-shadow: 0 18px 50px rgba(10, 20, 60, 0.22);
+}
+
+.modalHead{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #f4f6ff;
+  border-bottom: 1px solid #e9edf5;
+}
+
+.modalTitle{
+  font-size: 18px;
+  font-weight: 900;
+  color: #2C3A5F;
+}
+
+.modalSub{
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.modalClose{
+  border: 1px solid #e9edf5;
+  background: #fff;
+  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 160ms ease;
+}
+
+.modalClose:hover{
+  background: #f8fafc;
+  transform: scale(1.05);
+}
+
+.modalBody{
+  padding: 14px 16px 10px;
+}
+
+.modalGrid2{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 720px){
+  .modalGrid2{ grid-template-columns: 1fr; }
+}
+
+.modalField{ 
+  display: grid; 
+  gap: 6px; 
+}
+
+.modalLabel{
+  font-size: 13px;
+  font-weight: 900;
+  color: #2C3A5F;
+}
+
+.modalInput,
+.modalTextarea{
+  width: 100%;
+  border: 1px solid #e9edf5;
+  border-radius: 12px;
+  padding: 10px 12px;
+  outline: none;
+  font-weight: 700;
+  color: #2C3A5F;
+  background: #fff;
+  font-family: 'Cairo', sans-serif;
+}
+
+.modalTextarea{ 
+  resize: none; 
+  min-height: 84px; 
+}
+
+.modalInput:focus,
+.modalTextarea:focus{
+  border-color: #b7c6ff;
+  box-shadow: 0 0 0 4px rgba(110, 140, 255, 0.18);
+}
+
+.modalHint{
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.modalFooter{
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 12px 16px 16px;
+  border-top: 1px solid #e9edf5;
+  background: #fff;
+}
+
+.modalCancel{
+  border: 1px solid #e9edf5;
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 160ms ease;
+}
+
+.modalCancel:hover{
+  background: #f8fafc;
+  transform: translateY(-2px);
+}
+
+.modalPrimary{
+  border: 0;
+  background: linear-gradient(135deg, #2d5bff, #1e40af);
+  color: #fff;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 900;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 160ms ease;
+}
+
+.modalPrimary:hover{
+  background: linear-gradient(135deg, #1e40af, #1e3a8a);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(45, 91, 255, 0.3);
+}
+
+.modalError{
+  font-size: 12px;
+  font-weight: 800;
+  color: #d11a2a;
+}
+
+.modalHintRow{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.modalErrorInline{
+  font-size: 12px;
+  font-weight: 800;
+  color: #d11a2a;
+}
+
+/* ===================== Responsive ===================== */
+@media (max-width: 640px){
+  .addStudentModal{
+    width: 98vw;
+    border-radius: 14px;
+  }
+  
+  .modalCard{
+    width: 98vw;
+    border-radius: 14px;
+  }
+}

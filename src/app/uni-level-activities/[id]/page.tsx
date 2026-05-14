@@ -577,6 +577,61 @@ export default function EventDetailsPage() {
   const [draftReward, setDraftReward] = useState("");
   const [draftRank, setDraftRank] = useState("");
 
+  /* ===================== Add Student Modal ===================== */
+  const [addStudentOpen, setAddStudentOpen] = useState(false);
+  const [studentNid, setStudentNid] = useState("");
+  const [addingStudent, setAddingStudent] = useState(false);
+
+  const openAddStudentModal = () => {
+    setStudentNid("");
+    setAddStudentOpen(true);
+  };
+
+  const closeAddStudentModal = () => {
+    setAddStudentOpen(false);
+    setStudentNid("");
+  };
+
+  const addStudentByNid = async () => {
+    if (!id || !studentNid.trim()) {
+      showToast("⚠️ من فضلك أدخل الرقم القومي للطالب", "warning");
+      return;
+    }
+
+    setAddingStudent(true);
+    const res = await apiFetch<Record<string, unknown>>(
+      `/api/event/manage-events/${id}/add-member/`,
+      {
+        method: "POST",
+        body: JSON.stringify({ nid: studentNid.trim() }),
+      }
+    );
+    setAddingStudent(false);
+
+    if (!res.ok) {
+      // Check for specific error messages and translate to Arabic
+      let errorMessage = res.message || "فشل إضافة الطالب";
+      
+      // Handle "no nid in database" error
+      if (
+        errorMessage.toLowerCase().includes("not found") ||
+        errorMessage.toLowerCase().includes("does not exist") ||
+        errorMessage.toLowerCase().includes("no student") ||
+        errorMessage.toLowerCase().includes("nid") ||
+        res.status === 404
+      ) {
+        errorMessage = `❌ لا يوجد طالب في الجامعة بالرقم القومي: ${studentNid.trim()}`;
+      }
+      
+      showToast(errorMessage, "error");
+      return;
+    }
+
+    showToast("✅ تم إضافة الطالب بنجاح", "success");
+    closeAddStudentModal();
+    await loadEvent();
+  };
+
   const startEditReward = (row: StudentRow) => {
     setEditingRankId(null);
     setEditingRewardId(row.id);
@@ -1196,6 +1251,67 @@ export default function EventDetailsPage() {
           </div>
         )}
 
+        {/* ===================== Add Student Modal ===================== */}
+        {addStudentOpen && !isFacultyEvent && (
+          <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-label="إضافة طالب">
+            <div className={styles.addStudentModal}>
+              <div className={styles.modalHead}>
+                <div>
+                  <div className={styles.modalTitle}>إضافة طالب للفعالية</div>
+                  <div className={styles.modalSub}>أدخل الرقم القومي للطالب لإضافته</div>
+                </div>
+                <button className={styles.modalClose} type="button" onClick={closeAddStudentModal} disabled={addingStudent}>
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className={styles.modalBody}>
+                <div className={styles.modalField}>
+                  <label className={styles.modalLabel}>الرقم القومي للطالب</label>
+                  <input
+                    className={styles.modalInput}
+                    type="text"
+                    value={studentNid}
+                    onChange={(e) => setStudentNid(e.target.value)}
+                    placeholder="أدخل الرقم القومي (14 رقم)"
+                    maxLength={14}
+                    disabled={addingStudent}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !addingStudent) {
+                        addStudentByNid();
+                      }
+                    }}
+                  />
+                  <div className={styles.modalHint}>
+                    الرقم القومي يجب أن يكون 14 رقم
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.modalFooter}>
+                <button
+                  className={styles.modalCancel}
+                  type="button"
+                  onClick={closeAddStudentModal}
+                  disabled={addingStudent}
+                >
+                  إلغاء
+                </button>
+                <button
+                  className={styles.modalPrimary}
+                  type="button"
+                  onClick={addStudentByNid}
+                  disabled={addingStudent || !studentNid.trim()}
+                  style={{ opacity: addingStudent || !studentNid.trim() ? 0.6 : 1 }}
+                >
+                  <Users size={18} />
+                  {addingStudent ? "جاري الإضافة..." : "إضافة الطالب"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ===================== Participants Table ===================== */}
         <section className={styles.tableBlock}>
           <div className={styles.tableHead}>
@@ -1204,6 +1320,19 @@ export default function EventDetailsPage() {
             </div>
 
             <div className={styles.tableChips}>
+              {/* Add Student Button */}
+              {!isFacultyEvent && (
+                <button
+                  className={`${styles.actionBtn} ${styles.addStudentBtn}`}
+                  type="button"
+                  onClick={openAddStudentModal}
+                  disabled={busy}
+                >
+                  <Users size={16} />
+                  إضافة طالب
+                </button>
+              )}
+
               {/* Hide rank/reward counts and approve-all when teams are enabled */}
               {!teamsEnabled && (
                 <>

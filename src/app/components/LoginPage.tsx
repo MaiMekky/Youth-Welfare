@@ -127,8 +127,22 @@ const handleLogin = async (e: React.FormEvent) => {
     
     if (data.user_type === "admin") {
       if      (roleKey === "super_admin")   destination = "/CreateAdmins"; 
-      else if (roleKey === "uni_manager")   destination = getFirstRoute(depts, UNI_ROUTE_MAP) ?? "/uni-level";
-      else if (roleKey === "fac_manager")   destination = getFirstRoute(depts, FAC_ROUTE_MAP) ?? "/FacLevel";
+      else if (roleKey === "uni_manager") {
+        const route = getFirstRoute(depts, UNI_ROUTE_MAP);
+        if (!route) {
+          showToast("لا توجد أقسام مخصصة لهذا المستخدم، تواصل مع الدعم", "error");
+          return;
+        }
+        destination = route;
+      }
+      else if (roleKey === "fac_manager") {
+        const route = getFirstRoute(depts, FAC_ROUTE_MAP);
+        if (!route) {
+          showToast("لا توجد أقسام مخصصة لهذا المستخدم، تواصل مع الدعم", "error");
+          return;
+        }
+        destination = route;
+      }
       else if (roleKey === "fac_head")      destination = "/FacultyHead";
       else if (roleKey === "General_admin") destination = "/GeneralAdmin";
       else {

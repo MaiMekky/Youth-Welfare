@@ -331,7 +331,7 @@ const validate = useMemo(
             <div className={styles.headText}>
               <h1 className={styles.pageTitle}>{isConvert ? "إنشاء فعالية فعلية" : "إضافة فعالية مقترحة"}</h1>
               <p className={styles.pageSubtitle}>
-                {isConvert ? "يتم تحميل البيانات من الفعالية المقترحة ويمكن تعديلها" : "املئي البيانات الأساسية للفعالية"}
+                {isConvert ? "يتم تحميل البيانات من الفعالية المقترحة ويمكن تعديلها" : "املأ البيانات الأساسية للفعالية"}
               </p>
             </div>
             <button className={styles.backBtn} onClick={() => router.push('/Events-Faclevel/plans/' + planId + '/')} type="button">
@@ -366,7 +366,7 @@ const validate = useMemo(
             <div className={styles.formHead}>
               <div className={styles.formTitle}>{isConvert ? "بيانات الفعالية النهائية" : "بيانات الفعالية المقترحة"}</div>
               <div className={styles.formMeta}>
-                {isConvert ? "برجاء تعديل القيم ثم اضغطي حفظ." : "هذه البيانات للتخطيط ويمكن تعديلها لاحقاً."}
+                {isConvert ? "برجاء تعديل القيم ثم اضغط حفظ." : "هذه البيانات للتخطيط ويمكن تعديلها لاحقاً."}
               </div>
             </div>
 
@@ -490,7 +490,7 @@ const validate = useMemo(
         )} */}
           {isConvert && (
             <div className={styles.field}>
-              <label className={styles.label}>القيود</label>
+              <label className={styles.label}>الشروط</label>
               <input
                 className={styles.input}
                 placeholder="اختياري"

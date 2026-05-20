@@ -141,13 +141,6 @@ type MemberStatus = {
   joined_at: string | null;
 };
 
-/**
- * "not_applied"       → no application at all (API returned message only)
- * "pending"           → منتظر
- * "accepted"          → مقبول
- * "rejected"          → مرفوض
- * "preliminary"       → موافقة مبدئية
- */
 type AppState =
   | "not_applied"
   | "pending"
@@ -160,14 +153,13 @@ function parseAppState(statusRaw: string): AppState {
   if (s === "مقبول"          || s === "accepted")             return "accepted";
   if (s === "مرفوض"          || s === "rejected")             return "rejected";
   if (s === "موافقة مبدئية" || s === "preliminary_approved") return "preliminary";
-  return "pending"; // منتظر / pending / anything else
+  return "pending";
 }
 
 /* ══════════════════════════════════════════
    SUB-COMPONENTS
 ══════════════════════════════════════════ */
 
-/** Generic info card with icon header */
 function SectionCard({
   icon, title, children, fullWidth = false, accentTop = false,
 }: {
@@ -192,7 +184,6 @@ function SectionCard({
   );
 }
 
-/** Bullet list with configurable dot colour */
 function BulletList({ items, dotClass }: { items: string[]; dotClass: string }) {
   return (
     <div className="bullet-list">
@@ -218,7 +209,6 @@ export default function ScoutsPage() {
   const [joinLoading, setJoinLoading] = useState(false);
   const [joinMsg, setJoinMsg]         = useState("");
 
-  /* ── Fetch both endpoints in parallel ── */
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -227,7 +217,6 @@ export default function ScoutsPage() {
         authFetch(`${API_URL}/api/student/my_status/`),
       ]);
 
-      /* Clan */
       if (!clanRes.ok) {
         setClanAvail("none");
       } else {
@@ -240,15 +229,12 @@ export default function ScoutsPage() {
         }
       }
 
-      /* Member status */
       if (statusRes.ok) {
         const j = await statusRes.json();
         if (j.data) {
-          /* API returned actual member record */
           setMemberData(j.data);
           setAppState(parseAppState(j.data.status));
         } else {
-          /* No data field → student has not applied yet */
           setMemberData(null);
           setAppState("not_applied");
         }
@@ -263,14 +249,12 @@ export default function ScoutsPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  /* ── Submit join request ── */
   const handleJoin = async () => {
     setJoinLoading(true);
     setJoinMsg("");
     try {
       const res = await authFetch(`${API_URL}/api/student/join/`, { method: "POST" });
       if (res.ok) {
-        /* Re-fetch status to update UI */
         await load();
       } else {
         const data = await res.json().catch(() => ({}));
@@ -283,7 +267,6 @@ export default function ScoutsPage() {
     }
   };
 
-  /* ── CTA configuration ── */
   type CtaConfig = {
     badgeClass: string | null;
     badgeLabel: string | null;
@@ -295,7 +278,6 @@ export default function ScoutsPage() {
   };
 
   const buildCta = (): CtaConfig => {
-    /* 1 ── No clan exists for this faculty */
     if (clanAvail === "none") return {
       badgeClass: null, badgeLabel: null,
       heading: "لا تتوفر عشيرة لكليتك",
@@ -303,7 +285,6 @@ export default function ScoutsPage() {
       showJoinBtn: false, dashboardBtn: false, trackBtn: false,
     };
 
-    /* 2 ── Clan exists but is inactive */
     if (clanAvail === "inactive") return {
       badgeClass: "status-badge--inactive", badgeLabel: "غير نشطة",
       heading: "العشيرة غير نشطة حالياً",
@@ -311,7 +292,6 @@ export default function ScoutsPage() {
       showJoinBtn: false, dashboardBtn: false, trackBtn: false,
     };
 
-    /* 3 ── Clan is active → branch on appState */
     switch (appState) {
       case "not_applied": return {
         badgeClass: null, badgeLabel: null,
@@ -352,7 +332,6 @@ export default function ScoutsPage() {
     }
   };
 
-  /* ── Loading skeleton ── */
   if (loading) {
     return (
       <div className="loading-wrap">
@@ -378,26 +357,50 @@ export default function ScoutsPage() {
       {/* ── CONTENT ── */}
       <main className="scouts-grid">
 
-        {/* Card 1 — What is Scouts */}
-        <SectionCard icon={<IconCompass size={18} />} title="ما هي الجوالة؟" accentTop>
+        {/* Card 1 — Scout Movement Definition */}
+        <SectionCard icon={<IconFileText size={18} />} title="تعريف الحركة الكشفية" accentTop>
           <p className="card-prose">
-            الجوالة ليست مجرد نشاط طلابي، بل تجربة متكاملة تهدف إلى بناء الشخصية
-            وتنمية المهارات الحياتية. تقدم إدارة الجوالة والخدمة العامة بيئة تفاعلية
-            تجمع بين:
+            الحركة الكشفية هي حركة تربوية تطوعية غير سياسية مفتوحة للجميع، بغض النظر عن الأصل
+            أو الجنس أو العقيدة. تعتمد الحركة على الطريقة الكشفية بهدف التنمية الشاملة للفتيان
+            والشباب، ومساعدتهم على بناء شخصيتهم وقدراتهم البدنية والعقلية والروحية والاجتماعية،
+            ليصبحوا مواطنين صالحين وفاعلين في مجتمعاتهم المحلية والعالمية.
           </p>
-          <BulletList dotClass="bullet-list__dot--gold" items={[
-            "العمل الجماعي وروح الفريق",
-            "القيادة وتحمل المسؤولية",
-            "خدمة المجتمع والمشاركة الفعالة",
-            "اكتشاف المواهب وتنميتها",
-          ]} />
-          <p className="card-prose card-prose--sm">من خلال المشاركة في الجوالة، يخوض الطالب تجارب متنوعة مثل:</p>
-          <BulletList dotClass="bullet-list__dot--navy" items={[
-            "المعسكرات والأنشطة الخارجية",
-            "ورش العمل والتدريبات القيادية",
-            "الفعاليات المجتمعية والخدمية",
-            "تنظيم الأحداث والعمل ضمن فرق",
-          ]} />
+
+          <p className="card-prose card-prose--sm">مفاهيم أساسية:</p>
+
+          <div className="concept-list">
+            <div className="concept-item">
+              <span className="concept-item__label">تربوية</span>
+              <span className="concept-item__desc">
+                لأنها تسعى إلى التنمية المتكاملة للشباب وفق منهج تربوي قائم على التعلم بالممارسة والابتكار.
+              </span>
+            </div>
+            <div className="concept-item">
+              <span className="concept-item__label">تطوعية</span>
+              <span className="concept-item__desc">
+                لأن الانضمام إليها والمشاركة في أنشطتها يكون بالإرادة الحرة والحب والانتماء.
+              </span>
+            </div>
+            <div className="concept-item">
+              <span className="concept-item__label">غير سياسية</span>
+              <span className="concept-item__desc">
+                لا تسيطر عليها جهة سياسية أو تكون تابعة لميول أو أفكار حزبية، وهي متاحة للجميع.
+              </span>
+            </div>
+            <div className="concept-item concept-item--block">
+              <span className="concept-item__label">الطريقة الكشفية</span>
+              <span className="concept-item__desc">
+                نظام تعليمي متكامل يقوم على مجموعة من العناصر المترابطة، أهمها:
+              </span>
+              <BulletList dotClass="bullet-list__dot--navy" items={[
+                "الوعد والقانون الكشفي: التزام أخلاقي ذاتي.",
+                "التعلم بالممارسة.",
+                "نظام المجموعات الصغيرة (الطلائع).",
+                "البرامج التقدمية والجذابة والمثيرة.",
+                "الحياة في الخلاء.",
+              ]} />
+            </div>
+          </div>
         </SectionCard>
 
         {/* Card 2 — Why join + How to start */}
@@ -478,7 +481,6 @@ export default function ScoutsPage() {
           <div className="cta-card__content">
             {cta.badgeClass && cta.badgeLabel && (
               <span className={`status-badge ${cta.badgeClass}`}>
-                {/* Badge icon by state */}
                 {appState === "pending"     && <IconClock size={14} />}
                 {appState === "accepted"    && <IconAward size={14} />}
                 {appState === "rejected"    && <IconAlertTriangle size={14} />}
@@ -493,7 +495,6 @@ export default function ScoutsPage() {
           </div>
 
           <div className="cta-card__actions">
-            {/* Join / Re-apply button */}
             {cta.showJoinBtn && (
               <button
                 className="btn btn--primary"
@@ -509,14 +510,12 @@ export default function ScoutsPage() {
               </button>
             )}
 
-            {/* Dashboard button for accepted members */}
             {cta.dashboardBtn && (
               <Link href="/Student/Scouts/dashboard" className="btn btn--primary">
                 <IconLayoutDashboard size={18} />
                 لوحة التحكم
               </Link>
             )}
-
           </div>
         </div>
 

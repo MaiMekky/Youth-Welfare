@@ -140,7 +140,7 @@ const StudentNavbar: React.FC = () => {
     document.cookie = `user_type=; ${wipe}`;
     document.cookie = `roleKey=; ${wipe}`;
     document.cookie = `session_meta=; ${wipe}`;
-
+    document.cookie = `lastRoute=; ${wipe}`;
     // Set a short-lived cookie so middleware knows this is a logout
     document.cookie = `logging_out=1; path=/; max-age=5`;
 

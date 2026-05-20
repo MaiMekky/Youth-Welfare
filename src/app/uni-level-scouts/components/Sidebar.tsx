@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import "@/app/Styles/Sidebar.css";
-import { X, User, Shield, Home, CalendarDays, Users, Bell } from "lucide-react";
+import { X, User, Shield, Home, CalendarDays, Users, Bell, Trophy } from "lucide-react";
 import Image from "next/image";
 import logo from "../../assets/logo.png";
 import { getSessionMeta } from "@/utils/cookieHelpers";
@@ -103,25 +103,52 @@ export default function Sidebar({ isOpen = false, setIsOpen = () => {} }: Sideba
             <span>العشائر</span>
           </button>
           <button
-            className={pathname.startsWith("/uni-level-scouts/uni-level-activities") && !pathname.includes("/plans") && !pathname.includes("/uni-level-faculty-events") ? "active" : ""}
+            className={
+              pathname.startsWith("/uni-level-scouts/uni-level-activities") &&
+              !pathname.includes("/plans") &&
+              !pathname.includes("/uni-level-faculty-events")
+                ? "active"
+                : ""
+            }
             onClick={() => go("/uni-level-scouts/uni-level-activities")}
           >
             <CalendarDays size={18} />
             <span>الفعاليات</span>
           </button>
           <button
-            className={pathname.includes("/uni-level-scouts/uni-level-activities/plans") ? "active" : ""}
+            className={
+              pathname.includes("/uni-level-scouts/uni-level-activities/plans") ? "active" : ""
+            }
             onClick={() => go("/uni-level-scouts/uni-level-activities/plans")}
           >
             <Users size={18} />
             <span>الخطط</span>
           </button>
           <button
-            className={pathname.includes("/uni-level-scouts/uni-level-activities/uni-level-faculty-events") ? "active" : ""}
-            onClick={() => go("/uni-level-scouts/uni-level-activities/uni-level-faculty-events")}
+            className={
+              pathname.includes(
+                "/uni-level-scouts/uni-level-activities/uni-level-faculty-events"
+              )
+                ? "active"
+                : ""
+            }
+            onClick={() =>
+              go("/uni-level-scouts/uni-level-activities/uni-level-faculty-events")
+            }
           >
             <Bell size={18} />
             <span>فعاليات الكليات</span>
+          </button>
+
+          {/* ── NEW: المنتخبات ── */}
+          <button
+            className={
+              pathname.startsWith("/uni-level-scouts/university-team") ? "active" : ""
+            }
+            onClick={() => go("/uni-level-scouts/university-team")}
+          >
+            <Trophy size={18} />
+            <span>المنتخبات</span>
           </button>
         </nav>
 

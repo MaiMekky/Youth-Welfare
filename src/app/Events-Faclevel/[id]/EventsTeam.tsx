@@ -298,53 +298,68 @@ export default function EventTeams({
 
   /* ─────────── save settings ─────────── */
   const saveSettings = async () => {
-    const minM = Number(settingForm.min_members);
-    const maxM = Number(settingForm.max_members);
-    if (!settingForm.min_members || minM < 1) {
-      showToast("⚠️ الحد الأدنى للأعضاء يجب أن يكون 1 على الأقل", "warning"); return;
-    }
-    if (!settingForm.max_members || maxM < 1) {
-      showToast("⚠️ الحد الأقصى للأعضاء مطلوب", "warning"); return;
-    }
-    if (minM > maxM) {
-      showToast("⚠️ الحد الأدنى لا يمكن أن يتجاوز الحد الأقصى", "warning"); return;
-    }
+  const minM = Number(settingForm.min_members);
+  const maxM = Number(settingForm.max_members);
+  if (!settingForm.min_members || minM < 1) {
+    showToast("⚠️ الحد الأدنى للأعضاء يجب أن يكون 1 على الأقل", "warning"); return;
+  }
+  if (!settingForm.max_members || maxM < 1) {
+    showToast("⚠️ الحد الأقصى للأعضاء مطلوب", "warning"); return;
+  }
+  if (minM > maxM) {
+    showToast("⚠️ الحد الأدنى لا يمكن أن يتجاوز الحد الأقصى", "warning"); return;
+  }
+  if (settingForm.max_teams !== "" && Number(settingForm.max_teams) < 1) {
+  showToast("⚠️ الحد الأقصى للفرق يجب أن يكون 1 على الأقل", "warning"); return;
+  }
+  if (settingForm.max_teams !== "" && Number(settingForm.max_teams) < teams.length) {
+    showToast(`⚠️ الحد الأقصى للفرق لا يمكن أن يكون أقل من عدد الفرق الحالية (${teams.length})`, "warning"); return;
+  }
 
-    // Detect no changes on edit
-    const currentJson = JSON.stringify(settingForm);
-    if (settings?.setting_id && settingsSnapshot.current && currentJson === settingsSnapshot.current) {
-      showToast("⚠️ لم تقم بأي تعديل على الإعدادات", "warning"); return;
-    }
+  const currentJson = JSON.stringify(settingForm);
+  if (settings?.setting_id && settingsSnapshot.current && currentJson === settingsSnapshot.current) {
+    showToast("⚠️ لم تقم بأي تعديل على الإعدادات", "warning"); return;
+  }
+  
 
-    const isEdit = !!settings?.setting_id;
-    const body: Partial<TeamSettings> = {
-      enabled: settingForm.enabled,
-      min_members: minM,
-      max_members: maxM,
-      max_teams: settingForm.max_teams === "" ? 2147483647 : Number(settingForm.max_teams),
-      allow_individual_join: settingForm.allow_individual_join,
-      require_team_approval: settingForm.require_team_approval,
-    };
-
-    setSavingSettings(true);
-    const res = await apiFetch<TeamSettings>(
-      `/api/event/manage-teams/events/${eventId}/settings/`,
-      { method: isEdit ? "PATCH" : "POST", body: JSON.stringify(body) }
-    );
-    setSavingSettings(false);
-
-    if (!res.ok) { showToast(res.message, "error"); return; }
-
-    // Update local settings state with fresh data from server
-    setSettings(res.data);
-    // Notify parent that teams are now configured
-    onTeamsConfigured?.(res.data.enabled)
-
-    settingsSnapshot.current = JSON.stringify(settingForm);
-    setSettingsOpen(false);
-    showToast(isEdit ? "✅ تم تحديث إعدادات الفرق" : "✅ تم حفظ إعدادات الفرق", "success");
+  const isEdit = !!settings?.setting_id;
+  const body: Partial<TeamSettings> = {
+    enabled: settingForm.enabled,
+    min_members: minM,
+    max_members: maxM,
+    max_teams: settingForm.max_teams === "" ? 2147483647 : Number(settingForm.max_teams),
+    allow_individual_join: settingForm.allow_individual_join,
+    require_team_approval: settingForm.require_team_approval,
   };
 
+  setSavingSettings(true);
+  const res = await apiFetch<TeamSettings>(
+    `/api/event/manage-teams/events/${eventId}/settings/`,
+    { method: isEdit ? "PATCH" : "POST", body: JSON.stringify(body) }
+  );
+  setSavingSettings(false);
+
+  if (!res.ok) { showToast(res.message, "error"); return; }
+
+  // ✅ KEY FIX: Guarantee setting_id is present so settingsConfigured flips true immediately.
+  // Some APIs omit setting_id on the POST response body — fall back to -1 as a sentinel
+  // so the UI unlocks at once. loadSettings() below replaces it with the real server value.
+  const freshSettings: TeamSettings = {
+    ...res.data,
+    setting_id: res.data.setting_id ?? -1,
+  };
+
+  // Batch all state updates → single re-render with button + stats visible immediately
+  setSettings(freshSettings);
+  setSettingsOpen(false);
+  onTeamsConfigured?.(freshSettings.enabled);
+
+  settingsSnapshot.current = JSON.stringify(settingForm);
+  showToast(isEdit ? "✅ تم تحديث إعدادات الفرق" : "✅ تم حفظ إعدادات الفرق", "success");
+
+  // Re-fetch in background to get canonical server state (real setting_id, timestamps…)
+  loadSettings();
+};
   /* ─────────── create team ─────────── */
   const createTeam = async () => {
     if (!createForm.name.trim()) { showToast("⚠️ اسم الفريق مطلوب", "warning"); return; }
@@ -460,7 +475,7 @@ export default function EventTeams({
   const pendingCount = teams.filter(t => t.status === "منتظر").length;
   const acceptedCount = teams.filter(t => t.status === "مقبول").length;
   const totalMembers = teams.reduce((s, t) => s + t.members_count, 0);
-  const settingsConfigured = !!settings?.setting_id;
+  const settingsConfigured = !!settings?.setting_id && !!settings?.enabled;
 
   /* ════════════════════════════════════════════════════════════════
      RENDER
@@ -545,11 +560,11 @@ export default function EventTeams({
               <label className={styles.settingsLabel}>
                 <Hash size={12} /> الحد الأدنى للأعضاء
               </label>
-              <input
+             <input
                 className={styles.settingsInput}
                 type="number"
                 min={1}
-                value={settingForm.min_members}
+                value={settingForm.min_members === "" ? "" : String(settingForm.min_members)}
                 placeholder="مثال: 2"
                 onChange={e =>
                   setSettingForm(p => ({
@@ -564,11 +579,11 @@ export default function EventTeams({
               <label className={styles.settingsLabel}>
                 <Hash size={12} /> الحد الأقصى للأعضاء
               </label>
-              <input
+             <input
                 className={styles.settingsInput}
                 type="number"
                 min={1}
-                value={settingForm.max_members}
+                value={settingForm.max_members === "" ? "" : String(settingForm.max_members)}
                 placeholder="مثال: 10"
                 onChange={e =>
                   setSettingForm(p => ({
@@ -587,8 +602,8 @@ export default function EventTeams({
                 className={styles.settingsInput}
                 type="number"
                 min={1}
-                value={settingForm.max_teams}
-                placeholder="اتركه فارغاً = بلا حد"
+                value={settingForm.max_teams === "" ? "" : String(settingForm.max_teams)}
+                placeholder="مثال: 5"
                 onChange={e =>
                   setSettingForm(p => ({
                     ...p,
@@ -653,7 +668,7 @@ export default function EventTeams({
       )}
 
       {/* ══ SETTINGS INFO PILLS — show real saved values from DB ══ */}
-      {settingsConfigured && settings && (
+      {settingsConfigured && ( 
         <div className={styles.teamsStats}>
           <div className={`${styles.statPill} ${styles.statPillAccent}`}>
             <div className={styles.statPillLabel}>أعضاء الفريق</div>

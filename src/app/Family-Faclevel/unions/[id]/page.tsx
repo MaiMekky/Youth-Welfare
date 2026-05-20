@@ -76,7 +76,6 @@ export default function UnionDetailPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Edit form state
   const [editData, setEditData] = useState({
     name: "",
     description: "",
@@ -84,13 +83,14 @@ export default function UnionDetailPage() {
     vice_president_nid: "",
   });
 
-  const [editCommittees, setEditCommittees] = useState<Array<{
-    committee_key: string;
-    head: { uid: number; dept_id: number };
-    assistant: { uid: number; dept_id: number };
-  }>>([]);
+  const [editCommittees, setEditCommittees] = useState<
+    Array<{
+      committee_key: string;
+      head: { uid: number; dept_id: number };
+      assistant: { uid: number; dept_id: number };
+    }>
+  >([]);
 
-  // Fetch union details
   const fetchUnion = useCallback(async () => {
     try {
       setLoading(true);
@@ -99,7 +99,6 @@ export default function UnionDetailPage() {
       const data = await response.json();
       setUnion(data);
 
-      // Initialize edit data
       setEditData({
         name: data.name,
         description: data.description,
@@ -114,7 +113,6 @@ export default function UnionDetailPage() {
     }
   }, [unionId, showToast]);
 
-  // Fetch departments
   const fetchDepartments = useCallback(async () => {
     try {
       const response = await authFetch(`${API_URL}/family/departments/`);
@@ -136,16 +134,15 @@ export default function UnionDetailPage() {
 
   const handleEdit = () => {
     setIsEditing(true);
-    // Initialize committees for editing
     if (union) {
       const initialCommittees = COMMITTEES.map((c, index) => ({
         committee_key: c.key,
         head: {
-          uid: 0, // Will need to be filled by user
+          uid: 0,
           dept_id: union.committee_heads[index]?.dept_id || 0,
         },
         assistant: {
-          uid: 0, // Will need to be filled by user
+          uid: 0,
           dept_id: union.committee_assistants[index]?.dept_id || 0,
         },
       }));
@@ -174,17 +171,18 @@ export default function UnionDetailPage() {
         description: editData.description,
       };
 
-      // Only include president/vice president if changed
       if (editData.president_nid && editData.president_nid !== union?.president?.nid?.toString()) {
         payload.president_nid = parseInt(editData.president_nid);
       }
-      if (editData.vice_president_nid && editData.vice_president_nid !== union?.vice_president?.nid?.toString()) {
+      if (
+        editData.vice_president_nid &&
+        editData.vice_president_nid !== union?.vice_president?.nid?.toString()
+      ) {
         payload.vice_president_nid = parseInt(editData.vice_president_nid);
       }
 
-      // Include committees if any are filled
       const filledCommittees = editCommittees.filter(
-        c => c.head.uid && c.head.dept_id && c.assistant.uid && c.assistant.dept_id
+        (c) => c.head.uid && c.head.dept_id && c.assistant.uid && c.assistant.dept_id
       );
       if (filledCommittees.length > 0) {
         payload.committees = filledCommittees;
@@ -198,9 +196,10 @@ export default function UnionDetailPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        const errorMsg = typeof errorData === "string" 
-          ? errorData 
-          : errorData.detail || errorData.message || "فشل تحديث الاتحاد";
+        const errorMsg =
+          typeof errorData === "string"
+            ? errorData
+            : errorData.detail || errorData.message || "فشل تحديث الاتحاد";
         throw new Error(errorMsg);
       }
 
@@ -222,7 +221,7 @@ export default function UnionDetailPage() {
     field: "uid" | "dept_id",
     value: string
   ) => {
-    setEditCommittees(prev => {
+    setEditCommittees((prev) => {
       const updated = [...prev];
       updated[index][role][field] = parseInt(value) || 0;
       return updated;
@@ -266,7 +265,6 @@ export default function UnionDetailPage() {
             <h1 className={styles.title}>{union.name}</h1>
             <p className={styles.subtitle}>{union.faculty_name || "اتحاد عام"}</p>
           </div>
-        
         </div>
         {!isEditing && (
           <button className={styles.editBtn} onClick={handleEdit}>
@@ -278,7 +276,6 @@ export default function UnionDetailPage() {
 
       {isEditing ? (
         <div className={styles.editForm}>
-          {/* Basic Info */}
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>المعلومات الأساسية</h2>
             <div className={styles.formGrid}>
@@ -288,7 +285,7 @@ export default function UnionDetailPage() {
                   type="text"
                   className={styles.input}
                   value={editData.name}
-                  onChange={(e) => setEditData(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={(e) => setEditData((prev) => ({ ...prev, name: e.target.value }))}
                 />
               </div>
               <div className={styles.formGroup} style={{ gridColumn: "1 / -1" }}>
@@ -296,14 +293,13 @@ export default function UnionDetailPage() {
                 <textarea
                   className={styles.textarea}
                   value={editData.description}
-                  onChange={(e) => setEditData(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={(e) => setEditData((prev) => ({ ...prev, description: e.target.value }))}
                   rows={4}
                 />
               </div>
             </div>
           </div>
 
-          {/* Leadership */}
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>القيادة</h2>
             <div className={styles.formGrid}>
@@ -313,7 +309,7 @@ export default function UnionDetailPage() {
                   type="number"
                   className={styles.input}
                   value={editData.president_nid}
-                  onChange={(e) => setEditData(prev => ({ ...prev, president_nid: e.target.value }))}
+                  onChange={(e) => setEditData((prev) => ({ ...prev, president_nid: e.target.value }))}
                   placeholder="اترك فارغاً للإبقاء على الحالي"
                 />
               </div>
@@ -323,14 +319,15 @@ export default function UnionDetailPage() {
                   type="number"
                   className={styles.input}
                   value={editData.vice_president_nid}
-                  onChange={(e) => setEditData(prev => ({ ...prev, vice_president_nid: e.target.value }))}
+                  onChange={(e) =>
+                    setEditData((prev) => ({ ...prev, vice_president_nid: e.target.value }))
+                  }
                   placeholder="اترك فارغاً للإبقاء على الحالي"
                 />
               </div>
             </div>
           </div>
 
-          {/* Committees */}
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>تحديث اللجان (اختياري)</h2>
             <p className={styles.sectionNote}>املأ البيانات فقط للجان التي تريد تحديثها</p>
@@ -338,7 +335,7 @@ export default function UnionDetailPage() {
               {COMMITTEES.map((committee, index) => (
                 <div key={committee.key} className={styles.committeeCard}>
                   <h3 className={styles.committeeTitle}>{committee.name}</h3>
-                  
+
                   <div className={styles.committeeSection}>
                     <h4 className={styles.committeeSubtitle}>رئيس اللجنة</h4>
                     <div className={styles.formRow}>
@@ -357,10 +354,12 @@ export default function UnionDetailPage() {
                         <select
                           className={styles.select}
                           value={editCommittees[index]?.head.dept_id || ""}
-                          onChange={(e) => handleCommitteeChange(index, "head", "dept_id", e.target.value)}
+                          onChange={(e) =>
+                            handleCommitteeChange(index, "head", "dept_id", e.target.value)
+                          }
                         >
                           <option value="">اختر القسم</option>
-                          {departments.map(dept => (
+                          {departments.map((dept) => (
                             <option key={dept.dept_id} value={dept.dept_id}>
                               {dept.name}
                             </option>
@@ -379,7 +378,9 @@ export default function UnionDetailPage() {
                           type="number"
                           className={styles.input}
                           value={editCommittees[index]?.assistant.uid || ""}
-                          onChange={(e) => handleCommitteeChange(index, "assistant", "uid", e.target.value)}
+                          onChange={(e) =>
+                            handleCommitteeChange(index, "assistant", "uid", e.target.value)
+                          }
                           placeholder="UID"
                         />
                       </div>
@@ -388,10 +389,12 @@ export default function UnionDetailPage() {
                         <select
                           className={styles.select}
                           value={editCommittees[index]?.assistant.dept_id || ""}
-                          onChange={(e) => handleCommitteeChange(index, "assistant", "dept_id", e.target.value)}
+                          onChange={(e) =>
+                            handleCommitteeChange(index, "assistant", "dept_id", e.target.value)
+                          }
                         >
                           <option value="">اختر القسم</option>
-                          {departments.map(dept => (
+                          {departments.map((dept) => (
                             <option key={dept.dept_id} value={dept.dept_id}>
                               {dept.name}
                             </option>
@@ -405,7 +408,6 @@ export default function UnionDetailPage() {
             </div>
           </div>
 
-          {/* Actions */}
           <div className={styles.actions}>
             <button className={styles.cancelBtn} onClick={handleCancelEdit} disabled={saving}>
               <X size={18} />
@@ -428,7 +430,6 @@ export default function UnionDetailPage() {
         </div>
       ) : (
         <>
-          {/* View Mode */}
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>المعلومات الأساسية</h2>
             <div className={styles.infoGrid}>
@@ -451,7 +452,6 @@ export default function UnionDetailPage() {
             </div>
           </div>
 
-          {/* Leadership */}
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>القيادة</h2>
             <div className={styles.leadershipGrid}>
@@ -478,14 +478,13 @@ export default function UnionDetailPage() {
             </div>
           </div>
 
-          {/* Committees */}
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>اللجان</h2>
             <div className={styles.committeesViewGrid}>
               {COMMITTEES.map((committee, index) => {
                 const head = union.committee_heads[index];
                 const assistant = union.committee_assistants[index];
-                
+
                 return (
                   <div key={committee.key} className={styles.committeeViewCard}>
                     <h3 className={styles.committeeViewTitle}>{committee.name}</h3>

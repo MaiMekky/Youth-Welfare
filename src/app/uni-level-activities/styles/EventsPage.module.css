@@ -160,6 +160,87 @@
 /* ── Events section ── */
 .eventsSection { margin-top: 0; }
 
+/* ===== Filters ===== */
+.filtersBar{
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  background: #fff;
+  padding: 16px 18px;
+  border-radius: 12px;
+  border: 1px solid #E2ECF5;
+}
+
+.searchBox{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid #E2ECF5;
+  border-radius: 10px;
+  background: #F7FAFD;
+  flex: 1;
+  min-width: 200px;
+  transition: border .2s;
+}
+.searchBox:focus-within { border-color: #2D5F8A; background: #fff; }
+.searchBox input{
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1E3A5F;
+  font-family: 'Cairo', sans-serif;
+}
+.searchBox input::placeholder { color: #9CA3AF; }
+
+/* ===== Date Filter Group (label + input) ===== */
+.dateGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+ 
+.dateLabel {
+  font-size: 11px;
+  font-weight: 800;
+  color: #6B8299;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* ===== Date Filter Box ===== */
+.dateBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid #E2ECF5;
+  border-radius: 10px;
+  background: #F7FAFD;
+  transition: border .2s;
+  min-width: 160px;
+}
+.dateBox:focus-within { border-color: #2D5F8A; background: #fff; }
+.dateBox input[type="date"] {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1E3A5F;
+  font-family: 'Cairo', sans-serif;
+  cursor: pointer;
+}
+.dateBox input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.5;
+  cursor: pointer;
+}
+
 /* ── Card (event card) ── */
 .card {
   background: #fff;
@@ -201,6 +282,20 @@
 
 /* مقبول / نشط */
 .success { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+/* مقبول (accepted) - emerald green */
+.accepted { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+/* موافقة مبدئية (tentative) - cyan/teal */
+.tentative { background: #ECFEFF; color: #155E75; border: 1px solid #A5F3FC; }
+/* منتظر (pending) - amber */
+.pending { background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; }
+/* مكتمل (completed) - blue */
+.completed { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+/* منتهي الصلاحية (expired) - slate/grey */
+.expired { background: #F8FAFC; color: #475569; border: 1px solid #CBD5E1; }
+/* مرفوض (rejected) - rose/red */
+.rejected { background: #FFF1F2; color: #BE123C; border: 1px solid #FECDD3; }
+/* ملغي (cancelled) - deep red/crimson */
+.cancelled { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
 /* داخلي / primary */
 .primary { background: #EBF3FB; color: #1E3A5F; border: 1px solid #BFDBFE; }
 /* خارجي / info */
@@ -211,6 +306,12 @@
 .danger  { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
 /* منتظر / warning */
 .warning { background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; }
+/* orange */
+.orange { background: #FFF7ED; color: #C2410C; border: 1px solid #FED7AA; }
+/* teal */
+.teal { background: #F0FDFA; color: #115E59; border: 1px solid #99F6E4; }
+/* rose */
+.rose { background: #FFF1F2; color: #BE123C; border: 1px solid #FECDD3; }
 .facultyTag { display:inline-flex; align-items:center; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:800; background:#EBF3FB; color:#2D5F8A; }
 .meta { display:flex; flex-direction:column; gap:10px; color:#334155; }
 .metaRow { display:flex; align-items:center; gap:10px; }
@@ -220,11 +321,26 @@
 .actions .secondary:hover { background:#1E3A5F; color:#fff; border-color:#1E3A5F; transform:translateY(-2px); }
 .actions .danger { border-color:rgba(239,68,68,.35); color:#ef4444; }
 .actions .danger:hover { background:#ef4444; color:#fff; transform:translateY(-2px); }
+.actions .completeBtn {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: #fff;
+  border: none;
+  box-shadow: 0 2px 8px rgba(16,185,129,.3);
+}
+.actions .completeBtn:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16,185,129,.4);
+}
 
 /* ── Responsive ── */
 @media (max-width: 640px){
   .header { flex-direction:column; align-items:stretch; }
   .createBtnTop { width:100%; justify-content:center; }
+  .filtersBar { flex-direction: column; align-items: stretch; }
+  .searchBox { width: 100%; min-width: unset; }
+  .dateGroup { width: 100%; }
+  .dateBox { width: 100%; min-width: unset; }
 }
 @media (max-width: 500px) {
   .topRow       { flex-direction: column; }

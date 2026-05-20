@@ -5,7 +5,7 @@
 a { color: inherit; text-decoration: none; }
 
 /* ══════════════════════════════════════════
-   CSS VARIABLES  (aligned with Events palette)
+   CSS VARIABLES
 ══════════════════════════════════════════ */
 :root {
   --navy:         #1E3A5F;
@@ -64,7 +64,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ══════════════════════════════════════════
-   HERO — rounded floating card, matches Events
+   HERO
 ══════════════════════════════════════════ */
 .scouts-hero {
   background: linear-gradient(140deg, var(--navy-deep) 0%, var(--navy) 50%, var(--navy-mid) 100%);
@@ -79,7 +79,6 @@ a { color: inherit; text-decoration: none; }
   text-align: center;
 }
 
-/* gold top-bar shimmer */
 .scouts-hero::before {
   content: '';
   position: absolute;
@@ -95,7 +94,6 @@ a { color: inherit; text-decoration: none; }
   );
 }
 
-/* ambient glow blobs */
 .scouts-hero::after {
   content: '';
   position: absolute;
@@ -118,7 +116,6 @@ a { color: inherit; text-decoration: none; }
   z-index: 1;
 }
 
-/* gold underline replaces the old divider div */
 .scouts-hero__title::after {
   content: '';
   display: block;
@@ -191,15 +188,20 @@ a { color: inherit; text-decoration: none; }
   background: var(--navy-light);
 }
 
+/* ── Icon: light bg + navy icon + gold right-side accent bar ── */
 .section-card__icon {
-  width: 42px; height: 42px;
+  width: 42px;
+  height: 42px;
   border-radius: var(--radius-sm);
-  background: var(--navy);
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-right: 3px solid var(--gold);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: var(--gold);
+  color: var(--navy);
+  box-shadow: var(--shadow-xs);
 }
 
 .section-card__title {
@@ -247,6 +249,59 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ══════════════════════════════════════════
+   CONCEPT LIST  (new — Card 1)
+══════════════════════════════════════════ */
+.concept-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.concept-item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+  border-right: 3px solid var(--navy-mid);
+  flex-wrap: wrap;
+}
+
+/* variant that stacks label + desc + sub-list vertically */
+.concept-item--block {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.concept-item__label {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--navy);
+  background: var(--navy-light);
+  border-radius: 6px;
+  padding: 2px 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-family: var(--font);
+}
+
+.concept-item__desc {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mute);
+  line-height: 1.7;
+  font-family: var(--font);
+}
+
+.concept-item--block .bullet-list {
+  margin-top: 6px;
+  padding-right: 4px;
+}
+
+/* ══════════════════════════════════════════
    CARD PROSE
 ══════════════════════════════════════════ */
 .card-prose {
@@ -274,13 +329,16 @@ a { color: inherit; text-decoration: none; }
 
 .how-start-block__icon {
   width: 32px; height: 32px;
-  background: var(--navy);
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-right: 3px solid var(--gold);
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--gold);
+  color: var(--navy);
   flex-shrink: 0;
+  box-shadow: var(--shadow-xs);
 }
 
 .how-start-block__label {
@@ -328,13 +386,15 @@ a { color: inherit; text-decoration: none; }
 
 .benefit-card__icon {
   width: 46px; height: 46px;
-  background: var(--gold-pale);
-  border: 1px solid rgba(196,155,58,.25);
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-right: 3px solid var(--gold);
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--gold-dark);
+  color: var(--navy);
+  box-shadow: var(--shadow-xs);
 }
 
 .benefit-card__title {
@@ -386,15 +446,6 @@ a { color: inherit; text-decoration: none; }
   font-size: 15px;
   font-weight: 800;
   color: var(--navy);
-  font-family: var(--font);
-}
-
-.clan-description {
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.85;
-  color: var(--mute);
-  margin: 0;
   font-family: var(--font);
 }
 
@@ -580,12 +631,10 @@ a { color: inherit; text-decoration: none; }
    RESPONSIVE
 ══════════════════════════════════════════ */
 
-/* Tablet landscape */
 @media (max-width: 1100px) {
   .benefits-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* Tablet portrait */
 @media (max-width: 860px) {
   .scouts-hero {
     margin: 16px 16px 0;
@@ -624,7 +673,6 @@ a { color: inherit; text-decoration: none; }
   .clan-info-grid { grid-template-columns: 1fr 1fr; }
 }
 
-/* Mobile */
 @media (max-width: 600px) {
   .scouts-hero {
     margin: 12px 12px 0;
@@ -649,9 +697,10 @@ a { color: inherit; text-decoration: none; }
   .cta-heading { font-size: 18px; }
   .cta-sub     { font-size: 13px; }
   .cta-card__actions .btn { font-size: 14px; padding: 11px 18px; }
+
+  .concept-item { flex-direction: column; align-items: flex-start; gap: 4px; }
 }
 
-/* Very small */
 @media (max-width: 380px) {
   .scouts-hero {
     margin: 10px 8px 0;
@@ -663,7 +712,6 @@ a { color: inherit; text-decoration: none; }
   .cta-card__actions .btn { width: 100%; }
 }
 
-/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;

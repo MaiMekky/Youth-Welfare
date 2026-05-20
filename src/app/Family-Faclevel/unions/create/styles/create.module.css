@@ -78,7 +78,6 @@
   font-weight: 500;
 }
 
-/* Form */
 .form {
   display: flex;
   flex-direction: column;
@@ -151,7 +150,6 @@
   border-color: var(--navy-mid);
 }
 
-/* Error state for inputs */
 .inputError {
   border-color: var(--error-border) !important;
   background: var(--error-bg) !important;
@@ -162,7 +160,6 @@
   box-shadow: 0 0 0 3px rgba(214, 48, 49, 0.1) !important;
 }
 
-/* Error message */
 .errorMsg {
   font-size: 11.5px;
   font-weight: 700;
@@ -178,7 +175,6 @@
   font-size: 11px;
 }
 
-/* Error Banner */
 .errorBanner {
   background: var(--error-bg);
   border: 2px solid var(--error-border);
@@ -242,7 +238,6 @@
   background-position: left 10px center;
 }
 
-/* Committees */
 .committeesGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -292,7 +287,6 @@
   gap: 12px;
 }
 
-/* Actions */
 .actions {
   display: flex;
   justify-content: flex-end;
@@ -363,7 +357,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .container {
     padding: 16px 14px 32px;

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Users, Plus } from "lucide-react";
+import { Users, Plus, ArrowLeft, Building2, Globe, ChevronRight, Crown, UserCheck, Hash } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
 import { useRouter } from "next/navigation";
@@ -37,20 +37,13 @@ export default function UnionsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedFaculty, setSelectedFaculty] = useState<string>("all");
 
-  // Fetch faculties
   const fetchFaculties = useCallback(async () => {
     try {
       const response = await authFetch(`${API_URL}/family/faculties/`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
       });
-      
-      if (!response.ok) {
-        console.warn("Faculties endpoint not available");
-        return;
-      }
+      if (!response.ok) return;
       const data = await response.json();
       setFaculties(data);
     } catch (error) {
@@ -58,24 +51,18 @@ export default function UnionsPage() {
     }
   }, []);
 
-  // Fetch unions
   const fetchUnions = useCallback(async () => {
     try {
       setLoading(true);
       const response = await authFetch(`${API_URL}/family/unions/`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
       });
-      
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || `خطأ: ${response.status}`);
       }
-      
       const data = await response.json();
-      console.log('Unions data:', data); // Debug log
       setUnions(data);
     } catch (error) {
       console.error("Error fetching unions:", error);
@@ -91,37 +78,92 @@ export default function UnionsPage() {
     fetchUnions();
   }, [fetchFaculties, fetchUnions]);
 
-  // Filter unions by faculty
-  const filteredUnions = selectedFaculty === "all" 
-    ? unions 
-    : unions.filter(u => u.faculty?.toString() === selectedFaculty);
+  const filteredUnions =
+    selectedFaculty === "all"
+      ? unions
+      : unions.filter((u) => u.faculty?.toString() === selectedFaculty);
 
-  // Group unions by faculty
-  const groupedUnions = filteredUnions.reduce((acc, union) => {
-    const key = union.faculty_name || "اتحادات عامة";
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(union);
-    return acc;
-  }, {} as Record<string, Union[]>);
+  const generalUnions = filteredUnions.filter((u) => !u.faculty);
 
-  const handleCreateUnion = (facultyId?: number) => {
-    if (facultyId) {
-      router.push(`/uni-level-family/unions/create?faculty=${facultyId}`);
-    } else {
-      router.push(`/uni-level-family/unions/create`);
-    }
+  // Group faculty unions by faculty
+  const facultyGrouped = filteredUnions
+    .filter((u) => u.faculty)
+    .reduce((acc, union) => {
+      const key = union.faculty_name || "كلية غير محددة";
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(union);
+      return acc;
+    }, {} as Record<string, Union[]>);
+
+  const handleCreateUnion = () => {
+    router.push(`/uni-level-family/unions/create`);
   };
 
   const handleViewUnion = (unionId: number) => {
     router.push(`/uni-level-family/unions/${unionId}`);
   };
 
+  const statusMap: Record<string, { label: string; cls: string }> = {
+    pending: { label: "قيد الانتظار", cls: styles.statusPending },
+    منتظر: { label: "قيد الانتظار", cls: styles.statusPending },
+    approved: { label: "مقبول", cls: styles.statusApproved },
+    مقبول: { label: "مقبول", cls: styles.statusApproved },
+    rejected: { label: "مرفوض", cls: styles.statusRejected },
+    مرفوض: { label: "مرفوض", cls: styles.statusRejected },
+  };
+
+  const getStatus = (status: string) =>
+    statusMap[status] || { label: status, cls: styles.statusPending };
+
+  const UnionCard = ({ union }: { union: Union }) => {
+    const st = getStatus(union.status);
+    return (
+      <div className={styles.unionCard}>
+        <div className={styles.cardTop}>
+          <div className={styles.cardTitleRow}>
+            <h3 className={styles.unionName}>{union.name}</h3>
+            <span className={`${styles.statusBadge} ${st.cls}`}>{st.label}</span>
+          </div>
+          {union.description && (
+            <p className={styles.unionDescription}>{union.description}</p>
+          )}
+        </div>
+
+        <div className={styles.cardMeta}>
+          <div className={styles.metaItem}>
+            <Crown size={14} className={styles.metaIcon} />
+            <span className={styles.metaLabel}>الرئيس</span>
+            <span className={styles.metaValue}>{union.president_name || "—"}</span>
+          </div>
+          <div className={styles.metaItem}>
+            <UserCheck size={14} className={styles.metaIcon} />
+            <span className={styles.metaLabel}>نائب الرئيس</span>
+            <span className={styles.metaValue}>{union.vice_president_name || "—"}</span>
+          </div>
+          <div className={styles.metaItem}>
+            <Hash size={14} className={styles.metaIcon} />
+            <span className={styles.metaLabel}>الأعضاء</span>
+            <span className={styles.metaValue}>{union.member_count}</span>
+          </div>
+        </div>
+
+        <button
+          className={styles.detailsBtn}
+          onClick={() => handleViewUnion(union.family_id)}
+        >
+          <span>عرض التفاصيل</span>
+          <ArrowLeft size={15} />
+        </button>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className={styles.container}>
         <div className={styles.loadingWrap}>
-          <div className={styles.spinner} />
-          <p className={styles.loadingText}>جاري تحميل الاتحادات...</p>
+          <div className={styles.spinnerRing} />
+          <p className={styles.loadingText}>جاري تحميل الاتحادات…</p>
         </div>
       </div>
     );
@@ -129,129 +171,159 @@ export default function UnionsPage() {
 
   return (
     <div className={styles.container}>
+      {/* ── Header ── */}
       <header className={styles.header}>
-        <div>
-          <h1 className={styles.title}>إدارة الاتحادات</h1>
-          <p className={styles.subtitle}>إدارة ومتابعة اتحادات الطلاب على مستوى الكليات</p>
+        <div className={styles.headerLeft}>
+          <div className={styles.headerIcon}>
+            <Users size={26} />
+          </div>
+          <div>
+            <h1 className={styles.title}>إدارة الاتحادات</h1>
+            <p className={styles.subtitle}>إدارة ومتابعة اتحادات الطلاب على مستوى الكليات</p>
+          </div>
         </div>
+        <button className={styles.createBtn} onClick={handleCreateUnion}>
+          <Plus size={18} />
+          <span>إنشاء اتحاد جديد</span>
+        </button>
       </header>
 
-      {/* Stats */}
+      {/* ── Stats ── */}
       <div className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <div className={styles.statIcon}>
-            <Users size={24} />
+        <div className={`${styles.statCard} ${styles.statTotal}`}>
+          <div className={styles.statBg} />
+          <div className={styles.statIconWrap}>
+            <Users size={22} />
           </div>
-          <div className={styles.statContent}>
+          <div className={styles.statBody}>
             <p className={styles.statLabel}>إجمالي الاتحادات</p>
             <p className={styles.statValue}>{unions.length}</p>
           </div>
+          <div className={styles.statDecor}>{unions.length}</div>
         </div>
-        <div className={styles.statCard}>
-          <div className={styles.statIcon}>
-            <Users size={24} />
+
+        <div className={`${styles.statCard} ${styles.statFaculty}`}>
+          <div className={styles.statBg} />
+          <div className={styles.statIconWrap}>
+            <Building2 size={22} />
           </div>
-          <div className={styles.statContent}>
+          <div className={styles.statBody}>
             <p className={styles.statLabel}>اتحادات الكليات</p>
-            <p className={styles.statValue}>{unions.filter(u => u.faculty).length}</p>
+            <p className={styles.statValue}>{unions.filter((u) => u.faculty).length}</p>
           </div>
+          <div className={styles.statDecor}>{unions.filter((u) => u.faculty).length}</div>
         </div>
-        <div className={styles.statCard}>
-          <div className={styles.statIcon}>
-            <Users size={24} />
+
+        <div className={`${styles.statCard} ${styles.statGeneral}`}>
+          <div className={styles.statBg} />
+          <div className={styles.statIconWrap}>
+            <Globe size={22} />
           </div>
-          <div className={styles.statContent}>
+          <div className={styles.statBody}>
             <p className={styles.statLabel}>اتحادات عامة</p>
-            <p className={styles.statValue}>{unions.filter(u => !u.faculty).length}</p>
+            <p className={styles.statValue}>{unions.filter((u) => !u.faculty).length}</p>
           </div>
+          <div className={styles.statDecor}>{unions.filter((u) => !u.faculty).length}</div>
         </div>
       </div>
 
-      {/* Filter */}
+      {/* ── Filter ── */}
       {faculties.length > 0 && (
-        <div className={styles.filterSection}>
-          <label className={styles.filterLabel}>تصفية حسب الكلية:</label>
-          <select 
-            className={styles.filterSelect}
-            value={selectedFaculty}
-            onChange={(e) => setSelectedFaculty(e.target.value)}
-          >
-            <option value="all">جميع الكليات</option>
-            {faculties.map(faculty => (
-              <option key={faculty.faculty_id} value={faculty.faculty_id.toString()}>
-                {faculty.name}
-              </option>
+        <div className={styles.filterBar}>
+          <span className={styles.filterLabel}>تصفية حسب الكلية</span>
+          <div className={styles.filterGroup}>
+            <button
+              className={`${styles.filterChip} ${selectedFaculty === "all" ? styles.filterChipActive : ""}`}
+              onClick={() => setSelectedFaculty("all")}
+            >
+              الكل
+            </button>
+            {faculties.map((f) => (
+              <button
+                key={f.faculty_id}
+                className={`${styles.filterChip} ${selectedFaculty === f.faculty_id.toString() ? styles.filterChipActive : ""}`}
+                onClick={() => setSelectedFaculty(f.faculty_id.toString())}
+              >
+                {f.name}
+              </button>
             ))}
-          </select>
+          </div>
         </div>
       )}
 
-      <div className={styles.content}>
-        {Object.keys(groupedUnions).length === 0 ? (
-          <div className={styles.emptyState}>
-            <Users size={52} strokeWidth={1.4} />
-            <h3>لا توجد اتحادات</h3>
-            <p>لم يتم إنشاء أي اتحاد حتى الآن</p>
-            <button 
-              className={styles.createBtn}
-              onClick={() => handleCreateUnion()}
-              style={{ marginTop: '20px' }}
-            >
-              <Plus size={18} />
-              <span>إنشاء اتحاد جديد</span>
-            </button>
+      {/* ── Content ── */}
+      {unions.length === 0 ? (
+        <div className={styles.emptyState}>
+          <div className={styles.emptyIcon}>
+            <Users size={44} strokeWidth={1.2} />
           </div>
-        ) : (
-          Object.entries(groupedUnions).map(([facultyName, facultyUnions]) => (
-            <div key={facultyName} className={styles.facultySection}>
-              <div className={styles.facultyHeader}>
-                <h2 className={styles.facultyTitle}>{facultyName}</h2>
-                <button 
-                  className={styles.createBtn}
-                  onClick={() => {
-                    const faculty = faculties.find(f => f.name === facultyName);
-                    handleCreateUnion(faculty?.faculty_id);
-                  }}
-                >
-                  <Plus size={18} />
-                  <span>إنشاء اتحاد</span>
-                </button>
+          <h3>لا توجد اتحادات بعد</h3>
+          <p>لم يتم إنشاء أي اتحاد حتى الآن. ابدأ بإنشاء أول اتحاد.</p>
+          <button className={styles.createBtn} onClick={handleCreateUnion}>
+            <Plus size={18} />
+            <span>إنشاء اتحاد جديد</span>
+          </button>
+        </div>
+      ) : (
+        <div className={styles.sectionsWrap}>
+
+          {/* General Unions */}
+          {(selectedFaculty === "all" || generalUnions.length > 0) && (
+            <section className={styles.section}>
+              <div className={styles.sectionHeader}>
+                <div className={styles.sectionHeaderLeft}>
+                  <div className={`${styles.sectionDot} ${styles.dotGeneral}`} />
+                  <Globe size={18} />
+                  <h2 className={styles.sectionTitle}>الاتحادات العامة</h2>
+                  <span className={styles.sectionCount}>{generalUnions.length}</span>
+                </div>
               </div>
-              <div className={styles.unionsGrid}>
-                {facultyUnions.map(union => (
-                  <div 
-                    key={union.family_id} 
-                    className={styles.unionCard}
-                    onClick={() => handleViewUnion(union.family_id)}
-                  >
-                    <div className={styles.unionHeader}>
-                      <h3 className={styles.unionName}>{union.name}</h3>
-                      <span className={`${styles.statusBadge} ${styles[union.status]}`}>
-                        {union.status}
-                      </span>
+              {generalUnions.length === 0 ? (
+                <p className={styles.noItems}>لا توجد اتحادات عامة</p>
+              ) : (
+                <div className={styles.cardsGrid}>
+                  {generalUnions.map((u) => (
+                    <UnionCard key={u.family_id} union={u} />
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* Faculty Unions */}
+          {Object.keys(facultyGrouped).length > 0 && (
+            <section className={styles.section}>
+              <div className={styles.sectionHeader}>
+                <div className={styles.sectionHeaderLeft}>
+                  <div className={`${styles.sectionDot} ${styles.dotFaculty}`} />
+                  <Building2 size={18} />
+                  <h2 className={styles.sectionTitle}>اتحادات الكليات</h2>
+                  <span className={styles.sectionCount}>
+                    {Object.values(facultyGrouped).flat().length}
+                  </span>
+                </div>
+              </div>
+
+              <div className={styles.facultiesWrap}>
+                {Object.entries(facultyGrouped).map(([facultyName, facultyUnions]) => (
+                  <div key={facultyName} className={styles.facultyGroup}>
+                    <div className={styles.facultyGroupHeader}>
+                      <ChevronRight size={16} className={styles.chevron} />
+                      <span className={styles.facultyGroupName}>{facultyName}</span>
+                      <span className={styles.facultyCount}>{facultyUnions.length} اتحاد</span>
                     </div>
-                    <p className={styles.unionDescription}>{union.description}</p>
-                    <div className={styles.unionInfo}>
-                      <div className={styles.infoItem}>
-                        <span className={styles.infoLabel}>الرئيس:</span>
-                        <span className={styles.infoValue}>{union.president_name || "غير محدد"}</span>
-                      </div>
-                      <div className={styles.infoItem}>
-                        <span className={styles.infoLabel}>نائب الرئيس:</span>
-                        <span className={styles.infoValue}>{union.vice_president_name || "غير محدد"}</span>
-                      </div>
-                      <div className={styles.infoItem}>
-                        <span className={styles.infoLabel}>عدد الأعضاء:</span>
-                        <span className={styles.infoValue}>{union.member_count}</span>
-                      </div>
+                    <div className={styles.cardsGrid}>
+                      {facultyUnions.map((u) => (
+                        <UnionCard key={u.family_id} union={u} />
+                      ))}
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
-          ))
-        )}
-      </div>
+            </section>
+          )}
+        </div>
+      )}
     </div>
   );
 }

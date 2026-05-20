@@ -1,83 +1,23 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import styles from "./EventDetails.module.css";
 import { useParams, useRouter } from "next/navigation";
-import {
-  ArrowRight,
-  CalendarDays,
-  MapPin,
-  Users,
-  DollarSign,
-  ShieldAlert,
-  CheckCircle2,
-  Timer,
-  Award,
-  Medal,
-  X,
-  Check,
-  Eye,
-  Image as ImageIcon,
-  UploadCloud,
-  Trash2,
-  FileText,
-} from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
 import EventTeams from "./EventsTeam";
 
+import EventHeader from "./components/Eventheader";
+import StatsRow from "./components/Statsrow";
+import EventInfoGrid from "./components/Eventinfogrid";
+import ImagesSection from "./components/Imagessection";
+import ParticipantsTable from "./components/Participantstable";
+import ReportModal from "./components/Reportmodal";
+
+import styles from "./styles/EventDetails.module.css";
+
 const API_URL = getBaseUrl();
 
-
-async function apiFetch<T>(
-  path: string,
-  opts: RequestInit = {}
-): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number; raw?: Record<string, unknown> }> {
-  const headers: Record<string, string> = {
-    ...(opts.headers as Record<string, string>),
-  };
-
-  const isFormData = typeof FormData !== "undefined" && opts.body instanceof FormData;
-  if (!headers["Content-Type"] && opts.body && !isFormData) headers["Content-Type"] = "application/json";
-
-  try {
-    const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
-    const text = await res.text();
-    const maybeJson = text
-      ? (() => {
-          try {
-            return JSON.parse(text);
-          } catch {
-            return text;
-          }
-        })()
-      : null;
-
-    if (!res.ok) {
-      if (res.status === 403) {
-        return { ok: false, message: "ليس لديك صلاحية للوصول لهذه الفعالية", status: 403 };
-      }
-      if (res.status === 500) {
-        return { ok: false, message: "حدث خطأ في السيرفر، برجاء المحاولة لاحقاً", status: 500 };
-      }
-      const msg =
-        (typeof maybeJson === "object" &&
-          maybeJson &&
-          ((maybeJson as Record<string, unknown>).detail ||
-          (maybeJson as Record<string, unknown>).message ||
-          (maybeJson as Record<string, unknown>).error)) ||
-        (typeof maybeJson === "string" ? maybeJson : "") ||
-        `طلب غير ناجح (${res.status})`;
-      return { ok: false, message: String(msg), status: res.status, raw: maybeJson };
-    }
-
-    return { ok: true, data: maybeJson as T };
-  } catch (e: unknown) {
-    return { ok: false, message: (e as Error)?.message || "مشكلة في الاتصال" };
-  }
-}
-
-/* ===================== Types ===================== */
+/* ─── Types ─── */
 type ApiParticipant = {
   id: number;
   student_id: string;
@@ -87,7 +27,7 @@ type ApiParticipant = {
   status: string;
 };
 
-type ApiEventImage = {
+export type ApiEventImage = {
   doc_id: number;
   event: number;
   doc_type: string;
@@ -100,93 +40,51 @@ type ApiEventImage = {
   uploaded_by_name: string;
 };
 
-type ReportFormState = {
+export type ReportFormState = {
   event_title: string;
   event_code: string;
-
   male_count: number | "";
   female_count: number | "";
   total_participants: number | "";
-
   start_date: string;
   duration_days: number | "";
-
   project_stages: string;
   preparation_stage: string;
   execution_stage: string;
   evaluation_stage: string;
   achieved_goals: string;
-
   committee_preparation: string;
   committee_organizing: string;
   committee_execution: string;
   committee_purchases: string;
   committee_supervision: string;
   committee_other: string;
-
   evaluation: "excellent" | "very_good" | "good" | "acceptable";
-
   suggestions: string;
 };
 
-const emptyReportForm: ReportFormState = {
-  event_title: "",
-  event_code: "",
-
-  male_count: "",
-  female_count: "",
-  total_participants: "",
-
-  start_date: "",
-  duration_days: "",
-
-  project_stages: "",
-  preparation_stage: "",
-  execution_stage: "",
-  evaluation_stage: "",
-  achieved_goals: "",
-
-  committee_preparation: "",
-  committee_organizing: "",
-  committee_execution: "",
-  committee_purchases: "",
-  committee_supervision: "",
-  committee_other: "",
-
-  evaluation: "excellent",
-
-  suggestions: "",
-};
 type ApiEventDetails = {
   event_id: number;
   created_by_name: string;
   faculty_name: string | null;
   dept_name: string | null;
   family_name: string | null;
-
   participants?: ApiParticipant[];
   images?: Record<string, unknown>[];
-
   title: string;
   description: string;
-
   cost: string;
   location: string;
-
   restrictions: string;
   reward: string;
   status: string;
-
   st_date: string;
   end_date: string;
   s_limit: number;
-
   type: string;
   resource: string | null;
-
   selected_facs: number[] | null;
   active: boolean;
-
   dept: number;
   faculty: number | null;
   created_by: number;
@@ -194,7 +92,7 @@ type ApiEventDetails = {
   rejection_reason?: string | null;
 };
 
-type StudentRow = {
+export type StudentRow = {
   id: number;
   name: string;
   studentId: string;
@@ -203,6 +101,9 @@ type StudentRow = {
   rank?: string;
 };
 
+export type ReportErrors = Partial<Record<keyof ReportFormState, string>>;
+
+/* ─── Helpers ─── */
 function mapParticipantStatus(s: string): StudentRow["status"] {
   const x = (s || "").trim();
   if (x === "مؤكد" || x === "تم القبول" || x === "مقبول" || x === "Accepted") return "مقبول";
@@ -222,19 +123,44 @@ function diffDays(start: string, end: string): number {
   const a = new Date(start);
   const b = new Date(end);
   if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())) return 0;
-  const ms = b.getTime() - a.getTime();
-  const days = Math.ceil(ms / (1000 * 60 * 60 * 24));
-  return Math.max(days, 0);
+  return Math.max(Math.ceil((b.getTime() - a.getTime()) / (1000 * 60 * 60 * 24)), 0);
 }
 
 function pickFilenameFromDisposition(disposition: string | null, fallback: string) {
   if (!disposition) return fallback;
   const m = disposition.match(/filename\*?=(?:UTF-8''|")?([^\";]+)\"?/i);
   if (!m?.[1]) return fallback;
+  try { return decodeURIComponent(m[1]); } catch { return m[1]; }
+}
+
+async function apiFetch<T>(
+  path: string,
+  opts: RequestInit = {}
+): Promise<{ ok: true; data: T } | { ok: false; message: string; status?: number; raw?: Record<string, unknown> }> {
+  const headers: Record<string, string> = { ...(opts.headers as Record<string, string>) };
+  const isFormData = typeof FormData !== "undefined" && opts.body instanceof FormData;
+  if (!headers["Content-Type"] && opts.body && !isFormData) headers["Content-Type"] = "application/json";
+
   try {
-    return decodeURIComponent(m[1]);
-  } catch {
-    return m[1];
+    const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
+    const text = await res.text();
+    const maybeJson = text ? (() => { try { return JSON.parse(text); } catch { return text; } })() : null;
+
+    if (!res.ok) {
+      if (res.status === 403) return { ok: false, message: "ليس لديك صلاحية للوصول لهذه الفعالية", status: 403 };
+      if (res.status === 500) return { ok: false, message: "حدث خطأ في السيرفر، برجاء المحاولة لاحقاً", status: 500 };
+      const msg =
+        (typeof maybeJson === "object" && maybeJson &&
+          ((maybeJson as Record<string, unknown>).detail ||
+           (maybeJson as Record<string, unknown>).message ||
+           (maybeJson as Record<string, unknown>).error)) ||
+        (typeof maybeJson === "string" ? maybeJson : "") ||
+        `طلب غير ناجح (${res.status})`;
+      return { ok: false, message: String(msg), status: res.status, raw: maybeJson };
+    }
+    return { ok: true, data: maybeJson as T };
+  } catch (e: unknown) {
+    return { ok: false, message: (e as Error)?.message || "مشكلة في الاتصال" };
   }
 }
 
@@ -243,101 +169,255 @@ async function downloadPdf(path: string, opts: RequestInit = {}, fallbackName = 
   if (!headers["Content-Type"] && opts.body) headers["Content-Type"] = "application/json";
 
   const res = await authFetch(`${API_URL}${path}`, { ...opts, headers });
-
   if (!res.ok) {
     const text = await res.text();
     let msg = `طلب غير ناجح (${res.status})`;
-    try {
-      const j = JSON.parse(text);
-      msg = (j?.detail || j?.message || j?.error || msg) as string;
-    } catch {
-      if (text) msg = text;
-    }
+    try { const j = JSON.parse(text); msg = (j?.detail || j?.message || j?.error || msg) as string; } catch { if (text) msg = text; }
     throw new Error(String(msg));
   }
 
   const blob = await res.blob();
   const url = URL.createObjectURL(blob);
-
   const filename = pickFilenameFromDisposition(res.headers.get("content-disposition"), fallbackName);
-
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;
   document.body.appendChild(a);
   a.click();
   a.remove();
-
   URL.revokeObjectURL(url);
 }
 
-/* ===================== Page ===================== */
+const emptyReportForm: ReportFormState = {
+  event_title: "", event_code: "",
+  male_count: "", female_count: "", total_participants: "",
+  start_date: "", duration_days: "",
+  project_stages: "", preparation_stage: "", execution_stage: "",
+  evaluation_stage: "", achieved_goals: "",
+  committee_preparation: "", committee_organizing: "", committee_execution: "",
+  committee_purchases: "", committee_supervision: "", committee_other: "",
+  evaluation: "excellent", suggestions: "",
+};
+
+const MAX_250_FIELDS: (keyof ReportFormState)[] = [
+  "project_stages", "preparation_stage", "execution_stage", "evaluation_stage", "achieved_goals",
+];
+const committeeFields: (keyof ReportFormState)[] = [
+  "committee_preparation", "committee_organizing", "committee_execution",
+  "committee_purchases", "committee_supervision", "committee_other",
+];
+
+/* ─── Page ─── */
 export default function EventDetailsPage() {
   const router = useRouter();
   const params = useParams();
-  const id = String(params?.id ?? ""); // eventId
+  const id = String(params?.id ?? "");
   const { showToast } = useToast();
+
   const [event, setEvent] = useState<ApiEventDetails | null>(null);
   const [loadingEvent, setLoadingEvent] = useState(false);
-
   const [rows, setRows] = useState<StudentRow[]>([]);
   const [busy, setBusy] = useState(false);
   const [backPath, setBackPath] = useState("/Events-Faclevel");
-
-  // ─── Teams: when teams are configured, hide participant action buttons ───
   const [hasTeams, setHasTeams] = useState(false);
 
-  /* ===================== Images ===================== */
+  // Images
   const [images, setImages] = useState<ApiEventImage[]>([]);
   const [loadingImages, setLoadingImages] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [deletingDocId, setDeletingDocId] = useState<number | null>(null);
-  const [docType] = useState<string>("event_image");
   const fileRef = useRef<HTMLInputElement | null>(null);
 
-  type ReportErrors = Partial<Record<keyof ReportFormState, string>>;
+  // Inline edit
+  const [editingRewardId, setEditingRewardId] = useState<number | null>(null);
+  const [editingRankId, setEditingRankId] = useState<number | null>(null);
+  const [draftReward, setDraftReward] = useState("");
+  const [draftRank, setDraftRank] = useState("");
+
+  // Report modal
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportForm, setReportForm] = useState<ReportFormState>(emptyReportForm);
   const [reportErrors, setReportErrors] = useState<ReportErrors>({});
+  const [exportBusy, setExportBusy] = useState<null | "report" | "summary">(null);
 
-  const MAX_250_FIELDS: (keyof ReportFormState)[] = [
-    "project_stages",
-    "preparation_stage",
-    "execution_stage",
-    "evaluation_stage",
-    "achieved_goals",
-  ];
-  const committeeFields: (keyof ReportFormState)[] = [
-    "committee_preparation",
-    "committee_organizing",
-    "committee_execution",
-    "committee_purchases",
-    "committee_supervision",
-    "committee_other",
-  ];
+  /* ─── Data loading ─── */
+  const loadEvent = async () => {
+    if (!id) return;
+    setLoadingEvent(true);
+    const res = await apiFetch<ApiEventDetails>(`/api/event/get-events/${id}/`, { method: "GET" });
+    setLoadingEvent(false);
 
+    if (!res.ok) {
+      if (res.status === 403) showToast("❌ ليس لديك صلاحية لعرض هذه الفعالية", "error");
+      else if (res.status === 500) showToast("❌ حدث خطأ في السيرفر، برجاء المحاولة لاحقاً", "error");
+      else showToast(res.message, "error");
+      return;
+    }
+
+    setEvent(res.data);
+    const parts = Array.isArray(res.data.participants) ? res.data.participants : [];
+    setRows(parts.map((p) => ({
+      id: p.id,
+      name: p.student_name ?? "",
+      studentId: String(p.student_id ?? ""),
+      status: mapParticipantStatus(p.status),
+      reward: p.reward ?? "",
+      rank: p.rank === null || p.rank === undefined ? "" : String(p.rank),
+    })));
+  };
+
+  const loadImages = async () => {
+    if (!id) return;
+    setLoadingImages(true);
+    const res = await apiFetch<ApiEventImage[]>(`/api/event/manage-events/${id}/images/`, { method: "GET" });
+    setLoadingImages(false);
+    if (!res.ok) { showToast("تعذر تحميل الصور", "warning"); return; }
+    setImages(Array.isArray(res.data) ? res.data : []);
+  };
+
+  useEffect(() => { loadEvent(); loadImages(); }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { const from = sessionStorage.getItem("eventDetails_from"); if (from) setBackPath(from); }, []);
+
+  /* ─── Images ─── */
+  const uploadImages = async (files: FileList | null) => {
+    if (!id || !files || files.length === 0) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      Array.from(files).forEach((f) => fd.append("images", f));
+      fd.append("doc_type", "event_image");
+
+      const res = await authFetch(`${API_URL}/api/event/manage-events/${id}/upload-images/`, { method: "POST", body: fd });
+      if (!res.ok) {
+        try {
+          const data = await res.json();
+          if (data.detail === "Only the event creator can upload images for this event") {
+            showToast("❌ لا يمكنك رفع الصور إلا إذا كنت منشئ النشاط", "error");
+          } else if (data.images && Array.isArray(data.images)) {
+            showToast(data.images.map((msg: string) =>
+              msg.includes("exceeds") ? "❌ حجم الصورة أكبر من 20 ميجابايت" :
+              msg.includes("invalid extension") ? "❌ الصورة يجب أن تكون بصيغة jpg أو jpeg أو png أو pdf" :
+              `❌ ${msg}`
+            ).join(", "), "error");
+          } else {
+            showToast(`❌ ${data.detail || "حدث خطأ أثناء رفع الصور"}`, "error");
+          }
+        } catch { showToast("❌ حدث خطأ أثناء رفع الصور", "error"); }
+      } else {
+        showToast("✅ تم رفع الصور بنجاح", "success");
+        await loadImages();
+      }
+      if (fileRef.current) fileRef.current.value = "";
+    } finally { setUploading(false); }
+  };
+
+  const deleteImage = async (docId: number) => {
+    if (!id || !docId) return;
+    setDeletingDocId(docId);
+    const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-events/${id}/images/${docId}/`, { method: "DELETE" });
+    setDeletingDocId(null);
+    if (!res.ok) { showToast(res.message, "error"); return; }
+    setImages((prev) => prev.filter((x) => x.doc_id !== docId));
+    showToast("✅ تم مسح الصورة", "success");
+  };
+
+  /* ─── Participants ─── */
+  const approveAll = async () => {
+    if (!id) return;
+    setBusy(true);
+    const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-participants/${id}/approve-all-participants/`, { method: "PATCH" });
+    setBusy(false);
+    if (!res.ok) { showToast(res.message, "error"); return; }
+    await loadEvent();
+    showToast("✅ تم قبول الجميع بنجاح", "success");
+  };
+
+  const approveParticipant = async (studentId: string) => {
+    if (!id || !studentId) return;
+    setBusy(true);
+    const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-participants/${id}/participants/${studentId}/approve/`, { method: "PATCH" });
+    setBusy(false);
+    if (!res.ok) { showToast(res.message, "error"); return; }
+    await loadEvent();
+    showToast("✅ تم قبول الطالب", "success");
+  };
+
+  const rejectParticipant = async (studentId: string) => {
+    if (!id || !studentId) return;
+    setBusy(true);
+    const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-participants/${id}/participants/${studentId}/reject/`, { method: "PATCH" });
+    setBusy(false);
+    if (!res.ok) { showToast(res.message, "error"); return; }
+    await loadEvent();
+    showToast("❌ تم رفض الطالب", "warning");
+  };
+
+  const assignResult = async (studentId: string, rank: number | null, reward: string) => {
+    if (!id || !studentId) return;
+    setBusy(true);
+    const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-participants/${id}/participants/${studentId}/assign-result/`, {
+      method: "PATCH",
+      body: JSON.stringify({ rank, reward }),
+    });
+    setBusy(false);
+    if (!res.ok) { showToast(res.message, "error"); return; }
+    setEditingRankId(null);
+    setEditingRewardId(null);
+    setDraftRank("");
+    setDraftReward("");
+    await loadEvent();
+    showToast("✅ تم حفظ النتيجة بنجاح", "success");
+  };
+
+  const saveReward = async (rowId: number) => {
+    const row = rows.find((r) => r.id === rowId);
+    if (!row) return;
+    await assignResult(row.studentId, toRankNumber(row.rank), draftReward);
+  };
+
+  const saveRank = async (rowId: number) => {
+    const row = rows.find((r) => r.id === rowId);
+    if (!row) return;
+    const value = draftRank.trim();
+    if (!value) { showToast("⚠️ من فضلك أدخل رقم الترتيب", "warning"); return; }
+    if (!/^\d+$/.test(value)) { showToast("❌ الترتيب يجب أن يكون رقم صحيح فقط", "error"); return; }
+    await assignResult(row.studentId, Number(value), row.reward ?? "");
+  };
+
+  /* ─── Add Member ─── */
+  // Called by ParticipantsTable. Uses the same authFetch/apiFetch pattern as every
+  // other API call in this file so auth headers and base URL are handled correctly.
+  const addMember = async (
+    nid: string
+  ): Promise<{ success: true } | { success: false; message: string }> => {
+    if (!id) return { success: false, message: "معرف الفعالية غير موجود" };
+
+    const res = await apiFetch<Record<string, unknown>>(
+      `/api/event/manage-events/${id}/add-member/`,
+      {
+        method: "POST",
+        body: JSON.stringify({ nid }),
+      }
+    );
+
+    if (!res.ok) return { success: false, message: res.message };
+
+    await loadEvent(); // refresh the participants table immediately
+    return { success: true };
+  };
+
+  /* ─── Report ─── */
   const validateReportForm = (form: ReportFormState): ReportErrors => {
     const next: ReportErrors = {};
-
     if (!form.event_title.trim()) next.event_title = "عنوان الفعالية مطلوب";
     if (!form.event_code.trim()) next.event_code = "كود الفعالية مطلوب";
     if (!form.start_date) next.start_date = "تاريخ البداية مطلوب";
 
     const requireNonNegInt = (key: keyof ReportFormState, v: number | "") => {
-      if (v === "") {
-        next[key] = "الحقل مطلوب";
-        return;
-      }
-      if (!Number.isFinite(v)) {
-        next[key] = "لازم يكون رقم صحيح";
-        return;
-      }
-      if (!Number.isInteger(v)) {
-        next[key] = "لازم يكون رقم صحيح بدون كسور";
-        return;
-      }
-      if (v < 0) {
-        next[key] = "مينفعش أقل من صفر";
-        return;
-      }
+      if (v === "") { next[key] = "الحقل مطلوب"; return; }
+      if (!Number.isFinite(v)) { next[key] = "لازم يكون رقم صحيح"; return; }
+      if (!Number.isInteger(v)) { next[key] = "لازم يكون رقم صحيح بدون كسور"; return; }
+      if (v < 0) { next[key] = "مينفعش أقل من صفر"; return; }
     };
 
     requireNonNegInt("male_count", form.male_count);
@@ -353,237 +433,99 @@ export default function EventDetailsPage() {
     for (const k of committeeFields) {
       const v = String(form[k] ?? "").trim();
       if (!v) next[k] = "الحقل مطلوب";
-      else if (v.length > 250) next[k] = `الحد الأقصى 250 حرف`;
+      else if (v.length > 250) next[k] = "الحد الأقصى 250 حرف";
     }
-
     if (!form.evaluation) next.evaluation = "التقييم مطلوب";
     if (!form.suggestions.trim()) next.suggestions = "الاقتراحات مطلوبة";
-
     return next;
   };
-
-  const loadEvent = async () => {
-    if (!id) return;
-
-    setLoadingEvent(true);
-    const res = await apiFetch<ApiEventDetails>(`/api/event/get-events/${id}/`, { method: "GET" });
-    setLoadingEvent(false);
-
-    if (!res.ok) {
-      // Single, deduplicated error toast — only one message shown
-      if (res.status === 403) {
-        showToast("❌ ليس لديك صلاحية لعرض هذه الفعالية", "error");
-      } else if (res.status === 500) {
-        showToast("❌ حدث خطأ في السيرفر، برجاء المحاولة لاحقاً", "error");
-      } else {
-        showToast(res.message, "error");
-      }
-      return;
-    }
-
-    setEvent(res.data);
-
-    const parts = Array.isArray(res.data.participants) ? res.data.participants : [];
-    const mapped: StudentRow[] = parts.map((p) => ({
-      id: p.id,
-      name: p.student_name ?? "",
-      studentId: String(p.student_id ?? ""),
-      status: mapParticipantStatus(p.status),
-      reward: p.reward ?? "",
-      rank: p.rank === null || p.rank === undefined ? "" : String(p.rank),
-    }));
-    setRows(mapped);
-  };
-
-  const loadImages = async () => {
-    if (!id) return;
-    setLoadingImages(true);
-    const res = await apiFetch<ApiEventImage[]>(`/api/event/manage-events/${id}/images/`, { method: "GET" });
-    setLoadingImages(false);
-
-    if (!res.ok) {
-      console.error(res.message);
-      showToast("تعذر تحميل الصور", "warning");
-      return;
-    }
-
-    setImages(Array.isArray(res.data) ? res.data : []);
-  };
-
-  const uploadImages = async (files: FileList | null) => {
-    if (!id || !files || files.length === 0) return;
-
-    setUploading(true);
-
-    try {
-      const fd = new FormData();
-      Array.from(files).forEach((f) => fd.append("images", f));
-      fd.append("doc_type", docType);
-
-      const res = await authFetch(
-        `${API_URL}/api/event/manage-events/${id}/upload-images/`,
-        {
-          method: "POST",
-          body: fd,
-        }
-      );
-
-      let errorMessage = "";
-      let successMessage = "";
-
-      if (!res.ok) {
-        try {
-          const data = await res.json();
-          if (data.detail) {
-            switch (data.detail) {
-              case "Only the event creator can upload images for this event":
-                errorMessage = "❌ لا يمكنك رفع الصور إلا إذا كنت منشئ النشاط";
-                break;
-              default:
-                errorMessage = `❌ ${data.detail}`;
-            }
-          } else if (data.images && Array.isArray(data.images)) {
-            const messages: string[] = [];
-            data.images.forEach((msg: string) => {
-              if (msg.includes("exceeds")) {
-                messages.push("❌ حجم الصورة أكبر من 20 ميجابايت");
-              } else if (msg.includes("invalid extension")) {
-                messages.push("❌ الصورة يجب أن تكون بصيغة jpg أو jpeg أو png أو pdf");
-              } else {
-                messages.push(`❌ ${msg}`);
-              }
-            });
-            errorMessage = messages.join(", ");
-          } else if (data.doc_type && Array.isArray(data.doc_type)) {
-            errorMessage = "❌ نوع المستند غير مدعوم";
-          }
-        } catch (err) {
-          console.error("Error parsing server response:", err);
-          errorMessage = "❌ حدث خطأ أثناء رفع الصور";
-        }
-      } else {
-        successMessage = "✅ تم رفع الصور بنجاح";
-      }
-
-      // Show only one toast to avoid duplication
-      if (errorMessage) showToast(errorMessage, "error");
-      else if (successMessage) showToast(successMessage, "success");
-
-      if (fileRef.current) fileRef.current.value = "";
-
-      if (!errorMessage) {
-        await loadImages();
-      }
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const deleteImage = async (docId: number) => {
-    if (!id || !docId) return;
-
-    setDeletingDocId(docId);
-    const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-events/${id}/images/${docId}/`, { method: "DELETE" });
-    setDeletingDocId(null);
-
-    if (!res.ok) {
-      showToast(res.message, "error");
-      return;
-    }
-
-    setImages((prev) => prev.filter((x) => x.doc_id !== docId));
-    showToast("✅ تم مسح الصورة", "success");
-  };
-
-  useEffect(() => {
-    loadEvent();
-    loadImages();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
-
-  useEffect(() => {
-    const from = sessionStorage.getItem("eventDetails_from");
-    if (from) setBackPath(from);
-  }, []);
-
-  const [reportOpen, setReportOpen] = useState(false);
-  const [reportForm, setReportForm] = useState<ReportFormState>(emptyReportForm);
 
   const openReportModal = () => {
     const start = event?.st_date ?? "";
     const end = event?.end_date ?? "";
-
     setReportForm({
+      ...emptyReportForm,
       event_title: event?.title ?? "",
       event_code: String(event?.event_id ?? id ?? ""),
-      male_count: "",
-      female_count: "",
       total_participants: rows.length || "",
       start_date: start,
       duration_days: start && end ? diffDays(start, end) : "",
-      project_stages: "",
-      preparation_stage: "",
-      execution_stage: "",
-      evaluation_stage: "",
-      achieved_goals: "",
-      committee_preparation: "",
-      committee_organizing: "",
-      committee_execution: "",
-      committee_purchases: "",
-      committee_supervision: "",
-      committee_other: "",
-      evaluation: "excellent",
-      suggestions: "",
     });
-
     setReportErrors({});
     setReportOpen(true);
   };
-
-  const closeReportModal = () => setReportOpen(false);
 
   const setReportField = <K extends keyof ReportFormState>(key: K, value: ReportFormState[K]) => {
     setReportForm((p) => ({ ...p, [key]: value }));
     setReportErrors((p) => ({ ...p, [key]: undefined }));
   };
 
-  /* ===================== Derived UI ===================== */
+  const submitReportPdf = async () => {
+    if (!id) return;
+    const errs = validateReportForm(reportForm);
+    setReportErrors(errs);
+    if (Object.keys(errs).length) { showToast("⚠️ برجاء استكمال البيانات المطلوبة", "warning"); return; }
+
+    const body = {
+      event_title: reportForm.event_title.trim(),
+      event_code: reportForm.event_code.trim(),
+      male_count: Number(reportForm.male_count),
+      female_count: Number(reportForm.female_count),
+      total_participants: Number(reportForm.total_participants),
+      start_date: reportForm.start_date,
+      duration_days: Number(reportForm.duration_days),
+      project_stages: reportForm.project_stages.trim(),
+      preparation_stage: reportForm.preparation_stage.trim(),
+      execution_stage: reportForm.execution_stage.trim(),
+      evaluation_stage: reportForm.evaluation_stage.trim(),
+      achieved_goals: reportForm.achieved_goals.trim(),
+      committee_preparation: reportForm.committee_preparation.trim(),
+      committee_organizing: reportForm.committee_organizing.trim(),
+      committee_execution: reportForm.committee_execution.trim(),
+      committee_purchases: reportForm.committee_purchases.trim(),
+      committee_supervision: reportForm.committee_supervision.trim(),
+      committee_other: reportForm.committee_other.trim(),
+      evaluation: reportForm.evaluation,
+      suggestions: [reportForm.suggestions.trim()],
+    };
+
+    try {
+      setExportBusy("report");
+      await downloadPdf(`/api/event/reports/${id}/pdf/`, { method: "POST", body: JSON.stringify(body) }, `event_${id}_report.pdf`);
+      setReportOpen(false);
+      showToast("✅ تم تنزيل تقرير الفعالية", "success");
+    } catch (e: unknown) {
+      showToast((e as Error)?.message || "حصل خطأ أثناء تصدير تقرير الفعالية", "error");
+    } finally { setExportBusy(null); }
+  };
+
+  const exportEventSummary = async () => {
+    if (!id) return;
+    try {
+      setExportBusy("summary");
+      await downloadPdf(`/api/event/summary-reports/${id}/summary-pdf/`, { method: "GET" }, `event_${id}_summary.pdf`);
+      showToast("✅ تم تنزيل ملخص الفعالية", "success");
+    } catch (e: unknown) {
+      showToast((e as Error)?.message || "حصل خطأ أثناء تصدير ملخص الفعالية", "error");
+    } finally { setExportBusy(null); }
+  };
+
+  /* ─── Derived UI ─── */
   const ui = useMemo(() => {
-    if (!event) {
-      return {
-        title: "",
-        subtitle: "معلومات شاملة عن تفاصيل الفعالية والمشاركين",
-        status: "",
-        type: "",
-        // Raw type value (داخلي / خارجي) kept for logic; displayType shown to user
-        displayType: "",
-        scope: "",
-        cost: "",
-        startDate: "",
-        endDate: "",
-        location: "",
-        reward: "",
-        constraints: "",
-        description: "",
-        max: 0,
-        rejectionReason: "",
-        isDeptEvent: false,
-      };
-    }
+    if (!event) return {
+      title: "", subtitle: "معلومات شاملة عن تفاصيل الفعالية والمشاركين",
+      status: "", type: "", displayType: "", scope: "", cost: "",
+      startDate: "", endDate: "", location: "", reward: "",
+      constraints: "", description: "", max: 0, rejectionReason: "", isDeptEvent: false,
+    };
 
     const scope = event.dept_name ? `على مستوى ${event.dept_name}` : event.dept ? `القسم رقم ${event.dept}` : "—";
-
     const costNum = Number(String(event.cost ?? "").trim());
     const costText = !Number.isFinite(costNum) || costNum === 0 ? "مجاني" : `${costNum} جنيه`;
-
-    // ── Type display: داخلي → على مستوى الكلية | خارجي → على مستوى الجامعة ──
     const rawType = (event.type ?? "").trim();
     let displayType = rawType;
     if (rawType === "داخلي") displayType = "على مستوى الكلية";
     else if (rawType === "خارجي") displayType = "على مستوى الجامعة";
-
-    // ── Dept event: has a dept but no faculty ──
-    const isDeptEvent = event.faculty === null && !!event.dept;
 
     return {
       title: event.title ?? "",
@@ -601,312 +543,32 @@ export default function EventDetailsPage() {
       description: (event.description ?? "").trim() || "—",
       max: Number(event.s_limit ?? 0),
       rejectionReason: (event.rejection_reason ?? "").trim(),
-      isDeptEvent,
+      isDeptEvent: event.faculty === null && !!event.dept,
     };
   }, [event]);
 
+  const isFacultyEvent = (event?.faculty ?? null) !== null;
   const registered = rows.length;
   const remaining = Math.max(ui.max - registered, 0);
 
-  const rewardsCount = rows.filter((r) => (r.reward ?? "").trim().length > 0).length;
-  const ranksCount = rows.filter((r) => (r.rank ?? "").trim().length > 0).length;
-
-  /* ===================== Inline edit ===================== */
-  const [editingRewardId, setEditingRewardId] = useState<number | null>(null);
-  const [editingRankId, setEditingRankId] = useState<number | null>(null);
-  const [draftReward, setDraftReward] = useState("");
-  const [draftRank, setDraftRank] = useState("");
-
-  const startEditReward = (row: StudentRow) => {
-    setEditingRankId(null);
-    setEditingRewardId(row.id);
-    setDraftReward(row.reward ?? "");
-  };
-  const cancelReward = () => {
-    setEditingRewardId(null);
-    setDraftReward("");
-  };
-
-  const startEditRank = (row: StudentRow) => {
-    setEditingRewardId(null);
-    setEditingRankId(row.id);
-    setDraftRank(row.rank ?? "");
-  };
-  const cancelRank = () => {
-    setEditingRankId(null);
-    setDraftRank("");
-  };
-
-  /* ===================== Participants APIs ===================== */
-  const approveAll = async () => {
-    if (!id) return;
-    try {
-      setBusy(true);
-      const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-participants/${id}/approve-all-participants/`, {
-        method: "PATCH",
-      });
-      setBusy(false);
-
-      if (!res.ok) {
-        showToast(res.message, "error");
-        return;
-      }
-
-      await loadEvent();
-      showToast("✅ تم قبول الجميع بنجاح", "success");
-    } catch {
-      setBusy(false);
-      showToast("حدث خطأ ما.", "error");
-    }
-  };
-
-  const approveParticipant = async (studentId: string) => {
-    if (!id || !studentId) return;
-    try {
-      setBusy(true);
-      const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-participants/${id}/participants/${studentId}/approve/`, {
-        method: "PATCH",
-      });
-      setBusy(false);
-
-      if (!res.ok) {
-        showToast(res.message, "error");
-        return;
-      }
-
-      await loadEvent();
-      showToast("✅ تم قبول الطالب", "success");
-    } catch {
-      setBusy(false);
-      showToast("حدث خطأ ما.", "error");
-    }
-  };
-
-  const rejectParticipant = async (studentId: string) => {
-    if (!id || !studentId) return;
-    try {
-      setBusy(true);
-      const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-participants/${id}/participants/${studentId}/reject/`, {
-        method: "PATCH",
-      });
-      setBusy(false);
-
-      if (!res.ok) {
-        showToast(res.message, "error");
-        return;
-      }
-
-      await loadEvent();
-      showToast("❌ تم رفض الطالب", "warning");
-    } catch {
-      setBusy(false);
-      showToast("حدث خطأ ما.", "error");
-    }
-  };
-
-  const assignResult = async (studentId: string, rank: number | null, reward: string) => {
-    if (!id || !studentId) return;
-
-    try {
-      setBusy(true);
-      const res = await apiFetch<Record<string, unknown>>(`/api/event/manage-participants/${id}/participants/${studentId}/assign-result/`, {
-        method: "PATCH",
-        body: JSON.stringify({ rank, reward }),
-      });
-      setBusy(false);
-
-      if (!res.ok) {
-        showToast(res.message, "error");
-        return;
-      }
-
-      setEditingRankId(null);
-      setEditingRewardId(null);
-      setDraftRank("");
-      setDraftReward("");
-
-      await loadEvent();
-      showToast("✅ تم حفظ النتيجة بنجاح", "success");
-    } catch {
-      setBusy(false);
-      showToast("حدث خطأ ما.", "error");
-    }
-  };
-
-  const saveReward = async (rowId: number) => {
-    const row = rows.find((r) => r.id === rowId);
-    if (!row) return;
-
-    const rankNum = toRankNumber(row.rank);
-    await assignResult(row.studentId, rankNum, draftReward);
-  };
-
-  const saveRank = async (rowId: number) => {
-    const row = rows.find((r) => r.id === rowId);
-    if (!row) return;
-
-    const value = draftRank.trim();
-    if (!value) {
-      showToast("⚠️ من فضلك أدخل رقم الترتيب", "warning");
-      return;
-    }
-
-    if (!/^\d+$/.test(value)) {
-      showToast("❌ الترتيب يجب أن يكون رقم صحيح فقط", "error");
-      return;
-    }
-
-    const rankNum = Number(value);
-    await assignResult(row.studentId, rankNum, row.reward ?? "");
-  };
-
-  const pendingCount = rows.filter((r) => r.status === "منتظر").length;
-  const isFacultyEvent = (event?.faculty ?? null) !== null;
-
-  const statusBadgeClass = useMemo(() => {
-    const s = (ui.status || "").trim();
-    if (s === "نشط") return styles.badgeSuccess;
-    if (s === "منتظر") return styles.badgeBlue;
-    if (s === "غير نشط" || s === "ملغي" || s === "مرفوض") return (styles as Record<string, string>).badgeDanger || styles.badgeBlue;
-    return styles.badgeBlue;
-  }, [ui.status]);
-
-  const [exportBusy, setExportBusy] = useState<null | "report" | "summary">(null);
-
-  // ── Handler for dept-restricted PDF buttons ──
-  const handleDeptRestrictedClick = () => {
+  const handleDeptRestrictedClick = () =>
     showToast("❌ ليس لديك صلاحية للقيام بهذا الإجراء لهذه الفعالية", "error");
-  };
-
-  const submitReportPdf = async () => {
-    if (!id) return;
-
-    const errs = validateReportForm(reportForm);
-    setReportErrors(errs);
-    if (Object.keys(errs).length) {
-      showToast("⚠️ برجاء استكمال البيانات المطلوبة", "warning");
-      return;
-    }
-    const body = {
-      event_title: reportForm.event_title.trim(),
-      event_code: reportForm.event_code.trim(),
-
-      male_count: Number(reportForm.male_count),
-      female_count: Number(reportForm.female_count),
-      total_participants: Number(reportForm.total_participants),
-
-      start_date: reportForm.start_date,
-      duration_days: Number(reportForm.duration_days),
-
-      project_stages: reportForm.project_stages.trim(),
-      preparation_stage: reportForm.preparation_stage.trim(),
-      execution_stage: reportForm.execution_stage.trim(),
-      evaluation_stage: reportForm.evaluation_stage.trim(),
-      achieved_goals: reportForm.achieved_goals.trim(),
-
-      committee_preparation: reportForm.committee_preparation.trim(),
-      committee_organizing: reportForm.committee_organizing.trim(),
-      committee_execution: reportForm.committee_execution.trim(),
-      committee_purchases: reportForm.committee_purchases.trim(),
-      committee_supervision: reportForm.committee_supervision.trim(),
-      committee_other: reportForm.committee_other.trim(),
-
-      evaluation: reportForm.evaluation,
-
-      suggestions: [reportForm.suggestions.trim()],
-    };
-
-    try {
-      setExportBusy("report");
-      await downloadPdf(
-        `/api/event/reports/${id}/pdf/`,
-        { method: "POST", body: JSON.stringify(body) },
-        `event_${id}_report.pdf`
-      );
-      setReportOpen(false);
-      showToast("✅ تم تنزيل تقرير الفعالية", "success");
-    } catch (e: unknown) {
-      showToast((e as Error)?.message || "حصل خطأ أثناء تصدير تقرير الفعالية", "error");
-    } finally {
-      setExportBusy(null);
-    }
-  };
-
-  const exportEventSummary = async () => {
-    if (!id) return;
-
-    try {
-      setExportBusy("summary");
-      await downloadPdf(
-        `/api/event/summary-reports/${id}/summary-pdf/`,
-        { method: "GET" },
-        `event_${id}_summary.pdf`
-      );
-      showToast("✅ تم تنزيل ملخص الفعالية", "success");
-    } catch (e: unknown) {
-      showToast((e as Error)?.message || "حصل خطأ أثناء تصدير ملخص الفعالية", "error");
-    } finally {
-      setExportBusy(null);
-    }
-  };
-
-  const participantBadgeClass = (s: StudentRow["status"]) => {
-    if (s === "مقبول") return styles.participantAccepted;
-    if (s === "منتظر") return styles.participantPending;
-    return styles.participantRejected;
-  };
 
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-        <div className={styles.topBar}>
-          <div className={styles.headText}>
-            <h1 className={styles.pageTitle}>تفاصيل الفعالية</h1>
-            <p className={styles.pageSubtitle}>{ui.subtitle}</p>
-          </div>
 
-          <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-            {/* ── ملخص الفعالية: disabled + warning if dept event ── */}
-            <button
-              className={styles.actionBtn}
-              type="button"
-              onClick={ui.isDeptEvent ? handleDeptRestrictedClick : exportEventSummary}
-              disabled={!ui.isDeptEvent && exportBusy !== null}
-              style={{ opacity: (!ui.isDeptEvent && exportBusy !== null) || ui.isDeptEvent ? 0.6 : 1, cursor: ui.isDeptEvent ? "not-allowed" : undefined }}
-              title={ui.isDeptEvent ? "غير متاح لفعاليات الأقسام" : "تصدير ملخص الفعالية PDF"}
-            >
-              <FileText size={18} />
-              {exportBusy === "summary" ? "جاري التصدير..." : "ملخص الفعالية"}
-            </button>
-
-            {/* ── تقرير الفعالية: disabled + warning if dept event ── */}
-            <button
-              className={styles.actionBtn}
-              type="button"
-              onClick={ui.isDeptEvent ? handleDeptRestrictedClick : openReportModal}
-              disabled={!ui.isDeptEvent && (exportBusy !== null || !event)}
-              style={{ opacity: (!ui.isDeptEvent && (exportBusy !== null || !event)) || ui.isDeptEvent ? 0.6 : 1, cursor: ui.isDeptEvent ? "not-allowed" : undefined }}
-              title={ui.isDeptEvent ? "غير متاح لفعاليات الأقسام" : "تصدير تقرير الفعالية PDF"}
-            >
-              <FileText size={18} />
-              {exportBusy === "report" ? "جاري التصدير..." : "تقرير الفعالية"}
-            </button>
-
-            <button
-              className={styles.backBtn}
-              onClick={() => {
-                sessionStorage.removeItem("eventDetails_from");
-                router.push(backPath);
-              }}
-              type="button"
-              disabled={exportBusy !== null}
-              style={{ opacity: exportBusy !== null ? 0.7 : 1 }}
-            >
-              <ArrowRight size={18} />
-              العودة للفعاليات
-            </button>
-          </div>
-        </div>
+        <EventHeader
+          title={ui.title}
+          subtitle={ui.subtitle}
+          isDeptEvent={ui.isDeptEvent}
+          exportBusy={exportBusy}
+          hasEvent={!!event}
+          backPath={backPath}
+          onBack={() => { sessionStorage.removeItem("eventDetails_from"); router.push(backPath); }}
+          onExportSummary={ui.isDeptEvent ? handleDeptRestrictedClick : exportEventSummary}
+          onOpenReport={ui.isDeptEvent ? handleDeptRestrictedClick : openReportModal}
+        />
 
         {loadingEvent && (
           <div style={{ fontWeight: 800, opacity: 0.8, margin: "10px 0" }}>جاري تحميل بيانات الفعالية...</div>
@@ -916,749 +578,72 @@ export default function EventDetailsPage() {
           <div className={styles.heroTitle}>{ui.title || "—"}</div>
         </div>
 
-        <div className={styles.statsRow}>
-          <div className={`${styles.statCard} ${styles.statAmber}`}>
-            <div className={styles.statIcon}>
-              <Users size={20} />
-            </div>
-            <div className={styles.statText}>
-              <div className={styles.statLabel}>المقاعد المتبقية</div>
-              <div className={styles.statValue}>{remaining}</div>
-            </div>
-          </div>
+        <StatsRow remaining={remaining} max={ui.max} registered={registered} />
 
-          <div className={`${styles.statCard} ${styles.statGreen}`}>
-            <div className={styles.statIcon}>
-              <CheckCircle2 size={20} />
-            </div>
-            <div className={styles.statText}>
-              <div className={styles.statLabel}>الحد الأقصى</div>
-              <div className={styles.statValue}>{ui.max}</div>
-            </div>
-          </div>
+        <EventInfoGrid
+          cost={ui.cost}
+          status={ui.status}
+          scope={ui.scope}
+          displayType={ui.displayType}
+          location={ui.location}
+          startDate={ui.startDate}
+          endDate={ui.endDate}
+          rejectionReason={ui.rejectionReason}
+          reward={ui.reward}
+          constraints={ui.constraints}
+          description={ui.description}
+        />
 
-          <div className={`${styles.statCard} ${styles.statIndigo}`}>
-            <div className={styles.statIcon}>
-              <Users size={20} />
-            </div>
-            <div className={styles.statText}>
-              <div className={styles.statLabel}>العدد الحالي</div>
-              <div className={styles.statValue}>{registered}</div>
-            </div>
-          </div>
-        </div>
+        <ImagesSection
+          images={images}
+          loadingImages={loadingImages}
+          uploading={uploading}
+          deletingDocId={deletingDocId}
+          isFacultyEvent={isFacultyEvent}
+          fileRef={fileRef}
+          onUpload={uploadImages}
+          onDelete={deleteImage}
+        />
 
-        <section className={styles.infoGrid}>
-          <div className={styles.infoCard}>
-            <div className={styles.infoLabel}>
-              <DollarSign size={16} /> التكلفة
-            </div>
-            <div className={styles.infoValue}>{ui.cost}</div>
-          </div>
+        <ReportModal
+          open={reportOpen && isFacultyEvent}
+          reportForm={reportForm}
+          reportErrors={reportErrors}
+          exportBusy={exportBusy}
+          onClose={() => setReportOpen(false)}
+          onSubmit={submitReportPdf}
+          setField={setReportField}
+        />
 
-          <div className={styles.infoCard}>
-            <div className={styles.infoLabel}>
-              <ShieldAlert size={16} /> حالة الفعالية
-            </div>
-            <div className={statusBadgeClass}>{ui.status || "—"}</div>
-          </div>
+        <ParticipantsTable
+          rows={rows}
+          busy={busy}
+          hasTeams={hasTeams}
+          editingRewardId={editingRewardId}
+          editingRankId={editingRankId}
+          draftReward={draftReward}
+          draftRank={draftRank}
+          onApproveAll={approveAll}
+          onApprove={approveParticipant}
+          onReject={rejectParticipant}
+          onStartEditReward={(row) => { setEditingRankId(null); setEditingRewardId(row.id); setDraftReward(row.reward ?? ""); }}
+          onStartEditRank={(row) => { setEditingRewardId(null); setEditingRankId(row.id); setDraftRank(row.rank ?? ""); }}
+          onSaveReward={saveReward}
+          onSaveRank={saveRank}
+          onCancelReward={() => { setEditingRewardId(null); setDraftReward(""); }}
+          onCancelRank={() => { setEditingRankId(null); setDraftRank(""); }}
+          onSetDraftReward={setDraftReward}
+          onSetDraftRank={setDraftRank}
+          onViewStudent={(studentId) => router.push(`/Events-Faclevel/${id}/student/${studentId}`)}
+          onAddMember={addMember}   // ← the only new prop: handler lives here, event id is captured in closure
+        />
 
-          <div className={styles.infoCard}>
-            <div className={styles.infoLabel}>
-              <Users size={16} /> نطاق الفعالية
-            </div>
-            <div className={styles.infoValue}>{ui.scope || "—"}</div>
-          </div>
-
-          <div className={styles.infoCard}>
-            <div className={styles.infoLabel}>
-              <Timer size={16} /> نوع الفعالية
-            </div>
-            {/* Show display label (على مستوى الكلية / على مستوى الجامعة), raw value is in ui.type */}
-            <div className={styles.badgeBlue}>{ui.displayType || "—"}</div>
-          </div>
-
-          <div className={`${styles.infoCard} ${styles.infoWide}`}>
-            <div className={styles.infoLabel}>
-              <MapPin size={16} /> المكان
-            </div>
-            <div className={styles.infoValue}>{ui.location || "—"}</div>
-          </div>
-
-          <div className={styles.infoCard}>
-            <div className={styles.infoLabel}>
-              <CalendarDays size={16} /> تاريخ البداية
-            </div>
-            <div className={styles.infoValue} dir="ltr">
-              {ui.startDate || "—"}
-            </div>
-          </div>
-
-          <div className={styles.infoCard}>
-            <div className={styles.infoLabel}>
-              <CalendarDays size={16} /> تاريخ النهاية
-            </div>
-            <div className={styles.infoValue} dir="ltr">
-              {ui.endDate || "—"}
-            </div>
-          </div>
-        </section>
-
-        {ui.rejectionReason && (
-          <section
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "14px",
-              background: "linear-gradient(135deg, #FFF1F1, #FFE4E4)",
-              border: "1.5px solid #FCA5A5",
-              borderRight: "5px solid #EF4444",
-              borderRadius: "14px",
-              padding: "18px 20px",
-              direction: "rtl",
-              marginTop: "22px",
-            }}
-          >
-            <ShieldAlert size={22} color="#EF4444" style={{ flexShrink: 0, marginTop: 2 }} />
-            <div>
-              <div
-                style={{
-                  fontSize: "0.85rem",
-                  fontWeight: 700,
-                  color: "#EF4444",
-                  marginBottom: "6px",
-                  letterSpacing: "0.02em",
-                }}
-              >
-                سبب الرفض
-              </div>
-              <div
-                style={{
-                  fontSize: "0.95rem",
-                  color: "#7F1D1D",
-                  lineHeight: 1.7,
-                  fontWeight: 500,
-                }}
-              >
-                {ui.rejectionReason}
-              </div>
-            </div>
-          </section>
-        )}
-
-        <section className={styles.twoCols}>
-          <div className={styles.block}>
-            <div className={styles.blockTitle}>المكافأة</div>
-            <div className={styles.blockBody}>{ui.reward}</div>
-          </div>
-
-          <div className={styles.block}>
-            <div className={styles.blockTitle}>القيود والشروط</div>
-            <div className={styles.blockBody}>{ui.constraints}</div>
-          </div>
-        </section>
-
-        <section className={styles.block}>
-          <div className={styles.blockTitle}>وصف الفعالية</div>
-          <div className={styles.blockBody}>{ui.description}</div>
-        </section>
-
-        {/* ===================== Images Component ===================== */}
-        <section className={styles.imagesBlock}>
-          <div className={styles.imagesHead}>
-            <div className={styles.imagesTitle}>
-              <ImageIcon size={18} />
-              صور الفعالية
-            </div>
-            {isFacultyEvent && (
-              <div className={styles.imagesActions}>
-                <input
-                  ref={fileRef}
-                  className={styles.fileInput}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={(e) => uploadImages(e.target.files)}
-                  disabled={uploading}
-                />
-                <button
-                  type="button"
-                  className={styles.uploadBtn}
-                  onClick={() => fileRef.current?.click()}
-                  disabled={uploading}
-                  title="إضافة صورة"
-                >
-                  <UploadCloud size={18} />
-                  {uploading ? "جاري الرفع..." : "إضافة صورة"}
-                </button>
-              </div>
-            )}
-          </div>
-
-          {loadingImages ? (
-            <div style={{ fontWeight: 800, opacity: 0.8 }}>جاري تحميل الصور...</div>
-          ) : images.length === 0 ? (
-            <div className={styles.emptyImages}>لا توجد صور مضافة حتى الآن</div>
-          ) : (
-            <div className={styles.imagesGrid}>
-              {images.map((img) => (
-                <div key={img.doc_id} className={styles.imageCard}>
-                  <div className={styles.imagePreview}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img.file_url} alt={img.file_name} />
-                  </div>
-
-                  <div className={styles.imageMeta}>
-                    <div className={styles.imageName} title={img.file_name}>
-                      {img.file_name}
-                    </div>
-                  </div>
-
-                  <div className={styles.imageBtns}>
-                    <a className={styles.viewLink} href={img.file_url} target="_blank" rel="noreferrer">
-                      <Eye size={16} />
-                      عرض الصورة
-                    </a>
-                    {isFacultyEvent && (
-                      <button
-                        type="button"
-                        className={styles.deleteImgBtn}
-                        onClick={() => deleteImage(img.doc_id)}
-                        disabled={deletingDocId === img.doc_id}
-                        title="مسح"
-                      >
-                        <Trash2 size={16} />
-                        {deletingDocId === img.doc_id ? "..." : "مسح الصورة"}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {reportOpen && isFacultyEvent && (
-          <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-label="تقرير الفعالية">
-            <div className={styles.modalCard}>
-              <div className={styles.modalHead}>
-                <div>
-                  <div className={styles.modalTitle}>تقرير الفعالية</div>
-                  <div className={styles.modalSub}>املئي البيانات المطلوبة ثم اضغطي تنزيل</div>
-                </div>
-
-                <button className={styles.modalClose} type="button" onClick={closeReportModal} disabled={exportBusy !== null}>
-                  <X size={18} />
-                </button>
-              </div>
-
-              <div className={styles.modalBody}>
-                <div className={styles.modalGrid2}>
-                  <div className={styles.modalField}>
-                    <label className={styles.modalLabel}>عنوان الفعالية</label>
-                    <input
-                      className={styles.modalInput}
-                      value={reportForm.event_title}
-                      onChange={(e) => setReportField("event_title", e.target.value)}
-                      placeholder="عنوان الفعالية"
-                    />
-                    {reportErrors.event_title && <div className={styles.modalError}>{reportErrors.event_title}</div>}
-                  </div>
-
-                  <div className={styles.modalField}>
-                    <label className={styles.modalLabel}>كود الفعالية</label>
-                    <input
-                      className={styles.modalInput}
-                      value={reportForm.event_code}
-                      onChange={(e) => setReportField("event_code", e.target.value)}
-                      placeholder="مثال: EVT-001"
-                    />
-                    {reportErrors.event_code && <div className={styles.modalError}>{reportErrors.event_code}</div>}
-                  </div>
-
-                  <div className={styles.modalField}>
-                    <label className={styles.modalLabel}>عدد الذكور</label>
-                    <input
-                      className={styles.modalInput}
-                      type="number"
-                      min={0}
-                      value={reportForm.male_count}
-                      onChange={(e) => setReportField("male_count", e.target.value === "" ? "" : Number(e.target.value))}
-                      placeholder="0"
-                    />
-                    {reportErrors.male_count && <div className={styles.modalError}>{reportErrors.male_count}</div>}
-                  </div>
-
-                  <div className={styles.modalField}>
-                    <label className={styles.modalLabel}>عدد الإناث</label>
-                    <input
-                      className={styles.modalInput}
-                      type="number"
-                      min={0}
-                      value={reportForm.female_count}
-                      onChange={(e) => setReportField("female_count", e.target.value === "" ? "" : Number(e.target.value))}
-                      placeholder="0"
-                    />
-                    {reportErrors.female_count && <div className={styles.modalError}>{reportErrors.female_count}</div>}
-                  </div>
-
-                  <div className={styles.modalField}>
-                    <label className={styles.modalLabel}>إجمالي المشاركين</label>
-                    <input
-                      className={styles.modalInput}
-                      type="number"
-                      min={0}
-                      value={reportForm.total_participants}
-                      onChange={(e) =>
-                        setReportField("total_participants", e.target.value === "" ? "" : Number(e.target.value))
-                      }
-                      placeholder="0"
-                    />
-                    {reportErrors.total_participants && (
-                      <div className={styles.modalError}>{reportErrors.total_participants}</div>
-                    )}
-                  </div>
-
-                  <div className={styles.modalField}>
-                    <label className={styles.modalLabel}>تاريخ البداية</label>
-                    <input
-                      className={styles.modalInput}
-                      type="date"
-                      value={reportForm.start_date}
-                      onChange={(e) => setReportField("start_date", e.target.value)}
-                    />
-                    {reportErrors.start_date && <div className={styles.modalError}>{reportErrors.start_date}</div>}
-                  </div>
-
-                  <div className={styles.modalField}>
-                    <label className={styles.modalLabel}>مدة التنفيذ (بالأيام)</label>
-                    <input
-                      className={styles.modalInput}
-                      type="number"
-                      min={0}
-                      value={reportForm.duration_days}
-                      onChange={(e) => setReportField("duration_days", e.target.value === "" ? "" : Number(e.target.value))}
-                      placeholder="0"
-                    />
-                    {reportErrors.duration_days && <div className={styles.modalError}>{reportErrors.duration_days}</div>}
-                  </div>
-
-                  <div className={styles.modalField}>
-                    <label className={styles.modalLabel}>التقييم العام</label>
-                    <select
-                      className={styles.modalInput}
-                      value={reportForm.evaluation}
-                      onChange={(e) => setReportField("evaluation", e.target.value as ReportFormState["evaluation"])}
-                    >
-                      <option value="excellent">ممتاز</option>
-                      <option value="very_good">جيد جداً</option>
-                      <option value="good">جيد</option>
-                      <option value="acceptable">مقبول</option>
-                    </select>
-                    <div className={styles.modalHintRow}>
-                      {reportErrors.evaluation && (
-                        <span className={styles.modalErrorInline}>{reportErrors.evaluation}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className={styles.modalField}>
-                  <label className={styles.modalLabel}>مراحل المشروع</label>
-                  <textarea
-                    className={styles.modalTextarea}
-                    rows={3}
-                    maxLength={250}
-                    value={reportForm.project_stages}
-                    onChange={(e) => setReportField("project_stages", e.target.value)}
-                    placeholder="اكتب مراحل المشروع..."
-                  />
-                  <div className={styles.modalHintRow}>
-                    <span className={styles.modalHint}>{(reportForm.project_stages ?? "").length}/250</span>
-                    {reportErrors.project_stages && (
-                      <span className={styles.modalErrorInline}>{reportErrors.project_stages}</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className={styles.modalGrid2}>
-                  <div className={styles.modalField}>
-                    <label className={styles.modalLabel}>مرحلة الإعداد</label>
-                    <textarea
-                      className={styles.modalTextarea}
-                      rows={3}
-                      maxLength={250}
-                      value={reportForm.preparation_stage}
-                      onChange={(e) => setReportField("preparation_stage", e.target.value)}
-                      placeholder="اكتب تفاصيل الإعداد..."
-                    />
-                    <div className={styles.modalHintRow}>
-                      <span className={styles.modalHint}>{(reportForm.preparation_stage ?? "").length}/250</span>
-                      {reportErrors.preparation_stage && (
-                        <span className={styles.modalErrorInline}>{reportErrors.preparation_stage}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className={styles.modalField}>
-                    <label className={styles.modalLabel}>مرحلة التنفيذ</label>
-                    <textarea
-                      className={styles.modalTextarea}
-                      rows={3}
-                      maxLength={250}
-                      value={reportForm.execution_stage}
-                      onChange={(e) => setReportField("execution_stage", e.target.value)}
-                      placeholder="اكتب تفاصيل التنفيذ..."
-                    />
-                    <div className={styles.modalHintRow}>
-                      <span className={styles.modalHint}>{(reportForm.execution_stage ?? "").length}/250</span>
-                      {reportErrors.execution_stage && (
-                        <span className={styles.modalErrorInline}>{reportErrors.execution_stage}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className={styles.modalField}>
-                    <label className={styles.modalLabel}>مرحلة التقييم والمتابعة والنتائج</label>
-                    <textarea
-                      className={styles.modalTextarea}
-                      rows={3}
-                      maxLength={250}
-                      value={reportForm.evaluation_stage}
-                      onChange={(e) => setReportField("evaluation_stage", e.target.value)}
-                      placeholder="اكتب تفاصيل التقييم والمتابعة والنتائج..."
-                    />
-                    <div className={styles.modalHintRow}>
-                      <span className={styles.modalHint}>{(reportForm.evaluation_stage ?? "").length}/250</span>
-                      {reportErrors.evaluation_stage && (
-                        <span className={styles.modalErrorInline}>{reportErrors.evaluation_stage}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className={styles.modalField}>
-                    <label className={styles.modalLabel}>ما تحقق من أهداف</label>
-                    <textarea
-                      className={styles.modalTextarea}
-                      rows={3}
-                      maxLength={250}
-                      value={reportForm.achieved_goals}
-                      onChange={(e) => setReportField("achieved_goals", e.target.value)}
-                      placeholder="اكتب ما تحقق من أهداف المشروع..."
-                    />
-                    <div className={styles.modalHintRow}>
-                      <span className={styles.modalHint}>{(reportForm.achieved_goals ?? "").length}/250</span>
-                      {reportErrors.achieved_goals && (
-                        <span className={styles.modalErrorInline}>{reportErrors.achieved_goals}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className={styles.modalField}>
-                    <label className={styles.modalLabel}>لجنة الإعداد</label>
-                    <input
-                      className={styles.modalInput}
-                      value={reportForm.committee_preparation}
-                      onChange={(e) => setReportField("committee_preparation", e.target.value)}
-                      placeholder="لجنة الاعداد..."
-                    />
-                    <div className={styles.modalHintRow}>
-                      {reportErrors.committee_preparation && (
-                        <span className={styles.modalErrorInline}>{reportErrors.committee_preparation}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className={styles.modalField}>
-                    <label className={styles.modalLabel}>لجنة التنظيم</label>
-                    <input
-                      className={styles.modalInput}
-                      value={reportForm.committee_organizing}
-                      onChange={(e) => setReportField("committee_organizing", e.target.value)}
-                      placeholder="لجنة التنظيم..."
-                    />
-                    <div className={styles.modalHintRow}>
-                      {reportErrors.committee_organizing && (
-                        <span className={styles.modalErrorInline}>{reportErrors.committee_organizing}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className={styles.modalField}>
-                    <label className={styles.modalLabel}>لجنة التنفيذ</label>
-                    <input
-                      className={styles.modalInput}
-                      value={reportForm.committee_execution}
-                      onChange={(e) => setReportField("committee_execution", e.target.value)}
-                      placeholder="لجنة التنفيذ..."
-                    />
-                    <div className={styles.modalHintRow}>
-                      {reportErrors.committee_execution && (
-                        <span className={styles.modalErrorInline}>{reportErrors.committee_execution}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className={styles.modalField}>
-                    <label className={styles.modalLabel}>لجنة المشتريات</label>
-                    <input
-                      className={styles.modalInput}
-                      value={reportForm.committee_purchases}
-                      onChange={(e) => setReportField("committee_purchases", e.target.value)}
-                      placeholder="لجنة المشتريات..."
-                    />
-                    <div className={styles.modalHintRow}>
-                      {reportErrors.committee_purchases && (
-                        <span className={styles.modalErrorInline}>{reportErrors.committee_purchases}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className={styles.modalField}>
-                    <label className={styles.modalLabel}>لجنة الإشراف</label>
-                    <input
-                      className={styles.modalInput}
-                      value={reportForm.committee_supervision}
-                      onChange={(e) => setReportField("committee_supervision", e.target.value)}
-                      placeholder="لجنة الإشراف..."
-                    />
-                    <div className={styles.modalHintRow}>
-                      {reportErrors.committee_supervision && (
-                        <span className={styles.modalErrorInline}>{reportErrors.committee_supervision}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className={styles.modalField}>
-                    <label className={styles.modalLabel}>لجان أخرى</label>
-                    <input
-                      className={styles.modalInput}
-                      value={reportForm.committee_other}
-                      onChange={(e) => setReportField("committee_other", e.target.value)}
-                      placeholder="لجان أخرى..."
-                    />
-                    <div className={styles.modalHintRow}>
-                      {reportErrors.committee_other && (
-                        <span className={styles.modalErrorInline}>{reportErrors.committee_other}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className={styles.modalField}>
-                    <label className={styles.modalLabel}>مقترحات للتحسين</label>
-                    <textarea
-                      className={styles.modalTextarea}
-                      rows={3}
-                      maxLength={250}
-                      value={reportForm.suggestions}
-                      onChange={(e) => setReportField("suggestions", e.target.value)}
-                      placeholder="اكتب مقترحات للتحسين..."
-                    />
-                    <div className={styles.modalHintRow}>
-                      <span className={styles.modalHint}>{(reportForm.suggestions ?? "").length}/250</span>
-                      {reportErrors.suggestions && (
-                        <span className={styles.modalErrorInline}>{reportErrors.suggestions}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className={styles.modalFooter}>
-                <button className={styles.modalCancel} type="button" onClick={closeReportModal} disabled={exportBusy !== null}>
-                  إلغاء
-                </button>
-
-                <button
-                  className={styles.modalPrimary}
-                  type="button"
-                  onClick={submitReportPdf}
-                  disabled={exportBusy !== null}
-                  style={{ opacity: exportBusy !== null ? 0.7 : 1 }}
-                >
-                  <FileText size={18} />
-                  {exportBusy === "report" ? "جاري التنزيل..." : "تنزيل PDF"}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ===================== Participants Table ===================== */}
-        <section className={styles.tableBlock}>
-          <div className={styles.tableHead}>
-            <div className={styles.tableTitle}>
-              الطلاب المسجلين <span className={styles.count}>({rows.length})</span>
-            </div>
-
-            <div className={styles.tableChips}>
-              <span className={styles.miniChip}>
-                <Medal size={14} /> {ranksCount}
-              </span>
-              <span className={styles.miniChip}>
-                <Award size={14} /> {rewardsCount}
-              </span>
-
-              {/* ── قبول الجميع: hidden when teams are configured ── */}
-              {!hasTeams && (
-                <button
-                  className={`${styles.actionBtn} ${styles.acceptBtn}`}
-                  type="button"
-                  onClick={approveAll}
-                  disabled={pendingCount === 0 || busy}
-                  style={{ opacity: pendingCount === 0 || busy ? 0.6 : 1 }}
-                >
-                  <Check size={16} />
-                  قبول الجميع ({pendingCount})
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>اسم الطالب</th>
-                  <th>رقم الطالب</th>
-                  <th>حالة التسجيل</th>
-                  <th>الترتيب</th>
-                  <th>المكافأة</th>
-                  <th>الإجراءات</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {rows.map((r) => (
-                  <tr key={r.id}>
-                    <td>{r.name}</td>
-                    <td dir="ltr">{r.studentId}</td>
-
-                    <td>
-                      <span className={participantBadgeClass(r.status)}>{r.status}</span>
-                    </td>
-
-                    <td>
-                      <span className={styles.cellValue}>{(r.rank ?? "").trim() ? r.rank : "-"}</span>
-                    </td>
-
-                    <td>
-                      <span className={styles.cellValue}>{(r.reward ?? "").trim() ? r.reward : "-"}</span>
-                    </td>
-
-                    <td>
-                      <div className={styles.rowActions}>
-                        {/* ── قبول / رفض: hidden when teams are configured ── */}
-                        {!hasTeams && r.status === "منتظر" && (
-                          <>
-                            <button
-                              className={`${styles.actionBtn} ${styles.acceptBtn}`}
-                              type="button"
-                              disabled={busy}
-                              onClick={() => approveParticipant(r.studentId)}
-                            >
-                              <Check size={16} />
-                              قبول
-                            </button>
-
-                            <button
-                              className={`${styles.actionBtn} ${styles.rejectBtn}`}
-                              type="button"
-                              disabled={busy}
-                              onClick={() => rejectParticipant(r.studentId)}
-                            >
-                              <X size={16} />
-                              رفض
-                            </button>
-                          </>
-                        )}
-
-                        {/* ── مكافأة: hidden when teams are configured ── */}
-                        {!hasTeams && (
-                          <>
-                            {editingRewardId === r.id ? (
-                              <div className={styles.inlineEdit}>
-                                <input
-                                  className={styles.inlineInput}
-                                  value={draftReward}
-                                  onChange={(e) => setDraftReward(e.target.value)}
-                                  placeholder="المكافأة"
-                                />
-                                <button className={styles.iconBtn} type="button" disabled={busy} onClick={() => saveReward(r.id)}>
-                                  <Check size={18} />
-                                </button>
-                                <button className={styles.iconBtn} type="button" disabled={busy} onClick={cancelReward}>
-                                  <X size={18} />
-                                </button>
-                              </div>
-                            ) : (
-                              <button className={styles.actionBtn} type="button" disabled={busy} onClick={() => startEditReward(r)}>
-                                <Award size={16} />
-                                مكافأة
-                              </button>
-                            )}
-                          </>
-                        )}
-
-                        {/* ── ترتيب: hidden when teams are configured ── */}
-                        {!hasTeams && (
-                          <>
-                            {editingRankId === r.id ? (
-                              <div className={styles.inlineEdit}>
-                                <input
-                                  className={styles.inlineInput}
-                                  type="number"
-                                  min={1}
-                                  value={draftRank}
-                                  onChange={(e) => setDraftRank(e.target.value)}
-                                  placeholder="المركز"
-                                />
-                                <button className={styles.iconBtn} type="button" disabled={busy} onClick={() => saveRank(r.id)}>
-                                  <Check size={18} />
-                                </button>
-                                <button className={styles.iconBtn} type="button" disabled={busy} onClick={cancelRank}>
-                                  <X size={18} />
-                                </button>
-                              </div>
-                            ) : (
-                              <button className={styles.actionBtn} type="button" disabled={busy} onClick={() => startEditRank(r)}>
-                                <Medal size={16} />
-                                ترتيب
-                              </button>
-                            )}
-                          </>
-                        )}
-
-                        <button
-                          className={styles.actionBtn}
-                          type="button"
-                          onClick={() => router.push(`/Events-Faclevel/${id}/student/${r.studentId}`)}
-                        >
-                          <Eye size={16} />
-                          عرض التفاصيل
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {rows.length === 0 && (
-                  <tr>
-                    <td colSpan={6} style={{ textAlign: "center", padding: 18, opacity: 0.75, fontWeight: 700 }}>
-                      لا يوجد مشاركين حتى الآن
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* Pass onTeamsConfigured so EventTeams can notify us when teams exist */}
         <EventTeams
           eventId={id}
           participants={rows.map((r) => ({ id: r.id, studentId: r.studentId, name: r.name }))}
           onTeamsConfigured={setHasTeams}
         />
+
       </div>
     </div>
   );

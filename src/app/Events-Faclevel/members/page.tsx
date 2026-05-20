@@ -2,9 +2,10 @@
 
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import styles from "./styles/MembersPage.module.css";
-import { Search, Plus, Users } from "lucide-react";
+import { Search, Plus, Users, ArrowRight } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
+import { useRouter } from "next/navigation";
 import MembersTable from "./components/MembersTable";
 import StatsRow from "./components/StatsRow";
 import ReviewModal from "./components/ReviewModal";
@@ -77,6 +78,7 @@ async function fetchGroups(): Promise<Group[]> {
 
 export default function MembersPage() {
   const { showToast } = useToast();
+  const router = useRouter();
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(false);
   const [groups, setGroups] = useState<Group[]>([]);
@@ -142,6 +144,14 @@ export default function MembersPage() {
   return (
     <div className={styles.page}>
       <div className={styles.container}>
+        {/* Breadcrumb / Back Button */}
+        {/* <div className={styles.breadcrumb}>
+          <button onClick={() => router.push("/Events-Faclevel/scout")} className={styles.backBtn}>
+            <ArrowRight size={18} />
+            <span>العودة إلى الجوالة</span>
+          </button>
+        </div> */}
+
         {/* Header */}
         <div className={styles.header}>
           <div>

@@ -276,7 +276,7 @@ function PlanDetailsModal({ planId, planName, onClose }: {
                                 )}
                                 {ev.restrictions && (
                                   <div className={styles.eventGridItem}>
-                                    <span className={styles.gridLabel}><AlertTriangle size={12} /> القيود</span>
+                                    <span className={styles.gridLabel}><AlertTriangle size={12} /> الشروط</span>
                                     <span className={styles.gridVal}>{ev.restrictions}</span>
                                   </div>
                                 )}
@@ -320,7 +320,7 @@ export default function PlanView() {
   // ── Detail Modal state ──
   const [detailPlan, setDetailPlan] = useState<{ id: number; name: string } | null>(null);
 
-  const rowsPerPage = 8;
+  const rowsPerPage = 9;
 
   // ── Fetch plans ──
   const fetchPlans = useCallback(async () => {
@@ -511,7 +511,7 @@ export default function PlanView() {
           )}
 
           {/* Pagination */}
-          {/* {!loading && filtered.length > 0 && (
+          {!loading && filtered.length > 0 && (
             <div className={styles.pagination}>
               <span className={styles.pgInfo}>
                 عرض{" "}
@@ -537,7 +537,7 @@ export default function PlanView() {
                 </button>
               </div>
             </div>
-          )} */}
+          )}
         </div>
       )}
 

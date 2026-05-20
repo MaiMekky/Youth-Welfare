@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import styles from "./styles/Groupspage.module.css";
-import { Plus, FolderTree } from "lucide-react";
+import { Plus, FolderTree, ArrowRight } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
+import { useRouter } from "next/navigation";
 import GroupCard from "./components/GroupCard";
 import GroupFormModal from "./components/GroupFormModal";
 import DeleteGroupModal from "./components/DeleteGroupModal";
@@ -69,6 +70,7 @@ async function fetchGroups(): Promise<Group[]> {
 
 export default function GroupsPage() {
   const { showToast } = useToast();
+  const router = useRouter();
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -90,6 +92,13 @@ export default function GroupsPage() {
   return (
     <div className={styles.page}>
       <div className={styles.container}>
+        {/* Breadcrumb / Back Button */}
+        {/* <div className={styles.breadcrumb}>
+          <button onClick={() => router.push("/Events-Faclevel/scout")} className={styles.backBtn}>
+            <ArrowRight size={18} />
+            <span>العودة إلى الجوالة</span>
+          </button>
+        </div> */}
 
         {/* Header */}
         <div className={styles.header}>

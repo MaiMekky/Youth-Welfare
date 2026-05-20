@@ -131,6 +131,13 @@ export default function FacLevelSidebar({ isOpen = false, setIsOpen = () => {} }
             <span>طلبات الأسر</span>
           </button>
           <button
+            onClick={() => handleNavigation("/Family-Faclevel/unions")}
+            className={pathname.startsWith("/Family-Faclevel/unions") ? "active" : ""}
+          >
+            <User size={18} />
+            <span>الاتحادات</span>
+          </button>
+          <button
             onClick={() => handleNavigation("/Family-Faclevel/environment-friends")}
             className={pathname === "/Family-Faclevel/environment-friends" ? "active" : ""}
           >

@@ -113,7 +113,7 @@ const StudentNavbar: React.FC = () => {
   const baseNavItems: NavItem[] = [
     { key: "home",       label: "أنشطتي",            icon: <IconHome />,       href: "/Student/MainPage"   },
     { key: "activities", label: "الأنشطة",            icon: <IconActivities />, href: "/Student/Activities" },
-    { key: "families",   label: "الأسر الطلابية",     icon: <IconFamily />,     href: "/Student/Families"   },
+    { key: "families",   label: " الأسر الطلابية والاتحادات",     icon: <IconFamily />,     href: "/Student/Families"   },
     { key: "scouts",     label: "الجوالة",             icon: <IconScouts />,     href: "/Student/Scouts"     }, // ← NEW
     { key: "takafol",    label: "التكافل الاجتماعي",  icon: <IconTakafol />,    href: "/Student/takafol"    },
     { key: "profile",    label: "ملفي الشخصي",        icon: <IconProfile />,    href: "/Student/profile"    },
@@ -140,7 +140,7 @@ const StudentNavbar: React.FC = () => {
     document.cookie = `user_type=; ${wipe}`;
     document.cookie = `roleKey=; ${wipe}`;
     document.cookie = `session_meta=; ${wipe}`;
-
+    document.cookie = `lastRoute=; ${wipe}`;
     // Set a short-lived cookie so middleware knows this is a logout
     document.cookie = `logging_out=1; path=/; max-age=5`;
 

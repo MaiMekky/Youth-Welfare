@@ -1,20 +1,16 @@
 "use client";
 import React from "react";
-import FamilyAdBanner from "./FamilyAdBanner";
+import InfoButtons from "./InfoButtons";
 import StudentHero from "../../components/StudentHero";
+import "../styles/HeadPage.css";
 
 interface HeadPageProps {
   onCreateClick?: () => void;
   onReviewClick?: () => void;
+  onUnionInfoClick?: () => void;
 }
 
-export default function HeadPage({ onCreateClick }: HeadPageProps) {
-  const handleLearnMore = () => {
-    if (onCreateClick) {
-      onCreateClick();
-    }
-  };
-
+export default function HeadPage({ onCreateClick, onUnionInfoClick }: HeadPageProps) {
   return (
     <>
       <StudentHero
@@ -22,9 +18,10 @@ export default function HeadPage({ onCreateClick }: HeadPageProps) {
         subtitle="انضم إلى الأسر الطلابية المتنوعة وكن جزءًا من مجتمع طلابي نشط"
       />
 
-      <div className="fam-banner-wrap">
-        <FamilyAdBanner onLearnMore={handleLearnMore} />
-      </div>
+      <InfoButtons 
+        onFamilyInfoClick={onCreateClick}
+        onUnionInfoClick={onUnionInfoClick}
+      />
     </>
   );
 }

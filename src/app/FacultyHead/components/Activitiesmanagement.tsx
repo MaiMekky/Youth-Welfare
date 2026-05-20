@@ -133,7 +133,7 @@ function DetailModal({ id, onClose }: { id: number; onClose: () => void }) {
                   { icon:<Users size={15}/>,       label:"الحد الأقصى",   val:limitLabel(detail.s_limit) },
                   { icon:<DollarSign size={15}/>,  label:"التكلفة",       val:detail.cost||"مجاني" },
                   { icon:<Tag size={15}/>,         label:"المكافأة",      val:detail.reward||"—" },
-                  { icon:<AlertCircle size={15}/>, label:"القيود",        val:detail.restrictions||"لا يوجد" },
+                  { icon:<AlertCircle size={15}/>, label:"الشروط",        val:detail.restrictions||"لا يوجد" },
                   { icon:<Layers size={15}/>,      label:"الموارد",       val:detail.resource||"—" },
                   ...(detail.status && isRejectedStatus(detail.status) && detail.rejection_reason
                   ? [{ icon: <MessageSquare size={15}/>, label: "سبب الرفض", val: detail.rejection_reason }]

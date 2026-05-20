@@ -63,7 +63,8 @@ const [eventData, setEventData] = useState<EventData>({
 });
 
   const [studentsData, setStudentsData] = useState<Student[]>([]);
-
+  const [rawStartDate, setRawStartDate] = useState<string | null>(null);
+  const hasStarted = rawStartDate ? new Date() >= new Date(rawStartDate) : false;
   /* ================= Fetch Event ================= */
 
   useEffect(() => {
@@ -81,6 +82,7 @@ const [eventData, setEventData] = useState<EventData>({
         if (!res.ok) throw new Error("Failed to fetch event");
 
        const data = await res.json();
+       setRawStartDate(data.st_date);
 
 setEventData({
   title: data.title,
@@ -128,6 +130,10 @@ setStudentsData(
     studentId: number,
   action: "approve" | "reject"
 ) => {
+  if (hasStarted) {
+      showToast("لا يمكن تعديل المشاركين بعد بدء الفعالية", "warning");
+      return;
+    }
   try {
 
     const res = await authFetch(
@@ -166,6 +172,10 @@ setStudentsData(
   }
 };
 const handleApproveAll = async () => {
+   if (hasStarted) {
+      showToast("لا يمكن اعتماد المشاركين بعد بدء الفعالية", "warning");
+      return;
+    }
   try {
 
     // Loop through students and approve each
@@ -204,7 +214,18 @@ const handleApproveAll = async () => {
           <h1 className={styles.detailsTitle}>
             تفاصيل الفعالية: {eventData.title}
           </h1>
-
+            {hasStarted && (
+            <div className={styles.startedBanner}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                strokeLinejoin="round" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+               لا يمكن تعديل المشاركين
+            </div>
+          )}
           <div className={styles.headerActions}>
             <button className={`${styles.actionBtn} ${styles.back}`} onClick={handleBack}>
               <span className={styles.btnIcon}>←</span>
@@ -284,95 +305,101 @@ const handleApproveAll = async () => {
         </div>
 
         {/* ===== Students Table ===== */}
-        <div className={styles.studentsCard}>
+      <div className={styles.studentsCard}>
           <div className={styles.studentsHeader}>
             <h2 className={styles.cardTitle}>المشاركون</h2>
-            <button
-              className={styles.approveAllButton}
-              onClick={handleApproveAll}
-              disabled={studentsData.length === 0}
-            >
-              اعتماد الجميع
-            </button>
+            {/* ── approve-all: hidden when started ── */}
+            {!hasStarted && (
+              <button
+                className={styles.approveAllButton}
+                onClick={handleApproveAll}
+                disabled={studentsData.length === 0}
+              >
+                اعتماد الجميع
+              </button>
+            )}
           </div>
 
           <div className={styles.tableContainer}>
-           <table className={styles.studentsTable}>
-  <thead>
-    <tr>
-      <th>الاسم</th>
-      <th>الرقم القومي</th>
-      <th>الرقم الجامعي</th>
-      <th>الحالة</th>
-      <th>الإجراءات</th>
-    </tr>
-  </thead>
-  <tbody>
-  {studentsData.length === 0 ? (
-    <tr>
-      <td colSpan={5} className={styles.emptyState}>
-        <div className={styles.emptyStateContent}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-            <circle cx="12" cy="8" r="4"/>
-            <path d="M5.5 21a6.5 6.5 0 0113 0"/>
-          </svg>
-          <p>لا يوجد مشاركون حتى الآن</p>
-        </div>
-      </td>
-    </tr>
-  ) : (studentsData.map((p, idx) => (
-      <tr key={idx}>
-        <td>{p.name}</td>
-        <td>{p.nationalId}</td>
-        <td>{p.collegeId}</td>
-        <td>
-        <span className={`${styles.statusBadge} ${
-          p.status === "مقبول" ? styles.statusApproved :
-          p.status === "مرفوض" ? styles.statusRejected :
-          styles.statusPending
-        }`}>
-          {p.status}
-        </span>
-      </td>
-        
-        {/* <td>{p.rank ?? "-"}</td>
-        <td>{p.reward ?? "-"}</td> */}
-        <td>
-  <div className={styles.actionsRow}>
-    <button
-      className={styles.approveButton}
-      onClick={() => handleParticipantAction(p.studentId, "approve")}
-      disabled={p.status === "مقبول"}
-      title="اعتماد"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-        <polyline points="20 6 9 17 4 12" />
-      </svg>
-    </button>
-    <button
-      className={styles.rejectButton}
-      onClick={() => handleParticipantAction(p.studentId, "reject")}
-      disabled={p.status === "مرفوض"}
-      title="رفض"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-        <line x1="18" y1="6" x2="6" y2="18" />
-        <line x1="6" y1="6" x2="18" y2="18" />
-      </svg>
-    </button>
-  </div>
-</td>
-
-
-      </tr>
-    ))
-  )}
-  </tbody>
-</table>
+            <table className={styles.studentsTable}>
+              <thead>
+                <tr>
+                  <th>الاسم</th>
+                  <th>الرقم القومي</th>
+                  <th>الرقم الجامعي</th>
+                  <th>الحالة</th>
+                  {/* ── actions column hidden when started ── */}
+                  {!hasStarted && <th>الإجراءات</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {studentsData.length === 0 ? (
+                  <tr>
+                    <td colSpan={hasStarted ? 4 : 5} className={styles.emptyState}>
+                      <div className={styles.emptyStateContent}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none"
+                          stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
+                          strokeLinejoin="round" viewBox="0 0 24 24">
+                          <circle cx="12" cy="8" r="4" />
+                          <path d="M5.5 21a6.5 6.5 0 0113 0" />
+                        </svg>
+                        <p>لا يوجد مشاركون حتى الآن</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : studentsData.map((p, idx) => (
+                  <tr key={idx}>
+                    <td>{p.name}</td>
+                    <td>{p.nationalId}</td>
+                    <td>{p.collegeId}</td>
+                    <td>
+                      <span className={`${styles.statusBadge} ${
+                        p.status === "مقبول" ? styles.statusApproved :
+                        p.status === "مرفوض" ? styles.statusRejected :
+                        styles.statusPending
+                      }`}>
+                        {p.status}
+                      </span>
+                    </td>
+                    {/* ── actions cell hidden when started ── */}
+                    {!hasStarted && (
+                      <td>
+                        <div className={styles.actionsRow}>
+                          <button
+                            className={styles.approveButton}
+                            onClick={() => handleParticipantAction(p.studentId, "approve")}
+                            disabled={p.status === "مقبول"}
+                            title="اعتماد"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                              stroke="#fff" strokeWidth="2" strokeLinecap="round"
+                              strokeLinejoin="round" viewBox="0 0 24 24">
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                          </button>
+                          <button
+                            className={styles.rejectButton}
+                            onClick={() => handleParticipantAction(p.studentId, "reject")}
+                            disabled={p.status === "مرفوض"}
+                            title="رفض"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                              stroke="#fff" strokeWidth="2" strokeLinecap="round"
+                              strokeLinejoin="round" viewBox="0 0 24 24">
+                              <line x1="18" y1="6" x2="6" y2="18" />
+                              <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
-
       <Footer />
     </>
   );

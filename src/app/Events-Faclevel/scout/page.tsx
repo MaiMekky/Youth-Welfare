@@ -10,6 +10,9 @@ import { getSessionMeta } from "@/utils/cookieHelpers";
 import { useToast } from "@/app/context/ToastContext";
 import { Plus, Shield, Users, GitBranch, FolderTree, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
+import MembersPage from "@/app/Events-Faclevel/members/page";
+import GroupsPage from "@/app/Events-Faclevel/groups/page";
+import StructurePage from "@/app/Events-Faclevel/structure/page";
 
 const API_URL = getBaseUrl();
 
@@ -186,44 +189,11 @@ export default function ScoutPage() {
                 </div>
               )}
 
-              {activeTab === "members" && (
-                <div className={styles.previewTab}>
-                  <div className={styles.previewHeader}>
-                    <h3>معاينة الأعضاء</h3>
-                    <p>عرض سريع لأعضاء العشيرة</p>
-                  </div>
-                  <button className={styles.goToBtn} onClick={goToMembers}>
-                    <span>الانتقال إلى صفحة الأعضاء</span>
-                    <ArrowRight size={18} />
-                  </button>
-                </div>
-              )}
+            {activeTab === "members" && <MembersPage />}
 
-              {activeTab === "groups" && (
-                <div className={styles.previewTab}>
-                  <div className={styles.previewHeader}>
-                    <h3>معاينة الرهوط</h3>
-                    <p>عرض سريع لرهوط العشيرة</p>
-                  </div>
-                  <button className={styles.goToBtn} onClick={goToGroups}>
-                    <span>الانتقال إلى صفحة الرهوط</span>
-                    <ArrowRight size={18} />
-                  </button>
-                </div>
-              )}
+            {activeTab === "groups" && <GroupsPage />}
 
-              {activeTab === "structure" && (
-                <div className={styles.previewTab}>
-                  <div className={styles.previewHeader}>
-                    <h3>معاينة الهيكل التنظيمي</h3>
-                    <p>عرض الهيكل الهرمي للعشيرة</p>
-                  </div>
-                  <button className={styles.goToBtn} onClick={goToStructure}>
-                    <span>الانتقال إلى صفحة الهيكل التنظيمي</span>
-                    <ArrowRight size={18} />
-                  </button>
-                </div>
-              )}
+            {activeTab === "structure" && <StructurePage />}
             </div>
           </>
         )}

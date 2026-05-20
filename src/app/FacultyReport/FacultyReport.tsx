@@ -74,7 +74,7 @@ const handleExport = async () => {
     );
 
     if (res.status === 422) {
-      showToast("لا توجد سنة دراسية لهذه الفرقة", "error");
+      showToast("لا يوجد تقرير لهذه الفرقة", "error");
       setShowExportModal(false);
       setAcademicYear("");
       return;

@@ -139,11 +139,14 @@ export function middleware(req: NextRequest) {
     userType === "student" || VALID_ADMIN_ROLES.has(roleKey)
   );
 
-  // Root: redirect logged-in users to their home
+ // Root: redirect logged-in users to their last route or default home
   if (path === "/") {
     const isLoggingOut = req.cookies.get("logging_out")?.value === "1";
     if (!isLoggingOut && isLoggedIn) {
-      const dest = defaultRedirect(userType, roleKey);
+      const lastRoute = req.cookies.get("lastRoute")?.value;
+      const dest = lastRoute
+        ? decodeURIComponent(lastRoute)
+        : defaultRedirect(userType, roleKey);
       if (dest !== "/") return redirectTo(dest, req);
     }
     return NextResponse.next();

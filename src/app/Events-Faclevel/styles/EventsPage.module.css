@@ -349,7 +349,174 @@
 .cardActions .btnDanger:hover{ background:#DC2626; color:#fff; transform:translateY(-2px); box-shadow:0 8px 20px rgba(220,38,38,.2); }
 
 .empty{ grid-column:1 / -1; background:#fff; border:1px dashed rgba(30,58,95,.2); border-radius:16px; padding:18px; text-align:center; font-weight:900; color:#6B8299; }
+/* ── Append these rules to the BOTTOM of your existing EventsPage.module.css ── */
 
+/* ===== Elegant Status Chip Variants ===== */
+
+/* مقبول — emerald green */
+.accepted  { background: #ECFDF5; color: #065F46; border: 1px solid #6EE7B7; }
+
+/* موافقة مبدئية — cyan/teal */
+.tentative { background: #ECFEFF; color: #155E75; border: 1px solid #67E8F9; }
+
+/* منتظر — warm amber */
+.pending   { background: #FFFBEB; color: #92400E; border: 1px solid #FCD34D; }
+
+/* مكتمل — soft indigo/blue */
+.completed { background: #EFF6FF; color: #1E40AF; border: 1px solid #93C5FD; }
+
+/* منتهي الصلاحية — cool slate */
+.expired   { background: #F8FAFC; color: #475569; border: 1px solid #CBD5E1; }
+
+/* مرفوض — rose */
+.rejected  { background: #FFF1F2; color: #9F1239; border: 1px solid #FDA4AF; }
+
+/* ملغي — deep crimson */
+.cancelled { background: #FEF2F2; color: #7F1D1D; border: 1px solid #FCA5A5; font-weight: 800; }
+
+
+/* ===== Date Filter Box ===== */
+.dateBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1.5px solid #E2ECF5;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: #F7FAFD;
+  color: #1A2E42;
+  transition: border .2s;
+  min-width: 160px;
+}
+.dateBox:focus-within { border-color: #2D5F8A; background: #fff; }
+.dateBox input[type="date"] {
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #1A2E42;
+  font-family: 'Cairo', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  width: 100%;
+  cursor: pointer;
+}
+.dateBox input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+
+/* ===== Mark Completed Button ===== */
+.completeBtn {
+  border-radius: 10px!important;
+  padding: 9px 14px !important;
+  font-weight: 800!important;
+  cursor: pointer!important;
+  display: inline-flex!important;
+  align-items: center!important;
+  gap: 8px!important;
+  border: 1.5px solid #6EE7B7!important;
+  background: #ECFDF5!important;
+  color: #065F46!important;
+  font-family: 'Cairo', sans-serif!important;
+  font-size: 14px!important;
+  transition: all 160ms ease !important;
+  will-change: transform !important;
+}
+.completeBtn:hover:not(:disabled) {
+  background: #059669 !important;
+  color: #fff !important;
+  border-color: #059669 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(5,150,105,.25) !important;
+}
+.completeBtn:active:not(:disabled) { transform: translateY(0)!important; }
+.completeBtn:disabled { opacity: .55; cursor: not-allowed!important; }
+
+
+/* ===== Responsive for new date boxes ===== */
+@media (max-width: 640px) {
+  .dateBox {
+    width: 100%;
+    min-width: unset;
+  }
+}
+/* ===== Date Filter Group (label + input) ===== */
+.dateGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+ 
+.dateLabel {
+  font-size: 11px;
+  font-weight: 800;
+  color: #6B8299;
+  letter-spacing: 0.4px;
+  padding-right: 4px;
+  text-transform: uppercase;
+  user-select: none;
+}
+/* ── Completion button urgency variants ── */
+.completeBtn_normal {
+  border-color: #10B981;
+  color: #10B981;
+}
+.completeBtn_normal:hover {
+  background: #10B981;
+  color: #fff;
+}
+
+.completeBtn_warning {
+  border-color: #C49B3A;
+  color: #C49B3A;
+  animation: pulseWarning 2s ease-in-out infinite;
+}
+.completeBtn_warning:hover {
+  background: #C49B3A;
+  color: #fff;
+}
+
+.completeBtn_critical {
+  border-color: #EF4444;
+  color: #EF4444;
+  animation: pulseCritical 1s ease-in-out infinite;
+}
+.completeBtn_critical:hover {
+  background: #EF4444;
+  color: #fff;
+}
+
+@keyframes pulseWarning {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(196, 155, 58, 0.4); }
+  50%       { box-shadow: 0 0 0 5px rgba(196, 155, 58, 0); }
+}
+
+@keyframes pulseCritical {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+  50%       { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+}
+
+/* ── Completion notification pill (bell panel) ── */
+.pillComplete {
+  background: #FEF2F2;
+  color: #991B1B;
+  border: 1px solid #FECACA;
+}
+
+/* ── Complete kind notification item ── */
+.notif_complete {
+  border-right: 3px solid #EF4444;
+}
+
+.icon_complete {
+  background: #FEF2F2;
+  color: #EF4444;
+} 
+@media (max-width: 640px) {
+  .dateGroup { width: 100%; }
+}
+ 
 /* ===== Responsive ===== */
 @media (max-width: 1100px){ .cardsGrid{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media (max-width: 980px){ .statsRow{ grid-template-columns:repeat(2,1fr); } }

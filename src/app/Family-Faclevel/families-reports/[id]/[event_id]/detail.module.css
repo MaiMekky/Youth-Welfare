@@ -217,7 +217,19 @@
 
 .infoLabel { font-size: 13px; font-weight: 700; color: var(--gold); white-space: nowrap; }
 .infoValue { font-size: 13px; font-weight: 600; color: var(--navy); word-break: break-word; }
-
+.startedBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background-color: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #c2410c;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
 /* ── Description ── */
 .descriptionText {
   font-size: 14px;

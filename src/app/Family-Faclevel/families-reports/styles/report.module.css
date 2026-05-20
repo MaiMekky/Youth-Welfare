@@ -278,6 +278,57 @@
 
 .btnIcon { font-size: 1rem; }
 
+.deactivateBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: #fee2e2;
+  color: #dc2626;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.deactivateBtn:hover:not(:disabled) {
+  background-color: #fecaca;
+}
+
+.deactivateBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.deactivateBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: #fee2e2;
+  color: #dc2626;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.deactivateBtn:hover:not(:disabled) {
+  background-color: #fecaca;
+}
+
+.deactivateBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Slightly dim the whole card when inactive */
+.inactiveCard {
+  opacity: 0.75;
+}
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .reportsPage { padding: 16px 14px 32px; }

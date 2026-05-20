@@ -2,9 +2,9 @@
 
 import React from "react";
 import styles from "../styles/EventsPage.module.css";
-import { CalendarDays, MapPin, Users, DollarSign, Eye, Pencil, Trash2 } from "lucide-react";
+import { CalendarDays, MapPin, Users, DollarSign, Eye, Pencil, Trash2, CheckCircle2 } from "lucide-react";
 
-export type ChipVariant = "success" | "primary" | "info" | "purple" | "danger";
+export type ChipVariant = "success" | "primary" | "info" | "purple" | "danger" | "warning" | "orange" | "teal" | "rose" | "accepted" | "tentative" | "pending" | "completed" | "expired" | "rejected" | "cancelled";
 
 export type EventItem = {
   id: number;
@@ -36,12 +36,50 @@ function mapCategoryLabel(raw: string): string {
   return raw;
 }
 
+/**
+ * Maps status label for display.
+ * موافقة مبدئية → منتظر
+ */
+function mapStatusLabel(raw: string): string {
+  if (raw === "موافقة مبدئية") return "منتظر";
+  return raw;
+}
+
+/** Check if end_date has passed */
+function isPastEndDate(endDateStr: string): boolean {
+  if (!endDateStr) return false;
+  try {
+    return new Date(endDateStr) <= new Date();
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Returns how many full days have elapsed since end_date.
+ * Returns -1 if end date is in the future or invalid.
+ */
+function daysSinceEnd(endDateStr: string): number {
+  if (!endDateStr) return -1;
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const end = new Date(endDateStr);
+    end.setHours(0, 0, 0, 0);
+    const diff = Math.floor((today.getTime() - end.getTime()) / (1000 * 60 * 60 * 24));
+    return diff >= 0 ? diff : -1;
+  } catch {
+    return -1;
+  }
+}
+
 export default function EventCard({
   item,
   onView,
   onEdit,
   onDelete,
   onActiveChange,
+  onMarkCompleted,
   busy,
   hideToggle,
 }: {
@@ -50,13 +88,34 @@ export default function EventCard({
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
   onActiveChange?: (id: number, nextActive: boolean) => void;
+  onMarkCompleted?: (id: number) => void;
   busy?: boolean;
   hideToggle?: boolean;
 }) {
   if (!item) return null;
 
-  // Display label mapped from raw value; raw value stays in item.categoryLabel for any logic
   const displayCategory = mapCategoryLabel(item.categoryLabel);
+  const displayStatus   = mapStatusLabel(item.statusLabel);
+
+  const isCancelled = item.statusLabel === "ملغي";
+  const isRejected  = item.statusLabel === "مرفوض";
+  const isPastEnd   = isPastEndDate(item.time);
+  const isAccepted  = item.statusLabel === "مقبول";
+
+  // Days elapsed since end_date (0 = ended today, 1 = 1 day ago, etc.)
+  const elapsed     = daysSinceEnd(item.time);
+
+  // Hide edit & cancel when: cancelled, rejected, or end date has passed
+  const hideEditDelete = isCancelled || isRejected || isPastEnd;
+
+  // Show "إتمام الفعالية" anytime when:
+  //   • faculty_id is present (dept events are hidden from fac admin)
+  //   • status is مقبول
+  //   • end date has passed
+  const showMarkCompleted =
+    item.faculty_id !== null &&
+    isAccepted &&
+    isPastEnd;
 
   return (
     <article className={styles.card}>
@@ -67,12 +126,11 @@ export default function EventCard({
             <p className={styles.plan}>{item.planName}</p>
           </div>
 
-          {!hideToggle && item.statusLabel === "مقبول" && (
+          {!hideToggle && isAccepted && (
             <div className={styles.approvalWrap}>
               <span className={styles.approvalLabel}>
                 {item.isActive ? "نشط" : "غير نشط"}
               </span>
-
               <label className={styles.switch} aria-label="حالة النشاط">
                 <input
                   type="checkbox"
@@ -87,8 +145,7 @@ export default function EventCard({
         </div>
 
         <div className={styles.chips}>
-          <Chip label={item.statusLabel} variant={item.statusVariant} />
-          {/* Show mapped display label, not the raw داخلي/خارجي value */}
+          <Chip label={displayStatus} variant={item.statusVariant} />
           <Chip label={displayCategory} variant={item.categoryVariant} />
         </div>
       </div>
@@ -123,7 +180,8 @@ export default function EventCard({
           <Eye size={18} />
           عرض التفاصيل
         </button>
-        {!hideToggle && (
+
+        {!hideToggle && !hideEditDelete && (
           <>
             <button className={styles.secondary} onClick={() => onEdit(item.id)}>
               <Pencil size={18} />
@@ -135,6 +193,32 @@ export default function EventCard({
               الغاء
             </button>
           </>
+        )}
+
+        {showMarkCompleted && (
+          <button
+            className={styles.completeBtn}
+            onClick={() => onMarkCompleted?.(item.id)}
+            disabled={busy}
+          >
+            <CheckCircle2 size={18} />
+            إتمام الفعالية
+            {elapsed >= 0 && (
+              <span
+                style={{
+                  marginRight: "6px",
+                  padding: "1px 7px",
+                  borderRadius: "99px",
+                  fontSize: "0.75rem",
+                  fontWeight: 700,
+                  background: "rgba(21,128,61,0.15)",
+                  color: "#15803D",
+                }}
+              >
+                {elapsed === 0 ? "انتهى اليوم" : `منذ ${elapsed} ${elapsed === 1 ? "يوم" : "أيام"}`}
+              </span>
+            )}
+          </button>
         )}
       </div>
     </article>

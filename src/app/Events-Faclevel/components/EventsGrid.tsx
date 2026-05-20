@@ -51,12 +51,14 @@ export default function EventsGrid({
   onEdit,
   onDelete,
   onItemsChange,
+  onMarkCompleted,
 }: {
   items: EventItem[];
   onView: (id: number) => void;
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
   onItemsChange: (next: EventItem[]) => void;
+  onMarkCompleted?: (id: number) => void;
 }) {
   const safeItems = useMemo(() => items.filter(Boolean), [items]);
   const [busyId, setBusyId] = useState<number | null>(null);
@@ -66,7 +68,6 @@ export default function EventsGrid({
     const current = safeItems.find((x) => x.id === id);
     if (!current) return;
 
-    // ✅ لو التوجل مخفي (يعني عنده faculty id) منعملش حاجة
     if (current.hideToggle) return;
 
     setBusyId(id);
@@ -91,21 +92,20 @@ export default function EventsGrid({
   };
 
   return (
-    <>
-      <div className={styles.grid}>
-        {safeItems.map((e) => (
-          <EventCard
-            key={e.id}
-            item={e}
-            busy={busyId === e.id}
-            hideToggle={e.hideToggle}
-            onActiveChange={e.hideToggle ? undefined : onActiveChange}
-            onView={onView}
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
-        ))}
-      </div>
-    </>
+    <div className={styles.grid}>
+      {safeItems.map((e) => (
+        <EventCard
+          key={e.id}
+          item={e}
+          busy={busyId === e.id}
+          hideToggle={e.hideToggle}
+          onActiveChange={e.hideToggle ? undefined : onActiveChange}
+          onView={onView}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onMarkCompleted={onMarkCompleted}
+        />
+      ))}
+    </div>
   );
 }

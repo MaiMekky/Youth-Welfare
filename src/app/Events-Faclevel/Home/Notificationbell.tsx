@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import {
   Bell,
   X,
-  CalendarDays,
   AlertTriangle,
   Clock,
   CheckCircle2,
@@ -35,11 +34,12 @@ type Notification = {
   event_id: number;
   title: string;
   subtitle: string;
-  kind: "today" | "soon" | "new";
+  kind: "today" | "soon" | "new" | "complete";
   daysUntil: number;
+  daysOverdue: number;
   date: string;
   read: boolean;
-  timestamp: number; // for sorting
+  timestamp: number;
 };
 
 /* ─── Helpers ─── */
@@ -51,11 +51,17 @@ function getDaysUntil(dateStr: string): number {
   return Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-function isNewEvent(dateStr: string): boolean {
-  // Consider "new" if the event was created/registered in last 7 days
-  // We use st_date as a proxy — events starting within next 30 days added recently
-  // In real app you'd use a created_at field; we fake it with event_id ordering
-  return false; // override per logic below
+function getDaysOver(dateStr: string): number {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(dateStr);
+  target.setHours(0, 0, 0, 0);
+  return Math.floor((today.getTime() - target.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function isApproved(s: string): boolean {
+  const k = s?.trim();
+  return k === "مقبول" || k?.toLowerCase() === "approved";
 }
 
 function fmt(d: string) {
@@ -75,7 +81,7 @@ function timeAgo(daysUntil: number): string {
   return `بعد ${daysUntil} أيام`;
 }
 
-/* ─── Storage helpers (persist read state) ─── */
+/* ─── Storage helpers ─── */
 const STORAGE_KEY = "notif_read_ids";
 const DISMISSED_KEY = "notif_dismissed_ids";
 
@@ -114,14 +120,13 @@ function buildNotifications(events: ApiEvent[]): Notification[] {
   const notifs: Notification[] = [];
   const dismissed = getDismissedIds();
 
-  // Sort events by event_id desc to detect "newest"
   const sorted = [...events].sort((a, b) => b.event_id - a.event_id);
   const newestIds = new Set(sorted.slice(0, 5).map((e) => e.event_id));
 
   events.forEach((ev) => {
     const days = getDaysUntil(ev.st_date);
 
-    // Upcoming within 3 days (today, tomorrow, day after)
+    // Upcoming within 3 days
     if (days >= 0 && days <= 3) {
       const id = `upcoming-${ev.event_id}`;
       if (!dismissed.has(id)) {
@@ -135,6 +140,7 @@ function buildNotifications(events: ApiEvent[]): Notification[] {
               : `تبدأ ${timeAgo(days)} — ${fmt(ev.st_date)}`,
           kind: days === 0 ? "today" : "soon",
           daysUntil: days,
+          daysOverdue: 0,
           date: ev.st_date,
           read: false,
           timestamp: new Date(ev.st_date).getTime(),
@@ -153,16 +159,53 @@ function buildNotifications(events: ApiEvent[]): Notification[] {
           subtitle: `فعالية جديدة · ${fmt(ev.st_date)}`,
           kind: "new",
           daysUntil: days,
+          daysOverdue: 0,
           date: ev.st_date,
           read: false,
-          timestamp: Date.now() - ev.event_id, // newer id = more recent
+          timestamp: Date.now() - ev.event_id,
         });
+      }
+    }
+
+    // Completion reminder: faculty events only (faculty_id !== null),
+    // approved, within 7-day window after end_date
+    if (ev.faculty_id !== null && isApproved(ev.status)) {
+      const daysOver = getDaysOver(ev.end_date);
+      if (daysOver >= 0 && daysOver <= 7) {
+        const id = `complete-${ev.event_id}`;
+        if (!dismissed.has(id)) {
+          const remaining = 7 - daysOver;
+          notifs.push({
+            id,
+            event_id: ev.event_id,
+            title: ev.title,
+            subtitle:
+              remaining === 0
+                ? "⛔ آخر فرصة اليوم — أتمّ الفعالية الآن!"
+                : remaining === 1
+                ? "🔴 تبقّى يوم واحد فقط لإتمام الفعالية"
+                : daysOver <= 2
+                ? `تم انتهاء الفعالية — أتمّها خلال ${remaining} أيام`
+                : `⚠ تبقّى ${remaining} أيام لإتمام الفعالية`,
+            kind: "complete",
+            daysUntil: -daysOver,
+            daysOverdue: daysOver,
+            date: ev.end_date,
+            read: false,
+            timestamp: new Date(ev.end_date).getTime(),
+          });
+        }
       }
     }
   });
 
-  // Sort: today first, then soon, then new; within kind sort by date
-  const kindOrder = { today: 0, soon: 1, new: 2 };
+  // Sort: today → soon → complete → new; within kind sort by date
+  const kindOrder: Record<Notification["kind"], number> = {
+    today: 0,
+    soon: 1,
+    complete: 2,
+    new: 3,
+  };
   return notifs.sort(
     (a, b) => kindOrder[a.kind] - kindOrder[b.kind] || a.daysUntil - b.daysUntil
   );
@@ -185,6 +228,8 @@ function NotifItem({
       <AlertTriangle size={20} />
     ) : notif.kind === "soon" ? (
       <Clock size={20} />
+    ) : notif.kind === "complete" ? (
+      <CheckCircle2 size={20} />
     ) : (
       <Sparkles size={20} />
     );
@@ -239,49 +284,34 @@ export default function NotificationBell({
   const panelRef = useRef<HTMLDivElement>(null);
   const bellRef = useRef<HTMLButtonElement>(null);
 
-  // Build notifications whenever events change
   useEffect(() => {
     const dismissed = getDismissedIds();
     setDismissedIds(dismissed);
     const read = getReadIds();
     setReadIds(read);
-
     const built = buildNotifications(events);
-    setNotifications(
-      built.map((n) => ({ ...n, read: read.has(n.id) }))
-    );
+    setNotifications(built.map((n) => ({ ...n, read: read.has(n.id) })));
   }, [events]);
 
-  // Panel open animation + position calculation
   useEffect(() => {
     if (open) {
-      // Calculate panel position from bell button's screen rect
       if (bellRef.current) {
         const rect = bellRef.current.getBoundingClientRect();
         const panelWidth = Math.min(400, window.innerWidth - 24);
         const spaceRight = window.innerWidth - rect.right;
-        const spaceLeft  = rect.left;
+        const spaceLeft = rect.left;
 
         let left: number;
         if (spaceRight >= panelWidth + 12) {
-          // enough room to the right of bell → align panel left edge with bell left
           left = rect.left;
         } else if (spaceLeft >= panelWidth + 12) {
-          // enough room to the left → align panel right edge with bell right
           left = rect.right - panelWidth;
         } else {
-          // center on screen
           left = (window.innerWidth - panelWidth) / 2;
         }
 
-        // clamp so panel never goes off-screen
         left = Math.max(12, Math.min(left, window.innerWidth - panelWidth - 12));
-
-        setPanelStyle({
-          top: rect.bottom + 10,
-          left,
-          width: panelWidth,
-        });
+        setPanelStyle({ top: rect.bottom + 10, left, width: panelWidth });
       }
       requestAnimationFrame(() => setAnimateIn(true));
     } else {
@@ -289,7 +319,6 @@ export default function NotificationBell({
     }
   }, [open]);
 
-  // Click outside to close
   useEffect(() => {
     function handler(e: MouseEvent) {
       if (
@@ -337,9 +366,16 @@ export default function NotificationBell({
     });
   }, [notifications]);
 
-  const todayCount = notifications.filter((n) => n.kind === "today").length;
-  const soonCount = notifications.filter((n) => n.kind === "soon").length;
-  const newCount = notifications.filter((n) => n.kind === "new").length;
+  const todayCount    = notifications.filter((n) => n.kind === "today").length;
+  const soonCount     = notifications.filter((n) => n.kind === "soon").length;
+  const newCount      = notifications.filter((n) => n.kind === "new").length;
+  const completeCount = notifications.filter((n) => n.kind === "complete").length;
+
+  const navToEvent = (id: number) => {
+    setOpen(false);
+    sessionStorage.setItem("eventDetails_from", window.location.pathname);
+    router.push(`/Events-Faclevel/${id}`);
+  };
 
   return (
     <div className={styles.wrapper}>
@@ -382,10 +418,7 @@ export default function NotificationBell({
                     تعليم الكل كمقروء
                   </button>
                 )}
-                <button
-                  className={styles.closeBtn}
-                  onClick={() => setOpen(false)}
-                >
+                <button className={styles.closeBtn} onClick={() => setOpen(false)}>
                   <X size={18} />
                 </button>
               </div>
@@ -404,6 +437,12 @@ export default function NotificationBell({
                   <span className={`${styles.pill} ${styles.pillSoon}`}>
                     <Clock size={12} />
                     {soonCount} قريباً
+                  </span>
+                )}
+                {completeCount > 0 && (
+                  <span className={`${styles.pill} ${styles.pillComplete}`}>
+                    <CheckCircle2 size={12} />
+                    {completeCount} تحتاج إتماماً
                   </span>
                 )}
                 {newCount > 0 && (
@@ -430,7 +469,7 @@ export default function NotificationBell({
               ) : (
                 <>
                   {/* Today section */}
-                  {notifications.filter((n) => n.kind === "today").length > 0 && (
+                  {todayCount > 0 && (
                     <div className={styles.section}>
                       <div className={styles.sectionLabel}>
                         <span className={styles.sectionDotRed} />
@@ -444,18 +483,14 @@ export default function NotificationBell({
                             notif={n}
                             onRead={markRead}
                             onDismiss={dismiss}
-                            onClick={(id) => {
-                              setOpen(false);
-                              sessionStorage.setItem("eventDetails_from", window.location.pathname);
-                              router.push(`/Events-Faclevel/${id}`);
-                            }}
+                            onClick={navToEvent}
                           />
                         ))}
                     </div>
                   )}
 
                   {/* Soon section */}
-                  {notifications.filter((n) => n.kind === "soon").length > 0 && (
+                  {soonCount > 0 && (
                     <div className={styles.section}>
                       <div className={styles.sectionLabel}>
                         <span className={styles.sectionDotGold} />
@@ -469,18 +504,35 @@ export default function NotificationBell({
                             notif={n}
                             onRead={markRead}
                             onDismiss={dismiss}
-                            onClick={(id) => {
-                              setOpen(false);
-                              sessionStorage.setItem("eventDetails_from", window.location.pathname);
-                              router.push(`/Events-Faclevel/${id}`);
-                            }}
+                            onClick={navToEvent}
+                          />
+                        ))}
+                    </div>
+                  )}
+
+                  {/* Completion reminder section */}
+                  {completeCount > 0 && (
+                    <div className={styles.section}>
+                      <div className={styles.sectionLabel}>
+                        <span className={styles.sectionDotRed} />
+                        تحتاج إتماماً
+                      </div>
+                      {notifications
+                        .filter((n) => n.kind === "complete")
+                        .map((n) => (
+                          <NotifItem
+                            key={n.id}
+                            notif={n}
+                            onRead={markRead}
+                            onDismiss={dismiss}
+                            onClick={navToEvent}
                           />
                         ))}
                     </div>
                   )}
 
                   {/* New events section */}
-                  {notifications.filter((n) => n.kind === "new").length > 0 && (
+                  {newCount > 0 && (
                     <div className={styles.section}>
                       <div className={styles.sectionLabel}>
                         <span className={styles.sectionDotBlue} />
@@ -494,11 +546,7 @@ export default function NotificationBell({
                             notif={n}
                             onRead={markRead}
                             onDismiss={dismiss}
-                            onClick={(id) => {
-                              setOpen(false);
-                              sessionStorage.setItem("eventDetails_from", window.location.pathname);
-                              router.push(`/Events-Faclevel/${id}`);
-                            }}
+                            onClick={navToEvent}
                           />
                         ))}
                     </div>

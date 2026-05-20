@@ -1,0 +1,456 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --navy:       #1E3A5F;
+  --navy-mid:   #2D5F8A;
+  --navy-light: #EBF3FB;
+  --gold:       #C49B3A;
+  --green:      #059669;
+  --green-bg:   #ECFDF5;
+  --green-bdr:  #A7F3D0;
+  --red:        #DC2626;
+  --red-bg:     #FEF2F2;
+  --red-bdr:    #FECACA;
+  --border:     #E2ECF5;
+  --bg:         #EDF2F8;
+  --text:       #1A2E42;
+  --mute:       #6B8299;
+  --radius:     10px;
+  --shadow:     0 2px 12px rgba(26,46,66,.08);
+}
+
+.container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 20px 24px 36px;
+  direction: rtl;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  font-family: 'Cairo', sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: var(--text);
+}
+
+/* ── Header ── */
+.header {
+  background: linear-gradient(140deg, var(--navy) 0%, var(--navy-mid) 100%);
+  border-radius: 16px;
+  padding: 24px 30px;
+  box-shadow: 0 4px 18px rgba(30,58,95,.22);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.3px;
+}
+
+.subtitle {
+  margin: 5px 0 0;
+  font-size: 14px;
+  color: rgba(255,255,255,.65);
+  font-weight: 500;
+}
+
+/* Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.statCard {
+  background: white;
+  padding: 20px;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  transition: box-shadow .2s, transform .2s;
+}
+
+.statCard:hover {
+  box-shadow: 0 6px 24px rgba(30,58,95,.12);
+  transform: translateY(-2px);
+}
+
+.statIcon {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, var(--gold) 0%, #D4A825 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.statContent {
+  flex: 1;
+}
+
+.statLabel {
+  font-size: 14px;
+  color: var(--mute);
+  margin: 0 0 4px 0;
+  font-weight: 600;
+}
+
+.statValue {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--navy);
+  margin: 0;
+}
+
+/* Filter Section */
+.filterSection {
+  background: white;
+  padding: 20px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.filterLabel {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.filterSelect {
+  flex: 1;
+  min-width: 200px;
+  padding: 12px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Cairo', sans-serif;
+}
+
+.filterSelect:hover {
+  border-color: var(--gold);
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(196, 155, 58, 0.1);
+}
+
+/* Content */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Faculty Section */
+.facultySection {
+  background: white;
+  padding: 24px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.facultyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.facultyTitle {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--navy);
+  margin: 0;
+}
+
+.createBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--gold) 0%, #D4A825 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(196, 155, 58, 0.3);
+  font-family: 'Cairo', sans-serif;
+  min-height: 44px;
+}
+
+.createBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(196, 155, 58, 0.4);
+}
+
+.createBtn:active {
+  transform: translateY(0);
+}
+
+/* Unions Grid */
+.unionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
+  gap: 16px;
+}
+
+.unionCard {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow);
+  transition: box-shadow .2s, transform .2s;
+  cursor: pointer;
+  font-family: 'Cairo', sans-serif;
+}
+
+.unionCard:hover {
+  box-shadow: 0 6px 24px rgba(30,58,95,.12);
+  transform: translateY(-2px);
+}
+
+.unionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.unionName {
+  font-size: 18px;
+  font-weight: bold;
+  color: #2C3A5F;
+  text-align: right;
+  margin: 0;
+  flex: 1;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.statusBadge.منتظر,
+.statusBadge.pending {
+  background: #FFFBEB;
+  color: #92400E;
+  border: 1px solid #FDE68A;
+}
+
+.statusBadge.مقبول,
+.statusBadge.approved {
+  background: #ECFDF5;
+  color: #065F46;
+  border: 1px solid #A7F3D0;
+}
+
+.statusBadge.مرفوض,
+.statusBadge.rejected {
+  background: #FEF2F2;
+  color: #991B1B;
+  border: 1px solid #FECACA;
+}
+
+.unionDescription {
+  font-size: 14px;
+  color: #6C757D;
+  line-height: 1.4;
+  text-align: right;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.unionInfo {
+  border-top: 1px solid #E8EAF0;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.infoItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.infoLabel {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.infoValue {
+  color: var(--navy);
+  font-weight: 600;
+  text-align: left;
+}
+
+/* Loading */
+.loadingWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  gap: 16px;
+}
+
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(30,58,95,.12);
+  border-top-color: var(--navy-mid);
+  border-radius: 50%;
+  animation: spin .75s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loadingText {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--mute);
+  margin: 0;
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 72px 24px 80px;
+  background: #fff;
+  border: 1px dashed rgba(30,58,95,.18);
+  border-radius: 16px;
+  gap: 14px;
+  animation: fadeIn 0.3s ease;
+}
+
+.emptyState svg {
+  color: var(--navy-mid);
+  margin-bottom: 8px;
+}
+
+.emptyState h3 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--navy);
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--mute);
+  max-width: 380px;
+  line-height: 1.7;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px 14px 32px;
+  }
+
+  .header {
+    padding: 20px 22px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .facultyHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .createBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .unionsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 12px;
+  }
+
+  .facultySection {
+    padding: 18px;
+  }
+}

@@ -482,7 +482,7 @@ function DetailsModal({ detail, onClose }: { detail: ActivityDetail; onClose: ()
               { icon: <Users size={15} />,       label: "المقاعد",        val: !detail.s_limit || detail.s_limit >= 2147483647 ? "غير محدود" : String(detail.s_limit) },
               { icon: <DollarSign size={15} />,  label: "التكلفة",        val: isFree ? "مجاني" : `${costVal} ج.م` },
               { icon: <Award size={15} />,       label: "المكافأة",       val: safeStr(detail.reward) || "—" },
-              { icon: <ShieldAlert size={15} />, label: "القيود",         val: safeStr(detail.restrictions) || "لا يوجد" },
+              { icon: <ShieldAlert size={15} />, label: "الشروط",         val: safeStr(detail.restrictions) || "لا يوجد" },
               { icon: <Package size={15} />,     label: "الموارد",        val: safeStr(detail.resource) || "—" },
               ...(isRejected(detail.status) && detail.rejection_reason
                   ? [{ icon: <MessageSquare size={15} />, label: "سبب الرفض", val: detail.rejection_reason }]

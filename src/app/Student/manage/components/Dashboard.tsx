@@ -453,7 +453,7 @@ const Dashboard: React.FC = () => {
                   {activityErrors.cost && <span className="error-message">{activityErrors.cost}</span>}
                 </div>
                 <div className="form-group">
-                  <label>القيود <span className="optional">(اختياري)</span></label>
+                  <label>الشروط <span className="optional">(اختياري)</span></label>
                   <input
                     type="text" name="restrictions" value={activityData.restrictions}
                     onChange={handleActivityChange} placeholder="—" className="form-input"

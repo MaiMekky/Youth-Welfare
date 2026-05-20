@@ -432,10 +432,10 @@ export default function EventForm({
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>القيود (اختياري)</label>
+              <label className={styles.label}>الشروط (اختياري)</label>
               <input
                 className={`${styles.input} ${errors.restrictions ? styles.inputError : ""}`}
-                placeholder="القيود"
+                placeholder="الشروط"
                 value={form.restrictions}
                 onChange={(ev) => setField("restrictions", ev.target.value)}
               />

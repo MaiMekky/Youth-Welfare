@@ -679,6 +679,16 @@ export default function EventDetailsPage() {
   const pendingCount = rows.filter((r) => r.status === "منتظر").length;
   const isFacultyEvent = (event?.faculty ?? null) !== null;
 
+  // Allow approve/reject only before the event start date
+  const canApproveReject = useMemo(() => {
+    if (!event?.st_date) return true; // no date set → allow by default
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startDate = new Date(event.st_date);
+    startDate.setHours(0, 0, 0, 0);
+    return today < startDate;
+  }, [event?.st_date]);
+
   // Check if teams are enabled — passed from TeamsSection via callback
   const [teamsEnabled, setTeamsEnabled] = useState(false);
 
@@ -863,7 +873,6 @@ export default function EventDetailsPage() {
 
           <div className={styles.infoCard}>
             <div className={styles.infoLabel}><Timer size={16} /> نوع الفعالية</div>
-            {/* Show original type value + mapped label */}
             <div className={styles.badgeBlue}>{ui.typeLabel || ui.type || "—"}</div>
           </div>
 
@@ -908,7 +917,7 @@ export default function EventDetailsPage() {
             <div className={styles.blockBody}>{ui.reward}</div>
           </div>
           <div className={styles.block}>
-            <div className={styles.blockTitle}>القيود والشروط</div>
+            <div className={styles.blockTitle}>الشروط </div>
             <div className={styles.blockBody}>{ui.constraints}</div>
           </div>
         </section>
@@ -992,7 +1001,7 @@ export default function EventDetailsPage() {
               <div className={styles.modalHead}>
                 <div>
                   <div className={styles.modalTitle}>تقرير الفعالية</div>
-                  <div className={styles.modalSub}>املئي البيانات المطلوبة ثم اضغطي تنزيل</div>
+                  <div className={styles.modalSub}>املأ البيانات المطلوبة ثم اضغط تنزيل</div>
                 </div>
                 <button className={styles.modalClose} type="button" onClick={closeReportModal} disabled={exportBusy !== null}>
                   <X size={18} />
@@ -1204,14 +1213,11 @@ export default function EventDetailsPage() {
             </div>
 
             <div className={styles.tableChips}>
-              {/* Hide rank/reward counts and approve-all when teams are enabled */}
-              {!teamsEnabled && (
-                <>
-                  <span className={styles.miniChip}><Medal size={14} /> {ranksCount}</span>
-                  <span className={styles.miniChip}><Award size={14} /> {rewardsCount}</span>
-                </>
-              )}
-              {!isFacultyEvent && !teamsEnabled && (
+              <span className={styles.miniChip}><Medal size={14} /> {ranksCount}</span>
+              <span className={styles.miniChip}><Award size={14} /> {rewardsCount}</span>
+
+              {/* قبول الجميع — only shown before the event start date */}
+              {!isFacultyEvent && canApproveReject && (
                 <button
                   className={`${styles.actionBtn} ${styles.acceptBtn}`}
                   type="button"
@@ -1233,9 +1239,8 @@ export default function EventDetailsPage() {
                   <th>اسم الطالب</th>
                   <th>رقم الطالب</th>
                   <th>حالة التسجيل</th>
-                  {/* Hide rank/reward columns when teams enabled */}
-                  {!teamsEnabled && <th>الترتيب</th>}
-                  {!teamsEnabled && <th>المكافأة</th>}
+                  <th>الترتيب</th>
+                  <th>المكافأة</th>
                   <th>الإجراءات</th>
                 </tr>
               </thead>
@@ -1249,16 +1254,13 @@ export default function EventDetailsPage() {
                       <span className={participantBadgeClass(r.status)}>{r.status}</span>
                     </td>
 
-                    {!teamsEnabled && (
-                      <td>
-                        <span className={styles.cellValue}>{(r.rank ?? "").trim() ? r.rank : "-"}</span>
-                      </td>
-                    )}
-                    {!teamsEnabled && (
-                      <td>
-                        <span className={styles.cellValue}>{(r.reward ?? "").trim() ? r.reward : "-"}</span>
-                      </td>
-                    )}
+                    <td>
+                      <span className={styles.cellValue}>{(r.rank ?? "").trim() ? r.rank : "-"}</span>
+                    </td>
+
+                    <td>
+                      <span className={styles.cellValue}>{(r.reward ?? "").trim() ? r.reward : "-"}</span>
+                    </td>
 
                     <td>
                       <div className={styles.rowActions}>
@@ -1272,8 +1274,8 @@ export default function EventDetailsPage() {
                           </button>
                         ) : (
                           <>
-                            {/* Approve/Reject — hidden when teams enabled */}
-                            {!teamsEnabled && r.status === "منتظر" && (
+                            {/* Approve/Reject — only shown before the event start date */}
+                            {canApproveReject && r.status === "منتظر" && (
                               <>
                                 <button
                                   className={`${styles.actionBtn} ${styles.acceptBtn}`}
@@ -1294,44 +1296,40 @@ export default function EventDetailsPage() {
                               </>
                             )}
 
-                            {/* Reward — hidden when teams enabled */}
-                            {!teamsEnabled && (
-                              editingRewardId === r.id ? (
-                                <div className={styles.inlineEdit}>
-                                  <input className={styles.inlineInput} value={draftReward}
-                                    onChange={(e) => setDraftReward(e.target.value)} placeholder="المكافأة" />
-                                  <button className={styles.iconBtn} type="button" disabled={busy} onClick={() => saveReward(r.id)}>
-                                    <Check size={18} />
-                                  </button>
-                                  <button className={styles.iconBtn} type="button" disabled={busy} onClick={cancelReward}>
-                                    <X size={18} />
-                                  </button>
-                                </div>
-                              ) : (
-                                <button className={styles.actionBtn} type="button" disabled={busy} onClick={() => startEditReward(r)}>
-                                  <Award size={16} /> مكافأة
+                            {/* Reward */}
+                            {editingRewardId === r.id ? (
+                              <div className={styles.inlineEdit}>
+                                <input className={styles.inlineInput} value={draftReward}
+                                  onChange={(e) => setDraftReward(e.target.value)} placeholder="المكافأة" />
+                                <button className={styles.iconBtn} type="button" disabled={busy} onClick={() => saveReward(r.id)}>
+                                  <Check size={18} />
                                 </button>
-                              )
+                                <button className={styles.iconBtn} type="button" disabled={busy} onClick={cancelReward}>
+                                  <X size={18} />
+                                </button>
+                              </div>
+                            ) : (
+                              <button className={styles.actionBtn} type="button" disabled={busy} onClick={() => startEditReward(r)}>
+                                <Award size={16} /> مكافأة
+                              </button>
                             )}
 
-                            {/* Rank — hidden when teams enabled */}
-                            {!teamsEnabled && (
-                              editingRankId === r.id ? (
-                                <div className={styles.inlineEdit}>
-                                  <input className={styles.inlineInput} type="number" min={1} value={draftRank}
-                                    onChange={(e) => setDraftRank(e.target.value)} placeholder="المركز" />
-                                  <button className={styles.iconBtn} type="button" disabled={busy} onClick={() => saveRank(r.id)}>
-                                    <Check size={18} />
-                                  </button>
-                                  <button className={styles.iconBtn} type="button" disabled={busy} onClick={cancelRank}>
-                                    <X size={18} />
-                                  </button>
-                                </div>
-                              ) : (
-                                <button className={styles.actionBtn} type="button" disabled={busy} onClick={() => startEditRank(r)}>
-                                  <Medal size={16} /> ترتيب
+                            {/* Rank */}
+                            {editingRankId === r.id ? (
+                              <div className={styles.inlineEdit}>
+                                <input className={styles.inlineInput} type="number" min={1} value={draftRank}
+                                  onChange={(e) => setDraftRank(e.target.value)} placeholder="المركز" />
+                                <button className={styles.iconBtn} type="button" disabled={busy} onClick={() => saveRank(r.id)}>
+                                  <Check size={18} />
                                 </button>
-                              )
+                                <button className={styles.iconBtn} type="button" disabled={busy} onClick={cancelRank}>
+                                  <X size={18} />
+                                </button>
+                              </div>
+                            ) : (
+                              <button className={styles.actionBtn} type="button" disabled={busy} onClick={() => startEditRank(r)}>
+                                <Medal size={16} /> ترتيب
+                              </button>
                             )}
 
                             <button
@@ -1349,7 +1347,7 @@ export default function EventDetailsPage() {
                 ))}
                 {rows.length === 0 && (
                   <tr>
-                    <td colSpan={teamsEnabled ? 4 : 6} style={{ textAlign: "center", padding: 18, opacity: 0.75, fontWeight: 700 }}>
+                    <td colSpan={6} style={{ textAlign: "center", padding: 18, opacity: 0.75, fontWeight: 700 }}>
                       لا يوجد مشاركين حتى الآن
                     </td>
                   </tr>

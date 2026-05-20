@@ -20,10 +20,11 @@ export default function Sidebar({ isOpen = false, setIsOpen = () => {} }: Sideba
     { label: "صلاحيات الوصول",  href: "/CreateAdmins" },
     { label: "سجلات النشاط",    href: "/ActivityLogs" },
     { label: "إدارة الفعاليات", href: "/SuperAdmin/Events" },
-    // { label: "إحصائيات الزوار", href: "#" },
+    // { label: "إحصائيات الزوار", href: "#" },  
     { label: "التكافل الاجتماعي", href: "/SuperAdmin" },
     { label: "الأسر الطلابية",  href: "/SuperAdmin-family" },
     { label: "العشائر والجوالة", href: "/SuperAdmin/scouts" },
+    { label: "المنتخبات",      href: "/SuperAdmin/university-team" },
   ];
 
   // Close on outside click

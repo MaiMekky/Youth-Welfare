@@ -43,6 +43,7 @@ export default function Page() {
     const centralCount = families.filter((f) => f.type === "مركزية").length;
     const qualityCount = families.filter((f) => f.type === "نوعية").length;
     const ecoCount = families.filter((f) => f.type === "اصدقاء البيئة").length;
+    const unionCount = families.filter((f) => f.type === "اتحاد").length;
 
     return [
       {
@@ -89,6 +90,18 @@ export default function Page() {
             <path d="M12 22V2"></path>
             <path d="M17 12c0-2.76-2.24-5-5-5s-5 2.24-5 5 2.24 5 5 5"></path>
             <path d="M2 12h20"></path>
+          </svg>
+        ),
+      },
+      {
+        id: 5,
+        label: "الاتحادات",
+        value: unionCount,
+        icon: (
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+            <path d="M2 17l10 5 10-5"></path>
+            <path d="M2 12l10 5 10-5"></path>
           </svg>
         ),
       },
@@ -206,7 +219,12 @@ export default function Page() {
   );
 
   const qualityFamilies = useMemo(
-    () => families.filter((f) => f.type !== "مركزية"),
+    () => families.filter((f) => f.type === "نوعية" || f.type === "اصدقاء البيئة"),
+    [families]
+  );
+
+  const unionFamilies = useMemo(
+    () => families.filter((f) => f.type === "اتحاد"),
     [families]
   );
 
@@ -227,6 +245,20 @@ export default function Page() {
 
     return filtered;
   }, [qualityFamilies, selectedFaculty, selectedFamilyType, selectedStatus]);
+
+  const filteredUnionFamilies = useMemo(() => {
+    let filtered = unionFamilies;
+
+    if (selectedFaculty !== -1) {
+      filtered = filtered.filter((f) => f.faculty === selectedFaculty);
+    }
+
+    if (selectedStatus !== "all") {
+      filtered = filtered.filter((f) => f.status === selectedStatus);
+    }
+
+    return filtered;
+  }, [unionFamilies, selectedFaculty, selectedStatus]);
 
   const pendingCount = useMemo(
     () => filteredQualityFamilies.filter((f) => f.needsApproval).length,
@@ -284,6 +316,31 @@ export default function Page() {
           />
             <FamiliesGrid
               families={filteredQualityFamilies}
+              showActions={true}
+              loading={loadingFamilies}
+            />
+          </div>
+        )}
+
+        {activeTab === "union" && (
+          <div className={styles.contentSection}>
+          <Filters
+            faculties={faculties}
+            familyTypes={["all", "اتحاد"]}
+            selectedFaculty={selectedFaculty}
+            setSelectedFaculty={setSelectedFaculty}
+            selectedFamilyType={selectedFamilyType}
+            setSelectedFamilyType={setSelectedFamilyType}
+            selectedStatus={selectedStatus}
+            setSelectedStatus={setSelectedStatus}
+            readyOnly={readyOnly}
+            setReadyOnly={setReadyOnly}
+            showFamilyTypeFilter={false}
+            showStatusFilter={false}
+            showReadyOnlyFilter={false}
+          />
+            <FamiliesGrid
+              families={filteredUnionFamilies}
               showActions={true}
               loading={loadingFamilies}
             />

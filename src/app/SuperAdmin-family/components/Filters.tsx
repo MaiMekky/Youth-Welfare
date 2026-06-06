@@ -14,6 +14,9 @@ interface Props {
   setSelectedStatus: (v: string) => void;
   readyOnly: "all" | "true" | "false";
   setReadyOnly: (v: "all" | "true" | "false") => void;
+  showFamilyTypeFilter?: boolean;
+  showStatusFilter?: boolean;
+  showReadyOnlyFilter?: boolean;
 }
 
 export default function Filters({
@@ -27,11 +30,15 @@ export default function Filters({
   setSelectedStatus,
   readyOnly,
   setReadyOnly,
+  showFamilyTypeFilter = true,
+  showStatusFilter = true,
+  showReadyOnlyFilter = true,
 }: Props) {
   const familyTypeLabels: Record<string, string> = {
     all: "الكل",
     "نوعية": "نوعية",
     "اصدقاء البيئة": "اصدقاء البيئة",
+    "اتحاد": "اتحاد",
   };
 
   return (
@@ -54,51 +61,57 @@ export default function Filters({
         </select>
       </div>
 
-      <div className={styles.filterGroup}>
-        <label className={styles.filterLabel}>نوع الأسرة</label>
-        <select
-          className={styles.filterSelect}
-          value={selectedFamilyType}
-          onChange={(e) => setSelectedFamilyType(e.target.value)}
-        >
-          {familyTypes.map((t) => (
-            <option key={t} value={t}>
-              {familyTypeLabels[t] || t}
-            </option>
-          ))}
-        </select>
-      </div>
+      {showFamilyTypeFilter && (
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>نوع الأسرة</label>
+          <select
+            className={styles.filterSelect}
+            value={selectedFamilyType}
+            onChange={(e) => setSelectedFamilyType(e.target.value)}
+          >
+            {familyTypes.map((t) => (
+              <option key={t} value={t}>
+                {familyTypeLabels[t] || t}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
-      <div className={styles.filterGroup}>
-        <label className={styles.filterLabel}>حالة الأسرة</label>
-        <select
-          className={styles.filterSelect}
-          value={selectedStatus}
-          onChange={(e) => setSelectedStatus(e.target.value)}
-        >
-          <option value="all">الكل</option>
-          <option value="مقبول">مقبول</option>
-          <option value="مرفوض">مرفوض</option>
-          <option value="موافقة مبدئية">موافقة مبدئية</option>
-          <option value="منتظر">منتظر</option>
-        </select>
-      </div>
+      {showStatusFilter && (
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>حالة الأسرة</label>
+          <select
+            className={styles.filterSelect}
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+          >
+            <option value="all">الكل</option>
+            <option value="مقبول">مقبول</option>
+            <option value="مرفوض">مرفوض</option>
+            <option value="موافقة مبدئية">موافقة مبدئية</option>
+            <option value="منتظر">منتظر</option>
+          </select>
+        </div>
+      )}
 
-     <div className={styles.filterGroup}>
-      <label className={styles.filterLabel}>
-        عرض الأسر الجاهزة للاعتماد النهائي (وصل عدد الاعضاء إلى الحد الأدنى)
-      </label>
+      {showReadyOnlyFilter && (
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>
+            عرض الأسر الجاهزة للاعتماد النهائي (وصل عدد الاعضاء إلى الحد الأدنى)
+          </label>
 
-      <select
-        className={styles.filterSelect}
-        value={readyOnly}
-        onChange={(e) => setReadyOnly(e.target.value as "all" | "true" | "false")}
-      >
-        <option value="all">الكل</option>
-        <option value="true">نعم</option>
-        <option value="false">لا</option>
-      </select>
-    </div>
+          <select
+            className={styles.filterSelect}
+            value={readyOnly}
+            onChange={(e) => setReadyOnly(e.target.value as "all" | "true" | "false")}
+          >
+            <option value="all">الكل</option>
+            <option value="true">نعم</option>
+            <option value="false">لا</option>
+          </select>
+        </div>
+      )}
     </div>
   );
 }

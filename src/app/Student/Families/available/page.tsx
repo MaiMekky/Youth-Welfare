@@ -9,8 +9,8 @@ interface ApiFamily {
   family_id: number;
   name: string;
   description: string;
-  faculty_name: string;
-  type: string;
+  faculty_name: string | null;
+  type: string | null;
   status: string;
   member_count: number;
 }
@@ -19,8 +19,8 @@ interface Family {
   id: number;
   name: string;
   description: string;
-  facultyName: string;
-  type: string;
+  facultyName: string | null;
+  type: string | null;
   memberCount: number;
 }
 
@@ -131,10 +131,10 @@ export default function AvailableFamiliesPage() {
     const query = searchQuery.toLowerCase();
     const filtered = families.filter(
       (f) =>
-        f.name.toLowerCase().includes(query) ||
-        f.description.toLowerCase().includes(query) ||
-        f.type.toLowerCase().includes(query) ||
-        f.facultyName.toLowerCase().includes(query)
+        f.name?.toLowerCase().includes(query) ||
+        f.description?.toLowerCase().includes(query) ||
+        (f.type?.toLowerCase() ?? '').includes(query) ||
+        (f.facultyName?.toLowerCase() ?? '').includes(query)
     );
     setFilteredFamilies(filtered);
   }, [searchQuery, families]);
@@ -281,7 +281,7 @@ export default function AvailableFamiliesPage() {
                       <IconFlag size={14} />
                       <span>النوع</span>
                     </div>
-                    <p className={styles.infoValue}>{family.type}</p>
+                    <p className={styles.infoValue}>{family.type || 'غير محدد'}</p>
                   </div>
 
                   <div className={styles.infoRow}>
@@ -289,7 +289,7 @@ export default function AvailableFamiliesPage() {
                       <IconLocation size={14} />
                       <span>الكلية</span>
                     </div>
-                    <p className={styles.infoValue}>{family.facultyName}</p>
+                    <p className={styles.infoValue}>{family.facultyName || 'غير محدد'}</p>
                   </div>
 
                   <div className={styles.infoRow}>

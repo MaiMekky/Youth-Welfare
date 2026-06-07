@@ -65,26 +65,32 @@ const staticAllowedByRole: Record<string, string[]> = {
 // ── Department → route groups for fac_manager ─────────────────────────────────
 // Each dept_id maps to ALL routes that manager is allowed to access.
 // Base routes (/FacLevel, /FacultyReport) are always included for any dept.
+// Any dept_id not listed here (> 7 or unknown) falls back to FAC_FALLBACK_ROUTES.
 const FAC_DEPT_ROUTES: Record<number, string[]> = {
-  6: ["/FacLevel", "/FacultyReport"],                                        // تكافل
-  4: ["/FacLevel", "/FacultyReport", "/Family-Faclevel", "/requests"],       // أسر
-  1: ["/FacLevel", "/FacultyReport", "/Events-Faclevel"],                    // ثقافي
-  2: ["/FacLevel", "/FacultyReport", "/Events-Faclevel"],                    // اجتماعي
-  3: ["/FacLevel", "/FacultyReport", "/Events-Faclevel"],                    // رياضي
-  5: ["/FacLevel", "/FacultyReport", "/Events-Faclevel"],                    // علمي
-  7: ["/FacLevel", "/FacultyReport", "/Events-Faclevel"],                    // جوالة
+  6: ["/FacLevel", "/FacultyReport", "/requests"],                                        // تكافل
+  4: ["/Family-Faclevel/Home"],       // أسر
+  1: ["/Events-Faclevel/Home"],       // ثقافي
+  2: ["/Events-Faclevel/Home"],       // اجتماعي
+  3: ["/Events-Faclevel/Home"],       // رياضي
+  5: ["/Events-Faclevel/Home"],        // علمي
+  7: ["/Events-Faclevel/Home"],        // جوالة
 };
+// Fallback for any dept_id > 7 or unknown → treated as an events dept
+const FAC_FALLBACK_ROUTES = ["/Events-Faclevel/Home"];
 
 // ── Department → route groups for uni_manager ─────────────────────────────────
+// Any dept_id not listed here (> 7 or unknown) falls back to UNI_FALLBACK_ROUTES.
 const UNI_DEPT_ROUTES: Record<number, string[]> = {
-  6: ["/uni-level", "/uni-level/reports"],                                          // تكافل
-  4: ["/uni-level", "/uni-level/reports", "/uni-level-family"],                     // أسر
-  1: ["/uni-level", "/uni-level/reports", "/uni-level-activities"],                 // ثقافي
-  2: ["/uni-level", "/uni-level/reports", "/uni-level-activities"],                 // اجتماعي
-  3: ["/uni-level", "/uni-level/reports", "/uni-level-activities"],                 // رياضي
-  5: ["/uni-level", "/uni-level/reports", "/uni-level-activities"],                 // علمي
-  7: ["/uni-level", "/uni-level/reports", "/uni-level-scouts"],                     // جوالة
+  6: ["/uni-level"],                                          // تكافل
+  4: ["/uni-level-family"],                     // أسر
+  1: ["/uni-level-activities/Home"],                 // ثقافي
+  2: ["/uni-level-activities/Home"],                 // اجتماعي
+  3: ["/uni-level-activities/Home"],                 // رياضي
+  5: ["/uni-level-activities/Home"],                 // علمي
+  7: ["/uni-level-activities/Home","/uni-level-scouts"],                     // جوالة
 };
+// Fallback for any dept_id > 7 or unknown → treated as an activities dept
+const UNI_FALLBACK_ROUTES = ["/uni-level-activities/Home"];
 
 // ── Student routes ────────────────────────────────────────────────────────────
 const STUDENT_ROUTES = [
@@ -120,14 +126,20 @@ function routeMatches(allowedRoute: string, path: string): boolean {
   return next === undefined || next === "/";
 }
 
-/** Union of all routes allowed for a given set of dept_ids from a dept-route map. */
+/**
+ * Union of all routes allowed for a given set of dept_ids from a dept-route map.
+ * If a dept_id has no entry in the map (unknown / future ID), the fallback
+ * routes are used instead — so IDs > 7 are treated as activities/events depts.
+ */
 function getAllowedRoutesForDepts(
   deptIds: number[],
-  map: Record<number, string[]>
+  map: Record<number, string[]>,
+  fallback: string[] = []
 ): string[] {
   const set = new Set<string>();
   for (const id of deptIds) {
-    for (const route of map[id] ?? []) set.add(route);
+    const routes = map[id] ?? fallback;
+    for (const route of routes) set.add(route);
   }
   return [...set];
 }
@@ -135,10 +147,10 @@ function getAllowedRoutesForDepts(
 /** Resolve allowed routes for an admin based on roleKey + deptIds. */
 function getAdminAllowedRoutes(roleKey: string, deptIds: number[]): string[] {
   if (roleKey === "fac_manager") {
-    return getAllowedRoutesForDepts(deptIds, FAC_DEPT_ROUTES);
+    return getAllowedRoutesForDepts(deptIds, FAC_DEPT_ROUTES, FAC_FALLBACK_ROUTES);
   }
   if (roleKey === "uni_manager") {
-    return getAllowedRoutesForDepts(deptIds, UNI_DEPT_ROUTES);
+    return getAllowedRoutesForDepts(deptIds, UNI_DEPT_ROUTES, UNI_FALLBACK_ROUTES);
   }
   return staticAllowedByRole[roleKey] ?? [];
 }
@@ -151,11 +163,11 @@ function defaultRedirect(userType: string, roleKey: string, deptIds: number[]): 
     if (roleKey === "fac_head")      return "/FacultyHead";
     if (roleKey === "General_admin") return "/GeneralAdmin";
     if (roleKey === "fac_manager") {
-      const routes = getAllowedRoutesForDepts(deptIds, FAC_DEPT_ROUTES);
+      const routes = getAllowedRoutesForDepts(deptIds, FAC_DEPT_ROUTES, FAC_FALLBACK_ROUTES);
       return routes[0] ?? "/";
     }
     if (roleKey === "uni_manager") {
-      const routes = getAllowedRoutesForDepts(deptIds, UNI_DEPT_ROUTES);
+      const routes = getAllowedRoutesForDepts(deptIds, UNI_DEPT_ROUTES, UNI_FALLBACK_ROUTES);
       return routes[0] ?? "/";
     }
   }

@@ -39,10 +39,12 @@ const UNI_ROUTE_MAP: Record<number, string> = {
 
 function getFirstRoute(
   departments: Dept[],
-  map: Record<number, string>
+  map: Record<number, string>,
+  fallback: string
 ): string | null {
   for (const dept of departments) {
-    const route = map[dept.dept_id];
+    // Use the mapped route, or the fallback for any unknown/future dept_id
+    const route = map[dept.dept_id] ?? fallback;
     if (route) return route;
   }
   return null;
@@ -136,14 +138,14 @@ export default function LoginPage({ onClose, onSwitchToSignup }: LoginPageProps)
         if (roleKey === "super_admin") {
           destination = "/CreateAdmins";
         } else if (roleKey === "uni_manager") {
-          const route = getFirstRoute(depts, UNI_ROUTE_MAP);
+          const route = getFirstRoute(depts, UNI_ROUTE_MAP, "/uni-level-activities/Home");
           if (!route) {
             showToast("لا توجد أقسام مخصصة لهذا المستخدم، تواصل مع الدعم", "error");
             return;
           }
           destination = route;
         } else if (roleKey === "fac_manager") {
-          const route = getFirstRoute(depts, FAC_ROUTE_MAP);
+          const route = getFirstRoute(depts, FAC_ROUTE_MAP, "/Events-Faclevel/Home");
           if (!route) {
             showToast("لا توجد أقسام مخصصة لهذا المستخدم، تواصل مع الدعم", "error");
             return;

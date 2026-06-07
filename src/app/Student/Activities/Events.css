@@ -45,16 +45,16 @@
 .events-page {
   width: 100%;
   min-height: 100vh;
-  /* Fallback first, then var — prevents the white flash before :root resolves */
   background-color: #EDF2F8;
   background-color: var(--bg);
   font-family: 'Cairo', sans-serif;
   direction: rtl;
+  /* Prevent FOUC — ensure font is applied immediately */
+  font-display: swap;
 }
 
 /* ══════════════════════════════════════════ HERO */
 .events-hero {
-  /* Fallback gradient then var-based */
   background: linear-gradient(140deg, #152C47 0%, #1E3A5F 50%, #2D5F8A 100%);
   background: linear-gradient(140deg, var(--navy-deep) 0%, var(--navy) 50%, var(--navy-mid) 100%);
   border-radius: 20px;
@@ -67,17 +67,14 @@
   overflow: hidden;
 }
 
-/* decorative top bar */
 .events-hero::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 3px;
   background: linear-gradient(90deg, transparent 0%, #C49B3A 25%, #D4AF55 50%, #C49B3A 75%, transparent 100%);
-  background: linear-gradient(90deg, transparent 0%, var(--gold) 25%, var(--gold-light) 50%, var(--gold) 75%, transparent 100%);
 }
 
-/* ambient glow blobs */
 .events-hero::after {
   content: '';
   position: absolute;
@@ -107,6 +104,7 @@
   margin: 0;
   letter-spacing: -0.03em;
   line-height: 1.2;
+  font-family: 'Cairo', sans-serif;
 }
 .hero-title::after {
   content: '';
@@ -114,7 +112,6 @@
   width: 40px;
   height: 3px;
   background: linear-gradient(90deg, #C49B3A, #D4AF55);
-  background: linear-gradient(90deg, var(--gold), var(--gold-light));
   border-radius: 3px;
   margin-top: 12px;
 }
@@ -124,6 +121,7 @@
   color: rgba(255,255,255,0.60);
   margin: 14px 0 0;
   line-height: 1.7;
+  font-family: 'Cairo', sans-serif;
 }
 
 .hero-count {
@@ -134,14 +132,13 @@
   font-size: 13px;
   font-weight: 800;
   color: #D4AF55;
-  color: var(--gold-light);
   white-space: nowrap;
   flex-shrink: 0;
   margin-top: 4px;
   backdrop-filter: blur(8px);
+  font-family: 'Cairo', sans-serif;
 }
 
-/* Filter pills */
 .hero-filters {
   position: relative;
   z-index: 1;
@@ -174,9 +171,7 @@
 .filter-pill:hover { color: rgba(255,255,255,0.80); }
 .filter-pill.active {
   color: #D4AF55;
-  color: var(--gold-light);
   border-bottom-color: #C49B3A;
-  border-bottom-color: var(--gold);
 }
 
 /* ══════════════════════════════════════════ BODY */
@@ -207,7 +202,6 @@
   transform: translateY(-50%);
   width: 16px;
   height: 16px;
-  color: #6B8299;
   color: var(--mute);
   stroke-width: 2;
   pointer-events: none;
@@ -215,15 +209,12 @@
 .search-input {
   width: 100%;
   padding: 13px 48px 13px 18px;
-  border: 1.5px solid #DDE8F2;
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
   font-family: 'Cairo', sans-serif;
   font-size: 15px;
   font-weight: 600;
-  color: #1A2E42;
   color: var(--text);
-  background: #ffffff;
   background: var(--white);
   direction: rtl;
   outline: none;
@@ -232,21 +223,20 @@
   box-shadow: var(--shadow-xs);
 }
 .search-input:focus {
-  border-color: #2D5F8A;
   border-color: var(--navy-mid);
   box-shadow: 0 0 0 3px rgba(45,95,138,.10), var(--shadow-xs);
   background: #fff;
 }
-.search-input::placeholder { color: #94AABF; color: var(--mute-light); }
+.search-input::placeholder { color: var(--mute-light); }
 
 .results-label {
   font-size: 13px;
   font-weight: 700;
-  color: #6B8299;
   color: var(--mute);
   white-space: nowrap;
+  font-family: 'Cairo', sans-serif;
 }
-.results-label strong { color: #1A2E42; color: var(--text); }
+.results-label strong { color: var(--text); }
 
 /* ══════════════════════════════════════════ STATES */
 .ev-center-state {
@@ -255,19 +245,17 @@
   align-items: center;
   gap: 16px;
   padding: 100px 24px;
-  color: #6B8299;
   color: var(--mute);
   font-size: 15px;
   font-weight: 600;
+  font-family: 'Cairo', sans-serif;
 }
-.ev-error { color: #DC2626; color: var(--red); }
+.ev-error { color: var(--red); }
 
 .ev-spinner {
   width: 44px;
   height: 44px;
-  border: 3px solid #EDF3FA;
   border: 3px solid var(--border-light);
-  border-top-color: #C49B3A;
   border-top-color: var(--gold);
   border-radius: 50%;
   animation: spin 0.75s linear infinite;
@@ -279,14 +267,15 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 22px;
+  /* Ensure grid items don't overflow */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* ══════════════════════════════════════════ CARD */
 .event-card {
-  background: #ffffff;
   background: var(--white);
   border-radius: var(--radius);
-  border: 1px solid #DDE8F2;
   border: 1px solid var(--border);
   overflow: hidden;
   display: flex;
@@ -294,7 +283,10 @@
   box-shadow: var(--shadow);
   transition: transform var(--t), box-shadow var(--t), border-color var(--t);
   position: relative;
-  min-height: 480px;
+  /* Remove fixed min-height — let content define height naturally */
+  /* min-height: 480px; — REMOVED: this caused layout instability */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .event-card:hover {
@@ -310,31 +302,29 @@
   top: 0; right: 0;
   width: 4px;
   height: 100%;
-  background: #EDF3FA;
   background: var(--border-light);
   border-radius: 0 var(--radius) var(--radius) 0;
   transition: background var(--t);
 }
 .event-card:hover::after {
-  background: linear-gradient(180deg, #D4AF55 0%, #C49B3A 50%, #A67F2C 100%);
   background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
 }
 
 /* ── CARD HEADER ── */
 .card-header {
   padding: 20px 24px 18px;
-  border-bottom: 1px solid #EDF3FA;
   border-bottom: 1px solid var(--border-light);
-  background: #2D5F8A;
   background: var(--navy-mid);
   display: flex;
   flex-direction: column;
   gap: 14px;
   position: relative;
   overflow: hidden;
+  /* Fix: explicit width constraint */
+  width: 100%;
+  box-sizing: border-box;
 }
 
-/* subtle geometric accent in header */
 .card-header::before {
   content: '';
   position: absolute;
@@ -352,6 +342,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  /* Ensure chips don't overflow header */
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 /* Type badge */
@@ -367,6 +360,7 @@
   letter-spacing: 0.03em;
   flex-shrink: 0;
   box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+  font-family: 'Cairo', sans-serif;
 }
 .badge-social     { background: linear-gradient(135deg, #C49B3A, #C49B3A); }
 .badge-scientific { background: linear-gradient(135deg, #1d4ed8, #3b82f6); }
@@ -376,12 +370,13 @@
 .badge-unions     { background: linear-gradient(135deg, #0d9488, #14b8a6); }
 .badge-default    { background: linear-gradient(135deg, #6B8299, #6B8299); }
 
-/* Chips group */
 .card-chips {
   display: flex;
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
+  /* Prevent chips from overflowing */
+  min-width: 0;
 }
 
 .status-badge {
@@ -392,13 +387,11 @@
   border-radius: var(--radius-pill);
   font-size: 11.5px;
   font-weight: 800;
-  background: #ECFDF5;
   background: var(--green-bg);
-  color: #059669;
   color: var(--green);
-  border: 1px solid #6EE7B7;
   border: 1px solid var(--green-bdr);
   white-space: nowrap;
+  font-family: 'Cairo', sans-serif;
 }
 .full-badge {
   display: inline-flex;
@@ -407,13 +400,11 @@
   border-radius: var(--radius-pill);
   font-size: 11.5px;
   font-weight: 800;
-  background: #FEF2F2;
   background: var(--red-bg);
-  color: #DC2626;
   color: var(--red);
-  border: 1px solid #FECACA;
   border: 1px solid var(--red-bdr);
   white-space: nowrap;
+  font-family: 'Cairo', sans-serif;
 }
 .days-chip {
   display: inline-flex;
@@ -422,22 +413,24 @@
   border-radius: var(--radius-pill);
   font-size: 11.5px;
   font-weight: 800;
-  background: #FDF6E3;
   background: var(--gold-pale);
-  color: #A67F2C;
   color: var(--gold-dark);
   border: 1px solid rgba(196,155,58,0.30);
   white-space: nowrap;
+  font-family: 'Cairo', sans-serif;
 }
 
 .event-title {
   font-size: 16px;
   font-weight: 900;
-  color: #ffffff;
   color: var(--white);
   line-height: 1.45;
   margin: 0;
   letter-spacing: -0.01em;
+  font-family: 'Cairo', sans-serif;
+  /* Ensure title doesn't overflow */
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 /* ── CARD BODY ── */
@@ -447,12 +440,15 @@
   flex-direction: column;
   flex: 1;
   gap: 15px;
+  /* Fix: ensure content width is constrained */
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 .event-description {
   font-size: 14px;
   font-weight: 600;
-  color: #6B8299;
   color: var(--mute);
   line-height: 1.8;
   display: -webkit-box;
@@ -460,65 +456,87 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   margin: 0;
+  font-family: 'Cairo', sans-serif;
+  /* Fix: Reserve space to prevent layout shift */
+  min-height: calc(14px * 1.8 * 3); /* font-size × line-height × lines */
+  word-break: break-word;
 }
 
-/* Meta grid */
+/* ── META GRID — 2-column layout matching Image 1 ── */
 .event-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display: grid;
+  /* Two equal columns for structured look */
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 12px;
   padding: 14px 16px;
-  background: #F8FBFE;
   background: var(--bg-card);
   border-radius: var(--radius-sm);
-  border: 1px solid #EDF3FA;
   border: 1px solid var(--border-light);
+  /* Fix: explicit width */
+  width: 100%;
+  box-sizing: border-box;
 }
+
 .meta-item {
   display: flex;
   align-items: center;
   gap: 7px;
   font-size: 13px;
   font-weight: 700;
-  color: #2D4A63;
   color: var(--text-mid);
   line-height: 1.3;
+  /* Fix: proper overflow handling */
   min-width: 0;
+  width: 100%;
   overflow: hidden;
+  font-family: 'Cairo', sans-serif;
 }
+
 .meta-item span {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  /* Ensure span takes remaining space */
+  flex: 1;
+  min-width: 0;
 }
+
 .meta-item .icon {
   width: 14px;
   height: 14px;
-  color: #C49B3A;
   color: var(--gold);
   stroke-width: 2;
   flex-shrink: 0;
   opacity: 0.85;
+  /* Prevent icon from shrinking or distorting */
+  min-width: 14px;
+  min-height: 14px;
 }
-.meta-wide { /* No longer needed but kept for compatibility */ }
+
+/* Reward row spans full width (it's typically long text) */
+.meta-item.meta-wide,
+.meta-item:has(.icon + span):last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
 
 /* Seats progress */
 .seats-row {
   display: flex;
   align-items: center;
   gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
 }
 .seats-bar {
   flex: 1;
   height: 6px;
-  background: #EDF3FA;
   background: var(--border-light);
   border-radius: 4px;
   overflow: hidden;
+  min-width: 0;
 }
 .seats-fill {
   height: 100%;
-  background: linear-gradient(90deg, #10b981, #059669);
   background: linear-gradient(90deg, #10b981, var(--green));
   border-radius: 4px;
   transition: width 0.6s ease;
@@ -528,20 +546,21 @@
 .seats-pct {
   font-size: 12px;
   font-weight: 800;
-  color: #6B8299;
   color: var(--mute);
   white-space: nowrap;
   min-width: 36px;
   text-align: left;
+  font-family: 'Cairo', sans-serif;
 }
 
-/* ══════════════════════════════════════════
-   CARD ACTIONS
-══════════════════════════════════════════ */
+/* ══════════════════════════════════════════ CARD ACTIONS */
 .card-actions {
   display: flex;
   align-items: stretch;
   margin-top: auto;
+  /* Fix: ensure actions fill width */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* ── REGISTER BUTTON ── */
@@ -550,7 +569,6 @@
   width: 100%;
   padding: 0 22px;
   height: 48px;
-  background: linear-gradient(135deg, #D4AF55 0%, #C49B3A 50%, #A67F2C 100%);
   background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
   color: #fff;
   border: none;
@@ -568,11 +586,10 @@
   position: relative;
   overflow: hidden;
   letter-spacing: 0.01em;
-  /* Prevent any tap-highlight color flash on mobile */
   -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
 }
 
-/* shimmer on hover */
 .register-btn::after {
   content: '';
   position: absolute;
@@ -593,7 +610,6 @@
 .register-btn:disabled { opacity: 0.70; cursor: default; }
 
 .registered-btn {
-  background: linear-gradient(135deg, #10b981, #059669);
   background: linear-gradient(135deg, #10b981, var(--green));
   box-shadow: 0 4px 16px rgba(5,150,105,0.30);
 }
@@ -622,20 +638,17 @@
   grid-column: 1/-1;
   text-align: center;
   padding: 80px 24px;
-  background: #ffffff;
   background: var(--white);
   border-radius: var(--radius);
   border: 2px dashed rgba(196,155,58,.30);
   box-shadow: var(--shadow);
-  color: #6B8299;
   color: var(--mute);
   font-size: 15px;
   font-weight: 600;
+  font-family: 'Cairo', sans-serif;
 }
-/* ══════════════════════════════════════════
-   CONFIRMATION MODAL
-   Append these rules to the bottom of Events.css
-══════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════ CONFIRMATION MODAL */
 
 /* ── Overlay ── */
 .modal-overlay {
@@ -696,7 +709,6 @@
   flex-shrink: 0;
 }
 
-/* decorative gold bar on top */
 .modal-header::before {
   content: '';
   position: absolute;
@@ -735,6 +747,7 @@
   margin: 0 0 5px;
   letter-spacing: -0.02em;
   line-height: 1.3;
+  font-family: 'Cairo', sans-serif;
 }
 .modal-event-name {
   font-size: 13px;
@@ -744,6 +757,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-family: 'Cairo', sans-serif;
 }
 
 .modal-close-btn {
@@ -771,7 +785,6 @@
   gap: 18px;
 }
 
-/* Confirmation banner */
 .modal-confirm-banner {
   background: var(--gold-pale);
   border: 1px solid rgba(196,155,58,0.30);
@@ -786,12 +799,14 @@
   font-weight: 900;
   color: var(--gold-dark);
   letter-spacing: -0.01em;
+  font-family: 'Cairo', sans-serif;
 }
 .modal-confirm-sub {
   font-size: 12.5px;
   font-weight: 600;
   color: var(--mute);
   line-height: 1.6;
+  font-family: 'Cairo', sans-serif;
 }
 
 /* ── Restrictions grid ── */
@@ -816,28 +831,11 @@
   box-shadow: var(--shadow-xs);
 }
 
-/* Red variant */
-.restriction-red {
-  background: rgba(220, 38, 38, 0.04);
-  border-color: rgba(220, 38, 38, 0.18);
-}
-/* Orange variant */
-.restriction-orange {
-  background: rgba(217, 119, 6, 0.05);
-  border-color: rgba(217, 119, 6, 0.22);
-}
-/* Navy variant */
-.restriction-navy {
-  background: rgba(30, 58, 95, 0.04);
-  border-color: rgba(30, 58, 95, 0.16);
-}
-/* Green variant */
-.restriction-green {
-  background: rgba(5, 150, 105, 0.04);
-  border-color: rgba(5, 150, 105, 0.18);
-}
+.restriction-red    { background: rgba(220, 38, 38, 0.04);  border-color: rgba(220, 38, 38, 0.18); }
+.restriction-orange { background: rgba(217, 119, 6, 0.05);  border-color: rgba(217, 119, 6, 0.22); }
+.restriction-navy   { background: rgba(30, 58, 95, 0.04);   border-color: rgba(30, 58, 95, 0.16);  }
+.restriction-green  { background: rgba(5, 150, 105, 0.04);  border-color: rgba(5, 150, 105, 0.18); }
 
-/* Icon wrap */
 .restriction-icon-wrap {
   width: 38px;
   height: 38px;
@@ -847,11 +845,7 @@
   justify-content: center;
   flex-shrink: 0;
 }
-.restriction-icon-wrap svg {
-  width: 17px;
-  height: 17px;
-  stroke-width: 2;
-}
+.restriction-icon-wrap svg { width: 17px; height: 17px; stroke-width: 2; }
 
 .restriction-icon-red    { background: rgba(220,38,38,0.10);  border: 1px solid rgba(220,38,38,0.20);  }
 .restriction-icon-red svg    { color: #DC2626; }
@@ -870,6 +864,7 @@
   margin: 0 0 5px;
   letter-spacing: -0.01em;
   line-height: 1.3;
+  font-family: 'Cairo', sans-serif;
 }
 .restriction-desc {
   font-size: 12.5px;
@@ -877,13 +872,10 @@
   color: var(--mute);
   margin: 0;
   line-height: 1.75;
+  font-family: 'Cairo', sans-serif;
 }
-.restriction-desc strong {
-  color: var(--text-mid);
-  font-weight: 800;
-}
+.restriction-desc strong { color: var(--text-mid); font-weight: 800; }
 
-/* Disclaimer bar */
 .modal-disclaimer {
   display: flex;
   gap: 10px;
@@ -896,6 +888,7 @@
   font-weight: 700;
   color: var(--mute);
   line-height: 1.7;
+  font-family: 'Cairo', sans-serif;
 }
 .disclaimer-icon {
   width: 16px;
@@ -954,7 +947,6 @@
   color: #fff;
   box-shadow: var(--shadow-gold);
 }
-/* shimmer */
 .modal-btn-confirm::after {
   content: '';
   position: absolute;
@@ -972,7 +964,7 @@
 }
 .modal-btn-confirm .icon { width: 16px; height: 16px; stroke-width: 2.5; }
 
-/* ── RESPONSIVE ── */
+/* ══════════════════════════════════════════ RESPONSIVE */
 @media (max-width: 640px) {
   .modal-overlay { padding: 0; align-items: flex-end; }
   .modal-container {
@@ -1007,7 +999,6 @@
   .modal-footer      { padding: 12px 14px 16px; }
 }
 
-/* ══════════════════════════════════════════ RESPONSIVE */
 @media (max-width: 1024px) {
   .events-grid { grid-template-columns: repeat(2, 1fr); }
 }
@@ -1024,6 +1015,8 @@
   .events-grid  { grid-template-columns: repeat(2, 1fr); }
   .search-bar-row { flex-direction: column; align-items: flex-start; gap: 10px; }
   .search-wrap    { max-width: 100%; width: 100%; }
+  /* On tablet, collapse meta to single column */
+  .event-meta { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 480px) {
@@ -1038,13 +1031,13 @@
   .card-header    { padding: 16px 18px 14px; }
   .event-content  { padding: 16px 18px 18px; gap: 12px; }
   .events-grid    { grid-template-columns: 1fr; }
-
-  /* Remove the fixed tall height — card shrinks to its content on mobile */
   .event-card     { min-height: unset; }
-
-  /* Button sits immediately after the seats bar, no giant gap */
   .card-actions   { margin-top: 0; flex-direction: column; }
   .register-btn   { width: 100%; height: 48px; font-size: 15px; }
+  /* Single column meta on mobile */
+  .event-meta     { grid-template-columns: 1fr; }
+  /* Description with fewer lines on mobile */
+  .event-description { min-height: calc(14px * 1.8 * 2); }
 }
 
 @media (prefers-reduced-motion: reduce) {

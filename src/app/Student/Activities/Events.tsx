@@ -162,11 +162,9 @@ interface ConfirmModalProps {
 }
 
 const ConfirmModal: React.FC<ConfirmModalProps> = ({ event, onConfirm, onCancel, isLoading }) => {
-  // Close on Escape
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
     document.addEventListener('keydown', handleKey);
-    // Prevent body scroll
     document.body.style.overflow = 'hidden';
     return () => {
       document.removeEventListener('keydown', handleKey);
@@ -180,7 +178,6 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({ event, onConfirm, onCancel,
     <div className="modal-overlay" onClick={onCancel} role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div className="modal-container" onClick={e => e.stopPropagation()}>
 
-        {/* ── MODAL HEADER ── */}
         <div className="modal-header">
           <div className="modal-header-icon">
             <WarningIcon />
@@ -197,19 +194,13 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({ event, onConfirm, onCancel,
           </button>
         </div>
 
-        {/* ── MODAL BODY ── */}
         <div className="modal-body">
-
-          {/* Confirmation question */}
           <div className="modal-confirm-banner">
             <span className="modal-confirm-q">هل أنت متأكد من رغبتك في التسجيل؟</span>
             <span className="modal-confirm-sub">يرجى قراءة الشروط والقيود أدناه قبل تأكيد طلبك</span>
           </div>
 
-          {/* ── RESTRICTIONS GRID ── */}
           <div className="modal-restrictions">
-
-            {/* Card 1 — No undo */}
             <div className="restriction-card restriction-red">
               <div className="restriction-icon-wrap restriction-icon-red">
                 <UndoIcon />
@@ -224,7 +215,6 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({ event, onConfirm, onCancel,
               </div>
             </div>
 
-            {/* Card 2 — Absence penalty */}
             <div className="restriction-card restriction-orange">
               <div className="restriction-icon-wrap restriction-icon-orange">
                 <BanIcon />
@@ -239,7 +229,6 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({ event, onConfirm, onCancel,
               </div>
             </div>
 
-            {/* Card 3 — Commitment */}
             <div className="restriction-card restriction-navy">
               <div className="restriction-icon-wrap restriction-icon-navy">
                 <ShieldIcon />
@@ -254,7 +243,6 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({ event, onConfirm, onCancel,
               </div>
             </div>
 
-            {/* Card 4 — Contact officials */}
             <div className="restriction-card restriction-green">
               <div className="restriction-icon-wrap restriction-icon-green">
                 <UserCheckIcon />
@@ -268,10 +256,8 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({ event, onConfirm, onCancel,
                 </p>
               </div>
             </div>
+          </div>
 
-          </div>{/* end modal-restrictions */}
-
-          {/* Disclaimer bar */}
           <div className="modal-disclaimer">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="disclaimer-icon">
               <circle cx="12" cy="12" r="10"/>
@@ -282,10 +268,8 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({ event, onConfirm, onCancel,
               بالنقر على «تأكيد التسجيل» أدناه، فإنك تُقرّ بأنك قرأت وفهمت جميع الشروط المذكورة وتوافق عليها.
             </span>
           </div>
+        </div>
 
-        </div>{/* end modal-body */}
-
-        {/* ── MODAL FOOTER ── */}
         <div className="modal-footer">
           <button className="modal-btn modal-btn-cancel" onClick={onCancel} disabled={isLoading}>
             إلغاء
@@ -297,7 +281,6 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({ event, onConfirm, onCancel,
             }
           </button>
         </div>
-
       </div>
     </div>
   );
@@ -330,8 +313,6 @@ export default function Events() {
   const [registered,  setRegistered]  = useState<Set<number>>(new Set());
   const [activeType,  setActiveType]  = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Modal state
   const [modalEvent,  setModalEvent]  = useState<Event | null>(null);
 
   /* ── Fetch events ── */
@@ -356,19 +337,16 @@ export default function Events() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* ── Open modal ── */
-  const openModal = useCallback((e: React.MouseEvent, event: Event) => {
+  const openModal  = useCallback((e: React.MouseEvent, event: Event) => {
     e.stopPropagation();
     setModalEvent(event);
   }, []);
 
-  /* ── Cancel modal ── */
   const closeModal = useCallback(() => {
-    if (joiningId !== null) return; // don't close while submitting
+    if (joiningId !== null) return;
     setModalEvent(null);
   }, [joiningId]);
 
-  /* ── Confirm join (called from modal) ── */
   const confirmJoin = useCallback(async () => {
     if (!modalEvent) return;
     const id = modalEvent.id;
@@ -379,9 +357,7 @@ export default function Events() {
         headers: { 'Content-Type': 'application/json' },
       });
       const body = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        throw new Error(body.message || body.detail || 'فشل إرسال الطلب');
-      }
+      if (!res.ok) throw new Error(body.message || body.detail || 'فشل إرسال الطلب');
       setRegistered(prev => new Set([...prev, id]));
       setEvents(prev => prev.map(ev => ev.id === id ? { ...ev, takenSeats: ev.takenSeats + 1 } : ev));
       showToast('تم إرسال الطلب بنجاح', 'success');
@@ -393,7 +369,6 @@ export default function Events() {
     }
   }, [modalEvent, showToast]);
 
-  /* ── Filters ── */
   const types    = ['all', ...Array.from(new Set(events.map(e => e.type)))];
   const filtered = events.filter(e =>
     (activeType === 'all' || e.type === activeType) &&
@@ -405,12 +380,8 @@ export default function Events() {
     label: t === 'all' ? 'جميع الفعاليات' : t,
   }));
 
-  /* ══════════════════════════════════════════
-     RENDER
-  ══════════════════════════════════════════ */
   return (
     <>
-      {/* Confirmation Modal */}
       {modalEvent && (
         <ConfirmModal
           event={modalEvent}
@@ -422,7 +393,6 @@ export default function Events() {
 
       <div className="events-page" dir="rtl">
 
-        {/* ══ HERO ══ */}
         <StudentHero
           title="جميع الأنشطة والفعاليات"
           subtitle="استكشف الفعاليات المتاحة وسجّل في ما يناسبك مباشرةً"
@@ -433,10 +403,8 @@ export default function Events() {
           onFilterChange={setActiveType}
         />
 
-        {/* ══ BODY ══ */}
         <div className="events-body">
 
-          {/* Search + count */}
           <div className="search-bar-row">
             <div className="search-wrap">
               <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -486,12 +454,8 @@ export default function Events() {
                       <div className="card-header-top">
                         <span className={`event-badge ${getBadgeClass(event.type)}`}>{event.type}</span>
                         <div className="card-chips">
-                          {isReg && (
-                            <span className="status-badge">✓ مسجّل</span>
-                          )}
-                          {event.isFull && !isReg && (
-                            <span className="full-badge">مكتمل</span>
-                          )}
+                          {isReg && <span className="status-badge">✓ مسجّل</span>}
+                          {event.isFull && !isReg && <span className="full-badge">مكتمل</span>}
                           {!event.canRegister && !event.isFull && !isReg && (
                             <span className="full-badge">التسجيل غير متاح</span>
                           )}
@@ -507,15 +471,34 @@ export default function Events() {
                     <div className="event-content">
                       <p className="event-description">{event.description}</p>
 
+                      {/* 2-column meta grid */}
                       <div className="event-meta">
-                        <div className="meta-item"><CalendarIcon /><span>{event.date}</span></div>
-                        <div className="meta-item"><PinIcon /><span>{event.location}</span></div>
-                        <div className="meta-item"><BuildingIcon /><span>{event.faculty}</span></div>
+                        {/* Col 1 */}
                         <div className="meta-item">
-                          <UsersIcon /><span>{event.takenSeats} / {event.seats} مقعد</span>
+                          <CalendarIcon />
+                          <span>{event.date}</span>
                         </div>
+                        {/* Col 2 */}
+                        <div className="meta-item">
+                          <PinIcon />
+                          <span>{event.location}</span>
+                        </div>
+                        {/* Col 1 */}
+                        <div className="meta-item">
+                          <BuildingIcon />
+                          <span>{event.faculty}</span>
+                        </div>
+                        {/* Col 2 */}
+                        <div className="meta-item">
+                          <UsersIcon />
+                          <span>{event.takenSeats} / {event.seats} مقعد</span>
+                        </div>
+                        {/* Full-width reward row */}
                         {event.reward && event.reward !== '---' && (
-                          <div className="meta-item meta-wide"><GiftIcon /><span>{event.reward}</span></div>
+                          <div className="meta-item meta-wide">
+                            <GiftIcon />
+                            <span>{event.reward}</span>
+                          </div>
                         )}
                       </div>
 
@@ -530,7 +513,7 @@ export default function Events() {
                         <span className="seats-pct">{pct}%</span>
                       </div>
 
-                      {/* CTA buttons */}
+                      {/* CTA */}
                       <div className="card-actions" onClick={(e) => e.stopPropagation()}>
                         {isReg ? (
                           <button className="register-btn registered-btn" disabled>

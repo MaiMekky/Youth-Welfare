@@ -34,6 +34,14 @@ interface Post {
   created_at: string;
 }
 
+// Matches the exact API response shape from GET /api/family/student/{id}/event_requests/
+interface StudentParticipation {
+  is_registered: boolean;
+  status: string | null; // "منتظر" | "مقبول" | "مرفوض" | null
+  rank: number | null;
+  reward: string | null;
+}
+
 interface Activity {
   event_id: number;
   title: string;
@@ -46,41 +54,25 @@ interface Activity {
   cost: string;
   restrictions: string;
   reward: string;
-  registration_status?: string | null;
+  status: string;                              // event status (open/closed/etc.)
+  family: number;
+  family_name: string;
+  faculty: number;
+  faculty_name: string;
+  dept_id: number;
+  created_by: number;
+  created_by_admin_info: string;
+  created_by_student_info: string;
+  current_student_participation: StudentParticipation | null; // student's registration status
+  created_at: string;
+  updated_at: string;
 }
 
-interface RegistrationRecord {
-  status: string;
-  event_id: number;
-  event_title: string;
-  updatedAt: number;
-}
-
-type NotificationType = { show: boolean; message: string; type: "success" | "error" };
 type ActiveTab = "details" | "activities" | "posts";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const BASE = getBaseUrl();
-
-const storageKey = (familyId: number) => `family_registrations_${familyId}`;
-
-function loadRegistrations(familyId: number): Record<number, RegistrationRecord> {
-  if (typeof window === "undefined") return {};
-  try {
-    const raw = localStorage.getItem(storageKey(familyId));
-    return raw ? JSON.parse(raw) : {};
-  } catch {
-    return {};
-  }
-}
-
-function saveRegistration(familyId: number, record: Omit<RegistrationRecord, "updatedAt">) {
-  if (typeof window === "undefined") return;
-  const existing = loadRegistrations(familyId);
-  existing[record.event_id] = { ...record, updatedAt: Date.now() };
-  localStorage.setItem(storageKey(familyId), JSON.stringify(existing));
-}
 
 function formatDate(dateString: string) {
   try {
@@ -97,8 +89,6 @@ function formatTime(dateString: string) {
     });
   } catch { return ""; }
 }
-
-// ─── Filter helpers ───────────────────────────────────────────────────────────
 
 function isPastEvent(activity: Activity): boolean {
   try {
@@ -136,7 +126,13 @@ type StatusConfig = {
   disabled: boolean;
 };
 
-function getStatusConfig(status: string | null | undefined): StatusConfig {
+/**
+ * Maps current_student_participation object from the API to button config.
+ * status values: null → not registered | "منتظر" → pending | "مقبول" → accepted | "مرفوض" → rejected
+ */
+function getStatusConfig(participation: StudentParticipation | null | undefined): StatusConfig {
+  const status = participation?.status ?? null;
+
   switch (status) {
     case "مقبول":
       return {
@@ -180,7 +176,7 @@ function RegisterButton({
   registering: boolean;
   onRegister: () => void;
 }) {
-  const config = getStatusConfig(activity.registration_status);
+  const config = getStatusConfig(activity.current_student_participation);
 
   if (registering) {
     return (
@@ -330,25 +326,7 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
   const [registeringId, setRegisteringId] = useState<number | null>(null);
   const { showToast } = useToast();
 
-  const mergeWithPersisted = useCallback((raw: Activity[]): Activity[] => {
-    const persisted = loadRegistrations(family.id);
-    return raw.map(act => {
-      const local = persisted[act.event_id] ?? null;
-      if (act.registration_status) {
-        saveRegistration(family.id, {
-          status: act.registration_status,
-          event_id: act.event_id,
-          event_title: act.title,
-        });
-        return act;
-      }
-      return { ...act, registration_status: local?.status ?? null };
-    });
-  }, [family.id]);
-
-  const filterEligibleActivities = useCallback((raw: Activity[]): Activity[] => {
-    return raw.filter(act => !isPastEvent(act));
-  }, []);
+  // ── Fetch posts ────────────────────────────────────────────────────────────
 
   const fetchPosts = useCallback(async () => {
     try {
@@ -364,6 +342,8 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
     }
   }, [family.id, showToast]);
 
+  // ── Fetch activities ───────────────────────────────────────────────────────
+
   const fetchActivities = useCallback(async () => {
     try {
       setLoadingActivities(true);
@@ -371,18 +351,21 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
       if (!res.ok) throw new Error("فشل تحميل الفعاليات");
       const data = await res.json();
       const raw: Activity[] = Array.isArray(data) ? data : data.results ?? data.events ?? [];
-      const eligible = filterEligibleActivities(raw);
-      setActivities(mergeWithPersisted(eligible));
+      // Filter out already-ended events
+      setActivities(raw.filter(act => !isPastEvent(act)));
     } catch (err: unknown) {
       showToast((err as Error).message, "error");
     } finally {
       setLoadingActivities(false);
     }
-  }, [family.id, mergeWithPersisted, filterEligibleActivities, showToast]);
+  }, [family.id, showToast]);
+
+  // ── Register for event ─────────────────────────────────────────────────────
 
   const registerForEvent = useCallback(async (eventId: number) => {
     try {
       setRegisteringId(eventId);
+
       const res = await authFetch(
         `${BASE}/api/family/student/${family.id}/events/${eventId}/register/`,
         { method: "POST", headers: { "Content-Type": "application/json" } }
@@ -396,7 +379,9 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
             : JSON.stringify(errData.error ?? errData.message ?? errData.detail ?? errData ?? "");
 
         const errMessages = parseErrorDetails(rawErrString);
+        const flatMsg = errMessages.join(" ").toLowerCase() || rawErrString.toLowerCase();
 
+        // Silently remove events this student isn't eligible for
         if (res.status === 400 && isFacultyMismatchError(errMessages)) {
           setActivities(prev => prev.filter(act => act.event_id !== eventId));
           return;
@@ -407,16 +392,24 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
           return;
         }
 
-        const flatMsg = errMessages.join(" ").toLowerCase() || rawErrString.toLowerCase();
+        // Already registered → reflect pending state optimistically
         if (res.status === 400 && flatMsg.includes("already registered")) {
-          const fallbackStatus = "منتظر";
-          saveRegistration(family.id, { status: fallbackStatus, event_id: eventId, event_title: "" });
           setActivities(prev =>
             prev.map(act =>
-              act.event_id === eventId ? { ...act, registration_status: fallbackStatus } : act
+              act.event_id === eventId
+                ? {
+                    ...act,
+                    current_student_participation: {
+                      is_registered: true,
+                      status: "منتظر",
+                      rank: null,
+                      reward: null,
+                    },
+                  }
+                : act
             )
           );
-          showToast("أنت مسجل بالفعل في هذه الفعالية · الحالة: قيد المراجعة", "success");
+          showToast("أنت مسجل بالفعل — قيد المراجعة", "info");
           return;
         }
 
@@ -426,34 +419,26 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
         throw new Error(displayMsg);
       }
 
-      const data = await res.json();
-      const status: string = data.registration_status ?? "منتظر";
+      // Success: re-fetch to get the real status from the server
+      const data = await res.json().catch(() => ({}));
+      await fetchActivities();
+      showToast(data.message ?? "تم التسجيل بنجاح", "success");
 
-      saveRegistration(family.id, {
-        status,
-        event_id: data.event_id ?? eventId,
-        event_title: data.event_title ?? "",
-      });
-
-      setActivities(prev =>
-        prev.map(act =>
-          act.event_id === eventId ? { ...act, registration_status: status } : act
-        )
-      );
-
-      showToast(`${data.message ?? "تم التسجيل بنجاح"} · الحالة: ${status}`, "success");
-      fetchActivities();
     } catch (err: unknown) {
-      showToast((err as Error).message ?? "حصل خطأ أثناء التسجيل", "error");
+      showToast((err as Error).message ?? "فشل التسجيل، حاول مرة أخرى", "error");
     } finally {
       setRegisteringId(null);
     }
   }, [family.id, showToast, fetchActivities]);
 
+  // ── Tab-driven data loading ────────────────────────────────────────────────
+
   useEffect(() => {
     if (activeTab === "posts" && posts.length === 0) fetchPosts();
     if (activeTab === "activities" && activities.length === 0) fetchActivities();
   }, [activeTab, fetchPosts, fetchActivities, posts.length, activities.length]);
+
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <div className="fd-page" dir="rtl">
@@ -503,11 +488,11 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
               </h2>
               <div className="det-rows">
                 {[
-                  { label: "اسم الأسرة",   value: family.title },
-                  { label: "الوصف",        value: family.subtitle },
+                  { label: "اسم الأسرة",    value: family.title },
+                  { label: "الوصف",         value: family.subtitle },
                   family.description ? { label: "التفاصيل", value: family.description } : null,
-                  { label: "المكان",       value: family.place },
-                  { label: "عدد الأعضاء", value: family.views },
+                  { label: "المكان",        value: family.place },
+                  { label: "عدد الأعضاء",  value: family.views },
                   { label: "تاريخ الإنشاء", value: family.createdAt },
                   family.deadline ? { label: "الموعد النهائي", value: family.deadline } : null,
                 ].filter(Boolean).map((row, i) => (
@@ -560,8 +545,8 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
               <EmptyState message="لا توجد منشورات حالياً" />
             ) : (
               <div className="posts-list">
-                {posts.map(post => (
-                  <PostCard key={post.id} post={post} familyTitle={family.title} />
+                {posts.map((post, index) => (
+                  <PostCard key={post.id ?? `post-${index}`} post={post} familyTitle={family.title} />
                 ))}
               </div>
             )}

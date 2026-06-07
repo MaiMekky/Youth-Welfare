@@ -61,20 +61,20 @@ const fetchApplications = async (appliedFilters: Record<string, string> = {}): P
 
   const data = await res.json();
   return data.map((app: Record<string, unknown>) => ({
-    id:           app.solidarity_id,
-    studentName:  app.student_name,
+    id:            app.solidarity_id,
+    studentName:   app.student_name,
     requestNumber: app.student_uid,
-    college:      app.faculty_name,
-    amount:       app.total_income,
-    date:         app.created_at ? new Date(app.created_at as string).toLocaleDateString() : "-",
-    status:       app.req_status,
-    fatherStatus: app.father_status,
-    motherStatus: app.mother_status,
+    college:       app.faculty_name,
+    amount:        String(app.total_discount ?? 0), // ← changed from total_income to total_discount
+    date:          app.created_at ? new Date(app.created_at as string).toLocaleDateString() : "-",
+    status:        app.req_status,
+    fatherStatus:  app.father_status,
+    motherStatus:  app.mother_status,
     housingStatus: app.housing_status,
-    brothers:     app.family_numbers,
-    totalIncome:  app.total_income_level,
-    grade:        app.grade,
-    disability:   app.disabilities,
+    brothers:      app.family_numbers,
+    totalIncome:   app.total_income_level,
+    grade:         app.grade,
+    disability:    app.disabilities,
   }));
 };
 
@@ -162,7 +162,7 @@ export default function ApplicationsTable({ onDataLoaded }: { onDataLoaded?: (ap
                 <th>رقم الطلب</th>
                 <th>بيانات الطالب</th>
                 <th>الكلية</th>
-                <th>المبلغ</th>
+                <th>الخصم</th>{/* ← changed from المبلغ to الخصم */}
                 <th>تاريخ الاعتماد</th>
                 <th>حالة الطلب</th>
                 <th>الإجراءات</th>

@@ -291,33 +291,94 @@
 
 /* ========= RESPONSIVE ========= */
 @media (max-width: 1024px) {
-  .posts-page { padding: 22px 24px; }
+  .posts-page { padding: 1.375rem 1.5rem; }
 }
 
 @media (max-width: 768px) {
-  .posts-page { padding: 18px 16px; }
-  .posts-page .page-header-block { padding: 18px 22px; border-radius: 12px 12px 0 0; }
-  .posts-page .page-title { font-size: 20px; }
-  .posts-page .section-body { padding: 18px 16px; }
-  .posts-page .post-content { padding: 18px 20px 18px 16px; gap: 14px; }
-  .posts-page .post-title { font-size: 16px; }
-  .posts-page .author-name { font-size: 14px; }
+  .posts-page { padding: 1.125rem 1rem; }
+  
+  .posts-page .page-header-block { 
+    padding: 1.125rem 1.375rem; 
+    border-radius: 0.75rem 0.75rem 0 0; 
+  }
+  
+  .posts-page .page-title { font-size: clamp(1.125rem, 4vw, 1.25rem); }
+  .posts-page .page-subtitle { font-size: 0.8125rem; }
+  .posts-page .section-body { padding: 1.125rem 1rem; }
+  
+  .posts-page .post-content { 
+    padding: 1.125rem 1.25rem 1.125rem 1rem; 
+    gap: 0.875rem; 
+  }
+  
+  .posts-page .post-title { font-size: 1rem; }
+  .posts-page .post-text { font-size: 0.875rem; line-height: 1.7; }
+  .posts-page .author-name { font-size: 0.875rem; }
+  .posts-page .author-role { font-size: 0.6875rem; padding: 0.25rem 0.75rem; }
+  .posts-page .date-time { font-size: 0.75rem; }
+  
+  .posts-page .avatar .user-icon { 
+    width: 2.75rem; 
+    height: 2.75rem; 
+    padding: 0.625rem; 
+  }
 }
 
 @media (max-width: 480px) {
-  .posts-page { padding: 12px; }
-  .posts-page .page-header-block { padding: 15px 18px; border-radius: 10px 10px 0 0; }
-  .posts-page .page-title { font-size: 17px; }
-  .posts-page .section-body { padding: 14px 12px; }
-  .posts-page .post-content { padding: 14px 16px 14px 12px; gap: 10px; }
-  .posts-page .avatar .user-icon { width: 40px; height: 40px; padding: 9px; }
-  .posts-page .post-title { font-size: 15px; }
-  .posts-page .post-text { font-size: 13px; line-height: 1.7; }
-  .posts-page .author-name { font-size: 13px; }
-  .posts-page .author-role { font-size: 11px; padding: 4px 10px; }
-  .posts-page .date-time { font-size: 11px; }
+  .posts-page { padding: 0.75rem; }
+  
+  .posts-page .page-header-block { 
+    padding: 0.9375rem 1.125rem; 
+    border-radius: 0.625rem 0.625rem 0 0; 
+  }
+  
+  .posts-page .page-title { font-size: 1.0625rem; }
+  .posts-page .page-subtitle { font-size: 0.75rem; }
+  .posts-page .section-body { padding: 0.875rem 0.75rem; }
+  
+  .posts-page .post-content { 
+    padding: 0.875rem 1rem 0.875rem 0.75rem; 
+    gap: 0.625rem;
+    flex-direction: column;
+  }
+  
+  /* Move avatar to top on mobile */
+  .posts-page .avatar {
+    order: -1;
+    align-self: flex-start;
+  }
+  
+  .posts-page .avatar .user-icon { 
+    width: 2.5rem; 
+    height: 2.5rem; 
+    padding: 0.5625rem; 
+  }
+  
+  .posts-page .post-title { font-size: 0.9375rem; }
+  .posts-page .post-text { 
+    font-size: 0.8125rem; 
+    line-height: 1.65; 
+  }
+  
+  .posts-page .author-name { font-size: 0.8125rem; }
+  .posts-page .author-role { 
+    font-size: 0.6875rem; 
+    padding: 0.25rem 0.625rem; 
+  }
+  
+  .posts-page .date-time { font-size: 0.6875rem; }
+  .posts-page .meta { margin-bottom: 0.75rem; }
 }
 
 @media (max-width: 360px) {
-  .posts-page .post-content { padding: 12px 14px; gap: 8px; }
+  .posts-page { padding: 0.625rem 0.5rem; }
+  .posts-page .page-header-block { padding: 0.875rem 1rem; }
+  .posts-page .section-body { padding: 0.75rem 0.625rem; }
+  .posts-page .post-content { padding: 0.75rem 0.875rem; gap: 0.5rem; }
+  
+  .posts-page .avatar .user-icon { 
+    width: 2.25rem; 
+    height: 2.25rem; 
+    padding: 0.5rem; 
+  }
 }

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import "../styles/Activities.css";
-import { Calendar, Users, Briefcase, MapPin, Clock } from "lucide-react";
+import { Calendar, Users, Briefcase, MapPin } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 
 interface Activity {
@@ -9,7 +9,6 @@ interface Activity {
   title: string;
   type: string;
   date: string;
-  time: string;
   location: string;
   description: string;
   participants: string;
@@ -96,12 +95,9 @@ const mapApiActivityToActivity = (apiEvent: ApiEventRequest): Activity => {
       : apiEvent.created_by_student_info.name;
   }
 
-  let time = "00:00";
   let date = apiEvent.st_date;
   if (apiEvent.st_date.includes("T")) {
-    const [datePart, timePart] = apiEvent.st_date.split("T");
-    date = datePart;
-    time = timePart.substring(0, 5);
+    date = apiEvent.st_date.split("T")[0];
   }
 
   return {
@@ -109,7 +105,6 @@ const mapApiActivityToActivity = (apiEvent: ApiEventRequest): Activity => {
     title: apiEvent.title,
     type: apiEvent.type,
     date,
-    time,
     location: apiEvent.location,
     description: apiEvent.description,
     participants: apiEvent.s_limit ? `${apiEvent.s_limit} عضو` : "غير محدد",
@@ -213,10 +208,9 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
     <div className="activities-page" dir="rtl">
       <div className="activities-container">
 
-        {/* ── Page Header (exact same style as Posts) ── */}
+        {/* ── Page Header ── */}
         <div className="page-header-block">
           <h1 className="page-title">الفعاليات والأنشطة</h1>
-        
         </div>
 
         <div className="section-body">
@@ -242,12 +236,14 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
             <div className="activities-grid">
               {activities.map((act) => (
                 <div key={act.id} className="activity-card">
-                  {/* Colored top accent bar */}
-                  <div className="card-accent" style={{ backgroundColor: act.color }} />
 
-                  <div className="card-inner">
-                    {/* Header row: status badge + type icon */}
-                    <div className="activity-header">
+                  {/* ── Gold Header Band ── */}
+                  <div className="card-header-band">
+                    {/* Right: event title */}
+                    <h3 className="card-header-title">{act.title}</h3>
+
+                    {/* Left: status badge + type badge */}
+                    <div className="card-header-badges">
                       <span className={`activity-status ${
                         act.status === "قادمة" ? "status-upcoming" :
                         act.status === "منتظر" ? "status-pending" :
@@ -255,22 +251,12 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
                       }`}>
                         {act.status}
                       </span>
-                      <div className="activity-type-icon" style={{ backgroundColor: act.color }}>
-                        {act.type.includes("اجتماع") ? (
-                          <Users size={18} color="#fff" />
-                        ) : act.type.includes("مسابقة") ? (
-                          <Calendar size={18} color="#fff" />
-                        ) : (
-                          <Briefcase size={18} color="#fff" />
-                        )}
-                      </div>
+                      <span className="activity-type-label">{act.type}</span>
                     </div>
+                  </div>
 
-                    {/* Type label */}
-                    <span className="activity-type-label">{act.type}</span>
-
-                    {/* Title */}
-                    <h3 className="activity-title">{act.title}</h3>
+                  {/* ── Card Body ── */}
+                  <div className="card-inner">
 
                     {/* Description */}
                     <p className="activity-desc">{act.description}</p>
@@ -278,21 +264,17 @@ const Activities: React.FC<ActivitiesProps> = ({ refreshTrigger = 0 }) => {
                     {/* Divider */}
                     <div className="card-divider" />
 
-                    {/* Info rows */}
+                    {/* Info rows: date, location, participants */}
                     <div className="activity-info">
                       <div className="info-item">
                         <Calendar size={14} />
                         <span>{act.date}</span>
                       </div>
                       <div className="info-item">
-                        <Clock size={14} />
-                        <span>{act.time}</span>
-                      </div>
-                      <div className="info-item">
                         <MapPin size={14} />
                         <span>{act.location}</span>
                       </div>
-                      <div className="info-item">
+                      <div className="info-item info-item--full">
                         <Users size={14} />
                         <span>{act.participants}</span>
                       </div>

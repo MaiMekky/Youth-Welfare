@@ -63,7 +63,6 @@ type ActiveTab = "details" | "activities" | "posts";
 
 const BASE = getBaseUrl();
 
-
 const storageKey = (familyId: number) => `family_registrations_${familyId}`;
 
 function loadRegistrations(familyId: number): Record<number, RegistrationRecord> {
@@ -101,9 +100,6 @@ function formatTime(dateString: string) {
 
 // ─── Filter helpers ───────────────────────────────────────────────────────────
 
-/**
- * Returns true if the event end date is in the past.
- */
 function isPastEvent(activity: Activity): boolean {
   try {
     return new Date(activity.end_date) < new Date();
@@ -112,20 +108,11 @@ function isPastEvent(activity: Activity): boolean {
   }
 }
 
-/**
- * Parses a Django ErrorDetail string array like:
- *   "[ErrorDetail(string='...', code='invalid')]"
- * and returns the inner message strings.
- */
 function parseErrorDetails(raw: string): string[] {
   const matches = raw.match(/string='([^']+)'/g) ?? [];
   return matches.map(m => m.replace("string='", "").replace(/'\s*$/, ""));
 }
 
-/**
- * Returns true if any error message indicates a faculty mismatch.
- * Matches patterns like "This event is only for X faculty."
- */
 function isFacultyMismatchError(messages: string[]): boolean {
   return messages.some(m =>
     /this event is only for .+ faculty/i.test(m) ||
@@ -133,9 +120,6 @@ function isFacultyMismatchError(messages: string[]): boolean {
   );
 }
 
-/**
- * Returns true if any error message indicates the event is in the past.
- */
 function isPastEventError(messages: string[]): boolean {
   return messages.some(m =>
     /cannot register for past events/i.test(m) ||
@@ -156,7 +140,7 @@ function getStatusConfig(status: string | null | undefined): StatusConfig {
   switch (status) {
     case "مقبول":
       return {
-        label: "تم القبول ✓",
+        label: "تم القبول",
         className: "btn-status-accepted",
         icon: <CheckCircle size={16} />,
         disabled: true,
@@ -230,19 +214,23 @@ function ActivityCard({
 }) {
   return (
     <div className="act-card">
-      <div className="act-card-top">
+      {/* Type badge at top */}
+      <div className="act-card-header">
         <span className="act-type-badge">{activity.type || "فعالية"}</span>
-        <div className="act-icon-box">
-          <Calendar size={18} />
-        </div>
       </div>
 
+      {/* Title */}
       <h3 className="act-title">{activity.title}</h3>
 
+      {/* Description */}
       {activity.description && (
         <p className="act-desc">{activity.description}</p>
       )}
 
+      {/* Divider */}
+      <div className="act-divider" />
+
+      {/* Meta info */}
       <div className="act-meta">
         <div className="act-meta-item">
           <Clock size={14} />
@@ -267,13 +255,13 @@ function ActivityCard({
           </div>
         )}
         {activity.reward && (
-          <div className="act-meta-item">
+          <div className="act-meta-item act-meta-reward">
             <Award size={14} />
             <span>المكافأة: {activity.reward}</span>
           </div>
         )}
         {activity.restrictions && (
-          <div className="act-meta-item">
+          <div className="act-meta-item act-meta-restriction">
             <Info size={14} />
             <span>{activity.restrictions}</span>
           </div>
@@ -342,7 +330,6 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
   const [registeringId, setRegisteringId] = useState<number | null>(null);
   const { showToast } = useToast();
 
-  // ── Merge API status with localStorage fallback ──
   const mergeWithPersisted = useCallback((raw: Activity[]): Activity[] => {
     const persisted = loadRegistrations(family.id);
     return raw.map(act => {
@@ -359,28 +346,14 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
     });
   }, [family.id]);
 
-  /**
-   * Filters out activities the student cannot register for:
-   *  1. Events that have already ended (past events).
-   *  2. Events restricted to a different faculty — detected by probing the
-   *     register endpoint with a dry-run HEAD/OPTIONS, OR simply by checking
-   *     for the error on first attempt and removing from the list reactively.
-   *
-   * Strategy used here: filter by end_date on the client (no extra request),
-   * and reactively remove faculty-mismatch events when the 400 is returned.
-   */
   const filterEligibleActivities = useCallback((raw: Activity[]): Activity[] => {
     return raw.filter(act => !isPastEvent(act));
   }, []);
 
-  // ── Fetch Posts ──
   const fetchPosts = useCallback(async () => {
-
     try {
       setLoadingPosts(true);
-      const res = await authFetch(
-        `${BASE}/api/family/student/${family.id}/posts/`
-      );
+      const res = await authFetch(`${BASE}/api/family/student/${family.id}/posts/`);
       if (!res.ok) throw new Error("فشل تحميل المنشورات");
       const data = await res.json();
       setPosts(Array.isArray(data) ? data : data.results ?? data.posts ?? []);
@@ -391,20 +364,14 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
     }
   }, [family.id, showToast]);
 
-  // ── Fetch Activities ──
   const fetchActivities = useCallback(async () => {
     try {
       setLoadingActivities(true);
-      const res = await authFetch(
-        `${BASE}/api/family/student/${family.id}/event_requests/`
-      );
+      const res = await authFetch(`${BASE}/api/family/student/${family.id}/event_requests/`);
       if (!res.ok) throw new Error("فشل تحميل الفعاليات");
       const data = await res.json();
       const raw: Activity[] = Array.isArray(data) ? data : data.results ?? data.events ?? [];
-
-      // 1. Filter out ineligible activities (past events)
       const eligible = filterEligibleActivities(raw);
-      // 2. Merge with persisted registration statuses
       setActivities(mergeWithPersisted(eligible));
     } catch (err: unknown) {
       showToast((err as Error).message, "error");
@@ -413,24 +380,16 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
     }
   }, [family.id, mergeWithPersisted, filterEligibleActivities, showToast]);
 
-  // ── Register for Event ──
   const registerForEvent = useCallback(async (eventId: number) => {
-
     try {
       setRegisteringId(eventId);
       const res = await authFetch(
         `${BASE}/api/family/student/${family.id}/events/${eventId}/register/`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        }
+        { method: "POST", headers: { "Content-Type": "application/json" } }
       );
 
       if (!res.ok) {
-        // Try to parse the error body — Django may return an array of ErrorDetail objects
         const errData = await res.json().catch(() => ({}));
-
-        // Normalise to a plain string so we can run regex on it
         const rawErrString: string =
           typeof errData === "string"
             ? errData
@@ -438,20 +397,16 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
 
         const errMessages = parseErrorDetails(rawErrString);
 
-        // ── Faculty mismatch → silently remove the card from the list ──
         if (res.status === 400 && isFacultyMismatchError(errMessages)) {
           setActivities(prev => prev.filter(act => act.event_id !== eventId));
-          // No error toast — the card just disappears; the student never needed to see it.
           return;
         }
 
-        // ── Past event → silently remove the card from the list ──
         if (res.status === 400 && isPastEventError(errMessages)) {
           setActivities(prev => prev.filter(act => act.event_id !== eventId));
           return;
         }
 
-        // ── Already registered → treat as success ──
         const flatMsg = errMessages.join(" ").toLowerCase() || rawErrString.toLowerCase();
         if (res.status === 400 && flatMsg.includes("already registered")) {
           const fallbackStatus = "منتظر";
@@ -465,7 +420,6 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
           return;
         }
 
-        // ── Generic error ──
         const displayMsg =
           errMessages[0] ||
           (errData.error ?? errData.message ?? errData.detail ?? "فشل التسجيل في الفعالية");
@@ -496,13 +450,10 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
     }
   }, [family.id, showToast, fetchActivities]);
 
-  // ── Load data on tab switch ──
   useEffect(() => {
     if (activeTab === "posts" && posts.length === 0) fetchPosts();
     if (activeTab === "activities" && activities.length === 0) fetchActivities();
   }, [activeTab, fetchPosts, fetchActivities, posts.length, activities.length]);
-
-  // ─────────────────────────────────────────────────────────────────────────
 
   return (
     <div className="fd-page" dir="rtl">

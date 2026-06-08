@@ -150,7 +150,7 @@ function getStatusConfig(participation: StudentParticipation | null | undefined)
       };
     case "منتظر":
       return {
-        label: "قيد المراجعة",
+        label: "قيد الانتظار",
         className: "btn-status-pending",
         icon: <Hourglass size={16} />,
         disabled: true,
@@ -210,13 +210,11 @@ function ActivityCard({
 }) {
   return (
     <div className="act-card">
-      {/* Type badge at top */}
+      {/* Title row: title on right, badge on left */}
       <div className="act-card-header">
+        <h3 className="act-title">{activity.title}</h3>
         <span className="act-type-badge">{activity.type || "فعالية"}</span>
       </div>
-
-      {/* Title */}
-      <h3 className="act-title">{activity.title}</h3>
 
       {/* Description */}
       {activity.description && (
@@ -420,9 +418,9 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
       }
 
       // Success: re-fetch to get the real status from the server
-      const data = await res.json().catch(() => ({}));
+      await res.json().catch(() => ({}));
       await fetchActivities();
-      showToast(data.message ?? "تم التسجيل بنجاح", "success");
+      showToast("تم ارسال طلبك بنجاح", "success");
 
     } catch (err: unknown) {
       showToast((err as Error).message ?? "فشل التسجيل، حاول مرة أخرى", "error");

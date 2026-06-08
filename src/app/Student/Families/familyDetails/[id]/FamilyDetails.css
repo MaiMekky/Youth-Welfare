@@ -295,17 +295,31 @@
   background: linear-gradient(90deg, var(--navy) 0%, var(--gold) 100%);
 }
 
-/* Card header area */
+/* Card header: title (right) + badge (left), aligned in one row */
 .act-card-header {
-  padding: 20px 20px 0 20px;
-  padding-top: 24px; /* extra room for the top strip */
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 24px 20px 0 20px; /* extra top padding for accent strip */
 }
 
-/* Type badge */
+/* Title — larger, on the right side */
+.act-title {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--navy);
+  margin: 0;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  flex: 1;
+}
+
+/* Type badge — sits on the left, vertically centred with first line of title */
 .act-type-badge {
   display: inline-flex;
   align-items: center;
-  padding: 4px 12px;
+  padding: 5px 14px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 700;
@@ -313,16 +327,9 @@
   color: var(--navy);
   border: 1px solid #C8DCEF;
   letter-spacing: 0.02em;
-}
-
-/* Title */
-.act-title {
-  font-size: 17px;
-  font-weight: 800;
-  color: var(--navy);
-  margin: 12px 20px 0;
-  line-height: 1.45;
-  letter-spacing: -0.01em;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 3px; /* subtle optical alignment with title baseline */
 }
 
 /* Description */
@@ -330,7 +337,7 @@
   font-size: 14px;
   color: var(--text-3);
   line-height: 1.7;
-  margin: 8px 20px 0;
+  margin: 10px 20px 0;
   font-weight: 500;
 }
 
@@ -618,12 +625,14 @@
   .act-grid { grid-template-columns: 1fr; }
   .det-row { flex-direction: column; gap: 6px; }
   .det-label { min-width: auto; }
+  .act-card-header { flex-direction: column; gap: 8px; }
+  .act-type-badge { align-self: flex-start; }
 }
 
 @media (max-width: 480px) {
   .fd-title { font-size: 18px; }
   .fd-tab { font-size: 14px; padding: 10px 12px; }
-  .act-title { font-size: 16px; }
+  .act-title { font-size: 18px; }
   .post-title { font-size: 16px; }
   .reg-btn { font-size: 14px; }
 }

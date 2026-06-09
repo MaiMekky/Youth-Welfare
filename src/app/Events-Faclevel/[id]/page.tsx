@@ -623,6 +623,9 @@ export default function EventDetailsPage() {
           editingRankId={editingRankId}
           draftReward={draftReward}
           draftRank={draftRank}
+          eventStatus={event?.status ?? ""}
+          eventStartDate={event?.st_date ?? ""}
+          eventEndDate={event?.end_date ?? ""}
           onApproveAll={approveAll}
           onApprove={approveParticipant}
           onReject={rejectParticipant}
@@ -638,11 +641,14 @@ export default function EventDetailsPage() {
           onAddMember={addMember}   // ← the only new prop: handler lives here, event id is captured in closure
         />
 
-        <EventTeams
-          eventId={id}
-          participants={rows.map((r) => ({ id: r.id, studentId: r.studentId, name: r.name }))}
-          onTeamsConfigured={setHasTeams}
-        />
+        {/* Hide teams section when event is cancelled or rejected */}
+        {ui.status !== "ملغي" && ui.status !== "مرفوض" && (
+          <EventTeams
+            eventId={id}
+            participants={rows.map((r) => ({ id: r.id, studentId: r.studentId, name: r.name }))}
+            onTeamsConfigured={setHasTeams}
+          />
+        )}
 
       </div>
     </div>

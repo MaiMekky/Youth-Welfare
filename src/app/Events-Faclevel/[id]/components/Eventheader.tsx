@@ -30,7 +30,7 @@ export default function EventHeader({
         <p className={styles.pageSubtitle}>{subtitle}</p>
       </div>
 
-      <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+      <div className={styles.topActions}>
         <button
           className={styles.actionBtn}
           type="button"

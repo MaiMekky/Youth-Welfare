@@ -168,25 +168,24 @@ function buildNotifications(events: ApiEvent[]): Notification[] {
     }
 
     // Completion reminder: faculty events only (faculty_id !== null),
-    // approved, within 7-day window after end_date
+    // approved, after end_date (no time restriction)
     if (ev.faculty_id !== null && isApproved(ev.status)) {
       const daysOver = getDaysOver(ev.end_date);
-      if (daysOver >= 0 && daysOver <= 7) {
+      if (daysOver >= 0) {
         const id = `complete-${ev.event_id}`;
         if (!dismissed.has(id)) {
-          const remaining = 7 - daysOver;
           notifs.push({
             id,
             event_id: ev.event_id,
             title: ev.title,
             subtitle:
-              remaining === 0
-                ? "⛔ آخر فرصة اليوم — أتمّ الفعالية الآن!"
-                : remaining === 1
-                ? "🔴 تبقّى يوم واحد فقط لإتمام الفعالية"
-                : daysOver <= 2
-                ? `تم انتهاء الفعالية — أتمّها خلال ${remaining} أيام`
-                : `⚠ تبقّى ${remaining} أيام لإتمام الفعالية`,
+              daysOver === 0
+                ? "⛔ انتهت اليوم — أتمّ الفعالية الآن!"
+                : daysOver === 1
+                ? "🔴 انتهت منذ يوم واحد — تحتاج للإتمام"
+                : daysOver <= 3
+                ? `تم انتهاء الفعالية منذ ${daysOver} أيام — تحتاج للإتمام`
+                : `⚠ انتهت منذ ${daysOver} ${daysOver === 1 ? "يوم" : "أيام"} — تحتاج للإتمام`,
             kind: "complete",
             daysUntil: -daysOver,
             daysOverdue: daysOver,

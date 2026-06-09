@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Award, Check, Eye, Medal, UserPlus, X } from "lucide-react";
+import { Award, Check, Eye, Medal, UserPlus, X, User } from "lucide-react";
 import styles from "../styles/EventDetails.module.css";
 import { StudentRow } from "../page";
 
@@ -13,6 +13,9 @@ type Props = {
   editingRankId: number | null;
   draftReward: string;
   draftRank: string;
+  eventStatus: string;
+  eventStartDate: string;
+  eventEndDate: string;
   onApproveAll: () => void;
   onApprove: (studentId: string) => void;
   onReject: (studentId: string) => void;
@@ -40,6 +43,7 @@ export default function ParticipantsTable({
   rows, busy, hasTeams,
   editingRewardId, editingRankId,
   draftReward, draftRank,
+  eventStatus, eventStartDate, eventEndDate,
   onApproveAll, onApprove, onReject,
   onStartEditReward, onStartEditRank,
   onSaveReward, onSaveRank,
@@ -52,8 +56,15 @@ export default function ParticipantsTable({
   const rewardsCount  = rows.filter((r) => (r.reward ?? "").trim().length > 0).length;
   const ranksCount    = rows.filter((r) => (r.rank   ?? "").trim().length > 0).length;
 
+  // Check if event end date has passed
+  const eventHasEnded = eventEndDate ? new Date(eventEndDate) <= new Date() : false;
+  // Check if event status is accepted
+  const eventIsAccepted = eventStatus === "مقبول";
+  // Check if event status allows adding members (accepted or tentative approval)
+  const canAddMembers = eventStatus === "مقبول" || eventStatus === "موافقة مبدئية";
+
   /* ── add-member local state ── */
-  const [showAddMember, setShowAddMember] = useState(false);
+  const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [nidDraft,      setNidDraft]      = useState("");
   const [addBusy,       setAddBusy]       = useState(false);
   const [addError,      setAddError]      = useState<string | null>(null);
@@ -61,7 +72,10 @@ export default function ParticipantsTable({
 
   const handleAddMember = async () => {
     const nid = nidDraft.trim();
-    if (!nid) return;
+    if (!nid) {
+      setAddError("برجاء إدخال رقم الهوية");
+      return;
+    }
 
     setAddBusy(true);
     setAddError(null);
@@ -80,15 +94,15 @@ export default function ParticipantsTable({
     setAddSuccess(true);
     setNidDraft("");
 
-    // Auto-close after 2 s
+    // Auto-close after 1.5s
     setTimeout(() => {
       setAddSuccess(false);
-      setShowAddMember(false);
-    }, 2000);
+      setShowAddMemberModal(false);
+    }, 1500);
   };
 
   const handleCancelAdd = () => {
-    setShowAddMember(false);
+    setShowAddMemberModal(false);
     setNidDraft("");
     setAddError(null);
     setAddSuccess(false);
@@ -105,7 +119,7 @@ export default function ParticipantsTable({
           <span className={styles.miniChip}><Medal size={14} /> {ranksCount}</span>
           <span className={styles.miniChip}><Award size={14} /> {rewardsCount}</span>
 
-          {!hasTeams && (
+          {!hasTeams && eventIsAccepted && (
             <button
               className={`${styles.actionBtn} ${styles.acceptBtn}`}
               type="button"
@@ -118,67 +132,17 @@ export default function ParticipantsTable({
             </button>
           )}
 
-          {/* ── Add-member trigger / inline form ── */}
-          {!showAddMember ? (
+          {/* ── Add-member trigger button: only show when status is مقبول or موافقة مبدئية ── */}
+          {canAddMembers && (
             <button
               className={`${styles.actionBtn} ${styles.addMemberBtn}`}
               type="button"
-              onClick={() => setShowAddMember(true)}
+              onClick={() => setShowAddMemberModal(true)}
               disabled={busy}
             >
               <UserPlus size={16} />
               إضافة عضو
             </button>
-          ) : (
-            <div className={styles.addMemberForm}>
-              <input
-                className={[
-                  styles.inlineInput,
-                  addError   ? styles.inlineInputError   : "",
-                  addSuccess ? styles.inlineInputSuccess : "",
-                ].join(" ")}
-                value={nidDraft}
-                onChange={(e) => { setNidDraft(e.target.value); setAddError(null); }}
-                placeholder="رقم الهوية (NID)"
-                disabled={addBusy || addSuccess}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter")  handleAddMember();
-                  if (e.key === "Escape") handleCancelAdd();
-                }}
-                autoFocus
-                dir="ltr"
-              />
-
-              <button
-                className={`${styles.iconBtn} ${styles.iconBtnSuccess}`}
-                type="button"
-                disabled={addBusy || !nidDraft.trim() || addSuccess}
-                onClick={handleAddMember}
-                title="تأكيد"
-              >
-                {addBusy
-                  ? <span className={styles.spinnerSm} />
-                  : <Check size={18} />
-                }
-              </button>
-
-              <button
-                className={styles.iconBtn}
-                type="button"
-                disabled={addBusy}
-                onClick={handleCancelAdd}
-                title="إلغاء"
-              >
-                <X size={18} />
-              </button>
-
-              {addError && (
-                <span className={styles.addMemberError}>{addError}</span>
-              )}
-              {addSuccess && (
-                <span className={styles.addMemberSuccess}>تمت الإضافة ✓</span>
-              )}
-            </div>
           )}
         </div>
       </div>
@@ -218,7 +182,7 @@ export default function ParticipantsTable({
 
                 <td>
                   <div className={styles.rowActions}>
-                    {!hasTeams && r.status === "منتظر" && (
+                    {!hasTeams && r.status === "منتظر" && eventIsAccepted && (
                       <>
                         <button
                           className={`${styles.actionBtn} ${styles.acceptBtn}`}
@@ -239,7 +203,7 @@ export default function ParticipantsTable({
                       </>
                     )}
 
-                    {!hasTeams && (
+                    {!hasTeams && eventHasEnded && (
                       editingRewardId === r.id ? (
                         <div className={styles.inlineEdit}>
                           <input
@@ -262,7 +226,7 @@ export default function ParticipantsTable({
                       )
                     )}
 
-                    {!hasTeams && (
+                    {!hasTeams && eventHasEnded && (
                       editingRankId === r.id ? (
                         <div className={styles.inlineEdit}>
                           <input
@@ -309,6 +273,136 @@ export default function ParticipantsTable({
           </tbody>
         </table>
       </div>
+
+      {/* ── Add Member Modal ── */}
+      {showAddMemberModal && (
+        <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-label="إضافة عضو">
+          <div className={styles.modalCard} style={{ width: "min(480px, 96vw)" }}>
+            <div className={styles.modalHead}>
+              <div>
+                <div className={styles.modalTitle}>إضافة عضو جديد</div>
+                <div className={styles.modalSub}>أدخل رقم الهوية الوطنية للعضو</div>
+              </div>
+              <button 
+                className={styles.modalClose} 
+                type="button" 
+                onClick={handleCancelAdd}
+                disabled={addBusy}
+                aria-label="إغلاق"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className={styles.modalBody}>
+              <div className={styles.modalField}>
+                <label className={styles.modalLabel}>
+                  <User size={14} style={{ display: "inline", marginLeft: "6px" }} />
+                  رقم الهوية الوطنية (NID)
+                </label>
+                <input
+                  className={styles.modalInput}
+                  value={nidDraft}
+                  onChange={(e) => { 
+                    setNidDraft(e.target.value); 
+                    setAddError(null); 
+                  }}
+                  placeholder="مثال: 30012251234567"
+                  disabled={addBusy || addSuccess}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleAddMember();
+                    if (e.key === "Escape") handleCancelAdd();
+                  }}
+                  autoFocus
+                  dir="ltr"
+                  style={{
+                    textAlign: "left",
+                    fontFamily: "monospace",
+                    fontSize: "15px",
+                    letterSpacing: "0.5px"
+                  }}
+                />
+                {addError && (
+                  <div className={styles.modalError}>
+                    ⚠️ {addError}
+                  </div>
+                )}
+                {addSuccess && (
+                  <div style={{
+                    fontSize: "13px",
+                    fontWeight: 800,
+                    color: "#16a34a",
+                    padding: "8px 12px",
+                    background: "#f0fdf4",
+                    borderRadius: "8px",
+                    border: "1px solid #86efac"
+                  }}>
+                    ✓ تمت إضافة العضو بنجاح
+                  </div>
+                )}
+              </div>
+
+              <div style={{
+                marginTop: "16px",
+                padding: "12px",
+                background: "#f8fafc",
+                borderRadius: "10px",
+                border: "1px solid #e2e8f0"
+              }}>
+                <div style={{
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  color: "#64748b",
+                  marginBottom: "6px"
+                }}>
+                  💡 معلومة
+                </div>
+                <div style={{
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  color: "#475569",
+                  lineHeight: "1.5"
+                }}>
+                  رقم الهوية الوطنية يجب أن يكون 14 رقم ومسجل في النظام مسبقاً
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button
+                className={styles.modalCancel}
+                type="button"
+                onClick={handleCancelAdd}
+                disabled={addBusy}
+              >
+                إلغاء
+              </button>
+              <button
+                className={styles.modalPrimary}
+                type="button"
+                onClick={handleAddMember}
+                disabled={addBusy || !nidDraft.trim() || addSuccess}
+                style={{ 
+                  opacity: (addBusy || !nidDraft.trim() || addSuccess) ? 0.6 : 1,
+                  cursor: (addBusy || !nidDraft.trim() || addSuccess) ? "not-allowed" : "pointer"
+                }}
+              >
+                {addBusy ? (
+                  <>
+                    <span className={styles.spinnerSm} />
+                    جاري الإضافة...
+                  </>
+                ) : (
+                  <>
+                    <UserPlus size={18} />
+                    إضافة العضو
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

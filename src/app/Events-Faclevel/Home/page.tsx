@@ -155,15 +155,15 @@ function UpcomingRow({ ev, onClick }: { ev: ProcessedEvent; onClick: () => void 
               borderRadius: "99px",
               fontSize: "0.72rem",
               fontWeight: 700,
-              background: isLastDay ? "#FEF2F2" : isUrgentEnd ? "#FFFBEB" : "#F0FDF4",
-              color: isLastDay ? "#DC2626" : isUrgentEnd ? "#B45309" : "#15803D",
-              border: `1px solid ${isLastDay ? "#FECACA" : isUrgentEnd ? "#FDE68A" : "#BBF7D0"}`,
+              background: "#FEF2F2",
+              color: "#DC2626",
+              border: "1px solid #FECACA",
             }}
           >
             <AlertTriangle size={11} />
-            {isLastDay
-              ? "آخر يوم للإتمام"
-              : `${ev.completionDaysLeft} ${ev.completionDaysLeft === 1 ? "يوم" : "أيام"} للإتمام`}
+            {ev.completionDaysLeft === 0
+              ? "انتهت اليوم"
+              : `${ev.completionDaysLeft} ${ev.completionDaysLeft === 1 ? "يوم" : "أيام"} منذ الانتهاء`}
           </div>
         )}
       </div>
@@ -282,14 +282,13 @@ export default function HomePage() {
       .map((e) => {
         const daysUntil  = getDaysUntil(e.st_date);
         const daysOverEnd = getDaysOverEnd(e.end_date);
-        // Event is within 7-day completion window when:
-        //   faculty_id present + accepted + end_date passed + ≤ 7 days ago
+        // Event needs completion when:
+        //   faculty_id present + accepted + end_date passed (no time restriction)
         const needsCompletion =
           e.faculty_id !== null &&
           isApproved(e.status) &&
-          daysOverEnd >= 0 &&
-          daysOverEnd <= 7;
-        const completionDaysLeft = needsCompletion ? 7 - daysOverEnd : -1;
+          daysOverEnd >= 0;
+        const completionDaysLeft = needsCompletion ? daysOverEnd : -1;
 
         return {
           ...e,
@@ -348,7 +347,7 @@ export default function HomePage() {
         value: needComp,
         icon: <TrendingUp size={22} />,
         accent: "red" as const,
-        sub: needComp > 0 ? "انتهت ولم تُتمّ — أقل من 7 أيام" : "لا توجد فعاليات معلقة",
+        sub: needComp > 0 ? "انتهت ولم تُتمّ" : "لا توجد فعاليات معلقة",
       },
     ];
   }, [events, processed]);

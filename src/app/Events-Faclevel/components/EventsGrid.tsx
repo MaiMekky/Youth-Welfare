@@ -52,6 +52,7 @@ export default function EventsGrid({
   onDelete,
   onItemsChange,
   onMarkCompleted,
+  onJoinEvent,
 }: {
   items: EventItem[];
   onView: (id: number) => void;
@@ -59,6 +60,7 @@ export default function EventsGrid({
   onDelete: (id: number) => void;
   onItemsChange: (next: EventItem[]) => void;
   onMarkCompleted?: (id: number) => void;
+  onJoinEvent?: (id: number) => void;
 }) {
   const safeItems = useMemo(() => items.filter(Boolean), [items]);
   const [busyId, setBusyId] = useState<number | null>(null);
@@ -104,6 +106,7 @@ export default function EventsGrid({
           onEdit={onEdit}
           onDelete={onDelete}
           onMarkCompleted={onMarkCompleted}
+          onJoinEvent={onJoinEvent}
         />
       ))}
     </div>

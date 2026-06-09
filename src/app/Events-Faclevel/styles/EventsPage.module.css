@@ -250,6 +250,37 @@
 .actions .danger:hover { background:#DC2626; color:#fff; border-color:#DC2626; transform:translateY(-2px); box-shadow:0 8px 20px rgba(220,38,38,.22); }
 .actions .danger:active { transform:translateY(0); }
 
+/* Join Event Button */
+.joinBtn {
+  border-radius: 10px !important;
+  padding: 9px 14px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  border: 1.5px solid #6EE7B7 !important;
+  background: linear-gradient(135deg, #10B981, #059669) !important;
+  color: #fff !important;
+  font-family: 'Cairo', sans-serif !important;
+  font-size: 14px !important;
+  transition: all 160ms ease !important;
+  will-change: transform !important;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25) !important;
+}
+.joinBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #059669, #047857) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35) !important;
+}
+.joinBtn:active:not(:disabled) { 
+  transform: translateY(0) !important; 
+}
+.joinBtn:disabled { 
+  opacity: 0.55; 
+  cursor: not-allowed !important; 
+}
+
 .eventsSection { margin-top: 0; }
 
 /* ── Notification ── */

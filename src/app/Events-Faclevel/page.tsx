@@ -291,6 +291,19 @@ export default function Page() {
     await fetchEvents();
   };
 
+  const onJoinEvent = async (id: number) => {
+    const res = await apiFetch<Record<string, unknown>>(
+      `/api/event/manage-events/${id}/join/`,
+      { method: "POST" }
+    );
+    if (!res.ok) {
+      showToast(res.message || "فشل الانضمام للفعالية", "error");
+      return;
+    }
+    showToast("✅ تم الانضمام للفعالية بنجاح", "success");
+    await fetchEvents();
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.container}>
@@ -403,6 +416,7 @@ export default function Page() {
               onEdit={onEdit}
               onDelete={onDelete}
               onMarkCompleted={onMarkCompleted}
+              onJoinEvent={onJoinEvent}
             />
           )}
         </div>

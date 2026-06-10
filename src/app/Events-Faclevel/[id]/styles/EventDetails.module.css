@@ -911,28 +911,32 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
+  padding: 8px 10px;
   border: none;
-  border-radius: 8px;
-  font-size: 0.82rem;
-  font-weight: 600;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 900;
   cursor: pointer;
   transition: background 0.18s, transform 0.12s, box-shadow 0.18s;
-
-  background: linear-gradient(135deg, #4f46e5 0%, #0ea5e9 100%);
+  background: linear-gradient(135deg, #10b981, #059669);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
 .addMemberBtn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #4338ca 0%, #0284c7 100%);
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+  background: linear-gradient(135deg, #059669, #047857);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
   transform: translateY(-1px);
 }
 
 .addMemberBtn:active:not(:disabled) {
   transform: translateY(0);
   box-shadow: none;
+}
+
+.addMemberBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 /* Inline form that replaces the button */
@@ -1116,4 +1120,50 @@
 /* ── Modal Small Size Variation ── */
 .modalCard[style*="480px"] .modalBody {
   padding: 20px 18px;
+}
+/* ── Responsive: tableChips wrap on small screens ── */
+@media (max-width: 768px) {
+  .tableHead {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .tableChips {
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .tableChips .actionBtn,
+  .tableChips .addMemberBtn {
+    flex: 1 1 auto;
+    justify-content: center;
+    min-width: 100px;
+  }
+}
+
+/* ── Responsive: Add Member Modal ── */
+@media (max-width: 640px) {
+  .modalOverlay {
+    padding: 8px;
+    align-items: center;
+  }
+
+  .modalCard {
+    width: 100% !important;
+    max-height: 92vh;
+    border-radius: 20px 20px 20px 20px;
+  }
+
+  .modalFooter {
+    flex-direction: column;
+    padding: 10px 14px 14px;
+  }
+
+  .modalCancel,
+  .modalPrimary {
+    width: 100%;
+    justify-content: center;
+  }
 }

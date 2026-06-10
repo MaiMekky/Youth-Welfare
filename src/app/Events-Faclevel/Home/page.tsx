@@ -46,12 +46,6 @@ type ProcessedEvent = ApiEvent & {
   isUrgent: boolean;
   isToday: boolean;
   isPast: boolean;
-  /** days elapsed since end_date; -1 if end_date is in the future */
-  daysOverEnd: number;
-  /** true when accepted, past end_date, and within the 7-day completion window */
-  needsCompletion: boolean;
-  /** days remaining in the 7-day completion window */
-  completionDaysLeft: number;
 };
 
 type StatCard = {
@@ -113,10 +107,6 @@ function UpcomingRow({ ev, onClick }: { ev: ProcessedEvent; onClick: () => void 
     : ev.isUrgent
     ? styles.urgencySoon
     : styles.urgencyNormal;
-
-  const isLastDay   = ev.completionDaysLeft === 0;
-  const isUrgentEnd = ev.completionDaysLeft <= 2 && ev.completionDaysLeft >= 0;
-
   return (
     <button className={styles.upcomingRow} onClick={onClick}>
       <div className={`${styles.upcomingDot} ${urgencyClass}`} />
@@ -142,33 +132,22 @@ function UpcomingRow({ ev, onClick }: { ev: ProcessedEvent; onClick: () => void 
             </span>
           )}
         </div>
-
-        {/* ── Completion warning inline ── */}
-        {ev.needsCompletion && (
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "4px",
-              marginTop: "4px",
-              padding: "2px 8px",
-              borderRadius: "99px",
-              fontSize: "0.72rem",
-              fontWeight: 700,
-              background: "#FEF2F2",
-              color: "#DC2626",
-              border: "1px solid #FECACA",
-            }}
-          >
-            <AlertTriangle size={11} />
-            {ev.completionDaysLeft === 0
-              ? "انتهت اليوم"
-              : `${ev.completionDaysLeft} ${ev.completionDaysLeft === 1 ? "يوم" : "أيام"} منذ الانتهاء`}
-          </div>
-        )}
       </div>
       <div className={styles.upcomingRight}>
-        {ev.isToday ? (
+        {ev.status?.trim() === "مرفوض" ? (
+          <span style={{
+            padding: "4px 10px",
+            borderRadius: 999,
+            background: "#FEF2F2",
+            color: "#B42318",
+            fontWeight: 900,
+            fontSize: 12,
+            border: "1px solid #FECACA",
+            whiteSpace: "nowrap",
+          }}>
+            مرفوض
+          </span>
+        ) : ev.isToday ? (
           <span className={styles.badgeToday}>اليوم</span>
         ) : ev.daysUntil === 1 ? (
           <span className={styles.badgeSoon}>غداً</span>
@@ -270,87 +249,47 @@ export default function HomePage() {
     const data = await apiFetch<ApiEvent[]>("/api/event/get-events/");
     if (isRefresh) setRefreshing(false);
     else setLoading(false);
-    if (data && Array.isArray(data)) setEvents(data);
+    if (data && Array.isArray(data))
+      setEvents(data.filter((e) => e.status?.trim() !== "ملغي"));
   }, []);
 
   useEffect(() => {
     fetchEvents();
   }, [fetchEvents]);
-
-  const processed = useMemo<ProcessedEvent[]>(() => {
-    return events
-      .map((e) => {
-        const daysUntil  = getDaysUntil(e.st_date);
-        const daysOverEnd = getDaysOverEnd(e.end_date);
-        // Event needs completion when:
-        //   faculty_id present + accepted + end_date passed (no time restriction)
-        const needsCompletion =
-          e.faculty_id !== null &&
-          isApproved(e.status) &&
-          daysOverEnd >= 0;
-        const completionDaysLeft = needsCompletion ? daysOverEnd : -1;
-
-        return {
-          ...e,
-          daysUntil,
-          isToday: daysUntil === 0,
-          isUrgent: daysUntil >= 0 && daysUntil <= 3,
-          isPast: daysUntil < 0,
-          daysOverEnd,
-          needsCompletion,
-          completionDaysLeft,
-        };
-      })
-      .sort((a, b) => new Date(a.st_date).getTime() - new Date(b.st_date).getTime());
-  }, [events]);
+  
+const processed = useMemo<ProcessedEvent[]>(() => {
+  return events
+    .map((e) => {
+      const daysUntil = getDaysUntil(e.st_date);
+      return {
+        ...e,
+        daysUntil,
+        isToday: daysUntil === 0,
+        isUrgent: daysUntil >= 0 && daysUntil <= 3,
+        isPast: daysUntil < 0,
+      };
+    })
+    .sort((a, b) => new Date(a.st_date).getTime() - new Date(b.st_date).getTime());
+}, [events]);
 
   // Upcoming events (within 30 days) + events needing completion
   const upcomingEvents = useMemo(() => {
-    const upcoming = processed.filter((e) => !e.isPast && e.daysUntil <= 30);
-    const needCompletion = processed.filter(
-      (e) => e.needsCompletion && !upcoming.find((u) => u.event_id === e.event_id)
-    );
-    // Merge, completion-needed ones first, then upcoming by date; cap at 8
-    return [...needCompletion, ...upcoming].slice(0, 8);
-  }, [processed]);
+  return processed.filter((e) => !e.isPast && e.daysUntil <= 30).slice(0, 8);
+}, [processed]);
 
-  const stats = useMemo<StatCard[]>(() => {
-    const total     = events.length;
-    const approved  = events.filter((e) => isApproved(e.status)).length;
-    const pending   = events.filter((e) => isPending(e.status)).length;
-    const needComp  = processed.filter((e) => e.needsCompletion).length;
+ const stats = useMemo<StatCard[]>(() => {
+  const total    = events.length;
+  const approved = events.filter((e) => isApproved(e.status)).length;
+  const pending  = events.filter((e) => isPending(e.status)).length;
+  const rejected = events.filter((e) => e.status?.trim() === "مرفوض").length;
 
-    return [
-      {
-        label: "إجمالي الفعاليات",
-        value: total,
-        icon: <CalendarDays size={22} />,
-        accent: "navy" as const,
-        sub: "كل الفعاليات المسجلة",
-      },
-      {
-        label: "الفعاليات المقبولة",
-        value: approved,
-        icon: <CheckCircle2 size={22} />,
-        accent: "green" as const,
-        sub: "تمت الموافقة عليها",
-      },
-      {
-        label: "في انتظار المراجعة",
-        value: pending,
-        icon: <Clock size={22} />,
-        accent: "gold" as const,
-        sub: "تحتاج إجراء",
-      },
-      {
-        label: "تحتاج إتماماً",
-        value: needComp,
-        icon: <TrendingUp size={22} />,
-        accent: "red" as const,
-        sub: needComp > 0 ? "انتهت ولم تُتمّ" : "لا توجد فعاليات معلقة",
-      },
-    ];
-  }, [events, processed]);
+  return [
+    { label: "إجمالي الفعاليات",    value: total,    icon: <CalendarDays size={22} />, accent: "navy"  as const, sub: "كل الفعاليات المسجلة" },
+    { label: "الفعاليات المقبولة",   value: approved, icon: <CheckCircle2 size={22} />, accent: "green" as const, sub: "تمت الموافقة عليها" },
+    { label: "في انتظار المراجعة",   value: pending,  icon: <Clock size={22} />,        accent: "gold"  as const, sub: "تحتاج إجراء" },
+    { label: "الفعاليات المرفوضة",   value: rejected, icon: <TrendingUp size={22} />,   accent: "red"   as const, sub: "تم رفضها" },
+  ];
+}, [events]);
 
   const greetingHour = new Date().getHours();
   const greeting =
@@ -523,21 +462,6 @@ export default function HomePage() {
               <span className={styles.summaryMiniLabel}>فعاليات قادمة</span>
               <span className={`${styles.summaryMiniVal} ${styles.summaryFuture}`}>
                 {processed.filter((e) => !e.isPast).length}
-              </span>
-            </div>
-            <div className={styles.summaryDivider} />
-            {/* New: needs completion count */}
-            <div className={styles.summaryMiniRow}>
-              <span className={styles.summaryMiniLabel}>تحتاج إتماماً</span>
-              <span
-                className={styles.summaryMiniVal}
-                style={{
-                  color: processed.filter((e) => e.needsCompletion).length > 0
-                    ? "#DC2626"
-                    : undefined,
-                }}
-              >
-                {processed.filter((e) => e.needsCompletion).length}
               </span>
             </div>
           </div>

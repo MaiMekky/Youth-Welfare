@@ -9,6 +9,7 @@ type Props = {
   uploading: boolean;
   deletingDocId: number | null;
   isFacultyEvent: boolean;
+  eventStatus: string;
   fileRef: React.RefObject<HTMLInputElement | null>;
   onUpload: (files: FileList | null) => void;
   onDelete: (docId: number) => void;
@@ -16,9 +17,10 @@ type Props = {
 
 export default function ImagesSection({
   images, loadingImages, uploading,
-  deletingDocId, isFacultyEvent,
+  deletingDocId, isFacultyEvent, eventStatus,
   fileRef, onUpload, onDelete,
 }: Props) {
+  const isAccepted = eventStatus === "مقبول";
   return (
     <section className={styles.imagesBlock}>
       <div className={styles.imagesHead}>
@@ -27,7 +29,7 @@ export default function ImagesSection({
           صور الفعالية
         </div>
 
-        {isFacultyEvent && (
+        {isFacultyEvent && isAccepted && (
           <div className={styles.imagesActions}>
             <input
               ref={fileRef}
@@ -76,7 +78,7 @@ export default function ImagesSection({
                   <Eye size={16} />
                   عرض الصورة
                 </a>
-                {isFacultyEvent && (
+                {isFacultyEvent && isAccepted && (
                   <button
                     type="button"
                     className={styles.deleteImgBtn}

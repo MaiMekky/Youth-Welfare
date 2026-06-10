@@ -126,13 +126,16 @@ export default function Page() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<EventsTab>(() => {
-    if (typeof window !== "undefined") {
-      const saved = sessionStorage.getItem(TAB_SESSION_KEY);
-      if (saved === "faculty" || saved === "dept") return saved;
-    }
-    return "faculty";
-  });
+  // ✅ Always "faculty" on first render (matches server)
+const [activeTab, setActiveTab] = useState<EventsTab>("faculty");
+
+// Then restore saved tab after mount (client-only)
+useEffect(() => {
+  const saved = sessionStorage.getItem(TAB_SESSION_KEY);
+  if (saved === "faculty" || saved === "dept") {
+    setActiveTab(saved);
+  }
+}, []);
 
   const [userDepartments, setUserDepartments] = useState<Record<string, unknown>[]>([]);
   const [deptFilter, setDeptFilter] = useState<number | "all">("all");
@@ -171,7 +174,7 @@ export default function Page() {
     const res = await apiFetch<ApiEvent[]>(`/api/event/get-events/${qs}`);
     if (!silent) setLoading(false);
     if (!res.ok) return;
-    setEvents(res.data.map(toEventItem));
+    setEvents(res.data.filter((e) => e.status !== "منتظر").map(toEventItem));
   };
 
   // Initial load — show spinner
@@ -185,7 +188,7 @@ export default function Page() {
     const timer = setTimeout(() => {
       const qs = buildQueryString(dateFrom, dateTo);
       apiFetch<ApiEvent[]>(`/api/event/get-events/${qs}`).then((res) => {
-        if (res.ok) setEvents(res.data.map(toEventItem));
+        if (res.ok) setEvents(res.data.filter((e) => e.status !== "منتظر").map(toEventItem));
       });
     }, 400);
     return () => clearTimeout(timer);
@@ -224,32 +227,21 @@ export default function Page() {
     }
     return list;
   }, [events, activeTab, deptFilter, search]);
-
   const stats: StatItem[] = useMemo(() => {
-    const active   = visibleEvents.filter((e) => e.isActive).length;
-    const inactive = visibleEvents.filter((e) => !e.isActive).length;
+    const total     = visibleEvents.length;
+    const accepted  = visibleEvents.filter((e) => e.statusLabel === "مقبول").length;
+    const pending   = visibleEvents.filter((e) => e.statusLabel === "منتظر" || e.statusLabel === "موافقة مبدئية").length;
+    const cancelled = visibleEvents.filter((e) => e.statusLabel === "ملغي").length;
+    const rejected  = visibleEvents.filter((e) => e.statusLabel === "مرفوض").length;
+    const completed = visibleEvents.filter((e) => e.statusLabel === "مكتمل").length;
+
     return [
-      {
-        title: "إجمالي الفعاليات",
-        value: String(visibleEvents.length),
-        meta: "",
-        icon: "calendar",
-        accent: "gold",
-      },
-      {
-        title: "الفعاليات النشطة",
-        value: String(active),
-        meta: "",
-        icon: "check",
-        accent: "green",
-      },
-      {
-        title: "فعاليات غير نشطة",
-        value: String(inactive),
-        meta: "",
-        icon: "clock",
-        accent: "indigo",
-      },
+      { title: "إجمالي الفعاليات", value: String(total),     icon: "calendar", accent: "gold"   },
+      { title: "مقبول",            value: String(accepted),  icon: "check",    accent: "green"  },
+      { title: "منتظر",            value: String(pending),   icon: "clock",    accent: "amber"  },
+      { title: "مرفوض",            value: String(rejected),  icon: "clock",    accent: "indigo" },
+      { title: "ملغي",             value: String(cancelled), icon: "clock",    accent: "amber"  },
+      { title: "مكتمل",            value: String(completed), icon: "check",    accent: "green"  },
     ];
   }, [visibleEvents]);
 

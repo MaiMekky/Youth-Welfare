@@ -205,7 +205,7 @@ export default function EventCard({
       </div>
 
       {/* ── Completion warning strip ── */}
-      {showMarkCompleted && (
+      {/* {showMarkCompleted && (
         <div
           style={{
             display: "flex",
@@ -233,12 +233,12 @@ export default function EventCard({
         >
           <AlertTriangle size={15} />
           {elapsed === 0
-            ? "⛔ انتهت اليوم — يرجى إتمام الفعالية"
+            ? "⛔ تنتهي اليوم — يرجى إتمام الفعالية"
             : isUrgent
             ? `⚠ انتهت منذ ${elapsed} ${elapsed === 1 ? "يوم" : "أيام"} — تحتاج للإتمام`
             : `انتهت منذ ${elapsed} ${elapsed === 1 ? "يوم" : "أيام"} — تحتاج للإتمام`}
         </div>
-      )}
+      )} */}
 
       <div className={styles.actions}>
         <button className={styles.secondary} onClick={() => onView(item.id)}>

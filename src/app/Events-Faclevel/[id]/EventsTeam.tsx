@@ -136,8 +136,8 @@ type Props = {
   eventId: string;
   isFacultyEvent?: boolean;
   participants?: { id: number; studentId: string; name: string }[];
-  /** Called with `true` when settings have been saved (teams system is active) */
   onTeamsConfigured?: (configured: boolean) => void;
+  eventStatus?: string; // ← add
 };
 
 /* ─────────────────────────── Settings form type ─────────────────────────── */
@@ -188,7 +188,9 @@ export default function EventTeams({
   isFacultyEvent = false,
   participants = [],
   onTeamsConfigured,
+  eventStatus = "", // ← add
 }: Props) {
+  const isAccepted = eventStatus === "مقبول"; // ← add
   const { showToast } = useToast();
 
   /* ── data ── */
@@ -251,7 +253,7 @@ export default function EventTeams({
     );
     setLoadingTeams(false);
     if (res.ok) setTeams(res.data.data ?? []);
-    else showToast(res.message, "error");
+    // else showToast(res.message, "error");
   }, [eventId, showToast]);
 
   const loadRanking = useCallback(async () => {
@@ -499,7 +501,7 @@ export default function EventTeams({
           </div>
         </div>
 
-        {!isFacultyEvent && (
+        {!isFacultyEvent && isAccepted && (
           <div className={styles.teamsHeaderActions}>
             <button
               className={styles.btnGhost}

@@ -139,7 +139,7 @@
 }
 
 .input{
-  height:46px;
+  height:55px;
   width:100%;
   border:1px solid #e5e7eb;
   border-radius:12px;
@@ -149,6 +149,7 @@
   font-weight:900;
   font-size:14px;
   outline:none;
+  resize:none;
 }
 
 .input:focus{

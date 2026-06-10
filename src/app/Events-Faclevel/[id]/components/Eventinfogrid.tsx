@@ -24,14 +24,14 @@ export default function EventInfoGrid({
   location, startDate, endDate,
   rejectionReason, reward, constraints, description,
 }: Props) {
-  const statusBadgeClass = useMemo(() => {
-    const s = (status || "").trim();
-    if (s === "نشط") return styles.badgeSuccess;
-    if (s === "منتظر") return styles.badgeBlue;
-    if (s === "غير نشط" || s === "ملغي" || s === "مرفوض")
-      return (styles as Record<string, string>).badgeDanger || styles.badgeBlue;
-    return styles.badgeBlue;
-  }, [status]);
+ const statusBadgeClass = useMemo(() => {
+  const s = (status || "").trim();
+  if (s === "نشط" || s === "مقبول") return styles.badgeSuccess;
+  if (s === "منتظر") return styles.badgeBlue;
+  if (s === "غير نشط" || s === "ملغي" || s === "مرفوض")
+    return (styles as Record<string, string>).badgeDanger || styles.badgeBlue;
+  return styles.badgeBlue;
+}, [status]);
 
   return (
     <>

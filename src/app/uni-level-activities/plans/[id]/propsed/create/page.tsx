@@ -617,7 +617,7 @@ const toggleAllFacs = () => {
                 </div>
                 )}
                 {isConvert && (
-                  <div className={styles.facultyBox}>
+                  <div className={styles.facultyBox} style={{ gridColumn: "1 / -1" }}>
                     <div className={styles.facultyHeader}>
                       <div>
                         <div className={styles.facultyTitle}>الكليات المستهدفة</div>

@@ -1160,3 +1160,83 @@
     border-radius: 14px;
   }
 }
+/* ===================== Responsive: Top Bar Buttons ===================== */
+@media (max-width: 768px) {
+  .topBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .topBar > div:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .topBar .actionBtn,
+  .topBar .backBtn {
+    flex: 1 1 auto;
+    justify-content: center;
+    min-width: 120px;
+  }
+}
+
+/* ===================== Responsive: Table Head Chips ===================== */
+@media (max-width: 768px) {
+  .tableHead {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .tableChips {
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .tableChips .actionBtn,
+  .tableChips .addStudentBtn {
+    flex: 1 1 auto;
+    justify-content: center;
+    min-width: 100px;
+  }
+}
+/* ===================== Responsive: Modals ===================== */
+@media (max-width: 640px) {
+  .modalOverlay {
+    padding: 8px;
+    align-items: center;
+  }
+
+  .modalCard,
+  .addStudentModal {
+    width: 100%;
+    max-height: 92vh;
+    border-radius: 20px 20px 20px 20px;
+  }
+
+  .modalHead {
+    padding: 12px 14px;
+  }
+
+  .modalBody {
+    padding: 12px 14px 8px;
+  }
+
+  .modalFooter {
+    flex-direction: column;
+    padding: 10px 14px 14px;
+  }
+
+  .modalCancel,
+  .modalPrimary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .modalGrid2 {
+    grid-template-columns: 1fr;
+  }
+}

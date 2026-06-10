@@ -52,12 +52,14 @@ export default function EventsGrid({
   onEdit,
   onDelete,
   onItemsChange,
+  onMarkCompleted,
 }: {
   items: EventItem[];
   onView: (id: number) => void;
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
   onItemsChange: (next: EventItem[]) => void;
+  onMarkCompleted?: (id: number) => void;
 }) {
   const { showToast } = useToast();
   const safeItems = useMemo(() => items.filter(Boolean), [items]);
@@ -103,6 +105,7 @@ export default function EventsGrid({
             onView={onView}
             onEdit={onEdit}
             onDelete={onDelete}
+            onMarkCompleted={onMarkCompleted}
           />
         ))}
       </div>

@@ -1346,18 +1346,6 @@ const isEventAccepted = event?.status === "مقبول";
             </div>
 
             <div className={styles.tableChips}>
-              {/* Add Student Button */}
-              {!isFacultyEvent && event?.status === "مقبول" && (
-              <button
-                className={`${styles.actionBtn} ${styles.addStudentBtn}`}
-                type="button"
-                onClick={openAddStudentModal}
-                disabled={busy}
-              >
-                <Users size={16} />
-                إضافة طالب
-              </button>
-            )}
 
               {/* Hide rank/reward counts and approve-all when teams are enabled */}
               {!teamsEnabled && (
@@ -1378,6 +1366,18 @@ const isEventAccepted = event?.status === "مقبول";
                   قبول الجميع ({pendingCount})
                 </button>
               )}
+                  {/* Add Student Button */}
+              {!isFacultyEvent && event?.status === "مقبول" && (
+              <button
+                className={`${styles.actionBtn} ${styles.addStudentBtn}`}
+                type="button"
+                onClick={openAddStudentModal}
+                disabled={busy}
+              >
+                <Users size={16} />
+                إضافة طالب
+              </button>
+            )}
             </div>
           </div>
 

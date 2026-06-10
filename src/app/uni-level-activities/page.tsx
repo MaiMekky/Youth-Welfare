@@ -19,14 +19,14 @@ type ApiEvent = {
   st_date: string;
   end_date: string;
   location: string;
-  status: Record<string, unknown>;
+  status: string;
   type: string;
   cost: string;
   s_limit: number;
   faculty_id: number | null;
   faculty_name: string | null;
   dept_id: number;
-  active?: Record<string, unknown>;
+  active?: boolean | number | string;
 };
 
 
@@ -164,7 +164,7 @@ export default function Page() {
     if (!silent) setLoading(false);
     if (!res.ok) { showToast(res.message || "فشل تحميل الفعاليات", "error"); return; }
     const list = Array.isArray(res.data) ? res.data : [];
-    const deptOnly = list.filter((e) => e.faculty_id === null);
+    const deptOnly = list.filter((e) => e.faculty_id === null && e.status !== "منتظر");
     setEvents(deptOnly.map((e) => toEventItem(e)));
   };
 
@@ -181,7 +181,7 @@ export default function Page() {
       apiFetch<ApiEvent[]>(`/api/event/get-events/${qs}`).then((res) => {
         if (res.ok) {
         const list = Array.isArray(res.data) ? res.data : [];
-        const deptOnly = list.filter((e) => e.faculty_id === null);
+        const deptOnly = list.filter((e) => e.faculty_id === null && e.status !== "منتظر");
         setEvents(deptOnly.map((e) => toEventItem(e)));
         }
       });
@@ -200,16 +200,23 @@ export default function Page() {
     return list;
   }, [events, search]);
 
-  const stats: StatItem[] = useMemo(() => {
-    const active   = visibleEvents.filter((e) => e.isActive).length;
-    const inactive = visibleEvents.filter((e) => !e.isActive).length;
-    const total    = visibleEvents.length;
-    return [
-      { title: "إجمالي الفعاليات",   value: String(total),    meta: "", icon: "calendar", accent: "gold"   },
-      { title: "الفعاليات النشطة",    value: String(active),   meta: "", icon: "check",    accent: "green"  },
-      { title: "فعاليات غير نشطة",   value: String(inactive), meta: "", icon: "clock",    accent: "indigo" },
-    ];
-  }, [visibleEvents]);
+ const stats: StatItem[] = useMemo(() => {
+  const total     = visibleEvents.length;
+  const pending   = visibleEvents.filter((e) => e.statusLabel === "منتظر" || e.statusLabel === "موافقة مبدئية").length;
+  const accepted  = visibleEvents.filter((e) => e.statusLabel === "مقبول").length;
+  const rejected  = visibleEvents.filter((e) => e.statusLabel === "مرفوض").length;
+  const cancelled = visibleEvents.filter((e) => e.statusLabel === "ملغي").length;
+  const completed = visibleEvents.filter((e) => e.statusLabel === "مكتمل").length;
+
+  return [
+    { title: "إجمالي الفعاليات", value: String(total),     meta: "", icon: "calendar", accent: "gold"   },
+    { title: "منتظر",            value: String(pending),   meta: "", icon: "clock",    accent: "amber"  },
+    { title: "مقبول",            value: String(accepted),  meta: "", icon: "check",    accent: "green"  },
+    { title: "مرفوض",            value: String(rejected),  meta: "", icon: "clock",    accent: "indigo" },
+    { title: "ملغي",             value: String(cancelled), meta: "", icon: "clock",    accent: "amber"  },
+    { title: "مكتمل",            value: String(completed), meta: "", icon: "check",    accent: "green"  },
+  ];
+}, [visibleEvents]);
 
   const onView   = (id: number) => router.push(`/uni-level-activities/${id}`);
   const onEdit   = (id: number) => router.push(`/uni-level-activities/create/${id}`);

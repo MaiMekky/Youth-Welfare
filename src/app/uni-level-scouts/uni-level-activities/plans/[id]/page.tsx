@@ -248,7 +248,7 @@ export default function PlanDetailsPage() {
   }, [plan]);
 
   const onAddProposed = () => {
-    router.push(`/uni-level-activities/plans/${id}/propsed/create`);
+    router.push(`/uni-level-scouts/uni-level-activities/plans/${id}/propsed/create`);
   };
 
   const onConvertToEvent = (eventId: number) => {
@@ -264,12 +264,12 @@ export default function PlanDetailsPage() {
     );
 
     showToast("✅ تم تجهيز بيانات التحويل", "success");
-    router.push(`/uni-level-activities/plans/${id}/propsed/create?mode=convert`);
+    router.push(`/uni-level-scouts/uni-level-activities/plans/${id}/propsed/create?mode=convert`);
   };
 
  const onViewLinkedEvent = (eventId: number) => {
-  sessionStorage.setItem("eventDetails_from", `/uni-level-activities/plans/${id}`);
-  router.push(`/uni-level-activities/${eventId}`);
+  sessionStorage.setItem("eventDetails_from", `/uni-level-scouts/uni-level-activities/plans/${id}`);
+  router.push(`/uni-level-scouts/uni-level-activities/${eventId}`);
 };
 
   // UI safe fallbacks
@@ -277,6 +277,15 @@ export default function PlanDetailsPage() {
   const planSubtitle = "معلومات شاملة عن الخطة والفعاليات المرتبطة بها";
   const facultyName = plan?.faculty_name ?? "خطة عامة على مستوى الجامعة";
   const termLabel = plan?.term ? `الترم: ${plan.term}` : "—";
+
+  function scopeLabel(raw: string) {
+  const s = (raw || "").trim();
+
+  if (s === "داخلي") return "على مستوى الكلية";
+  if (s === "خارجي") return "على مستوى الجامعة";
+
+  return s || "—";
+}
 
   return (
     <>
@@ -289,7 +298,7 @@ export default function PlanDetailsPage() {
               <p className={styles.pageSubtitle}>{planSubtitle}</p>
             </div>
 
-            <button className={styles.backBtn} onClick={() => router.push("/uni-level-activities/plans")}>
+            <button className={styles.backBtn} onClick={() => router.push("/uni-level-scouts/uni-level-activities/plans")}>
               <ArrowRight size={18} />
               العودة للخطط
             </button>
@@ -436,7 +445,7 @@ export default function PlanDetailsPage() {
 
                         <td>
                           <span className={`${styles.typePill} ${typeClass(styles, e.type)}`}>
-                            {e.type || "—"}
+                            {scopeLabel(e.type)}
                           </span>
                         </td>
 

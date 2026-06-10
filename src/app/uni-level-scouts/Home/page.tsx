@@ -92,8 +92,9 @@ async function apiFetch<T>(path: string): Promise<T | null> {
   }
 }
 
-/* ─── Upcoming Event Row ─── */
-function UpcomingRow({ ev, onClick }: { ev: ProcessedEvent; onClick: () => void }) {
+/* ─── Upcoming Event Row ─── */function UpcomingRow({ ev, onClick }: { ev: ProcessedEvent; onClick: () => void }) {
+  const isRejected = ev.status?.trim() === "مرفوض";
+
   const urgencyClass = ev.isToday
     ? styles.urgencyToday
     : ev.isUrgent
@@ -127,7 +128,20 @@ function UpcomingRow({ ev, onClick }: { ev: ProcessedEvent; onClick: () => void 
         </div>
       </div>
       <div className={styles.upcomingRight}>
-        {ev.isToday ? (
+        {isRejected ? (
+          <span style={{
+            padding: "4px 10px",
+            borderRadius: 999,
+            background: "#FEF2F2",
+            color: "#B42318",
+            fontWeight: 900,
+            fontSize: 12,
+            border: "1px solid #FECACA",
+            whiteSpace: "nowrap",
+          }}>
+            مرفوض
+          </span>
+        ) : ev.isToday ? (
           <span className={styles.badgeToday}>اليوم</span>
         ) : ev.daysUntil === 1 ? (
           <span className={styles.badgeSoon}>غداً</span>
@@ -372,6 +386,7 @@ export default function HomePage() {
 
   const processed = useMemo<ProcessedEvent[]>(() => {
     return events
+    .filter((e) => e.status?.trim() !== "ملغي")
       .map((e) => {
         const daysUntil = getDaysUntil(e.st_date);
         return {

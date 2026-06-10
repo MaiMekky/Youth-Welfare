@@ -210,9 +210,10 @@ export default function TeamsSection({
     setSettingsLoading(false);
     if (res.ok) {
       setSettings(res.data);
-    } else if (res.status !== 404) {
-      showToast("تعذر تحميل إعدادات الفرق", "warning");
-    }
+    } 
+    // else if (res.status !== 404) {
+    //   showToast("تعذر تحميل إعدادات الفرق", "warning");
+    // }
   }, [eventId, showToast]);
 
   const loadTeams = useCallback(async () => {

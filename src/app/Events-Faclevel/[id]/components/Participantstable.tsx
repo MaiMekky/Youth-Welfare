@@ -31,6 +31,7 @@ type Props = {
   // The parent owns the API call. It receives the nid, hits the endpoint with the
   // correct authFetch + API_URL + event id, and returns a typed result.
   onAddMember: (nid: string) => Promise<AddMemberResult>;
+ facultyId?: number | null;
 };
 
 function participantBadgeClass(s: StudentRow["status"], styles: Record<string, string>) {
@@ -51,6 +52,7 @@ export default function ParticipantsTable({
   onSetDraftReward, onSetDraftRank,
   onViewStudent,
   onAddMember,
+  facultyId,
 }: Props) {
   const pendingCount  = rows.filter((r) => r.status === "منتظر").length;
   const rewardsCount  = rows.filter((r) => (r.reward ?? "").trim().length > 0).length;
@@ -63,6 +65,7 @@ export default function ParticipantsTable({
   // Check if event status allows adding members (accepted or tentative approval)
   const canAddMembers = eventStatus === "مقبول" || eventStatus === "موافقة مبدئية";
 
+  const isFacultyEvent = facultyId !== null;
   /* ── add-member local state ── */
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [nidDraft,      setNidDraft]      = useState("");
@@ -171,7 +174,7 @@ export default function ParticipantsTable({
                     {r.status}
                   </span>
                 </td>
-
+              
                 <td>
                   <span className={styles.cellValue}>{(r.rank ?? "").trim() ? r.rank : "-"}</span>
                 </td>
@@ -203,7 +206,7 @@ export default function ParticipantsTable({
                       </>
                     )}
 
-                    {!hasTeams && eventHasEnded && (
+                    {!hasTeams && eventHasEnded && isFacultyEvent && (
                       editingRewardId === r.id ? (
                         <div className={styles.inlineEdit}>
                           <input
@@ -226,7 +229,7 @@ export default function ParticipantsTable({
                       )
                     )}
 
-                    {!hasTeams && eventHasEnded && (
+                    {!hasTeams && eventHasEnded && isFacultyEvent && (
                       editingRankId === r.id ? (
                         <div className={styles.inlineEdit}>
                           <input

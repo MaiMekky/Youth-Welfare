@@ -116,7 +116,7 @@
   flex: 1;
   color: #1A2E42;
   transition: border .2s;
-  margin-bottom: -20px;
+  margin: 22px 0 0;
 }
 .searchBox:focus-within { border-color: #2D5F8A; background: #fff; }
 .searchBox input{

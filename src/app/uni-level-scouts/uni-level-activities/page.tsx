@@ -7,7 +7,7 @@ import StatsGrid from "./component/StatsGrid";
 import type { StatItem } from "./component/StatsGrid";
 import { EventItem, ChipVariant } from "./component/EventCard";
 import { useRouter } from "next/navigation";
-import { Plus, CalendarX } from "lucide-react";
+import { Plus, CalendarX, Search } from "lucide-react";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
 const API_URL = getBaseUrl();
@@ -19,14 +19,14 @@ type ApiEvent = {
   st_date: string;
   end_date: string;
   location: string;
-  status: Record<string, unknown>;
+  status: string;
   type: string;
   cost: string;
   s_limit: number;
   faculty_id: number | null;
   faculty_name: string | null;
   dept_id: number;
-  active?: Record<string, unknown>;
+  active?: boolean | number | string;
 };
 
 
@@ -82,10 +82,15 @@ function toBool(v: unknown): boolean | null {
 
 function statusVariant(status: string): ChipVariant {
   const s = (status || "").trim();
-  if (s === "نشط") return "success";
-  if (s === "منتظر") return "primary";
-  if (s === "مكتمل") return "info";
-  if (s === "غير نشط" || s === "ملغي" || s === "مرفوض") return "danger";
+  if (s === "نشط")                return "success";
+  if (s === "مقبول")              return "accepted";   // emerald green
+  if (s === "موافقة مبدئية")     return "pending";  // cyan/teal
+  if (s === "منتظر")              return "pending";    // amber
+  if (s === "مكتمل")              return "completed";  // blue
+  if (s === "منتهي الصلاحية")    return "expired";    // slate/grey
+  if (s === "مرفوض")             return "rejected";   // rose/red
+  if (s === "ملغي")              return "cancelled";  // deep red/crimson
+  if (s === "غير نشط")           return "danger";
   return "purple";
 }
 
@@ -129,11 +134,22 @@ type Faculty = { faculty_id: number; name: string };
 export default function Page() {
   const router = useRouter();
   const { showToast } = useToast();
-  const goCreate = () => router.push("/uni-level-activities/create");
+  const goCreate = () => router.push("/uni-level-scouts/uni-level-activities/create");
 
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [faculties, setFaculties] = useState<Faculty[]>([]);
+  const [search, setSearch] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo]   = useState("");
+
+  const buildQueryString = (from: string, to: string) => {
+    const params = new URLSearchParams();
+    if (from) params.set("date_from", from);
+    if (to)   params.set("date_to",   to);
+    const qs = params.toString();
+    return qs ? `?${qs}` : "";
+  };
 
   const fetchFaculties = async () => {
     const res = await apiFetch<Faculty[]>("/api/family/faculties/", { method: "GET" });
@@ -141,38 +157,87 @@ export default function Page() {
     setFaculties(res.data);
   };
 
-  const fetchEvents = async () => {
-    setLoading(true);
-    const res = await apiFetch<ApiEvent[]>("/api/event/get-events/", { method: "GET" });
-    setLoading(false);
+  const fetchEvents = async (silent = false) => {
+    if (!silent) setLoading(true);
+    const qs  = buildQueryString(dateFrom, dateTo);
+    const res = await apiFetch<ApiEvent[]>(`/api/event/get-events/${qs}`, { method: "GET" });
+    if (!silent) setLoading(false);
     if (!res.ok) { showToast(res.message || "فشل تحميل الفعاليات", "error"); return; }
     const list = Array.isArray(res.data) ? res.data : [];
-    setEvents(list.map((e) => toEventItem(e)));
+    const deptOnly = list.filter((e) => e.faculty_id === null && e.status !== "منتظر");
+    setEvents(deptOnly.map((e) => toEventItem(e)));
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchFaculties(); }, []);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (faculties.length) fetchEvents(); }, [faculties]);
+  useEffect(() => { if (faculties.length) fetchEvents(false); }, [faculties]);
 
-  const stats: StatItem[] = useMemo(() => {
-    const active   = events.filter((e) => e.isActive).length;
-    const inactive = events.filter((e) => !e.isActive).length;
-    const total    = events.length;
-    return [
-      { title: "إجمالي الفعاليات",   value: String(total),    meta: "", icon: "calendar", accent: "gold"   },
-      { title: "الفعاليات النشطة",    value: String(active),   meta: "", icon: "check",    accent: "green"  },
-      { title: "فعاليات غير نشطة",   value: String(inactive), meta: "", icon: "clock",    accent: "indigo" },
-    ];
-  }, [events]);
+  // Date filter changes — debounce 400 ms, silent refresh (no spinner flash)
+  useEffect(() => {
+    if (!faculties.length) return;
+    const timer = setTimeout(() => {
+      const qs = buildQueryString(dateFrom, dateTo);
+      apiFetch<ApiEvent[]>(`/api/event/get-events/${qs}`).then((res) => {
+        if (res.ok) {
+        const list = Array.isArray(res.data) ? res.data : [];
+        const deptOnly = list.filter((e) => e.faculty_id === null && e.status !== "منتظر");
+        setEvents(deptOnly.map((e) => toEventItem(e)));
+        }
+      });
+    }, 400);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateFrom, dateTo]);
 
-  const onView   = (id: number) => router.push(`/uni-level-activities/${id}`);
-  const onEdit   = (id: number) => router.push(`/uni-level-activities/create/${id}`);
+  const visibleEvents = useMemo(() => {
+    let list = events;
+    if (search.trim()) {
+      list = list.filter((e) =>
+        e.title.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+    return list;
+  }, [events, search]);
+
+ const stats: StatItem[] = useMemo(() => {
+  const total     = visibleEvents.length;
+  const pending   = visibleEvents.filter((e) => e.statusLabel === "منتظر" || e.statusLabel === "موافقة مبدئية").length;
+  const accepted  = visibleEvents.filter((e) => e.statusLabel === "مقبول").length;
+  const rejected  = visibleEvents.filter((e) => e.statusLabel === "مرفوض").length;
+  const cancelled = visibleEvents.filter((e) => e.statusLabel === "ملغي").length;
+  const completed = visibleEvents.filter((e) => e.statusLabel === "مكتمل").length;
+
+  return [
+    { title: "إجمالي الفعاليات", value: String(total),     meta: "", icon: "calendar", accent: "gold"   },
+    { title: "منتظر",            value: String(pending),   meta: "", icon: "clock",    accent: "amber"  },
+    { title: "مقبول",            value: String(accepted),  meta: "", icon: "check",    accent: "green"  },
+    { title: "مرفوض",            value: String(rejected),  meta: "", icon: "clock",    accent: "indigo" },
+    { title: "ملغي",             value: String(cancelled), meta: "", icon: "clock",    accent: "amber"  },
+    { title: "مكتمل",            value: String(completed), meta: "", icon: "check",    accent: "green"  },
+  ];
+}, [visibleEvents]);
+
+  const onView   = (id: number) => router.push(`/uni-level-scouts/uni-level-activities/${id}`);
+  const onEdit   = (id: number) => router.push(`/uni-level-scouts/uni-level-activities/create/${id}`);
   const onDelete = async (id: number) => {
     const prev = events;
     const res = await apiFetch<Record<string, unknown>>(`/api/event/get-events/${id}/`, { method: "DELETE" });
     if (!res.ok) { setEvents(prev); showToast(res.message || "فشل الغاء الفعالية", "error"); return; }
     showToast("✅ تم الغاء الفعالية بنجاح", "success");
+    await fetchEvents();
+  };
+
+  const onMarkCompleted = async (id: number) => {
+    const res = await apiFetch<Record<string, unknown>>(
+      `/api/event/manage-events/${id}/mark-completed/`,
+      { method: "PATCH" }
+    );
+    if (!res.ok) {
+      showToast(res.message || "فشل تغيير حالة الفعالية", "error");
+      return;
+    }
+    showToast("✅ تم إتمام الفعالية بنجاح", "success");
     await fetchEvents();
   };
 
@@ -191,6 +256,42 @@ export default function Page() {
           </button>
         </div>
 
+        <div className={styles.filtersBar}>
+          {/* Search */}
+          <div className={styles.searchBox}>
+            <Search size={16} />
+            <input
+              placeholder="ابحث باسم الفعالية..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+
+           {/* Date from */}
+          <div className={styles.dateGroup}>
+            <label className={styles.dateLabel}>من تاريخ</label>
+            <div className={styles.dateBox}>
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Date to */}
+          <div className={styles.dateGroup}>
+            <label className={styles.dateLabel}>إلى تاريخ</label>
+            <div className={styles.dateBox}>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+
         <StatsGrid items={stats} />
 
         <div className={styles.eventsSection}>
@@ -203,7 +304,7 @@ export default function Page() {
           )}
 
           {/* Empty state — only when done loading and no data */}
-          {!loading && events.length === 0 && (
+          {!loading && visibleEvents.length === 0 && (
             <div className={styles.emptyState}>
               <div className={styles.emptyIcon}>
                 <CalendarX size={52} strokeWidth={1.4} />
@@ -220,13 +321,14 @@ export default function Page() {
           )}
 
           {/* Events grid — only when there's data */}
-          {!loading && events.length > 0 && (
+          {!loading && visibleEvents.length > 0 && (
             <EventsGrid
-              items={events}
+              items={visibleEvents}
               onItemsChange={setEvents}
               onView={onView}
               onEdit={onEdit}
               onDelete={onDelete}
+              onMarkCompleted={onMarkCompleted}
             />
           )}
         </div>

@@ -94,21 +94,11 @@ const validateEmail = (email: string) => {
         if (!departmentsRes.ok) throw new Error('Failed to fetch departments');
 
         const allDepartments = await departmentsRes.json();
-        
-        // Filter to show only specific departments
-        const allowedDeptIds = [1, 2, 3, 4, 5, 6, 7];
     
-        const filteredDepartments = allDepartments.filter(
-          (dept: { dept_id: number }) => allowedDeptIds.includes(dept.dept_id)
-        );
-
         console.log('All departments:', allDepartments.map((d: any) => d.name));
-        console.log('Filtered departments:', filteredDepartments.map((d: any) => d.name));
-        console.log('Filtered count:', filteredDepartments.length);
-
         setFaculties(await facultiesRes.json());
         // If filtering results in empty array, show all departments (fallback)
-        setDepartments(filteredDepartments.length > 0 ? filteredDepartments : allDepartments);
+        setDepartments(allDepartments);
       } catch (error) {
         console.error('Error fetching initial data:', error);
         const errorMessage = await handleBackendError(error);

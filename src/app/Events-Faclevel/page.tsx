@@ -317,7 +317,8 @@ useEffect(() => {
           onChange={handleTabChange}
           items={tabItems}
         />
-
+          {/* Dept filter — only when user has >1 dept */}
+          {showFilters && (
         <div className={styles.filtersBar}>
           {/* Search */}
           <div className={styles.searchBox}>
@@ -329,8 +330,7 @@ useEffect(() => {
             />
           </div>
 
-          {/* Dept filter — only when user has >1 dept */}
-          {showFilters && (
+
             <select
               value={deptFilter}
               className={styles.searchBox}
@@ -347,7 +347,7 @@ useEffect(() => {
                 </option>
               ))}
             </select>
-          )}
+         
            {/* Date from */}
           <div className={styles.dateGroup}>
             <label className={styles.dateLabel}>من تاريخ</label>
@@ -372,7 +372,8 @@ useEffect(() => {
             </div>
           </div>
         </div>
-
+        )}
+        
         <StatsGrid items={stats} />
 
         <div className={styles.eventsSection}>

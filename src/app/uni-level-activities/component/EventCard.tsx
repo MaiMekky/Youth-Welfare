@@ -99,12 +99,13 @@ export default function EventCard({
   const isRejected  = item.statusLabel === "مرفوض";
   const isPastEnd   = isPastEndDate(item.time);
   const isAccepted  = item.statusLabel === "مقبول";
+  const isCompleted = item.statusLabel === "مكتمل";
 
   // Days elapsed since end_date (0 = ended today, 1 = 1 day ago, etc.)
   const elapsed     = daysSinceEnd(item.time);
 
   // Hide edit & cancel when: cancelled, rejected, or end date has passed
-  const hideEditDelete = isCancelled || isRejected || isPastEnd;
+  const hideEditDelete = isCancelled || isRejected || isPastEnd || isCompleted;
 
   // Show "إتمام الفعالية" anytime when:
   //   • hideToggle is false (university-level events only)

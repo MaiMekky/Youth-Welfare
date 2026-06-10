@@ -330,7 +330,7 @@ export default function Page() {
                 <div className={styles.cardTop}>
                   <div className={styles.cardHeader}>
                     <h3 className={styles.cardTitle}>{r.title}</h3>
-                    <div className={styles.cardId}>#{r.event_id}</div>
+                    {/* <div className={styles.cardId}>#{r.event_id}</div> */}
                   </div>
                   
                   <div className={styles.badges}>

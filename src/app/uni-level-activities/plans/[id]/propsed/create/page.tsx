@@ -280,16 +280,35 @@ const toggleAllFacs = () => {
   //           2) fallback to e.type string if already a name
 
   useEffect(() => {
-    if (!isConvert) return;
-    const raw = sessionStorage.getItem("convert_proposed_payload");
-    if (!raw) return;
-    let parsed: Record<string, unknown> | null = null;
-    try { parsed = JSON.parse(raw); } catch { return; }
+   if (!isConvert) return;
+  const raw = sessionStorage.getItem("convert_proposed_payload");
+  if (!raw) return;
 
-    const idFromPayload =
-      (parsed?.event as Record<string, unknown>)?.event_id ?? (parsed?.event as Record<string, unknown>)?.id ??
-      (parsed?.row as Record<string, unknown>)?.event_id ?? (parsed?.row as Record<string, unknown>)?.id ??
-      parsed?.event_id ?? parsed?.id ?? null;
+  let parsed: Record<string, unknown> | null = null;
+  try { parsed = JSON.parse(raw); } catch { return; }
+
+  // ── ADD THIS to see exactly what shape the payload has ──
+  console.log("convert_proposed_payload:", JSON.stringify(parsed, null, 2));
+
+  const idFromPayload =
+    (parsed?.event as Record<string, unknown>)?.event_id ??
+    (parsed?.event as Record<string, unknown>)?.id ??
+    (parsed?.row as Record<string, unknown>)?.event_id ??
+    (parsed?.row as Record<string, unknown>)?.id ??
+    parsed?.event_id ??
+    parsed?.id ??
+    // ── ADD: try one more common shape ──
+    (parsed?.data as Record<string, unknown>)?.event_id ??
+    (parsed?.data as Record<string, unknown>)?.id ??
+    null;
+
+  // ── ADD: bail early if still null, don't call the API with null ──
+  if (!idFromPayload) {
+    showToast("❌ لم يتم العثور على رقم الفعالية في البيانات المحفوظة", "error");
+    console.error("idFromPayload is null. Full payload:", parsed);
+    return;
+  }
+
 
     const fallbackRow = (parsed?.event ?? parsed?.row ?? parsed ?? {}) as Record<string, unknown>;
 
@@ -598,7 +617,7 @@ const toggleAllFacs = () => {
                 </div>
                 )}
                 {isConvert && (
-                  <div className={styles.facultyBox}>
+                  <div className={styles.facultyBox} style={{ gridColumn: "1 / -1" }}>
                     <div className={styles.facultyHeader}>
                       <div>
                         <div className={styles.facultyTitle}>الكليات المستهدفة</div>

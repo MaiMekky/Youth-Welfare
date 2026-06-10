@@ -658,7 +658,7 @@ export default function FriendsForm() {
   /* ── build body ── */
   const buildBody = () => {
     const meta = getSessionMeta();
-    const faculty_id = meta?.admin_id ?? 0;
+    const faculty_id = meta?.faculty_id ?? 0;
     return {
       name: general.name,
       description: general.description,

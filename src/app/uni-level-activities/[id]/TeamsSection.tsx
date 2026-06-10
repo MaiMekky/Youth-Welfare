@@ -137,10 +137,9 @@ type ParticipantRow = {
 interface TeamsSectionProps {
   eventId: string;
   isFacultyEvent?: boolean;
-  /** Participants list from the parent EventDetails page */
   participants?: ParticipantRow[];
-  /** Callback to notify parent when teams setting changes */
   onTeamsEnabledChange?: (enabled: boolean) => void;
+  eventStatus?: string;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -151,6 +150,7 @@ export default function TeamsSection({
   isFacultyEvent = false,
   participants = [],
   onTeamsEnabledChange,
+  eventStatus,
 }: TeamsSectionProps) {
   const { showToast } = useToast();
 
@@ -284,10 +284,16 @@ export default function TeamsSection({
       return;
     }
 
-    setSettings(res.data);
-    onTeamsEnabledChange?.(res.data.enabled);
+    const freshSettings: TeamSettings = {
+      ...res.data,
+      setting_id: res.data.setting_id ?? -1, // sentinel so settingsConfigured flips true immediately
+    };
+    setSettings(freshSettings);
+    onTeamsEnabledChange?.(freshSettings.enabled);
     setSettingsModal(false);
     showToast(method === "POST" ? "✅ تم حفظ إعدادات الفرق" : "✅ تم تحديث الإعدادات", "success");
+    // Re-fetch in background to get the real setting_id from server
+    loadSettings();
   };
 
   const openSettingsModal = () => {
@@ -443,7 +449,7 @@ export default function TeamsSection({
   /* ─────────── derived ─────────── */
   const pendingTeams = useMemo(() => teams.filter(t => t.status === "منتظر").length, [teams]);
   const acceptedTeams = useMemo(() => teams.filter(t => t.status === "مقبول").length, [teams]);
-
+  const settingsConfigured = !!settings?.setting_id && !!settings?.enabled;
   const statusColor = (s: string) => {
     if (s === "مقبول") return styles.statusAccepted;
     if (s === "مرفوض") return styles.statusRejected;
@@ -484,13 +490,13 @@ export default function TeamsSection({
         </div>
 
         <div className={styles.headerActions}>
-          {!isFacultyEvent && (
+         {!isFacultyEvent && eventStatus === "مقبول" && (
             <>
-              <button className={styles.btnSecondary} onClick={openSettingsModal} title="إعدادات الفرق">
-                <Settings size={16} />
-                {settings ? "تعديل الإعدادات" : "تفعيل الفرق"}
-              </button>
-             {settings !== null && settings.enabled && (
+            <button className={styles.btnSecondary} onClick={openSettingsModal} title="إعدادات الفرق">
+              <Settings size={16} />
+              {settings?.setting_id && settings?.enabled ? "تعديل الإعدادات" : "تفعيل الفرق"}
+            </button>
+             {settingsConfigured && (
                 <button className={styles.btnPrimary} onClick={() => { setCreateErrors({}); setCreateTeamModal(true); }}>
                   <Plus size={16} />
                   إنشاء فريق
@@ -562,7 +568,7 @@ export default function TeamsSection({
             <div className={styles.emptyState}>
               <div className={styles.emptyIcon}>🏆</div>
               <p className={styles.emptyText}>لا توجد فرق حتى الآن</p>
-              {!isFacultyEvent && settings?.enabled && (
+              {!isFacultyEvent && settingsConfigured && (
                 <button className={styles.btnPrimary} onClick={() => { setCreateErrors({}); setCreateTeamModal(true); }}>
                   <Plus size={16} /> إنشاء أول فريق
                 </button>
@@ -763,7 +769,21 @@ export default function TeamsSection({
                   <span className={styles.toggleThumb} />
                 </button>
               </div>
-
+              {!settingsForm.enabled && settings?.setting_id && (
+                <div style={{
+                  display: "flex", alignItems: "flex-start", gap: 8,
+                  background: "#FFF7ED", border: "1px solid #FED7AA",
+                  borderRadius: 10, padding: "10px 14px", marginTop: 4,
+                  fontSize: "0.82rem", color: "#92400E", fontWeight: 600,
+                  direction: "rtl",
+                }}>
+                  <span style={{ fontSize: "1rem", flexShrink: 0 }}>⚠️</span>
+                  <span>
+                    تعطيل نظام الفرق سيجعل زر «إنشاء فريق» غير ظاهر وكأن الإعداد لم يتم بعد.
+                    يمكنك إعادة تفعيله في أي وقت.
+                  </span>
+                </div>
+              )}
               <div className={styles.modalGrid}>
                 <div className={styles.modalField}>
                   <label className={styles.modalLabel}>الحد الأدنى للأعضاء</label>

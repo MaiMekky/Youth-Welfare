@@ -325,14 +325,14 @@ function QuickActionsCard() {
       <div className={styles.quickActionsList}>
         <button
           className={styles.quickActionBtn}
-          onClick={() => router.push("/uni-level-activities")}
+          onClick={() => router.push("/uni-level-scouts/uni-level-activities")}
         >
           <CalendarDays size={16} />
           <span>إدارة الفعاليات</span>
         </button>
         <button
           className={`${styles.quickActionBtn} ${styles.quickActionBtnGold}`}
-          onClick={() => router.push("/uni-level-activities/create")}
+          onClick={() => router.push("/uni-level-scouts/uni-level-activities/create")}
         >
           <Plus size={16} />
           <span>إنشاء فعالية جديدة</span>
@@ -523,8 +523,8 @@ export default function HomePage() {
                   key={ev.event_id}
                   ev={ev}
                   onClick={() => {
-                    sessionStorage.setItem("eventDetails_from", "/uni-level-activities/Home");
-                    router.push(`/uni-level-activities/${ev.event_id}`);
+                    sessionStorage.setItem("eventDetails_from", "/uni-level-scouts/uni-level-activities/Home");
+                    router.push(`/uni-level-scouts/uni-level-activities/${ev.event_id}`);
                   }}
                 />
               ))}
@@ -535,7 +535,7 @@ export default function HomePage() {
             <div className={styles.panelFooter}>
               <button
                 className={styles.viewAllBtn}
-                onClick={() => router.push("/uni-level-activities")}
+                onClick={() => router.push("/uni-level-scouts/uni-level-activities")}
               >
                 عرض كل الفعاليات
                 <ChevronLeft size={15} />

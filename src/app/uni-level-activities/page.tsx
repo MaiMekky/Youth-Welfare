@@ -164,7 +164,8 @@ export default function Page() {
     if (!silent) setLoading(false);
     if (!res.ok) { showToast(res.message || "فشل تحميل الفعاليات", "error"); return; }
     const list = Array.isArray(res.data) ? res.data : [];
-    setEvents(list.map((e) => toEventItem(e)));
+    const deptOnly = list.filter((e) => e.faculty_id === null);
+    setEvents(deptOnly.map((e) => toEventItem(e)));
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -179,8 +180,9 @@ export default function Page() {
       const qs = buildQueryString(dateFrom, dateTo);
       apiFetch<ApiEvent[]>(`/api/event/get-events/${qs}`).then((res) => {
         if (res.ok) {
-          const list = Array.isArray(res.data) ? res.data : [];
-          setEvents(list.map((e) => toEventItem(e)));
+        const list = Array.isArray(res.data) ? res.data : [];
+        const deptOnly = list.filter((e) => e.faculty_id === null);
+        setEvents(deptOnly.map((e) => toEventItem(e)));
         }
       });
     }, 400);

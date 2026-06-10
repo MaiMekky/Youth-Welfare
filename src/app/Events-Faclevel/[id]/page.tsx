@@ -643,7 +643,8 @@ export default function EventDetailsPage() {
           onSetDraftRank={setDraftRank}
           onViewStudent={(studentId) => router.push(`/Events-Faclevel/${id}/student/${studentId}`)}
           onAddMember={addMember}   // ← the only new prop: handler lives here, event id is captured in closure
-        />
+          facultyId={event?.faculty?? null}
+       />
 
         {/* Hide teams section when event is cancelled or rejected */}
         {ui.status !== "ملغي" && ui.status !== "مرفوض" && (

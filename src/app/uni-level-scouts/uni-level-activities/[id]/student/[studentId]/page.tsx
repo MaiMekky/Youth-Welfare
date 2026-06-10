@@ -148,7 +148,7 @@ const facultyName = student.faculty_name ?? "—";
 
           <button
             className={styles.backBtn}
-            onClick={() => router.push(`/uni-level-activities/${params?.id}`)}
+            onClick={() => router.push(`/uni-level-scouts/uni-level-activities/${params?.id}`)}
             type="button"
           >
             <ArrowRight size={18} />

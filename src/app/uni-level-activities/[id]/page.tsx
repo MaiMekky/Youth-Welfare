@@ -356,8 +356,13 @@ export default function EventDetailsPage() {
       }
       return;
     }
-
-    setEvent(res.data);
+    
+    const normalizedData = {
+  ...res.data,
+  status: res.data.status === "موافقة مبدئية" ? "منتظر" : res.data.status,
+    };
+    setEvent(normalizedData);
+    
     const parts = Array.isArray(res.data.participants) ? res.data.participants : [];
     const mapped: StudentRow[] = parts.map((p) => ({
       id: p.id,
@@ -744,6 +749,18 @@ export default function EventDetailsPage() {
     return today < startDate;
   }, [event?.st_date]);
 
+  const canManageResults = useMemo(() => {
+  if (event?.status !== "مقبول") return false;
+  if (!event?.end_date) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const endDate = new Date(event.end_date);
+  endDate.setHours(0, 0, 0, 0);
+  return today >= endDate;
+}, [event?.status, event?.end_date]);
+
+const isEventAccepted = event?.status === "مقبول";
+
   // Check if teams are enabled — passed from TeamsSection via callback
   const [teamsEnabled, setTeamsEnabled] = useState(false);
 
@@ -986,7 +1003,7 @@ export default function EventDetailsPage() {
         <section className={styles.imagesBlock}>
           <div className={styles.imagesHead}>
             <div className={styles.imagesTitle}><ImageIcon size={18} /> صور الفعالية</div>
-            {!isFacultyEvent && (
+            {!isFacultyEvent && isEventAccepted && (
               <div className={styles.imagesActions}>
                 <input
                   ref={fileRef}
@@ -1329,18 +1346,6 @@ export default function EventDetailsPage() {
             </div>
 
             <div className={styles.tableChips}>
-              {/* Add Student Button */}
-              {!isFacultyEvent && (
-                <button
-                  className={`${styles.actionBtn} ${styles.addStudentBtn}`}
-                  type="button"
-                  onClick={openAddStudentModal}
-                  disabled={busy}
-                >
-                  <Users size={16} />
-                  إضافة طالب
-                </button>
-              )}
 
               {/* Hide rank/reward counts and approve-all when teams are enabled */}
               {!teamsEnabled && (
@@ -1349,7 +1354,7 @@ export default function EventDetailsPage() {
                   <span className={styles.miniChip}><Award size={14} /> {rewardsCount}</span>
                 </>
               )}
-              {!isFacultyEvent && !teamsEnabled && (
+              {!isFacultyEvent && !teamsEnabled && isEventAccepted && (
                 <button
                   className={`${styles.actionBtn} ${styles.acceptBtn}`}
                   type="button"
@@ -1361,6 +1366,18 @@ export default function EventDetailsPage() {
                   قبول الجميع ({pendingCount})
                 </button>
               )}
+                  {/* Add Student Button */}
+              {!isFacultyEvent && event?.status === "مقبول" && (
+              <button
+                className={`${styles.actionBtn} ${styles.addStudentBtn}`}
+                type="button"
+                onClick={openAddStudentModal}
+                disabled={busy}
+              >
+                <Users size={16} />
+                إضافة طالب
+              </button>
+            )}
             </div>
           </div>
 
@@ -1407,7 +1424,7 @@ export default function EventDetailsPage() {
                         ) : (
                           <>
                             {/* Approve/Reject — only shown before the event start date */}
-                            {canApproveReject && r.status === "منتظر" && (
+                            {isEventAccepted && canApproveReject && r.status === "منتظر" && (
                               <>
                                 <button
                                   className={`${styles.actionBtn} ${styles.acceptBtn}`}
@@ -1429,7 +1446,8 @@ export default function EventDetailsPage() {
                             )}
 
                             {/* Reward */}
-                            {editingRewardId === r.id ? (
+                            {canManageResults && ( 
+                             editingRewardId === r.id ? (
                               <div className={styles.inlineEdit}>
                                 <input className={styles.inlineInput} value={draftReward}
                                   onChange={(e) => setDraftReward(e.target.value)} placeholder="المكافأة" />
@@ -1444,10 +1462,12 @@ export default function EventDetailsPage() {
                               <button className={styles.actionBtn} type="button" disabled={busy} onClick={() => startEditReward(r)}>
                                 <Award size={16} /> مكافأة
                               </button>
+                            )
                             )}
 
                             {/* Rank */}
-                            {editingRankId === r.id ? (
+                            {canManageResults && (
+                              editingRankId === r.id ? (
                               <div className={styles.inlineEdit}>
                                 <input className={styles.inlineInput} type="number" min={1} value={draftRank}
                                   onChange={(e) => setDraftRank(e.target.value)} placeholder="المركز" />
@@ -1462,6 +1482,7 @@ export default function EventDetailsPage() {
                               <button className={styles.actionBtn} type="button" disabled={busy} onClick={() => startEditRank(r)}>
                                 <Medal size={16} /> ترتيب
                               </button>
+                            )
                             )}
 
                             <button
@@ -1494,6 +1515,7 @@ export default function EventDetailsPage() {
           isFacultyEvent={isFacultyEvent}
           participants={rows}
           onTeamsEnabledChange={setTeamsEnabled}
+          eventStatus={event?.status}
         />
       </div>
     </div>

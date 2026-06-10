@@ -1,7 +1,7 @@
-/* ── Stats Grid — matches uni-level-family theme ── */
+/* ── Stats Grid ── */
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 14px;
   width: 100%;
 }
@@ -19,25 +19,35 @@
 
 .statsCard:hover { transform: translateY(-2px); }
 
-/* Card 1 — navy gradient (total) */
+/* Card 1 — navy (إجمالي) */
 .statsCard:nth-child(1) {
   background: linear-gradient(140deg, #1E3A5F, #2D5F8A);
   box-shadow: 0 4px 18px rgba(30,58,95,.22);
 }
 
-/* Card 2 — green (active) */
+/* Card 2 — amber (منتظر) */
 .statsCard:nth-child(2) {
-  box-shadow: 0 0 0 2px #6EE7B7, 0 4px 14px rgba(5,150,105,.06);
-}
-
-/* Card 3 — amber (inactive) */
-.statsCard:nth-child(3) {
   box-shadow: 0 0 0 2px #FDE68A, 0 4px 14px rgba(245,158,11,.06);
 }
 
-/* Card 4 — blue (extra) */
+/* Card 3 — green (مقبول) */
+.statsCard:nth-child(3) {
+  box-shadow: 0 0 0 2px #6EE7B7, 0 4px 14px rgba(5,150,105,.06);
+}
+
+/* Card 4 — red (مرفوض) */
 .statsCard:nth-child(4) {
-  box-shadow: 0 0 0 2px #BFDBFE, 0 4px 14px rgba(59,130,246,.06);
+  box-shadow: 0 0 0 2px #FECACA, 0 4px 14px rgba(239,68,68,.06);
+}
+
+/* Card 5 — slate (ملغي) */
+.statsCard:nth-child(5) {
+  box-shadow: 0 0 0 2px #CBD5E1, 0 4px 14px rgba(100,116,139,.06);
+}
+
+/* Card 6 — purple (مكتمل) */
+.statsCard:nth-child(6) {
+  box-shadow: 0 0 0 2px #DDD6FE, 0 4px 14px rgba(139,92,246,.06);
 }
 
 /* Numbers */
@@ -49,9 +59,11 @@
 }
 
 .statsCard:nth-child(1) .statsValue { color: #fff; }
-.statsCard:nth-child(2) .statsValue { color: #059669; }
-.statsCard:nth-child(3) .statsValue { color: #D97706; }
-.statsCard:nth-child(4) .statsValue { color: #2563EB; }
+.statsCard:nth-child(2) .statsValue { color: #D97706; }
+.statsCard:nth-child(3) .statsValue { color: #059669; }
+.statsCard:nth-child(4) .statsValue { color: #DC2626; }
+.statsCard:nth-child(5) .statsValue { color: #475569; }
+.statsCard:nth-child(6) .statsValue { color: #7C3AED; }
 
 /* Labels */
 .statsTitle {
@@ -62,19 +74,22 @@
 .statsCard:nth-child(1) .statsTitle { color: rgba(255,255,255,.7); }
 .statsCard:nth-child(2) .statsTitle,
 .statsCard:nth-child(3) .statsTitle,
-.statsCard:nth-child(4) .statsTitle { color: #6B8299; }
+.statsCard:nth-child(4) .statsTitle,
+.statsCard:nth-child(5) .statsTitle,
+.statsCard:nth-child(6) .statsTitle { color: #6B8299; }
 
-/* Hide icon wrap — keep layout clean */
+/* Layout */
 .statsIconWrap { display: none; }
 .statsRow { display: flex; align-items: baseline; gap: 10px; }
 .statsMeta { font-size: 12px; color: #6B8299; }
 .statsContent { flex: 1; min-width: 0; text-align: right; }
 
 /* Responsive */
-@media (max-width: 1024px) { .statsGrid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 480px)  { .statsGrid { grid-template-columns: 1fr 1fr; } .statsValue { font-size: 26px; } }
+@media (max-width: 1280px) { .statsGrid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 768px)  { .statsGrid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px)  { .statsGrid { grid-template-columns: repeat(2, 1fr); } .statsValue { font-size: 26px; } }
 
-/* Legacy accent classes — kept for compatibility */
+/* Legacy accent classes */
 .amber  {}
 .green  {}
 .indigo {}

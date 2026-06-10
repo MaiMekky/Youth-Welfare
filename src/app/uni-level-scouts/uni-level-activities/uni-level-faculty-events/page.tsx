@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import styles from "./FacEvents.module.css";
-import { CalendarDays, Building2, ClipboardList, Eye } from "lucide-react";
+import { CalendarDays, Building2, ClipboardList, Eye, MapPin, Users, DollarSign } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 type ApiEvent = {
@@ -187,9 +187,16 @@ export default function Page() {
   }, [rows]);
 
   const onView = (eventId: number) => {
-    sessionStorage.setItem("eventDetails_from", `/uni-level-activities\/uni-level-faculty-events`);
-    router.push(`/uni-level-activities/${eventId}`);
+    sessionStorage.setItem("eventDetails_from", `/uni-level-scouts\/uni-level-activities\/uni-level-faculty-events`);
+    router.push(`/uni-level-scouts/uni-level-activities/${eventId}`);
   };
+
+  function scopeLabel(raw: string) {
+    const s = (raw || "").trim();
+    if (s === "داخلي") return "على مستوى الكلية";
+    if (s === "خارجي") return "على مستوى الجامعة";
+    return s || "—";
+  }
 
   return (
     <div className={styles.page}>
@@ -309,89 +316,108 @@ export default function Page() {
         )}
 
         {/* Table */}
-        <section className={styles.tableBlock}>
-          <div className={styles.tableHead}>
-            <div className={styles.tableTitle}>
+        <section className={styles.cardsSection}>
+          <div className={styles.sectionHead}>
+            <div className={styles.sectionTitle}>
               الفعاليات <span className={styles.count}>({filteredRows.length})</span>
             </div>
           </div>
 
-          <div className={styles.tableWrap}>
-            <div className={styles.tableScroll}>
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>رقم الفعالية</th>
-                    <th>العنوان</th>
-                    <th>الكلية</th>
-                    <th>الوصف</th>
-                    <th>تاريخ البداية</th>
-                    <th>تاريخ النهاية</th>
-                    <th>المكان</th>
-                    <th>الحالة</th>
-                    <th>النوع</th>
-                    <th>التكلفة</th>
-                    <th>الحد الأقصى</th>
-                    <th>الإجراءات</th>
-                  </tr>
-                </thead>
+          {/* Cards Grid */}
+          <div className={styles.cardsGrid}>
+            {filteredRows.map((r) => (
+              <article key={r.event_id} className={styles.eventCard}>
+                <div className={styles.cardTop}>
+                  <div className={styles.cardHeader}>
+                    <h3 className={styles.cardTitle}>{r.title}</h3>
+                    {/* <div className={styles.cardId}>#{r.event_id}</div> */}
+                  </div>
+                  
+                  <div className={styles.badges}>
+                    <span className={`${styles.statusBadge} ${getStatusClass(r.status)}`}>
+                      {r.status}
+                    </span>
+                    <span className={`${styles.typeBadge} ${getTypeClass(r.type)}`}>
+                      {scopeLabel(r.type)}
+                    </span>
+                  </div>
 
-                <tbody>
-                  {filteredRows.map((r) => (
-                    <tr key={r.event_id}>
-                      <td>{r.event_id}</td>
-                      <td className={styles.cellTitle}>{r.title}</td>
+                  <div className={styles.facultyBadge}>
+                    <Building2 size={14} />
+                    <span>{facultyNameById[r.faculty_id] ?? "—"}</span>
+                  </div>
+                </div>
 
-                      <td>{facultyNameById[r.faculty_id] ?? "—"}</td>
+                <div className={styles.cardBody}>
+                  <p className={styles.description}>{r.description}</p>
 
-                      <td>{r.description}</td>
-                      <td dir="ltr">{r.st_date}</td>
-                      <td dir="ltr">{r.end_date}</td>
-                      <td>{r.location}</td>
+                  <div className={styles.metaGrid}>
+                    <div className={styles.metaItem}>
+                      <CalendarDays size={16} />
+                      <div className={styles.metaContent}>
+                        <span className={styles.metaLabel}>تاريخ البداية</span>
+                        <span className={styles.metaValue} dir="ltr">{r.st_date}</span>
+                      </div>
+                    </div>
 
-                      <td>
-                        <span className={`${styles.statusBadge} ${getStatusClass(r.status)}`}>
-                          {r.status}
+                    <div className={styles.metaItem}>
+                      <CalendarDays size={16} />
+                      <div className={styles.metaContent}>
+                        <span className={styles.metaLabel}>تاريخ النهاية</span>
+                        <span className={styles.metaValue} dir="ltr">{r.end_date}</span>
+                      </div>
+                    </div>
+
+                    <div className={styles.metaItem}>
+                      <MapPin size={16} />
+                      <div className={styles.metaContent}>
+                        <span className={styles.metaLabel}>المكان</span>
+                        <span className={styles.metaValue}>{r.location}</span>
+                      </div>
+                    </div>
+
+                    <div className={styles.metaItem}>
+                      <Users size={16} />
+                      <div className={styles.metaContent}>
+                        <span className={styles.metaLabel}>الحد الأقصى</span>
+                        <span className={styles.metaValue}>{r.s_limit} مشارك</span>
+                      </div>
+                    </div>
+
+                    <div className={styles.metaItem}>
+                      <DollarSign size={16} />
+                      <div className={styles.metaContent}>
+                        <span className={styles.metaLabel}>التكلفة</span>
+                        <span className={styles.metaValue}>
+                          {r.cost ? `${r.cost} جنيه` : "مجاني"}
                         </span>
-                      </td>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-                      <td>
-                        <span className={`${styles.typeBadge} ${getTypeClass(r.type)}`}>
-                          {r.type}
-                        </span>
-                      </td>
+                <div className={styles.cardActions}>
+                  <button
+                    className={styles.viewBtn}
+                    type="button"
+                    onClick={() => onView(r.event_id)}
+                  >
+                    <Eye size={18} />
+                    عرض التفاصيل
+                  </button>
+                </div>
+              </article>
+            ))}
 
-                      <td className={styles.cellValue}>
-                        {r.cost ? `${r.cost} جنيه` : "مجاني"}
-                      </td>
-
-                      <td className={styles.cellValue}>{r.s_limit}</td>
-
-                      <td>
-                        <div className={styles.rowActions}>
-                          <button
-                            className={styles.actionBtn}
-                            type="button"
-                            onClick={() => onView(r.event_id)}
-                          >
-                            <Eye size={16} />
-                            عرض التفاصيل
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-
-                  {!loading && !error && filteredRows.length === 0 && (
-                    <tr>
-                      <td colSpan={12} style={{ textAlign: "center", padding: 18, color: "#64748b" }}>
-                        لا توجد فعاليات مطابقة للفلاتر
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+            {!loading && !error && filteredRows.length === 0 && (
+              <div className={styles.emptyState}>
+                <div className={styles.emptyIcon}>
+                  <ClipboardList size={48} />
+                </div>
+                <h3 className={styles.emptyTitle}>لا توجد فعاليات</h3>
+                <p className={styles.emptyDesc}>لا توجد فعاليات مطابقة للفلاتر المحددة</p>
+              </div>
+            )}
           </div>
         </section>
       </div>

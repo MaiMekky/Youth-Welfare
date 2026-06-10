@@ -294,7 +294,7 @@ export default function EventForm({
       if (!res.ok) { showToast(res.message || "❌ حصل خطأ أثناء إنشاء الفعالية", "error"); return; }
       showToast("✅ تم إنشاء الفعالية بنجاح", "success");
     }
-    router.push("/uni-level-activities");
+    router.push("/uni-level-scouts/uni-level-activities");
   };
 
   return (
@@ -305,7 +305,7 @@ export default function EventForm({
             <h1 className={styles.title}>{isEditMode ? "تعديل الفعالية" : "إنشاء فعالية جديدة"}</h1>
             <p className={styles.subtitle}>{isEditMode ? "برجاء تعديل البيانات ثم حفظ" : "برجاء ملء البيانات لإنشاء فعالية جديدة"}</p>
           </div>
-          <button className={styles.backBtn} onClick={() => router.push('/uni-level-activities')} type="button" disabled={submitting}>
+          <button className={styles.backBtn} onClick={() => router.push('/uni-level-scouts/uni-level-activities')} type="button" disabled={submitting}>
             <ArrowRight size={18} /> رجوع
           </button>
         </header>
@@ -493,7 +493,7 @@ export default function EventForm({
           </div>
 
           <div className={styles.footer}>
-            <button type="button" className={styles.cancelBtn} onClick={() => router.push('/uni-level-activities')} disabled={submitting}>
+            <button type="button" className={styles.cancelBtn} onClick={() => router.push('/uni-level-scouts/uni-level-activities')} disabled={submitting}>
               إلغاء
             </button>
             <button type="submit" className={styles.saveBtn} disabled={submitting}>

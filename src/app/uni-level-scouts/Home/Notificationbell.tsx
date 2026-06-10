@@ -35,11 +35,11 @@ type Notification = {
   event_id: number;
   title: string;
   subtitle: string;
-  kind: "today" | "soon" | "new";
+  kind: "today" | "soon" | "new" | "rejected"; // ← add "rejected"
   daysUntil: number;
   date: string;
   read: boolean;
-  timestamp: number; // for sorting
+  timestamp: number;
 };
 
 /* ─── Helpers ─── */
@@ -109,19 +109,17 @@ function saveDismissedIds(ids: Set<string>) {
   } catch {}
 }
 
-/* ─── Build notifications from events ─── */
-function buildNotifications(events: ApiEvent[]): Notification[] {
+/* ─── Build notifications from events ─── */function buildNotifications(events: ApiEvent[]): Notification[] {
   const notifs: Notification[] = [];
   const dismissed = getDismissedIds();
 
-  // Sort events by event_id desc to detect "newest"
   const sorted = [...events].sort((a, b) => b.event_id - a.event_id);
   const newestIds = new Set(sorted.slice(0, 5).map((e) => e.event_id));
 
   events.forEach((ev) => {
+    if (ev.status?.trim() === "ملغي") return;
     const days = getDaysUntil(ev.st_date);
 
-    // Upcoming within 3 days (today, tomorrow, day after)
     if (days >= 0 && days <= 3) {
       const id = `upcoming-${ev.event_id}`;
       if (!dismissed.has(id)) {
@@ -129,10 +127,7 @@ function buildNotifications(events: ApiEvent[]): Notification[] {
           id,
           event_id: ev.event_id,
           title: ev.title,
-          subtitle:
-            days === 0
-              ? "⚡ الفعالية تبدأ اليوم!"
-              : `تبدأ ${timeAgo(days)} — ${fmt(ev.st_date)}`,
+          subtitle: days === 0 ? "⚡ الفعالية تبدأ اليوم!" : `تبدأ ${timeAgo(days)} — ${fmt(ev.st_date)}`,
           kind: days === 0 ? "today" : "soon",
           daysUntil: days,
           date: ev.st_date,
@@ -142,7 +137,6 @@ function buildNotifications(events: ApiEvent[]): Notification[] {
       }
     }
 
-    // Newly added events (top 5 by event_id)
     if (newestIds.has(ev.event_id) && days > 3) {
       const id = `new-${ev.event_id}`;
       if (!dismissed.has(id)) {
@@ -155,14 +149,31 @@ function buildNotifications(events: ApiEvent[]): Notification[] {
           daysUntil: days,
           date: ev.st_date,
           read: false,
-          timestamp: Date.now() - ev.event_id, // newer id = more recent
+          timestamp: Date.now() - ev.event_id,
+        });
+      }
+    }
+
+    // ← NEW: rejected events
+    if (ev.status?.trim() === "مرفوض") {
+      const id = `rejected-${ev.event_id}`;
+      if (!dismissed.has(id)) {
+        notifs.push({
+          id,
+          event_id: ev.event_id,
+          title: ev.title,
+          subtitle: `تم رفض هذه الفعالية · ${fmt(ev.st_date)}`,
+          kind: "rejected",
+          daysUntil: 0,
+          date: ev.st_date,
+          read: false,
+          timestamp: new Date(ev.st_date).getTime(),
         });
       }
     }
   });
 
-  // Sort: today first, then soon, then new; within kind sort by date
-  const kindOrder = { today: 0, soon: 1, new: 2 };
+  const kindOrder = { today: 0, soon: 1, new: 2, rejected: 3 }; // ← add rejected
   return notifs.sort(
     (a, b) => kindOrder[a.kind] - kindOrder[b.kind] || a.daysUntil - b.daysUntil
   );
@@ -180,14 +191,16 @@ function NotifItem({
   onDismiss: (id: string) => void;
   onClick: (event_id: number) => void;
 }) {
-  const icon =
-    notif.kind === "today" ? (
-      <AlertTriangle size={20} />
-    ) : notif.kind === "soon" ? (
-      <Clock size={20} />
-    ) : (
-      <Sparkles size={20} />
-    );
+ const icon =
+  notif.kind === "today" ? (
+    <AlertTriangle size={20} />
+  ) : notif.kind === "soon" ? (
+    <Clock size={20} />
+  ) : notif.kind === "rejected" ? ( // ← add this
+    <X size={20} />
+  ) : (
+    <Sparkles size={20} />
+  );
 
   return (
     <div
@@ -337,10 +350,10 @@ export default function NotificationBell({
     });
   }, [notifications]);
 
-  const todayCount = notifications.filter((n) => n.kind === "today").length;
-  const soonCount = notifications.filter((n) => n.kind === "soon").length;
-  const newCount = notifications.filter((n) => n.kind === "new").length;
-
+const todayCount    = notifications.filter((n) => n.kind === "today").length;
+const soonCount     = notifications.filter((n) => n.kind === "soon").length;
+const newCount      = notifications.filter((n) => n.kind === "new").length;
+const rejectedCount = notifications.filter((n) => n.kind === "rejected").length; // ← add
   return (
     <div className={styles.wrapper}>
       {/* ── Bell Button ── */}
@@ -412,6 +425,12 @@ export default function NotificationBell({
                     {newCount} جديدة
                   </span>
                 )}
+                {rejectedCount > 0 && (
+                  <span className={`${styles.pill} ${styles.pillToday}`}>
+                    <X size={12} />
+                    {rejectedCount} مرفوضة
+                  </span>
+                )}
               </div>
             )}
 
@@ -447,7 +466,7 @@ export default function NotificationBell({
                             onClick={(id) => {
                               setOpen(false);
                               sessionStorage.setItem("eventDetails_from", window.location.pathname);
-                              router.push(`/uni-level-activities/${id}`);
+                              router.push(`/uni-level-scouts/uni-level-activities/${id}`);
                             }}
                           />
                         ))}
@@ -472,7 +491,7 @@ export default function NotificationBell({
                             onClick={(id) => {
                               setOpen(false);
                               sessionStorage.setItem("eventDetails_from", window.location.pathname);
-                              router.push(`/uni-level-activities/${id}`);
+                              router.push(`/uni-level-scouts/uni-level-activities/${id}`);
                             }}
                           />
                         ))}
@@ -497,13 +516,36 @@ export default function NotificationBell({
                             onClick={(id) => {
                               setOpen(false);
                               sessionStorage.setItem("eventDetails_from", window.location.pathname);
-                              router.push(`/uni-level-activities/${id}`);
+                              router.push(`/uni-level-scouts/uni-level-activities/${id}`);
                             }}
                           />
                         ))}
                     </div>
                   )}
                 </>
+              )}
+              {notifications.filter((n) => n.kind === "rejected").length > 0 && (
+                <div className={styles.section}>
+                  <div className={styles.sectionLabel}>
+                    <span className={styles.sectionDotRed} />
+                    مرفوضة
+                  </div>
+                  {notifications
+                    .filter((n) => n.kind === "rejected")
+                    .map((n) => (
+                      <NotifItem
+                        key={n.id}
+                        notif={n}
+                        onRead={markRead}
+                        onDismiss={dismiss}
+                        onClick={(id) => {
+                          setOpen(false);
+                          sessionStorage.setItem("eventDetails_from", window.location.pathname);
+                          router.push(`/uni-level-scouts/uni-level-activities/${id}`);
+                        }}
+                      />
+                    ))}
+                </div>
               )}
             </div>
 
@@ -514,7 +556,7 @@ export default function NotificationBell({
                   className={styles.viewAllBtn}
                   onClick={() => {
                     setOpen(false);
-                    router.push("/uni-level-activities");
+                    router.push("/uni-level-scouts/uni-level-activities");
                   }}
                 >
                   عرض كل الفعاليات

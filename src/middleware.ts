@@ -69,28 +69,28 @@ const staticAllowedByRole: Record<string, string[]> = {
 const FAC_DEPT_ROUTES: Record<number, string[]> = {
   6: ["/FacLevel", "/FacultyReport", "/requests"],                                        // تكافل
   4: ["/Family-Faclevel"],       // أسر
-  1: ["/Events-Faclevel"],       // ثقافي
-  2: ["/Events-Faclevel"],       // اجتماعي
-  3: ["/Events-Faclevel"],       // رياضي
-  5: ["/Events-Faclevel"],        // علمي
-  7: ["/Events-Faclevel"],        // جوالة
+  1: ["/Events-Faclevel/Home" , "/Events-Faclevel"],       // ثقافي
+  2: ["/Events-Faclevel/Home" , "/Events-Faclevel"],       // اجتماعي
+  3: ["/Events-Faclevel/Home" , "/Events-Faclevel"],       // رياضي
+  5: ["/Events-Faclevel/Home" , "/Events-Faclevel"],        // علمي
+  7: ["/Events-Faclevel/Home", "/Events-Faclevel"],        // جوالة
 };
 // Fallback for any dept_id > 7 or unknown → treated as an events dept
-const FAC_FALLBACK_ROUTES = ["/Events-Faclevel"];
+const FAC_FALLBACK_ROUTES = ["/Events-Faclevel/Home", "/Events-Faclevel"];
 
 // ── Department → route groups for uni_manager ─────────────────────────────────
 // Any dept_id not listed here (> 7 or unknown) falls back to UNI_FALLBACK_ROUTES.
 const UNI_DEPT_ROUTES: Record<number, string[]> = {
-  6: ["/uni-level"],                                          // تكافل
-  4: ["/uni-level-family"],                     // أسر
-  1: ["/uni-level-activities"],                 // ثقافي
-  2: ["/uni-level-activities"],                 // اجتماعي
-  3: ["/uni-level-activities"],                 // رياضي
-  5: ["/uni-level-activities"],                 // علمي
-  7: ["/uni-level-activities","/uni-level-scouts"],                     // جوالة
+  6: ["/uni-level"],       // تكافل
+  4: ["/uni-level-family"],        // أسر
+  1: ["/uni-level-activities/Home" , "/uni-level-activities"  ],     // ثقافي
+  2: ["/uni-level-activities/Home" , "/uni-level-activities"],       // اجتماعي
+  3: ["/uni-level-activities/Home", "/uni-level-activities"],       // رياضي
+  5: ["/uni-level-activities/Home", "/uni-level-activities"],      // علمي
+  7: ["/uni-level-scouts/Home", "/uni-level-scouts"],      // جوالة
 };
 // Fallback for any dept_id > 7 or unknown → treated as an activities dept
-const UNI_FALLBACK_ROUTES = ["/uni-level-activities"];
+const UNI_FALLBACK_ROUTES = ["/uni-level-activities/Home", "/uni-level-activities"];
 
 // ── Student routes ────────────────────────────────────────────────────────────
 const STUDENT_ROUTES = [

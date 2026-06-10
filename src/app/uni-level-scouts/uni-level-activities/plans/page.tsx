@@ -37,7 +37,7 @@ const API_URL = `${getBaseUrl()}/api`;
 
 export default function Page() {
   const router = useRouter();
-  const goDetails = (id: number) => router.push(`/uni-level-activities/plans/${id}`);
+  const goDetails = (id: number) => router.push(`/uni-level-scouts/uni-level-activities/plans/${id}`);
 
   const [plans, setPlans] = useState<PlanItem[]>([]);
   const [loading, setLoading] = useState(false);

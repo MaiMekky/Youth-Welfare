@@ -34,7 +34,7 @@ type Notification = {
   event_id: number;
   title: string;
   subtitle: string;
-  kind: "today" | "soon" | "new" | "complete";
+  kind: "today" | "soon" | "new" | "complete" | "rejected";
   daysUntil: number;
   daysOverdue: number;
   date: string;
@@ -115,8 +115,7 @@ function saveDismissedIds(ids: Set<string>) {
   } catch {}
 }
 
-/* ─── Build notifications from events ─── */
-function buildNotifications(events: ApiEvent[]): Notification[] {
+/* ─── Build notifications from events ─── */function buildNotifications(events: ApiEvent[]): Notification[] {
   const notifs: Notification[] = [];
   const dismissed = getDismissedIds();
 
@@ -124,6 +123,8 @@ function buildNotifications(events: ApiEvent[]): Notification[] {
   const newestIds = new Set(sorted.slice(0, 5).map((e) => e.event_id));
 
   events.forEach((ev) => {
+    if (ev.status?.trim() === "ملغي") return; // ← skip cancelled
+
     const days = getDaysUntil(ev.st_date);
 
     // Upcoming within 3 days
@@ -131,84 +132,45 @@ function buildNotifications(events: ApiEvent[]): Notification[] {
       const id = `upcoming-${ev.event_id}`;
       if (!dismissed.has(id)) {
         notifs.push({
-          id,
-          event_id: ev.event_id,
-          title: ev.title,
-          subtitle:
-            days === 0
-              ? "⚡ الفعالية تبدأ اليوم!"
-              : `تبدأ ${timeAgo(days)} — ${fmt(ev.st_date)}`,
+          id, event_id: ev.event_id, title: ev.title,
+          subtitle: days === 0 ? "⚡ الفعالية تبدأ اليوم!" : `تبدأ ${timeAgo(days)} — ${fmt(ev.st_date)}`,
           kind: days === 0 ? "today" : "soon",
-          daysUntil: days,
-          daysOverdue: 0,
-          date: ev.st_date,
-          read: false,
+          daysUntil: days, daysOverdue: 0, date: ev.st_date, read: false,
           timestamp: new Date(ev.st_date).getTime(),
         });
       }
     }
 
-    // Newly added events (top 5 by event_id)
+    // Newly added
     if (newestIds.has(ev.event_id) && days > 3) {
       const id = `new-${ev.event_id}`;
       if (!dismissed.has(id)) {
         notifs.push({
-          id,
-          event_id: ev.event_id,
-          title: ev.title,
+          id, event_id: ev.event_id, title: ev.title,
           subtitle: `فعالية جديدة · ${fmt(ev.st_date)}`,
-          kind: "new",
-          daysUntil: days,
-          daysOverdue: 0,
-          date: ev.st_date,
-          read: false,
+          kind: "new", daysUntil: days, daysOverdue: 0, date: ev.st_date, read: false,
           timestamp: Date.now() - ev.event_id,
         });
       }
     }
 
-    // Completion reminder: faculty events only (faculty_id !== null),
-    // approved, within 7-day window after end_date
-    if (ev.faculty_id !== null && isApproved(ev.status)) {
-      const daysOver = getDaysOver(ev.end_date);
-      if (daysOver >= 0 && daysOver <= 7) {
-        const id = `complete-${ev.event_id}`;
-        if (!dismissed.has(id)) {
-          const remaining = 7 - daysOver;
-          notifs.push({
-            id,
-            event_id: ev.event_id,
-            title: ev.title,
-            subtitle:
-              remaining === 0
-                ? "⛔ آخر فرصة اليوم — أتمّ الفعالية الآن!"
-                : remaining === 1
-                ? "🔴 تبقّى يوم واحد فقط لإتمام الفعالية"
-                : daysOver <= 2
-                ? `تم انتهاء الفعالية — أتمّها خلال ${remaining} أيام`
-                : `⚠ تبقّى ${remaining} أيام لإتمام الفعالية`,
-            kind: "complete",
-            daysUntil: -daysOver,
-            daysOverdue: daysOver,
-            date: ev.end_date,
-            read: false,
-            timestamp: new Date(ev.end_date).getTime(),
-          });
-        }
+    // ← NEW: rejected events
+    if (ev.status?.trim() === "مرفوض") {
+      const id = `rejected-${ev.event_id}`;
+      if (!dismissed.has(id)) {
+        notifs.push({
+          id, event_id: ev.event_id, title: ev.title,
+          subtitle: `تم رفض هذه الفعالية · ${fmt(ev.st_date)}`,
+          kind: "rejected" as unknown as "today", // cast until type updated
+          daysUntil: 0, daysOverdue: 0, date: ev.st_date, read: false,
+          timestamp: new Date(ev.st_date).getTime(),
+        });
       }
     }
   });
 
-  // Sort: today → soon → complete → new; within kind sort by date
-  const kindOrder: Record<Notification["kind"], number> = {
-    today: 0,
-    soon: 1,
-    complete: 2,
-    new: 3,
-  };
-  return notifs.sort(
-    (a, b) => kindOrder[a.kind] - kindOrder[b.kind] || a.daysUntil - b.daysUntil
-  );
+  const kindOrder: Record<string, number> = { today: 0, soon: 1, rejected: 3, new: 4 };
+  return notifs.sort((a, b) => kindOrder[a.kind] - kindOrder[b.kind] || a.daysUntil - b.daysUntil);
 }
 
 /* ─── Notification Item ─── */
@@ -223,16 +185,12 @@ function NotifItem({
   onDismiss: (id: string) => void;
   onClick: (event_id: number) => void;
 }) {
-  const icon =
-    notif.kind === "today" ? (
-      <AlertTriangle size={20} />
-    ) : notif.kind === "soon" ? (
-      <Clock size={20} />
-    ) : notif.kind === "complete" ? (
-      <CheckCircle2 size={20} />
-    ) : (
-      <Sparkles size={20} />
-    );
+ const icon =
+  notif.kind === "today" ? <AlertTriangle size={20} /> :
+  notif.kind === "soon"  ? <Clock size={20} /> :
+  notif.kind === "complete" ? <CheckCircle2 size={20} /> :
+  notif.kind === "rejected" ? <X size={20} /> :
+  <Sparkles size={20} />;
 
   return (
     <div
@@ -335,7 +293,7 @@ export default function NotificationBell({
   }, [open]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
-
+  const rejectedCount = notifications.filter((n) => n.kind === "rejected").length;
   const markRead = useCallback((id: string) => {
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: true } : n))
@@ -369,8 +327,6 @@ export default function NotificationBell({
   const todayCount    = notifications.filter((n) => n.kind === "today").length;
   const soonCount     = notifications.filter((n) => n.kind === "soon").length;
   const newCount      = notifications.filter((n) => n.kind === "new").length;
-  const completeCount = notifications.filter((n) => n.kind === "complete").length;
-
   const navToEvent = (id: number) => {
     setOpen(false);
     sessionStorage.setItem("eventDetails_from", window.location.pathname);
@@ -439,16 +395,16 @@ export default function NotificationBell({
                     {soonCount} قريباً
                   </span>
                 )}
-                {completeCount > 0 && (
-                  <span className={`${styles.pill} ${styles.pillComplete}`}>
-                    <CheckCircle2 size={12} />
-                    {completeCount} تحتاج إتماماً
-                  </span>
-                )}
                 {newCount > 0 && (
                   <span className={`${styles.pill} ${styles.pillNew}`}>
                     <Sparkles size={12} />
                     {newCount} جديدة
+                  </span>
+                )}
+                {rejectedCount > 0 && (
+                  <span className={`${styles.pill} ${styles.pillToday}`}>
+                    <X size={12} />
+                    {rejectedCount} مرفوضة
                   </span>
                 )}
               </div>
@@ -509,27 +465,17 @@ export default function NotificationBell({
                         ))}
                     </div>
                   )}
-
-                  {/* Completion reminder section */}
-                  {completeCount > 0 && (
-                    <div className={styles.section}>
-                      <div className={styles.sectionLabel}>
-                        <span className={styles.sectionDotRed} />
-                        تحتاج إتماماً
-                      </div>
-                      {notifications
-                        .filter((n) => n.kind === "complete")
-                        .map((n) => (
-                          <NotifItem
-                            key={n.id}
-                            notif={n}
-                            onRead={markRead}
-                            onDismiss={dismiss}
-                            onClick={navToEvent}
-                          />
-                        ))}
-                    </div>
-                  )}
+                  {rejectedCount > 0 && (
+                  <div className={styles.section}>
+                  <div className={styles.sectionLabel}>
+                    <span className={styles.sectionDotRed} />
+                    مرفوضة
+                  </div>
+                  {notifications.filter((n) => n.kind === "rejected").map((n) => (
+                    <NotifItem key={n.id} notif={n} onRead={markRead} onDismiss={dismiss} onClick={navToEvent} />
+                  ))}
+                </div>
+              )}
 
                   {/* New events section */}
                   {newCount > 0 && (

@@ -7,7 +7,7 @@ import styles from "../Styles/components/HeroSection.module.css";
 const eligibility = [
   "معدل تراكمي لا يقل عن 2.0",
   "الجنسية المصرية",
-  "دخل الأسرة لا يتجاوز 700 جنيه للفرد",
+  "دخل الأسرة لا يتجاوز 2000 جنيه للفرد",
   "ظروف عائلية موثقة",
 ];
 
@@ -424,7 +424,7 @@ const SocialSupportSection: React.FC = () => {
               <h3>التعليم حق للجميع</h3>
               <p>نؤمن بأن الظروف المادية لا يجب أن تكون عائقًا أمام تحقيق أحلامك الأكاديمية</p>
             </div>
-            <button className="ss-btn" onClick={() => { setActiveScreen("signup"); setShowModal(true); }}>
+            <button className="ss-btn" onClick={() => { setActiveScreen("login"); setShowModal(true); }}>
               قدم طلبك الآن
             </button>
           </div>

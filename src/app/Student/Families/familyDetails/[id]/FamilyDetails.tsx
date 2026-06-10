@@ -34,6 +34,14 @@ interface Post {
   created_at: string;
 }
 
+// Matches the exact API response shape from GET /api/family/student/{id}/event_requests/
+interface StudentParticipation {
+  is_registered: boolean;
+  status: string | null; // "منتظر" | "مقبول" | "مرفوض" | null
+  rank: number | null;
+  reward: string | null;
+}
+
 interface Activity {
   event_id: number;
   title: string;
@@ -46,42 +54,25 @@ interface Activity {
   cost: string;
   restrictions: string;
   reward: string;
-  registration_status?: string | null;
+  status: string;                              // event status (open/closed/etc.)
+  family: number;
+  family_name: string;
+  faculty: number;
+  faculty_name: string;
+  dept_id: number;
+  created_by: number;
+  created_by_admin_info: string;
+  created_by_student_info: string;
+  current_student_participation: StudentParticipation | null; // student's registration status
+  created_at: string;
+  updated_at: string;
 }
 
-interface RegistrationRecord {
-  status: string;
-  event_id: number;
-  event_title: string;
-  updatedAt: number;
-}
-
-type NotificationType = { show: boolean; message: string; type: "success" | "error" };
 type ActiveTab = "details" | "activities" | "posts";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const BASE = getBaseUrl();
-
-
-const storageKey = (familyId: number) => `family_registrations_${familyId}`;
-
-function loadRegistrations(familyId: number): Record<number, RegistrationRecord> {
-  if (typeof window === "undefined") return {};
-  try {
-    const raw = localStorage.getItem(storageKey(familyId));
-    return raw ? JSON.parse(raw) : {};
-  } catch {
-    return {};
-  }
-}
-
-function saveRegistration(familyId: number, record: Omit<RegistrationRecord, "updatedAt">) {
-  if (typeof window === "undefined") return;
-  const existing = loadRegistrations(familyId);
-  existing[record.event_id] = { ...record, updatedAt: Date.now() };
-  localStorage.setItem(storageKey(familyId), JSON.stringify(existing));
-}
 
 function formatDate(dateString: string) {
   try {
@@ -99,11 +90,6 @@ function formatTime(dateString: string) {
   } catch { return ""; }
 }
 
-// ─── Filter helpers ───────────────────────────────────────────────────────────
-
-/**
- * Returns true if the event end date is in the past.
- */
 function isPastEvent(activity: Activity): boolean {
   try {
     return new Date(activity.end_date) < new Date();
@@ -112,20 +98,11 @@ function isPastEvent(activity: Activity): boolean {
   }
 }
 
-/**
- * Parses a Django ErrorDetail string array like:
- *   "[ErrorDetail(string='...', code='invalid')]"
- * and returns the inner message strings.
- */
 function parseErrorDetails(raw: string): string[] {
   const matches = raw.match(/string='([^']+)'/g) ?? [];
   return matches.map(m => m.replace("string='", "").replace(/'\s*$/, ""));
 }
 
-/**
- * Returns true if any error message indicates a faculty mismatch.
- * Matches patterns like "This event is only for X faculty."
- */
 function isFacultyMismatchError(messages: string[]): boolean {
   return messages.some(m =>
     /this event is only for .+ faculty/i.test(m) ||
@@ -133,9 +110,6 @@ function isFacultyMismatchError(messages: string[]): boolean {
   );
 }
 
-/**
- * Returns true if any error message indicates the event is in the past.
- */
 function isPastEventError(messages: string[]): boolean {
   return messages.some(m =>
     /cannot register for past events/i.test(m) ||
@@ -152,11 +126,17 @@ type StatusConfig = {
   disabled: boolean;
 };
 
-function getStatusConfig(status: string | null | undefined): StatusConfig {
+/**
+ * Maps current_student_participation object from the API to button config.
+ * status values: null → not registered | "منتظر" → pending | "مقبول" → accepted | "مرفوض" → rejected
+ */
+function getStatusConfig(participation: StudentParticipation | null | undefined): StatusConfig {
+  const status = participation?.status ?? null;
+
   switch (status) {
     case "مقبول":
       return {
-        label: "تم القبول ✓",
+        label: "تم القبول",
         className: "btn-status-accepted",
         icon: <CheckCircle size={16} />,
         disabled: true,
@@ -170,7 +150,7 @@ function getStatusConfig(status: string | null | undefined): StatusConfig {
       };
     case "منتظر":
       return {
-        label: "قيد المراجعة",
+        label: "قيد الانتظار",
         className: "btn-status-pending",
         icon: <Hourglass size={16} />,
         disabled: true,
@@ -196,7 +176,7 @@ function RegisterButton({
   registering: boolean;
   onRegister: () => void;
 }) {
-  const config = getStatusConfig(activity.registration_status);
+  const config = getStatusConfig(activity.current_student_participation);
 
   if (registering) {
     return (
@@ -230,19 +210,21 @@ function ActivityCard({
 }) {
   return (
     <div className="act-card">
-      <div className="act-card-top">
+      {/* Title row: title on right, badge on left */}
+      <div className="act-card-header">
+        <h3 className="act-title">{activity.title}</h3>
         <span className="act-type-badge">{activity.type || "فعالية"}</span>
-        <div className="act-icon-box">
-          <Calendar size={18} />
-        </div>
       </div>
 
-      <h3 className="act-title">{activity.title}</h3>
-
+      {/* Description */}
       {activity.description && (
         <p className="act-desc">{activity.description}</p>
       )}
 
+      {/* Divider */}
+      <div className="act-divider" />
+
+      {/* Meta info */}
       <div className="act-meta">
         <div className="act-meta-item">
           <Clock size={14} />
@@ -267,13 +249,13 @@ function ActivityCard({
           </div>
         )}
         {activity.reward && (
-          <div className="act-meta-item">
+          <div className="act-meta-item act-meta-reward">
             <Award size={14} />
             <span>المكافأة: {activity.reward}</span>
           </div>
         )}
         {activity.restrictions && (
-          <div className="act-meta-item">
+          <div className="act-meta-item act-meta-restriction">
             <Info size={14} />
             <span>{activity.restrictions}</span>
           </div>
@@ -342,45 +324,12 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
   const [registeringId, setRegisteringId] = useState<number | null>(null);
   const { showToast } = useToast();
 
-  // ── Merge API status with localStorage fallback ──
-  const mergeWithPersisted = useCallback((raw: Activity[]): Activity[] => {
-    const persisted = loadRegistrations(family.id);
-    return raw.map(act => {
-      const local = persisted[act.event_id] ?? null;
-      if (act.registration_status) {
-        saveRegistration(family.id, {
-          status: act.registration_status,
-          event_id: act.event_id,
-          event_title: act.title,
-        });
-        return act;
-      }
-      return { ...act, registration_status: local?.status ?? null };
-    });
-  }, [family.id]);
+  // ── Fetch posts ────────────────────────────────────────────────────────────
 
-  /**
-   * Filters out activities the student cannot register for:
-   *  1. Events that have already ended (past events).
-   *  2. Events restricted to a different faculty — detected by probing the
-   *     register endpoint with a dry-run HEAD/OPTIONS, OR simply by checking
-   *     for the error on first attempt and removing from the list reactively.
-   *
-   * Strategy used here: filter by end_date on the client (no extra request),
-   * and reactively remove faculty-mismatch events when the 400 is returned.
-   */
-  const filterEligibleActivities = useCallback((raw: Activity[]): Activity[] => {
-    return raw.filter(act => !isPastEvent(act));
-  }, []);
-
-  // ── Fetch Posts ──
   const fetchPosts = useCallback(async () => {
-
     try {
       setLoadingPosts(true);
-      const res = await authFetch(
-        `${BASE}/api/family/student/${family.id}/posts/`
-      );
+      const res = await authFetch(`${BASE}/api/family/student/${family.id}/posts/`);
       if (!res.ok) throw new Error("فشل تحميل المنشورات");
       const data = await res.json();
       setPosts(Array.isArray(data) ? data : data.results ?? data.posts ?? []);
@@ -391,118 +340,103 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
     }
   }, [family.id, showToast]);
 
-  // ── Fetch Activities ──
+  // ── Fetch activities ───────────────────────────────────────────────────────
+
   const fetchActivities = useCallback(async () => {
     try {
       setLoadingActivities(true);
-      const res = await authFetch(
-        `${BASE}/api/family/student/${family.id}/event_requests/`
-      );
+      const res = await authFetch(`${BASE}/api/family/student/${family.id}/event_requests/`);
       if (!res.ok) throw new Error("فشل تحميل الفعاليات");
       const data = await res.json();
       const raw: Activity[] = Array.isArray(data) ? data : data.results ?? data.events ?? [];
-
-      // 1. Filter out ineligible activities (past events)
-      const eligible = filterEligibleActivities(raw);
-      // 2. Merge with persisted registration statuses
-      setActivities(mergeWithPersisted(eligible));
+      // Filter out already-ended events
+      setActivities(raw.filter(act => !isPastEvent(act)));
     } catch (err: unknown) {
       showToast((err as Error).message, "error");
     } finally {
       setLoadingActivities(false);
     }
-  }, [family.id, mergeWithPersisted, filterEligibleActivities, showToast]);
+  }, [family.id, showToast]);
 
-  // ── Register for Event ──
+  // ── Register for event ─────────────────────────────────────────────────────
+
   const registerForEvent = useCallback(async (eventId: number) => {
-
     try {
       setRegisteringId(eventId);
+
       const res = await authFetch(
         `${BASE}/api/family/student/${family.id}/events/${eventId}/register/`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        }
+        { method: "POST", headers: { "Content-Type": "application/json" } }
       );
 
       if (!res.ok) {
-        // Try to parse the error body — Django may return an array of ErrorDetail objects
         const errData = await res.json().catch(() => ({}));
-
-        // Normalise to a plain string so we can run regex on it
         const rawErrString: string =
           typeof errData === "string"
             ? errData
             : JSON.stringify(errData.error ?? errData.message ?? errData.detail ?? errData ?? "");
 
         const errMessages = parseErrorDetails(rawErrString);
+        const flatMsg = errMessages.join(" ").toLowerCase() || rawErrString.toLowerCase();
 
-        // ── Faculty mismatch → silently remove the card from the list ──
+        // Silently remove events this student isn't eligible for
         if (res.status === 400 && isFacultyMismatchError(errMessages)) {
           setActivities(prev => prev.filter(act => act.event_id !== eventId));
-          // No error toast — the card just disappears; the student never needed to see it.
           return;
         }
 
-        // ── Past event → silently remove the card from the list ──
         if (res.status === 400 && isPastEventError(errMessages)) {
           setActivities(prev => prev.filter(act => act.event_id !== eventId));
           return;
         }
 
-        // ── Already registered → treat as success ──
-        const flatMsg = errMessages.join(" ").toLowerCase() || rawErrString.toLowerCase();
+        // Already registered → reflect pending state optimistically
         if (res.status === 400 && flatMsg.includes("already registered")) {
-          const fallbackStatus = "منتظر";
-          saveRegistration(family.id, { status: fallbackStatus, event_id: eventId, event_title: "" });
           setActivities(prev =>
             prev.map(act =>
-              act.event_id === eventId ? { ...act, registration_status: fallbackStatus } : act
+              act.event_id === eventId
+                ? {
+                    ...act,
+                    current_student_participation: {
+                      is_registered: true,
+                      status: "منتظر",
+                      rank: null,
+                      reward: null,
+                    },
+                  }
+                : act
             )
           );
-          showToast("أنت مسجل بالفعل في هذه الفعالية · الحالة: قيد المراجعة", "success");
+          showToast("أنت مسجل بالفعل — قيد المراجعة", "info");
           return;
         }
 
-        // ── Generic error ──
         const displayMsg =
           errMessages[0] ||
           (errData.error ?? errData.message ?? errData.detail ?? "فشل التسجيل في الفعالية");
         throw new Error(displayMsg);
       }
 
-      const data = await res.json();
-      const status: string = data.registration_status ?? "منتظر";
+      // Success: re-fetch to get the real status from the server
+      await res.json().catch(() => ({}));
+      await fetchActivities();
+      showToast("تم ارسال طلبك بنجاح", "success");
 
-      saveRegistration(family.id, {
-        status,
-        event_id: data.event_id ?? eventId,
-        event_title: data.event_title ?? "",
-      });
-
-      setActivities(prev =>
-        prev.map(act =>
-          act.event_id === eventId ? { ...act, registration_status: status } : act
-        )
-      );
-
-      showToast(`${data.message ?? "تم التسجيل بنجاح"} · الحالة: ${status}`, "success");
-      fetchActivities();
     } catch (err: unknown) {
-      showToast((err as Error).message ?? "حصل خطأ أثناء التسجيل", "error");
+      showToast((err as Error).message ?? "فشل التسجيل، حاول مرة أخرى", "error");
     } finally {
       setRegisteringId(null);
     }
   }, [family.id, showToast, fetchActivities]);
 
-  // ── Load data on tab switch ──
+  // ── Tab-driven data loading ────────────────────────────────────────────────
+
   useEffect(() => {
     if (activeTab === "posts" && posts.length === 0) fetchPosts();
     if (activeTab === "activities" && activities.length === 0) fetchActivities();
   }, [activeTab, fetchPosts, fetchActivities, posts.length, activities.length]);
 
-  // ─────────────────────────────────────────────────────────────────────────
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <div className="fd-page" dir="rtl">
@@ -552,11 +486,11 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
               </h2>
               <div className="det-rows">
                 {[
-                  { label: "اسم الأسرة",   value: family.title },
-                  { label: "الوصف",        value: family.subtitle },
+                  { label: "اسم الأسرة",    value: family.title },
+                  { label: "الوصف",         value: family.subtitle },
                   family.description ? { label: "التفاصيل", value: family.description } : null,
-                  { label: "المكان",       value: family.place },
-                  { label: "عدد الأعضاء", value: family.views },
+                  { label: "المكان",        value: family.place },
+                  { label: "عدد الأعضاء",  value: family.views },
                   { label: "تاريخ الإنشاء", value: family.createdAt },
                   family.deadline ? { label: "الموعد النهائي", value: family.deadline } : null,
                 ].filter(Boolean).map((row, i) => (
@@ -609,8 +543,8 @@ const FamilyDetails: React.FC<FamilyDetailsProps> = ({ family, onBack }) => {
               <EmptyState message="لا توجد منشورات حالياً" />
             ) : (
               <div className="posts-list">
-                {posts.map(post => (
-                  <PostCard key={post.id} post={post} familyTitle={family.title} />
+                {posts.map((post, index) => (
+                  <PostCard key={post.id ?? `post-${index}`} post={post} familyTitle={family.title} />
                 ))}
               </div>
             )}

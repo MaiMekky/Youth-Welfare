@@ -2,7 +2,7 @@
 
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 14px;
   width: 100%;
 }
@@ -43,6 +43,12 @@
   box-shadow: 0 0 0 2px #BFDBFE, 0 4px 14px rgba(59,130,246,.06);
 }
 
+/* Card 5 — purple (اتحاد) */
+.statFifth {
+  background: #fff;
+  box-shadow: 0 0 0 2px #DDD6FE, 0 4px 14px rgba(139,92,246,.06);
+}
+
 /* Numbers */
 .statNum {
   font-size: 34px;
@@ -55,6 +61,7 @@
 .statSecond .statNum { color: #059669; }
 .statThird  .statNum { color: #D97706; }
 .statFourth .statNum { color: #2563EB; }
+.statFifth  .statNum { color: #7C3AED; }
 
 /* Labels */
 .statLabel {
@@ -65,8 +72,10 @@
 .statTotal  .statLabel { color: rgba(255,255,255,.7); }
 .statSecond .statLabel,
 .statThird  .statLabel,
-.statFourth .statLabel { color: #6B8299; }
+.statFourth .statLabel,
+.statFifth  .statLabel { color: #6B8299; }
 
 /* Responsive */
-@media (max-width: 1024px) { .statsGrid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 1024px) { .statsGrid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 768px)  { .statsGrid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 480px)  { .statsGrid { grid-template-columns: 1fr 1fr; } .statNum { font-size: 26px; } }

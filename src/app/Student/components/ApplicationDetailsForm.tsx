@@ -38,8 +38,8 @@ export default function ApplicationDetailsForm({ onSuccess, onNotify }: Applicat
   else if (formData.address.trim().length < 5)  e.address = "العنوان يجب أن يكون 5 أحرف على الأقل";
   if (!formData.fatherStatus)   e.fatherStatus  = "حالة الأب مطلوبة";
   if (!formData.motherStatus)   e.motherStatus  = "حالة الأم مطلوبة";
-  if (formData.fatherStatus !== "متوفى"  && !formData.FatherIncome.trim()) e.FatherIncome = "دخل الأب مطلوب";
-  if (formData.motherStatus !== "متوفاة" && !formData.MotherIncome.trim()) e.MotherIncome = "دخل الأم مطلوب";
+  if (formData.fatherStatus !== "متوفى" && formData.fatherStatus !== "كريم النسب" && !formData.FatherIncome.trim()) e.FatherIncome = "دخل الأب مطلوب";
+  if (formData.motherStatus !== "متوفاة" && formData.motherStatus !== "كريم النسب" && !formData.MotherIncome.trim()) e.MotherIncome = "دخل الأم مطلوب";
   if (!formData.familyMembers.trim()) e.familyMembers = "عدد أفراد الأسرة مطلوب";
   if (!formData.siblingOrder.trim())  e.siblingOrder  = "الترتيب بين الإخوات مطلوب";
 
@@ -67,8 +67,8 @@ export default function ApplicationDetailsForm({ onSuccess, onNotify }: Applicat
     payload.append("family_numbers",    formData.familyMembers);
     payload.append("father_status",     formData.fatherStatus);
     payload.append("mother_status",     formData.motherStatus);
-    if (formData.fatherStatus !== "متوفى")  payload.append("father_income", formData.FatherIncome);
-    if (formData.motherStatus !== "متوفاة") payload.append("mother_income", formData.MotherIncome);
+    if (formData.fatherStatus !== "متوفى" && formData.fatherStatus !== "كريم النسب")  payload.append("father_income", formData.FatherIncome);
+    if (formData.motherStatus !== "متوفاة" && formData.motherStatus !== "كريم النسب") payload.append("mother_income", formData.MotherIncome);
     payload.append("arrange_of_brothers", formData.siblingOrder);
     payload.append("f_phone_num",   formData.fatherPhone);
     payload.append("m_phone_num",   formData.motherPhone);
@@ -209,18 +209,18 @@ export default function ApplicationDetailsForm({ onSuccess, onNotify }: Applicat
             <div className="form-group">
               <label>دخل الأب</label>
               <input type="number" name="FatherIncome"
-                value={formData.fatherStatus === "متوفى" ? "" : formData.FatherIncome}
+                value={formData.fatherStatus === "متوفى" || formData.fatherStatus === "كريم النسب" ? "" : formData.FatherIncome}
                 onChange={handleChange} placeholder="أدخل دخل الأب"
-                disabled={formData.fatherStatus === "متوفى"} />
+                disabled={formData.fatherStatus === "متوفى" || formData.fatherStatus === "كريم النسب"} />
               {errors.FatherIncome && <span className="error">{errors.FatherIncome}</span>}
             </div>
 
             <div className="form-group">
               <label>دخل الأم</label>
               <input type="number" name="MotherIncome"
-                value={formData.motherStatus === "متوفاة" ? "" : formData.MotherIncome}
+                value={formData.motherStatus === "متوفاة" || formData.motherStatus === "كريم النسب" ? "" : formData.MotherIncome}
                 onChange={handleChange} placeholder="أدخل دخل الأم"
-                disabled={formData.motherStatus === "متوفاة"} />
+                disabled={formData.motherStatus === "متوفاة" || formData.motherStatus === "كريم النسب"} />
               {errors.MotherIncome && <span className="error">{errors.MotherIncome}</span>}
             </div>
 

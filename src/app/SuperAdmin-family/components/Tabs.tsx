@@ -36,6 +36,13 @@ export default function Tabs({ activeTab, setActiveTab }: Props) {
           )} */}
         </button>
 
+        <button
+          className={`${styles.tab} ${activeTab === "union" ? styles.tabActive : ""}`}
+          onClick={() => setActiveTab("union")}
+        >
+          <span className={styles.tabText}>اتحاد</span>
+        </button>
+
       </div>
 
     </div>

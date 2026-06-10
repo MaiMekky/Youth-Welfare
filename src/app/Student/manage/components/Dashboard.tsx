@@ -220,20 +220,40 @@ const Dashboard: React.FC = () => {
         style={{
           margin:  "24px 32px 0",
           width:   "calc(100% - 64px)",
-          padding: "28px 32px 0",     /* zero bottom — tabs sit flush */
+          padding: "28px 32px 0",
         }}
       >
-        {/* Inner content row */}
+        {/* ── Inner content row — layout fully inlined to prevent hydration flash ── */}
         <div
           className="dashboard-header__inner"
-          style={{ marginBottom: 28 }}   /* inline so it survives re-order */
+          style={{
+            marginBottom:    28,
+            display:         "flex",
+            flexDirection:   "row",          /* ← always row; never let CSS cascade override */
+            alignItems:      "flex-start",
+            justifyContent:  "space-between",
+            gap:             24,
+          }}
         >
           <div className="dashboard-header__text">
             <h1>إدارة الأسرة: {familyName}</h1>
             <p>لوحة تحكم خاصة بمؤسس الأسرة لإدارة الأعضاء والفعاليات</p>
           </div>
 
-          <div className="dashboard-buttons">
+          {/* Buttons — inlined so they always stay in a row regardless of hydration timing */}
+          <div
+            className="dashboard-buttons"
+            style={{
+              display:       "flex",
+              flexDirection: "row",    /* ← explicit; blocks mobile CSS cascade during SSR */
+              flexWrap:      "nowrap",
+              flexShrink:    0,
+              gap:           12,
+              alignItems:    "flex-start",
+              position:      "relative",
+              zIndex:        1,
+            }}
+          >
             <button
               className="btn create-activity"
               onClick={() => setShowCreateActivityForm(true)}
@@ -256,7 +276,7 @@ const Dashboard: React.FC = () => {
         {/* Tabs — flush to bottom edge, inside the hero card */}
         <div
           className="dashboard-tabs"
-          style={{ margin: "0 -4px" }}   /* bleed to card edges, inline-safe */
+          style={{ margin: "0 -4px" }}
         >
           {tabs.map((t) => (
             <button

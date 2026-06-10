@@ -21,6 +21,7 @@ const cardVariants = [
   styles.statSecond,
   styles.statThird,
   styles.statFourth,
+  styles.statFifth,
 ];
 
 const StatsGrid: React.FC<StatsGridProps> = ({ stats }) => (

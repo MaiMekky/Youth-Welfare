@@ -9,7 +9,6 @@ import {
   Users,
   GitBranch,
   Network,
-  ArrowRight,
   Power,
   Building2,
   Calendar,
@@ -41,9 +40,6 @@ export default function ClanDetailPage() {
   const [stats, setStats] = useState<ClanStats | null>(null);
   const [structure, setStructure] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "members" | "groups" | "structure">(
-    "overview"
-  );
 
   const fetchClanDetail = useCallback(async () => {
     if (!clanId) return;
@@ -104,9 +100,9 @@ export default function ClanDetailPage() {
     }
   };
 
-  const goToMembers = () => router.push(`/uni-level-scouts/${clanId}/members`);
-  const goToGroups = () => router.push(`/uni-level-scouts/${clanId}/groups`);
-  const goToStructure = () => router.push(`/uni-level-scouts/${clanId}/structure`);
+  const handleTabClick = (tab: "members" | "groups" | "structure") => {
+    router.push(`/uni-level-scouts/${clanId}/${tab}`);
+  };
 
   if (loading) {
     return (
@@ -175,29 +171,28 @@ export default function ClanDetailPage() {
       {/* Tabs */}
       <div className={styles.tabs}>
         <button
-          className={activeTab === "overview" ? styles.tabActive : styles.tab}
-          onClick={() => setActiveTab("overview")}
+          className={styles.tab}
         >
           <Shield size={18} />
           نظرة عامة
         </button>
         <button
-          className={activeTab === "members" ? styles.tabActive : styles.tab}
-          onClick={() => setActiveTab("members")}
+          className={styles.tab}
+          onClick={() => handleTabClick("members")}
         >
           <Users size={18} />
           الأعضاء
         </button>
         <button
-          className={activeTab === "groups" ? styles.tabActive : styles.tab}
-          onClick={() => setActiveTab("groups")}
+          className={styles.tab}
+          onClick={() => handleTabClick("groups")}
         >
           <GitBranch size={18} />
           المجموعات
         </button>
         <button
-          className={activeTab === "structure" ? styles.tabActive : styles.tab}
-          onClick={() => setActiveTab("structure")}
+          className={styles.tab}
+          onClick={() => handleTabClick("structure")}
         >
           <Network size={18} />
           الهيكل التنظيمي
@@ -206,7 +201,7 @@ export default function ClanDetailPage() {
 
       {/* Tab Content */}
       <div className={styles.content}>
-        {activeTab === "overview" && stats && (
+        {stats && (
           <div className={styles.overviewTab}>
             <div className={styles.statsGrid}>
               <div className={styles.statCard}>
@@ -296,45 +291,6 @@ export default function ClanDetailPage() {
                 </div>
               </div>
             </div>
-          </div>
-        )}
-
-        {activeTab === "members" && (
-          <div className={styles.previewTab}>
-            <div className={styles.previewHeader}>
-              <h3>معاينة الأعضاء</h3>
-              <p>عرض سريع لأعضاء العشيرة</p>
-            </div>
-            <button className={styles.goToBtn} onClick={goToMembers}>
-              <span>الانتقال إلى صفحة الأعضاء</span>
-              <ArrowRight size={18} />
-            </button>
-          </div>
-        )}
-
-        {activeTab === "groups" && (
-          <div className={styles.previewTab}>
-            <div className={styles.previewHeader}>
-              <h3>معاينة المجموعات</h3>
-              <p>عرض سريع لمجموعات العشيرة</p>
-            </div>
-            <button className={styles.goToBtn} onClick={goToGroups}>
-              <span>الانتقال إلى صفحة المجموعات</span>
-              <ArrowRight size={18} />
-            </button>
-          </div>
-        )}
-
-        {activeTab === "structure" && (
-          <div className={styles.previewTab}>
-            <div className={styles.previewHeader}>
-              <h3>معاينة الهيكل التنظيمي</h3>
-              <p>عرض الهيكل الهرمي للعشيرة</p>
-            </div>
-            <button className={styles.goToBtn} onClick={goToStructure}>
-              <span>الانتقال إلى صفحة الهيكل التنظيمي</span>
-              <ArrowRight size={18} />
-            </button>
           </div>
         )}
       </div>

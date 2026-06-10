@@ -42,11 +42,33 @@ const FIELD_AR: Record<string, string> = {
   non_field_errors: '',
 };
 
+/* ─── Extract human-readable messages from Python ErrorDetail string repr ─── */
+/**
+ * Handles strings like:
+ *   [ErrorDetail(string="some message", code='invalid')]
+ *   ErrorDetail(string="some message", code='invalid')
+ * Returns all extracted `string=` values, or null if none found.
+ */
+function extractErrorDetailMessages(raw: string): string[] | null {
+  // Match all string="..." or string='...' occurrences
+  const pattern = /ErrorDetail\s*\(\s*string\s*=\s*["']([^"']+)["']/g;
+  const found: string[] = [];
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(raw)) !== null) {
+    if (match[1]) found.push(match[1]);
+  }
+  return found.length > 0 ? found : null;
+}
+
 function parseApiErrors(err: unknown): string[] {
-  if (!err || typeof err !== 'object') return ['\u062d\u062f\u062b \u062e\u0637\u0623 \u063a\u064a\u0631 \u0645\u062a\u0648\u0642\u0639'];
+  if (!err || typeof err !== 'object') return ['حدث خطأ غير متوقع'];
   const msgs: string[] = [];
 
   const resolveString = (raw: string, parentKey = ''): string => {
+    // ── NEW: handle Python ErrorDetail repr before anything else ──
+    const detailMsgs = extractErrorDetailMessages(raw);
+    if (detailMsgs) return detailMsgs.join(' — ');
+
     const strM  = raw.match(/string='([^']+)'/);
     const codeM = raw.match(/code='([^']+)'/);
     const clean = strM ? strM[1] : raw;
@@ -60,6 +82,12 @@ function parseApiErrors(err: unknown): string[] {
 
   const extract = (obj: unknown, parentKey = ''): void => {
     if (typeof obj === 'string') {
+      // ── NEW: top-level string may itself be an ErrorDetail repr ──
+      const detailMsgs = extractErrorDetailMessages(obj);
+      if (detailMsgs) {
+        detailMsgs.forEach(m => msgs.push(m));
+        return;
+      }
       msgs.push(resolveString(obj, parentKey));
       return;
     }

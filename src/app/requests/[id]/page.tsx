@@ -669,7 +669,7 @@ const fetchDiscountValues = async () => {
             {showAiSummary && aiSummary && (
               <div className={styles.aiSummaryCard}>
                 <div className={styles.aiSummaryHeader}>
-                  <span>تحليل الذكاء الاصطناعي للطلب</span>
+                  <span>تحليل للطلب</span>
                 </div>
 
                 <div className={styles.aiSummaryBody}>

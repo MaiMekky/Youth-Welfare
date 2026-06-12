@@ -594,6 +594,119 @@
   font-size: 15px;
   line-height: 1.6;
 }
+/* ─── AI Summary Section ─────────────────────── */
+.btnAiSummary {
+  min-width: 180px;
+  height: 44px;
+  padding: 0 22px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: 1.5px solid #d4a017;
+  background-color: #fffaf0;
+  color: #2c2a6a;
+}
+
+.btnAiSummary:hover {
+  background-color: #fff3d6;
+  transform: translateY(-2px);
+}
+
+.btnAiSummary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.aiSummaryCard {
+  margin-top: 14px;
+  background: #fff;
+  border: 1.5px solid #e0c97d;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.aiSummaryHeader {
+  background: linear-gradient(135deg, #2c2a6a 0%, #2c2a6a 100%);
+  color: #fff;
+  padding: 12px 18px;
+  font-weight: 700;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.aiSummaryBody {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.aiSummaryItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed #eee3c4;
+}
+
+.aiSummaryItem:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.aiSummaryItemLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: #2c2a6a;
+  font-size: 14px;
+}
+
+.aiSummaryItemIcon {
+  font-size: 16px;
+}
+
+.aiSummaryItemText {
+  color: #374151;
+  font-size: 15px;
+  line-height: 1.8;
+  background: #fffdf7;
+  border-radius: 8px;
+  padding: 10px 12px;
+  border: 1px solid #f3eddc;
+}
+
+@media (max-width: 640px) {
+  .btnAiSummary {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .aiSummaryBody {
+    padding: 14px;
+  }
+
+  .aiSummaryItemText {
+    font-size: 14px;
+    padding: 8px 10px;
+  }
+
+  .aiSummaryHeader {
+    font-size: 14px;
+    padding: 10px 14px;
+  }
+}
 /* =========================
    Responsive
    ========================= */

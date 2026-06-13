@@ -8,9 +8,10 @@ interface FamiliesGridProps {
   families: Record<string, unknown>[];
   showActions?: boolean;
   loading?: boolean;
+  familyType?: string;
 }
 
-export default function FamiliesGrid({ families, showActions, loading }: FamiliesGridProps) {
+export default function FamiliesGrid({ families, showActions, loading, familyType }: FamiliesGridProps) {
   if (loading) {
     return (
       <div className={styles.loadingWrap}>
@@ -21,6 +22,12 @@ export default function FamiliesGrid({ families, showActions, loading }: Familie
   }
 
   if (families.length === 0) {
+    const isUnionType = familyType === "اتحاد";
+    const emptyTitle = isUnionType ? "لا توجد اتحادات" : "لا توجد أسر";
+    const emptyDesc = isUnionType 
+      ? "لم يتم العثور على أي اتحادات تطابق البحث"
+      : "لم يتم العثور على أي أسر طلابية تطابق  البحث";
+
     return (
       <div className={styles.emptyState}>
         <div className={styles.emptyIcon}>
@@ -40,9 +47,9 @@ export default function FamiliesGrid({ families, showActions, loading }: Familie
             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
           </svg>
         </div>
-        <h3 className={styles.emptyTitle}>لا توجد أسر</h3>
+        <h3 className={styles.emptyTitle}>{emptyTitle}</h3>
         <p className={styles.emptyDesc}>
-          لم يتم العثور على أي أسر طلابية تطابق  البحث
+          {emptyDesc}
         </p>
       </div>
     );

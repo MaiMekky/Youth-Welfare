@@ -343,6 +343,7 @@ export default function Page() {
               families={filteredUnionFamilies}
               showActions={true}
               loading={loadingFamilies}
+              familyType="اتحاد"
             />
           </div>
         )}

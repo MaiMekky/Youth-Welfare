@@ -61,11 +61,7 @@
 }
 
 /* ── Stats Row ── */
-.statsRow {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-}
+
 .statCard {
   border-radius: var(--radius);
   padding: 14px 20px;
@@ -76,21 +72,36 @@
 }
 .statCard:hover { transform: translateY(-2px); }
 .statTotal    { background: linear-gradient(140deg, var(--navy), var(--navy-mid)); box-shadow: 0 4px 18px rgba(30,58,95,.22); }
-.statSuccess  { background: #fff; box-shadow: 0 0 0 2px var(--green-bdr), 0 4px 14px rgba(5,150,105,.06); }
-.statFailed   { background: #fff; box-shadow: 0 0 0 2px var(--red-bdr), 0 4px 14px rgba(220,38,38,.06); }
-.statFiltered { background: #fff; box-shadow: 0 0 0 2px #BFDBFE, 0 4px 14px rgba(59,130,246,.06); }
+.statActivities {
+  background: #fff;
+  box-shadow: 0 0 0 2px #C4B5FD, 0 4px 14px rgba(124,58,237,.06);
+}
+.statActivities .statNum { color: #7C3AED; }.statFiltered { background: #fff; box-shadow: 0 0 0 2px #BFDBFE, 0 4px 14px rgba(59,130,246,.06); }
 
 .statNum { font-size: 34px; font-weight: 900; line-height: 1; letter-spacing: -1px; }
-.statTotal .statNum    { color: #fff; }
-.statSuccess .statNum  { color: var(--green); }
-.statFailed .statNum   { color: var(--red); }
-.statFiltered .statNum { color: #2563EB; }
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+}
 
-.statLabel { font-size: 13px; font-weight: 600; }
+.statTotal   { background: linear-gradient(140deg, var(--navy), var(--navy-mid)); box-shadow: 0 4px 18px rgba(30,58,95,.22); }
+.statTakafol { background: #fff; box-shadow: 0 0 0 2px #A7F3D0, 0 4px 14px rgba(5,150,105,.06); }
+.statOsra    { background: #fff; box-shadow: 0 0 0 2px #BFDBFE, 0 4px 14px rgba(59,130,246,.06); }
+.statNashat  { background: #fff; box-shadow: 0 0 0 2px #C4B5FD, 0 4px 14px rgba(124,58,237,.06); }
+.statOther   { background: #fff; box-shadow: 0 0 0 2px #FED7AA, 0 4px 14px rgba(234,88,12,.06); }
+
+.statTotal .statNum    { color: #fff; }
+.statTakafol .statNum  { color: var(--green); }
+.statOsra .statNum     { color: #2563EB; }
+.statNashat .statNum   { color: #7C3AED; }
+.statOther .statNum    { color: #EA580C; }
+
 .statTotal .statLabel    { color: rgba(255,255,255,.7); }
-.statSuccess .statLabel,
-.statFailed .statLabel,
-.statFiltered .statLabel { color: var(--mute); }
+.statTakafol .statLabel,
+.statOsra .statLabel,
+.statNashat .statLabel,
+.statOther .statLabel    { color: var(--mute); }
 
 /* ── Controls Bar ── */
 .controlsBar {
@@ -424,4 +435,10 @@
   .logsTable { min-width: 100%; }
   .logsTable th,
   .logsTable td { white-space: normal; }
+}@media (max-width: 1024px) {
+  .statsRow { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .statsRow { grid-template-columns: 1fr 1fr; gap: 10px; }
 }

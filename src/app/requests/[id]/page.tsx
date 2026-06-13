@@ -84,7 +84,12 @@ type SelectedDiscounts = {
   aff_discount: string;
   full_discount: string;
 };
-
+type AiSummary = {
+  summary: string;
+  financial_assessment: string;
+  need_level: string;
+  recommendation: string;
+};
 const EMPTY_DISCOUNTS: SelectedDiscounts = {
   bk_discount: "none",
   reg_discount: "none",
@@ -147,7 +152,28 @@ function RejectionBox({ reason }: { reason?: string | null }) {
     </div>
   );
 }
+  function NeedLevelBadge({ level }: { level?: string | null }) {
+  if (!level) return null;
 
+  const styleMap: Record<string, React.CSSProperties> = {
+    "مرتفع":  { background: "#fee2e2", color: "#991b1b", border: "1px solid #fca5a5" },
+    "متوسط":  { background: "#fef3c7", color: "#92400e", border: "1px solid #fcd34d" },
+    "منخفض":  { background: "#d1fae5", color: "#065f46", border: "1px solid #6ee7b7" },
+  };
+
+  const base: React.CSSProperties = {
+    display: "inline-block",
+    padding: "3px 14px",
+    borderRadius: "999px",
+    fontSize: "13px",
+    fontWeight: 700,
+    letterSpacing: "0.3px",
+    verticalAlign: "middle",
+    ...(styleMap[level] ?? { background: "#f3f4f6", color: "#374151", border: "1px solid #d1d5db" }),
+  };
+
+  return <span style={base}>{level}</span>;
+}
 export default function RequestDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
@@ -170,7 +196,9 @@ export default function RequestDetailsPage() {
   // ====== Reject modal state ======
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [selectedReason, setSelectedReason] = useState<number | null>(null);
-
+  const [aiSummary, setAiSummary] = useState<AiSummary | null>(null);
+  const [aiSummaryLoading, setAiSummaryLoading] = useState(false);
+  const [showAiSummary, setShowAiSummary] = useState(false);
   const baseAmount = 1500;
 
   useEffect(() => {
@@ -226,7 +254,30 @@ export default function RequestDetailsPage() {
       setDocuments([]);
     }
   };
+  const fetchAiSummary = async () => {
+    if (!id) return;
+    setAiSummaryLoading(true);
+    try {
+      const baseUrl = getBaseUrl();
+      const res = await authFetch(`${baseUrl}/api/solidarity/faculty/${id}/ai-summary/`);
+      if (!res.ok) throw new Error("AI_SUMMARY_ERROR");
+      const data = await res.json();
+      setAiSummary(data);
+    } catch (err: unknown) {
+      console.error("fetchAiSummary error:", err);
+      showToast("فشل في تحميل الملخص الذكي", "error");
+      setAiSummary(null);
+    } finally {
+      setAiSummaryLoading(false);
+    }
+  };
 
+  const handleToggleAiSummary = async () => {
+    if (!showAiSummary && !aiSummary) {
+      await fetchAiSummary();
+    }
+    setShowAiSummary((prev) => !prev);
+  };
 const fetchDiscountValues = async () => {
   try {
     const baseUrl = getBaseUrl();
@@ -599,8 +650,65 @@ const fetchDiscountValues = async () => {
             <RejectionBox reason={application?.rejection_reason} />
           </section>
         )}
+          {/* ====== الملخص الذكي للطلب ====== */}
+          <section className={styles.section}>
+            <h3>الملخص الذكي للطلب</h3>
 
-        {/* ====== الخصومات ====== */}
+            <button
+              onClick={handleToggleAiSummary}
+              disabled={aiSummaryLoading}
+              className={styles.btnAiSummary}
+            >
+              {aiSummaryLoading
+                ? "جاري التحميل..."
+                : showAiSummary
+                ? "إخفاء الملخص الذكي"
+                : "عرض الملخص الذكي"}
+            </button>
+
+            {showAiSummary && aiSummary && (
+              <div className={styles.aiSummaryCard}>
+                <div className={styles.aiSummaryHeader}>
+                  <span>تحليل للطلب</span>
+                </div>
+
+                <div className={styles.aiSummaryBody}>
+                  <div className={styles.aiSummaryItem}>
+                    <div className={styles.aiSummaryItemLabel}>
+                      <span>الملخص:</span>
+                    </div>
+                    <div className={styles.aiSummaryItemText}>{aiSummary.summary}</div>
+                  </div>
+
+                  <div className={styles.aiSummaryItem}>
+                    <div className={styles.aiSummaryItemLabel}>
+                      <span>التقييم المالي:</span>
+                    </div>
+                    <div className={styles.aiSummaryItemText}>{aiSummary.financial_assessment}</div>
+                  </div>
+
+                  <div className={styles.aiSummaryItem}>
+                    <div className={styles.aiSummaryItemLabel}>
+                      <span>مستوى الحاجة:</span>
+                    </div>
+                    <div><NeedLevelBadge level={aiSummary.need_level} /></div>
+                  </div>
+
+                  <div className={styles.aiSummaryItem}>
+                    <div className={styles.aiSummaryItemLabel}>
+                      <span>التوصية:</span>
+                    </div>
+                    <div className={styles.aiSummaryItemText}>{aiSummary.recommendation}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {showAiSummary && !aiSummary && !aiSummaryLoading && (
+              <p className={styles.noLink}>تعذر تحميل الملخص الذكي لهذا الطلب.</p>
+            )}
+          </section>
+          {/* ====== الخصومات ====== */}
         {application?.req_status === "موافقة مبدئية" && (
           <section className={styles.section}>
             <h3>الخصومات المتاحة</h3>

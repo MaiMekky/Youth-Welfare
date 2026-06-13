@@ -20,7 +20,7 @@ interface EventRow {
   status: string;
   type: string;
   cost: string;
-  s_limit: number;
+  s_limit: number|null;
   faculty_id: number;
   dept_id: number;
 }
@@ -42,7 +42,7 @@ interface EventDetail {
   imgs: string;
   st_date: string;
   end_date: string;
-  s_limit: number;
+  s_limit: number|null;
   created_at: string;
   type: string;
   resource: string;
@@ -78,7 +78,8 @@ function fmt(d?: string) {
   if (!d) return "—";
   return new Date(d).toLocaleDateString("ar-EG");
 }
-function limitLabel(n: number) {
+function limitLabel(n: number | null | undefined) {
+  if (n == null) return "غير محدود";
   return n >= 2147483647 ? "غير محدود" : n.toLocaleString("ar-EG");
 }
 function extractTypes(events: EventRow[]): string[] {

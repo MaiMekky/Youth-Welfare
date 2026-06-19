@@ -496,7 +496,77 @@
 .notification.success { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
 .notification.warning { background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; }
 .notification.error   { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+.gmailFooter {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  font-size: 14px;
+  color: var(--text);
+  gap: 12px;
+}
 
+.paginationInfo { font-weight: 500; color: var(--mute); }
+.paginationInfo strong { color: var(--navy); }
+
+.perPageSelect {
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: #F7FAFD;
+  font-family: 'Cairo', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+  outline: none;
+  transition: border .2s;
+}
+.perPageSelect:focus { border-color: var(--navy-mid); }
+
+.paginationControls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.pageIndicator {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+  min-width: 50px;
+  text-align: center;
+}
+
+.arrowBtn {
+  width: 36px;
+  height: 36px;
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .2s, border-color .2s, transform .15s;
+}
+.arrowBtn:hover:not(:disabled) {
+  background: var(--navy-light);
+  border-color: var(--navy-mid);
+  transform: translateY(-1px);
+}
+.arrowBtn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+@media (max-width: 768px) {
+  .gmailFooter { flex-direction: column; align-items: stretch; gap: 10px; }
+  .paginationInfo { text-align: center; }
+  .perPageSelect { width: 100%; }
+  .paginationControls { justify-content: center; }
+}
 @media (max-width: 1140px) { .addUserCard { max-width: 95vw; } }
 @media (max-width: 768px) {
   .addUserCard   { border-radius: 14px; }

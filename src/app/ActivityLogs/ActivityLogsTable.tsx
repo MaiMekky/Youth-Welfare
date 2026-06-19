@@ -26,21 +26,13 @@ export default function ActivityLogsTable() {
   const [logsPerPage, setLogsPerPage] = useState(5);
   const [dateFilter, setDateFilter] = useState("");
 
-  // FETCH LOGS
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-
         const response = await authFetch(
           `${getBaseUrl()}/api/solidarity/super_dept/system_logs/`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
+          { method: "GET", headers: { "Content-Type": "application/json" } }
         );
-
         const data = await response.json();
         const logsArray = Array.isArray(data)
           ? data
@@ -52,7 +44,6 @@ export default function ActivityLogsTable() {
         console.error("Error fetching logs: ", error);
       }
     };
-
     fetchLogs();
   }, []);
 
@@ -73,8 +64,6 @@ export default function ActivityLogsTable() {
     ip: log.ip_address || "-",
     which: log.target_type,
     what: log.solidarity_id,
-    status: log.action.includes("رفض") ? "فشل" : "نجاح",
-    statusClass: log.action.includes("رفض") ? "failed" : "success",
     activityType: log.target_type.includes("تكافل")
       ? "تكافل"
       : log.target_type.includes("اسر") || log.target_type.includes("أسرة")
@@ -90,17 +79,17 @@ export default function ActivityLogsTable() {
       log.who.toLowerCase().includes(term) ||
       log.action.toLowerCase().includes(term) ||
       log.which.toLowerCase().includes(term);
-
-    const matchesRole =
-      roleFilter === "all" || log.role === roleFilter;
+    const matchesRole = roleFilter === "all" || log.role === roleFilter;
     const matchesActivity =
       activityFilter === "all" || log.activityType === activityFilter;
     const matchesDate =
       !dateFilter ||
       new Date(log.rawDate).toISOString().split("T")[0] === dateFilter;
-
-    return matchesSearch && matchesRole && matchesActivity && matchesDate
+    return matchesSearch && matchesRole && matchesActivity && matchesDate;
   });
+
+  // Count distinct activity types in filtered results
+  const distinctActivities = new Set(filteredLogs.map((l) => l.activityType)).size;
 
   const totalPages = Math.ceil(filteredLogs.length / logsPerPage);
   const displayedLogs = filteredLogs.slice(
@@ -109,7 +98,8 @@ export default function ActivityLogsTable() {
   );
 
   const handlePrev = () => setCurrentPage((p) => Math.max(p - 1, 1));
-  const handleNext = () => setCurrentPage((p) => Math.min(p + 1, totalPages));
+  const handleNext = () =>
+    setCurrentPage((p) => Math.min(p + 1, totalPages));
 
   return (
     <div className={styles.activityLogsContainer} dir="rtl">
@@ -122,38 +112,45 @@ export default function ActivityLogsTable() {
         </div>
       </div>
 
-      {/* Stats Row */}
-      <div className={styles.statsRow}>
-        <div className={`${styles.statCard} ${styles.statTotal}`}>
-          <div className={styles.statNum}>{mappedLogs.length}</div>
-          <div className={styles.statLabel}>إجمالي السجلات</div>
-        </div>
-        <div className={`${styles.statCard} ${styles.statSuccess}`}>
-          <div className={styles.statNum}>{mappedLogs.filter(l => l.statusClass === "success").length}</div>
-          <div className={styles.statLabel}>عملية ناجحة</div>
-        </div>
-        <div className={`${styles.statCard} ${styles.statFailed}`}>
-          <div className={styles.statNum}>{mappedLogs.filter(l => l.statusClass === "failed").length}</div>
-          <div className={styles.statLabel}>عملية فاشلة</div>
-        </div>
-        <div className={`${styles.statCard} ${styles.statFiltered}`}>
-          <div className={styles.statNum}>{filteredLogs.length}</div>
-          <div className={styles.statLabel}>نتائج البحث</div>
-        </div>
+      {/* Stats Row — 3 cards */}
+      {/* Stats Row — total + 4 activity counts */}
+    <div className={styles.statsRow}>
+      <div className={`${styles.statCard} ${styles.statTotal}`}>
+        <div className={styles.statNum}>{mappedLogs.length}</div>
+        <div className={styles.statLabel}>إجمالي السجلات</div>
       </div>
+      <div className={`${styles.statCard} ${styles.statTakafol}`}>
+        <div className={styles.statNum}>{mappedLogs.filter(l => l.activityType === "تكافل").length}</div>
+        <div className={styles.statLabel}>تكافل</div>
+      </div>
+      <div className={`${styles.statCard} ${styles.statOsra}`}>
+        <div className={styles.statNum}>{mappedLogs.filter(l => l.activityType === "اسر").length}</div>
+        <div className={styles.statLabel}>اسر</div>
+      </div>
+      <div className={`${styles.statCard} ${styles.statNashat}`}>
+        <div className={styles.statNum}>{mappedLogs.filter(l => l.activityType === "نشاط").length}</div>
+        <div className={styles.statLabel}>نشاط</div>
+      </div>
+      <div className={`${styles.statCard} ${styles.statOther}`}>
+        <div className={styles.statNum}>{mappedLogs.filter(l => l.activityType === "اخر").length}</div>
+        <div className={styles.statLabel}>اخر</div>
+      </div>
+    </div>
 
-      {/* Filters */}
+      {/* Filters — reversed order: search → role → activity → date */}
       <div className={styles.controlsBar}>
-        <input
-          type="date"
-          placeholder="التاريخ"
-          className={styles.dateInput}
-          value={dateFilter}
-          onChange={(e) => {
-            setDateFilter(e.target.value);
-            setCurrentPage(1);
-          }}
-        />
+        <div className={styles.searchWrapper}>
+          <svg className={styles.searchIcon} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="text"
+            placeholder="ابحث بالاسم أو الإجراء أو الهدف"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+            className={styles.searchInput}
+          />
+        </div>
 
         <div className={styles.selectWrapper}>
           <select
@@ -182,18 +179,12 @@ export default function ActivityLogsTable() {
           </select>
         </div>
 
-        <div className={styles.searchWrapper}>
-          <svg className={styles.searchIcon} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input
-            type="text"
-            placeholder="ابحث بالاسم أو الإجراء أو الهدف"
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-            className={styles.searchInput}
-          />
-        </div>
+        <input
+          type="date"
+          className={styles.dateInput}
+          value={dateFilter}
+          onChange={(e) => { setDateFilter(e.target.value); setCurrentPage(1); }}
+        />
       </div>
 
       {/* Table */}
@@ -209,14 +200,12 @@ export default function ActivityLogsTable() {
               <th>عنوان IP</th>
               <th>الهدف</th>
               <th>رقم الطلب</th>
-              <th>الحالة</th>
             </tr>
           </thead>
-
           <tbody>
             {displayedLogs.length === 0 ? (
               <tr>
-                <td colSpan={9} className={styles.emptyState}>
+                <td colSpan={8} className={styles.emptyState}>
                   <div className={styles.emptyIcon}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                       <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/>
@@ -236,18 +225,11 @@ export default function ActivityLogsTable() {
                   </td>
                   <td className={styles.actionCell}>{log.action}</td>
                   <td><span className={styles.dateText}>{log.when}</span></td>
-                  <td>
-                    <span className={styles.roleBadge}>{log.role}</span>
-                  </td>
+                  <td><span className={styles.roleBadge}>{log.role}</span></td>
                   <td className={styles.mutedCell}>{log.faculty}</td>
                   <td className={styles.ipCell}>{log.ip}</td>
                   <td className={styles.targetCell}>{log.which}</td>
                   <td className={styles.mutedCell}>{log.what}</td>
-                  <td>
-                    <span className={`${styles.statusTag} ${styles[log.statusClass]}`}>
-                      {log.status}
-                    </span>
-                  </td>
                 </tr>
               ))
             )}
@@ -262,7 +244,6 @@ export default function ActivityLogsTable() {
           <strong>{Math.min(currentPage * logsPerPage, filteredLogs.length)}</strong>{" "}
           من <strong>{filteredLogs.length}</strong> سجل
         </div>
-
         <select
           className={styles.perPageSelect}
           value={logsPerPage}
@@ -272,7 +253,6 @@ export default function ActivityLogsTable() {
           <option value={10}>10</option>
           <option value={25}>25</option>
         </select>
-
         <div className={styles.paginationControls}>
           <button className={styles.arrowBtn} onClick={handlePrev} disabled={currentPage === 1}>
             <ChevronRight size={18} />

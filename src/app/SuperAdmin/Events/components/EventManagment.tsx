@@ -5,6 +5,7 @@ import { useMemo, useState, useEffect } from "react";
 import styles from "../styles/EventManagment.module.css";
 import { useRouter } from "next/navigation";
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 /* ══════════════════════════════════════════
    API TYPES
@@ -72,7 +73,7 @@ const mapApiEvent = (e: ApiEvent, facultyMap: Map<number, string>): EventRow => 
 };
 
 /* ══════════════════════════════════════════
-   STATUS BADGE CLASS
+   STATUS BADGE CLASS (table / mobile cards)
 ══════════════════════════════════════════ */
 function getStatusClass(status: string): string {
   switch (status) {
@@ -85,12 +86,51 @@ function getStatusClass(status: string): string {
       return styles.badgePending;
     case "موافقة مبدئية":
       return styles.badgeProvisional;
-    case "مرفوض":
-    case "completed":
+    case "مكتمل":
     case "مكتملة":
+    case "completed":
+      return styles.badgeCompleted;
+    case "مرفوض":
+    case "rejected":
       return styles.badgeRejected;
+    case "ملغي":
+    case "ملغاة":
+    case "cancelled":
+    case "canceled":
+      return styles.badgeCancelled;
     default:
       return styles.badgeDefault;
+  }
+}
+
+/* ══════════════════════════════════════════
+   STAT CARD CLASS (stats row)
+══════════════════════════════════════════ */
+function getStatCardClass(status: string): string {
+  switch (status) {
+    case "مقبول":
+    case "active":
+    case "نشطة":
+      return styles.statSuccess;
+    case "منتظر":
+    case "pending":
+      return styles.statPending ?? styles.statTotal;
+    case "موافقة مبدئية":
+      return styles.statProvisional ?? styles.statTotal;
+    case "مكتمل":
+    case "مكتملة":
+    case "completed":
+      return styles.statCompleted ?? styles.statTotal;
+    case "مرفوض":
+    case "rejected":
+      return styles.statRejected ?? styles.statTotal;
+    case "ملغي":
+    case "ملغاة":
+    case "cancelled":
+    case "canceled":
+      return styles.statCancelled ?? styles.statTotal;
+    default:
+      return styles.statTotal;
   }
 }
 
@@ -170,6 +210,9 @@ export default function EventsPage() {
   const [typeFilter, setTypeFilter]       = useState("");
   const [facultyFilter, setFacultyFilter] = useState("");
 
+  const [currentPage, setCurrentPage]     = useState(1);
+  const [eventsPerPage, setEventsPerPage] = useState(5);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -221,10 +264,31 @@ export default function EventsPage() {
     });
   }, [data, q, statusFilter, typeFilter, facultyFilter]);
 
-  const totalCost      = useMemo(() => data.reduce((s, e) => s + e.cost, 0), [data]);
-  const completedCount = useMemo(() => data.filter((e) => e.status === "مكتملة" || e.status === "completed").length, [data]);
-  const activeCount    = useMemo(() => data.filter((e) => e.status === "active" || e.status === "نشطة" || e.status === "مقبول").length, [data]);
-  const totalEvents    = data.length;
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    data.forEach((e) => {
+      const key = e.status || "غير محدد";
+      counts[key] = (counts[key] ?? 0) + 1;
+    });
+    return counts;
+  }, [data]);
+
+  const totalCost   = useMemo(() => data.reduce((s, e) => s + e.cost, 0), [data]);
+  const totalEvents = data.length;
+
+  // Reset to first page whenever filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [q, statusFilter, typeFilter, facultyFilter]);
+
+  const totalPages = Math.ceil(filtered.length / eventsPerPage);
+  const displayedEvents = filtered.slice(
+    (currentPage - 1) * eventsPerPage,
+    currentPage * eventsPerPage
+  );
+
+  const handlePrev = () => setCurrentPage((p) => Math.max(p - 1, 1));
+  const handleNext = () => setCurrentPage((p) => Math.min(p + 1, totalPages));
 
   const handleView = (id: number) => router.push(`/SuperAdmin/Events/${id}`);
 
@@ -242,28 +306,22 @@ export default function EventsPage() {
       {/* Stats Row */}
       <div className={styles.statsRow}>
         <div className={`${styles.statCard} ${styles.statTotal}`}>
-          {/* <div className={styles.statIconWrap}><CalendarIcon className={styles.statIcon} /></div> */}
           <div className={styles.statMeta}>
             <div className={styles.statNum}>{loading ? "…" : totalEvents}</div>
             <div className={styles.statLabel}>إجمالي الفعاليات</div>
           </div>
         </div>
-        <div className={`${styles.statCard} ${styles.statSuccess}`}>
-          {/* <div className={styles.statIconWrap}><BoltIcon className={styles.statIcon} /></div> */}
-          <div className={styles.statMeta}>
-            <div className={styles.statNum}>{loading ? "…" : activeCount}</div>
-            <div className={styles.statLabel}>الفعاليات النشطة</div>
+
+        {Object.entries(statusCounts).map(([status, count]) => (
+          <div key={status} className={`${styles.statCard} ${getStatCardClass(status)}`}>
+            <div className={styles.statMeta}>
+              <div className={styles.statNum}>{loading ? "…" : count}</div>
+              <div className={styles.statLabel}>{status}</div>
+            </div>
           </div>
-        </div>
-        <div className={`${styles.statCard} ${styles.statFailed}`}>
-          {/* <div className={styles.statIconWrap}><CheckDocIcon className={styles.statIcon} /></div> */}
-          <div className={styles.statMeta}>
-            <div className={styles.statNum}>{loading ? "…" : completedCount}</div>
-            <div className={styles.statLabel}>الفعاليات المكتملة</div>
-          </div>
-        </div>
+        ))}
+
         <div className={`${styles.statCard} ${styles.statFiltered}`}>
-          {/* <div className={styles.statIconWrap}><MoneyIcon className={styles.statIcon} /></div> */}
           <div className={styles.statMeta}>
             <div className={styles.statNum}>{loading ? "…" : `${totalCost.toLocaleString("EG")}`}</div>
             <div className={styles.statLabel}>التكلفة الإجمالية (ج)</div>
@@ -273,6 +331,20 @@ export default function EventsPage() {
 
       {/* Controls Bar */}
       <div className={styles.controlsBar}>
+        {/* Search comes first */}
+        <div className={styles.searchWrapper}>
+          <svg className={styles.searchIcon} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="text"
+            placeholder="ابحث باسم الفعالية، المكان، الوصف..."
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            className={styles.searchInput}
+          />
+        </div>
+
         <div className={styles.selectWrapper}>
           <select
             className={styles.roleSelect}
@@ -283,6 +355,9 @@ export default function EventsPage() {
             <option value="مقبول">مقبول</option>
             <option value="موافقة مبدئية">موافقة مبدئية</option>
             <option value="منتظر">منتظر</option>
+            <option value="مكتملة">مكتملة</option>
+            <option value="مرفوض">مرفوض</option>
+            <option value="ملغي">ملغي</option>
           </select>
         </div>
 
@@ -309,19 +384,6 @@ export default function EventsPage() {
               <option key={f.faculty_id} value={f.name}>{f.name}</option>
             ))}
           </select>
-        </div>
-
-        <div className={styles.searchWrapper}>
-          <svg className={styles.searchIcon} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input
-            type="text"
-            placeholder="ابحث باسم الفعالية، المكان، الوصف..."
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            className={styles.searchInput}
-          />
         </div>
       </div>
 
@@ -364,7 +426,7 @@ export default function EventsPage() {
               </tr>
             )}
 
-            {!loading && filtered.map((e) => (
+            {!loading && displayedEvents.map((e) => (
               <tr key={e.event_id} className={styles.tr}>
                 <td>
                   <div className={styles.actorCell}>
@@ -425,7 +487,7 @@ export default function EventsPage() {
             جاري التحميل...
           </div>
         )}
-        {!loading && filtered.map((e) => (
+        {!loading && displayedEvents.map((e) => (
           <article key={e.event_id} className={styles.mobileCard}>
             <div className={styles.mobileTop}>
               <div className={styles.actorCell}>
@@ -461,6 +523,35 @@ export default function EventsPage() {
             </button>
           </article>
         ))}
+      </div>
+
+      {/* Footer */}
+      <div className={styles.gmailFooter}>
+        <div className={styles.paginationInfo}>
+          عرض <strong>{filtered.length === 0 ? 0 : (currentPage - 1) * eventsPerPage + 1}</strong>–
+          <strong>{Math.min(currentPage * eventsPerPage, filtered.length)}</strong>{" "}
+          من <strong>{filtered.length}</strong> فعالية
+        </div>
+
+        <select
+          className={styles.perPageSelect}
+          value={eventsPerPage}
+          onChange={(e) => { setEventsPerPage(Number(e.target.value)); setCurrentPage(1); }}
+        >
+          <option value={5}>5</option>
+          <option value={10}>10</option>
+          <option value={25}>25</option>
+        </select>
+
+        <div className={styles.paginationControls}>
+          <button className={styles.arrowBtn} onClick={handlePrev} disabled={currentPage === 1}>
+            <ChevronRight size={18} />
+          </button>
+          <span className={styles.pageIndicator}>{currentPage} / {totalPages || 1}</span>
+          <button className={styles.arrowBtn} onClick={handleNext} disabled={currentPage === totalPages || totalPages === 0}>
+            <ChevronLeft size={18} />
+          </button>
+        </div>
       </div>
 
     </div>

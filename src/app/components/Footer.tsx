@@ -101,12 +101,23 @@ const Footer: React.FC = () => {
           </div>
         </div>
 
-        {/* Footer Bottom */}
-        <div className={styles.footerBottom}>
-          <p className={styles.copyright}>
-            © 2026 جامعة العاصمة — بوابة رعاية الطلاب. جميع الحقوق محفوظة.
-          </p>
-        </div>
+       {/* Footer Bottom */}
+    <div className={styles.footerBottom}>
+      <div className={styles.copyrightDivider} />
+      <div className={styles.copyrightContent}>
+        <p className={styles.copyrightAr}>
+          جميع حقوق النشر والملكية الفكرية محفوظة لـ
+          <span className={styles.copyrightHighlight}> كلية الحاسبات والذكاء الاصطناعي </span>
+          و <span className={styles.copyrightHighlight}> مركز الاتصالات وتكنولوجيا المعلومات </span>
+        </p>
+        <span className={styles.copyrightSep}>·</span>
+        <p className={styles.copyrightEn}>
+          All copyrights &amp; intellectual property rights reserved by
+          <span className={styles.copyrightHighlight}> FCAI </span>&amp;
+          <span className={styles.copyrightHighlight}> CITC</span>
+        </p>
+      </div>
+    </div>
       </div>
     </footer>
   );

@@ -53,7 +53,8 @@ export default function Footer() {
             <li>إدارة الأنشطة الفنية</li>
             <li>إدارة الأنشطة الثقافية</li>
             <li>إدارة الأنشطة العلمية</li>
-            <li>إدارة التضامن الاجتماعي</li>
+            <li>إدارة التكافل الاجتماعي</li>
+            <li>إدارة الاسر الطلابية و الاتحادات</li>
           </ul>
         </div>
 
@@ -68,7 +69,22 @@ export default function Footer() {
         <div className="statItem"><span className="statNum">100</span><span className="statLbl">عام من التميز</span></div>
         <div className="statItem"><span className="statNum">3</span><span className="statLbl">فروع جامعية</span></div>
       </div> */}
-
+     <div className="footerBottom">
+    <div className="copyrightDivider" />
+    <div className="copyrightContent">
+      <p className="copyrightAr">
+        جميع حقوق النشر والملكية الفكرية محفوظة لـ
+        <span className="copyrightHighlight"> كلية الحاسبات والذكاء الاصطناعي </span>
+        و<span className="copyrightHighlight"> مركز الاتصالات وتكنولوجيا المعلومات</span>
+      </p>
+      <span className="copyrightSep">·</span>
+      <p className="copyrightEn">
+        All copyrights &amp; intellectual property rights reserved by
+        <span className="copyrightHighlight"> FCAI </span>&amp;
+        <span className="copyrightHighlight"> CITC</span>
+      </p>
+    </div>
+  </div>
     </footer>
   );
 }

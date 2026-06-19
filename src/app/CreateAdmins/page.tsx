@@ -5,6 +5,7 @@ import styles from './access-privileges.module.css';
 import { useRouter } from 'next/navigation';
 import { authFetch, getBaseUrl } from "@/utils/globalFetch";
 import { useToast } from "@/app/context/ToastContext";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface User {
   id: string;
@@ -25,6 +26,8 @@ export default function AccessPrivileges() {
   const [users, setUsers] = useState<User[]>([]);
   const router = useRouter();
   const { showToast } = useToast();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [usersPerPage, setUsersPerPage] = useState(10);
 
   const permissionLabels: { [key: string]: string } = {
     D: 'حذف',
@@ -82,14 +85,23 @@ export default function AccessPrivileges() {
 
     fetchUsers();
   }, []);
-
+   useEffect(() => {
+  setCurrentPage(1);
+}, [searchTerm, selectedRole]);
   // ✅ email lowercase filter
   const filteredUsers = users.filter(user =>
     (selectedRole === 'جميع الأدوار' || user.role === selectedRole) &&
     (user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.trim().toLowerCase()))
   );
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+  const displayedUsers = filteredUsers.slice(
+    (currentPage - 1) * usersPerPage,
+    currentPage * usersPerPage
+  );
 
+  const handlePrev = () => setCurrentPage(p => Math.max(p - 1, 1));
+  const handleNext = () => setCurrentPage(p => Math.min(p + 1, totalPages));
   const toggleStatus = async (id: string) => {
     const user = users.find(u => u.id === id);
     if (!user) return;
@@ -193,7 +205,7 @@ export default function AccessPrivileges() {
       </tr>
     </thead>
     <tbody>
-      {filteredUsers.length === 0 ? (
+      {displayedUsers.length === 0 ? (
         <tr>
           <td colSpan={6} className={styles.emptyState}>
             <div className={styles.emptyIcon}>👤</div>
@@ -201,7 +213,7 @@ export default function AccessPrivileges() {
           </td>
         </tr>
       ) : (
-        filteredUsers.map(user => (
+        displayedUsers.map(user => (
           <tr key={user.id}>
 
             <td className={styles.tdUser}>
@@ -272,6 +284,32 @@ export default function AccessPrivileges() {
     </tbody>
   </table>
 </div>
+    <div className={styles.gmailFooter}>
+      <div className={styles.paginationInfo}>
+        عرض{" "}
+        <strong>{filteredUsers.length === 0 ? 0 : (currentPage - 1) * usersPerPage + 1}</strong>–
+        <strong>{Math.min(currentPage * usersPerPage, filteredUsers.length)}</strong>{" "}
+        من <strong>{filteredUsers.length}</strong> مستخدم
+      </div>
+      <select
+        className={styles.perPageSelect}
+        value={usersPerPage}
+        onChange={e => { setUsersPerPage(Number(e.target.value)); setCurrentPage(1); }}
+      >
+        <option value={5}>5</option>
+        <option value={10}>10</option>
+        <option value={25}>25</option>
+      </select>
+      <div className={styles.paginationControls}>
+        <button className={styles.arrowBtn} onClick={handlePrev} disabled={currentPage === 1}>
+          <ChevronRight size={18} />
+        </button>
+        <span className={styles.pageIndicator}>{currentPage} / {totalPages || 1}</span>
+        <button className={styles.arrowBtn} onClick={handleNext} disabled={currentPage === totalPages || totalPages === 0}>
+          <ChevronLeft size={18} />
+        </button>
+      </div>
+    </div>
       </div>
     </>
   );
